@@ -1,0 +1,30 @@
+This example shows how to generate the SNAP bispectrum on a grid.
+
+Usage:
+
+python3 ./grid.py > bgrid.out
+
+Requirements:
+
+Python3
+LAMMPS, with compute sna/grid, from here:
+https://github.com/athomps/lammps/tree/compute-grid
+
+Before running, you will need to do the following:
+
+1. Compile the LAMMPS shared library with the SNAP package installed
+2. Make the shared library visible e.g.
+
+ln -s $LAMMPS/src/liblammps.so .
+
+The files that are produces are as follows:
+
+bgrid.out: Screen output from LAMMPS and bgrid.py
+log.lammps: LAMMPS log file
+b.dump: per-atom bispectrum components
+bgrid.dat: grid bispectrum components as LAMMPS array
+bgrid_np.dat: grid bispectrum components as Numpy array
+
+You can compare these to the corresponding files
+with names containing a timestamp e.g. b_25Oct2019.dump
+  
