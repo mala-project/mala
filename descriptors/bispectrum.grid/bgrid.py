@@ -58,7 +58,7 @@ print("b = ",bptr[0][0])
 # 2. from compute sna/grid
 
 bgridptr = lmp.extract_compute("bgrid", 0, 2) # 0 = style global, 2 = type array
-print("bgrid = ",bgridptr[0][3])
+print("bgrid = ",bgridptr[0][ncols0+0])
 
 # 3. from Numpy array pointing to sna/atom array
  

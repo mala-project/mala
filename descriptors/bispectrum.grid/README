@@ -26,5 +26,5 @@ bgrid.dat: grid bispectrum components as LAMMPS array
 bgrid_np.dat: grid bispectrum components as Numpy array
 
 You can compare these to the corresponding files
-with names containing a timestamp e.g. b_25Oct2019.dump
+with names containing a timestamp e.g. b.25Oct2019.dump
   
