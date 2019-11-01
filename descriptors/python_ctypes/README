@@ -10,13 +10,20 @@ gcc -shared -fPIC -o test_libraryc.so test_library.c
 g++ -shared -fPIC -o test_librarycpp.so test_library.cpp
 gfortran -shared -fPIC -o test_libraryf90.so test_library.f90
 
+(JAS: I had a use a somewhat newer GCC than the default on 
+RHEL6, which is 4.4.7. By default, it complains about the
+dialect of C.)
+
 To test the fuctions from Python, do:
 
 python test_library.py
+
+(JAS: I had to add the pwd to my LD_LIBRARY_PATH for them to
+be picked up.)
 
 Here is a summary of the functions:
 
 1. hello_world() works for C, C++, and F90
 2. create_matrix() works for C and C++
 3. create_vector() works for F90
-4. I could not figure out how to make create_matrix() work for F90.
+4. create_matrix() works for F90

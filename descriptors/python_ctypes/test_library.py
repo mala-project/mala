@@ -84,23 +84,31 @@ for i in range(n):
 lib_examplecpp.destroy_matrix(array)
 
 lib_examplef90.create_matrix_.restype = None
-lib_examplef90.create_matrix_.argtypes = [c_int, c_int, POINTER(POINTER(c_double))]
+# create_matrix takes a double*, not a double**, because in Fortran 2D array
+# variables are treated like a pointer to a contiguous block of (column-major)
+# memory.
+lib_examplef90.create_matrix_.argtypes = [c_int, c_int, POINTER(c_double)]
 n1 = 3
-n2 = 3
+n2 = 4
 
 # allocate C++ array
 array = lib_examplecpp.create_matrix(n1, n2)
-print("array ptr = ", array,array[0],array[1],array[2],array[0][0])
+print("array (created by C++) = ")
+for i in range(n1):
+    for j in range(n2):
+        print("%8.4f " % array[i][j],end="")
+    print("\n",end="")
+#print("array ptr = ", array,array[0],array[1],array[2],array[0][0])
 
-# This does not work, gies segfault
-
-#lib_examplef90.create_matrix_(n1, n2, array)
+# array[0] acts like a double* to the beginning of the block of
+# memory
+lib_examplef90.create_matrix_(n1, n2, array[0])
 #print("array ptr = ", array,array[0],array[1],array[2])
-#print("array = ")
-#for i in range(n1):
-#    for j in range(n2):
-#        print("%g " % array[i][j])
-#    print("")
+print("array (created by Fortran) = ")
+for i in range(n1):
+    for j in range(n2):
+        print("%8.4f " % array[i][j],end="")
+    print("\n",end="")
 
 # clean up C++ array
 lib_examplecpp.destroy_matrix(array)
