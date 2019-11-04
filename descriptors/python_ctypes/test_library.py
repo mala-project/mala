@@ -3,6 +3,8 @@
 #
 
 from ctypes import *
+import numpy as np
+from numpy_utils import *
 
 n1 = 3
 n2 = 4
@@ -30,6 +32,10 @@ for i in range(n1):
     for j in range(n2):
         print("%8.4f " % array[i][j],end="")
     print("")
+
+np_array = array2nparray(array, (n1,n2))
+print("np_array = \n",np_array)
+
 lib_examplec.destroy_matrix(array)
 
 # C++ interface
@@ -55,6 +61,10 @@ for i in range(n1):
     for j in range(n2):
         print("%8.4f " % array[i][j],end="")
     print("")
+
+np_array = array2nparray(array, (n1,n2))
+print("np_array = \n",np_array)
+
 lib_examplecpp.destroy_matrix(array)
 
 # F90 interface
@@ -111,6 +121,9 @@ for i in range(n1):
     for j in range(n2):
         print("%8.4f " % array[i][j],end="")
     print("")
+
+np_array = array2nparray(array, (n1,n2))
+print("np_array = \n",np_array)
 
 # clean up C++ array
 lib_examplecpp.destroy_matrix(array)
