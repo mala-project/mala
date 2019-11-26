@@ -23,7 +23,7 @@ To Run:
   + The above will run `source ./mlmm_env/bin/activate` to set the python env
   + (Run `deactivate` if you wish to exit python env)
 
-2. Allocate node with `salloc -N 1 -n 1 -t 60` for 1 node(`-N`) and 1 rank(`-n`)
+2. Allocate node with `salloc -N 4 -n 4 -t 60` for 4 node(`-N`), 4 ranks(`-n`), wall-limit of 1 hr
   + Make sure you are in the python env and correct modules are loaded
   + i.e. run `source mlmm_env/bin/activate` and `source load_mlmm_blake_modules.sh` again
 

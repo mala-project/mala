@@ -1,0 +1,61 @@
+Running with 32 threads
+Running with 4 rank(s)
+Building LDOS estimation model with bidirectional LSTM
+Train Epoch: 1 [0/8000 (0%)]	Loss: 0.332842
+Train Epoch: 1 [0/8000 (0%)]	Loss: 0.337082
+Train Epoch: 1 [0/8000 (0%)]	Loss: 0.332282
+Train Epoch: 1 [0/8000 (0%)]	Loss: 0.335493
+Train Epoch: 1 [640/8000 (8%)]	Loss: 0.337016
+Train Epoch: 1 [640/8000 (8%)]	Loss: 0.334978
+Train Epoch: 1 [640/8000 (8%)]	Loss: 0.332239
+Train Epoch: 1 [640/8000 (8%)]	Loss: 0.334536
+Train Epoch: 1 [1280/8000 (16%)]	Loss: 0.332038
+Train Epoch: 1 [1280/8000 (16%)]	Loss: 0.333177
+Train Epoch: 1 [1280/8000 (16%)]	Loss: 0.336317
+Train Epoch: 1 [1280/8000 (16%)]	Loss: 0.332391
+Train Epoch: 1 [1920/8000 (24%)]	Loss: 0.328376
+Train Epoch: 1 [1920/8000 (24%)]	Loss: 0.328220
+Train Epoch: 1 [1920/8000 (24%)]	Loss: 0.330583
+Train Epoch: 1 [1920/8000 (24%)]	Loss: 0.332276
+Train Epoch: 1 [2560/8000 (32%)]	Loss: 0.328686
+Train Epoch: 1 [2560/8000 (32%)]	Loss: 0.325883
+Train Epoch: 1 [2560/8000 (32%)]	Loss: 0.327618
+Train Epoch: 1 [2560/8000 (32%)]	Loss: 0.332493
+Train Epoch: 1 [3200/8000 (40%)]	Loss: 0.328394
+Train Epoch: 1 [3200/8000 (40%)]	Loss: 0.322698
+Train Epoch: 1 [3200/8000 (40%)]	Loss: 0.327740
+Train Epoch: 1 [3200/8000 (40%)]	Loss: 0.325528
+Train Epoch: 1 [3840/8000 (48%)]	Loss: 0.327065
+Train Epoch: 1 [3840/8000 (48%)]	Loss: 0.325603
+Train Epoch: 1 [3840/8000 (48%)]	Loss: 0.327273
+Train Epoch: 1 [3840/8000 (48%)]	Loss: 0.325308
+Train Epoch: 1 [4480/8000 (56%)]	Loss: 0.319808
+Train Epoch: 1 [4480/8000 (56%)]	Loss: 0.321250
+Train Epoch: 1 [4480/8000 (56%)]	Loss: 0.323781
+Train Epoch: 1 [4480/8000 (56%)]	Loss: 0.330148
+Train Epoch: 1 [5120/8000 (64%)]	Loss: 0.314930
+Train Epoch: 1 [5120/8000 (64%)]	Loss: 0.319348
+Train Epoch: 1 [5120/8000 (64%)]	Loss: 0.316318
+Train Epoch: 1 [5120/8000 (64%)]	Loss: 0.322949
+Train Epoch: 1 [5760/8000 (72%)]	Loss: 0.314619
+Train Epoch: 1 [5760/8000 (72%)]	Loss: 0.319567
+Train Epoch: 1 [5760/8000 (72%)]	Loss: 0.318198
+Train Epoch: 1 [5760/8000 (72%)]	Loss: 0.320474
+Train Epoch: 1 [6400/8000 (80%)]	Loss: 0.317267
+Train Epoch: 1 [6400/8000 (80%)]	Loss: 0.317528
+Train Epoch: 1 [6400/8000 (80%)]	Loss: 0.317227
+Train Epoch: 1 [6400/8000 (80%)]	Loss: 0.319249
+Train Epoch: 1 [7040/8000 (88%)]	Loss: 0.310626
+Train Epoch: 1 [7040/8000 (88%)]	Loss: 0.314488
+Train Epoch: 1 [7040/8000 (88%)]	Loss: 0.311544
+Train Epoch: 1 [7040/8000 (88%)]	Loss: 0.316762
+Train Epoch: 1 [7680/8000 (96%)]	Loss: 0.316007
+Train Epoch: 1 [7680/8000 (96%)]	Loss: 0.308970
+Train Epoch: 1 [7680/8000 (96%)]	Loss: 0.314278
+Train Epoch: 1 [7680/8000 (96%)]	Loss: 0.313442
+Epoch 1, Training time: 33.244 
+
+Test set: Average loss: 56.3465
+
+Epoch 1, Testing time: 10.391 
+Total train time 33.2441, Total test time 10.3915
