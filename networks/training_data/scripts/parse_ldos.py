@@ -8,7 +8,7 @@ mass_density_folder="/ascldap/users/acangi/q-e_calcs/Al/datasets/RoomTemp/300K/N
 
 # Density gram per cubic centimeter grid
 #gcc_grid=np.array([0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
-gcc_grid=np.array([0.4, 0.6, 0.8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
+gcc_grid={"0.4", "0.6", "0.8", "1.0", "2.0", "3.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"}
 #gcc_grid=np.array([0.4, 0.6])
 
 # Head and tail of LDOS filenames
@@ -40,7 +40,7 @@ temp = 300
 tot_tic = timeit.default_timer()
 # Loop over density grid
 for gcc in gcc_grid:
-    out_filename = output_dir + npy_filename_head + "%dK_%1.1fgcc_%dx%dx%dgrid_%delvls" % (temp, gcc, xdim, ydim, zdim, e_lvls) 
+    out_filename = output_dir + "/%s" + "/%sgcc" % (gcc) + npy_filename_head + "%dx%dx%dgrid_%delvls" % (xdim, ydim, zdim, e_lvls) 
 
     etic = timeit.default_timer()
 
@@ -49,7 +49,7 @@ for gcc in gcc_grid:
 
     # Loop over energy grid
     for e in range(e_lvls):
-        infile_name = mass_density_folder + "/%1.1fgcc/" % (gcc) + \
+        infile_name = mass_density_folder + "/%sgcc/" % (gcc) + \
                       cube_filename_head + "%03d" % (e + 1) + cube_filename_tail 
 
         print(infile_name)
@@ -62,7 +62,7 @@ for gcc in gcc_grid:
     
     etoc = timeit.default_timer()
 
-    print ("GCC %1.1f took %4.2f secs" % (gcc, etoc - etic))
+    print ("Time %s gcc: %4.2f secs" % (gcc, etoc - etic))
 
 tot_toc = timeit.default_timer()
 

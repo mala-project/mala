@@ -19,8 +19,9 @@ pip3 install matplotlib
 pip3 install seaborn
 pip3 install tensorboard
 
-# Parallel training
+# Parallel support
 pip3 install horovod
+pip3 install mpi4py
 
 # Use PyTorch
 pip3 install torch
