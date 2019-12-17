@@ -17,6 +17,8 @@ parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
 parser.add_argument('--test-batch-size', type=int, default=64, metavar='N',
                     help='input batch size for testing (default: 64)')
+parser.add_argument('--train-test-ratio', type=float, default=.80, metavar='R',
+                    help='pecentage of training data to use (default: .80)')
 parser.add_argument('--nxyz', type=int, default=20, metavar='N',
                     help='num elements along x,y,z dims (default: 20)')
 parser.add_argument('--epochs', type=int, default=1, metavar='N',
@@ -63,7 +65,8 @@ if (hvd.rank() == 0):
 
 torch.set_num_threads(args.num_threads)
 
-kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
+# num_workers for multiprocessed data loading
+kwargs = {'num_workers': 2, 'pin_memory': True} if args.cuda else {}
 
 
 # Choose a Model
@@ -74,7 +77,14 @@ kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
 # Model 4: LDOS estimation with LSTM
 # Model 5: LDOS estimation with bidirectional LSTM
 
-model_choice = 4;
+#model_choice = 4;
+
+dataset = "fp_ldos"
+
+temp = "300K"
+gcc = "5.0"
+
+training_path = "/ascldap/users/johelli/Code/mlmm/mlmm-ldrd-data/networks/training_data"
 
 if (args.model != 0):
     model_choice = args.model
@@ -107,32 +117,112 @@ if(hvd.rank() == 0):
         exit();
 
 # Set up model outputs
-if (model_choice == 1):
-    train_np_y = torch.tensor(np.random.rand(grid_pts, dens_length), dtype=torch.float32)
-    test_np_y = torch.tensor(np.random.rand(test_pts, dens_length), dtype=torch.float32)
-elif (model_choice == 2):
-    train_np_y = torch.tensor(np.random.rand(grid_pts, dens_length), dtype=torch.float32)
-    test_np_y = torch.tensor(np.random.rand(test_pts, dens_length), dtype=torch.float32)
-elif (model_choice == 3):
-    train_np_y = torch.tensor(np.random.rand(grid_pts, ldos_length), dtype=torch.float32)
-    test_np_y = torch.tensor(np.random.rand(test_pts, ldos_length), dtype=torch.float32)
-elif (model_choice == 4):
-    train_np_y = torch.tensor(np.random.rand(grid_pts, ldos_length), dtype=torch.float32)
-    test_np_y = torch.tensor(np.random.rand(test_pts, ldos_length), dtype=torch.float32)
-elif (model_choice == 5):
-    train_np_y = torch.tensor(np.random.rand(grid_pts, ldos_length), dtype=torch.float32)
-    test_np_y = torch.tensor(np.random.rand(test_pts, ldos_length), dtype=torch.float32)
-else:
-    print("Error in model choice");
-    exit();
+if (dataset == "random"):
+    if (model_choice == 1):
+        train_np_y = torch.tensor(np.random.rand(grid_pts, dens_length), dtype=torch.float32)
+        test_np_y = torch.tensor(np.random.rand(test_pts, dens_length), dtype=torch.float32)
+    elif (model_choice == 2):
+        train_np_y = torch.tensor(np.random.rand(grid_pts, dens_length), dtype=torch.float32)
+        test_np_y = torch.tensor(np.random.rand(test_pts, dens_length), dtype=torch.float32)
+    elif (model_choice == 3):
+        train_np_y = torch.tensor(np.random.rand(grid_pts, ldos_length), dtype=torch.float32)
+        test_np_y = torch.tensor(np.random.rand(test_pts, ldos_length), dtype=torch.float32)
+    elif (model_choice == 4):
+        train_np_y = torch.tensor(np.random.rand(grid_pts, ldos_length), dtype=torch.float32)
+        test_np_y = torch.tensor(np.random.rand(test_pts, ldos_length), dtype=torch.float32)
+    elif (model_choice == 5):
+        train_np_y = torch.tensor(np.random.rand(grid_pts, ldos_length), dtype=torch.float32)
+        test_np_y = torch.tensor(np.random.rand(test_pts, ldos_length), dtype=torch.float32)
+    else:
+        print("Error in model choice");
+        exit();
 
+    train_np_x = torch.tensor(np.random.rand(grid_pts, bis_length), dtype=torch.float32)
+    train_dataset = torch.utils.data.TensorDataset(train_np_x, train_np_y)
+
+    test_np_x = torch.tensor(np.random.rand(test_pts, bis_length), dtype=torch.float32)
+    test_dataset = torch.utils.data.TensorDataset(test_np_x, test_np_y)
+
+elif (dataset == "fp_ldos"):
+    if (model_choice != 3 and model_choice != 4 and model_choice != 5):
+        print("Error in model choice with fp_ldos dataset");
+        exit();
+
+    print("Reading Fingerprint and LDOS dataset")
+
+    fp_np = np.load(training_path + "/mat_configs/%s/%sgcc/Al.fingerprint.npy" % (temp, gcc))
+    ldos_np = np.load(training_path + "/ldos_data/ldos_%s_%sgcc_200x200x200grid_128elvls.npy" % (temp, gcc))
+
+    fp_shape = fp_np.shape
+    ldos_shape = ldos_np.shape
+
+#    print(fp_shape)
+#    print(ldos_shape)
+
+
+    fp_pts = fp_shape[0] * fp_shape[1] * fp_shape[2]
+    ldos_pts = ldos_shape[0] * ldos_shape[1] * ldos_shape[2]
+
+    if (fp_pts != ldos_pts):
+        print("Error in fp_pts %d and ldos_pts %d" % (fp_pts, ldos_pts));
+        exit();
+
+    grid_pts = fp_pts
+
+    train_pts = int(grid_pts * args.train_test_ratio)
+    test_pts = grid_pts - train_pts
+
+    # Vector lengths
+    bis_length = fp_shape[3]
+    ldos_length = ldos_shape[3]
+   
+    if (hvd.rank() == 0):
+        print("Grid_pts %d" % grid_pts)
+        print("Train_pts %d, Test pts %d" % (train_pts, test_pts))
+        print("Fingerprint vector length: %d" % bis_length)
+        print("LDOS vector length: %d" % ldos_length)
+
+    fp_np = fp_np.reshape([grid_pts, bis_length])
+    ldos_np = ldos_np.reshape([grid_pts, ldos_length])
+
+    # Row scaling of features 
+    for row in range(bis_length):
+
+        #meanv = np.mean(fp_np[row, :])
+        maxv  = np.max(fp_np[row, :])
+        minv  = np.min(fp_np[row, :])
+
+        fp_np[row, :] = (fp_np[row, :] - minv) / (maxv - minv)
+        #fp_np[row, :] = fp_np[row, :] / maxv
+
+        if (hvd.rank() == 0):
+            print("FP Row: %g, Min: %g, Avg: %g, Max: %g" % (row, np.min(fp_np[row, :]), np.mean(fp_np[row, :]), np.max(fp_np[row, :])))
+
+    # Row scaling of outputs
+    for row in range(ldos_length):
+
+        #meanv = np.mean(fp_np[row, :])
+        maxv  = np.max(ldos_np[row, :])
+        minv  = np.min(ldos_np[row, :])
+
+        ldos_np[row, :] = (ldos_np[row, :] - minv) / (maxv - minv)
+        #fp_np[row, :] = fp_np[row, :] / maxv
+
+        if (hvd.rank() == 0):
+            print("LDOS Row: %g, Min: %g, Avg: %g, Max: %g" % (row, np.min(ldos_np[row, :]), np.mean(ldos_np[row, :]), np.max(ldos_np[row, :])))
+
+    fp_torch = torch.tensor(fp_np, dtype=torch.float32)
+    ldos_torch = torch.tensor(ldos_np, dtype=torch.float32)
+
+    fp_ldos_dataset = torch.utils.data.TensorDataset(fp_torch, ldos_torch)
+
+    train_dataset, test_dataset = torch.utils.data.random_split(fp_ldos_dataset, [train_pts, test_pts])
+
+
+
+#exit()
 
 # TRAINING DATA
-
-train_np_x = torch.tensor(np.random.rand(grid_pts, bis_length), dtype=torch.float32)
-
-train_dataset = torch.utils.data.TensorDataset(train_np_x, train_np_y)
-
 # Horovod: use DistributedSampler to partition the training data.
 train_sampler = torch.utils.data.distributed.DistributedSampler(
     train_dataset, num_replicas=hvd.size(), rank=hvd.rank())
@@ -141,11 +231,6 @@ train_loader = torch.utils.data.DataLoader(
 
 
 # TESTING DATA
-
-test_np_x = torch.tensor(np.random.rand(test_pts, bis_length), dtype=torch.float32)
-
-test_dataset = torch.utils.data.TensorDataset(test_np_x, test_np_y)
-
 # Horovod: use DistributedSampler to partition the test data.
 test_sampler = torch.utils.data.distributed.DistributedSampler(
     test_dataset, num_replicas=hvd.size(), rank=hvd.rank())
@@ -153,11 +238,15 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.test_bat
                                           sampler=test_sampler, **kwargs)
 
 
+#print("\n\nSucess!\n\n", flush=True)
+#exit()
+
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.mid_layers = 2
-        self.hidden_dim = 180
+        self.hidden_dim = ldos_length
 
         self.fc1 = nn.Linear(bis_length, 300)
         self.fc2 = nn.Linear(300, 300)
@@ -225,7 +314,9 @@ if args.cuda:
 
 # Horovod: scale learning rate by the number of GPUs.
 optimizer = optim.SGD(model.parameters(), lr=args.lr * hvd.size(),
-                      momentum=args.momentum)
+                      momentum=args.momentum, nesterov=True)
+
+#optimizer = optim.Adam(model.parameters(), lr=args.lr * hvd.size())
 
 # Horovod: broadcast parameters & optimizer state.
 hvd.broadcast_parameters(model.state_dict(), root_rank=0)
@@ -245,14 +336,18 @@ def train(epoch):
     # Clear stored gradient
     model.zero_grad()
 
-    # Initialize hidden state
-    model.hidden = model.init_hidden()
+#    if (epoch == 0):
+        # Initialize hidden state
+#    model.hidden = model.init_hidden()
     
     model.train()
     # Horovod: set epoch to sampler for shuffling.
     train_sampler.set_epoch(epoch)
 
     for batch_idx, (data, target) in enumerate(train_loader):
+        
+        model.zero_grad()
+
         if args.cuda:
             data, target = data.cuda(), target.cuda()
         optimizer.zero_grad()
@@ -307,6 +402,9 @@ tot_tic = timeit.default_timer()
 
 train_time = 0; 
 
+
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+
 for epoch in range(1, args.epochs + 1):
 
     tic = timeit.default_timer()
@@ -316,20 +414,21 @@ for epoch in range(1, args.epochs + 1):
     hvd.allreduce(torch.tensor(0), name='barrier')  
     toc = timeit.default_timer()
     
-
     if (hvd.rank() == 0):
         print("Epoch %d, Training time: %3.3f " % (epoch, toc - tic))
     train_time += toc - tic
 
-    tic = timeit.default_timer()
-    test()
+    scheduler.step()
 
-    # Global barrier
-    hvd.allreduce(torch.tensor(0), name='barrier') 
-    toc = timeit.default_timer()
+tic = timeit.default_timer()
+test()
+
+# Global barrier
+hvd.allreduce(torch.tensor(0), name='barrier') 
+toc = timeit.default_timer()
     
-    if (hvd.rank() == 0):
-        print("Epoch %d, Testing time: %3.3f " % (epoch, toc - tic))
+if (hvd.rank() == 0):
+    print("Epoch %d, Testing time: %3.3f " % (epoch, toc - tic))
 
 
 tot_toc = timeit.default_timer()
