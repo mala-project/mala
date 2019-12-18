@@ -1,30 +1,54 @@
 import os
+import sys
 import numpy as np
 import timeit
+import itertools
 
 import cube_parser
 
-mass_density_folder="/ascldap/users/acangi/q-e_calcs/Al/datasets/RoomTemp/300K/N108/mass-density_highFFTres_e128"
+do_water_density = False
 
-# Density gram per cubic centimeter grid
-#gcc_grid=np.array([0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
-gcc_grid={"0.4", "0.6", "0.8", "1.0", "2.0", "3.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"}
-#gcc_grid=np.array([0.4, 0.6])
+if (sys.argv[1]=="water"):
+    do_water_density = True
+    print ("Using this script in water density reading mode")
+    folder = '/ascldap/users/jracker/water64cp2k/dataset_1593/results/'
+    #folder = '/Users/jracker/ldrd_ml_density/mlmm-ldrd-data/water/'
 
-# Head and tail of LDOS filenames
-cube_filename_head = "tmp.pp"
-cube_filename_tail = "Al_ldos.cube"
+    gcc_grid = [''.join(i) for i in itertools.product("abcdefghijklmnopqrstuvwxyz",repeat=4)][:1593]
+    print (gcc_grid)
 
-# xyz grid
-xdim = 200
-ydim = 200
-zdim = 200
+    cube_filename_head = "w64_"
+    cube_filename_tail = "-ELECTRON_DENSITY-1_0.cube"
 
-# Energy levels for LDOS
-e_lvls = 128
-#e_lvls = 2
+    # xyz grid
+    xdim = 75
+    ydim = 75
+    zdim = 75
 
-xyze_shape = [xdim, ydim, zdim, e_lvls]
+    # only doing density: 1 level
+    e_lvls = 1
+
+
+else:
+    folder="/ascldap/users/acangi/q-e_calcs/Al/datasets/RoomTemp/300K/N108/mass-density_highFFTres_e128"
+
+    # Density gram per cubic centimeter grid
+    #gcc_grid=np.array([0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
+    gcc_grid={"0.4", "0.6", "0.8", "1.0", "2.0", "3.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"}
+    #gcc_grid=np.array([0.4, 0.6])
+
+    # Head and tail of LDOS filenames
+    cube_filename_head = "tmp.pp"
+    cube_filename_tail = "Al_ldos.cube"
+
+    # xyz grid
+    xdim = 200
+    ydim = 200
+    zdim = 200
+
+    # Energy levels for LDOS
+    e_lvls = 128
+    #e_lvls = 2
 
 # Output location of .npy binary files
 output_dir = '../ldos_data'
@@ -35,12 +59,19 @@ if not os.path.exists(output_dir):
 # Output filename head
 npy_filename_head = "/ldos_"
 
+
+
+
 temp = 300
+
+xyze_shape = [xdim, ydim, zdim, e_lvls]
 
 tot_tic = timeit.default_timer()
 # Loop over density grid
 for gcc in gcc_grid:
     out_filename = output_dir + "/%s" + "/%sgcc" % (gcc) + npy_filename_head + "%dx%dx%dgrid_%delvls" % (xdim, ydim, zdim, e_lvls) 
+    if (do_water_density):
+        out_filename = folder + cube_filename_head + gcc + cube_filename_tail + "_pkl"
 
     etic = timeit.default_timer()
 
@@ -48,9 +79,13 @@ for gcc in gcc_grid:
     ldos_gcc = np.empty(xyze_shape)
 
     # Loop over energy grid
+    # separate cube file for each ldos 
     for e in range(e_lvls):
-        infile_name = mass_density_folder + "/%sgcc/" % (gcc) + \
+        infile_name = folder + "/%sgcc/" % (gcc) + \
                       cube_filename_head + "%03d" % (e + 1) + cube_filename_tail 
+        
+        if (do_water_density):
+            infile_name = folder + cube_filename_head + gcc + cube_filename_tail  
 
         print(infile_name)
 
