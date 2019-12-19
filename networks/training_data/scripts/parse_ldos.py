@@ -3,15 +3,19 @@ import sys
 import numpy as np
 import timeit
 import itertools
+import argparse
 
 import cube_parser
 
-do_water_density = False
 
-if (sys.argv[1]=="water"):
-    do_water_density = True
+parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
+parser.add_argument('--water', action='store_true', default=False,
+                            help='run ldos parser on for water files')
+args = parser.parse_args()
+
+if (args.water):
     print ("Using this script in water density reading mode")
-    folder = '/ascldap/users/jracker/water64cp2k/dataset_1593/results/'
+    folder = '/ascldap/users/jracker/water64cp2k/datast_1593/results/'
     #folder = '/Users/jracker/ldrd_ml_density/mlmm-ldrd-data/water/'
 
     gcc_grid = [''.join(i) for i in itertools.product("abcdefghijklmnopqrstuvwxyz",repeat=4)][:1593]
@@ -28,18 +32,20 @@ if (sys.argv[1]=="water"):
     # only doing density: 1 level
     e_lvls = 1
 
-
 else:
     folder="/ascldap/users/acangi/q-e_calcs/Al/datasets/RoomTemp/300K/N108/mass-density_highFFTres_e128"
 
     # Density gram per cubic centimeter grid
     #gcc_grid=np.array([0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
-    gcc_grid={"0.4", "0.6", "0.8", "1.0", "2.0", "3.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"}
+    #gcc_grid={"0.4", "0.6", "0.8", "1.0", "2.0", "3.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"}
     #gcc_grid=np.array([0.4, 0.6])
-
+    gcc_grid = {"0.8"}
     # Head and tail of LDOS filenames
-    cube_filename_head = "tmp.pp"
-    cube_filename_tail = "Al_ldos.cube"
+#    cube_filename_head = "tmp.pp"
+#    cube_filename_tail = "Al_ldos.cube"
+
+    cube_filename_head = "Al_ldos_"
+    cube_filename_tail = ".cube"
 
     # xyz grid
     xdim = 200
@@ -70,7 +76,7 @@ tot_tic = timeit.default_timer()
 # Loop over density grid
 for gcc in gcc_grid:
     out_filename = output_dir + "/%s" + "/%sgcc" % (gcc) + npy_filename_head + "%dx%dx%dgrid_%delvls" % (xdim, ydim, zdim, e_lvls) 
-    if (do_water_density):
+    if (args.water):
         out_filename = folder + cube_filename_head + gcc + cube_filename_tail + "_pkl"
 
     etic = timeit.default_timer()
@@ -82,9 +88,9 @@ for gcc in gcc_grid:
     # separate cube file for each ldos 
     for e in range(e_lvls):
         infile_name = folder + "/%sgcc/" % (gcc) + \
-                      cube_filename_head + "%03d" % (e + 1) + cube_filename_tail 
+                      cube_filename_head + "%d" % (e + 1) + cube_filename_tail 
         
-        if (do_water_density):
+        if (args.water):
             infile_name = folder + cube_filename_head + gcc + cube_filename_tail  
 
         print(infile_name)
