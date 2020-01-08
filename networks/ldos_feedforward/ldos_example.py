@@ -3,7 +3,7 @@ import argparse
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torchvision import datasets, transforms
+#from torchvision import datasets, transforms
 import torch.utils.data.distributed
 import horovod.torch as hvd
 
@@ -368,6 +368,7 @@ def train(epoch):
                 epoch, batch_idx * len(data), len(train_sampler),
                 100. * batch_idx / len(train_loader), loss.item()))
 
+    return loss.item()
 
 def metric_average(val, name):
     tensor = torch.tensor(val)
@@ -408,7 +409,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
 for epoch in range(1, args.epochs + 1):
 
     tic = timeit.default_timer()
-    train(epoch)
+    epoch_loss = train(epoch)
     
     # Global barrier
     hvd.allreduce(torch.tensor(0), name='barrier')  
@@ -418,7 +419,7 @@ for epoch in range(1, args.epochs + 1):
         print("Epoch %d, Training time: %3.3f " % (epoch, toc - tic))
     train_time += toc - tic
 
-    scheduler.step()
+    scheduler.step(epoch_loss)
 
 tic = timeit.default_timer()
 test()
