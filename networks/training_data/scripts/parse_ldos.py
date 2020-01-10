@@ -65,17 +65,26 @@ if not os.path.exists(output_dir):
 # Output filename head
 npy_filename_head = "/ldos_"
 
-
-
-
-temp = 300
+temp = "300K"
 
 xyze_shape = [xdim, ydim, zdim, e_lvls]
 
 tot_tic = timeit.default_timer()
 # Loop over density grid
 for gcc in gcc_grid:
-    out_filename = output_dir + "/%s" + "/%sgcc" % (gcc) + npy_filename_head + "%dx%dx%dgrid_%delvls" % (xdim, ydim, zdim, e_lvls) 
+
+    temp_dir =  output_dir + "/%s" % (temp)
+
+    if not os.path.exists(temp_dir):
+        os.makedirs(temp_dir)
+
+    gcc_dir = temp_dir + "/%sgcc" % (gcc)
+
+    if not os.path.exists(gcc_dir):
+        os.makedirs(gcc_dir)
+
+    out_filename = gcc_dir + npy_filename_head + "%dx%dx%dgrid_%delvls" % (xdim, ydim, zdim, e_lvls) 
+
     if (args.water):
         out_filename = folder + cube_filename_head + gcc + cube_filename_tail + "_pkl"
 
