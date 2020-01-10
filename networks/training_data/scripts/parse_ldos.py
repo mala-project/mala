@@ -88,7 +88,7 @@ for gcc in gcc_grid:
     # separate cube file for each ldos 
     for e in range(e_lvls):
         infile_name = folder + "/%sgcc/" % (gcc) + \
-                      cube_filename_head + "%d" % (e + 1) + cube_filename_tail 
+                      cube_filename_head + "%d" % (e) + cube_filename_tail 
         
         if (args.water):
             infile_name = folder + cube_filename_head + gcc + cube_filename_tail  
