@@ -19,13 +19,13 @@ pip3 install matplotlib
 pip3 install seaborn
 pip3 install tensorboard
 
-# Parallel support
-pip3 install horovod
-pip3 install mpi4py
-
 # Use PyTorch
 pip3 install torch
 pip3 install torchvision
+
+# Parallel support
+pip3 install horovod
+pip3 install mpi4py
 
 # Atomic Simulation Environment
 pip3 install ase
