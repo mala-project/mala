@@ -173,8 +173,8 @@ for g in gccs:
     bgridptr_np = lammps_utils.extract_compute_np(lmp, "bgrid", 0, 2, (nz,ny,nx,fp_length))
 
     # switch from x-fastest to z-fastest order
-
     bgridptr_np = bgridptr_np.transpose([2,1,0,3])
+
 #    print("bgrid_np = ",bgridptr_np[0][0][0][ncols0+0])
     if (rank == 0):
         print("bgrid_np size = ",bgridptr_np.shape, flush=True)

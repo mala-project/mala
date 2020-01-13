@@ -3,7 +3,8 @@
 
 # Run `python3 ldos_example.py --help` for more option information
 
-NODES="1 2 4"
+#NODES="1 2 4"
+NODES="1"
 RANKS=${NODES}
 
 echo "Total ranks: ${RANKS}"
@@ -16,12 +17,12 @@ echo "Total ranks: ${RANKS}"
 # Model 5: LDOS estimation with bidirectional LSTM
 
 #MODEL="1 2 3 4 5"
-MODEL="4 5"
+MODEL="5"
 #MODEL="1"
 
 
 # 8 million grid pts
-NXYZ="20"
+NXYZ="200"
 #NXYZ="200"
 
 BATCHSIZE="64" 

@@ -31,7 +31,6 @@ pip3 install mpi4py
 pip3 install ase
 
 
-
 # Use TF
 #pip3 install keras=2.2.5
 #pip3 install tensorflow==1.14.0

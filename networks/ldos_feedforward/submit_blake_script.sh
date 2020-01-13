@@ -1,6 +1,6 @@
 #!/bin/bash                                                 
-#SBATCH -N 16
-#SBATCH -n 16
+#SBATCH -N 8
+#SBATCH -n 8
 #SBATCH -p blake                                                         
 #SBATCH -A johelli                                                   
 #SBATCH --time=48:00:00                                        
@@ -9,7 +9,7 @@
 
 # Run `python3 ldos_example.py --help` for more option information
 
-NODES=16
+NODES=8
 RANKS=${NODES}
 
 echo "Total ranks: ${RANKS}"
@@ -28,8 +28,8 @@ MODEL="5"
 # 8 million grid pts
 NXYZ="200"
 
-BATCHSIZE="64" 
-EPOCHS="20"
+BATCHSIZE="128" 
+EPOCHS="10"
 
 #EXE="mpirun -np ${RANKS} -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x PATH -mca pml ob1 -mca btl ^openib"
 EXE="mpirun -np ${RANKS} -bind-to none -map-by slot -x NCCL_DEBUG=INFO -x LD_LIBRARY_PATH -x PATH -mca pml ob1 -mca btl ^tcp"
