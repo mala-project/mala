@@ -5,6 +5,7 @@
 import ase
 import ase.io
 import argparse
+import os, sys
 
 import numpy as np
 #import io
@@ -25,34 +26,68 @@ print("Proc %d out of %d procs" % (rank, ranks), flush=True)
 
 comm.Barrier()
 
-parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
+if (rank == 0):
+    print("\n-----------------------------------\n")
+    print("----  GENERATE LAMMPS FP DATA  ----")
+    print("\n-----------------------------------\n")
+
+parser = argparse.ArgumentParser(description='Fingerprint Generation')
+
+parser.add_argument('--water', action='store_true', default=False,
+                            help='run fingerprint generation for water files')
+parser.add_argument('--atom-based', action='store_true', default=False,
+                            help='run lammps fingerprints for atoms instead of grid files')
+parser.add_argument('--run-all', action='store_true', default=False,
+                            help='run ldos parser for all densities and temperatures')
 parser.add_argument('--temp', type=str, default="300K", metavar='S',
-                            help='config temperature (default: 300K)')
-parser.add_argument('--gcc', type=str, default="4.0", metavar='S',
-                            help='config density in gcc (default: 4.0)')
+                            help='temperature of fingerprint in units K (default: "300K")')
+parser.add_argument('--gcc', type=str, default="2.0", metavar='S',
+                            help='density of fingerprint in units in g/cm^3 (default: "2.0")')
 parser.add_argument('--nxyz', type=int, default=20, metavar='N',
-                            help='byn ekenebts akibg x,y,z dims (default: 20)')
+                            help='number of grid cells in the X/Y/Z dimensions (default: 20)')
+parser.add_argument('--rcutfrac', type=float, default=4.67637, metavar='R',
+                            help='radius cutoff factor for the fingerprint sphere in Angstroms (default: 4.67637)')
+parser.add_argument('--twojmax', type=int, default=8, metavar='N',
+                            help='band limit for fingerprints (default: 8)')
+parser.add_argument('--data-dir', type=str, \
+                default="../fp_data", \
+                metavar="str", help='path to data directory with QE output files (default: ../fp_data)')
+parser.add_argument('--output-dir', type=str, default="../fp_data",
+                metavar="str", help='path to output directory (default: ../fp_data)')
 args = parser.parse_args()
 
+# Print arguments
+print("Parser Arguments")
+for arg in vars(args):
+        print ("%s: %s" % (arg, getattr(args, arg)))
 
-#temps = ["300K", "10000K", "20000K", "30000K"]
+if (args.water):
+    print("\n\nFor Josh\n\n")
+    exit(0)
 
-#temps = ["300K"]
+    args.atom_based = True
 
-#gccs = ["0.1", "0.2", "0.4", "0.6", "0.8", "1.0", "2.0", "3.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"]
+if (args.run_all):
 
-# Missing gcc = [0.1, 0.2] QE out file
-#gccs = ["0.4", "0.6", "0.8", "1.0", "2.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"]
-#gccs = ["0.1", "0.2", "3.0"]
+    # Currently available
+    temp_grid = np.array(["300K"])
+    # Future
+#    temp_grid = np.array(["300K", "10000K", "20000K", "30000K"])
 
-# Test files
-#gccs = ["5.0"]
 
-temps = [args.temp]
-gccs = [args.gcc]
+    # Currently available
+    gcc_grid = np.array(["0.4", "0.6", "0.8", "1.0", "2.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"])
+    
+    # Future
+    # Missing gcc = [0.1, 0.2] QE out file
+#    gcc_grid = np.array(["0.1", "0.2", "0.4", "0.6", "0.8", "1.0", "2.0", "3.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"])
+    # Test
+#    gcc_grid = np.array(["2.0", "3.0"])
 
-filedir = "./%s/" % (temps[0])
+else:
 
+    temp_grid = np.array([args.temp])
+    gcc_grid = np.array([args.gcc])
 
 echo_to_screen = False
 
@@ -70,7 +105,6 @@ lammps_format = "lammps-data"
 
 # Grid points and training data
 nx = args.nxyz
-#nx = 20
 ny = nx
 nz = ny
 
@@ -81,115 +115,146 @@ nz = ny
 # 11: 116
 # 15: 245
 
-twojmax = 8
-
-if (rank == 0):
-    print("\n---Beginning the fingerprint generation---\n", flush=True)
-
 tic = timeit.default_timer()
 
-for g in gccs:
+# Loops over temperature grid
+for temp in temp_grid:
 
-    gtic = timeit.default_timer()
+    print("\nWorking on Temp %s" % temp)
+
+    # Loop over density grid
+    for gcc in gcc_grid:
+
+        inner_tic = timeit.default_timer()
+      
+        temp_dir =  args.data_dir + "/%s" % (temp)
+        gcc_dir = temp_dir + "/%sgcc/" % (gcc)
+
+        if (args.water):
+            print("For Josh")
+            exit(0)
+
+        else:
+            # Make Temp directory
+            if not os.path.exists(temp_dir):
+                print("\nWarning! Creating input folder %s" % temp_dir)
+                os.makedirs(temp_dir)
+            # Make Density directory
+            if not os.path.exists(gcc_dir):
+                print("\nWarning! Creating input folder %s" % gcc_dir)
+                os.makedirs(gcc_dir)
    
-    if (rank == 0):
-        print("Converting file %s gcc!" % g, flush=True)
-
-    qe_filepath = filedir + g + "gcc/" + qe_fname
-    lammps_filepath = filedir + g + "gcc/" + lammps_fname
-
-    atoms = ase.io.read(qe_filepath, format=qe_format);
-
-    if (rank == 0):
-        print(atoms, flush=True)
-
-    # Write to LAMMPS File
-#    if (write_to_lammps_file):
-    ase.io.write(lammps_filepath, atoms, format=lammps_format)
-    
-    if (rank == 0):
-        print("Wrote QE to file for %s gcc" % (g), flush=True)
-#        continue
-
-    if (echo_to_screen):
-        lmp_cmdargs = ["-echo", "screen", "-log", log_fname]
-    else: 
-        lmp_cmdargs = ["-screen", "none", "-log", log_fname]
-    
-    lmp_cmdargs = lammps_utils.set_cmdlinevars(lmp_cmdargs,
-        {
-        "ngridx":nx,
-        "ngridy":ny,
-        "ngridz":nz,
-        "twojmax":twojmax,
-        "rcutfac":4.67637,
-        "atom_config_fname":lammps_filepath
-        }
-    )
-
-    lmp = lammps(cmdargs=lmp_cmdargs)
-  
-    if (rank == 0):
-        print("Computing fingerprints", flush=True)
-
-    try:
-        lmp.file(lammps_compute_grid_fname)
-    except lammps.LAMMPSException:
         if (rank == 0):
-            print("Bad Read of %s" % (lammps_compute_grid_fname), flush=True)
+            print("\nConverting file %s gcc!" % gcc, flush=True)
 
-    # Check atom quantities from LAMMPS 
-    num_atoms = lmp.get_natoms() 
+        qe_filepath = gcc_dir + qe_fname
+        lammps_filepath = gcc_dir + lammps_fname
 
-    if (rank == 0):
-        print("NUM_ATOMS: %d" % (num_atoms), flush=True)
+        if (rank == 0):
+            print("\nConverting %sgcc file %s to %s!" % (gcc, qe_filepath, lammps_filepath), flush=True)
+       
+        if not os.path.exists(qe_filepath):
+            print("\n\nQE out file %s does not exist! Exiting.\n\n" % (qe_filepath))
+            exit(0)
 
-    # Set things not accessible from LAMMPS
-    # First 3 cols are x, y, z, coords
+        atoms = ase.io.read(qe_filepath, format=qe_format);
 
-    ncols0 = 3 
+        if (rank == 0):
+            print(atoms, flush=True)
 
-    # Analytical relation for fingerprint length
-    ncoeff = (twojmax+2)*(twojmax+3)*(twojmax+4)
-    ncoeff = ncoeff // 24 # integer division
-    fp_length = ncols0+ncoeff
+        # Write to LAMMPS File
+    #    if (write_to_lammps_file):
+        ase.io.write(lammps_filepath, atoms, format=lammps_format)
+        
+        if (rank == 0):
+            print("Wrote QE to file for %s gcc" % (gcc), flush=True)
+    #        continue
 
-    # 1. From compute sna/atom
-#    bptr = lmp.extract_compute("b", 1, 2) # 1 = per-atom data, 2 = array
-#    print("b = ",bptr[0][0])
+        if (echo_to_screen):
+            lmp_cmdargs = ["-echo", "screen", "-log", log_fname]
+        else: 
+            lmp_cmdargs = ["-screen", "none", "-log", log_fname]
+        
+        lmp_cmdargs = lammps_utils.set_cmdlinevars(lmp_cmdargs,
+            {
+            "ngridx":nx,
+            "ngridy":ny,
+            "ngridz":nz,
+            "twojmax":args.twojmax,
+            "rcutfac":args.rcutfrac,
+            "atom_config_fname":lammps_filepath
+            }
+        )
 
-    # 2. From compute sna/grid
+        lmp = lammps(cmdargs=lmp_cmdargs)
+      
+        if (rank == 0):
+            print("\nComputing fingerprints...", flush=True)
 
-#    bgridptr = lmp.extract_compute("bgrid", 0, 2) # 0 = style global, 2 = type array
-#    print("bgrid = ",bgridptr[0][ncols0+0])
+        try:
+            lmp.file(lammps_compute_grid_fname)
+        except lammps.LAMMPSException:
+            if (rank == 0):
+                print("Bad Read of %s" % (lammps_compute_grid_fname), flush=True)
 
-    # 3. From numpy array pointing to sna/atom array
-     
-#    bptr_np = lammps_utils.extract_compute_np(lmp,"b",1,2,(num_atoms,ncoeff))
-#    print("b_np = ",bptr_np[0][0])
+        # Check atom quantities from LAMMPS 
+        num_atoms = lmp.get_natoms() 
 
-    # 4. From numpy array pointing to sna/grid array
+        if (rank == 0):
+            print("NUM_ATOMS: %d" % (num_atoms), flush=True)
 
-    bgridptr_np = lammps_utils.extract_compute_np(lmp, "bgrid", 0, 2, (nz,ny,nx,fp_length))
+        # Set things not accessible from LAMMPS
+        # First 3 cols are x, y, z, coords
 
-    # switch from x-fastest to z-fastest order
-    bgridptr_np = bgridptr_np.transpose([2,1,0,3])
+        ncols0 = 3 
 
-#    print("bgrid_np = ",bgridptr_np[0][0][0][ncols0+0])
-    if (rank == 0):
-        print("bgrid_np size = ",bgridptr_np.shape, flush=True)
+        # Analytical relation for fingerprint length
+        ncoeff = (args.twojmax+2)*(args.twojmax+3)*(args.twojmax+4)
+        ncoeff = ncoeff // 24 # integer division
+        fp_length = ncols0+ncoeff
+
+        # Extract numpy array pointing to sna/atom array
+
+        if (args.atom_based):
+            print("\n\nFor Josh\n\n")
+            exit(0)
+
+            bptr_np = lammps_utils.extract_compute_np(lmp, "b", 1, 2, (num_atoms,ncoeff))
 
 
-    fingerprint_filepath = filedir + g + "gcc/" + np_fname
-    # Save LAMMPS numpy array as binary 
-    if (rank == 0):
-        np.save(fingerprint_filepath, bgridptr_np, allow_pickle=True)
+        # Extract numpy array pointing to sna/grid array (Z, Y, X ordering)
+        else:
+            bptr_np = lammps_utils.extract_compute_np(lmp, "bgrid", 0, 2, (nz,ny,nx,fp_length))
 
-    gtoc = timeit.default_timer()
+            # switch from x-fastest to z-fastest order (swaps 0th and 2nd dimension)
+            bptr_np = bptr_np.transpose([2,1,0,3])
 
-    comm.Barrier()
+        if (rank == 0):
+            print("bptr_np shape = ",bptr_np.shape, flush=True)
 
-    print("Rank %d Time %s gcc: %4.4f" % (rank, g, gtoc - gtic), flush=True)
+        # Output location
+        temp_dir = args.output_dir + "/%s" % temp
+        gcc_dir = temp_dir + "/%sgcc/" % gcc 
+
+        # Make Temp directory
+        if not os.path.exists(temp_dir):
+            print("\nCreating output folder %s" % temp_dir)
+            os.makedirs(temp_dir)
+        # Make Density directory
+        if not os.path.exists(gcc_dir):
+            print("\nCreating output folder %s" % gcc_dir)
+            os.makedirs(gcc_dir)
+
+        fingerprint_filepath = gcc_dir + np_fname
+        # Save LAMMPS numpy array as binary 
+        if (rank == 0):
+            np.save(fingerprint_filepath, bptr_np, allow_pickle=True)
+
+        inner_toc = timeit.default_timer()
+
+        comm.Barrier()
+
+        print("Rank %d Time %s gcc: %4.4f" % (rank, gcc, inner_toc - inner_tic), flush=True)
 
 toc = timeit.default_timer()
 
