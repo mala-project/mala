@@ -50,10 +50,10 @@ parser.add_argument('--rcutfrac', type=float, default=4.67637, metavar='R',
 parser.add_argument('--twojmax', type=int, default=8, metavar='N',
                             help='band limit for fingerprints (default: 8)')
 parser.add_argument('--data-dir', type=str, \
-                default="../fp_data", \
-                metavar="str", help='path to data directory with QE output files (default: ../fp_data)')
-parser.add_argument('--output-dir', type=str, default="../fp_data",
-                metavar="str", help='path to output directory (default: ../fp_data)')
+                default="../../fp_data", \
+                metavar="str", help='path to data directory with QE output files (default: ../../fp_data)')
+parser.add_argument('--output-dir', type=str, default="../../fp_data",
+                metavar="str", help='path to output directory (default: ../../fp_data)')
 args = parser.parse_args()
 
 # Print arguments
