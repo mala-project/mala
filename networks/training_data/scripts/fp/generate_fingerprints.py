@@ -45,7 +45,7 @@ parser.add_argument('--gcc', type=str, default="2.0", metavar='S',
                             help='density of fingerprint in units in g/cm^3 (default: "2.0")')
 parser.add_argument('--nxyz', type=int, default=20, metavar='N',
                             help='number of grid cells in the X/Y/Z dimensions (default: 20)')
-parser.add_argument('--rcutfrac', type=float, default=4.67637, metavar='R',
+parser.add_argument('--rcutfac', type=float, default=4.67637, metavar='R',
                             help='radius cutoff factor for the fingerprint sphere in Angstroms (default: 4.67637)')
 parser.add_argument('--twojmax', type=int, default=8, metavar='N',
                             help='band limit for fingerprints (default: 8)')
@@ -144,31 +144,30 @@ for temp in temp_grid:
                 print("\nWarning! Creating input folder %s" % gcc_dir)
                 os.makedirs(gcc_dir)
    
-        if (rank == 0):
-            print("\nConverting file %s gcc!" % gcc, flush=True)
-
         qe_filepath = gcc_dir + qe_fname
         lammps_filepath = gcc_dir + lammps_fname
-
-        if (rank == 0):
-            print("\nConverting %sgcc file %s to %s!" % (gcc, qe_filepath, lammps_filepath), flush=True)
-       
+    
         if not os.path.exists(qe_filepath):
             print("\n\nQE out file %s does not exist! Exiting.\n\n" % (qe_filepath))
             exit(0)
 
-        atoms = ase.io.read(qe_filepath, format=qe_format);
-
-        if (rank == 0):
-            print(atoms, flush=True)
-
-        # Write to LAMMPS File
-    #    if (write_to_lammps_file):
-        ase.io.write(lammps_filepath, atoms, format=lammps_format)
+        if not os.path.exists(lammps_filepath):
         
-        if (rank == 0):
-            print("Wrote QE to file for %s gcc" % (gcc), flush=True)
-    #        continue
+            if (rank == 0):
+                print("\nConverting %sgcc file %s to %s!" % (gcc, qe_filepath, lammps_filepath), flush=True)
+            
+            atoms = ase.io.read(qe_filepath, format=qe_format);
+
+            if (rank == 0):
+                print(atoms, flush=True)
+
+            # Write to LAMMPS File
+            ase.io.write(lammps_filepath, atoms, format=lammps_format)
+        
+            if (rank == 0):
+                print("Wrote QE to file for %s gcc" % (gcc), flush=True)
+        else:
+            print("\nLAMMPS input file %s already exists.\n" % lammps_filepath)
 
         if (echo_to_screen):
             lmp_cmdargs = ["-echo", "screen", "-log", log_fname]
@@ -181,7 +180,7 @@ for temp in temp_grid:
             "ngridy":ny,
             "ngridz":nz,
             "twojmax":args.twojmax,
-            "rcutfac":args.rcutfrac,
+            "rcutfac":args.rcutfac,
             "atom_config_fname":lammps_filepath
             }
         )

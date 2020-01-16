@@ -23,6 +23,9 @@ pip3 install tensorboard
 pip3 install torch
 pip3 install torchvision
 
+# Logging 
+pip3 install tensorboard
+
 # Parallel support
 pip3 install horovod
 pip3 install mpi4py

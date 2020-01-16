@@ -13,7 +13,7 @@ print("\n-----------------------------------\n")
 
 parser = argparse.ArgumentParser(description='LDOS Parser')
 parser.add_argument('--water', action='store_true', default=False,
-                            help='run ldos parser on for water files')
+                            help='run ldos parser for water files')
 parser.add_argument('--run-all', action='store_true', default=False,
                             help='run ldos parser for all densities and temperatures')
 parser.add_argument('--density', action='store_true', default=False,
@@ -24,12 +24,12 @@ parser.add_argument('--temp', type=str, default="300K", metavar='T',
                             help='temperature of ldos parser in units K (default: 300K)')
 parser.add_argument('--gcc', type=str, default="2.0", metavar='GCC',
                             help='density of ldos parser in units g/cm^3 (default: "2.0")')
-parser.add_argument('--elvls', type=int, default=1, metavar='E',
-                            help='the number of energy levels in the LDOS (for density only e=1) (default: 1)')
+parser.add_argument('--elvls', type=int, default=128, metavar='E',
+                            help='the number of energy levels in the LDOS (for density only e=1) (default: 128)')
 parser.add_argument('--data-dir', type=str, \
         default="/ascldap/users/acangi/q-e_calcs/Al/datasets/RoomTemp/300K/N108/mass-density_highFFTres_e128", \
         metavar="str", help='path to data directory (default: Attila Al N108 directory)')
-parser.add_argument('--output-dir', type=str, default="../ldos_data",
+parser.add_argument('--output-dir', type=str, default="../../ldos_data",
         metavar="str", help='path to output directory (default: ../ldos_data)')
 args = parser.parse_args()
 
@@ -124,7 +124,7 @@ for temp in temp_grid:
         temp_dir =  args.output_dir + "/%s" % (temp)
         gcc_dir = temp_dir + "/%sgcc" % (gcc)
 
-        out_filename = args.gcc_dir + npy_filename_head + "%dx%dx%dgrid_%delvls" % (xdim, ydim, zdim, e_lvls) 
+        out_filename = gcc_dir + npy_filename_head + "%dx%dx%dgrid_%delvls" % (xdim, ydim, zdim, e_lvls) 
 
         if (args.water):
             out_filename = args.data_dir + cube_filename_head + gcc + cube_filename_tail + "_pkl"
