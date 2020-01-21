@@ -12,26 +12,36 @@ print("--------  PARSE LDOS DATA  --------")
 print("\n-----------------------------------\n")
 
 parser = argparse.ArgumentParser(description='LDOS Parser')
+
+# Targets
 parser.add_argument('--water', action='store_true', default=False,
                             help='run ldos parser for water files')
 parser.add_argument('--run-all', action='store_true', default=False,
                             help='run ldos parser for all densities and temperatures')
 parser.add_argument('--density', action='store_true', default=False,
                             help='run density parser for each density and temperature, also')
+
+# Dimensions
 parser.add_argument('--nxyz', type=int, default=200, metavar='N',
                             help='number of grid cells in the X/Y/Z dimensions (default: 200)')
+parser.add_argument('--elvls', type=int, default=128, metavar='E',
+                            help='the number of energy levels in the LDOS (for density only e=1) (default: 128)')
+
+# Directories
 parser.add_argument('--temp', type=str, default="300K", metavar='T',
                             help='temperature of ldos parser in units K (default: 300K)')
 parser.add_argument('--gcc', type=str, default="2.0", metavar='GCC',
                             help='density of ldos parser in units g/cm^3 (default: "2.0")')
-parser.add_argument('--elvls', type=int, default=128, metavar='E',
-                            help='the number of energy levels in the LDOS (for density only e=1) (default: 128)')
+
 parser.add_argument('--data-dir', type=str, \
         default="/ascldap/users/acangi/q-e_calcs/Al/datasets/RoomTemp/300K/N108/mass-density_highFFTres_e128", \
         metavar="str", help='path to data directory (default: Attila Al N108 directory)')
+
 parser.add_argument('--output-dir', type=str, default="../../ldos_data",
         metavar="str", help='path to output directory (default: ../ldos_data)')
+
 args = parser.parse_args()
+
 
 if (args.water):
     print ("Using this script in water density reading mode")
@@ -78,7 +88,8 @@ else:
 #        gcc_grid = np.array(["0.4", "0.6"])
 
     # Head and tail of LDOS filenames
-    cube_filename_head = "Al_ldos_"
+#    cube_filename_head = "Al_ldos_"
+    cube_filename_head = "/170726180545.0/100Ry_k333/Al_ldos_"
     cube_filename_tail = ".cube"
 
     dens_filename = "Al_dens.cube"
@@ -144,7 +155,8 @@ for temp in temp_grid:
         # Loop over energy grid
         # separate cube file for each ldos 
         for e in range(e_lvls):
-            infile_name = args.data_dir + "/%sgcc/" % (gcc) + \
+#            infile_name = args.data_dir + "/%sgcc/" % (gcc) + \
+            infile_name = args.data_dir + "/%s" % temp + "/%sg/" % (gcc) + \
                           cube_filename_head + "%d" % (e) + cube_filename_tail
 
             if (args.water):
