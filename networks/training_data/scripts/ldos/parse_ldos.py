@@ -89,7 +89,7 @@ else:
 
     # Head and tail of LDOS filenames
 #    cube_filename_head = "Al_ldos_"
-    cube_filename_head = "/170726180545.0/100Ry_k333/Al_ldos_"
+    cube_filename_head = "/170726180545.0/170726180545.0/100Ry_k333/Al_ldos_"
     cube_filename_tail = ".cube"
 
     dens_filename = "Al_dens.cube"
