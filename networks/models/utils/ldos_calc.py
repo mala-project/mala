@@ -49,7 +49,8 @@ grid_spacing = .08099
 fermi_energy = 7.770
 
 # Boltzmann's constant
-k = 1.0
+#k = 1.0
+k = 8.617333262145e-5
 
 # E min/max accessors
 def get_e_min(temp, gcc):
