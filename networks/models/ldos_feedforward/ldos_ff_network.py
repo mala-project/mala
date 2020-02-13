@@ -118,16 +118,18 @@ if (hvd.rank() == 0 and not args.cuda):
 torch.set_num_threads(args.num_threads)
 
 args.tb_output_dir = args.output_dir + "/tb_" + args.dataset + "_" + \
-        args.model + "model_" + str(args.nxyz) + "nxyz_" + \
+        str(args.model) + "model_" + str(args.nxyz) + "nxyz_" + \
         args.temp + "temp_" + args.gcc + "gcc"
 
-if not os.path.exists(args.output_dir) and hvd.rank() == 0:
-    print("\nCreating output folder %s\n" % args.output_dir)
-    os.makedirs(args.output_dir)
+if hvd.rank() == 0:
+    if not os.path.exists(args.output_dir):
+        print("\nCreating output folder %s\n" % args.output_dir)
+        os.makedirs(args.output_dir)
 
-if not os.path.exists(args.tb_output_dir) and hvd.rank() == 0:
-    print("\nCreating output folder %s\n" % args.tb_output_dir)
-    os.makedirs(args.tb_output_dir)
+if hvd.rank() == 0:
+    if not os.path.exists(args.tb_output_dir):
+        print("\nCreating output folder %s\n" % args.tb_output_dir)
+        os.makedirs(args.tb_output_dir)
 
 args.writer = SummaryWriter(args.tb_output_dir)
 
@@ -212,13 +214,14 @@ if (args.dataset == "random"):
 
 elif (args.dataset == "fp_ldos"):
     if (model_choice != 3 and model_choice != 4 and model_choice != 5):
-        print("Error in model choice with fp_ldos dataset");
+        print("Error in model choice with fp_ldos dataset. Please use model = {3, 4, or 5}");
         exit();
 
     print("Reading Fingerprint and LDOS dataset")
 
     fp_np = np.load(args.fp_dir + "/%s/%sgcc/Al.fingerprint.npy" % (args.temp, args.gcc))
     ldos_np = np.load(args.ldos_dir + "/%s/%sgcc/ldos_%s_%sgcc_200x200x200grid_128elvls.npy" % (args.temp, args.gcc, args.temp, args.gcc))
+#    ldos_np = np.load(args.ldos_dir + "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%s.npy" % (args.temp, args.gcc, args.temp, args.gcc, sshot))
 #    ldos_np = np.load(args.ldos_dir + "/%s/%sgcc/ldos_%s_%sgcc_200x200x200grid_128elvls.npy" % (args.temp, args.gcc, args.temp, args.gcc))
 
 #    print(fp_shape)

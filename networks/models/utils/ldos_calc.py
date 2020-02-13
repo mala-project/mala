@@ -43,14 +43,18 @@ ldos_e_max = \
 # Parameters for 298K, 2.699gcc
 
 # delta x/y/z
-grid_spacing = .08099
+#grid_spacing = .08099
+grid_spacing = .153049
 
-# Fermi Level
+# Fermi Level (2.699gcc/298K)
 fermi_energy = 7.770
 
 # Boltzmann's constant
 #k = 1.0
 k = 8.617333262145e-5
+
+# Conversion factor from Rydberg to eV
+Ry2eV = 13.6056980659
 
 # E min/max accessors
 def get_e_min(temp, gcc):
@@ -131,12 +135,21 @@ def ldos_to_dos(all_ldos_vals, temp, gcc):
 
     # LDOS should be shape (NX, NY, NZ, NUM_E_LVLS)
 
-    # Simpson's 3/8 rule for integration over 3 cells
+    # Simpson's 3/8 rule (Closed) for integration over 3 cells
     # defined by 4 pts.
     # Ex:       |___|___|___|
     #           x0  x1  x2  x3
-    
+ 
+    # Closed (cell-edges)
     wgt = (1.0/8.0) * np.array([3.0, 9.0, 9.0, 3.0])
+
+    # Netwon-Cotes Degree 5 rule (Open) for integration over 3 cells
+    # defined by 4 pts.
+    # Ex:       |___|___|___|
+    #           x0  x1  x2  x3
+
+    # Open (cell-centers)
+#    wgt = (5.0/24.0) * np.array([11.0, 1.0, 1.0, 11.0])
 
     # Integrate Z
     all_ldos_vals = grid_spacing * np.sum(( \
@@ -161,13 +174,48 @@ def ldos_to_dos(all_ldos_vals, temp, gcc):
 
     return all_ldos_vals
 
+
+def ldos_to_dos_simple(all_ldos_vals, temp, gcc):
+    # LDOS should be shape (NX, NY, NZ, NUM_E_LVLS)
+
+    # Simpson's rule for integration over 2 cells with periodic functions
+    # defined by 3 pts.
+    # Ex:       |___|___|
+    #           x0  x1  x2
+    
+    wgt = np.array([1.0])
+
+    # Integrate Z
+    all_ldos_vals = grid_spacing * np.sum(( \
+            wgt[0] * all_ldos_vals[:,:,:,:]), 2)
+    
+    # Integrate Y
+    all_ldos_vals = grid_spacing * np.sum(( \
+            wgt[0] * all_ldos_vals[:,:,:]), 1)
+            
+    # Integrate X
+    all_ldos_vals = grid_spacing * np.sum(( \
+            wgt[0] * all_ldos_vals[:,:]), 0)
+
+    return all_ldos_vals
+
+
 # DOS -> BANDENERGY
 def dos_to_bandenergy(dos_vals, temp, gcc):
    
     ldos_e_lvls = dos_vals.shape[0]
+    ldos_e_lvls = 136
 
-    emin = ldos_e_min[gcc][temp]
-    emax = ldos_e_max[gcc][temp]
+    print("\nE_LVLS: %d" % ldos_e_lvls)
+
+
+    dos_vals = dos_vals[0:ldos_e_lvls]
+
+#    emin = ldos_e_min[gcc][temp]
+#    emax = ldos_e_max[gcc][temp]
+
+    emin = -4.627
+    emax = 10.254 
 
     e_spacing = (emax - emin) / ldos_e_lvls
     energy_vals = np.linspace(emin, emax, ldos_e_lvls)

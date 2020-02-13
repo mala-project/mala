@@ -32,9 +32,12 @@ parser.add_argument('--temp', type=str, default="300K", metavar='T',
                             help='temperature of ldos parser in units K (default: 300K)')
 parser.add_argument('--gcc', type=str, default="2.0", metavar='GCC',
                             help='density of ldos parser in units g/cm^3 (default: "2.0")')
+parser.add_argument('--snapshot', type=str, default="0", metavar='T',
+                            help='snapshot for ldos parser (default: 0)')
 
 parser.add_argument('--data-dir', type=str, \
-        default="/ascldap/users/acangi/q-e_calcs/Al/datasets/RoomTemp/300K/N108/mass-density_highFFTres_e128", \
+#        default="/ascldap/users/acangi/q-e_calcs/Al/datasets/RoomTemp/300K/N108/mass-density_highFFTres_e128", \
+        default="/ascldap/users/acangi/q-e_calcs/Al/datasets/vasp_econ_snapshots", \
         metavar="str", help='path to data directory (default: Attila Al N108 directory)')
 
 parser.add_argument('--output-dir', type=str, default="../../ldos_data",
@@ -50,6 +53,7 @@ if (args.water):
 
     temp_grid = np.array([args.temp])
     gcc_grid = np.array(['aaaa'])
+    snapshot_grid = np.array([args.snapshot])
 
     if (args.run_all):
         gcc_grid = [''.join(i) for i in itertools.product("abcdefghijklmnopqrstuvwxyz",repeat=4)][:1593]
@@ -73,6 +77,7 @@ else:
     if (not args.run_all):
         temp_grid = np.array([args.temp])
         gcc_grid = np.array([args.gcc])
+        snapshot_grid = np.array([args.snapshot])
     else: 
         
         # Currently available
@@ -89,7 +94,7 @@ else:
 
     # Head and tail of LDOS filenames
 #    cube_filename_head = "Al_ldos_"
-    cube_filename_head = "/170726180545.0/170726180545.0/100Ry_k333/Al_ldos_"
+    cube_filename_head = "/170726180545.%s/100Ry_k333/Al_ldos_" % args.snapshot
     cube_filename_tail = ".cube"
 
     dens_filename = "Al_dens.cube"
@@ -135,7 +140,7 @@ for temp in temp_grid:
         temp_dir =  args.output_dir + "/%s" % (temp)
         gcc_dir = temp_dir + "/%sgcc" % (gcc)
 
-        out_filename = gcc_dir + npy_filename_head + "%dx%dx%dgrid_%delvls" % (xdim, ydim, zdim, e_lvls) 
+        out_filename = gcc_dir + npy_filename_head + "%dx%dx%dgrid_%delvls_snapshot%s" % (xdim, ydim, zdim, e_lvls, args.snapshot) 
 
         if (args.water):
             out_filename = args.data_dir + cube_filename_head + gcc + cube_filename_tail + "_pkl"
