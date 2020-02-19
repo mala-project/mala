@@ -36,6 +36,10 @@ parser.add_argument('--train-test-split', type=float, default=.80, metavar='R',
                     help='pecentage of training data to use (default: .80)')
 parser.add_argument('--epochs', type=int, default=1, metavar='N',
                     help='number of epochs to train (default: 1)')
+parser.add_argument('--patience', type=int, default=5, metavar='N',
+                    help='number of epochs to tolerate no decrease in validation error (default: 5)')
+parser.add_argument('--early-stopping', type=float, default=1.0, metavar='ES',
+                    help='required validation decrease to not test patience (default: 1.0)')
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')
 parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
@@ -56,6 +60,8 @@ parser.add_argument('--temp', type=str, default="300K", metavar='T',
                     help='temperature of snapshot to train on (default: "300K")')
 parser.add_argument('--gcc', type=str, default="2.0", metavar='GCC',
                     help='density of snapshot to train on (default: "2.0")')
+parser.add_argument('--num-snapshots', type=int, default=1, metavar='N',
+                    help='num snapshots per temp/gcc pair (default: 1)')
 parser.add_argument('--water', action='store_true', default=False,
                     help='train on water fp and ldos files')
 
@@ -145,25 +151,11 @@ kwargs = {'num_workers': 2, 'pin_memory': True} if args.cuda else {}
 # Model 4: LDOS estimation with LSTM
 # Model 5: LDOS estimation with bidirectional LSTM
 
-#model_choice = 4;
-
-#dataset = "fp_ldos"
-
-#temp = "300K"
-#gcc = "5.0"
-
-#training_path = "/ascldap/users/johelli/Code/mlmm/mlmm-ldrd-data/networks/training_data"
 
 if (args.model != 0):
     model_choice = args.model
 
 # Model params
-
-#grid_pts = 200 ** 3
-#args.grid_pts = args.nxyz ** 3
-
-#bis_length = 80
-#ldos_length = 180
 dens_length = 1
 lstm_in_length = 10
 
@@ -194,7 +186,8 @@ if (args.dataset == "random"):
     args.grid_pts = args.nxyz ** 3
 
     train_pts = int(args.grid_pts * args.train_test_split)
-    test_pts = args.grid_pts - train_pts
+    validation_pts = int((args.grid_pts - train_pts) / 2.0)
+    test_pts = args.grid_pts - train_pts - validation_pts
 
     # Density models
     if (model_choice == 1 or model_choice == 2):
@@ -210,43 +203,91 @@ if (args.dataset == "random"):
 
     fp_ldos_dataset = torch.utils.data.TensorDataset(fp_random_torch, ldos_random_torch)
 
-    train_dataset, test_dataset = torch.utils.data.random_split(fp_ldos_dataset, [train_pts, test_pts])
+    train_dataset, validation_dataset, test_dataset = \
+torch.utils.data.random_split(fp_ldos_dataset, [train_pts, validation_pts, test_pts])
 
 elif (args.dataset == "fp_ldos"):
     if (model_choice != 3 and model_choice != 4 and model_choice != 5):
         print("Error in model choice with fp_ldos dataset. Please use model = {3, 4, or 5}");
         exit();
 
+    args.test_snapshot = args.num_snapshots - 1;
+    args.validation_snapshot = args.num_snapshots - 2;
+    args.num_train_snapshots = args.num_snapshots - 2;
+
+    if (args.num_train_snapshots < 1):
+        args.num_train_snapshots = 1
+    if (args.validation_snapshot < 0):
+        args.validation_snapshot = 0
+
+    # Get dims of fp/ldos numpy arrays  
+    empty_fp_np = np.load(args.fp_dir + \
+        "/%s/%sgcc/Al_fingerprint_snapshot%d.npy" % (args.temp, args.gcc, 0), mmap_mode='r')
+    empty_ldos_np = np.load(args.ldos_dir + \
+        "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, 0), mmap_mode='r')
+
+    fp_shape = empty_fp_np.shape
+    ldos_shape = empty_ldos_np.shape
+
+    full_train_fp_np = np.empty(np.insert(fp_shape, 0, args.num_train_snapshots))
+    full_train_ldos_np = np.empty(np.insert(ldos_shape, 0, args.num_train_snapshots))
+
+    print(full_train_fp_np.shape)
+    print(full_train_ldos_np.shape)
+
     print("Reading Fingerprint and LDOS dataset")
+    
+    
+    for sshot in range(args.num_train_snapshots):
+        print("Reading train snapshot %d" % sshot)
 
-    fp_np = np.load(args.fp_dir + "/%s/%sgcc/Al.fingerprint.npy" % (args.temp, args.gcc))
-    ldos_np = np.load(args.ldos_dir + "/%s/%sgcc/ldos_%s_%sgcc_200x200x200grid_128elvls.npy" % (args.temp, args.gcc, args.temp, args.gcc))
-#    ldos_np = np.load(args.ldos_dir + "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%s.npy" % (args.temp, args.gcc, args.temp, args.gcc, sshot))
-#    ldos_np = np.load(args.ldos_dir + "/%s/%sgcc/ldos_%s_%sgcc_200x200x200grid_128elvls.npy" % (args.temp, args.gcc, args.temp, args.gcc))
+ #       temp_fp = \
+        full_train_fp_np[sshot, :, :, :] = np.load(args.fp_dir + \
+            "/%s/%sgcc/Al_fingerprint_snapshot%d.npy" % (args.temp, args.gcc, sshot))
 
-#    print(fp_shape)
-#    print(ldos_shape)
+#        temp_ldos = \
+        full_train_ldos_np[sshot, :, :, :] = np.load(args.ldos_dir + \
+            "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, sshot))
 
+    print("Reading validation snapshot %d" % args.validation_snapshot)
+    validation_fp_np = np.load(args.fp_dir + \
+        "/%s/%sgcc/Al_fingerprint_snapshot%d.npy" % (args.temp, args.gcc, args.validation_snapshot))
+    validation_ldos_np = np.load(args.ldos_dir + \
+        "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, args.validation_snapshot))
+ 
+    print("Reading test snapshot %d" % args.test_snapshot)
+    test_fp_np = np.load(args.fp_dir + \
+        "/%s/%sgcc/Al_fingerprint_snapshot%d.npy" % (args.temp, args.gcc, args.test_snapshot))
+    test_ldos_np = np.load(args.ldos_dir + \
+        "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, args.test_snapshot))
+
+    # Pick subset of FP vector is user requested
     if (args.no_coords):
         # Remove first 3 elements of fp's (x/y/z coords)
-        fp_np = fp_np[:, :, :, 3:]
+        full_train_fp_np = full_train_fp_np[:, :, :, :, 3:]
+        validation_fp_np = validation_fp_np[:, :, :, 3:]
+        test_fp_np = test_fp_np[:, :, :, 3:]
+
     elif (args.no_bispectrum):
         fp_np = fp_np[:, :, :, :3]
+        validation_fp_np = validation_fp_np[:, :, :, :3]
+        test_fp_np = test_fp_np[:, :, :, :3]
 
-    fp_shape = fp_np.shape
-    ldos_shape = ldos_np.shape
+    fp_shape = test_fp_np.shape
+    ldos_shape = test_ldos_np.shape
 
     fp_pts = fp_shape[0] * fp_shape[1] * fp_shape[2]
     ldos_pts = ldos_shape[0] * ldos_shape[1] * ldos_shape[2]
 
     if (fp_pts != ldos_pts):
-        print("\n\nError in grid points: fp_pts %d and ldos_pts %d\n\n" % (fp_pts, ldos_pts));
+        print("\n\nError in num grid points: fp_pts %d and ldos_pts %d\n\n" % (fp_pts, ldos_pts));
         exit(0)
 
     args.grid_pts = fp_pts
 
-    train_pts = int(args.grid_pts * args.train_test_split)
-    test_pts = args.grid_pts - train_pts
+    args.train_pts = args.grid_pts * args.num_train_snapshots
+    args.validation_pts = args.grid_pts
+    args.test_pts = args.grid_pts
 
     # Vector lengths
     args.fp_length = fp_shape[3]
@@ -254,53 +295,83 @@ elif (args.dataset == "fp_ldos"):
    
     if (hvd.rank() == 0):
         print("Grid_pts %d" % args.grid_pts)
-        print("Train_pts %d, Test pts %d" % (train_pts, test_pts))
+        print("Train_pts %d" % args.train_pts)
+        print("Validation_pts %d" % args.validation_pts)
+        print("Test pts %d" % args.test_pts)
         print("Fingerprint vector length: %d" % args.fp_length)
         print("LDOS vector length: %d" % args.ldos_length)
 
-    fp_np = fp_np.reshape([args.grid_pts, args.fp_length])
-    ldos_np = ldos_np.reshape([args.grid_pts, args.ldos_length])
+    full_train_fp_np = full_train_fp_np.reshape([args.train_pts, args.fp_length])
+    full_train_ldos_np = full_train_ldos_np.reshape([args.train_pts, args.ldos_length])
+
+    validation_fp_np = validation_fp_np.reshape([args.validation_pts, args.fp_length])
+    validation_ldos_np = validation_ldos_np.reshape([args.validation_pts, args.ldos_length])
+    
+    test_fp_np = test_fp_np.reshape([args.test_pts, args.fp_length])
+    test_ldos_np = test_ldos_np.reshape([args.test_pts, args.ldos_length])
+    
 
     # Row scaling of features 
     for row in range(args.fp_length):
 
         #meanv = np.mean(fp_np[row, :])
-        fp_maxv  = np.max(fp_np[row, :])
-        fp_minv  = np.min(fp_np[row, :])
+#        fp_maxv  = np.max(fp_np[row, :])
+#        fp_minv  = np.min(fp_np[row, :])
+        
+        fp_meanv = np.mean([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
+        fp_stdv  = np.std([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
 
 #        fp_np[row, :] = (fp_np[row, :] - fp_minv) / (fp_maxv - fp_minv)
-        fp_np[row, :] = fp_np[row, :] / fp_maxv
+#        fp_np[row, :] = fp_np[row, :] / fp_maxv
+        full_train_fp_np[row, :] = (full_train_fp_np[row, :] - fp_meanv) / fp_stdv
+        validation_fp_np[row, :] = (validation_fp_np[row, :] - fp_meanv) / fp_stdv
+        test_fp_np[row, :] = (test_fp_np[row, :] - fp_meanv) / fp_stdv
 
         if (hvd.rank() == 0):
-            print("FP Row: %g, Min: %g, Avg: %g, Max: %g" % (row, np.min(fp_np[row, :]), np.mean(fp_np[row, :]), np.max(fp_np[row, :])))
+#            print("FP Row: %g, Min: %g, Avg: %g, Max: %g" % (row, np.min(fp_np[row, :]), np.mean(fp_np[row, :]), np.max(fp_np[row, :])))
+            print("FP Row: %g, Mean: %g, Std: %g" % (row, fp_meanv, fp_stdv))
 
     # Row scaling of outputs
     for row in range(args.ldos_length):
 
         #meanv = np.mean(fp_np[row, :])
-        ldos_maxv  = np.max(ldos_np[row, :])
-        ldos_minv  = np.min(ldos_np[row, :])
+#        ldos_maxv  = np.max(ldos_np[row, :])
+#        ldos_minv  = np.min(ldos_np[row, :])
 
+        ldos_meanv = np.mean([full_train_ldos_np[row,:], validation_ldos_np[row, :], test_ldos_np[row, :]])
+        ldos_stdv  = np.std([full_train_ldos_np[row,:], validation_ldos_np[row, :], test_ldos_np[row, :]])
+        
 #        ldos_np[row, :] = (ldos_np[row, :] - ldos_minv) / (ldos_maxv - ldos_minv)
-        fp_np[row, :] = fp_np[row, :] / ldos_maxv
+#        fp_np[row, :] = fp_np[row, :] / ldos_maxv
+        full_train_ldos_np[row, :] = (full_train_ldos_np[row, :] - ldos_meanv) / ldos_stdv
+        validation_ldos_np[row, :] = (validation_ldos_np[row, :] - ldos_meanv) / ldos_stdv
+        test_ldos_np[row, :] = (test_ldos_np[row, :] - ldos_meanv) / ldos_stdv
 
         if (hvd.rank() == 0):
-            print("LDOS Row: %g, Min: %g, Avg: %g, Max: %g" % (row, np.min(ldos_np[row, :]), np.mean(ldos_np[row, :]), np.max(ldos_np[row, :])))
+#            print("LDOS Row: %g, Min: %g, Avg: %g, Max: %g" % (row, np.min(ldos_np[row, :]), np.mean(ldos_np[row, :]), np.max(ldos_np[row, :])))
+            print("LDOS Row: %g, Mean: %g, Std: %g" % (row, ldos_meanv, ldos_stdv))
+    
 
-    fp_torch = torch.tensor(fp_np, dtype=torch.float32)
-    ldos_torch = torch.tensor(ldos_np, dtype=torch.float32)
+
+    full_train_fp_torch = torch.tensor(full_train_fp_np, dtype=torch.float32)
+    full_train_ldos_torch = torch.tensor(full_train_ldos_np, dtype=torch.float32)
+
+    validation_fp_torch = torch.tensor(validation_fp_np, dtype=torch.float32)
+    validation_ldos_torch = torch.tensor(validation_ldos_np, dtype=torch.float32)
+
+    test_fp_torch = torch.tensor(test_fp_np, dtype=torch.float32)
+    test_ldos_torch = torch.tensor(test_ldos_np, dtype=torch.float32)
+    
 
     # Create fp (inputs) and ldos (outputs) Pytorch Dataset and apply random split
-    fp_ldos_dataset = torch.utils.data.TensorDataset(fp_torch, ldos_torch)
+    train_dataset = torch.utils.data.TensorDataset(full_train_fp_torch, full_train_ldos_torch)
+    validation_dataset = torch.utils.data.TensorDataset(validation_fp_torch, validation_ldos_torch)
+    test_dataset = torch.utils.data.TensorDataset(test_fp_torch, test_ldos_torch)
+
 
 else:
     print("\n\nDataset %s is not available. Currently available datasets are (random, fp_ldos)" % args.dataset)
     exit(0)
-
-# Create train and test split for training
-# Dataset choice above must define a fp_ldos_dataset and train_pts/test_pts
-train_dataset, test_dataset = torch.utils.data.random_split(fp_ldos_dataset, [train_pts, test_pts])
-
 
 # TRAINING DATA
 # Horovod: use DistributedSampler to partition the training data.
@@ -309,19 +380,20 @@ train_sampler = torch.utils.data.distributed.DistributedSampler(
 train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=args.batch_size, sampler=train_sampler, **kwargs)
 
+# VALIDATION DATA
+validation_sampler = torch.utils.data.distributed.DistributedSampler(
+    validation_dataset, num_replicas=hvd.size(), rank=hvd.rank())
+validation_loader = torch.utils.data.DataLoader(
+    validation_dataset, batch_size=args.test_batch_size, sampler=validation_sampler, **kwargs)
 
 # TESTING DATA
-# Horovod: use DistributedSampler to partition the test data.
 test_sampler = torch.utils.data.distributed.DistributedSampler(
     test_dataset, num_replicas=hvd.size(), rank=hvd.rank())
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.test_batch_size,
-                                          sampler=test_sampler, **kwargs)
+test_loader = torch.utils.data.DataLoader(
+    test_dataset, batch_size=args.test_batch_size, sampler=test_sampler, **kwargs)
 
 
-#print("\n\nSucess!\n\n", flush=True)
-#exit()
-
-
+# Neural Network Class
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -410,6 +482,12 @@ optimizer = hvd.DistributedOptimizer(optimizer,
                                      named_parameters=model.named_parameters(),
                                      compression=compression)
 
+
+def metric_average(val, name):
+    tensor = torch.tensor(val)
+    avg_tensor = hvd.allreduce(tensor, name=name)
+    return avg_tensor.item()
+
 # Train FP-LDOS Model
 def train(epoch):
 
@@ -439,37 +517,52 @@ def train(epoch):
 #        print(output.shape)
 #        print(target.shape)
 
-        loss = F.mse_loss(output, target)
-        loss.backward()
+        ldos_loss = F.mse_loss(output, target)
+        ldos_loss.backward()
         optimizer.step()
 
-        running_loss += loss.item()
+        running_loss += ldos_loss.item()
 
-        if batch_idx % args.log_interval == -1 % args.log_interval:
-            # Horovod: use train_sampler to determine the number of examples in
-            # this worker's partition.
+        if (batch_idx % args.log_interval == -1 % args.log_interval and hvd.rank() == 0): 
+
+            ldos_loss_val = metric_average(ldos_loss, 'avg_ldos_loss')
+            
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6E}'.format(
                 epoch, batch_idx * len(data), len(train_sampler),
-                100. * batch_idx / len(train_loader), loss.item()))
+                100. * batch_idx / len(train_loader), ldos_loss_val))
             
-            args.writer.add_scalar('training loss rank%d' % hvd.rank(), \
-                running_loss / args.log_interval, \
-                epoch * len(train_loader) + batch_idx)
+#            args.writer.add_scalar('training loss rank%d' % hvd.rank(), \
+#                running_loss / args.log_interval, \
+#                epoch * len(train_loader) + batch_idx)
 
 
-    return loss.item()
+    return ldos_loss_val
 
-def metric_average(val, name):
-    tensor = torch.tensor(val)
-    avg_tensor = hvd.allreduce(tensor, name=name)
-    return avg_tensor.item()
+# Validate trained model for early stopping
+def validate():
+    model.eval()
 
+    running_ldos_loss = 0.0
+
+    for batch_idx, (data, target) in enumerate(validation_loader):
+        
+        if args.cuda:
+            data, target = data.cuda(), target.cuda()
+        
+        output = model(data)
+
+        running_ldos_loss += F.mse_loss(output, target)
+        
+    ldos_loss_val = metric_average(running_ldos_loss, 'avg_ldos_loss')
+    
+    return ldos_loss_val
 
 # Test model, post training
 def test():
     model.eval()
-    ldos_loss = 0.0
-    dens_loss = 0.0
+
+    running_ldos_loss = 0.0
+    running_dens_loss = 0.0
     plot_ldos = True
 #    test_accuracy = 0.
     for data, target in test_loader:
@@ -477,15 +570,19 @@ def test():
             data, target = data.cuda(), target.cuda()
         output = model(data)
 
-        dens_output = ldos_calc.ldos_to_density(output, args.temp, args.gcc)       
-        dens_target = ldos_calc.ldos_to_density(target, args.temp, args.gcc)
+#        dens_output = ldos_calc.ldos_to_density(output, args.temp, args.gcc)       
+#        dens_target = ldos_calc.ldos_to_density(target, args.temp, args.gcc)
 
-#        dens_output = torch.tensor(np.array([.99, 1.0]))
-#        dens_target = torch.tensor(np.array([1.0, .99]))
+#        bandE_output = ldos_calc.ldos_to_bandenergy(output, args.temp, args.gcc)
+#        bandE_target = ldos_calc.ldos_to_bandenergy(target, args.temp, args.gcc)
+#        bandE_true   = ldos_calc.get_bandenergy(args.temp, args.gcc)
+
 
         # sum up batch loss
-        ldos_loss += F.mse_loss(output, target, size_average=None).item()
-        dens_loss += F.mse_loss(dens_output, dens_target, size_average=None).item()
+        running_ldos_loss += F.mse_loss(output, target, size_average=None).item()
+#        running_dens_loss += F.mse_loss(dens_output, dens_target, size_average=None).item()
+#        bandE_loss += F.mse_loss(bandE_output, bandE_target, size_average=None).item()
+#       bandE_true_loss += F.mse_loss(bandE_output, bandE_true, size_average=None).item()
 
         if plot_ldos:
             for i in range(args.tb_ldos_comparisons):
@@ -493,21 +590,30 @@ def test():
                     args.writer.add_scalars('test ldos %d rank%d' % (i, hvd.rank()), \
                             {'LDOS-ML': output[i,j], 'True': target[i,j]}, j)
 
+
             plot_ldos = False
+
+#    if (hvd.rank() == 0):
+#        print("Done test predictions.\n\nCalculating Band Energies.\n")
+#    predicted_bandE = ldos_calc.ldos_to_bandenergy(predicted_ldos, args.temp, args.gcc)
+#    target_bandE = ldos_calc.ldos_to_bandenergy(target_ldos, args.temp, args.gcc)
+#    qe_bandE = ldos_calc.get_bandenergy(args.temp, args.gcc, args.test_snapshot)
+
 
     # Horovod: use test_sampler to determine the number of examples in
     # this worker's partition.
-    ldos_loss /= len(test_sampler)
-    dens_loss /= len(test_sampler)
+#    ldos_loss /= len(test_sampler)
+#    dens_loss /= len(test_sampler)
 
     # Horovod: average metric values across workers.
-    ldos_loss = metric_average(ldos_loss, 'avg_ldos_loss')
-    dens_loss = metric_average(dens_loss, 'avg_dens_loss')
+    ldos_loss_val = metric_average(running_ldos_loss, 'avg_ldos_loss')
+    dens_loss_val = metric_average(running_dens_loss, 'avg_dens_loss')
 
     # Horovod: print output only on first rank.
     if hvd.rank() == 0:
-        print('\nTest set: \nAverage LDOS loss: %4.4E\nAverage Dens loss: %4.4E\n' % (ldos_loss, dens_loss))
+        print('\nTest set: \nAverage LDOS loss: %4.4E\nAverage Dens loss: %4.4E\n' % (ldos_loss_val, dens_loss_val))
 
+    return ldos_loss_val
 
 
 ### TRAIN ####
@@ -516,6 +622,12 @@ tot_tic = timeit.default_timer()
 train_time = 0; 
 
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+
+epoch_loss = 0.0
+prev_validate_loss = 1e16
+validate_loss = 0.0
+
+curr_patience = 0
 
 for epoch in range(1, args.epochs + 1):
 
@@ -531,19 +643,35 @@ for epoch in range(1, args.epochs + 1):
     train_time += toc - tic
 
     scheduler.step(epoch_loss)
+     
+    # Early Stopping 
+    validate_loss = validate()
+
+    if (validate_loss < prev_validate_loss * args.early_stopping):
+        print("\nValidation loss has decreased from %4.6e to %4.6e\n" % (prev_validate_loss, validate_loss))
+        prev_validate_loss = validate_loss
+        curr_patience = 0
+    else:
+        print("\nValidation loss has NOT decreased enough! (from %4.6e to %4.6e) Patience at %d of %d\n" % \
+            (prev_validate_loss, validate_loss, curr_patience + 1, args.patience))
+        curr_patience += 1
+        if (curr_patience >= args.patience):
+            print("\n\nPatience has been reached! Final validation error %4.6e\n\n" % validate_loss)
+            break;
 
 tic = timeit.default_timer()
-test()
+test_loss = test()
 
 # Global barrier
 hvd.allreduce(torch.tensor(0), name='barrier') 
 toc = timeit.default_timer()
     
 if (hvd.rank() == 0):
-    print("Total Epochs %d, Testing time: %3.3f " % (args.epochs, toc - tic))
+    print("Total Epochs %d, Testing time: %3.3f " % (epoch, toc - tic))
 
 
 tot_toc = timeit.default_timer()
 
 if (hvd.rank() == 0):
+    print("\nSuccess!\n")
     print("\n\nTotal train time %4.4f, Total test time %4.4f\n\n" % (train_time, (tot_toc - tot_tic) - train_time))
