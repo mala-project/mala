@@ -43,12 +43,14 @@ parser.add_argument('--temp', type=str, default="300K", metavar='S',
                             help='temperature of fingerprint in units K (default: "300K")')
 parser.add_argument('--gcc', type=str, default="2.0", metavar='S',
                             help='density of fingerprint in units in g/cm^3 (default: "2.0")')
+parser.add_argument('--snapshot', type=str, default="0", metavar='S',
+                            help='snapshot number at given gcc/temp (default: "0")')
 parser.add_argument('--nxyz', type=int, default=20, metavar='N',
                             help='number of grid cells in the X/Y/Z dimensions (default: 20)')
 parser.add_argument('--rcutfac', type=float, default=4.67637, metavar='R',
                             help='radius cutoff factor for the fingerprint sphere in Angstroms (default: 4.67637)')
-parser.add_argument('--twojmax', type=int, default=8, metavar='N',
-                            help='band limit for fingerprints (default: 8)')
+parser.add_argument('--twojmax', type=int, default=11, metavar='N',
+                            help='band limit for fingerprints (default: 11)')
 parser.add_argument('--data-dir', type=str, \
                 default="../../fp_data", \
                 metavar="str", help='path to data directory with QE output files (default: ../../fp_data)')
@@ -93,10 +95,10 @@ echo_to_screen = False
 
 #write_to_lammps_file = True
 
-qe_fname = "QE_Al.scf.pw.out"
-lammps_fname = "Al.scf.pw.lammps"
-np_fname = "Al.fingerprint"
-log_fname = "lammps_fp.log"  
+qe_fname = "QE_Al.scf.pw.snapshot%s.out" % args.snapshot
+lammps_fname = "Al.scf.pw.snapshot%s.lammps" % args.snapshot
+np_fname = "Al_fingerprint_snapshot%s" % args.snapshot
+log_fname = "lammps_fp_snapshot%s.log" % args.snapshot  
  
 lammps_compute_grid_fname = "./in.bgrid.python"
 

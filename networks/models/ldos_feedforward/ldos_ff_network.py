@@ -15,6 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import horovod.torch as hvd
 
+from datetime import datetime
 import timeit
 import numpy as np 
 
@@ -36,7 +37,9 @@ parser.add_argument('--train-test-split', type=float, default=.80, metavar='R',
                     help='pecentage of training data to use (default: .80)')
 parser.add_argument('--epochs', type=int, default=1, metavar='N',
                     help='number of epochs to train (default: 1)')
-parser.add_argument('--patience', type=int, default=5, metavar='N',
+parser.add_argument('--early-patience', type=int, default=10, metavar='N',
+                    help='number of epochs to tolerate no decrease in validation error (default: 10)')
+parser.add_argument('--optim-patience', type=int, default=5, metavar='N',
                     help='number of epochs to tolerate no decrease in validation error (default: 5)')
 parser.add_argument('--early-stopping', type=float, default=1.0, metavar='ES',
                     help='required validation decrease to not test patience (default: 1.0)')
@@ -108,13 +111,17 @@ if (args.batch_size < hvd.size()):
     print("Changing batch_size from %d to %d (number of ranks)" % (args.batch_size, hvd.size()))
     args.batch_size = hvd.size()
 
-args.test_batch_size = args.batch_size
+#args.test_batch_size = args.batch_size
 
 if args.cuda:
     # Horovod: pin GPU to local rank.
     torch.cuda.set_device(hvd.local_rank())
     torch.cuda.manual_seed(args.seed)
 
+# Unique timestamp
+args.timestamp = datetime.now().strftime("%c")
+if (hvd.rank() == 0):
+    print("Current Time: %s" % args.timestamp)
 
 # Horovod: limit # of CPU threads to be used per worker.
 
@@ -123,7 +130,9 @@ if (hvd.rank() == 0 and not args.cuda):
 
 torch.set_num_threads(args.num_threads)
 
-args.tb_output_dir = args.output_dir + "/tb_" + args.dataset + "_" + \
+args.model_dir = args.output_dir + "/" + args.timestamp
+
+args.tb_output_dir = args.model_dir + "/tb_" + args.dataset + "_" + \
         str(args.model) + "model_" + str(args.nxyz) + "nxyz_" + \
         args.temp + "temp_" + args.gcc + "gcc"
 
@@ -132,9 +141,12 @@ if hvd.rank() == 0:
         print("\nCreating output folder %s\n" % args.output_dir)
         os.makedirs(args.output_dir)
 
-if hvd.rank() == 0:
+    if not os.path.exists(args.model_dir):
+        print("\nCreating Model output folder %s\n" % args.model_dir)
+        os.makedirs(args.model_dir)
+    
     if not os.path.exists(args.tb_output_dir):
-        print("\nCreating output folder %s\n" % args.tb_output_dir)
+        print("\nCreating Tensorboard output folder %s\n" % args.tb_output_dir)
         os.makedirs(args.tb_output_dir)
 
 args.writer = SummaryWriter(args.tb_output_dir)
@@ -387,10 +399,16 @@ validation_loader = torch.utils.data.DataLoader(
     validation_dataset, batch_size=args.test_batch_size, sampler=validation_sampler, **kwargs)
 
 # TESTING DATA
-test_sampler = torch.utils.data.distributed.DistributedSampler(
-    test_dataset, num_replicas=hvd.size(), rank=hvd.rank())
+test_sampler = torch.utils.data.sampler.SequentialSampler(test_dataset)
 test_loader = torch.utils.data.DataLoader(
     test_dataset, batch_size=args.test_batch_size, sampler=test_sampler, **kwargs)
+
+
+
+#test_sampler = torch.utils.data.distributed.DistributedSampler(
+#    test_dataset, num_replicas=hvd.size(), rank=hvd.rank())
+#test_loader = torch.utils.data.DataLoader(
+#    test_dataset, batch_size=args.test_batch_size, sampler=test_sampler, **kwargs)
 
 
 # Neural Network Class
@@ -564,6 +582,11 @@ def test():
     running_ldos_loss = 0.0
     running_dens_loss = 0.0
     plot_ldos = True
+
+    test_ldos = np.empty([args.grid_pts, args.ldos_length])
+
+    data_idx = 0
+
 #    test_accuracy = 0.
     for data, target in test_loader:
         if args.cuda:
@@ -577,6 +600,10 @@ def test():
 #        bandE_target = ldos_calc.ldos_to_bandenergy(target, args.temp, args.gcc)
 #        bandE_true   = ldos_calc.get_bandenergy(args.temp, args.gcc)
 
+        num_samples = output.shape[0] 
+
+        test_ldos[data_idx:data_idx + num_samples, :] = output.detach().numpy()
+        data_idx += num_samples
 
         # sum up batch loss
         running_ldos_loss += F.mse_loss(output, target, size_average=None).item()
@@ -612,6 +639,8 @@ def test():
     # Horovod: print output only on first rank.
     if hvd.rank() == 0:
         print('\nTest set: \nAverage LDOS loss: %4.4E\nAverage Dens loss: %4.4E\n' % (ldos_loss_val, dens_loss_val))
+        print('\nSaving LDOS predictions to %s\n' % args.model_dir + "/" + args.dataset + "_predictions")
+        np.save(args.model_dir + "/" + args.dataset + "_predictions", test_ldos)
 
     return ldos_loss_val
 
@@ -621,7 +650,7 @@ tot_tic = timeit.default_timer()
 
 train_time = 0; 
 
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=args.optim_patience, mode="max", factor=0.5, verbose=True)
 
 epoch_loss = 0.0
 prev_validate_loss = 1e16
@@ -638,12 +667,12 @@ for epoch in range(1, args.epochs + 1):
     hvd.allreduce(torch.tensor(0), name='barrier')  
     toc = timeit.default_timer()
     
+    scheduler.step(epoch_loss)
+    
     if (hvd.rank() == 0):
         print("\nEpoch %d, Training time: %3.3f\n" % (epoch, toc - tic))
     train_time += toc - tic
-
-    scheduler.step(epoch_loss)
-     
+    
     # Early Stopping 
     validate_loss = validate()
 
@@ -653,9 +682,9 @@ for epoch in range(1, args.epochs + 1):
         curr_patience = 0
     else:
         print("\nValidation loss has NOT decreased enough! (from %4.6e to %4.6e) Patience at %d of %d\n" % \
-            (prev_validate_loss, validate_loss, curr_patience + 1, args.patience))
+            (prev_validate_loss, validate_loss, curr_patience + 1, args.early_patience))
         curr_patience += 1
-        if (curr_patience >= args.patience):
+        if (curr_patience >= args.early_patience):
             print("\n\nPatience has been reached! Final validation error %4.6e\n\n" % validate_loss)
             break;
 
@@ -667,6 +696,10 @@ hvd.allreduce(torch.tensor(0), name='barrier')
 toc = timeit.default_timer()
     
 if (hvd.rank() == 0):
+
+    print("\nSaving model to %s.\n" % (args.model_dir + "/" + args.dataset + "_model"))
+    torch.save(model.state_dict(), args.model_dir + "/" + args.dataset + "_model")
+
     print("Total Epochs %d, Testing time: %3.3f " % (epoch, toc - tic))
 
 
