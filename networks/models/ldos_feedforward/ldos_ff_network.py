@@ -31,12 +31,12 @@ parser = argparse.ArgumentParser(description='FP-LDOS Feedforward Network')
 # Training
 parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
-parser.add_argument('--test-batch-size', type=int, default=64, metavar='N',
-                    help='input batch size for testing (default: 64)')
+parser.add_argument('--test-batch-size', type=int, default=512, metavar='N',
+                    help='input batch size for testing (default: 512)')
 parser.add_argument('--train-test-split', type=float, default=.80, metavar='R',
                     help='pecentage of training data to use (default: .80)')
-parser.add_argument('--epochs', type=int, default=1, metavar='N',
-                    help='number of epochs to train (default: 1)')
+parser.add_argument('--epochs', type=int, default=10, metavar='N',
+                    help='number of epochs to train (default: 10)')
 parser.add_argument('--early-patience', type=int, default=10, metavar='N',
                     help='number of epochs to tolerate no decrease in validation error (default: 10)')
 parser.add_argument('--optim-patience', type=int, default=5, metavar='N',
@@ -51,18 +51,18 @@ parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
 # Model
 parser.add_argument('--dataset', type=str, default="random", metavar='DS',
                     help='dataset to train on (ex: "random", "fp_ldos") (default: "random")')
-parser.add_argument('--model', type=int, default=3, metavar='N',
-                    help='model choice (default: 3)')
+parser.add_argument('--model', type=int, default=5, metavar='N',
+                    help='model choice (default: 5)')
 parser.add_argument('--nxyz', type=int, default=20, metavar='N',
                     help='num elements along x,y,z dims (default: 20)')
 parser.add_argument('--no-coords', action='store_true', default=False,
                     help='do not use x/y/z coordinates in fp inputs')
 parser.add_argument('--no-bispectrum', action='store_true', default=False,
                     help='do not use bispectrum components in fp inputs (only coordinates)')
-parser.add_argument('--temp', type=str, default="300K", metavar='T',
-                    help='temperature of snapshot to train on (default: "300K")')
-parser.add_argument('--gcc', type=str, default="2.0", metavar='GCC',
-                    help='density of snapshot to train on (default: "2.0")')
+parser.add_argument('--temp', type=str, default="298K", metavar='T',
+                    help='temperature of snapshot to train on (default: "298K")')
+parser.add_argument('--gcc', type=str, default="2.699", metavar='GCC',
+                    help='density of snapshot to train on (default: "2.699")')
 parser.add_argument('--num-snapshots', type=int, default=1, metavar='N',
                     help='num snapshots per temp/gcc pair (default: 1)')
 parser.add_argument('--water', action='store_true', default=False,
@@ -124,12 +124,12 @@ if (hvd.rank() == 0):
     print("Current Time: %s" % args.timestamp)
 
 # Horovod: limit # of CPU threads to be used per worker.
-
 if (hvd.rank() == 0 and not args.cuda):
     print("Running with %d threads" % (args.num_threads))
 
 torch.set_num_threads(args.num_threads)
 
+# Create output directories if they do not exist
 args.model_dir = args.output_dir + "/" + args.timestamp
 
 args.tb_output_dir = args.model_dir + "/tb_" + args.dataset + "_" + \
@@ -154,6 +154,10 @@ args.writer = SummaryWriter(args.tb_output_dir)
 # num_workers for multiprocessed data loading
 kwargs = {'num_workers': 2, 'pin_memory': True} if args.cuda else {}
 
+if (hvd.rank() == 0):
+    print("Parser Arguments")
+    for arg in vars(args):
+        print ("%s: %s" % (arg, getattr(args, arg)))
 
 # Choose a Model
 
@@ -163,11 +167,10 @@ kwargs = {'num_workers': 2, 'pin_memory': True} if args.cuda else {}
 # Model 4: LDOS estimation with LSTM
 # Model 5: LDOS estimation with bidirectional LSTM
 
-
 if (args.model != 0):
     model_choice = args.model
 
-# Model params
+# Other model params
 dens_length = 1
 lstm_in_length = 10
 
@@ -219,10 +222,12 @@ if (args.dataset == "random"):
 torch.utils.data.random_split(fp_ldos_dataset, [train_pts, validation_pts, test_pts])
 
 elif (args.dataset == "fp_ldos"):
+    # FP_LDOS datasets should only be used for LDOS prediction (i.e. not Model 1 or 2)
     if (model_choice != 3 and model_choice != 4 and model_choice != 5):
         print("Error in model choice with fp_ldos dataset. Please use model = {3, 4, or 5}");
         exit();
 
+    # Currently use 1 snapshot for validation, 1 snapshot for test, and the rest for training.
     args.test_snapshot = args.num_snapshots - 1;
     args.validation_snapshot = args.num_snapshots - 2;
     args.num_train_snapshots = args.num_snapshots - 2;
@@ -232,7 +237,7 @@ elif (args.dataset == "fp_ldos"):
     if (args.validation_snapshot < 0):
         args.validation_snapshot = 0
 
-    # Get dims of fp/ldos numpy arrays  
+    # Get dimensions of fp/ldos numpy arrays  
     empty_fp_np = np.load(args.fp_dir + \
         "/%s/%sgcc/Al_fingerprint_snapshot%d.npy" % (args.temp, args.gcc, 0), mmap_mode='r')
     empty_ldos_np = np.load(args.ldos_dir + \
@@ -241,6 +246,7 @@ elif (args.dataset == "fp_ldos"):
     fp_shape = empty_fp_np.shape
     ldos_shape = empty_ldos_np.shape
 
+    # Create empty np arrays to store all train snapshots (FP(input) and LDOS(output)) 
     full_train_fp_np = np.empty(np.insert(fp_shape, 0, args.num_train_snapshots))
     full_train_ldos_np = np.empty(np.insert(ldos_shape, 0, args.num_train_snapshots))
 
@@ -274,6 +280,7 @@ elif (args.dataset == "fp_ldos"):
         "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, args.test_snapshot))
 
     # Pick subset of FP vector is user requested
+    # The first 3 elements in FPs are coords and the rest are bispectrum components
     if (args.no_coords):
         # Remove first 3 elements of fp's (x/y/z coords)
         full_train_fp_np = full_train_fp_np[:, :, :, :, 3:]
@@ -313,6 +320,8 @@ elif (args.dataset == "fp_ldos"):
         print("Fingerprint vector length: %d" % args.fp_length)
         print("LDOS vector length: %d" % args.ldos_length)
 
+    # Reshape tensor datasets such that 
+    # NUM_SNAPSHOTS x 200 x 200 x 200 x VEC_LEN => (NUM_SNAPSHOTS * 200^3) x VEC_LEN
     full_train_fp_np = full_train_fp_np.reshape([args.train_pts, args.fp_length])
     full_train_ldos_np = full_train_ldos_np.reshape([args.train_pts, args.ldos_length])
 
@@ -323,7 +332,7 @@ elif (args.dataset == "fp_ldos"):
     test_ldos_np = test_ldos_np.reshape([args.test_pts, args.ldos_length])
     
 
-    # Row scaling of features 
+    # Row scaling of features. Currently, scale by mean and std (Disabled: to Uniform [0,1])
     for row in range(args.fp_length):
 
         #meanv = np.mean(fp_np[row, :])
@@ -364,7 +373,7 @@ elif (args.dataset == "fp_ldos"):
             print("LDOS Row: %g, Mean: %g, Std: %g" % (row, ldos_meanv, ldos_stdv))
     
 
-
+    # Create PyTorch Tensors (and Datasets X/Y) from numpy arrays
     full_train_fp_torch = torch.tensor(full_train_fp_np, dtype=torch.float32)
     full_train_ldos_torch = torch.tensor(full_train_ldos_np, dtype=torch.float32)
 
@@ -435,31 +444,7 @@ class Net(nn.Module):
                 torch.zeros(lstm_in_length, int(args.batch_size / hvd.size()), self.hidden_dim))
 
     def forward(self, x):
-        self.batch_size = x.shape[0]
-        # MODEL 1
-        # Density prediction 
-        if (model_choice == 1):
-            x = F.relu(self.fc1(x))
-            for i in range(self.mid_layers):
-                x = F.relu(self.fc2(x))
-            x = F.relu(self.fc3(x))
-
-        # MODEL 2
-        # Density prediction, no activation
-        if (model_choice == 2):
-            x = self.fc1(x)
-            for i in range(self.mid_layers):
-                x = self.fc2(x)
-            x = self.fc3(x)
-
-        # MODEL 3
-        # LDOS prediction without LSTM
-        if (model_choice == 3):
-            x = F.relu(self.fc1(x))
-            for i in range(self.mid_layers):
-                x = F.relu(self.fc2(x))
-            x = F.relu(self.fc4(x))
-            x = F.relu(self.fc5(x))
+#        self.batch_size = x.shape[0]
 
         # MODEL 4 and 5
         # LDOS prediction with LSTM (uni-directional or bi-directional)
@@ -470,6 +455,31 @@ class Net(nn.Module):
             x = F.relu(self.fc4(x))
             x, self.hidden = self.my_lstm(x.view(lstm_in_length, self.batch_size, args.ldos_length))
             x = x[-1].view(self.batch_size, -1)
+
+        # MODEL 1
+        # Density prediction 
+        elif (model_choice == 1):
+            x = F.relu(self.fc1(x))
+            for i in range(self.mid_layers):
+                x = F.relu(self.fc2(x))
+            x = F.relu(self.fc3(x))
+
+        # MODEL 2
+        # Density prediction, no activation
+        elif (model_choice == 2):
+            x = self.fc1(x)
+            for i in range(self.mid_layers):
+                x = self.fc2(x)
+            x = self.fc3(x)
+
+        # MODEL 3
+        # LDOS prediction without LSTM
+        elif (model_choice == 3):
+            x = F.relu(self.fc1(x))
+            for i in range(self.mid_layers):
+                x = F.relu(self.fc2(x))
+            x = F.relu(self.fc4(x))
+            x = F.relu(self.fc5(x))
 
         return x
 
@@ -502,7 +512,8 @@ optimizer = hvd.DistributedOptimizer(optimizer,
 
 
 def metric_average(val, name):
-    tensor = torch.tensor(val)
+#    tensor = torch.tensor(val)
+    tensor = val.clone().detach()
     avg_tensor = hvd.allreduce(tensor, name=name)
     return avg_tensor.item()
 
@@ -606,7 +617,7 @@ def test():
         data_idx += num_samples
 
         # sum up batch loss
-        running_ldos_loss += F.mse_loss(output, target, size_average=None).item()
+        running_ldos_loss += F.mse_loss(output, target, size_average=None)
 #        running_dens_loss += F.mse_loss(dens_output, dens_target, size_average=None).item()
 #        bandE_loss += F.mse_loss(bandE_output, bandE_target, size_average=None).item()
 #       bandE_true_loss += F.mse_loss(bandE_output, bandE_true, size_average=None).item()
@@ -634,7 +645,9 @@ def test():
 
     # Horovod: average metric values across workers.
     ldos_loss_val = metric_average(running_ldos_loss, 'avg_ldos_loss')
-    dens_loss_val = metric_average(running_dens_loss, 'avg_dens_loss')
+#    dens_loss_val = metric_average(running_dens_loss, 'avg_dens_loss')
+    
+    dens_loss_val = running_dens_loss
 
     # Horovod: print output only on first rank.
     if hvd.rank() == 0:
@@ -707,4 +720,4 @@ tot_toc = timeit.default_timer()
 
 if (hvd.rank() == 0):
     print("\nSuccess!\n")
-    print("\n\nTotal train time %4.4f, Total test time %4.4f\n\n" % (train_time, (tot_toc - tot_tic) - train_time))
+    print("\n\nTotal train time %4.4f\n\n" % (tot_toc - tot_tic))
