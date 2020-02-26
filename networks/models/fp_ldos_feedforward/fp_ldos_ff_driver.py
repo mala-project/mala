@@ -24,19 +24,18 @@ sys.path.append('../utils/')
 import ldos_calc
 
 
-
 # Training settings
 parser = argparse.ArgumentParser(description='FP-LDOS Feedforward Network')
 
 # Training
 parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
-parser.add_argument('--test-batch-size', type=int, default=512, metavar='N',
-                    help='input batch size for testing (default: 512)')
+parser.add_argument('--test-batch-size', type=int, default=64, metavar='N',
+                    help='input batch size for testing (default: 64)')
 parser.add_argument('--train-test-split', type=float, default=.80, metavar='R',
                     help='pecentage of training data to use (default: .80)')
-parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                    help='number of epochs to train (default: 10)')
+parser.add_argument('--epochs', type=int, default=1, metavar='N',
+                    help='number of epochs to train (default: 1)')
 parser.add_argument('--early-patience', type=int, default=10, metavar='N',
                     help='number of epochs to tolerate no decrease in validation error (default: 10)')
 parser.add_argument('--optim-patience', type=int, default=5, metavar='N',
@@ -53,8 +52,8 @@ parser.add_argument('--dataset', type=str, default="random", metavar='DS',
                     help='dataset to train on (ex: "random", "fp_ldos") (default: "random")')
 parser.add_argument('--model', type=int, default=5, metavar='N',
                     help='model choice (default: 5)')
-parser.add_argument('--nxyz', type=int, default=20, metavar='N',
-                    help='num elements along x,y,z dims (default: 20)')
+parser.add_argument('--nxyz', type=int, default=40, metavar='N',
+                    help='num elements along x,y,z dims (default: 40)')
 parser.add_argument('--no-coords', action='store_true', default=False,
                     help='do not use x/y/z coordinates in fp inputs')
 parser.add_argument('--no-bispectrum', action='store_true', default=False,
@@ -87,7 +86,9 @@ parser.add_argument('--tb-ldos-comparisons', type=int, default=4, metavar='N',
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='disables CUDA training')
 parser.add_argument('--num-threads', type=int, default=32, metavar='N',
-                    help='number of  (default: 32)')
+                    help='number of threads (default: 32)')
+parser.add_argument('--num-gpus', type=int, default=1, metavar='N',
+                    help='number of gpus (default: 1)')
 parser.add_argument('--seed', type=int, default=42, metavar='S',
                     help='random seed (default: 42)')
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
@@ -97,14 +98,17 @@ parser.add_argument('--fp16-allreduce', action='store_true', default=False,
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
-# Horovod: initialize library.
+# Horovod: initialize MPI library.
 hvd.init()
 torch.manual_seed(args.seed)
 
+# WELCOME!
 if (hvd.rank() == 0):
     print("\n------------------------------------\n")
     print("--  FEEDFORWARD FP-LDOS ML MODEL  --")
     print("\n------------------------------------\n")
+
+    print("Running with %d ranks" % hvd.size())
 
 
 if (args.batch_size < hvd.size()):
@@ -136,7 +140,10 @@ args.tb_output_dir = args.model_dir + "/tb_" + args.dataset + "_" + \
         str(args.model) + "model_" + str(args.nxyz) + "nxyz_" + \
         args.temp + "temp_" + args.gcc + "gcc"
 
-if hvd.rank() == 0:
+if (hvd.rank() == 0):
+
+    print("Rank: %d" % hvd.rank())
+
     if not os.path.exists(args.output_dir):
         print("\nCreating output folder %s\n" % args.output_dir)
         os.makedirs(args.output_dir)
@@ -148,6 +155,8 @@ if hvd.rank() == 0:
     if not os.path.exists(args.tb_output_dir):
         print("\nCreating Tensorboard output folder %s\n" % args.tb_output_dir)
         os.makedirs(args.tb_output_dir)
+
+hvd.allreduce(torch.tensor(0), name='barrier')
 
 args.writer = SummaryWriter(args.tb_output_dir)
 
@@ -189,6 +198,8 @@ if(hvd.rank() == 0):
     else:
         print("Error in model choice");
         exit();
+
+hvd.allreduce(torch.tensor(0), name='barrier')
 
 # Set up model outputs
 if (args.dataset == "random"):
@@ -255,9 +266,10 @@ elif (args.dataset == "fp_ldos"):
 
     print("Reading Fingerprint and LDOS dataset")
     
+    hvd.allreduce(torch.tensor(0), name='barrier')
     
     for sshot in range(args.num_train_snapshots):
-        print("Reading train snapshot %d" % sshot)
+        print("Rank: %d, Reading train snapshot %d" % (hvd.rank(), sshot))
 
  #       temp_fp = \
         full_train_fp_np[sshot, :, :, :] = np.load(args.fp_dir + \
@@ -267,18 +279,24 @@ elif (args.dataset == "fp_ldos"):
         full_train_ldos_np[sshot, :, :, :] = np.load(args.ldos_dir + \
             "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, sshot))
 
-    print("Reading validation snapshot %d" % args.validation_snapshot)
+        hvd.allreduce(torch.tensor(0), name='barrier')
+    
+    print("Rank: %d, Reading validation snapshot %d" % (hvd.rank(), args.validation_snapshot))
     validation_fp_np = np.load(args.fp_dir + \
         "/%s/%sgcc/Al_fingerprint_snapshot%d.npy" % (args.temp, args.gcc, args.validation_snapshot))
     validation_ldos_np = np.load(args.ldos_dir + \
         "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, args.validation_snapshot))
  
-    print("Reading test snapshot %d" % args.test_snapshot)
+    hvd.allreduce(torch.tensor(0), name='barrier')
+    
+    print("Rank: %d, Reading test snapshot %d" % (hvd.rank(), args.test_snapshot))
     test_fp_np = np.load(args.fp_dir + \
         "/%s/%sgcc/Al_fingerprint_snapshot%d.npy" % (args.temp, args.gcc, args.test_snapshot))
     test_ldos_np = np.load(args.ldos_dir + \
         "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, args.test_snapshot))
 
+    hvd.allreduce(torch.tensor(0), name='barrier')
+    
     # Pick subset of FP vector is user requested
     # The first 3 elements in FPs are coords and the rest are bispectrum components
     if (args.no_coords):
@@ -373,13 +391,22 @@ elif (args.dataset == "fp_ldos"):
             print("LDOS Row: %g, Mean: %g, Std: %g" % (row, ldos_meanv, ldos_stdv))
     
 
+    hvd.allreduce(torch.tensor(0), name='barrier')
+    print("Rank: %d, Creating train tensor" % hvd.rank())
+
     # Create PyTorch Tensors (and Datasets X/Y) from numpy arrays
     full_train_fp_torch = torch.tensor(full_train_fp_np, dtype=torch.float32)
     full_train_ldos_torch = torch.tensor(full_train_ldos_np, dtype=torch.float32)
 
+    hvd.allreduce(torch.tensor(0), name='barrier')
+    print("Rank: %d, Creating validation tensor" % hvd.rank())
+    
     validation_fp_torch = torch.tensor(validation_fp_np, dtype=torch.float32)
     validation_ldos_torch = torch.tensor(validation_ldos_np, dtype=torch.float32)
 
+    hvd.allreduce(torch.tensor(0), name='barrier')
+    print("Rank: %d, Creating test tensor" % hvd.rank())
+    
     test_fp_torch = torch.tensor(test_fp_np, dtype=torch.float32)
     test_ldos_torch = torch.tensor(test_ldos_np, dtype=torch.float32)
     
@@ -394,6 +421,9 @@ else:
     print("\n\nDataset %s is not available. Currently available datasets are (random, fp_ldos)" % args.dataset)
     exit(0)
 
+hvd.allreduce(torch.tensor(0), name='barrier')
+print("Rank: %d, Creating train sampler/loader" % hvd.rank())
+
 # TRAINING DATA
 # Horovod: use DistributedSampler to partition the training data.
 train_sampler = torch.utils.data.distributed.DistributedSampler(
@@ -401,11 +431,17 @@ train_sampler = torch.utils.data.distributed.DistributedSampler(
 train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=args.batch_size, sampler=train_sampler, **kwargs)
 
+hvd.allreduce(torch.tensor(0), name='barrier')
+print("Rank: %d, Creating validation sampler/loader" % hvd.rank())
+
 # VALIDATION DATA
 validation_sampler = torch.utils.data.distributed.DistributedSampler(
     validation_dataset, num_replicas=hvd.size(), rank=hvd.rank())
 validation_loader = torch.utils.data.DataLoader(
     validation_dataset, batch_size=args.test_batch_size, sampler=validation_sampler, **kwargs)
+
+hvd.allreduce(torch.tensor(0), name='barrier')
+print("Rank: %d, Creating test sampler/loader" % hvd.rank())
 
 # TESTING DATA
 test_sampler = torch.utils.data.sampler.SequentialSampler(test_dataset)
@@ -438,22 +474,46 @@ class Net(nn.Module):
         elif (model_choice == 5):
             self.my_lstm = nn.LSTM(args.ldos_length, int(self.hidden_dim / 2), lstm_in_length, bidirectional=True)
 
-    def init_hidden(self):
-        # This is what we'll initialise our hidden state as
-        return (torch.zeros(lstm_in_length, int(args.batch_size / hvd.size()), self.hidden_dim),
-                torch.zeros(lstm_in_length, int(args.batch_size / hvd.size()), self.hidden_dim))
+    def init_hidden_train(self):
+        
 
-    def forward(self, x):
-#        self.batch_size = x.shape[0]
+        #        h0 = torch.empty(lstm_in_length * 2, int(args.batch_size / hvd.size()), self.hidden_dim // 2)
+#        c0 = torch.empty(lstm_in_length * 2, int(args.batch_size / hvd.size()), self.hidden_dim // 2)
+
+        h0 = torch.empty(lstm_in_length * 2, args.batch_size, self.hidden_dim // 2)
+        c0 = torch.empty(lstm_in_length * 2, args.batch_size, self.hidden_dim // 2)
+        
+        h0.zero_()
+        c0.zero_()
+
+        return (h0, c0) 
+ 
+    def init_hidden_test(self):
+        
+
+        h0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
+        c0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
+
+        h0.zero_()
+        c0.zero_()
+
+        return (h0, c0) 
+              
+
+    def forward(self, x, hidden):
 
         # MODEL 4 and 5
         # LDOS prediction with LSTM (uni-directional or bi-directional)
         if (model_choice == 4 or model_choice == 5):
+            self.batch_size = x.shape[0]
+           
+#            print("Forward BS: %d" % self.batch_size)
+
             x = F.relu(self.fc1(x))
             for i in range(self.mid_layers):
                 x = F.relu(self.fc2(x))
             x = F.relu(self.fc4(x))
-            x, self.hidden = self.my_lstm(x.view(lstm_in_length, self.batch_size, args.ldos_length))
+            x, hidden = self.my_lstm(x.view(lstm_in_length, self.batch_size, args.ldos_length), hidden)
             x = x[-1].view(self.batch_size, -1)
 
         # MODEL 1
@@ -481,16 +541,32 @@ class Net(nn.Module):
             x = F.relu(self.fc4(x))
             x = F.relu(self.fc5(x))
 
-        return x
+        return x, hidden
 
 
 model = Net()
 
-model.hidden = model.init_hidden()
+if (model_choice == 4 or model_choice == 5):
+#    model.hidden, model.cell = model.init_hidden()
+    model.train_hidden = model.init_hidden_train()
+    model.test_hidden = model.init_hidden_test()
 
 if args.cuda:
     # Move model to GPU.
     model.cuda()
+    model.train_hidden = (model.train_hidden[0].cuda(), model.train_hidden[1].cuda())
+    model.test_hidden = (model.test_hidden[0].cuda(), model.test_hidden[1].cuda())
+#    model.cell = model.cell.cuda()
+
+# Count number of network parameters
+#num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+#print("\nNum Params: %d " % num_params)
+#exit(0);
+
+
+#model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
+
+
 
 # Horovod: scale learning rate by the number of GPUs.
 optimizer = optim.SGD(model.parameters(), lr=args.lr * hvd.size(),
@@ -513,9 +589,11 @@ optimizer = hvd.DistributedOptimizer(optimizer,
 
 def metric_average(val, name):
 #    tensor = torch.tensor(val)
-    tensor = val.clone().detach()
-    avg_tensor = hvd.allreduce(tensor, name=name)
-    return avg_tensor.item()
+#    tensor = val.clone().detach()
+#    avg_tensor = hvd.allreduce(tensor, name=name)
+#    return avg_tensor.item()
+
+    return val
 
 # Train FP-LDOS Model
 def train(epoch):
@@ -533,28 +611,39 @@ def train(epoch):
 
     running_loss = 0.0
 
+    hidden_n = model.train_hidden
+
     for batch_idx, (data, target) in enumerate(train_loader):
         
         model.zero_grad()
 
+        # Move data and target to gpu
         if args.cuda:
             data, target = data.cuda(), target.cuda()
+        
+        # Zero out gradients for the new batch
         optimizer.zero_grad()
-        output = model(data)
+        
+        # RUN MODEL
+        output, hidden_n = model(data, hidden_n)
 
 #        print(data.shape)
 #        print(output.shape)
 #        print(target.shape)
 
+        hidden_n = (hidden_n[0].detach(), hidden_n[1].detach())
+
         ldos_loss = F.mse_loss(output, target)
         ldos_loss.backward()
         optimizer.step()
 
+#        model.train_hidden = hidden_n
+
         running_loss += ldos_loss.item()
 
-        if (batch_idx % args.log_interval == -1 % args.log_interval and hvd.rank() == 0): 
+        if (batch_idx % args.log_interval == 0 % args.log_interval and hvd.rank() == 0): 
 
-            ldos_loss_val = metric_average(ldos_loss, 'avg_ldos_loss')
+            ldos_loss_val = metric_average(ldos_loss.item(), 'avg_ldos_loss')
             
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6E}'.format(
                 epoch, batch_idx * len(data), len(train_sampler),
@@ -563,8 +652,15 @@ def train(epoch):
 #            args.writer.add_scalar('training loss rank%d' % hvd.rank(), \
 #                running_loss / args.log_interval, \
 #                epoch * len(train_loader) + batch_idx)
+           
+        if (batch_idx > 20):
+            break
 
 
+    model.train_hidden = hidden_n
+
+
+    ldos_loss_val = ldos_loss.item()
     return ldos_loss_val
 
 # Validate trained model for early stopping
@@ -573,17 +669,33 @@ def validate():
 
     running_ldos_loss = 0.0
 
+    hidden_n = model.test_hidden
+
     for batch_idx, (data, target) in enumerate(validation_loader):
-        
+       
+#        print("Batch: %d" % batch_idx)
+
+        # Move data and target to gpu
         if args.cuda:
             data, target = data.cuda(), target.cuda()
         
-        output = model(data)
+        # RUN MODEL
+        output, hidden_n = model(data, hidden_n)
 
-        running_ldos_loss += F.mse_loss(output, target)
-        
+        hidden_n = (hidden_n[0].detach(), hidden_n[1].detach())
+
+        running_ldos_loss += F.mse_loss(output, target).item()
+       
+        if (batch_idx % args.log_interval == 0 % args.log_interval and hvd.rank() == 0):
+            print("Validation batch_idx %d of %d" % (batch_idx, len(validation_loader)))
+
+        if (batch_idx > 20):
+            break
+
     ldos_loss_val = metric_average(running_ldos_loss, 'avg_ldos_loss')
     
+    model.test_hidden = hidden_n
+
     return ldos_loss_val
 
 # Test model, post training
@@ -598,11 +710,19 @@ def test():
 
     data_idx = 0
 
+    hidden_n = model.test_hidden
+
 #    test_accuracy = 0.
-    for data, target in test_loader:
+    for batch_idx, (data, target) in enumerate(test_loader):
+        
+        # Move data and target to gpu
         if args.cuda:
             data, target = data.cuda(), target.cuda()
-        output = model(data)
+
+        # RUN MODEL
+        output, hidden_n = model(data, hidden_n)
+
+        hidden_n = (hidden_n[0].detach(), hidden_n[1].detach())
 
 #        dens_output = ldos_calc.ldos_to_density(output, args.temp, args.gcc)       
 #        dens_target = ldos_calc.ldos_to_density(target, args.temp, args.gcc)
@@ -613,16 +733,20 @@ def test():
 
         num_samples = output.shape[0] 
 
-        test_ldos[data_idx:data_idx + num_samples, :] = output.detach().numpy()
+        if (args.cuda):
+            test_ldos[data_idx:data_idx + num_samples, :] = output.cpu().detach().numpy()
+        else:
+            test_ldos[data_idx:data_idx + num_samples, :] = output.detach().numpy()
+
         data_idx += num_samples
 
         # sum up batch loss
-        running_ldos_loss += F.mse_loss(output, target, size_average=None)
+        running_ldos_loss += F.mse_loss(output, target, size_average=None).item()
 #        running_dens_loss += F.mse_loss(dens_output, dens_target, size_average=None).item()
 #        bandE_loss += F.mse_loss(bandE_output, bandE_target, size_average=None).item()
 #       bandE_true_loss += F.mse_loss(bandE_output, bandE_true, size_average=None).item()
 
-        if plot_ldos:
+        if (plot_ldos and hvd.rank() == 0):
             for i in range(args.tb_ldos_comparisons):
                 for j in range(output.shape[1]):
                     args.writer.add_scalars('test ldos %d rank%d' % (i, hvd.rank()), \
@@ -631,6 +755,11 @@ def test():
 
             plot_ldos = False
 
+        if (batch_idx % args.log_interval == 0 % args.log_interval and hvd.rank() == 0):
+            print("Test batch_idx %d of %d" % (batch_idx, len(test_loader)))
+
+        if (batch_idx > 20):
+            break
 #    if (hvd.rank() == 0):
 #        print("Done test predictions.\n\nCalculating Band Energies.\n")
 #    predicted_bandE = ldos_calc.ldos_to_bandenergy(predicted_ldos, args.temp, args.gcc)
@@ -655,6 +784,8 @@ def test():
         print('\nSaving LDOS predictions to %s\n' % args.model_dir + "/" + args.dataset + "_predictions")
         np.save(args.model_dir + "/" + args.dataset + "_predictions", test_ldos)
 
+    model.test_hidden = hidden_n
+
     return ldos_loss_val
 
 
@@ -671,19 +802,22 @@ validate_loss = 0.0
 
 curr_patience = 0
 
+if (hvd.rank() == 0):
+    print("\n\nBegin Training!\n\n")
+
 for epoch in range(1, args.epochs + 1):
 
     tic = timeit.default_timer()
     epoch_loss = train(epoch)
     
     # Global barrier
-    hvd.allreduce(torch.tensor(0), name='barrier')  
+    #hvd.allreduce(torch.tensor(0), name='barrier')  
     toc = timeit.default_timer()
     
     scheduler.step(epoch_loss)
     
     if (hvd.rank() == 0):
-        print("\nEpoch %d, Training time: %3.3f\n" % (epoch, toc - tic))
+        print("\nEpoch %d of %d, Training time: %3.3f\n" % (epoch, args.epochs, toc - tic))
     train_time += toc - tic
     
     # Early Stopping 
@@ -701,11 +835,14 @@ for epoch in range(1, args.epochs + 1):
             print("\n\nPatience has been reached! Final validation error %4.6e\n\n" % validate_loss)
             break;
 
+if (hvd.rank() == 0):
+    print("\n\nTraining Complete!\n\n")
+
 tic = timeit.default_timer()
 test_loss = test()
 
 # Global barrier
-hvd.allreduce(torch.tensor(0), name='barrier') 
+#hvd.allreduce(torch.tensor(0), name='barrier') 
 toc = timeit.default_timer()
     
 if (hvd.rank() == 0):
