@@ -3,43 +3,49 @@
 
 # Run on machines/testbeds with no root privs
 
-#pip3 install --upgrade pip --user
+PIP=pip3
+PYTHON=python3
 
-source load_mlmm_blake_modules.sh
+#${PIP} install --upgrade pip --user
 
-pip3 install --user virtualenv
+#source load_mlmm_blake_modules.sh
 
-python3 -m venv mlmm_env
+#${PIP} install --user virtualenv
+
+${PYTHON} -m venv mlmm_env
 
 source mlmm_env/bin/activate
 
-pip3 install numpy 
-pip3 install scipy 
-pip3 install matplotlib
-pip3 install seaborn
-pip3 install tensorboard
-
-# Parallel training
-pip3 install horovod
+${PIP} install numpy 
+${PIP} install scipy 
+${PIP} install matplotlib
+${PIP} install seaborn
+${PIP} install tensorboard
 
 # Use PyTorch
-pip3 install torch
-pip3 install torchvision
+${PIP} install torch
+${PIP} install torchvision
+
+# Logging 
+${PIP} install tensorboard
+
+# Parallel support
+${PIP} install horovod
+${PIP} install mpi4py
 
 # Atomic Simulation Environment
-pip3 install ase
-
+${PIP} install ase
 
 
 # Use TF
-#pip3 install keras=2.2.5
-#pip3 install tensorflow==1.14.0
-#pip3 install tensorflow_datasets 
-#pip3 install tensorboard 
+#${PIP} install keras=2.2.5
+#${PIP} install tensorflow==1.14.0
+#${PIP} install tensorflow_datasets 
+#${PIP} install tensorboard 
 
 # Not Tested
-#pip3 install tensorflow-gpu
-#pip3 install tensorflow-gpu==2.0.0-rc0
+#${PIP} install tensorflow-gpu
+#${PIP} install tensorflow-gpu==2.0.0-rc0
 
-pip3 list
+${PIP} list
 
