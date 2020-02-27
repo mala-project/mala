@@ -29,8 +29,11 @@ lmp_cmdargs = lammps_utils.set_cmdlinevars(lmp_cmdargs,
 lmp = lammps(cmdargs=lmp_cmdargs)
 
 # run LAMMPS input script
+try:
+    lmp.file("in.bgrid.python")
+except lammps.LAMMPSException:
+    print("BAD READ")
 
-lmp.file("in.bgrid.python")
 
 # get quantities from LAMMPS 
 
