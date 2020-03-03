@@ -17,7 +17,8 @@ import horovod.torch as hvd
 
 from datetime import datetime
 import timeit
-import numpy as np 
+import numpy as np
+import sklearn.preprocessing
 
 sys.path.append('../utils/')
 
@@ -48,8 +49,6 @@ parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                     help='Optimizer momentum (default: 0.5)')
 
 # Model
-parser.add_argument('--dataset', type=str, default="random", metavar='DS',
-                    help='dataset to train on (ex: "random", "fp_ldos") (default: "random")')
 parser.add_argument('--model', type=int, default=5, metavar='N',
                     help='model choice (default: 5)')
 parser.add_argument('--nxyz', type=int, default=40, metavar='N',
@@ -58,6 +57,22 @@ parser.add_argument('--no-coords', action='store_true', default=False,
                     help='do not use x/y/z coordinates in fp inputs')
 parser.add_argument('--no-bispectrum', action='store_true', default=False,
                     help='do not use bispectrum components in fp inputs (only coordinates)')
+parser.add_argument('--fp-row-scaling', action='store_true', default=False,
+                    help='scale the row of fingerprint inputs')
+parser.add_argument('--ldos-row-scaling', action='store_true', default=False,
+                    help='scale the row of ldos outputs')
+parser.add_argument('--fp-standard-scaling', action='store_true', default=False,
+                    help='standardize the fp inputs to mean 0, std 1 (Default is MinMaxScaling [0,1])')
+parser.add_argument('--ldos-standard-scaling', action='store_true', default=False,
+                    help='standardize the ldos outputs to mean 0, std 1 (Default is MinMaxScaling [0,1])')
+parser.add_argument('--fp-log', action='store_true', default=False,
+                    help='apply log function to fingerprint inputs before scaling')
+parser.add_argument('--ldos-log', action='store_true', default=False,
+                    help='apply log function to ldos outputs before scaling')
+
+# Dataset
+parser.add_argument('--dataset', type=str, default="random", metavar='DS',
+                    help='dataset to train on (ex: "random", "fp_ldos") (default: "random")')
 parser.add_argument('--temp', type=str, default="298K", metavar='T',
                     help='temperature of snapshot to train on (default: "298K")')
 parser.add_argument('--gcc', type=str, default="2.699", metavar='GCC',
@@ -350,71 +365,263 @@ elif (args.dataset == "fp_ldos"):
     test_ldos_np = test_ldos_np.reshape([args.test_pts, args.ldos_length])
     
 
-    # Row scaling of features. Currently, scale by mean and std (Disabled: to Uniform [0,1])
+    # Feature scaling
+
+    # Apply log function to the data
+    if (args.fp_log):
+        if (hvd.rank() == 0):
+            print("Applying Log function to fingerprints")    
+        full_train_fp_np = np.log(full_train_fp_np)
+        validation_fp_np = np.log(validation_fp_np)
+        test_fp_np = np.log(test_fp_np)
+    
+    if (args.ldos_log):
+        if (hvd.rank() == 0):
+            print("Applying Log function to LDOS")    
+        full_train_ldos_np = np.log(full_train_ldos_np)
+        validation_ldos_np = np.log(validation_ldos_np)
+        test_ldos_np = np.log(test_ldos_np)
+
+
+    # Row vs total scaling
+    if (args.fp_row_scaling):
+        fp_factors = np.zeros([args.fp_length, 2])
+        fp_factors_fname = "/fp_row"
+    else:
+        fp_factors = np.zeros([1, 2])
+        fp_factors_fname = "/fp_total"
+
+    if (args.ldos_row_scaling):
+        ldos_factors = np.zeros([args.ldos_length, 2])
+        ldos_factors_fname = "/ldos_row"
+    else:
+        ldos_factors = np.zeros([1, 2])
+        ldos_factors_fname = "/ldos_total"
+
+    
+
+
+    # Apply FP normalizations
     for row in range(args.fp_length):
 
-        #meanv = np.mean(fp_np[row, :])
-#        fp_maxv  = np.max(fp_np[row, :])
-#        fp_minv  = np.min(fp_np[row, :])
-        
-        fp_meanv = np.mean([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
-        fp_stdv  = np.std([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
+        if (args.fp_row_scaling):
+            if (args.fp_standard_scaling):
+                fp_meanv = np.mean([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
+                fp_stdv  = np.std([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
+   
+                full_train_fp_np[row, :] = (full_train_fp_np[row, :] - fp_meanv) / fp_stdv
+                validation_fp_np[row, :] = (validation_fp_np[row, :] - fp_meanv) / fp_stdv
+                test_fp_np[row, :] = (test_fp_np[row, :] - fp_meanv) / fp_stdv
+   
+                fp_factors[row, 0] = fp_meanv
+                fp_factors[row, 1] = fp_stdv
 
-#        fp_np[row, :] = (fp_np[row, :] - fp_minv) / (fp_maxv - fp_minv)
-#        fp_np[row, :] = fp_np[row, :] / fp_maxv
-        full_train_fp_np[row, :] = (full_train_fp_np[row, :] - fp_meanv) / fp_stdv
-        validation_fp_np[row, :] = (validation_fp_np[row, :] - fp_meanv) / fp_stdv
-        test_fp_np[row, :] = (test_fp_np[row, :] - fp_meanv) / fp_stdv
+            else:
+                fp_minv = np.min([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
+                fp_maxv = np.max([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
+       
+                if (fp_maxv - fp_minv < 1e-12):
+                    print("Normalization of fp error. max-min ~ 0")
+                    exit(0);
+        
+                full_train_fp_np[row, :] = (full_train_fp_np[row, :] - fp_minv) / (fp_maxv - fp_minv)
+                validation_fp_np[row, :] = (validation_fp_np[row, :] - fp_minv) / (fp_maxv - fp_minv)
+                test_fp_np[row, :] = (test_fp_np[row, :] - fp_minv) / (fp_maxv - fp_minv)
+        
+        else:
+            if (args.fp_standard_scaling):
+                fp_mean = np.mean([full_train_fp_np, validation_fp_np, test_fp_np]) 
+                fp_std = np.std([full_train_fp_np, validation_fp_np, test_fp_np]) 
+             
+                full_train_fp_np[row, :] = (full_train_fp_np[row, :] - fp_mean) / fp_std
+                validation_fp_np[row, :] = (validation_fp_np[row, :] - fp_mean) / fp_std
+                test_fp_np[row, :] = (test_fp_np[row, :] - fp_mean) / fp_std
+            
+                fp_factors[row, 0] = fp_mean
+                fp_factors[row, 1] = fp_std
+            
+            else:
+                fp_min = np.min([full_train_fp_np, validation_fp_np, test_fp_np]) 
+                fp_max = np.max([full_train_fp_np, validation_fp_np, test_fp_np]) 
+    
+                if (fp_max - fp_min < 1e-12):
+                    print("Normalization of fp error. max-min ~ 0")
+                    exit(0);
+
+                full_train_fp_np = (full_train_fp_np - fp_min) / (fp_max - fp_min)
+                validation_fp_np = (validation_fp_np - fp_min) / (fp_max - fp_min)
+                test_fp_np = (test_fp_np - fp_min) / (fp_max - fp_min)
+
+                fp_factors[row, 0] = fp_min
+                fp_factors[row, 1] = fp_max
+
+
 
         if (hvd.rank() == 0):
-#            print("FP Row: %g, Min: %g, Avg: %g, Max: %g" % (row, np.min(fp_np[row, :]), np.mean(fp_np[row, :]), np.max(fp_np[row, :])))
-            print("FP Row: %g, Mean: %g, Std: %g" % (row, fp_meanv, fp_stdv))
+            if (args.fp_row_scaling):
+                if (args.fp_standard_scaling):
+                    print("FP Row: %g, Mean: %g, Std: %g" % (row, fp_factors[row, 0], fp_factors[row, 1]))
+                else:
+                    print("FP Row: %g, Min: %g, Max: %g" % (row, fp_factors[row, 0], fp_factors[row, 1]))
+            else: 
+                if (args.fp_standard_scaling):
+                    print("FP Total, Mean: %g, Std: %g" % (fp_factors[0, 0], fp_factors[0, 1]))
+                else:
+                    print("FP Total, Min: %g, Max: %g" % (fp_factors[0, 0], fp_factors[0, 1]))
+             
 
-    # Row scaling of outputs
+        if (row == 0):
+            if (args.fp_row_scaling):
+                if (args.fp_standard_scaling):
+                    fp_factors_fname += "_standard_mean_std"
+                else:
+                    fp_factors_fname += "_min_max"
+
+            else: 
+                if (args.fp_standard_scaling):
+                    fp_factors_fname += "_standard_mean_std"
+                else:
+                    fp_factors_fname += "_min_max"
+
+                # No Row scaling
+                break;
+
+    # Save normalization coefficients
+    np.save(args.model_dir + fp_factors_fname, fp_factors)
+
+    hvd.allreduce(torch.tensor(0), name='barrier')
+        
+       
+    # Apply LDOS normalizations
     for row in range(args.ldos_length):
 
-        #meanv = np.mean(fp_np[row, :])
-#        ldos_maxv  = np.max(ldos_np[row, :])
-#        ldos_minv  = np.min(ldos_np[row, :])
+        if (args.ldos_row_scaling):
+            if (args.ldos_standard_scaling):
+                ldos_meanv = np.mean([full_train_ldos_np[row,:], validation_ldos_np[row, :], test_ldos_np[row, :]])
+                ldos_stdv  = np.std([full_train_ldos_np[row,:], validation_ldos_np[row, :], test_ldos_np[row, :]])
+   
+                full_train_ldos_np[row, :] = (full_train_ldos_np[row, :] - ldos_meanv) / ldos_stdv
+                validation_ldos_np[row, :] = (validation_ldos_np[row, :] - ldos_meanv) / ldos_stdv
+                test_ldos_np[row, :] = (test_ldos_np[row, :] - ldos_meanv) / ldos_stdv
+   
+                ldos_factors[row, 0] = ldos_meanv
+                ldos_factors[row, 1] = ldos_stdv
 
-        ldos_meanv = np.mean([full_train_ldos_np[row,:], validation_ldos_np[row, :], test_ldos_np[row, :]])
-        ldos_stdv  = np.std([full_train_ldos_np[row,:], validation_ldos_np[row, :], test_ldos_np[row, :]])
+            else:
+                ldos_minv = np.min([full_train_ldos_np[row,:], validation_ldos_np[row, :], test_ldos_np[row, :]])
+                ldos_maxv = np.max([full_train_ldos_np[row,:], validation_ldos_np[row, :], test_ldos_np[row, :]])
+       
+                if (ldos_maxv - ldos_minv < 1e-12):
+                    print("Normalization of ldos error. max-min ~ 0")
+                    exit(0);
         
-#        ldos_np[row, :] = (ldos_np[row, :] - ldos_minv) / (ldos_maxv - ldos_minv)
-#        fp_np[row, :] = fp_np[row, :] / ldos_maxv
-        full_train_ldos_np[row, :] = (full_train_ldos_np[row, :] - ldos_meanv) / ldos_stdv
-        validation_ldos_np[row, :] = (validation_ldos_np[row, :] - ldos_meanv) / ldos_stdv
-        test_ldos_np[row, :] = (test_ldos_np[row, :] - ldos_meanv) / ldos_stdv
+                full_train_ldos_np[row, :] = (full_train_ldos_np[row, :] - ldos_minv) / (ldos_maxv - ldos_minv)
+                validation_ldos_np[row, :] = (validation_ldos_np[row, :] - ldos_minv) / (ldos_maxv - ldos_minv)
+                test_ldos_np[row, :] = (test_ldos_np[row, :] - ldos_minv) / (ldos_maxv - ldos_minv)
+        
+        else:
+            if (args.ldos_standard_scaling):
+                ldos_mean = np.mean([full_train_ldos_np, validation_ldos_np, test_ldos_np]) 
+                ldos_std = np.std([full_train_ldos_np, validation_ldos_np, test_ldos_np]) 
+             
+                full_train_ldos_np[row, :] = (full_train_ldos_np[row, :] - ldos_mean) / ldos_std
+                validation_ldos_np[row, :] = (validation_ldos_np[row, :] - ldos_mean) / ldos_std
+                test_ldos_np[row, :] = (test_ldos_np[row, :] - ldos_mean) / ldos_std
+            
+                ldos_factors[row, 0] = ldos_mean
+                ldos_factors[row, 1] = ldos_std
+            
+            else:
+                ldos_min = np.min([full_train_ldos_np, validation_ldos_np, test_ldos_np]) 
+                ldos_max = np.max([full_train_ldos_np, validation_ldos_np, test_ldos_np]) 
+    
+                if (ldos_max - ldos_min < 1e-12):
+                    print("Normalization of ldos error. max-min ~ 0")
+                    exit(0);
+
+                full_train_ldos_np = (full_train_ldos_np - ldos_min) / (ldos_max - ldos_min)
+                validation_ldos_np = (validation_ldos_np - ldos_min) / (ldos_max - ldos_min)
+                test_ldos_np = (test_ldos_np - ldos_min) / (ldos_max - ldos_min)
+
+                ldos_factors[row, 0] = ldos_min
+                ldos_factors[row, 1] = ldos_max
+
+
 
         if (hvd.rank() == 0):
-#            print("LDOS Row: %g, Min: %g, Avg: %g, Max: %g" % (row, np.min(ldos_np[row, :]), np.mean(ldos_np[row, :]), np.max(ldos_np[row, :])))
-            print("LDOS Row: %g, Mean: %g, Std: %g" % (row, ldos_meanv, ldos_stdv))
+            if (args.ldos_row_scaling):
+                if (args.ldos_standard_scaling):
+                    print("LDOS Row: %g, Mean: %g, Std: %g" % (row, ldos_factors[row, 0], ldos_factors[row, 1]))
+                else:
+                    print("LDOS Row: %g, Min: %g, Max: %g" % (row, ldos_factors[row, 0], ldos_factors[row, 1]))
+            else: 
+                if (args.ldos_standard_scaling):
+                    print("LDOS Total, Mean: %g, Std: %g" % (ldos_factors[0, 0], ldos_factors[0, 1]))
+                else:
+                    print("LDOS Total, Min: %g, Max: %g" % (ldos_factors[0, 0], ldos_factors[0, 1]))
+
+        if (row == 0):
+            if (args.ldos_row_scaling):
+                if (args.ldos_standard_scaling):
+                    ldos_factors_fname += "_standard_mean_std"
+                else:
+                    ldos_factors_fname += "_min_max"
+
+            else: 
+                if (args.ldos_standard_scaling):
+                    ldos_factors_fname += "_standard_mean_std"
+                else:
+                    ldos_factors_fname += "_min_max"
+
+                # No Row scaling
+                break;
+
     
+    # Save normalization coefficients
+    np.save(args.model_dir + ldos_factors_fname, fp_factors)
 
     hvd.allreduce(torch.tensor(0), name='barrier')
-    print("Rank: %d, Creating train tensor" % hvd.rank())
 
+    
+
+
+    print("Rank: %d, Creating train tensors" % hvd.rank())
     # Create PyTorch Tensors (and Datasets X/Y) from numpy arrays
     full_train_fp_torch = torch.tensor(full_train_fp_np, dtype=torch.float32)
-    full_train_ldos_torch = torch.tensor(full_train_ldos_np, dtype=torch.float32)
-
     hvd.allreduce(torch.tensor(0), name='barrier')
-    print("Rank: %d, Creating validation tensor" % hvd.rank())
+    
+    full_train_ldos_torch = torch.tensor(full_train_ldos_np, dtype=torch.float32)
+    hvd.allreduce(torch.tensor(0), name='barrier')
+
+    print("Rank: %d, Creating validation tensors" % hvd.rank())
     
     validation_fp_torch = torch.tensor(validation_fp_np, dtype=torch.float32)
-    validation_ldos_torch = torch.tensor(validation_ldos_np, dtype=torch.float32)
-
     hvd.allreduce(torch.tensor(0), name='barrier')
-    print("Rank: %d, Creating test tensor" % hvd.rank())
+    
+    validation_ldos_torch = torch.tensor(validation_ldos_np, dtype=torch.float32)
+    hvd.allreduce(torch.tensor(0), name='barrier')
+
+    print("Rank: %d, Creating test tensors" % hvd.rank())
     
     test_fp_torch = torch.tensor(test_fp_np, dtype=torch.float32)
-    test_ldos_torch = torch.tensor(test_ldos_np, dtype=torch.float32)
-    
+    hvd.allreduce(torch.tensor(0), name='barrier')
+
+    test_ldos_torch = torch.tensor(test_ldos_np, dtype=torch.float32)  
+    hvd.allreduce(torch.tensor(0), name='barrier')
+
+    print("Rank: %d, Creating tensor datasets" % hvd.rank())
 
     # Create fp (inputs) and ldos (outputs) Pytorch Dataset and apply random split
     train_dataset = torch.utils.data.TensorDataset(full_train_fp_torch, full_train_ldos_torch)
+    hvd.allreduce(torch.tensor(0), name='barrier')
+    
     validation_dataset = torch.utils.data.TensorDataset(validation_fp_torch, validation_ldos_torch)
+    hvd.allreduce(torch.tensor(0), name='barrier')
+    
     test_dataset = torch.utils.data.TensorDataset(test_fp_torch, test_ldos_torch)
+    hvd.allreduce(torch.tensor(0), name='barrier')
+
+
 
 
 else:
@@ -422,6 +629,8 @@ else:
     exit(0)
 
 hvd.allreduce(torch.tensor(0), name='barrier')
+
+
 print("Rank: %d, Creating train sampler/loader" % hvd.rank())
 
 # TRAINING DATA
@@ -431,7 +640,7 @@ train_sampler = torch.utils.data.distributed.DistributedSampler(
 train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=args.batch_size, sampler=train_sampler, **kwargs)
 
-hvd.allreduce(torch.tensor(0), name='barrier')
+#        hvd.allreduce(torch.tensor(0), name='barrier')
 print("Rank: %d, Creating validation sampler/loader" % hvd.rank())
 
 # VALIDATION DATA
@@ -440,7 +649,7 @@ validation_sampler = torch.utils.data.distributed.DistributedSampler(
 validation_loader = torch.utils.data.DataLoader(
     validation_dataset, batch_size=args.test_batch_size, sampler=validation_sampler, **kwargs)
 
-hvd.allreduce(torch.tensor(0), name='barrier')
+#        hvd.allreduce(torch.tensor(0), name='barrier')
 print("Rank: %d, Creating test sampler/loader" % hvd.rank())
 
 # TESTING DATA
@@ -448,7 +657,9 @@ test_sampler = torch.utils.data.sampler.SequentialSampler(test_dataset)
 test_loader = torch.utils.data.DataLoader(
     test_dataset, batch_size=args.test_batch_size, sampler=test_sampler, **kwargs)
 
+ 
 
+hvd.allreduce(torch.tensor(0), name='barrier')
 
 #test_sampler = torch.utils.data.distributed.DistributedSampler(
 #    test_dataset, num_replicas=hvd.size(), rank=hvd.rank())
@@ -653,8 +864,8 @@ def train(epoch):
 #                running_loss / args.log_interval, \
 #                epoch * len(train_loader) + batch_idx)
            
-        if (batch_idx > 20):
-            break
+#        if (batch_idx > 20):
+#            break
 
 
     model.train_hidden = hidden_n
@@ -689,8 +900,8 @@ def validate():
         if (batch_idx % args.log_interval == 0 % args.log_interval and hvd.rank() == 0):
             print("Validation batch_idx %d of %d" % (batch_idx, len(validation_loader)))
 
-        if (batch_idx > 20):
-            break
+#        if (batch_idx > 20):
+#            break
 
     ldos_loss_val = metric_average(running_ldos_loss, 'avg_ldos_loss')
     
@@ -758,8 +969,9 @@ def test():
         if (batch_idx % args.log_interval == 0 % args.log_interval and hvd.rank() == 0):
             print("Test batch_idx %d of %d" % (batch_idx, len(test_loader)))
 
-        if (batch_idx > 20):
-            break
+#        if (batch_idx > 20):
+#            break
+
 #    if (hvd.rank() == 0):
 #        print("Done test predictions.\n\nCalculating Band Energies.\n")
 #    predicted_bandE = ldos_calc.ldos_to_bandenergy(predicted_ldos, args.temp, args.gcc)
@@ -780,8 +992,10 @@ def test():
 
     # Horovod: print output only on first rank.
     if hvd.rank() == 0:
-        print('\nTest set: \nAverage LDOS loss: %4.4E\nAverage Dens loss: %4.4E\n' % (ldos_loss_val, dens_loss_val))
-        print('\nSaving LDOS predictions to %s\n' % args.model_dir + "/" + args.dataset + "_predictions")
+        print('\nTest set: \nAverage LDOS loss: %4.4E\nAverage Dens loss: %4.4E\n' % \
+                (ldos_loss_val, dens_loss_val))
+        print('\nSaving LDOS predictions to %s\n' % args.model_dir + "/" + \
+                args.dataset + "_predictions")
         np.save(args.model_dir + "/" + args.dataset + "_predictions", test_ldos)
 
     model.test_hidden = hidden_n
@@ -794,7 +1008,8 @@ tot_tic = timeit.default_timer()
 
 train_time = 0; 
 
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=args.optim_patience, mode="max", factor=0.5, verbose=True)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=args.optim_patience, \
+        mode="min", factor=0.1, verbose=True)
 
 epoch_loss = 0.0
 prev_validate_loss = 1e16
@@ -824,12 +1039,14 @@ for epoch in range(1, args.epochs + 1):
     validate_loss = validate()
 
     if (validate_loss < prev_validate_loss * args.early_stopping):
-        print("\nValidation loss has decreased from %4.6e to %4.6e\n" % (prev_validate_loss, validate_loss))
+        if (hvd.rank() == 0):
+            print("\nValidation loss has decreased from %4.6e to %4.6e\n" % (prev_validate_loss, validate_loss))
         prev_validate_loss = validate_loss
         curr_patience = 0
     else:
-        print("\nValidation loss has NOT decreased enough! (from %4.6e to %4.6e) Patience at %d of %d\n" % \
-            (prev_validate_loss, validate_loss, curr_patience + 1, args.early_patience))
+        if (hvd.rank() == 0):
+            print("\nValidation loss has NOT decreased enough! (from %4.6e to %4.6e) Patience at %d of %d\n" % \
+                (prev_validate_loss, validate_loss, curr_patience + 1, args.early_patience))
         curr_patience += 1
         if (curr_patience >= args.early_patience):
             print("\n\nPatience has been reached! Final validation error %4.6e\n\n" % validate_loss)
