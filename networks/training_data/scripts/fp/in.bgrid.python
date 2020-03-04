@@ -33,7 +33,12 @@ compute bgrid all sna/grid grid ${ngridx} ${ngridy} ${ngridz} ${rcutfac} ${rfac0
 
 # create dummy potential for neighbor list
 
+
+# is this important? or does it just need to be big enough?
 variable rcutneigh equal 2.0*${rcutfac}*${radelem}
+# for water
+#variable rcutneigh equal 4.0*${rcutfac}*${radelem}
+
 pair_style zero ${rcutneigh}
 pair_coeff * *
 
