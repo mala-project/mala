@@ -18,7 +18,7 @@ import horovod.torch as hvd
 from datetime import datetime
 import timeit
 import numpy as np
-import sklearn.preprocessing
+#import sklearn.preprocessing
 
 sys.path.append('../utils/')
 
