@@ -13,8 +13,8 @@ then
     echo "$1 GPUS"
     GPUS=$1
 else
-    echo "Default 1 GPU"
-    GPUS=1
+    echo "Default 2 GPUs"
+    GPUS=2
 fi
 
 #DS=random
@@ -27,7 +27,7 @@ TM=298K
 GC=2.699
 #SSHOT=5
 SSHOT=3
-LR=.01
+LR=.000001
 ES=.999
 EP=2
 OP=1
@@ -46,7 +46,9 @@ ${EXE} -np ${GPUS} ${PYT} ${DRVR} \
     --early-stopping ${ES} \
     --lr ${LR} \
     --num-snapshots ${SSHOT} \
-    --ldos-row-scaling \
+    --fp-row-scaling \
+    --fp-standard-scaling \
+    --ldos-max-only \
     2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fprow_fpstand_ldosrow_ldosstand.log
 
 
