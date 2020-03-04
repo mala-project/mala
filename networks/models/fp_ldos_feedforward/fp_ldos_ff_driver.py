@@ -18,7 +18,6 @@ import horovod.torch as hvd
 from datetime import datetime
 import timeit
 import numpy as np
-import sklearn.preprocessing
 
 sys.path.append('../utils/')
 
@@ -61,6 +60,10 @@ parser.add_argument('--fp-row-scaling', action='store_true', default=False,
                     help='scale the row of fingerprint inputs')
 parser.add_argument('--ldos-row-scaling', action='store_true', default=False,
                     help='scale the row of ldos outputs')
+parser.add_argument('--fp-max-only', action='store_true', default=False,
+                    help='If using MinMax normalization on fingerprint inputs, do not scale min (Default: Min set to 0)')
+parser.add_argument('--ldos-max-only', action='store_true', default=False,
+                    help='If using MinMax normalization on ldos outputs, do not scale min (Default: Min set to 0)')
 parser.add_argument('--fp-standard-scaling', action='store_true', default=False,
                     help='standardize the fp inputs to mean 0, std 1 (Default is MinMaxScaling [0,1])')
 parser.add_argument('--ldos-standard-scaling', action='store_true', default=False,
@@ -263,11 +266,25 @@ elif (args.dataset == "fp_ldos"):
     if (args.validation_snapshot < 0):
         args.validation_snapshot = 0
 
+    # If using water dataset
+    if (args.water):
+        args.fp_data_fpath = "/%s/%sgcc/~~~~~~~~" % (args.temp, args.gcc)
+        args.ldos_data_fpath = "/%s/%sgcc/~~~~~~~~" % (args.temp, args.gcc)
+
+        print("For Josh, water case")
+        exit(0);
+    # If using Material (Al) dataset
+    else:
+        args.fp_data_fpath = "/%s/%sgcc/Al_fingerprint" % (args.temp, args.gcc)
+        args.ldos_data_fpath = "/%s/%sgcc/ldos_200x200x200grid_128elvls" % (args.temp, args.gcc)
+
+
+
     # Get dimensions of fp/ldos numpy arrays  
-    empty_fp_np = np.load(args.fp_dir + \
-        "/%s/%sgcc/Al_fingerprint_snapshot%d.npy" % (args.temp, args.gcc, 0), mmap_mode='r')
-    empty_ldos_np = np.load(args.ldos_dir + \
-        "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, 0), mmap_mode='r')
+    empty_fp_np = np.load(args.fp_dir + args.fp_data_fpath + \
+        "_snapshot%d.npy" % (0), mmap_mode='r')
+    empty_ldos_np = np.load(args.ldos_dir + args.ldos_data_fpath + \
+        "_snapshot%d.npy" % (0), mmap_mode='r')
 
     fp_shape = empty_fp_np.shape
     ldos_shape = empty_ldos_np.shape
@@ -287,28 +304,29 @@ elif (args.dataset == "fp_ldos"):
         print("Rank: %d, Reading train snapshot %d" % (hvd.rank(), sshot))
 
  #       temp_fp = \
-        full_train_fp_np[sshot, :, :, :] = np.load(args.fp_dir + \
-            "/%s/%sgcc/Al_fingerprint_snapshot%d.npy" % (args.temp, args.gcc, sshot))
+        full_train_fp_np[sshot, :, :, :] = np.load(args.fp_dir + args.fp_data_fpath + \
+            "_snapshot%d.npy" % (sshot))
 
 #        temp_ldos = \
-        full_train_ldos_np[sshot, :, :, :] = np.load(args.ldos_dir + \
-            "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, sshot))
+        full_train_ldos_np[sshot, :, :, :] = np.load(args.ldos_dir + args.ldos_data_fpath + \
+            "_snapshot%d.npy" % (sshot))
+
 
         hvd.allreduce(torch.tensor(0), name='barrier')
     
     print("Rank: %d, Reading validation snapshot %d" % (hvd.rank(), args.validation_snapshot))
-    validation_fp_np = np.load(args.fp_dir + \
-        "/%s/%sgcc/Al_fingerprint_snapshot%d.npy" % (args.temp, args.gcc, args.validation_snapshot))
-    validation_ldos_np = np.load(args.ldos_dir + \
-        "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, args.validation_snapshot))
+    validation_fp_np = np.load(args.fp_dir + args.fp_data_fpath + \
+        "_snapshot%d.npy" % (args.validation_snapshot))
+    validation_ldos_np = np.load(args.ldos_dir + args.ldos_data_fpath + \
+        "_snapshot%d.npy" % (args.validation_snapshot))
  
     hvd.allreduce(torch.tensor(0), name='barrier')
     
     print("Rank: %d, Reading test snapshot %d" % (hvd.rank(), args.test_snapshot))
-    test_fp_np = np.load(args.fp_dir + \
-        "/%s/%sgcc/Al_fingerprint_snapshot%d.npy" % (args.temp, args.gcc, args.test_snapshot))
-    test_ldos_np = np.load(args.ldos_dir + \
-        "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, args.test_snapshot))
+    test_fp_np = np.load(args.fp_dir + args.fp_data_fpath + \
+        "_snapshot%d.npy" % (args.test_snapshot))
+    test_ldos_np = np.load(args.ldos_dir + args.ldos_data_fpath + \
+        "_snapshot%d.npy" % (args.test_snapshot))
 
     hvd.allreduce(torch.tensor(0), name='barrier')
     
@@ -417,9 +435,13 @@ elif (args.dataset == "fp_ldos"):
                 fp_factors[row, 1] = fp_stdv
 
             else:
-                fp_minv = np.min([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
+                if (args.fp_max_only):
+                    fp_minv = 0
+                else:
+                    fp_minv = np.min([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
+
                 fp_maxv = np.max([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
-       
+
                 if (fp_maxv - fp_minv < 1e-12):
                     print("Normalization of fp error. max-min ~ 0")
                     exit(0);
@@ -440,10 +462,14 @@ elif (args.dataset == "fp_ldos"):
                 fp_factors[row, 0] = fp_mean
                 fp_factors[row, 1] = fp_std
             
-            else:
-                fp_min = np.min([full_train_fp_np, validation_fp_np, test_fp_np]) 
+            else: 
+                if (args.fp_max_only):
+                    fp_min = 0
+                else:
+                    fp_min = np.min([full_train_fp_np, validation_fp_np, test_fp_np])  
+                
                 fp_max = np.max([full_train_fp_np, validation_fp_np, test_fp_np]) 
-    
+                
                 if (fp_max - fp_min < 1e-12):
                     print("Normalization of fp error. max-min ~ 0")
                     exit(0);
@@ -507,10 +533,14 @@ elif (args.dataset == "fp_ldos"):
                 ldos_factors[row, 0] = ldos_meanv
                 ldos_factors[row, 1] = ldos_stdv
 
-            else:
-                ldos_minv = np.min([full_train_ldos_np[row,:], validation_ldos_np[row, :], test_ldos_np[row, :]])
+            else: 
+                if (args.ldos_max_only):
+                    ldos_minv = 0
+                else:
+                    ldos_minv = np.min([full_train_ldos_np[row,:], validation_ldos_np[row, :], test_ldos_np[row, :]])
+                
                 ldos_maxv = np.max([full_train_ldos_np[row,:], validation_ldos_np[row, :], test_ldos_np[row, :]])
-       
+                
                 if (ldos_maxv - ldos_minv < 1e-12):
                     print("Normalization of ldos error. max-min ~ 0")
                     exit(0);
@@ -531,10 +561,14 @@ elif (args.dataset == "fp_ldos"):
                 ldos_factors[row, 0] = ldos_mean
                 ldos_factors[row, 1] = ldos_std
             
-            else:
-                ldos_min = np.min([full_train_ldos_np, validation_ldos_np, test_ldos_np]) 
+            else: 
+                if (args.ldos_max_only):
+                    ldos_min = 0
+                else:
+                    ldos_min = np.min([full_train_ldos_np, validation_ldos_np, test_ldos_np])
+                
                 ldos_max = np.max([full_train_ldos_np, validation_ldos_np, test_ldos_np]) 
-    
+                
                 if (ldos_max - ldos_min < 1e-12):
                     print("Normalization of ldos error. max-min ~ 0")
                     exit(0);
@@ -780,10 +814,10 @@ if args.cuda:
 
 
 # Horovod: scale learning rate by the number of GPUs.
-optimizer = optim.SGD(model.parameters(), lr=args.lr * hvd.size(),
-                      momentum=args.momentum, nesterov=True)
+#optimizer = optim.SGD(model.parameters(), lr=args.lr * hvd.size(),
+#                      momentum=args.momentum, nesterov=True)
 
-#optimizer = optim.Adam(model.parameters(), lr=args.lr * hvd.size())
+optimizer = optim.Adam(model.parameters(), lr=args.lr * hvd.size())
 
 # Horovod: broadcast parameters & optimizer state.
 hvd.broadcast_parameters(model.state_dict(), root_rank=0)
