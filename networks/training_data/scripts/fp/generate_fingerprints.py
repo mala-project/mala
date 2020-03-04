@@ -6,6 +6,7 @@ import ase
 import ase.io
 import argparse
 import os, sys
+import itertools
 
 import numpy as np
 #import io
@@ -64,10 +65,20 @@ for arg in vars(args):
         print ("%s: %s" % (arg, getattr(args, arg)))
 
 if (args.water):
-    print("\n\nFor Josh\n\n")
-    exit(0)
+    print("Using this script to generate fingerprints for water")
 
-    args.atom_based = True
+    #args.data_dir = '/ascldap/users/jracker/water64cp2k/datast_1593/results/'
+
+    temp_grid = np.array([args.temp])
+    gcc_grid = np.array(['aaaa'])
+    #gcc_grid = [''.join(i) for i in itertools.product("abcdefghijklmnopqrstuvwxyz",repeat=4)][:1593]
+    snapshot_grid = np.array([args.snapshot])
+
+    cube_filename_head = "w64_"
+    cube_filename_tail = "-ELECTRON_DENSITY-1_0.cube"
+
+
+    #args.atom_based = True
 
 if (args.run_all):
 
@@ -97,12 +108,19 @@ echo_to_screen = False
 
 qe_fname = "QE_Al.scf.pw.snapshot%s.out" % args.snapshot
 lammps_fname = "Al.scf.pw.snapshot%s.lammps" % args.snapshot
-np_fname = "Al_fingerprint_snapshot%s" % args.snapshot
+
 log_fname = "lammps_fp_snapshot%s.log" % args.snapshot  
- 
+
+
 lammps_compute_grid_fname = "./in.bgrid.python"
 
-qe_format = "espresso-out"
+if (args.water):
+    qe_format = "cube"
+    np_fname = "water_fingerprint_snapshot%s" % args.snapshot
+else:
+    qe_format = "espresso-out"
+    np_fname = "Al_fingerprint_snapshot%s" % args.snapshot
+
 lammps_format = "lammps-data"
 
 # Grid points and training data
@@ -133,9 +151,8 @@ for temp in temp_grid:
         gcc_dir = temp_dir + "/%sgcc/" % (gcc)
 
         if (args.water):
-            print("For Josh")
-            exit(0)
-
+            qe_filepath = args.data_dir + cube_filename_head + gcc + cube_filename_tail
+            lammps_filepath = args.data_dir + cube_filename_head + gcc + ".lammps" 
         else:
             # Make Temp directory
             if not os.path.exists(temp_dir):
@@ -146,8 +163,8 @@ for temp in temp_grid:
                 print("\nWarning! Creating input folder %s" % gcc_dir)
                 os.makedirs(gcc_dir)
    
-        qe_filepath = gcc_dir + qe_fname
-        lammps_filepath = gcc_dir + lammps_fname
+            qe_filepath = gcc_dir + qe_fname
+            lammps_filepath = gcc_dir + lammps_fname
     
         if not os.path.exists(qe_filepath):
             print("\n\nQE out file %s does not exist! Exiting.\n\n" % (qe_filepath))
