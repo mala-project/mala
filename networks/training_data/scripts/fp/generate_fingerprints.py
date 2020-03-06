@@ -108,18 +108,16 @@ echo_to_screen = False
 
 qe_fname = "QE_Al.scf.pw.snapshot%s.out" % args.snapshot
 lammps_fname = "Al.scf.pw.snapshot%s.lammps" % args.snapshot
-
 log_fname = "lammps_fp_snapshot%s.log" % args.snapshot  
-
-
-lammps_compute_grid_fname = "./in.bgrid.python"
 
 if (args.water):
     qe_format = "cube"
     np_fname = "water_fingerprint_snapshot%s" % args.snapshot
+    lammps_compute_grid_fname = "./in.bgrid.twoelements.python"
 else:
     qe_format = "espresso-out"
     np_fname = "Al_fingerprint_snapshot%s" % args.snapshot
+    lammps_compute_grid_fname = "./in.bgrid.python"
 
 lammps_format = "lammps-data"
 

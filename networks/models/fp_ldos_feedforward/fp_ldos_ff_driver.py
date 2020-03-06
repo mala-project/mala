@@ -18,7 +18,6 @@ import horovod.torch as hvd
 from datetime import datetime
 import timeit
 import numpy as np
-
 sys.path.append('../utils/')
 
 import ldos_calc
