@@ -222,8 +222,10 @@ hvd.allreduce(torch.tensor(0), name='barrier')
 # Set up model outputs
 if (args.dataset == "random"):
 
-    args.fp_length = 116
-    args.ldos_length = 128
+#    args.fp_length = 116
+    args.fp_length = 14
+#    args.ldos_length = 128
+    args.ldos_length = 1
     args.dens_length = 1
     args.lstm_in_length = 10
 
@@ -293,8 +295,8 @@ elif (args.dataset == "fp_ldos"):
     full_train_fp_np = np.empty(np.insert(fp_shape, 0, args.num_train_snapshots))
     full_train_ldos_np = np.empty(np.insert(ldos_shape, 0, args.num_train_snapshots))
 
-    print(full_train_fp_np.shape)
-    print(full_train_ldos_np.shape)
+    print("Fingerprint shape: ", full_train_fp_np.shape)
+    print("LDOS shape: ", full_train_ldos_np.shape)
 
     print("Reading Fingerprint and LDOS dataset")
     
@@ -351,7 +353,11 @@ elif (args.dataset == "fp_ldos"):
 
     if (fp_pts != ldos_pts):
         print("\n\nError in num grid points: fp_pts %d and ldos_pts %d\n\n" % (fp_pts, ldos_pts));
-        exit(0)
+        exit(0);
+
+    if (ldos_shape[3] == 1 and model_choice == 5):
+        print("\n\nError cannot use bidirectional LSTM when predicting densities. Please use model 3 or 4.\n\n")
+        exit(0);
 
     args.grid_pts = fp_pts
 
@@ -370,6 +376,8 @@ elif (args.dataset == "fp_ldos"):
         print("Test pts %d" % args.test_pts)
         print("Fingerprint vector length: %d" % args.fp_length)
         print("LDOS vector length: %d" % args.ldos_length)
+
+    
 
     # Reshape tensor datasets such that 
     # NUM_SNAPSHOTS x 200 x 200 x 200 x VEC_LEN => (NUM_SNAPSHOTS * 200^3) x VEC_LEN
@@ -720,13 +728,16 @@ class Net(nn.Module):
             self.my_lstm = nn.LSTM(args.ldos_length, int(self.hidden_dim / 2), lstm_in_length, bidirectional=True)
 
     def init_hidden_train(self):
-        
-
-        #        h0 = torch.empty(lstm_in_length * 2, int(args.batch_size / hvd.size()), self.hidden_dim // 2)
-#        c0 = torch.empty(lstm_in_length * 2, int(args.batch_size / hvd.size()), self.hidden_dim // 2)
-
-        h0 = torch.empty(lstm_in_length * 2, args.batch_size, self.hidden_dim // 2)
-        c0 = torch.empty(lstm_in_length * 2, args.batch_size, self.hidden_dim // 2)
+                
+        if (model_choice == 4):
+            h0 = torch.empty(lstm_in_length, args.test_batch_size, self.hidden_dim)
+            c0 = torch.empty(lstm_in_length, args.test_batch_size, self.hidden_dim)
+        elif (model_choice == 5):
+            h0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
+            c0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
+        else:
+            h0 = torch.empty(1)
+            c0 = torch.empty(1)
         
         h0.zero_()
         c0.zero_()
@@ -735,9 +746,16 @@ class Net(nn.Module):
  
     def init_hidden_test(self):
         
-
-        h0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
-        c0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
+        if (model_choice == 4):
+            h0 = torch.empty(lstm_in_length, args.test_batch_size, self.hidden_dim)
+            c0 = torch.empty(lstm_in_length, args.test_batch_size, self.hidden_dim)
+        elif (model_choice == 5):
+            h0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
+            c0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
+        else:
+            h0 = torch.empty(1)
+            c0 = torch.empty(1)
+        
 
         h0.zero_()
         c0.zero_()
@@ -791,10 +809,10 @@ class Net(nn.Module):
 
 model = Net()
 
-if (model_choice == 4 or model_choice == 5):
+#if (model_choice == 4 or model_choice == 5):
 #    model.hidden, model.cell = model.init_hidden()
-    model.train_hidden = model.init_hidden_train()
-    model.test_hidden = model.init_hidden_test()
+model.train_hidden = model.init_hidden_train()
+model.test_hidden = model.init_hidden_test()
 
 if args.cuda:
     # Move model to GPU.
