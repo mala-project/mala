@@ -267,11 +267,9 @@ elif (args.dataset == "fp_ldos"):
 
     # If using water dataset
     if (args.water):
-        args.fp_data_fpath = "/%s/%sgcc/~~~~~~~~" % (args.temp, args.gcc)
-        args.ldos_data_fpath = "/%s/%sgcc/~~~~~~~~" % (args.temp, args.gcc)
+        args.fp_data_fpath = "/%s/%sgcc/water_fingerprint" % (args.temp, args.gcc)
+        args.ldos_data_fpath = "/%s/%sgcc/w64_aaaa-ELECTRON_DENSITY-1_0.cube_pkl" % (args.temp, args.gcc)
 
-        print("For Josh, water case")
-        exit(0);
     # If using Material (Al) dataset
     else:
         args.fp_data_fpath = "/%s/%sgcc/Al_fingerprint" % (args.temp, args.gcc)
@@ -699,6 +697,7 @@ hvd.allreduce(torch.tensor(0), name='barrier')
 #test_loader = torch.utils.data.DataLoader(
 #    test_dataset, batch_size=args.test_batch_size, sampler=test_sampler, **kwargs)
 
+print (args.ldos_length)
 
 # Neural Network Class
 class Net(nn.Module):
