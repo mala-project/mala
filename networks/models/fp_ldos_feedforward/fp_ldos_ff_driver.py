@@ -45,10 +45,20 @@ parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')
 parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                     help='Optimizer momentum (default: 0.5)')
+parser.add_argument('--grad-clip', type=float, default=0.25, metavar='M',
+                    help='Optimizer momentum (default: 0.25)')
 
 # Model
 parser.add_argument('--model', type=int, default=5, metavar='N',
                     help='model choice (default: 5)')
+parser.add_argument('--ff-mid-layers', type=int, default=2, metavar='N',
+                    help='how many feedforward layers to use (default: 2)')
+parser.add_argument('--ff-width', type=int, default=300, metavar='N',
+                    help='how many neurons in the feedforward layers (default: 300)')
+parser.add_argument('--ae-factor', type=float, default=.8, metavar='N',
+                    help='how many feedforward layers to use (default: .8)')
+
+# Inputs/Outputs
 parser.add_argument('--nxyz', type=int, default=40, metavar='N',
                     help='num elements along x,y,z dims (default: 40)')
 parser.add_argument('--no-coords', action='store_true', default=False,
@@ -72,7 +82,7 @@ parser.add_argument('--fp-log', action='store_true', default=False,
 parser.add_argument('--ldos-log', action='store_true', default=False,
                     help='apply log function to ldos outputs before scaling')
 
-# Dataset
+# Dataset Choice
 parser.add_argument('--dataset', type=str, default="random", metavar='DS',
                     help='dataset to train on (ex: "random", "fp_ldos") (default: "random")')
 parser.add_argument('--temp', type=str, default="298K", metavar='T',
@@ -192,6 +202,8 @@ if (hvd.rank() == 0):
 # Model 3: LDOS estimation without LSTM
 # Model 4: LDOS estimation with LSTM
 # Model 5: LDOS estimation with bidirectional LSTM
+# Model 6: LDOS estimation with Stacked Autoencoders and bidirectional LSTM
+# Model 7: LDOS estimation with a Deep Autoencoder and bidirectional LSTM
 
 if (args.model != 0):
     model_choice = args.model
@@ -212,9 +224,13 @@ if(hvd.rank() == 0):
         print("\nBuilding LDOS estimation model with LSTM\n")
     elif (model_choice == 5):
         print("\nBuilding LDOS estimation model with bidirectional LSTM\n")
+    elif (model_choice == 6):
+        print("\nBuilding LDOS estimation model with stacked autoencoders and bidirectional LSTM\n")
+    elif (model_choice == 7):
+        print("\nBuilding LDOS estimation model with a deep autoencoder and bidirectional LSTM\n")
     else:
-        print("Error in model choice");
-        exit();
+        print("\n\nError in model choice. Options are {1-7}\n\n");
+        exit(0);
 
 hvd.allreduce(torch.tensor(0), name='barrier')
 
@@ -223,8 +239,8 @@ if (args.dataset == "random"):
 
 #    args.fp_length = 116
     args.fp_length = 14
-#    args.ldos_length = 128
-    args.ldos_length = 1
+    args.ldos_length = 128
+#    args.ldos_length = 1
     args.dens_length = 1
     args.lstm_in_length = 10
 
@@ -238,11 +254,11 @@ if (args.dataset == "random"):
     if (model_choice == 1 or model_choice == 2):
         ldos_random_torch = torch.tensor(np.random.rand(args.grid_pts, dens_length), dtype=torch.float32)
     # LDOS models
-    elif (model_choice == 3 or model_choice == 4 or model_choice == 5):
+    elif (model_choice >= 3 and model_choice <= 7):
         ldos_random_torch = torch.tensor(np.random.rand(args.grid_pts, args.ldos_length), dtype=torch.float32)
-    else:
-        print("Error in model choice");
-        exit();
+    else: 
+        print("\n\nError in model choice. Options are {1-7}\n\n");
+        exit(0);
 
     fp_random_torch = torch.tensor(np.random.rand(args.grid_pts, args.fp_length), dtype=torch.float32)
 
@@ -253,9 +269,9 @@ torch.utils.data.random_split(fp_ldos_dataset, [train_pts, validation_pts, test_
 
 elif (args.dataset == "fp_ldos"):
     # FP_LDOS datasets should only be used for LDOS prediction (i.e. not Model 1 or 2)
-    if (model_choice != 3 and model_choice != 4 and model_choice != 5):
-        print("Error in model choice with fp_ldos dataset. Please use model = {3, 4, or 5}");
-        exit();
+    if (model_choice < 3 or model_choice > 7):
+        print("Error in model choice with fp_ldos dataset. Please use model = {3, 4, 5, 6, or 7}");
+        exit(0);
 
     # Currently use 1 snapshot for validation, 1 snapshot for test, and the rest for training.
     args.test_snapshot = args.num_snapshots - 1;
@@ -715,23 +731,59 @@ class Net(nn.Module):
         self.mid_layers = 2
         self.hidden_dim = args.ldos_length
 
-        self.fc1 = nn.Linear(args.fp_length, 300)
-        self.fc2 = nn.Linear(300, 300)
-        self.fc3 = nn.Linear(300, dens_length)
-        self.fc4 = nn.Linear(300, args.ldos_length * lstm_in_length)
-        self.fc5 = nn.Linear(args.ldos_length * lstm_in_length, args.ldos_length)
+        args.ae_width = int(args.ff_width * args.ae_factor)
 
+        # Fully Connected Layers
+        self.fc_fp_width = nn.Linear(args.fp_length, args.ff_width)
+        self.fc_width_width = nn.Linear(args.ff_width, args.ff_width)
+        self.fc_width_ae = nn.Linear(args.ff_width, args.ae_width)
+        self.fc_ae_width = nn.Linear(args.ae_width, args.ff_width)
+        self.fc_width_dens = nn.Linear(args.ff_width, dens_length)
+        self.fc_width_lstm_in = nn.Linear(args.ff_width, args.ldos_length * lstm_in_length)
+        self.fc_lstm_in_ldos = nn.Linear(args.ldos_length * lstm_in_length, args.ldos_length)
+
+        self.fc_encode = []
+        self.fc_decode = []
+
+        if (model_choice == 7):
+
+            encode_in = args.ff_width
+            encode_out = int(encode_in * args.ae_factor)
+            
+            decode_in = encode_out
+            decode_out = encode_in
+
+            for i in range(args.ff_mid_layers):
+                self.fc_encode.append(nn.Linear(encode_in, encode_out))
+                self.fc_decode.append(nn.Linear(decode_in, decode_out))
+
+                encode_in = encode_out
+                encode_out = int(encode_in * args.ae_factor)
+                
+                decode_in = encode_out
+                decode_out = encode_in
+
+            self.fc_encode = nn.ModuleList(self.fc_encode)
+            self.fc_decode = nn.ModuleList(self.fc_decode)
+
+        # LSTM Layers
         if (model_choice == 4):
-            self.my_lstm = nn.LSTM(args.ldos_length, self.hidden_dim, lstm_in_length)
-        elif (model_choice == 5):
-            self.my_lstm = nn.LSTM(args.ldos_length, int(self.hidden_dim / 2), lstm_in_length, bidirectional=True)
+            self.ldos_lstm = nn.LSTM(args.ldos_length, self.hidden_dim, lstm_in_length)
+        elif (model_choice >= 5 and model_choice <= 7):
+            self.ldos_lstm = nn.LSTM(args.ldos_length, int(self.hidden_dim / 2), lstm_in_length, bidirectional=True)
 
+        # Activation Functions
+        self.activation = nn.LeakyReLU()
+#        self.activation = F.relu
+#        self.activation = F.relu
+
+    # Initialize hidden and cell states
     def init_hidden_train(self):
                 
         if (model_choice == 4):
             h0 = torch.empty(lstm_in_length, args.test_batch_size, self.hidden_dim)
             c0 = torch.empty(lstm_in_length, args.test_batch_size, self.hidden_dim)
-        elif (model_choice == 5):
+        elif (model_choice >= 5 and model_choice <= 7):
             h0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
             c0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
         else:
@@ -748,7 +800,7 @@ class Net(nn.Module):
         if (model_choice == 4):
             h0 = torch.empty(lstm_in_length, args.test_batch_size, self.hidden_dim)
             c0 = torch.empty(lstm_in_length, args.test_batch_size, self.hidden_dim)
-        elif (model_choice == 5):
+        elif (model_choice >= 5 and model_choice <= 7):
             h0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
             c0 = torch.empty(lstm_in_length * 2, args.test_batch_size, self.hidden_dim // 2)
         else:
@@ -771,37 +823,71 @@ class Net(nn.Module):
            
 #            print("Forward BS: %d" % self.batch_size)
 
-            x = F.relu(self.fc1(x))
-            for i in range(self.mid_layers):
-                x = F.relu(self.fc2(x))
-            x = F.relu(self.fc4(x))
-            x, hidden = self.my_lstm(x.view(lstm_in_length, self.batch_size, args.ldos_length), hidden)
+            x = self.activation(self.fc_fp_width(x))
+            for i in range(args.ff_mid_layers):
+                x = self.activation(self.fc_width_width(x))
+            x = self.activation(self.fc_width_lstm_in(x))
+            x, hidden = self.ldos_lstm(x.view(lstm_in_length, self.batch_size, args.ldos_length), hidden)
             x = x[-1].view(self.batch_size, -1)
+
+        # MODEL 6
+        # LDOS prediction with stacked autoencoders and bidirectional LSTM
+        elif (model_choice == 6):
+            self.batch_size = x.shape[0]
+
+            x = self.activation(self.fc_fp_width(x))
+            for i in range(args.ff_mid_layers):
+                x = self.activation(self.fc_width_ae(x))
+                x = self.activation(self.fc_ae_width(x))
+            x = self.activation(self.fc_width_lstm_in(x))
+            x, hidden = self.ldos_lstm(x.view(lstm_in_length, self.batch_size, args.ldos_length), hidden)
+            x = x[-1].view(self.batch_size, -1)
+            
+        # MODEL 7
+        # LDOS prediction with a deep autoencoder and bidirectional LSTM
+        elif (model_choice == 7):
+            self.batch_size = x.shape[0]
+
+            x = self.activation(self.fc_fp_width(x))
+            
+            # Encode
+            for i in range(args.ff_mid_layers):
+                x = self.activation(self.fc_encode[i](x))
+
+            # Decode
+            for i in range(args.ff_mid_layers - 1, -1, -1):
+                x = self.activation(self.fc_decode[i](x))
+            
+            x = self.activation(self.fc_width_lstm_in(x))
+            x, hidden = self.ldos_lstm(x.view(lstm_in_length, self.batch_size, args.ldos_length), hidden)
+            x = x[-1].view(self.batch_size, -1)
+            
+
 
         # MODEL 1
         # Density prediction 
         elif (model_choice == 1):
-            x = F.relu(self.fc1(x))
-            for i in range(self.mid_layers):
-                x = F.relu(self.fc2(x))
-            x = F.relu(self.fc3(x))
+            x = self.activation(self.fc_fp_width(x))
+            for i in range(args.ff_mid_layers):
+                x = self.activation(self.fc_width_width(x))
+            x = self.activation(self.fc_width_dens(x))
 
         # MODEL 2
         # Density prediction, no activation
         elif (model_choice == 2):
-            x = self.fc1(x)
-            for i in range(self.mid_layers):
-                x = self.fc2(x)
-            x = self.fc3(x)
+            x = self.fc_fp_width(x)
+            for i in range(args.ff_mid_layers):
+                x = self.fc_width_width(x)
+            x = self.fc_width_dens(x)
 
         # MODEL 3
         # LDOS prediction without LSTM
         elif (model_choice == 3):
-            x = F.relu(self.fc1(x))
-            for i in range(self.mid_layers):
-                x = F.relu(self.fc2(x))
-            x = F.relu(self.fc4(x))
-            x = F.relu(self.fc5(x))
+            x = self.activation(self.fc_fp_width(x))
+            for i in range(args.ff_mid_layers):
+                x = self.activation(self.fc_width_width(x))
+            x = self.activation(self.fc_width_lstm_in(x))
+            x = self.activation(self.fc_lstm_in_ldos(x))
 
         return x, hidden
 
@@ -831,10 +917,10 @@ if args.cuda:
 
 
 # Horovod: scale learning rate by the number of GPUs.
-#optimizer = optim.SGD(model.parameters(), lr=args.lr * hvd.size(),
-#                      momentum=args.momentum, nesterov=True)
+optimizer = optim.SGD(model.parameters(), lr=args.lr * hvd.size(),
+                      momentum=args.momentum, nesterov=True)
 
-optimizer = optim.Adam(model.parameters(), lr=args.lr * hvd.size())
+#optimizer = optim.Adam(model.parameters(), lr=args.lr * hvd.size())
 
 # Horovod: broadcast parameters & optimizer state.
 hvd.broadcast_parameters(model.state_dict(), root_rank=0)
@@ -897,6 +983,10 @@ def train(epoch):
 
         ldos_loss = F.mse_loss(output, target)
         ldos_loss.backward()
+      
+        # Gradient Clipping
+        nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
+        
         optimizer.step()
 
 #        model.train_hidden = hidden_n
@@ -911,6 +1001,8 @@ def train(epoch):
                 epoch, batch_idx * len(data), len(train_sampler),
                 100. * batch_idx / len(train_loader), ldos_loss_val))
             
+
+
 #            args.writer.add_scalar('training loss rank%d' % hvd.rank(), \
 #                running_loss / args.log_interval, \
 #                epoch * len(train_loader) + batch_idx)
