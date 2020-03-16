@@ -54,7 +54,7 @@ pair_coeff * *
 thermo_style	custom step temp ke pe vol c_bgrid[1][1]
 thermo_modify norm yes
 
-dump mydump_b all custom 1000 b.dump id c_b[*]
+dump mydump_b all custom 1000 b.dump id x y z c_b[*]
 
 # run
 
