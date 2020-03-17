@@ -3,7 +3,7 @@ Lattice spacing in x,y,z = 3.316 3.316 3.316
 Created orthogonal box = (0 0 0) to (3.316 3.316 3.316)
   1 by 1 by 1 MPI processor grid
 Created 2 atoms
-  create_atoms CPU = 6.8903e-05 secs
+  create_atoms CPU = 5.60284e-05 secs
 2 atoms in group snapgroup
 WARNING: No fixes defined, atoms won't move (../verlet.cpp:52)
 Neighbor list info ...
@@ -31,9 +31,9 @@ Neighbor list info ...
 Per MPI rank memory allocation (min/avg/max) = 6.157 | 6.157 | 6.157 Mbytes
 Step Temp KinEng PotEng Volume c_bgrid[1][1] 
        0            0            0            0    36.462258            0 
-Loop time of 1.19209e-06 on 1 procs for 0 steps with 2 atoms
+Loop time of 9.53674e-07 on 1 procs for 0 steps with 2 atoms
 
-83.9% CPU use with 1 MPI tasks x no OpenMP threads
+104.9% CPU use with 1 MPI tasks x no OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
@@ -43,7 +43,7 @@ Neigh   | 0          | 0          | 0          |   0.0 |  0.00
 Comm    | 0          | 0          | 0          |   0.0 |  0.00
 Output  | 0          | 0          | 0          |   0.0 |  0.00
 Modify  | 0          | 0          | 0          |   0.0 |  0.00
-Other   |            | 1.192e-06  |            |       |100.00
+Other   |            | 9.537e-07  |            |       |100.00
 
 Nlocal:    2 ave 2 max 2 min
 Histogram: 1 0 0 0 0 0 0 0 0 0

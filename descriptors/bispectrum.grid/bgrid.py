@@ -151,3 +151,67 @@ for iz in range(ngridz):
                 outfile.write("%g " % bgridptr_np[iz][iy][ix][ncols0+icoeff])
             outfile.write("\n")
 outfile.close()
+
+# print out the rescaled bispectrum
+# use this secret recipe for scaling bispectrum
+# This is not guaranteed to be the best choice, but it might help
+# 1. Divide all B's by 2j+1
+# 2. U_0 = B_(0,0,0)^1/3
+# 3. Divide B_(0,0,0) by U_0^3
+# 4. Divide B_(j,0,j) by U_0
+
+outfile = open("bgridnorm_np.dat",'w')
+for iz in range(ngridz):
+    for iy in range(ngridy):
+        for ix in range(ngridx):
+            outfile.write("x, y, z = %g %g %g\n" % 
+                          (bgridptr_np[iz][iy][ix][0],
+                           bgridptr_np[iz][iy][ix][1],
+                           bgridptr_np[iz][iy][ix][2]))
+            icoeff = 0
+            val = bgridptr_np[iz][iy][ix][ncols0+icoeff]
+            u0inv = val**(-1.0/3.0)
+            val = 1.0
+            outfile.write("%g " % val)
+            icoeff += 1
+            for j1 in range(1,twojmax+1):
+                for j2 in range(0,j1+1):
+                    for j in range(j1-j2,min(twojmax,j1+j2)+1,2):
+                        if (j>=j1):
+                            fac = 1.0/(j+1)
+                            if j2==0: fac *= u0inv
+                            val = bgridptr_np[iz][iy][ix][ncols0+icoeff]
+                            val *= fac
+                            outfile.write("%g " % val)
+                            icoeff += 1
+            outfile.write("\n")
+outfile.close()
+
+outfile = open("pgridnorm_np.dat",'w')
+for iz in range(ngridz):
+    for iy in range(ngridy):
+        for ix in range(ngridx):
+            outfile.write("x, y, z = %g %g %g\n" % 
+                          (bgridptr_np[iz][iy][ix][0],
+                           bgridptr_np[iz][iy][ix][1],
+                           bgridptr_np[iz][iy][ix][2]))
+            icoeff = 0
+            val = bgridptr_np[iz][iy][ix][ncols0+icoeff]
+            u0inv = val**(-1.0/3.0)
+            val = 1.0
+            outfile.write("%g " % val)
+            icoeff += 1
+            for j1 in range(1,twojmax+1):
+                for j2 in range(0,j1+1):
+                    for j in range(j1-j2,min(twojmax,j1+j2)+1,2):
+                        if (j>=j1):
+                            if j2 == 0:
+                                fac = 1.0/(j+1)
+                                fac *= u0inv
+                                val = bgridptr_np[iz][iy][ix][ncols0+icoeff]
+                                val *= fac
+                                outfile.write("%g " % val)
+                            icoeff += 1
+            outfile.write("\n")
+outfile.close()
+
