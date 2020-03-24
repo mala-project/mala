@@ -37,7 +37,7 @@ variable 	wj equal 1
 variable 	radelem equal 0.5
 variable 	bzero equal 0
 variable 	quad equal 0
-variable 	switch equal 0
+variable 	switch equal 1
 
 compute b all sna/atom ${rcutfac} ${rfac0} ${twojmax} ${radelem} ${wj} rmin0 ${rmin0} bzeroflag ${bzero} quadraticflag ${quad} switchflag ${switch}
 
