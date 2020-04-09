@@ -163,6 +163,38 @@ def ldos_to_density(ldos_vals, temp, gcc, simple=False):
 
     return dens_vals
 
+
+# Local Density -> Electron Num
+def density_to_electron_number(dens_vals, temp, gcc, simple=False):
+    
+    # Density should be shape (NX, NY, NZ, 1)
+
+    # Integrate X
+    dens_vals = integrate_vals_spacing(dens_vals, grid_spacing, axis=0, simple=simple)
+
+    # Integrate Y
+    dens_vals = integrate_vals_spacing(dens_vals, grid_spacing, axis=0, simple=simple)
+
+    # Integrate Z
+    dens_vals = integrate_vals_spacing(dens_vals, grid_spacing, axis=0, simple=simple)
+
+    return dens_vals
+
+
+# LDOS -> Local Density -> Electron Num
+def ldos_to_electron_number(all_ldos_vals, temp, gcc, simple=False):
+
+    # LDOS should be shape (NX, NY, NZ, NUM_E_LVLS)
+
+    # LDOS -> Local Density
+    density_vals = ldos_to_density(all_ldos_vals, temp, gcc, simple)
+
+    # Local Density -> Electron Num
+    electron_num = density_to_electron_number(density_vals, temp, gcc, simple)
+
+    return electron_num
+
+
 # LDOS -> DOS
 def ldos_to_dos(all_ldos_vals, temp, gcc, simple=False):
 
