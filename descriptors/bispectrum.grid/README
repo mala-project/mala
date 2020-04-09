@@ -30,6 +30,9 @@ log.lammps: LAMMPS log file
 b.dump: per-atom bispectrum components
 bgrid.dat: grid bispectrum components as LAMMPS array
 bgrid_np.dat: grid bispectrum components as Numpy array
+pgrid_np.dat: grid power spectrum components as Numpy array
+bgridnorm_np.dat: normalized bispectrum 
+pgridnorm_np.dat: normalized power spectrum
 
 You can compare these to the corresponding files
 with names containing a timestamp e.g. b.25Oct2019.dump

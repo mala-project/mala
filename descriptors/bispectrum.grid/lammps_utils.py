@@ -16,7 +16,7 @@ def extract_compute_np(lmp,name,compute_type,result_type,array_shape):
     Note that the result is a view into the original memory.                                                          
     If the result type is 0 (scalar) then conversion to numpy is skipped and a python float is returned.              
     """
-    ptr = lmp.extract_compute(name, compute_type, result_type)  # 1,2: Style (1) is per-atom compute, returns array type (2).                                                                                                              
+    ptr = lmp.extract_compute(name, compute_type, result_type)  # 1,2: Style (1) is per-atom compute, returns array type (2).
     if result_type == 0: return ptr # No casting needed, lammps.py already works                                      
     if result_type == 2: ptr = ptr.contents
     total_size = np.prod(array_shape)
