@@ -82,11 +82,16 @@ class Big_Dataset(torch.utils.data.Dataset):
 
             data_shape = self.fp_dataset[i].shape 
 
-            data_pts = data_shape[0] * data_shape[1] * data_shape[2]
+            grid_pts = data_shape[0] * data_shape[1] * data_shape[2]
 
-            self.fp_dataset[i] = np.reshape(self.fp_dataset[i], [data_pts, data_shape[3]])
+            self.fp_dataset[i] = np.reshape(self.fp_dataset[i], [grid_pts, data_shape[3]])
 
             self.fp_dataset[i] = self.fp_dataset[i]
+
+        # !!! Need to modify !!! 
+        # Switch args.fp_length -> args.fp_length and args.final_fp_length 
+        if (data_name == "test"):
+            args.fp_length = data_shape[-1]
 
 
         # LDOS subset and reshape
@@ -96,13 +101,19 @@ class Big_Dataset(torch.utils.data.Dataset):
 
             data_shape = self.ldos_dataset[i].shape 
 
-            data_pts = data_shape[0] * data_shape[1] * data_shape[2]
+            grid_pts = data_shape[0] * data_shape[1] * data_shape[2]
 
-            self.ldos_dataset[i] = np.reshape(self.ldos_dataset[i], [data_pts, data_shape[3]])
+            self.ldos_dataset[i] = np.reshape(self.ldos_dataset[i], [grid_pts, data_shape[3]])
             
             self.ldos_dataset[i] = self.ldos_dataset[i]
 
-        self.data_pts = data_pts
+        # !!! Need to modify !!! 
+        # Switch args.ldos_length -> args.ldos_length and args.final_ldos_length 
+        if (data_name == "test"):
+            args.ldos_length = data_shape[-1]
+            args.grid_pts = grid_pts
+
+        self.grid_pts = grid_pts
 
         # Consistency Checks
         if (len(self.fp_dataset) != len(self.ldos_dataset)):
@@ -116,16 +127,109 @@ class Big_Dataset(torch.utils.data.Dataset):
                     print("\nError. Snapshot %d, FP and LDOS dataset have different number of data points.\n\n" % i)
                 exit(0);
 
+            if (self.fp_dataset[0].shape[-1] != self.fp_dataset[i].shape[-1]):
+                if (hvd.rank() == 0):
+                    print("\nError. Snapshot %d, Fingerprint lengths are not consistent between snapshots.\n\n" % i)
+                exit(0);
+            
+            if (self.ldos_dataset[0].shape[-1] != self.ldos_dataset[i].shape[-1]):
+                if (hvd.rank() == 0):
+                    print("\nError. Snapshot %d, LDOS lengths are not consistent between snapshots.\n\n" % i)
+                exit(0);
+
+
+
     # Fetch a sample
     def __getitem__(self, idx):
-       
-        return self.fp_dataset[idx // self.data_pts][idx % self.data_pts, :], \
-               self.ldos_dataset[idx // self.data_pts][idx % self.data_pts, :]
+      
+#        print("idx: ", idx)
+
+        return torch.tensor(self.fp_dataset[idx // self.grid_pts][idx % self.grid_pts, :]).float(), \
+               torch.tensor(self.ldos_dataset[idx // self.grid_pts][idx % self.grid_pts, :]).float()
+
+#        print("input shape: ", t1.shape)
+#        print("output shape: ", t2.shape)
+
+
+#        return t1, t2
 
 
     # Number of samples in dataset
     def __len__(self):
-        return self.num_snapshots * self.data_pts
+        return self.num_snapshots * self.grid_pts
+
+
+
+
+
+
+
+
+
+###-----------------------------------------------------------------------###
+
+# Compressed Dataset
+#class Compressed_Dataset(torch.utils.data.Dataset):
+#
+#    def __init__(self, args, data_name, fp_data, ldos_data):
+#
+#        self.args = args
+#        self.sample = 0
+#       
+#        if (args.load_encoder):
+#            self.encoder = 0
+#        else:
+#
+#            args.fp_length = fp_data.shape[1]
+#
+#            self.num_subdim = 2
+#            self.ks = 256
+#
+#            if (args.fp_length % self.num_subdim != 0):
+#                print("\n\nPQKMeans division error. %d not a factor of %d. Exiting!\n" % (self.num_subdim, args.fp_length))
+#                exit(0)
+#
+#            self.pqkmeans.encoder.PQEncoder(num_subdim=self.num_subdim, Ks=self.ks
+#
+#            sample_pts = fp_data.shape[0] * args.compress_fit_ratio
+#
+#            if (hvd.rank() == 0):
+#                print("Begin fitting encoder to subset of data")
+#    
+#            tic = timeit.default_timer()
+#            self.encoder.fit(fp_data[:sample_pts])
+#            toc = timeit.default_timer()
+#
+#            if (hvd.rank() == 0):
+#                print("Fit %d samples to %s dataset encoder: %4.4fs" % (sample_pts, data_name, toc - tic))
+#            
+#            tic
+#
+#            fp_encode = encoder.transform(fp_data)
+#        
+#
+#            self
+#
+#
+#
+#
+#        self.cluster_ids = []
+#
+#        for i in range(args.clusters):
+#            self.cluster_ids.append()
+#
+#       
+#
+#    def __getitem__(self, idx):
+#
+#    
+#
+#        return 0;
+#
+#    def __len__(self):
+#        return 1;
+
+
 
 
 ###-----------------------------------------------------------------------###
@@ -166,6 +270,13 @@ def load_data_random(args):
                                      [train_pts, validation_pts, test_pts])
 
     return (train_dataset, validation_dataset, test_dataset)
+
+
+
+
+
+
+
 
 
 ###-----------------------------------------------------------------------###
@@ -232,10 +343,10 @@ def load_data_fp_ldos(args):
     for sshot in range(args.num_train_snapshots):
         print("Rank: %d, Reading train snapshot %d" % (hvd.rank(), sshot))
 
-        full_train_fp_np[sshot, :, :, :] = np.load(args.fp_dir + args.fp_data_fpath + \
+        full_train_fp_np[sshot, :, :, :, :] = np.load(args.fp_dir + args.fp_data_fpath + \
             "_snapshot%d.npy" % (sshot))
 
-        full_train_ldos_np[sshot, :, :, :] = np.load(args.ldos_dir + args.ldos_data_fpath + \
+        full_train_ldos_np[sshot, :, :, :, :] = np.load(args.ldos_dir + args.ldos_data_fpath + \
             "_snapshot%d.npy" % (sshot))
 
         hvd.allreduce(torch.tensor(0), name='barrier')
@@ -260,9 +371,23 @@ def load_data_fp_ldos(args):
     # Pick subset of FP vector that the user requested
     fp_idxs = subset_fp(args)
 
-    fp_np = fp_np[:, :, :, fp_idxs]
+    if (hvd.rank() == 0):
+        print("Subsetting FP dataset")        
+
+    full_train_fp_np = full_train_fp_np[:, :, :, :, fp_idxs]
     validation_fp_np = validation_fp_np[:, :, :, fp_idxs]
     test_fp_np = test_fp_np[:, :, :, fp_idxs]
+
+    # Pick subset of LDOS vector that the user requested
+    ldos_idxs = subset_ldos(args)
+
+    if (hvd.rank() == 0):
+        print("Subsetting LDOS dataset")        
+    
+    full_train_ldos_np = full_train_ldos_np[:, :, :, :, ldos_idxs]
+    validation_ldos_np = validation_ldos_np[:, :, :, ldos_idxs]
+    test_ldos_np = test_ldos_np[:, :, :, ldos_idxs]
+
 
     fp_shape = test_fp_np.shape
     ldos_shape = test_ldos_np.shape
@@ -295,7 +420,7 @@ def load_data_fp_ldos(args):
         print("Test pts %d" % args.test_pts)
         print("Final FP vector length: %d" % args.fp_length)
         print("Final LDOS vector length: %d" % args.ldos_length)
-
+        print("Reshaping Datasets")
     
 
     # Reshape tensor datasets such that 
@@ -336,6 +461,24 @@ def load_data_fp_ldos(args):
                        args.ldos_max_only, \
                        args.ldos_standard_scaling)
 
+
+    # Save modified input/outputs
+    if (hvd.rank() == 0 and args.save_training_data):
+
+        print("Saving training data.")
+
+        np.save(args.model_dir + "/full_train_fp_np", full_train_fp_np)
+        np.save(args.model_dir + "/validation_fp_np", validation_fp_np)
+        np.save(args.model_dir + "/test_fp_np", test_fp_np)
+
+        np.save(args.model_dir + "/full_train_ldos_np", full_train_ldos_np)
+        np.save(args.model_dir + "/validation_ldos_np", validation_ldos_np)
+        np.save(args.model_dir + "/test_ldos_np", test_ldos_np)
+
+
+
+    # Create Pytorch tensors
+
     hvd.allreduce(torch.tensor(0), name='barrier')
 
     print("Rank: %d, Creating train tensors" % hvd.rank())
@@ -346,25 +489,25 @@ def load_data_fp_ldos(args):
     full_train_ldos_torch = torch.tensor(full_train_ldos_np, dtype=torch.float32)
     hvd.allreduce(torch.tensor(0), name='barrier')
 
-    print("Rank: %d, Creating validation tensors" % hvd.rank())
-    
+
+    print("Rank: %d, Creating validation tensors" % hvd.rank()) 
     validation_fp_torch = torch.tensor(validation_fp_np, dtype=torch.float32)
     hvd.allreduce(torch.tensor(0), name='barrier')
     
     validation_ldos_torch = torch.tensor(validation_ldos_np, dtype=torch.float32)
     hvd.allreduce(torch.tensor(0), name='barrier')
 
-    print("Rank: %d, Creating test tensors" % hvd.rank())
-    
+
+    print("Rank: %d, Creating test tensors" % hvd.rank())    
     test_fp_torch = torch.tensor(test_fp_np, dtype=torch.float32)
     hvd.allreduce(torch.tensor(0), name='barrier')
 
     test_ldos_torch = torch.tensor(test_ldos_np, dtype=torch.float32)  
     hvd.allreduce(torch.tensor(0), name='barrier')
 
-    print("Rank: %d, Creating tensor datasets" % hvd.rank())
 
-    # Create fp (inputs) and ldos (outputs) Pytorch Dataset and apply random split
+    print("Rank: %d, Creating tensor datasets" % hvd.rank())
+    # Create fp (inputs) and ldos (outputs) Pytorch Dataset
     train_dataset = torch.utils.data.TensorDataset(full_train_fp_torch, full_train_ldos_torch)
     hvd.allreduce(torch.tensor(0), name='barrier')
     
@@ -376,6 +519,12 @@ def load_data_fp_ldos(args):
 
 
     return (train_dataset, validation_dataset, test_dataset)
+
+
+
+
+
+
 
 
 ###-----------------------------------------------------------------------###
@@ -428,15 +577,22 @@ def scale_data(args, data_name, \
         # Apply data normalizations
         for row in range(data_length):
 
+            # Row scaling
             if (row_scaling):
                 if (standard_scaling):
-                    data_meanv = np.mean(np.concatenate((data_train[:, row], \
-                                                       data_validation[:, row], \
-                                                       data_test[:, row]), axis=0))
-                    data_stdv  = np.std(np.concatenate((data_train[:, row], \
-                                                      data_validation[:, row], \
-                                                      data_test[:, row]), axis=0))
-       
+
+                    if (args.calc_training_norm_only):
+                        data_meanv = np.mean(data_train[:, row])                
+                        data_stdv  = np.std(data_train[:, row])
+                                                            
+                    else: 
+                        data_meanv = np.mean(np.concatenate((data_train[:, row], \
+                                                             data_validation[:, row], \
+                                                             data_test[:, row]), axis=0))
+                        data_stdv  = np.std(np.concatenate((data_train[:, row], \
+                                                            data_validation[:, row], \
+                                                            data_test[:, row]), axis=0))
+           
                     data_train[:, row]      = (data_train[:, row] - data_meanv) / data_stdv
                     data_validation[:, row] = (data_validation[:, row] - data_meanv) / data_stdv
                     data_test[:, row]       = (data_test[:, row] - data_meanv) / data_stdv
@@ -448,13 +604,18 @@ def scale_data(args, data_name, \
                     if (max_only):
                         data_minv = 0
                     else:
-                        data_minv = np.min(np.concatenate((data_train[:, row], \
+                        if (args.calc_training_norm_only):
+                            data_minv = np.min(data_train[:, row])
+                        else:
+                            data_minv = np.min(np.concatenate((data_train[:, row], \
+                                                             data_validation[:, row], \
+                                                             data_test[:, row]), axis=0))
+                    if (args.calc_training_norm_only):
+                        data_maxv = np.max(data_train[:, row])
+                    else:
+                        data_maxv = np.max(np.concatenate((data_train[:, row], \
                                                          data_validation[:, row], \
                                                          data_test[:, row]), axis=0))
-
-                    data_maxv = np.max(np.concatenate((data_train[:, row], \
-                                                     data_validation[:, row], \
-                                                     data_test[:, row]), axis=0))
 
                     if (data_maxv - data_minv < 1e-12):
                         print("\nNormalization of %s error. max-min ~ 0. Exiting. \n\n" % data_name)
@@ -464,15 +625,22 @@ def scale_data(args, data_name, \
                     data_validation[:, row] = (data_validation[:, row] - data_minv) / (data_maxv - data_minv)
                     data_test[:, row]       = (data_test[:, row] - data_minv) / (data_maxv - data_minv)
             
+            # No row scaling
             else:
                 if (standard_scaling):
-                    data_mean = np.mean(np.concatenate((data_train, \
-                                                      data_validation, \
-                                                      data_test), axis=0))
-                    data_std  = np.std(np.concatenate((data_train, \
-                                                     data_validation, \
-                                                     data_test), axis=0))
-                 
+
+                    if (args.calc_training_norm_only):
+                        data_mean = np.mean(data_train)
+                        data_std = np.std(data_train)
+
+                    else:
+                        data_mean = np.mean(np.concatenate((data_train, \
+                                                          data_validation, \
+                                                          data_test), axis=0))
+                        data_std  = np.std(np.concatenate((data_train, \
+                                                         data_validation, \
+                                                         data_test), axis=0))
+                     
                     data_train      = (data_train - data_mean) / data_std
                     data_validation = (data_validation - data_mean) / data_std
                     data_test       = (data_test - data_mean) / data_std
@@ -484,14 +652,19 @@ def scale_data(args, data_name, \
                     if (max_only):
                         data_min = 0
                     else:
-                        data_min = np.min(np.concatenate((data_train, \
+                        if (args.calc_training_norm_only):
+                            data_min = np.min(data_train)
+                        else:
+                            data_min = np.min(np.concatenate((data_train, \
+                                                            data_validation, \
+                                                            data_test), axis=0))  
+                    if (args.calc_training_norm_only):
+                        data_max = np.max(data_train)
+                    else:
+                        data_max = np.max(np.concatenate((data_train, \
                                                         data_validation, \
-                                                        data_test), axis=0))  
-                    
-                    data_max = np.max(np.concatenate((data_train, \
-                                                    data_validation, \
-                                                    data_test), axis=0))
-                    
+                                                        data_test), axis=0))
+                        
                     if (data_max - data_min < 1e-12):
                         print("\nNormalization of %s error. max-min ~ 0. Exiting\n\n" % data_name)
                         exit(0);
@@ -551,9 +724,10 @@ def scale_data(args, data_name, \
 
 
 
+
+
+
 ###-----------------------------------------------------------------------###
-
-
 
 # Take subset of FP inputs
 # Options:
@@ -582,6 +756,8 @@ def subset_fp(args):
         if(hvd.rank() == 0):
             print("Using FP power spectrum only.")
 
+        fp_idxs = np.append(fp_idxs, [0,1,2])
+
         bs_length = args.fp_length - 3
         twojmax = 0
 
@@ -607,11 +783,14 @@ def subset_fp(args):
 
         if (count != bs_length):
             print("Error: could not find power spectrum. bs_length = %d and counted_elements = %d" % (bs_length, count))
-
+    else:
+        fp_idxs = np.arange(args.fp_length)
 
     # The first 3 elements in FPs are coords and the rest are bispectrum components
-    if (not args.no_coords):
-        fp_idxs = np.insert(fp_idxs, 0, [0,1,2])
+    if (args.no_coords):
+        if(hvd.rank() == 0):
+            print("Removing X/Y/Z coords from the SNAP FP.")
+        fp_idxs = fp_idxs[3:]
 
     else:
         if(hvd.rank() == 0):

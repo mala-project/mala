@@ -76,15 +76,20 @@ class Net_Trainer():
             
             # Zero out gradients for the new batch
             self.optimizer.zero_grad()
-            
+
+#            if (batch_idx % self.args.log_interval == 0 % self.args.log_interval and hvd.rank() == 0):
+#                old_hidden = hidden_n
+
             # RUN self.model
             output, hidden_n = self.model(data, hidden_n)
 
-    #        print(data.shape)
-    #        print(output.shape)
-    #        print(target.shape)
+            hidden_n = (hidden_n[0].detach(), hidden_n[1].detach()) 
 
-            hidden_n = (hidden_n[0].detach(), hidden_n[1].detach())
+
+#            if (batch_idx % self.args.log_interval == 0 % self.args.log_interval and hvd.rank() == 0):
+#                print("Hidden diff: [%4.4f, %4.4f]" % (np.sum(np.abs(hidden_n[0].data.cpu().numpy() - old_hidden[0].data.cpu().numpy())), \
+#                                                       np.sum(np.abs(hidden_n[1].data.cpu().numpy() - old_hidden[1].data.cpu().numpy()))))
+            
 
             ldos_loss = F.mse_loss(output, target)
             ldos_loss.backward()
@@ -103,12 +108,14 @@ class Net_Trainer():
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6E}'.format(
                     epoch, batch_idx * len(data), len(self.train_sampler),
                     100. * batch_idx / len(self.train_loader), ldos_loss_val))
-                
-
-
-    #            self.args.writer.add_scalar('training loss rank%d' % hvd.rank(), \
-    #                running_loss / self.args.log_interval, \
-    #                epoch * len(train_loader) + batch_idx)
+ 
+#                for name, param in self.model.named_parameters():
+#                    if param.requires_grad:
+#                        print(batch_idx, name, param.data)
+                                
+                self.args.writer.add_scalar('training loss rank%d' % hvd.rank(), \
+                    running_loss / self.args.log_interval, \
+                    epoch * len(self.train_loader) + batch_idx)
                
         self.model.train_hidden = hidden_n
 

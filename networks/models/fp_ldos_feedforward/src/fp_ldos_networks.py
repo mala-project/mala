@@ -91,6 +91,9 @@ class FP_LDOS_FF_Net(nn.Module):
         self.batch_size = x.shape[0]
 
         x = self.activation(self.fc_fp_width(x))
+
+        if (self.args.skip_connection):
+            skip_x = x
         
         if (self.args.stacked_auto):
             for i in range(self.args.ff_mid_layers):
@@ -107,7 +110,10 @@ class FP_LDOS_FF_Net(nn.Module):
         else:
             for i in range(self.args.ff_mid_layers):
                 x = self.activation(self.fc_width_width(x))
-        
+       
+        if (self.args.skip_connection):
+            x = x + skip_x
+
         x = self.activation(self.fc_width_lstm_in(x))
 
         return (self.final_activation(self.fc_lstm_in_ldos(x)), hidden)
@@ -167,19 +173,45 @@ class FP_LDOS_LSTM_Net(nn.Module):
         self.fc_width_lstm_in = nn.Linear(args.ff_width, args.ldos_length * args.lstm_in_length)
 
         # LSTM 
-        if (args.no_bidirection):
-            self.ldos_lstm = nn.LSTM(args.ldos_length, \
-                                     self.hidden_dim, \
-                                     args.lstm_in_length)
+#        if (args.no_bidirection):
+#            self.ldos_lstm = nn.LSTM(args.ldos_length, \
+#                                     self.hidden_dim, \
+#                                     args.lstm_in_length)
+#        else:
+#            self.ldos_lstm = nn.LSTM(args.ldos_length, \
+#                                     int(self.hidden_dim / 2), \
+#                                     args.lstm_in_length, \
+#                                     bidirectional=True)
+        if (args.gru):
+            if (args.no_bidirection):
+                self.ldos_lstm = nn.GRU(args.ldos_length, \
+                                         self.hidden_dim, \
+                                         args.lstm_in_length, \
+                                         batch_first=True)
+            else:
+                self.ldos_lstm = nn.GRU(args.ldos_length, \
+                                         int(self.hidden_dim / 2), \
+                                         args.lstm_in_length, \
+                                         batch_first=True, \
+                                         bidirectional=True)
+
+
         else:
-            self.ldos_lstm = nn.LSTM(args.ldos_length, \
-                                     int(self.hidden_dim / 2), \
-                                     args.lstm_in_length, \
-                                     bidirectional=True)
+            if (args.no_bidirection):
+                self.ldos_lstm = nn.LSTM(args.ldos_length, \
+                                         self.hidden_dim, \
+                                         args.lstm_in_length, \
+                                         batch_first=True)
+            else:
+                self.ldos_lstm = nn.LSTM(args.ldos_length, \
+                                         int(self.hidden_dim / 2), \
+                                         args.lstm_in_length, \
+                                         batch_first=True, \
+                                         bidirectional=True)
 
         # Activation Functions
         self.activation = nn.LeakyReLU()
-        self.final_activation = nn.LeakyReLU()
+        self.final_activation = nn.ReLU()
 
     # Initialize hidden and cell states
     def init_hidden_train(self):
@@ -199,13 +231,29 @@ class FP_LDOS_LSTM_Net(nn.Module):
                              self.args.batch_size, \
                              self.hidden_dim // 2)
 
+#        if (self.args.no_bidirection):
+#            h0 = torch.empty(self.args.batch_size, \
+        #                             self.args.lstm_in_length, \
+        #                             self.hidden_dim)
+#            c0 = torch.empty(self.args.batch_size, \
+        #                             self.args.lstm_in_length, \
+        #                             self.hidden_dim)
+#        else:
+#            h0 = torch.empty(self.args.batch_size, \
+        #                             self.args.lstm_in_length * 2, \
+        #                             self.hidden_dim // 2)
+#            c0 = torch.empty(self.args.batch_size, \
+#                             self.args.lstm_in_length * 2, \
+#                             self.hidden_dim // 2)
+
         h0.zero_()
         c0.zero_()
 
         return (h0, c0) 
  
     def init_hidden_test(self):
-        
+       
+
         if (self.args.no_bidirection):
             h0 = torch.empty(self.args.lstm_in_length, \
                              self.args.test_batch_size, \
@@ -220,6 +268,22 @@ class FP_LDOS_LSTM_Net(nn.Module):
             c0 = torch.empty(self.args.lstm_in_length * 2, \
                              self.args.test_batch_size, \
                              self.hidden_dim // 2)
+
+
+            #        if (self.args.no_bidirection):
+#            h0 = torch.empty(self.args.test_batch_size, \
+        #                             self.args.lstm_in_length, \
+        #                             self.hidden_dim)
+#            c0 = torch.empty(self.args.test_batch_size, \
+        #                             self.args.lstm_in_length, \
+        #                             self.hidden_dim)
+#        else:
+#            h0 = torch.empty(self.args.test_batch_size, \
+        #                             self.args.lstm_in_length * 2, \
+        #                             self.hidden_dim // 2)
+#            c0 = torch.empty(self.args.test_batch_size, \
+        #                             self.args.lstm_in_length * 2, \
+        #                             self.hidden_dim // 2)
         
         h0.zero_()
         c0.zero_()
@@ -235,6 +299,9 @@ class FP_LDOS_LSTM_Net(nn.Module):
             hidden = (hidden[0].fill_(0.0), hidden[1].fill_(0.0))
 
         x = self.activation(self.fc_fp_width(x))
+
+        if (self.args.skip_connection):
+            skip_x = x
         
         if (self.args.stacked_auto):
             for i in range(self.args.ff_mid_layers):
@@ -251,21 +318,44 @@ class FP_LDOS_LSTM_Net(nn.Module):
         else:
             for i in range(self.args.ff_mid_layers):
                 x = self.activation(self.fc_width_width(x))
-        
+       
+        if (self.args.skip_connection):
+            x = x + skip_x
+
         x = self.activation(self.fc_width_lstm_in(x))
-        
+ 
+
+
+#     if (self.args.no_bidirection):
+#            x, hidden = self.ldos_lstm(x.view(self.args.lstm_in_length, \
+        #                                              self.batch_size, \
+        #                                              self.args.ldos_length), \
+        #                                       hidden)
+#        else:
+#            x, hidden = self.ldos_lstm(x.view(self.args.lstm_in_length, \
+        #                                              self.batch_size, \
+        #                                              self.args.ldos_length), \
+        #                                       hidden)
+
+
+
+
+
         if (self.args.no_bidirection):
-            x, hidden = self.ldos_lstm(x.view(self.args.lstm_in_length, \
-                                              self.batch_size, \
+            x, hidden = self.ldos_lstm(x.view(self.batch_size, \
+                                              self.args.lstm_in_length, \
                                               self.args.ldos_length), \
                                        hidden)
         else:
-            x, hidden = self.ldos_lstm(x.view(self.args.lstm_in_length, \
-                                              self.batch_size, \
+            x, hidden = self.ldos_lstm(x.view(self.batch_size, \
+                                              self.args.lstm_in_length, \
                                               self.args.ldos_length), \
                                        hidden)
 
-        x = x[-1].view(self.batch_size, -1)
+#        print(x.shape)
+
+#        x = x[-1].view(self.batch_size, -1)
+        x = x[:, -1, :]
         return (self.final_activation(x), hidden)
  
 

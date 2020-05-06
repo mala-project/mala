@@ -17,39 +17,54 @@ else
     GPUS=2
 fi
 
+
+### Input/Output
+
 #DS=random
 DS=fp_ldos
-#EPCS=100
-#EPCS=250
-EPCS=1
-#MDL=4
-#MDL=6
-MDL=5
+
 NXYZ=200
-TM=298K
+TMP=298K
 GC=2.699
 
-BS=64
-#BS=4
-
-#FPL="8 17 33 58"
-#FPL="58"
-#FPL=8
-#FPL=17
-#FPL=33
-#FPL=58
 FPL=94
-LDOSL=128
+
+#LDOSL=128
+LDOSL=250
+
 #SSHOT=5
 SSHOT=3
+
+
+
+
+### Optimizer/Training
+
+EPCS=250
+#EPCS=100
+#EPCS=1
+
+TBS=4000
+BS=4000
+#BS=4
+
 LR=.01
 ES=.99999
 EP=8
 OP=4
 
+LIL=4
+
+NUMW=2
+
+# Network
 WID=300
-MIDLYS=4
+MIDLYS=2
 AE=.8
+
+#   --model-lstm-network \
+#   --adam \
+#   --skip-connection \
 
 
 for FL in $FPL
@@ -58,28 +73,37 @@ do
     ${EXE} -np ${GPUS} ${PYT} ${DRVR} \
         --dataset ${DS} \
         --epochs ${EPCS} \
-        --model-lstm-network \
         --nxyz ${NXYZ} \
-        --temp ${TM} \
+        --temp ${TMP} \
         --gcc ${GC} \
         --batch-size ${BS} \
+        --test-batch-size ${TBS} \
         --fp-length ${FL} \
         --ldos-length ${LDOSL} \
         --optim-patience ${OP} \
         --early-patience ${EP} \
         --early-stopping ${ES} \
         --lr ${LR} \
+        --lstm-in-length ${LIL} \
         --ff-mid-layers ${MIDLYS} \
         --ff-width ${WID} \
         --ae-factor ${AE} \
         --num-snapshots ${SSHOT} \
         --no-coords \
-        --no-hidden-state \
-        --big-data \
-        2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${FL}fp_${LDOSL}ldos_${NXYZ}nxyz_nocoords_LSTM_${BS}batchsize_${SSHOT}snapshots_${EPCS}epochs_${LR}learnrate_fprow_fpstand_ldosmax.log
+        --num-data-workers ${NUMW} \
+        --calc-training-norm-only \
+        --fp-row-scaling \
+        --fp-standard-scaling \
+        --ldos-norm-scaling \
+        --ldos-max-only \
+        2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TMP}_${GC}gcc_${FL}fp_${LDOSL}ldos_${NXYZ}nxyz_${RANDOM}${RANDOM}.log
 
 done
 
+
+
+
+#        --save-training-data \
 
 #        --fp-row-scaling \
 #        --fp-standard-scaling \

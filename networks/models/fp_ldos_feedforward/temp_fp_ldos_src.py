@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import argparse
 import os, sys
+import json
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -36,6 +37,8 @@ parser.add_argument('--train-test-split', type=float, default=.80, metavar='R',
                     help='pecentage of training data to use (default: .80)')
 parser.add_argument('--epochs', type=int, default=1, metavar='N',
                     help='number of epochs to train (default: 1)')
+parser.add_argument('--adam', action='store_true', default=False,
+                    help='use ADAM optimizer (default: SGD)')
 parser.add_argument('--early-patience', type=int, default=10, metavar='N',
                     help='number of epochs to tolerate no decrease in validation error for early stopping (default: 10)')
 parser.add_argument('--optim-patience', type=int, default=5, metavar='N',
@@ -57,6 +60,10 @@ parser.add_argument('--stacked-auto', action='store_true', default=False,
                     help='use the stacked autoencoder layers')
 parser.add_argument('--deep-auto', action='store_true', default=False,
                     help='use the deep autoencoder layers')
+parser.add_argument('--skip-connection', action='store_true', default=False,
+                    help='add skip connection over feedforward layers')
+parser.add_argument('--gru', action='store_true', default=False,
+                    help='use GRU instead of LSTM')
 parser.add_argument('--ff-mid-layers', type=int, default=2, metavar='N',
                     help='how many feedforward layers to use (default: 2)')
 parser.add_argument('--ff-width', type=int, default=300, metavar='N',
@@ -64,7 +71,7 @@ parser.add_argument('--ff-width', type=int, default=300, metavar='N',
 parser.add_argument('--ae-factor', type=float, default=.8, metavar='N',
                     help='how many feedforward layers to use (default: .8)')
 parser.add_argument('--lstm-in-length', type=int, default=10, metavar='N',
-                    help='sequence length to transform to 1 LDOS element (default: 10)')
+                    help='number of stacked lstm layers (default: 10)')
 parser.add_argument('--no-bidirection', action='store_true', default=False,
                     help='do not use bidirectional LSTM/RNN')
 parser.add_argument('--no-hidden-state', action='store_true', default=False,
@@ -81,6 +88,8 @@ parser.add_argument('--ldos-length', type=int, default=128, metavar='N',
 parser.add_argument('--no-coords', action='store_true', default=False,
                     help='do not use x/y/z coordinates in fp inputs')
 parser.add_argument('--no-bispectrum', action='store_true', default=False,
+                    help='do not use bispectrum components in fp inputs (only coordinates)')
+parser.add_argument('--calc-training-norm-only', action='store_true', default=False,
                     help='do not use bispectrum components in fp inputs (only coordinates)')
 parser.add_argument('--power-spectrum-only', action='store_true', default=False,
                     help='train on only the power spectrum within the fingerprints')
@@ -141,10 +150,14 @@ parser.add_argument('--tb-ldos-comparisons', type=int, default=4, metavar='N',
 # Other options
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='disables CUDA training')
+parser.add_argument('--num-data-workers', type=int, default=2, metavar='N',
+                    help='number of data workers for async gpu data movement (default: 2)')
 parser.add_argument('--num-threads', type=int, default=32, metavar='N',
                     help='number of threads (default: 32)')
 parser.add_argument('--num-gpus', type=int, default=1, metavar='N',
                     help='number of gpus (default: 1)')
+parser.add_argument('--save-training-data', action='store_true', default=False,
+                    help='save the 6 training tensors (input/output: train,validation,test)')
 parser.add_argument('--seed', type=int, default=42, metavar='S',
                     help='random seed (default: 42)')
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
@@ -182,7 +195,7 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
 # Unique timestamp
-args.timestamp = datetime.now().strftime("%c")
+args.timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 if (hvd.rank() == 0):
     print("Current Time: %s" % args.timestamp)
 
@@ -193,7 +206,7 @@ if (hvd.rank() == 0 and not args.cuda):
 torch.set_num_threads(args.num_threads)
 
 # Create output directories if they do not exist
-args.model_dir = args.output_dir + "/" + args.timestamp
+args.model_dir = args.output_dir + "/fp_ldos_dir_" + args.timestamp
 
 args.tb_output_dir = args.model_dir + "/tb_" + args.dataset + "_" + \
         "fp_ldos_" + str(args.nxyz) + "nxyz_" + \
@@ -215,12 +228,16 @@ if (hvd.rank() == 0):
         print("\nCreating Tensorboard output folder %s\n" % args.tb_output_dir)
         os.makedirs(args.tb_output_dir)
 
+    with open(args.model_dir + '/commandline_args.txt', 'w') as f:
+        json.dump(args.__dict__, f, indent=2)
+
+
 hvd.allreduce(torch.tensor(0), name='barrier')
 
 args.writer = SummaryWriter(args.tb_output_dir)
 
 # num_workers for multiprocessed data loading
-kwargs = {'num_workers': 2, 'pin_memory': True} if args.cuda else {}
+kwargs = {'num_workers': args.num_data_workers, 'pin_memory': True} if args.cuda else {}
 
 if (hvd.rank() == 0):
     print("Parser Arguments")
@@ -253,6 +270,9 @@ else:
 
 hvd.allreduce(torch.tensor(0), name='barrier')
 
+
+
+
 print("Rank: %d, Creating train sampler/loader" % hvd.rank())
 
 # TRAINING DATA
@@ -263,6 +283,8 @@ train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=args.batch_size, sampler=train_sampler, **kwargs)
 
 hvd.allreduce(torch.tensor(0), name='barrier')
+
+
 print("Rank: %d, Creating validation sampler/loader" % hvd.rank())
 
 # VALIDATION DATA
@@ -272,6 +294,8 @@ validation_loader = torch.utils.data.DataLoader(
     validation_dataset, batch_size=args.test_batch_size, sampler=validation_sampler, **kwargs)
 
 hvd.allreduce(torch.tensor(0), name='barrier')
+
+
 print("Rank: %d, Creating test sampler/loader" % hvd.rank())
 
 # TESTING DATA
@@ -308,10 +332,13 @@ if args.cuda:
 #exit(0);
 
 # Horovod: scale learning rate by the number of GPUs.
-optimizer = optim.SGD(model.parameters(), lr=args.lr * hvd.size(),
-                      momentum=args.momentum, nesterov=True)
 
-#optimizer = optim.Adam(model.parameters(), lr=args.lr * hvd.size())
+if (args.adam):
+    optimizer = optim.Adam(model.parameters(), lr=args.lr * hvd.size())
+
+else:
+    optimizer = optim.SGD(model.parameters(), lr=args.lr * hvd.size(),
+                          momentum=args.momentum, nesterov=True)
 
 # Horovod: broadcast parameters & optimizer state.
 hvd.broadcast_parameters(model.state_dict(), root_rank=0)
