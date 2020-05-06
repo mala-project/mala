@@ -17,6 +17,10 @@ parser.add_argument('--temp', type=str, default="298K", metavar='T',
                     help='temperature of snapshot to train on (default: "298K")')
 parser.add_argument('--gcc', type=str, default="2.699", metavar='GCC',
                     help='density of snapshot to train on (default: "2.699")')
+parser.add_argument('--elvls', type=int, default=250, metavar='ELVLS',
+                    help='number of ldos energy levels (default: 250)')
+parser.add_argument('--nxyz', type=int, default=200, metavar='GCC',
+                    help='number of x/y/z elements (default: 200)')
 parser.add_argument('--snapshot', type=int, default=2, metavar='N',
                     help='snapshot of temp/gcc pair to compare (default: 2)')
 parser.add_argument('--num-slices', type=int, default=4, metavar='N',
@@ -48,7 +52,7 @@ print("\n\nBegin Prediction/True LDOS comparisons\n\n")
 
 # Conversion factor from Rydberg to eV
 Ry2eV = ldos_calc.get_Ry2eV()
-ar_en = ldos_calc.get_energies(args.temp, args.gcc)
+ar_en = ldos_calc.get_energies(args.temp, args.gcc, args.elvls)
 
 
 args.output_dirs = glob(args.pred_dir + "/*/")
@@ -61,14 +65,24 @@ for idx, current_dir in enumerate(args.output_dirs):
 #exit(0)
 
 # "True" LDOS values
-true_snp = np.load(args.ldos_dir + "/%s/%sgcc/ldos_200x200x200grid_128elvls_snapshot%d.npy" % (args.temp, args.gcc, args.snapshot))
+true_snp = np.load(args.ldos_dir + "/%s/%sgcc/Al_ldos_%dx%dx%dgrid_%delvls_snapshot%d.npy" % \
+        (args.temp, args.gcc, args.nxyz, args.nxyz, args.nxyz, args.elvls, args.snapshot))
 
 for idx, current_dir in enumerate(args.output_dirs):
 
     print("\n\nGenerating comparison %d from output_dir: %s" % (idx, current_dir))
 
+    if (not os.path.exists(current_dir + "fp_ldos_predictions.npy")):
+        print("Skipped!")
+        continue;
+
     # ML Predictions
     pred_snp = np.load(current_dir + "fp_ldos_predictions.npy")
+
+    if (pred_snp.shape[1] != args.elvls):
+        print("Skipped!")
+        continue;
+
 
     factor_fname = glob(current_dir + "ldos_*.npy")
 
@@ -84,17 +98,17 @@ for idx, current_dir in enumerate(args.output_dirs):
 
     if (row_norms):
         if(minmax_norms):
-            for row, (minv, maxv) in enumerate(ldos_factors):
+            for row, (minv, maxv) in enumerate(np.transpose(ldos_factors)):
                 pred_snp[row, :] = (pred_snp[row, :] * (maxv - minv)) + minv
         else:
-            for row, (meanv, stdv) in enumerate(ldos_factors):
+            for row, (meanv, stdv) in enumerate(np.transpose(ldos_factors)):
                 pred_snp[row, :] = (pred_snp[row, :] * stdv) + meanv
     else:
         if(minmax_norms):
-            for row, (minv, maxv) in enumerate(ldos_factors):
+            for row, (minv, maxv) in enumerate(np.transpose(ldos_factors)):
                 pred_snp = (pred_snp * (maxv - minv)) + minv
         else:
-            for row, (meanv, stdv) in enumerate(ldos_factors):
+            for row, (meanv, stdv) in enumerate(np.transpose(ldos_factors)):
                 pred_snp = (pred_snp * stdv) + meanv
 
     pred_snp = np.reshape(pred_snp, true_snp.shape)
@@ -142,8 +156,8 @@ for idx, current_dir in enumerate(args.output_dirs):
         pred_dos = pred_dos / Ry2eV
         true_dos = true_dos / Ry2eV
 
-        pred_be = pred_be / (Ry2eV ** 2)
-        true_be = true_be / (Ry2eV ** 2)
+        pred_be = pred_be / (Ry2eV)
+        true_be = true_be / (Ry2eV)
 
     # Error Results
     print("\nPred/True Density Min: %f, %f" % (np.min(pred_density), np.min(true_density)))
@@ -183,7 +197,7 @@ for idx, current_dir in enumerate(args.output_dirs):
     ax1.set_xlabel("Energy (eV)")
     ax1.set_ylabel("Error")
 
-    plt.savefig(args.output_dir + "/pred_true_dos%d.png" % idx)
+    plt.savefig(args.output_dir + "/pred_true_dos%d.eps" % idx, format='eps')
 
     print("\nDOS plot created")
 
@@ -209,22 +223,24 @@ for idx, current_dir in enumerate(args.output_dirs):
         xgrid = np.linspace(0, true_snp.shape[0], true_snp.shape[0]) * gs
         ygrid = np.linspace(0, true_snp.shape[1], true_snp.shape[1]) * gs
 
-        density_slice = pred_density[:,:,z_slices[i]] - true_density[:,:,z_slices[i]] 
+        density_slice = np.abs(pred_density[:,:,z_slices[i]] - true_density[:,:,z_slices[i]])
 
         if (args.log):
             density_slice = np.log(density_slice)
 
-        ax[i].contourf(xgrid, ygrid, density_slice, cmap="seismic")
+        im = ax[i].contourf(xgrid, ygrid, density_slice, cmap="seismic")
         ax[i].set_title("Absolute Density Error Z-Slice at %3.1f" % (z_slices[i] * gs))
+
+        cbar = fig.colorbar(im, ax=ax[i])
 
     #plt.tight_layout()
 
     if (args.log):
-        density_fname = "/pred_true_error_density_log%d.png" % idx
+        density_fname = "/pred_true_error_density_log%d.eps" % idx
     else:
-        density_fname = "/pred_true_error_density%d.png" % idx
+        density_fname = "/pred_true_error_density%d.eps" % idx
 
-    plt.savefig(args.output_dir + density_fname)
+    plt.savefig(args.output_dir + density_fname, format='eps')
 
 
 
@@ -248,17 +264,19 @@ for idx, current_dir in enumerate(args.output_dirs):
         if (args.log):
             density_slice = np.log(density_slice)
 
-        ax[i].contourf(xgrid, ygrid, density_slice, vmin=vmin_plot, vmax=vmax_plot, cmap="seismic")
+        im = ax[i].contourf(xgrid, ygrid, density_slice, vmin=vmin_plot, vmax=vmax_plot, cmap="seismic")
         ax[i].set_title("Pred Density Z-Slice at %3.1f" % (z_slices[i] * gs))
+
+        cbar = fig.colorbar(im, ax=ax[i])
 
     #plt.tight_layout()
 
     if (args.log):
-        density_fname = "/pred_density_log%d.png" % idx
+        density_fname = "/pred_density_log%d.eps" % idx
     else:
-        density_fname = "/pred_density%d.png" % idx
+        density_fname = "/pred_density%d.eps" % idx
 
-    plt.savefig(args.output_dir + density_fname)
+    plt.savefig(args.output_dir + density_fname, format='eps')
 
 
 
@@ -279,17 +297,19 @@ for idx, current_dir in enumerate(args.output_dirs):
         if (args.log):
             density_slice = np.log(density_slice)
 
-        ax[i].contourf(xgrid, ygrid, density_slice, vmin=vmin_plot, vmax=vmax_plot, cmap="seismic")
+        im = ax[i].contourf(xgrid, ygrid, density_slice, vmin=vmin_plot, vmax=vmax_plot, cmap="seismic")
         ax[i].set_title("True Density Z-Slice at %3.1f" % (z_slices[i] * gs))
+
+        cbar = fig.colorbar(im, ax=ax[i])
 
     #plt.tight_layout()
 
     if (args.log):
-        density_fname = "/true_density_log%d.png" % idx
+        density_fname = "/true_density_log%d.eps" % idx
     else:
-        density_fname = "/true_density%d.png" % idx    
+        density_fname = "/true_density%d.eps" % idx    
 
-    plt.savefig(args.output_dir + density_fname)
+    plt.savefig(args.output_dir + density_fname, format='eps')
 
     print("Density plots created")
 

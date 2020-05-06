@@ -1,5 +1,5 @@
 
-import torch
+#import torch
 import numpy as np
 
 import scipy.integrate
@@ -13,7 +13,7 @@ ldos_e_min = \
      '0.8': {'300K': -6.0},\
      '1.0': {'300K': -6.0},\
      '2.0': {'300K': -6.0},\
-     '2.699': {'298K': -6.0},\
+     '2.699': {'298K': -10.0},\
      '3.0': {'300K': -4.0},\
      '4.0': {'300K': -2.0},\
      '5.0': {'300K': -2.0},\
@@ -21,6 +21,8 @@ ldos_e_min = \
      '7.0': {'300K': 2.0},\
      '8.0': {'300K': 4.0},\
      '9.0': {'300K': 6.0}}
+
+#     '2.699': {'298K': -6.0},\
 
 ldos_e_max = \
     {'0.1': {'300K': 0.0},\
@@ -30,7 +32,7 @@ ldos_e_max = \
      '0.8': {'300K': 2.0},\
      '1.0': {'300K': 2.0},\
      '2.0': {'300K': 8.0},\
-     '2.699': {'298K': 12.0},\
+     '2.699': {'298K': 15.0},\
      '3.0': {'300K': 12.0},\
      '4.0': {'300K': 16.0},\
      '5.0': {'300K': 20.0},\
@@ -38,6 +40,8 @@ ldos_e_max = \
      '7.0': {'300K': 26.0},\
      '8.0': {'300K': 30.0},\
      '9.0': {'300K': 34.0}}
+
+#     '2.699': {'298K': 12.0},\
 
 #ldos_e_lvls = 128
 
@@ -49,7 +53,8 @@ ldos_e_max = \
 grid_spacing = .153049
 
 # Fermi Level (2.699gcc/298K)
-fermi_energy = 7.770345
+#fermi_energy = 7.770345
+fermi_energy = 7.7967
 
 # Boltzmann's constant
 #k = 1.0
@@ -80,7 +85,7 @@ def get_grid_spacing():
 def get_k():
     return k
 
-def get_energies(temp, gcc, e_lvls=128):
+def get_energies(temp, gcc, e_lvls=250):
     
     e_min = get_e_min(temp, gcc)
     e_max = get_e_max(temp, gcc)
@@ -163,19 +168,55 @@ def ldos_to_density(ldos_vals, temp, gcc, simple=False):
 
     return dens_vals
 
+
+# Local Density -> Electron Num
+def density_to_electron_number(dens_vals, temp, gcc, simple=False):
+    
+    # Density should be shape (NX, NY, NZ, 1)
+
+    # Integrate X
+    dens_vals = integrate_vals_spacing(dens_vals, grid_spacing, axis=0, simple=simple)
+
+    # Integrate Y
+    dens_vals = integrate_vals_spacing(dens_vals, grid_spacing, axis=0, simple=simple)
+
+    # Integrate Z
+    dens_vals = integrate_vals_spacing(dens_vals, grid_spacing, axis=0, simple=simple)
+
+    return dens_vals
+
+
+# LDOS -> Local Density -> Electron Num
+def ldos_to_electron_number(all_ldos_vals, temp, gcc, simple=False):
+
+    # LDOS should be shape (NX, NY, NZ, NUM_E_LVLS)
+
+    # LDOS -> Local Density
+    density_vals = ldos_to_density(all_ldos_vals, temp, gcc, simple)
+
+    # Local Density -> Electron Num
+    electron_num = density_to_electron_number(density_vals, temp, gcc, simple)
+
+    return electron_num
+
+
 # LDOS -> DOS
 def ldos_to_dos(all_ldos_vals, temp, gcc, simple=False):
 
     # LDOS should be shape (NX, NY, NZ, NUM_E_LVLS)
 
+    # Summation for periodicity
+    all_ldos_vals = np.sum(all_ldos_vals, axis=(0,1,2)) * (grid_spacing**3)
+    
+    
     # Integrate X
-    all_ldos_vals = integrate_vals_spacing(all_ldos_vals, grid_spacing, axis=0, simple=simple)
+#    all_ldos_vals = integrate_vals_spacing(all_ldos_vals, grid_spacing, axis=0, simple=simple)
 
     # Integrate Y
-    all_ldos_vals = integrate_vals_spacing(all_ldos_vals, grid_spacing, axis=0, simple=simple)
+#    all_ldos_vals = integrate_vals_spacing(all_ldos_vals, grid_spacing, axis=0, simple=simple)
 
     # Integrate Z
-    all_ldos_vals = integrate_vals_spacing(all_ldos_vals, grid_spacing, axis=0, simple=simple)
+#    all_ldos_vals = integrate_vals_spacing(all_ldos_vals, grid_spacing, axis=0, simple=simple)
 
     return all_ldos_vals
 
