@@ -46,19 +46,51 @@ def reshape_fps(X):
         num_fps = X.shape[0]
     return X
 
-def load_and_scale_fps(config_file, scaler):
-    """Load and scale the 4D fingerprints array at config_file
-
-    If scaler is None, do not scale.
-    """
-    X = np.load(config_file)
+def scale_fps(X, scaler):
+    if scaler is None:
+        return X
     x_shape = X.shape
     X = reshape_fps(X)
-    if scaler:
-        X = scaler.transform(X)
+    X = scaler.transform(X)
     X.shape = x_shape
     return X
 
+def load_fps(config_file):
+    """Load the fingerprints amd remove coordinates"""
+    X = np.load(config_file)
+    X = X[:,:,:,3:]
+    return X
+
+def pad_fps(X, num_dims):
+    """Pad fingerprints so they can be partitioned into num_dims subspaces
+
+       Number of fingerprints must be evenly disvisible by num_dims. Insert
+       zeros to make this true for X. An attempt is made to insert an equal
+       number of extra zeros at the end of each subspace, beginning at the
+       last subspace.
+    """
+    num_initial_fps = X.shape[3]
+    zeros_needed = num_dims - num_initial_fps % num_dims
+    num_final_fps = num_initial_fps + zeros_needed
+    subspace_size = num_final_fps / num_dims
+    if zeros_needed == 0:
+        return X
+   
+    zeros_per_subspace = [0]*num_dims
+    for i in cycle(reversed(range(num_dims))):
+        zeros_per_subspace[i] += 1
+        zeros_needed -= 1
+        if zeros_needed == 0:
+            break
+    insertion_indices = [0]*num_dims 
+    index_offset = 0
+    for i in range(num_dims):
+         insertion_indices[i] = int((i+1)*subspace_size - zeros_per_subspace[i] - index_offset)
+         index_offset += zeros_per_subspace[i]
+    for i, num_zeros in zip(reversed(insertion_indices), reversed(zeros_per_subspace)):
+        X = np.insert(X, [i]*num_zeros, np.array([0.0]*num_zeros), axis=3)
+    return X
+ 
 def pq_encode(X_in, codebook_size, dimensions,training_fraction):
     """Construct and return a PQk-means encoder
 
@@ -238,7 +270,8 @@ def main(input_file):
             scaler = StandardScaler(copy=False)
             for config in configs:
                 config_file = os.path.join(config_root,config)
-                X = np.load(config_file)
+                X = load_fps(config_file)
+                X = pad_fps(X, options["dimensions"])
                 X = reshape_fps(X)
                 scaler.partial_fit(X)
                 del X
@@ -254,11 +287,13 @@ def main(input_file):
     log("Beginning Phase 1.")
     for config in configs[mpi_rank::mpi_size]:
         config_file = os.path.join(config_root,config)
-        X = load_and_scale_fps(config_file, scaler)
+        X = load_fps(config_file)
+        X = pad_fps(X, options["dimensions"])
+        X = scale_fps(X, scaler)
         if p1_opts["Cluster method"] == "pqkmeans":
             log("Encoding config %s" % config,"all")
             encoder = pq_encode(X, p1_opts["codebook size"],
-                                 p1_opts["dimensions"],
+                                 options["dimensions"],
                                  p1_opts["training fraction"])
             clusters, _ = pq_cluster(X, encoder, p1_opts["clusters"])
             log("Clustering config %s" % config,"all")
@@ -270,9 +305,6 @@ def main(input_file):
         write_samples(clusters, X, p1_opts["samples"],
                       configs.index(config), options["workspace"])
         del X, clusters
-        #
-        # clusters = pqkmeans.clustering.PQKMeans(
-        #    encoder=encoder, k=p1_opts["clusters"]).fit_predict(pqcodes)
     mpi_comm.Barrier()
     log("Phase 1 Complete. Beginning Phase 2.")
     
@@ -281,9 +313,9 @@ def main(input_file):
     if mpi_rank == 0:
         samples = load_samples(options["workspace"])
         encoder = pq_encode(samples, p2_opts["codebook size"],
-                             p2_opts["dimensions"],1.0)
+                             options["dimensions"],1.0)
         log("Phase 2 encoder trained.")
-        write_codewords(encoder, options["output"])
+        write_codewords(encoder, scaler, options["output"])
         del samples
         mpi_comm.bcast(encoder, root=0)
     else:
@@ -293,7 +325,9 @@ def main(input_file):
     for i, config in enumerate(configs[mpi_rank::mpi_size]):
         log("Clustering config %s" % config, "all")
         config_file = os.path.join(config_root,config)
-        X = load_and_scale_fps(config_file, scaler)
+        X = load_fps(config_file)
+        X = pad_fps(X, options["dimensions"])
+        X = scale_fps(X, scaler)
         clusters, cluster_centers = pq_cluster(X, encoder, p2_opts["clusters"])
         write_clusters(clusters, cluster_centers, configs.index(config),
                         options["output"])
