@@ -2,19 +2,17 @@ configuration root: /scratch/jasteph/cluster_fingerprints/fp_data/
 configurations:
   - 300K-gcc0.6.npy
   - 300K-gcc1.0.npy
-  - 300K-gcc3.0.npy
 Scale: y
 workspace: /scratch/jasteph/cluster_fingerprints/workspace
 output: /scratch/jasteph/cluster_fingerprints/output
+dimensions: 4
 phase one:
   clusters: 64
   codebook size: 256
-  dimensions: 4
   samples: 160000
   training fraction: 0.25
   Cluster method: pqkmeans
 phase two:
   clusters: 64
   codebook size: 256
-  dimensions: 4
   Mismatch test score: 0.01
