@@ -554,15 +554,23 @@ def scale_data(args, data_name, \
         train_min = np.min(data_train)
         validation_min = np.min(data_validation)
         test_min = np.min(data_test)
+        
+        log_shift = np.array([1e-8])
 
-        if (train_min < 0 or validation_min < 0 or test_min < 0):
+        train_min += log_shift
+        validation_min += log_shift
+        test_min += log_shift
+
+        if (train_min <= 0.0 or validation_min <= 0.0 or test_min <= 0.0):
             if (hvd.rank() == 0):
-                print("\nApplying the log fn to %s fails because there are values < 0. Exiting.\n\n" % data_name)
+                print("\nApplying the log fn to %s fails because there are values <= 0. Exiting.\n\n" % data_name)
             exit(0);
 
-        data_train      = np.log(data_train)
-        data_validation = np.log(data_validation)
-        data_test       = np.log(data_test)
+        np.save(args.model_dir + "/log_shift", log_shift)
+
+        data_train      = np.log(data_train + log_shift)
+        data_validation = np.log(data_validation + log_shift)
+        data_test       = np.log(data_test + log_shift)
         
     # Row vs total scaling
     if (row_scaling and (norm_scaling or standard_scaling)):
