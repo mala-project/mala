@@ -16,29 +16,36 @@ parser = argparse.ArgumentParser(description='LDOS Parser')
 # Targets
 parser.add_argument('--water', action='store_true', default=False,
                             help='run ldos parser for water files')
-parser.add_argument('--run-all', action='store_true', default=False,
-                            help='run ldos parser for all densities and temperatures')
+#parser.add_argument('--run-all', action='store_true', default=False,
+#                            help='run ldos parser for all densities and temperatures')
 parser.add_argument('--density', action='store_true', default=False,
                             help='run density parser for each density and temperature, also')
 
 # Dimensions
 parser.add_argument('--nxyz', type=int, default=200, metavar='N',
                             help='number of grid cells in the X/Y/Z dimensions (default: 200)')
-parser.add_argument('--elvls', type=int, default=128, metavar='E',
-                            help='the number of energy levels in the LDOS (for density only e=1) (default: 128)')
+parser.add_argument('--elvls', type=int, default=250, metavar='E',
+                            help='the number of energy levels in the LDOS (for density only e=1) (default: 250)')
 
 # Directories
-parser.add_argument('--temp', type=str, default="300K", metavar='T',
-                            help='temperature of ldos parser in units K (default: 300K)')
-parser.add_argument('--gcc', type=str, default="2.0", metavar='GCC',
-                            help='density of ldos parser in units g/cm^3 (default: "2.0")')
+parser.add_argument('--material', type=str, default="Al", metavar='T',
+                            help='material of ldos parser (default: "Al")')
+parser.add_argument('--temp', type=str, default="298K", metavar='T',
+                            help='temperature of ldos parser in units K (default: 298K)')
+parser.add_argument('--gcc', type=str, default="2.699", metavar='GCC',
+                            help='density of ldos parser in units g/cm^3 (default: "2.699")')
 parser.add_argument('--snapshot', type=str, default="0", metavar='T',
                             help='snapshot for ldos parser (default: 0)')
+parser.add_argument('--cube-fname-head', type=str, default="/tmp.pp", metavar='H',
+                            help='head of the ldos cube filenames (default: "/tmp.pp")')
+parser.add_argument('--cube-fname-tail', type=str, default="_ldos.cube", metavar='T',
+                            help='tail of the ldos cube filenames (default: "_ldos.cube")')
+parser.add_argument('--density-cube-fname', type=str, default="Al_dens.cube", metavar='C',
+                            help='density cube filenames (default: "Al_dens.cube")')
 
 parser.add_argument('--data-dir', type=str, \
-#        default="/ascldap/users/acangi/q-e_calcs/Al/datasets/RoomTemp/300K/N108/mass-density_highFFTres_e128", \
-        default="/ascldap/users/acangi/q-e_calcs/Al/datasets/vasp_econ_snapshots", \
-        metavar="str", help='path to data directory (default: Attila Al N108 directory)')
+        default="./cube_files", \
+        metavar="str", help='path to data directory (default: "./cube_files")')
 
 parser.add_argument('--output-dir', type=str, default="../../ldos_data",
         metavar="str", help='path to output directory (default: ../ldos_data)')
@@ -63,46 +70,17 @@ if (args.water):
     cube_filename_head = "w64_"
     cube_filename_tail = "-ELECTRON_DENSITY-1_0.cube"
 
-    # xyz grid
-    xdim = args.nxyz
-    ydim = xdim
-    zdim = ydim
 
     # only doing density: 1 level
     e_lvls = args.elvls
 
 else:
-    # Density gram per cubic centimeter grid
-   
-    if (not args.run_all):
-        temp_grid = np.array([args.temp])
-        gcc_grid = np.array([args.gcc])
-        snapshot_grid = np.array([args.snapshot])
-    else: 
-        
-        # Currently available
-        temp_grid = np.array(["300K"])
-        # Future
-#        temp_grid = np.array(["300K", "10000K", "20000K", "30000K"])
-        
-        # Currently available
-        gcc_grid = np.array(["0.4", "0.6", "0.8", "1.0", "2.0", "3.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"])
-        # Future
-#        gcc_grid = np.array(["0.1", "0.2", "0.4", "0.6", "0.8", "1.0", "2.0", "3.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"])
-        # Test
-#        gcc_grid = np.array(["0.4", "0.6"])
+  
+    # 1 snapshot per parse_ldos call, for now
+    temp_grid = np.array([args.temp])
+    gcc_grid = np.array([args.gcc])
+    snapshot_grid = np.array([args.snapshot])
 
-    # Head and tail of LDOS filenames
-#    cube_filename_head = "Al_ldos_"
-    cube_filename_head = "/170726180545.%s/100Ry_k333/Al_ldos_" % args.snapshot
-    cube_filename_tail = ".cube"
-
-    dens_filename = "Al_dens.cube"
-
-    # xyz grid
-    xdim = args.nxyz
-    ydim = xdim
-    zdim = ydim
 
     # Energy levels for LDOS
     e_lvls = args.elvls
@@ -114,11 +92,11 @@ if not os.path.exists(args.output_dir):
     os.makedirs(args.output_dir)
 
 # Output filename head
-npy_filename_head = "/ldos_"
-npy_filename_head_dens = "/dens_"
+npy_filename_head = "/%s_ldos_" % args.material
+npy_filename_head_dens = "/%s_dens_" % args.material
 
-xyze_shape = [xdim, ydim, zdim, e_lvls]
-dens_shape = [xdim, ydim, zdim]
+xyze_shape = [args.nxyz, args.nxyz, args.nxyz, args.elvls]
+dens_shape = [args.nxyz, args.nxyz, args.nxyz]
 
 tot_tic = timeit.default_timer()
 
@@ -140,12 +118,13 @@ for temp in temp_grid:
         temp_dir =  args.output_dir + "/%s" % (temp)
         gcc_dir = temp_dir + "/%sgcc" % (gcc)
 
-        out_filename = gcc_dir + npy_filename_head + "%dx%dx%dgrid_%delvls_snapshot%s" % (xdim, ydim, zdim, e_lvls, args.snapshot) 
+        out_filename = gcc_dir + npy_filename_head + "%dx%dx%dgrid_%delvls_snapshot%s" % \
+                (args.nxyz, args.nxyz, args.nxyz, args.elvls, args.snapshot) 
 
         if (args.water):
             out_filename = args.data_dir + cube_filename_head + gcc + cube_filename_tail + "_pkl"
         else:
-            # Make Temp directory
+            # Make Temperature directory
             if not os.path.exists(temp_dir):
                 print("\nCreating folder %s" % temp_dir)
                 os.makedirs(temp_dir)
@@ -155,14 +134,17 @@ for temp in temp_grid:
                 os.makedirs(gcc_dir)
 
         # Allocate space
-        ldos_gcc = np.empty(xyze_shape)
+        ldos = np.empty(xyze_shape)
 
         # Loop over energy grid
         # separate cube file for each ldos 
         for e in range(e_lvls):
 #            infile_name = args.data_dir + "/%sgcc/" % (gcc) + \
-            infile_name = args.data_dir + "/%s" % temp + "/%sg/" % (gcc) + \
-                          cube_filename_head + "%d" % (e) + cube_filename_tail
+#            infile_name = args.data_dir + "/%s" % temp + "/%sg/" % (gcc) + \
+#                          cube_fname_head + "%d" % (e) + cube_fname_tail
+
+            infile_name = args.data_dir + args.cube_fname_head + \
+                    str(e + 1).zfill(len(str(e_lvls))) + args.cube_fname_tail
 
             if (args.water):
                 infile_name = args.data_dir + cube_filename_head + gcc + cube_filename_tail  
@@ -170,16 +152,17 @@ for temp in temp_grid:
             print("\nLoading data from %s" % infile_name)
 
             # load into numpy array (ignore metadata w/ '_')
-            ldos_gcc[:,:,:,e], _ = cube_parser.read_cube(infile_name)
+            ldos[:,:,:,e], _ = cube_parser.read_cube(infile_name)
+
 
         # Save numpy array to binary file
-
         print("Saving LDOS to %s" % (out_filename))
-        np.save(out_filename, ldos_gcc, allow_pickle=True)
-       
+        np.save(out_filename, ldos, allow_pickle=True)
+
+
         # If parsing density, as well
         if (args.density):
-            infile_name = args.data_dir + "/%sgcc/" % (gcc) + dens_filename
+            infile_name = args.data_dir + "/%sgcc/" % (gcc) + args.density_cube_fname 
             outfile_name = args.output_dir + npy_filename_head_dens + "%dx%dx%dgrid" % (xdim, ydim, zdim)
 
             print("\nLoading data from %s" % infile_name)
