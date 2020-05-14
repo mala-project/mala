@@ -40,18 +40,18 @@ parser.add_argument('--atom-based', action='store_true', default=False,
                             help='run lammps fingerprints for atoms instead of grid files')
 parser.add_argument('--run-all', action='store_true', default=False,
                             help='run ldos parser for all densities and temperatures')
-parser.add_argument('--temp', type=str, default="300K", metavar='S',
-                            help='temperature of fingerprint in units K (default: "300K")')
-parser.add_argument('--gcc', type=str, default="2.0", metavar='S',
-                            help='density of fingerprint in units in g/cm^3 (default: "2.0")')
+parser.add_argument('--temp', type=str, default="298K", metavar='S',
+                            help='temperature of fingerprint in units K (default: "298K")')
+parser.add_argument('--gcc', type=str, default="2.699", metavar='S',
+                            help='density of fingerprint in units in g/cm^3 (default: "2.699")')
 parser.add_argument('--snapshot', type=str, default="0", metavar='S',
                             help='snapshot number at given gcc/temp (default: "0")')
 parser.add_argument('--nxyz', type=int, default=20, metavar='N',
                             help='number of grid cells in the X/Y/Z dimensions (default: 20)')
 parser.add_argument('--rcutfac', type=float, default=4.67637, metavar='R',
                             help='radius cutoff factor for the fingerprint sphere in Angstroms (default: 4.67637)')
-parser.add_argument('--twojmax', type=int, default=11, metavar='N',
-                            help='band limit for fingerprints (default: 11)')
+parser.add_argument('--twojmax', type=int, default=10, metavar='N',
+                            help='band limit for fingerprints (default: 10)')
 parser.add_argument('--no-qe', action='store_true', default=False,
                             help='use LAMMPS input file directly (default: False)')
 
