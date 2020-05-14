@@ -52,6 +52,9 @@ parser.add_argument('--rcutfac', type=float, default=4.67637, metavar='R',
                             help='radius cutoff factor for the fingerprint sphere in Angstroms (default: 4.67637)')
 parser.add_argument('--twojmax', type=int, default=11, metavar='N',
                             help='band limit for fingerprints (default: 11)')
+parser.add_argument('--no-qe', action='store_true', default=False,
+                            help='use LAMMPS input file directly (default: False)')
+
 parser.add_argument('--data-dir', type=str, \
                 default="../../fp_data", \
                 metavar="str", help='path to data directory with QE output files (default: ../../fp_data)')
@@ -80,16 +83,17 @@ if (args.water):
 
     #args.atom_based = True
 
-if (args.run_all):
+elif (args.run_all):
 
     # Currently available
-    temp_grid = np.array(["300K"])
+    temp_grid = np.array(["298K"])
     # Future
 #    temp_grid = np.array(["300K", "10000K", "20000K", "30000K"])
 
 
     # Currently available
-    gcc_grid = np.array(["0.4", "0.6", "0.8", "1.0", "2.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"])
+    gcc_grid = np.array(["2.699"])
+#    gcc_grid = np.array(["0.4", "0.6", "0.8", "1.0", "2.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"])
     
     # Future
     # Missing gcc = [0.1, 0.2] QE out file
@@ -110,13 +114,24 @@ qe_fname = "QE_Al.scf.pw.snapshot%s.out" % args.snapshot
 lammps_fname = "Al.scf.pw.snapshot%s.lammps" % args.snapshot
 log_fname = "lammps_fp_snapshot%s.log" % args.snapshot  
 
+
+# First 3 cols are x, y, z, coords
+
+ncols0 = 3 
+
+# Analytical relation for fingerprint length
+ncoeff = (args.twojmax+2)*(args.twojmax+3)*(args.twojmax+4)
+ncoeff = ncoeff // 24 # integer division
+fp_length = ncols0 + ncoeff
+
+
 if (args.water):
     qe_format = "cube"
-    np_fname = "water_fingerprint_snapshot%s" % args.snapshot
+    np_fname = "water_fp_%dx%dx%dgrid_%dcomps_snapshot%s" % args.snapshot
     lammps_compute_grid_fname = "./in.bgrid.twoelements.python"
 else:
     qe_format = "espresso-out"
-    np_fname = "Al_fingerprint_snapshot%s" % args.snapshot
+    np_fname = "Al_fp_%dx%dx%dgrid_%dcomps_snapshot%s" % (args.nxyz, args.nxyz, args.nxyz, fp_length, args.snapshot)
     lammps_compute_grid_fname = "./in.bgrid.python"
 
 lammps_format = "lammps-data"
@@ -164,11 +179,18 @@ for temp in temp_grid:
             qe_filepath = gcc_dir + qe_fname
             lammps_filepath = gcc_dir + lammps_fname
     
-        if not os.path.exists(qe_filepath):
+        if (args.no_qe):
+            print("Skipping QE conversion. Reading LAMMPS input directly.")
+        elif not os.path.exists(qe_filepath):
             print("\n\nQE out file %s does not exist! Exiting.\n\n" % (qe_filepath))
             exit(0)
-
-        if not os.path.exists(lammps_filepath):
+        
+        if (args.no_qe):
+            if (not os.path.exists(lammps_filepath)):
+                print("\n\nLAMMPS file %s does not exist! Exiting.\n\n" % (lammps_filepath))
+                exit(0)
+            
+        elif (not os.path.exists(lammps_filepath) and not args.no_qe):
         
             if (rank == 0):
                 print("\nConverting %sgcc file %s to %s!" % (gcc, qe_filepath, lammps_filepath), flush=True)
@@ -217,17 +239,7 @@ for temp in temp_grid:
         num_atoms = lmp.get_natoms() 
 
         if (rank == 0):
-            print("NUM_ATOMS: %d" % (num_atoms), flush=True)
-
-        # Set things not accessible from LAMMPS
-        # First 3 cols are x, y, z, coords
-
-        ncols0 = 3 
-
-        # Analytical relation for fingerprint length
-        ncoeff = (args.twojmax+2)*(args.twojmax+3)*(args.twojmax+4)
-        ncoeff = ncoeff // 24 # integer division
-        fp_length = ncols0+ncoeff
+            print("TEST, NUM_ATOMS: %d" % (num_atoms), flush=True)
 
         # Extract numpy array pointing to sna/atom array
 
