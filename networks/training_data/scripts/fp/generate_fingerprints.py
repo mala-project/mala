@@ -112,7 +112,8 @@ echo_to_screen = False
 
 qe_fname = "QE_Al.scf.pw.snapshot%s.out" % args.snapshot
 lammps_fname = "Al.scf.pw.snapshot%s.lammps" % args.snapshot
-log_fname = "lammps_fp_snapshot%s.log" % args.snapshot  
+log_fname = "lammps_fp_%dx%dx%dgrid_%dtwojmax_snapshot%s.log" % \
+        (args.nxyz, args.nxyz, args.nxyz, args.twojmax, args.snapshot) 
 
 
 # First 3 cols are x, y, z, coords
