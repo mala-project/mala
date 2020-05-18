@@ -173,6 +173,9 @@ class Big_Dataset(torch.utils.data.Dataset):
 #
 #    def __init__(self, args, data_name, fp_data, ldos_data):
 #
+#        if (hvd.rank() == 0):
+#            print("Creating Big Compressed Dataset:")
+#
 #        self.args = args
 #        self.sample = 0
 #       
@@ -372,18 +375,21 @@ def load_data_fp_ldos(args):
     fp_idxs = subset_fp(args)
 
     if (hvd.rank() == 0):
-        print("Subsetting FP dataset")        
+        print("Subsetting FP dataset")
+        print("FP_idxs: ", fp_idxs)
 
     full_train_fp_np = full_train_fp_np[:, :, :, :, fp_idxs]
     validation_fp_np = validation_fp_np[:, :, :, fp_idxs]
     test_fp_np = test_fp_np[:, :, :, fp_idxs]
 
+
     # Pick subset of LDOS vector that the user requested
     ldos_idxs = subset_ldos(args)
 
     if (hvd.rank() == 0):
-        print("Subsetting LDOS dataset")        
-    
+        print("Subsetting LDOS dataset")    
+        print("LDOS_idxs: ", ldos_idxs)
+        
     full_train_ldos_np = full_train_ldos_np[:, :, :, :, ldos_idxs]
     validation_ldos_np = validation_ldos_np[:, :, :, ldos_idxs]
     test_ldos_np = test_ldos_np[:, :, :, ldos_idxs]
@@ -395,13 +401,16 @@ def load_data_fp_ldos(args):
     fp_pts = fp_shape[0] * fp_shape[1] * fp_shape[2]
     ldos_pts = ldos_shape[0] * ldos_shape[1] * ldos_shape[2]
 
+    # Grid inconsistent
     if (fp_pts != ldos_pts):
         print("\n\nError in num grid points: fp_pts %d and ldos_pts %d\n\n" % (fp_pts, ldos_pts));
         exit(0);
 
-    if (ldos_shape[3] == 1 and args.lstm_network and not args.no_bidirection):
+    # Bidirection with density prediction
+    if (ldos_shape[3] == 1 and (args.model_lstm_network and not args.no_bidirection)):
         print("\n\nError cannot use bidirectional LSTM when predicting densities. Please use unidirectional LSTM or Feedforward only. Exiting.\n\n")
         exit(0);
+
 
     args.grid_pts = fp_pts
 
@@ -412,6 +421,7 @@ def load_data_fp_ldos(args):
     # Vector lengths
     args.fp_length = fp_shape[3]
     args.ldos_length = ldos_shape[3]
+
    
     if (hvd.rank() == 0):
         print("Grid_pts %d" % args.grid_pts)

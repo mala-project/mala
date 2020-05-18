@@ -13,8 +13,8 @@ then
     echo "$1 GPUS"
     GPUS=$1
 else
-    echo "Default 2 GPUs"
-    GPUS=2
+    echo "Default 3 GPUs"
+    GPUS=3
 fi
 
 
@@ -23,40 +23,59 @@ fi
 #DS=random
 DS=fp_ldos
 
-NXYZ=200
-TMP=298K
-GC=2.699
+MAT=H2O
+NXYZ=75
+TMP=300K
+GC=1.0
 
-FPL=94
-
-#LDOSL=128
-LDOSL=250
+FPL=17
+LDOSL=1
 
 #SSHOT=5
-SSHOT=3
+SSHOT=1
 
 
 
 
 ### Optimizer/Training
 
-EPCS=250
+#EPCS=250
 #EPCS=100
-#EPCS=1
+EPCS=1
 
-TBS=4000
-#BATS="16 32 64"
-BATS="4000"
 
+# Test Batch Size (TBS) and Training Batch Size (BS) 
+# GPUS * BS must evenly divide NUM_GRIDPTS = 75^3 = 41875
+TBS=3125
+BS=3125
+
+
+# Learning rates
 #LRS=".0005 .0001 .00005 .00001"
-LR=.0001
+#LRS=".0001 .00005 .00001"
+LRS=".0001" 
+
+# Necessary reduction in validation loss 
+# (must be less that best_loss * ${ES})
 ES=.99999
+
+# After 8 consecutive failures end training.
 EP=8
+
+# After 4 consecutive failures reduce learning rate by factor of 10
 OP=4
 
 #LSTMIL="1 2 4 8"
-LIL=1
 
+
+# Last output layer size multiple.
+# I.E. if output size = 1 (density-case)
+# then next to last layer is size ${LIL}
+# if ouptut size = 250 (ldos-case)
+# then next to last layer is size ${LIL} * 250
+LIL=50
+
+# Asynch GPU data-loading
 NUMW=2
 
 # Network
@@ -69,11 +88,12 @@ AE=.8
 #   --skip-connection \
 
 
-for BS in $BATS
+for LR in $LRS
 do
 
     ${EXE} -np ${GPUS} ${PYT} ${DRVR} \
         --dataset ${DS} \
+        --material ${MAT} \
         --epochs ${EPCS} \
         --adam \
         --nxyz ${NXYZ} \
@@ -98,8 +118,8 @@ do
         --fp-row-scaling \
         --fp-standard-scaling \
         --ldos-norm-scaling \
-        --ldos-log \
-        2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TMP}_${GC}gcc_${FPL}fp_${LDOSL}ldos_${NXYZ}nxyz_${RANDOM}${RANDOM}.log
+        --ldos-max-only \
+        2>&1 | tee ./logs/fp_ldos_synapse_${MAT}_${GPUS}gpus_${TMP}_${GC}gcc_${FPL}fp_${LDOSL}ldos_${NXYZ}nxyz_${RANDOM}${RANDOM}.log
 
 done
 

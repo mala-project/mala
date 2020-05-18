@@ -12,7 +12,7 @@ import horovod.torch as hvd
 
 sys.path.append("../utils/")
 
-import ldos_calc
+#import ldos_calc
 
 ###-----------------------------------------------------------------------###
 
