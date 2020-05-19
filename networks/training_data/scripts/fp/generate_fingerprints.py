@@ -73,8 +73,12 @@ if (args.water):
     #args.data_dir = '/ascldap/users/jracker/water64cp2k/datast_1593/results/'
 
     temp_grid = np.array([args.temp])
-    gcc_grid = np.array(['aaaa'])
-    #gcc_grid = [''.join(i) for i in itertools.product("abcdefghijklmnopqrstuvwxyz",repeat=4)][:1593]
+    #gcc_grid = np.array(['aaaa'])
+    gcc_grid = np.array([args.gcc])
+
+    if args.run_all:
+        gcc_grid = [''.join(i) for i in itertools.product("abcdefghijklmnopqrstuvwxyz",repeat=4)][:1593]
+    
     snapshot_grid = np.array([args.snapshot])
 
     cube_filename_head = "w64_"
@@ -128,7 +132,7 @@ fp_length = ncols0 + ncoeff
 
 if (args.water):
     qe_format = "cube"
-    np_fname = "water_fp_%dx%dx%dgrid_%dcomps_snapshot%s" % args.snapshot
+    np_fname = "water_fp_%dx%dx%dgrid_%dcomps_snapshot%s" % (args.nxyz, args.nxyz, args.nxyz, fp_length, args.snapshot)
     lammps_compute_grid_fname = "./in.bgrid.twoelements.python"
 else:
     qe_format = "espresso-out"
@@ -262,17 +266,20 @@ for temp in temp_grid:
             print("bptr_np shape = ",bptr_np.shape, flush=True)
 
         # Output location
-        temp_dir = args.output_dir + "/%s" % temp
-        gcc_dir = temp_dir + "/%sgcc/" % gcc 
+        if (args.water):
+            gcc_dir = args.output_dir + gcc + "_"
+        else:
+            temp_dir = args.output_dir + "/%s" % temp
+            gcc_dir = temp_dir + "/%sgcc/" % gcc 
 
-        # Make Temp directory
-        if not os.path.exists(temp_dir):
-            print("\nCreating output folder %s" % temp_dir)
-            os.makedirs(temp_dir)
-        # Make Density directory
-        if not os.path.exists(gcc_dir):
-            print("\nCreating output folder %s" % gcc_dir)
-            os.makedirs(gcc_dir)
+            # Make Temp directory
+            if not os.path.exists(temp_dir):
+                print("\nCreating output folder %s" % temp_dir)
+                os.makedirs(temp_dir)
+            # Make Density directory
+            if not os.path.exists(gcc_dir):
+                print("\nCreating output folder %s" % gcc_dir)
+                os.makedirs(gcc_dir)
 
         fingerprint_filepath = gcc_dir + np_fname
         # Save LAMMPS numpy array as binary 
