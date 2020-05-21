@@ -36,6 +36,12 @@ ${PIP} install mpi4py
 # Atomic Simulation Environment
 ${PIP} install ase
 
+# Numeric Tools
+${PIP} install sklearn
+${PIP} install mpmath
+
+
+
 
 # Use TF
 #${PIP} install keras=2.2.5

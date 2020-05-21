@@ -398,17 +398,17 @@ for epoch in range(1, args.epochs + 1):
     # Early Stopping 
     validate_loss = trainer.validate()
 
-    validate_loss = hvd.allreduce(torch.tensor(validate_loss), name='barrier')
+    validate_loss = hvd.allreduce(torch.tensor(validate_loss), name='validation_loss_reduction')
     
 
     if (validate_loss < prev_validate_loss * args.early_stopping):
         #if (hvd.rank() == 0):
-        print("\nValidation loss has decreased from %4.6e to %4.6e\n" % (prev_validate_loss, validate_loss))
+        print("Validation loss has decreased from %4.6e to %4.6e" % (prev_validate_loss, validate_loss))
         prev_validate_loss = validate_loss
         curr_patience = 0
     else:
         #if (hvd.rank() == 0):
-        print("\nValidation loss has NOT decreased enough! (from %4.6e to %4.6e) Patience at %d of %d\n" % \
+        print("Validation loss has NOT decreased enough! (from %4.6e to %4.6e) Patience at %d of %d" % \
             (prev_validate_loss, validate_loss, curr_patience + 1, args.early_patience))
         curr_patience += 1
         if (curr_patience >= args.early_patience):
@@ -424,7 +424,7 @@ test_loss = 0.0
 if (hvd.rank() == 0):
     test_loss = trainer.test()
 
-test_loss = hvd.allreduce(torch.tensor(test_loss), name="barrier");
+test_loss = hvd.allreduce(torch.tensor(test_loss), name="test_loss_reduction");
 
 # Global barrier
 #hvd.allreduce(torch.tensor(0), name='barrier') 
@@ -443,3 +443,8 @@ tot_toc = timeit.default_timer()
 if (hvd.rank() == 0):
     print("\nSuccess!\n")
     print("\n\nTotal train time %4.4f\n\n" % (tot_toc - tot_tic))
+
+
+hvd.allreduce(torch.tensor(0), name='barrier')
+hvd.shutdown()
+

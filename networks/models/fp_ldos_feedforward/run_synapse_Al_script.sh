@@ -5,7 +5,7 @@ EXE="horovodrun --gloo-timeout-seconds 600"
 #EXE=mpiexec
 
 PYT=python3
-DRVR=temp_fp_ldos_src.py
+DRVR=fp_ldos_driver.py
 
 
 if [ $1 ]
@@ -23,6 +23,7 @@ fi
 #DS=random
 DS=fp_ldos
 
+MAT=Al
 NXYZ=200
 TMP=298K
 GC=2.699
@@ -45,20 +46,23 @@ EPCS=250
 #EPCS=1
 
 TBS=4000
+#BATS="16 32 64"
+#BATS="4000"
 BS=4000
-#BS=4
 
-LR=.01
+#LRS=".0005 .0001 .00005 .00001"
+LRS=".0001 .00005 .00001"
 ES=.99999
 EP=8
 OP=4
 
-LIL=4
+#LSTMIL="1 2 4 8"
+LIL=1
 
 NUMW=2
 
 # Network
-WID=300
+WID=800
 MIDLYS=2
 AE=.8
 
@@ -67,18 +71,20 @@ AE=.8
 #   --skip-connection \
 
 
-for FL in $FPL
+for LR in $LRS
 do
 
     ${EXE} -np ${GPUS} ${PYT} ${DRVR} \
         --dataset ${DS} \
+        --material ${MAT} \
         --epochs ${EPCS} \
+        --adam \
         --nxyz ${NXYZ} \
         --temp ${TMP} \
         --gcc ${GC} \
         --batch-size ${BS} \
         --test-batch-size ${TBS} \
-        --fp-length ${FL} \
+        --fp-length ${FPL} \
         --ldos-length ${LDOSL} \
         --optim-patience ${OP} \
         --early-patience ${EP} \
@@ -96,7 +102,7 @@ do
         --fp-standard-scaling \
         --ldos-norm-scaling \
         --ldos-max-only \
-        2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TMP}_${GC}gcc_${FL}fp_${LDOSL}ldos_${NXYZ}nxyz_${RANDOM}${RANDOM}.log
+        2>&1 | tee ./logs/fp_ldos_synapse_${MAT}_${GPUS}gpus_${TMP}_${GC}gcc_${FPL}fp_${LDOSL}ldos_${NXYZ}nxyz_${RANDOM}${RANDOM}.log
 
 done
 
