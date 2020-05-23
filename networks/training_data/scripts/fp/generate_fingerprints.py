@@ -52,6 +52,10 @@ parser.add_argument('--rcutfac', type=float, default=4.67637, metavar='R',
                             help='radius cutoff factor for the fingerprint sphere in Angstroms (default: 4.67637)')
 parser.add_argument('--twojmax', type=int, default=10, metavar='N',
                             help='band limit for fingerprints (default: 10)')
+parser.add_argument('--switch', type=int, default=0, metavar='0/1',
+                            help='Use smooth cutoff switching function (default: 0)')
+parser.add_argument('--quadratic', type=int, default=0, metavar='0/1',
+                            help='Include quadratic SNAP descriptors (default: 0)')
 parser.add_argument('--no-qe', action='store_true', default=False,
                             help='use LAMMPS input file directly (default: False)')
 parser.add_argument('--data-dir', type=str, \
@@ -118,8 +122,8 @@ echo_to_screen = False
 
 qe_fname = "QE_Al.scf.pw.snapshot%s.out" % args.snapshot
 lammps_fname = "Al.scf.pw.snapshot%s.lammps" % args.snapshot
-log_fname = "lammps_fp_%dx%dx%dgrid_%dtwojmax_snapshot%s.log" % \
-        (args.nxyz, args.nxyz, args.nxyz, args.twojmax, args.snapshot) 
+log_fname = "lammps_fp_%dx%dx%dgrid_%dtwojmax_s%d_q%d_snapshot%s.log" % \
+        (args.nxyz, args.nxyz, args.nxyz, args.twojmax, args.switch, args.quadratic, args.snapshot) 
 
 
 # First 3 cols are x, y, z, coords
@@ -129,6 +133,8 @@ ncols0 = 3
 # Analytical relation for fingerprint length
 ncoeff = (args.twojmax+2)*(args.twojmax+3)*(args.twojmax+4)
 ncoeff = ncoeff // 24 # integer division
+if (args.quadratic):
+    ncoeff += ((ncoeff+1)*ncoeff)//2 
 fp_length = ncols0 + ncoeff
 
 
@@ -227,6 +233,8 @@ for temp in temp_grid:
             "ngridz":nz,
             "twojmax":args.twojmax,
             "rcutfac":args.rcutfac,
+            "quadratic":args.quadratic,
+            "switch":args.switch,
             "atom_config_fname":lammps_filepath
             }
         )
