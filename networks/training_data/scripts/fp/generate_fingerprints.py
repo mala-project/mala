@@ -54,12 +54,14 @@ parser.add_argument('--twojmax', type=int, default=10, metavar='N',
                             help='band limit for fingerprints (default: 10)')
 parser.add_argument('--no-qe', action='store_true', default=False,
                             help='use LAMMPS input file directly (default: False)')
-
 parser.add_argument('--data-dir', type=str, \
                 default="../../fp_data", \
                 metavar="str", help='path to data directory with QE output files (default: ../../fp_data)')
 parser.add_argument('--output-dir', type=str, default="../../fp_data",
                 metavar="str", help='path to output directory (default: ../../fp_data)')
+parser.add_argument('--unwrapdelta', type=float, default=0.0,
+                            help='use value UNWRAPDELTA to generate new LAMMPS data file with unwrapped coords (default: 0.0 i.e. off)')
+
 args = parser.parse_args()
 
 # Print arguments
@@ -242,7 +244,6 @@ for temp in temp_grid:
 
         # Check atom quantities from LAMMPS 
         num_atoms = lmp.get_natoms() 
-
         if (rank == 0):
             print("TEST, NUM_ATOMS: %d" % (num_atoms), flush=True)
 
@@ -261,6 +262,18 @@ for temp in temp_grid:
 
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd dimension)
             bptr_np = bptr_np.transpose([2,1,0,3])
+
+        # Generate unwrapped LAMMPS coords, if requested
+        if (args.unwrapdelta != 0.0):
+            lmp.command("change_box all boundary s s s")
+            delta = args.unwrapdelta
+            boxlo,boxhi,xy,yz,xz,periodicity,box_change = lmp.extract_box()
+            coords = lmp.extract_atom("x",3)
+            for i in range(num_atoms):
+                for j in range(3):
+                    if coords[i][j]+delta > boxhi[j]:
+                        coords[i][j] -= boxhi[j]-boxlo[j]
+            lmp.command("write_data %s.unwrapped" % lammps_filepath)
 
         if (rank == 0):
             print("bptr_np shape = ",bptr_np.shape, flush=True)
