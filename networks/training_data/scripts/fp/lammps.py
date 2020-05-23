@@ -1,1 +1,0 @@
-../../../lammps/python/lammps.py
