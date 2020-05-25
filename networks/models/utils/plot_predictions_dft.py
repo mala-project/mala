@@ -108,7 +108,8 @@ true_efermi = DFT_calculators.dos_2_efermi(true_dos, tempv, integration=args.int
 print("ef1: ", true_efermi)
 
 true_eband = DFT_calculators.dft_2_eband(dft_results, e_fermi='sc', temperature=tempv)
-true_enum  = DFT_calculators.dft_2_enum(dft_results, e_fermi=true_efermi, temperature=tempv)
+true_enum  = DFT_calculators.dft_2_enum(dft_results, e_fermi='sc', temperature=tempv)
+#true_enum  = DFT_calculators.dft_2_enum(dft_results, e_fermi=true_efermi, temperature=tempv)
 
 #exit(0)
 
@@ -254,13 +255,13 @@ for idx, current_dir in enumerate(args.output_dirs):
     print("QE DOS BE: ", qe_dos_eband)
     print("DFT Eigen BE: ", true_eband)
     
-    print("\nPred/Target BE diff: ", abs(pred_ldos.eband - target_ldos.eband))
-    print("Pred/Target BE relative diff: ", abs(pred_ldos.eband - target_ldos.eband) / target_ldos.eband)
-    print("Pred/Target BE meV/Atom diff: ", (target_ldos.eband - pred_ldos.eband) / dft_results.num_atoms)
+    print("\nPred/Target BE diff: ", (target_ldos.eband - pred_ldos.eband))
+    print("Pred/Target BE relative diff: ", (target_ldos.eband - pred_ldos.eband) / target_ldos.eband * 100)
+    print("Pred/Target BE meV/Atom diff: ", (target_ldos.eband - pred_ldos.eband) / dft_results.num_atoms * 1000)
 
-    print("\nPred/True Eigen BE diff: ", abs(pred_ldos.eband - true_eband))
-    print("Pred/True Eigen BE relative diff: ", abs(pred_ldos.eband - true_eband) / true_eband)
-    print("Pred/True Eigen BE meV/Atom diff: ", (true_eband - pred_ldos.eband) / dft_results.num_atoms)
+    print("\nPred/True Eigen BE diff: ", (true_eband - pred_ldos.eband))
+    print("Pred/True Eigen BE relative diff: ", (true_eband - pred_ldos.eband) / true_eband * 100)
+    print("Pred/True Eigen BE meV/Atom diff: ", (true_eband - pred_ldos.eband) / dft_results.num_atoms * 1000)
 
     print("\n\nElectron Num Comparisons")
     print("Pred ENUM: ", pred_ldos.enum)
@@ -281,7 +282,8 @@ for idx, current_dir in enumerate(args.output_dirs):
     if not os.path.exists(args.output_dir):
         print("\nCreating output folder %s\n" % args.output_dir)
         os.makedirs(args.output_dir)
-
+ 
+    matplotlib.rcdefaults()
 
     # DOS and error plots
 
@@ -306,7 +308,7 @@ for idx, current_dir in enumerate(args.output_dirs):
     # Density Error Slice Plots
 
     font = {'weight' : 'bold',
-            'size'   : 50}
+            'size'   : 40}
 
     matplotlib.rc('font', **font)
 
@@ -316,6 +318,8 @@ for idx, current_dir in enumerate(args.output_dirs):
 
     fig.set_figheight(20 * args.num_slices)
     fig.set_figwidth(20)
+
+    cbar_err_max = np.max(np.abs(pred_ldos.density - target_ldos.density))
 
     for i in range(args.num_slices):
         
@@ -333,9 +337,11 @@ for idx, current_dir in enumerate(args.output_dirs):
         ax[i].set_title("Absolute Density Error Z-Slice at %3.1f" % (z_slices[i] * gs))
 
         cbar = fig.colorbar(im, ax=ax[i])
+        cbar.set_clim(0.0, cbar_err_max)
 
     #plt.tight_layout()
-
+    
+    
     if (args.log):
         density_fname = "/pred_target_error_density_log%d.eps" % idx
     else:
@@ -369,8 +375,10 @@ for idx, current_dir in enumerate(args.output_dirs):
         ax[i].set_title("Pred Density Z-Slice at %3.1f" % (z_slices[i] * gs))
 
         cbar = fig.colorbar(im, ax=ax[i])
+        cbar.set_clim(0.0, vmax_plot)
 
     #plt.tight_layout()
+    
 
     if (args.log):
         density_fname = "/pred_density_log%d.eps" % idx
@@ -402,9 +410,11 @@ for idx, current_dir in enumerate(args.output_dirs):
         ax[i].set_title("Target Density Z-Slice at %3.1f" % (z_slices[i] * gs))
 
         cbar = fig.colorbar(im, ax=ax[i])
+        cbar.set_clim(0.0, vmax_plot)
 
     #plt.tight_layout()
-
+    
+    
     if (args.log):
         density_fname = "/target_density_log%d.eps" % idx
     else:

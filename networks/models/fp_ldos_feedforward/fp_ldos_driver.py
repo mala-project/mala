@@ -1,8 +1,12 @@
 from __future__ import print_function
 
+import faulthandler; faulthandler.enable()
+
+
 import argparse
 import os, sys
 import json
+import pickle
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -11,7 +15,7 @@ import torch.optim as optim
 #from torchvision import datasets, transforms
 
 import torch.utils.data.distributed
-from torch.utils.tensorboard import SummaryWriter
+#from torch.utils.tensorboard import SummaryWriter
 
 import horovod.torch as hvd
 
@@ -81,10 +85,10 @@ parser.add_argument('--no-hidden-state', action='store_true', default=False,
 # Inputs/Outputs
 parser.add_argument('--nxyz', type=int, default=200, metavar='N',
                     help='num elements along x,y,z dims (default: 200)')
-parser.add_argument('--fp-length', type=int, default=116, metavar='N',
-                    help='number of coefficients in FPs (default: 116)')
-parser.add_argument('--ldos-length', type=int, default=128, metavar='N',
-                    help='number of energy levels in LDOS  (default: 128)')
+parser.add_argument('--fp-length', type=int, default=94, metavar='N',
+                    help='number of coefficients in FPs (default: 94)')
+parser.add_argument('--ldos-length', type=int, default=250, metavar='N',
+                    help='number of energy levels in LDOS  (default: 250)')
 parser.add_argument('--no-coords', action='store_true', default=False,
                     help='do not use x/y/z coordinates in fp inputs')
 parser.add_argument('--no-bispectrum', action='store_true', default=False,
@@ -228,13 +232,12 @@ if (hvd.rank() == 0):
         print("\nCreating Tensorboard output folder %s\n" % args.tb_output_dir)
         os.makedirs(args.tb_output_dir)
 
-    with open(args.model_dir + '/commandline_args.txt', 'w') as f:
+    with open(args.model_dir + '/commandline_args1.txt', 'w') as f:
         json.dump(args.__dict__, f, indent=2)
-
 
 hvd.allreduce(torch.tensor(0), name='barrier')
 
-args.writer = SummaryWriter(args.tb_output_dir)
+#args.writer = SummaryWriter(args.tb_output_dir)
 
 # num_workers for multiprocessed data loading
 kwargs = {'num_workers': args.num_data_workers, 'pin_memory': True} if args.cuda else {}
@@ -306,14 +309,11 @@ test_loader = torch.utils.data.DataLoader(
 hvd.allreduce(torch.tensor(0), name='barrier')
 
 
-
-# Choose a Model
+# Choose and create a Model
 if (args.model_lstm_network):
     model = fp_ldos_networks.FP_LDOS_LSTM_Net(args)
 else:
     model = fp_ldos_networks.FP_LDOS_FF_Net(args)
-
-
 
 # Set model hidden state
 model.train_hidden = model.init_hidden_train()
@@ -326,13 +326,13 @@ if args.cuda:
     model.test_hidden = (model.test_hidden[0].cuda(), model.test_hidden[1].cuda())
 
 
+
 # Count number of network parameters
-#num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-#print("\nNum Params: %d " % num_params)
-#exit(0);
+if (hvd.rank() == 0):
+    num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print("\nNum Model Params: %d " % num_params)
 
 # Horovod: scale learning rate by the number of GPUs.
-
 if (args.adam):
     optimizer = optim.Adam(model.parameters(), lr=args.lr * hvd.size())
 
@@ -351,6 +351,20 @@ compression = hvd.Compression.fp16 if args.fp16_allreduce else hvd.Compression.n
 optimizer = hvd.DistributedOptimizer(optimizer,
                                      named_parameters=model.named_parameters(),
                                      compression=compression)
+  
+
+# Save args once model is created (txt and pkl formats)
+if (hvd.rank() == 0):
+    # Plain txt, after pre-processing
+    with open(args.model_dir + '/commandline_args2.txt', 'w') as f:
+        json.dump(args.__dict__, f, indent=2)
+
+    # Python obj pickle for reloading later
+    args_file = args.model_dir + "/commandline_args.pkl"
+    afile = open(args_file, 'wb')
+    pickle.dump(args, afile)
+    afile.close()
+
 
 ### TRAIN ####
 tot_tic = timeit.default_timer()
@@ -432,8 +446,11 @@ toc = timeit.default_timer()
     
 if (hvd.rank() == 0):
 
-    print("\nSaving model to %s.\n" % (args.model_dir + "/" + args.dataset + "_model"))
-    torch.save(model.state_dict(), args.model_dir + "/" + args.dataset + "_model")
+    model_fpath = args.model_dir + "/" + args.dataset + "_model.pth"
+
+    print("\nSaving model to %s.\n" % (model_fpath))
+#    torch.save(model.state_dict(), model_fpath)
+    torch.save(model, model_fpath)
 
     print("Total Epochs %d, Testing time: %3.3f " % (epoch, toc - tic))
 
@@ -445,6 +462,5 @@ if (hvd.rank() == 0):
     print("\n\nTotal train time %4.4f\n\n" % (tot_toc - tot_tic))
 
 
-hvd.allreduce(torch.tensor(0), name='barrier')
 hvd.shutdown()
 

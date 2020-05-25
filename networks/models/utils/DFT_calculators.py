@@ -401,6 +401,13 @@ def dft_2_enum(dft, e_fermi = None, temperature = temp):
 
     if e_fermi is None:
         e_fermi = dft.fermi_energy
+    elif e_fermi == "self-consistent" or e_fermi == "sc":
+        e_fermi = toms748(lambda e_fermi: dft_2_enum(dft, e_fermi, temperature) - dft.n_electrons, \
+                          a = np.min(dft.eigs), \
+                          b = np.max(dft.eigs))
+
+    print("dft ef_enum: ", e_fermi)
+
     enum_per_band = fd_function(dft.eigs, e_fermi=e_fermi, temperature=temperature)
     enum_per_band = dft.kweights[np.newaxis,:] * enum_per_band
     enum = np.sum(enum_per_band)
@@ -424,7 +431,7 @@ def dft_2_eband(dft, e_fermi = None, temperature = temp):
                           a = np.min(dft.eigs), \
                           b = np.max(dft.eigs))
    
-    print("ef2: ", e_fermi)
+    print("dft ef_eb: ", e_fermi)
 
     eband_per_band = dft.eigs * fd_function(dft.eigs, e_fermi=e_fermi, temperature=temperature)
     eband_per_band = dft.kweights[np.newaxis, :] * eband_per_band
@@ -485,6 +492,9 @@ def dos_2_efermi(dos, temperature = temp, integration = 'analytic'):
     
     e_fermi = toms748(lambda e_fermi: dos_2_enum(dos, e_fermi, temperature, integration) - dos.dft.n_electrons, \
                           a = dos.e_grid[0], b = dos.e_grid[-1])
+
+    print("dos ef: ", e_fermi)
+
     return e_fermi
 
 
