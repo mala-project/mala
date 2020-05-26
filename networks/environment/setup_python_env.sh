@@ -12,15 +12,14 @@ PYTHON=python3
 
 #${PIP} install --user virtualenv
 
-${PYTHON} -m venv mlmm_env
+${PYTHON} -m venv ../mlmm_env
 
-source mlmm_env/bin/activate
+source ../mlmm_env/bin/activate
 
 ${PIP} install numpy 
 ${PIP} install scipy 
 ${PIP} install matplotlib
 ${PIP} install seaborn
-${PIP} install tensorboard
 
 # Use PyTorch
 ${PIP} install torch
