@@ -28,32 +28,35 @@ NXYZ=75
 TMP=300K
 GC=1.0
 
-FPL=17
+FPL=94
 LDOSL=1
 
 #SSHOT=5
-SSHOT=1
+#SSHOT=3
 
+SSHOT=10
 
 
 
 ### Optimizer/Training
 
-#EPCS=250
+EPCS=250
 #EPCS=100
-EPCS=1
+#EPCS=1
 
 
 # Test Batch Size (TBS) and Training Batch Size (BS) 
 # GPUS * BS must evenly divide NUM_GRIDPTS = 75^3 = 41875
 TBS=3125
-BS=3125
+#BS=3125
+#BS=625
+BS=100
 
 
 # Learning rates
 #LRS=".0005 .0001 .00005 .00001"
-#LRS=".0001 .00005 .00001"
-LRS=".0001" 
+LRS=".0001 .00005 .00001 .000005 .000001"
+#LR=.0001 
 
 # Necessary reduction in validation loss 
 # (must be less that best_loss * ${ES})
@@ -73,14 +76,20 @@ OP=4
 # then next to last layer is size ${LIL}
 # if ouptut size = 250 (ldos-case)
 # then next to last layer is size ${LIL} * 250
-LIL=50
+LIL=20
 
 # Asynch GPU data-loading
 NUMW=2
 
 # Network
-WID=800
+
+#WIDS="20 50 100 200 300 400"
+WID=20
+
+#MIDLYSS="1 2 3 4 5 6"
 MIDLYS=2
+
+#MIDLYS=2
 AE=.8
 
 #   --model-lstm-network \

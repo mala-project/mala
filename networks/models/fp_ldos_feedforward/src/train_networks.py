@@ -5,7 +5,7 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 
-from torch.utils.tensorboard import SummaryWriter
+#from torch.utils.tensorboard import SummaryWriter
 import torch.optim as optim
 
 import horovod.torch as hvd
@@ -113,9 +113,9 @@ class Net_Trainer():
 #                    if param.requires_grad:
 #                        print(batch_idx, name, param.data)
                                 
-                self.args.writer.add_scalar('training loss rank%d' % hvd.rank(), \
-                    running_loss / self.args.log_interval, \
-                    epoch * len(self.train_loader) + batch_idx)
+#                self.args.writer.add_scalar('training loss rank%d' % hvd.rank(), \
+#                    running_loss / self.args.log_interval, \
+#                    epoch * len(self.train_loader) + batch_idx)
                
         self.model.train_hidden = hidden_n
 
@@ -211,14 +211,14 @@ class Net_Trainer():
     #        bandE_loss += F.mse_loss(bandE_output, bandE_target, size_average=None).item()
     #       bandE_true_loss += F.mse_loss(bandE_output, bandE_true, size_average=None).item()
 
-            if (plot_ldos and hvd.rank() == 0):
-                for i in range(self.args.tb_ldos_comparisons):
-                    for j in range(output.shape[1]):
-                        self.args.writer.add_scalars('test ldos %d rank%d' % (i, hvd.rank()), \
-                                {'LDOS-ML': output[i,j], 'True': target[i,j]}, j)
+#            if (plot_ldos and hvd.rank() == 0):
+#                for i in range(self.args.tb_ldos_comparisons):
+#                    for j in range(output.shape[1]):
+#                        self.args.writer.add_scalars('test ldos %d rank%d' % (i, hvd.rank()), \
+#                                {'LDOS-ML': output[i,j], 'True': target[i,j]}, j)
 
 
-                plot_ldos = False
+#                plot_ldos = False
 
             if (batch_idx % self.args.log_interval == 0 % self.args.log_interval and hvd.rank() == 0):
                 print("Test batch_idx %d of %d" % (batch_idx, len(self.test_loader)))
