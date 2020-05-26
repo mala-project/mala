@@ -360,10 +360,13 @@ if (hvd.rank() == 0):
         json.dump(args.__dict__, f, indent=2)
 
     # Python obj pickle for reloading later
-    args_file = args.model_dir + "/commandline_args.pkl"
-    afile = open(args_file, 'wb')
-    pickle.dump(args, afile)
-    afile.close()
+    args_file = args.model_dir + "/commandline_args.pth"
+#    afile = open(args_file, 'wb')
+#    pickle.dump(args, afile)
+#    afile.close()
+
+    torch.save(args, args_file)
+    
 
 
 ### TRAIN ####
@@ -401,9 +404,9 @@ for epoch in range(1, args.epochs + 1):
     #hvd.allreduce(torch.tensor(0), name='barrier')  
     toc = timeit.default_timer()
     
-    scheduler.step(epoch_loss)
+  #  scheduler.step(epoch_loss)
    
-    trainer.set_optimizer(optimizer)
+  #  trainer.set_optimizer(optimizer)
 
     if (hvd.rank() == 0):
         print("\nEpoch %d of %d, Training time: %3.3f\n" % (epoch, args.epochs, toc - tic))
@@ -428,6 +431,10 @@ for epoch in range(1, args.epochs + 1):
         if (curr_patience >= args.early_patience):
             print("\n\nPatience has been reached! Final validation error %4.6e\n\n" % validate_loss)
             break;
+
+    # LR scheduler decrease if no sufficient decrease
+    scheduler.step(validate_loss) 
+    trainer.set_optimizer(optimizer)
 
 if (hvd.rank() == 0):
     print("\n\nTraining Complete!\n\n")
