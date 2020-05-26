@@ -576,7 +576,7 @@ def scale_data(args, data_name, \
                 print("\nApplying the log fn to %s fails because there are values <= 0. Exiting.\n\n" % data_name)
             exit(0);
 
-        np.save(args.model_dir + "/log_shift", log_shift)
+        np.save(args.model_dir + "/%s_log_shift" % data_name, log_shift)
 
         data_train      = np.log(data_train + log_shift)
         data_validation = np.log(data_validation + log_shift)
@@ -585,10 +585,10 @@ def scale_data(args, data_name, \
     # Row vs total scaling
     if (row_scaling and (norm_scaling or standard_scaling)):
         scaling_factors = np.zeros([2, data_length])
-        scaling_factors_fname = "/%s_row" % data_name
+        scaling_factors_fname = "/%s_factor_row" % data_name
     else:
         scaling_factors = np.zeros([2, 1])
-        scaling_factors_fname = "/%s_total" % data_name
+        scaling_factors_fname = "/%s_factor_total" % data_name
 
     # Scale features
     if (norm_scaling or standard_scaling):
