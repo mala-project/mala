@@ -16,8 +16,8 @@ parser = argparse.ArgumentParser(description='LDOS Parser')
 # Targets
 parser.add_argument('--water', action='store_true', default=False,
                             help='run ldos parser for water files')
-#parser.add_argument('--run-all', action='store_true', default=False,
-#                            help='run ldos parser for all densities and temperatures')
+parser.add_argument('--run-all-water', action='store_true', default=False,
+                            help='run ldos parser for all densities and temperatures')
 parser.add_argument('--density', action='store_true', default=False,
                             help='run density parser for each density and temperature, also')
 
@@ -55,24 +55,25 @@ args = parser.parse_args()
 
 if (args.water):
     print ("Using this script in water density reading mode")
-    args.data_dir = '/ascldap/users/jracker/water64cp2k/datast_1593/results/'
+    #args.data_dir = '/ascldap/users/jracker/water64cp2k/datast_1593/results/'
     #args.data_dir = '/Users/jracker/ldrd_ml_density/mlmm-ldrd-data/water/'
 
     temp_grid = np.array([args.temp])
     gcc_grid = np.array(['aaaa'])
     snapshot_grid = np.array([args.snapshot])
 
-    if (args.run_all):
+    if (args.run_all_water):
         gcc_grid = [''.join(i) for i in itertools.product("abcdefghijklmnopqrstuvwxyz",repeat=4)][:1593]
     
     print (gcc_grid)
 
-    cube_filename_head = "w64_"
-    cube_filename_tail = "-ELECTRON_DENSITY-1_0.cube"
+    #cube_filename_head = "w64_"
+    #cube_filename_tail = "-ELECTRON_DENSITY-1_0.cube"
 
 
     # only doing density: 1 level
-    e_lvls = args.elvls
+    #e_lvls = args.elvls
+    e_lvls = 1
 
 else:
   
@@ -122,7 +123,7 @@ for temp in temp_grid:
                 (args.nxyz, args.nxyz, args.nxyz, args.elvls, args.snapshot) 
 
         if (args.water):
-            out_filename = args.data_dir + cube_filename_head + gcc + cube_filename_tail + "_pkl"
+            out_filename = args.data_dir + args.cube_fname_head + gcc + args.cube_fname_tail + "_pkl"
         else:
             # Make Temperature directory
             if not os.path.exists(temp_dir):
@@ -147,7 +148,7 @@ for temp in temp_grid:
                     str(e + 1).zfill(len(str(e_lvls))) + args.cube_fname_tail
 
             if (args.water):
-                infile_name = args.data_dir + cube_filename_head + gcc + cube_filename_tail  
+                infile_name = args.data_dir + args.cube_fname_head + gcc + "-" + args.cube_fname_tail  
 
             print("\nLoading data from %s" % infile_name)
 

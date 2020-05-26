@@ -52,14 +52,20 @@ parser.add_argument('--rcutfac', type=float, default=4.67637, metavar='R',
                             help='radius cutoff factor for the fingerprint sphere in Angstroms (default: 4.67637)')
 parser.add_argument('--twojmax', type=int, default=10, metavar='N',
                             help='band limit for fingerprints (default: 10)')
+parser.add_argument('--switch', type=int, default=0, metavar='0/1',
+                            help='Use smooth cutoff switching function (default: 0)')
+parser.add_argument('--quadratic', type=int, default=0, metavar='0/1',
+                            help='Include quadratic SNAP descriptors (default: 0)')
 parser.add_argument('--no-qe', action='store_true', default=False,
                             help='use LAMMPS input file directly (default: False)')
-
 parser.add_argument('--data-dir', type=str, \
                 default="../../fp_data", \
                 metavar="str", help='path to data directory with QE output files (default: ../../fp_data)')
 parser.add_argument('--output-dir', type=str, default="../../fp_data",
                 metavar="str", help='path to output directory (default: ../../fp_data)')
+parser.add_argument('--unwrapdelta', type=float, default=0.0,
+                            help='use value UNWRAPDELTA to generate new LAMMPS data file with unwrapped coords (default: 0.0 i.e. off)')
+
 args = parser.parse_args()
 
 # Print arguments
@@ -73,8 +79,12 @@ if (args.water):
     #args.data_dir = '/ascldap/users/jracker/water64cp2k/datast_1593/results/'
 
     temp_grid = np.array([args.temp])
-    gcc_grid = np.array(['aaaa'])
-    #gcc_grid = [''.join(i) for i in itertools.product("abcdefghijklmnopqrstuvwxyz",repeat=4)][:1593]
+    #gcc_grid = np.array(['aaaa'])
+    gcc_grid = np.array([args.gcc])
+
+    if args.run_all:
+        gcc_grid = [''.join(i) for i in itertools.product("abcdefghijklmnopqrstuvwxyz",repeat=4)][:1593]
+    
     snapshot_grid = np.array([args.snapshot])
 
     cube_filename_head = "w64_"
@@ -112,8 +122,8 @@ echo_to_screen = False
 
 qe_fname = "QE_Al.scf.pw.snapshot%s.out" % args.snapshot
 lammps_fname = "Al.scf.pw.snapshot%s.lammps" % args.snapshot
-log_fname = "lammps_fp_%dx%dx%dgrid_%dtwojmax_snapshot%s.log" % \
-        (args.nxyz, args.nxyz, args.nxyz, args.twojmax, args.snapshot) 
+log_fname = "lammps_fp_%dx%dx%dgrid_%dtwojmax_s%d_q%d_snapshot%s.log" % \
+        (args.nxyz, args.nxyz, args.nxyz, args.twojmax, args.switch, args.quadratic, args.snapshot) 
 
 
 # First 3 cols are x, y, z, coords
@@ -123,12 +133,14 @@ ncols0 = 3
 # Analytical relation for fingerprint length
 ncoeff = (args.twojmax+2)*(args.twojmax+3)*(args.twojmax+4)
 ncoeff = ncoeff // 24 # integer division
+if (args.quadratic):
+    ncoeff += ((ncoeff+1)*ncoeff)//2 
 fp_length = ncols0 + ncoeff
 
 
 if (args.water):
     qe_format = "cube"
-    np_fname = "water_fp_%dx%dx%dgrid_%dcomps_snapshot%s" % args.snapshot
+    np_fname = "water_fp_%dx%dx%dgrid_%dcomps_snapshot%s" % (args.nxyz, args.nxyz, args.nxyz, fp_length, args.snapshot)
     lammps_compute_grid_fname = "./in.bgrid.twoelements.python"
 else:
     qe_format = "espresso-out"
@@ -221,6 +233,8 @@ for temp in temp_grid:
             "ngridz":nz,
             "twojmax":args.twojmax,
             "rcutfac":args.rcutfac,
+            "quadratic":args.quadratic,
+            "switch":args.switch,
             "atom_config_fname":lammps_filepath
             }
         )
@@ -238,7 +252,6 @@ for temp in temp_grid:
 
         # Check atom quantities from LAMMPS 
         num_atoms = lmp.get_natoms() 
-
         if (rank == 0):
             print("TEST, NUM_ATOMS: %d" % (num_atoms), flush=True)
 
@@ -258,21 +271,36 @@ for temp in temp_grid:
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd dimension)
             bptr_np = bptr_np.transpose([2,1,0,3])
 
+        # Generate unwrapped LAMMPS coords, if requested
+        if (args.unwrapdelta != 0.0):
+            lmp.command("change_box all boundary s s s")
+            delta = args.unwrapdelta
+            boxlo,boxhi,xy,yz,xz,periodicity,box_change = lmp.extract_box()
+            coords = lmp.extract_atom("x",3)
+            for i in range(num_atoms):
+                for j in range(3):
+                    if coords[i][j]+delta > boxhi[j]:
+                        coords[i][j] -= boxhi[j]-boxlo[j]
+            lmp.command("write_data %s.unwrapped" % lammps_filepath)
+
         if (rank == 0):
             print("bptr_np shape = ",bptr_np.shape, flush=True)
 
         # Output location
-        temp_dir = args.output_dir + "/%s" % temp
-        gcc_dir = temp_dir + "/%sgcc/" % gcc 
+        if (args.water):
+            gcc_dir = args.output_dir + gcc + "_"
+        else:
+            temp_dir = args.output_dir + "/%s" % temp
+            gcc_dir = temp_dir + "/%sgcc/" % gcc 
 
-        # Make Temp directory
-        if not os.path.exists(temp_dir):
-            print("\nCreating output folder %s" % temp_dir)
-            os.makedirs(temp_dir)
-        # Make Density directory
-        if not os.path.exists(gcc_dir):
-            print("\nCreating output folder %s" % gcc_dir)
-            os.makedirs(gcc_dir)
+            # Make Temp directory
+            if not os.path.exists(temp_dir):
+                print("\nCreating output folder %s" % temp_dir)
+                os.makedirs(temp_dir)
+            # Make Density directory
+            if not os.path.exists(gcc_dir):
+                print("\nCreating output folder %s" % gcc_dir)
+                os.makedirs(gcc_dir)
 
         fingerprint_filepath = gcc_dir + np_fname
         # Save LAMMPS numpy array as binary 
