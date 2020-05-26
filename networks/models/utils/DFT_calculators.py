@@ -148,7 +148,7 @@ class DOS:
 #----------------------------------------------------------------------------------------#
 # Class that encapsulates the results of a Local-Density-of-States calculation
 class LDOS:
-    def __init__(self, dft, e_grid, filename, temperature = temp, integration = "analytic"):
+    def __init__(self, dft, e_grid, ldos_filename, temperature = temp, integration = "analytic"):
         # input:
         ## dft: a DFT_results instance
         ## e_grid: energy grid [eV] on which the LDOS has been evaluated
@@ -164,7 +164,13 @@ class LDOS:
         self.temperature = temperature
         self.integration = integration
 
-        self.ldos = np.load(filename)
+        if (isinstance(ldos_filename, str)):
+            self.ldos = np.load(ldos_filename)
+        # Quick-Fix for inference
+        elif (type(ldos_filename) == np.ndarray):
+            self.ldos = ldos_filename
+        else: 
+            raise ValueError('LDOS must be a filename string or numpy ndarray')
 
         # Quick fix for ldos_predictions saved as [8mil samples x 250elvls]
         if (len(self.ldos.shape) == 2):
@@ -181,11 +187,19 @@ class LDOS:
 
         self.dos = DOS.from_ldos_data(self.dft, self.e_grid, self.ldos)
         
-        self.e_fermi = dos_2_efermi(self.dos, temperature=self.temperature, integration=self.integration)
+        self.e_fermi = dos_2_efermi(self.dos, \
+                                    temperature=self.temperature, \
+                                    integration=self.integration)
         
-        self.eband = dos_2_eband(self.dos, e_fermi=self.e_fermi, temperature=self.temperature, integration=self.integration)
+        self.eband = dos_2_eband(self.dos, \
+                                 e_fermi=self.e_fermi, \
+                                 temperature=self.temperature, \
+                                 integration=self.integration)
        
-        self.enum = dos_2_enum(self.dos, e_fermi=self.e_fermi, temperature=self.temperature, integration=self.integration)
+        self.enum = dos_2_enum(self.dos, \
+                               e_fermi=self.e_fermi, \
+                               temperature=self.temperature, \
+                               integration=self.integration)
 
         dw = get_density_weights(self.e_grid, self.e_fermi, temperature=self.temperature)
         self.density = np.sum(self.ldos * dw[np.newaxis, np.newaxis, np.newaxis, :], axis=(3))
@@ -406,7 +420,7 @@ def dft_2_enum(dft, e_fermi = None, temperature = temp):
                           a = np.min(dft.eigs), \
                           b = np.max(dft.eigs))
 
-    print("dft ef_enum: ", e_fermi)
+#    print("dft ef_enum: ", e_fermi)
 
     enum_per_band = fd_function(dft.eigs, e_fermi=e_fermi, temperature=temperature)
     enum_per_band = dft.kweights[np.newaxis,:] * enum_per_band
@@ -431,7 +445,7 @@ def dft_2_eband(dft, e_fermi = None, temperature = temp):
                           a = np.min(dft.eigs), \
                           b = np.max(dft.eigs))
    
-    print("dft ef_eb: ", e_fermi)
+#    print("dft ef_eb: ", e_fermi)
 
     eband_per_band = dft.eigs * fd_function(dft.eigs, e_fermi=e_fermi, temperature=temperature)
     eband_per_band = dft.kweights[np.newaxis, :] * eband_per_band
@@ -493,7 +507,7 @@ def dos_2_efermi(dos, temperature = temp, integration = 'analytic'):
     e_fermi = toms748(lambda e_fermi: dos_2_enum(dos, e_fermi, temperature, integration) - dos.dft.n_electrons, \
                           a = dos.e_grid[0], b = dos.e_grid[-1])
 
-    print("dos ef: ", e_fermi)
+#    print("dos ef: ", e_fermi)
 
     return e_fermi
 

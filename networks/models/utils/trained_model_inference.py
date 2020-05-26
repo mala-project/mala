@@ -125,7 +125,7 @@ args.snapshots = np.min([len(args.fp_files), len(args.ldos_files)])
 
 
 
-args.snapshots = 2;
+#args.snapshots = 3;
 
 
 
@@ -288,21 +288,25 @@ for idx, current_dir in enumerate(args.output_dirs):
 
 #    exit(0);
 
+
     old_ldos = None
+    predictions = None
+
+    inference_fp = None
+    old_fp = None
 
     for i in range(args.snapshots):
 
         if (hvd.rank() == 0):
             print("\nWorking on Snapshot%d" % i)
 
+        old_fp = inference_fp
+
         # Loading FP and transforming
-        inference_fp = np.load(args.fp_files[0])
+        inference_fp = np.load(args.fp_files[i])
 
         # Remove Coords
         inference_fp = inference_fp[:,:,:, 3:] 
-
-        
-
         inference_fp = np.reshape(inference_fp, [model_args.grid_pts, model_args.fp_length])
 
 #        print(fp_factors.shape)
@@ -313,7 +317,19 @@ for idx, current_dir in enumerate(args.output_dirs):
         
         for row in range(model_args.fp_length):
             inference_fp[:, row] = (inference_fp[:, row] - fp_factors[0, row]) / fp_factors[1, row]
-        
+       
+        if (i > 0):
+            print("Old/New FP Diffs: ")
+
+            for row in range(model_args.fp_length):
+                mind = np.min(abs(inference_fp[:, row] - old_fp[:, row]))
+                mend = np.mean(abs(inference_fp[:, row] - old_fp[:, row]))
+                maxd = np.max(abs(inference_fp[:, row] - old_fp[:, row]))
+                
+                print("MIN/MEAN/MAX DIFFS: %4.4f %4.4f %4.4f" % (mind, mend, maxd))
+
+
+
 
         inference_fp_dataset = torch.utils.data.TensorDataset(torch.tensor(inference_fp, dtype=torch.float32), 
                                                               torch.ones([model_args.grid_pts, 1], dtype=torch.float32))
@@ -329,6 +345,8 @@ for idx, current_dir in enumerate(args.output_dirs):
         hvd.allreduce(torch.tensor(0), name='barrier')
 
         # Running Model
+
+        old_ldos = predictions
 
         predictions = np.empty([model_args.grid_pts, model_args.ldos_length]) 
         hidden_n = model.test_hidden
@@ -361,6 +379,19 @@ for idx, current_dir in enumerate(args.output_dirs):
 
 #        exit(0);
 
+        if (i > 0):
+            print("Old/New LDOS Diffs: ")
+
+            for row in range(model_args.ldos_length):
+                mind = np.min(abs(predictions[:, row] - old_ldos[:, row]))
+                mend = np.mean(abs(predictions[:, row] - old_ldos[:, row]))
+                maxd = np.max(abs(predictions[:, row] - old_ldos[:, row]))
+                
+                print("MIN/MEAN/MAX DIFFS: %4.4f %4.4f %4.4f" % (mind, mend, maxd))
+
+
+#            print("Done")
+#            exit(0);
 
         pred_ldos = DFT_calculators.LDOS(dft_results[i], ldos_e_grid, predictions)
 
