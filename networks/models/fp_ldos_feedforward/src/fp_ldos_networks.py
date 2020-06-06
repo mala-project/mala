@@ -211,7 +211,7 @@ class FP_LDOS_LSTM_Net(nn.Module):
 
         # Activation Functions
         self.activation = nn.LeakyReLU()
-        self.final_activation = nn.ReLU()
+        self.final_activation = nn.LeakyReLU()
 
     # Initialize hidden and cell states
     def init_hidden_train(self):

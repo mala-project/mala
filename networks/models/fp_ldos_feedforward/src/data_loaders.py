@@ -11,6 +11,8 @@ import torch.utils.data
 import torch.utils
 import horovod.torch as hvd
 
+#sys.path.append("./charm/")
+#import charm.big_data
 
 ###-----------------------------------------------------------------------###
 
@@ -311,8 +313,9 @@ def load_data_fp_ldos(args):
         args.fp_data_fpath = "/%s/%sgcc/~~~~~~~~" % (args.temp, args.gcc)
         args.ldos_data_fpath = "/%s/%sgcc/~~~~~~~~" % (args.temp, args.gcc)
 
-        print("For Josh, water case")
+        print("\n\nFor Josh, water case.\n\n")
         exit(0);
+
     # If using Material (Al) dataset
     else:
         args.fp_data_fpath = "/%s/%sgcc/%s_fp_%dx%dx%dgrid_%dcomps" % \
@@ -698,14 +701,14 @@ def scale_data(args, data_name, \
             if (hvd.rank() == 0):
                 if (row_scaling):
                     if (standard_scaling):
-                        print("%s Row: %g, Mean: %g, Std: %g" % (data_name, row, scaling_factors[0, row], scaling_factors[1, row]))
+                        print("%s Row: %g, Mean: %4.4f, Std: %4.4f" % (data_name, row, scaling_factors[0, row], scaling_factors[1, row]))
                     else:
-                        print("%s Row: %g, Min: %g, Max: %g" % (data_name, row, scaling_factors[0, row], scaling_factors[1, row]))
+                        print("%s Row: %g, Min: %4.4f, Max: %4.4f" % (data_name, row, scaling_factors[0, row], scaling_factors[1, row]))
                 else: 
                     if (standard_scaling):
-                        print("%s Total, Mean: %g, Std: %g" % (data_name, scaling_factors[0, 0], scaling_factors[1, 0]))
+                        print("%s Total, Mean: %4.4f, Std: %4.4f" % (data_name, scaling_factors[0, 0], scaling_factors[1, 0]))
                     else:
-                        print("%s Total, Min: %g, Max: %g" % (data_name, scaling_factors[0, 0], scaling_factors[1, 0]))
+                        print("%s Total, Min: %4.4f, Max: %4.4f" % (data_name, scaling_factors[0, 0], scaling_factors[1, 0]))
 
             if (row == 0):
                 if (row_scaling):
@@ -783,7 +786,6 @@ def subset_fp(args):
         while (count < bs_length):                
             twojmax += 1
             
-
             count = 0
             for j1 in range(0, twojmax + 1):
                 for j2 in range(0, j1 + 1):
