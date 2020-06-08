@@ -28,9 +28,13 @@
 1. Load a Python 3 module (on blake: module load python/3.7.3) 
 2. Activate the virtual environment. If using the mlmm\_env environment, then 
   'source /path/to/mlmm\_env/bin/activate'.
-3. Load other needed modules. On blake, you can source blake\_\qe\_env.sh.
+3. Load other needed modules. On blake, you can source blake\_qe\_env.sh.
 4. Change to q-e/PW/src and run the build\_total\_energy\_energy\_module.sh 
    script in this folder. If the build is successful, a file named 
-   total_energy.cpython-37m-x86_64-linux-gnu.so will be generated. It contains
+   total_energy.cpython-37m-x86\_64-linux-gnu.so will be generated. It contains
    the Python module.
-
+   
+## Use the Python Module
+1. Add the folder that contains total_energy.cpython-37m-x86\_64-linux-gnu.so to
+   your PYTHONPATH.
+2. In the Python REPL or script: import total_energy

@@ -8,7 +8,6 @@ SUBROUTINE total_energy_setup()
   USE fft_base,    ONLY : dfftp
   IMPLICIT NONE
   print *, "Setup called"
-  nspin = 2
 END SUBROUTINE
 !
 INTEGER FUNCTION get_nnr()
