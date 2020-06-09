@@ -154,6 +154,8 @@ parser.add_argument('--gcc', type=str, default="2.699", metavar='GCC',
                     help='density of snapshots to train on (default: "2.699")')
 parser.add_argument('--num-snapshots', type=int, default=1, metavar='N',
                     help='num snapshots per temp/gcc pair (default: 1)')
+parser.add_argument('--no-testing', action='store_true', default=False,
+                    help='only train with training/validation snapshots (i.e. test later)')
 parser.add_argument('--water', action='store_true', default=False,
                     help='train on water fp and ldos files')
 
@@ -326,25 +328,25 @@ elif (args.dataset == "fp_ldos" and args.big_charm_data):
 
     # gather all fpaths of training data
     train_fp_fpaths = \
-        glob(args.fp_dir + args.fp_data_fpath + \
-             "_snapshot[0-%d].npy" % (args.num_train_snapshots - 1))
+        sorted(glob(args.fp_dir + args.fp_data_fpath + \
+             "_snapshot[0-%d].npy" % (args.num_train_snapshots - 1)))
     train_ldos_fpaths = \
-        glob(args.ldos_dir + args.ldos_data_fpath + \
-             "_snapshot[0-%d].npy" % (args.num_train_snapshots - 1))
+        sorted(glob(args.ldos_dir + args.ldos_data_fpath + \
+             "_snapshot[0-%d].npy" % (args.num_train_snapshots - 1)))
 
     validation_fp_fpaths = \
-        glob(args.fp_dir + args.fp_data_fpath + \
-             "_snapshot[%d].npy" % args.validation_snapshot)
+        sorted(glob(args.fp_dir + args.fp_data_fpath + \
+             "_snapshot[%d].npy" % args.validation_snapshot))
     validation_ldos_fpaths = \
-        glob(args.ldos_dir + args.ldos_data_fpath + \
-             "_snapshot[%d].npy" % args.validation_snapshot)
+        sorted(glob(args.ldos_dir + args.ldos_data_fpath + \
+             "_snapshot[%d].npy" % args.validation_snapshot))
 
     test_fp_fpaths = \
-        glob(args.fp_dir + args.fp_data_fpath + \
-             "_snapshot[%d].npy" % args.test_snapshot)
+        sorted(glob(args.fp_dir + args.fp_data_fpath + \
+             "_snapshot[%d].npy" % args.test_snapshot))
     test_ldos_fpaths = \
-        glob(args.ldos_dir + args.ldos_data_fpath + \
-             "_snapshot[%d].npy" % args.test_snapshot)
+        sorted(glob(args.ldos_dir + args.ldos_data_fpath + \
+             "_snapshot[%d].npy" % args.test_snapshot))
 
     #        print(args.fp_dir + args.fp_data_fpath)
 
@@ -390,6 +392,8 @@ elif (args.dataset == "fp_ldos" and args.big_charm_data):
 
     if (hvd.rank() == 0):
         print("\n\nCreating train Charm dataset")
+    hvd.allreduce(torch.tensor(0), name='barrier')
+
     train_dataset       = big_data.Big_Charm_Dataset(args, \
                                                      train_fp_fpaths, \
                                                      train_ldos_fpaths, \
@@ -399,12 +403,15 @@ elif (args.dataset == "fp_ldos" and args.big_charm_data):
                                                      input_subset, \
                                                      output_subset, \
                                                      input_scaler_kwargs, \
-                                                     output_scaler_kwargs)
+                                                     output_scaler_kwargs) #, \
+                                                     #no_reset=False)
 
     hvd.allreduce(torch.tensor(0), name='barrier')
     
     if (hvd.rank() == 0):
         print("\n\nCreating validation Charm dataset")
+    hvd.allreduce(torch.tensor(0), name='barrier')
+
     validation_dataset  = big_data.Big_Charm_Dataset(args, \
                                                      validation_fp_fpaths, \
                                                      validation_ldos_fpaths, \
@@ -412,32 +419,41 @@ elif (args.dataset == "fp_ldos" and args.big_charm_data):
                                                      input_shape, \
                                                      output_shape, \
                                                      input_subset, \
-                                                     output_subset)
-
+                                                     output_subset) #, \
+                                                     #mmap_mode=None)
+    # Avoid recalculation of data scaler
+    validation_dataset.input_scaler = train_dataset.input_scaler
+    validation_dataset.output_scaler = train_dataset.output_scaler
+    
     hvd.allreduce(torch.tensor(0), name='barrier')
 
     if (hvd.rank() == 0):
         print("\n\nCreating test Charm dataset")
-    test_dataset        = big_data.Big_Charm_Dataset(args, \
-                                                     test_fp_fpaths, \
-                                                     test_ldos_fpaths, \
-                                                     args.nxyz ** 3, \
-                                                     input_shape, \
-                                                     output_shape, \
-                                                     input_subset, \
-                                                     output_subset)
+    hvd.allreduce(torch.tensor(0), name='barrier')
+
+    if (not args.no_testing):
+        test_dataset        = big_data.Big_Charm_Dataset(args, \
+                                                         test_fp_fpaths, \
+                                                         test_ldos_fpaths, \
+                                                         args.nxyz ** 3, \
+                                                         input_shape, \
+                                                         output_shape, \
+                                                         input_subset, \
+                                                         output_subset) #, \
+                                                         #mmap_mode=None)
+    
+        test_dataset.input_scaler = train_dataset.input_scaler
+        test_dataset.output_scaler = train_dataset.output_scaler
+    
+    else:
+        test_dataset = None
 
     hvd.allreduce(torch.tensor(0), name='barrier')
     
     # Set new fp/ldos lengths
     args.fp_length   = len(input_subset)
     args.ldos_length = len(output_subset)
-
-    validation_dataset.input_scaler = train_dataset.input_scaler
-    validation_dataset.output_scaler = train_dataset.output_scaler
-    test_dataset.input_scaler = train_dataset.input_scaler
-    test_dataset.output_scaler = train_dataset.output_scaler
-
+    args.grid_pts = args.nxyz ** 3
 
     torch.save(train_dataset.input_scaler, args.model_dir + "/charm_input_scaler.pth")
     torch.save(train_dataset.output_scaler, args.model_dir + "/charm_output_scaler.pth")
@@ -481,18 +497,25 @@ validation_loader = \
 
 hvd.allreduce(torch.tensor(0), name='barrier')
 
+if (not args.no_testing):
+    print("Rank: %d, Creating test sampler/loader" % hvd.rank())
 
-print("Rank: %d, Creating test sampler/loader" % hvd.rank())
+    # TESTING DATA
+    test_sampler = \
+            torch.utils.data.sampler.SequentialSampler(test_dataset)
+    test_loader = \
+            torch.utils.data.DataLoader( \
+                test_dataset, \
+                batch_size=args.test_batch_size, \
+                sampler=test_sampler, \
+                **kwargs)
 
-# TESTING DATA
-test_sampler = \
-        torch.utils.data.sampler.SequentialSampler(test_dataset)
-test_loader = \
-        torch.utils.data.DataLoader( \
-            test_dataset, \
-            batch_size=args.test_batch_size, \
-            sampler=test_sampler, \
-            **kwargs)
+else:
+    if (hvd.rank() == 0):
+        print("Rank: %d, Skip creating the test sampler/loader.")
+
+    test_sampler = None
+    test_loader = None
 
 hvd.allreduce(torch.tensor(0), name='barrier')
 
@@ -650,11 +673,12 @@ if (hvd.rank() == 0):
 
 tic = timeit.default_timer()
 
-test_loss = 0.0
-if (hvd.rank() == 0):
-    test_loss = trainer.test()
+if (args.no_testing):
+    test_loss = 0.0
+    if (hvd.rank() == 0):
+        test_loss = trainer.test()
 
-test_loss = hvd.allreduce(torch.tensor(test_loss), name="test_loss_reduction");
+    test_loss = hvd.allreduce(torch.tensor(test_loss), name="test_loss_reduction");
 
 toc = timeit.default_timer()
 

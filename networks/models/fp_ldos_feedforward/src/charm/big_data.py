@@ -1,4 +1,4 @@
-# FP LDOS, Data Loaders
+#FP LDOS, Data Loaders
 
 import os, sys
 import numpy as np
@@ -7,6 +7,7 @@ import timeit
 #import torch.nn.functional as F
 
 import torch
+import torch.multiprocessing as mp
 
 #import torch.utils.Dataset
 import torch.utils.data.distributed
@@ -26,10 +27,11 @@ class Big_Charm_Dataset(torch.utils.data.Dataset):
                  num_samples, \
                  input_sample_shape, \
                  output_sample_shape, \
-                 input_subset=None, \
-                 output_subset=None, \
+                 input_subset, \
+                 output_subset, \
                  input_scaler_kwargs={}, \
-                 output_scaler_kwargs={}):
+                 output_scaler_kwargs={}): #, \
+                 #do_reset=True):
         # input:
         ## args:                    Argparser args
         ## input_fpaths:            paths to input numpy files
@@ -44,8 +46,31 @@ class Big_Charm_Dataset(torch.utils.data.Dataset):
         ## input_scaler_kwargs:     dict of input scaler options
         ## output_scalar_kwargs:    dict of output scaler options 
        
+        self.args = args
+
+        self.input_fpaths = input_fpaths
+        self.output_fpaths = output_fpaths
+
         self.num_samples = num_samples
+
+        self.input_shape = np.insert(input_sample_shape, 0, num_samples)
+        self.output_shape = np.insert(output_sample_shape, 0, num_samples)
+
+        self.input_mask = np.zeros(input_sample_shape, dtype=bool)
+        self.output_mask = np.zeros(output_sample_shape, dtype=bool)
+
+        self.input_mask[input_subset] = True
+        self.output_mask[output_subset] = True
+
+#        self.input_subset = input_subset
+#        self.output_subset = output_subset
+
         self.num_files = len(input_fpaths)
+
+
+        self.reset = True
+        if (self.num_files == 1):
+            self.reset = False
 
 #        print("Num files: %d" % self.num_files)
 
@@ -69,6 +94,8 @@ class Big_Charm_Dataset(torch.utils.data.Dataset):
 
         print("Input Scaler Timing: %4.4f" % (toc - tic))
 
+        hvd.allreduce(torch.tensor(0), name="barrier")
+        
         tic = timeit.default_timer()
         self.output_scaler = Big_Data_Scaler(output_fpaths, \
                                              num_samples, \
@@ -79,84 +106,213 @@ class Big_Charm_Dataset(torch.utils.data.Dataset):
 
         print("Output Scaler Timing: %4.4f" % (toc - tic))
        
+        hvd.allreduce(torch.tensor(0), name="barrier")
+        
         if (hvd.rank() == 0):
             print("Input FP Factors")
             self.input_scaler.print_factors()
             print("Output LDOS Factors")
             self.output_scaler.print_factors()
 
-#        hvd.allreduce(torch.tensor(0), name="barrier")
+        hvd.allreduce(torch.tensor(0), name="barrier")
 #        print("\n\nDone.\n\n")
 #        exit(0);   
 
         # List of numpy arrays to preserve mmap_mode
-        self.input_datasets = [] 
-        self.output_datasets = []
+#        self.input_datasets = [] 
+#        self.output_datasets = []
 
         # Load Datasets
-        for idx, path in enumerate(input_fpaths):
-            self.input_datasets.append(np.load(path, mmap_mode="r"))
-        for idx, path in enumerate(output_fpaths):
-            self.output_datasets.append(np.load(path, mmap_mode="r"))
+#        for idx, path in enumerate(input_fpaths):
+#            print("Input: %d" % idx)
+#            self.input_datasets.append(np.load(path, mmap_mode=mmap_mode))
+#            hvd.allreduce(torch.tensor(0), name="barrier")
+
+#        for idx, path in enumerate(output_fpaths):
+#            print("Output: %d" % idx)
+#            self.output_datasets.append(np.load(path, mmap_mode=mmap_mode))
+#            hvd.allreduce(torch.tensor(0), name="barrier")
 
         # Input subset and reshape
-        for i in range(self.num_files):
-            self.input_datasets[i] = np.reshape(self.input_datasets[i], \
-                                                np.insert(input_sample_shape, \
-                                                          0, self.num_samples))
+#        for i in range(self.num_files):
+#            self.input_datasets[i] = np.reshape(self.input_datasets[i], \
+#                                                self.input_shape) 
+                                               
             
-            if (input_subset is not None):
-                self.input_datasets[i] = self.input_datasets[i][:, input_subset]
+#            if (input_subset is not None):
+#                self.input_datasets[i] = self.input_datasets[i][:, input_subset]
 
         # Output subset and reshape 
-        for i in range(self.num_files):
-            self.output_datasets[i] = np.reshape(self.output_datasets[i], \
-                                                 np.insert(output_sample_shape, \
-                                                           0, self.num_samples))
-            
-            if (output_subset is not None):
-                self.output_datasets[i] = self.output_datasets[i][:, output_subset]
-
-
-
-
-
-
-#            self.output_datasets[i] = self.output_datasets[i][:,:,:,ldos_idxs]
-
-#            data_shape = self.output_datasets[i].shape 
-
-#            grid_pts = data_shape[0] * data_shape[1] * data_shape[2]
-
+#        for i in range(self.num_files):
 #            self.output_datasets[i] = np.reshape(self.output_datasets[i], \
-#                                                [self.num_samples, output_sample_shape])
+#                                                 self.output_shape)  
+                                                
             
-#            self.output_datasets[i] = self.output_datasets[i]
+#            if (output_subset is not None):
+#                self.output_datasets[i] = self.output_datasets[i][:, output_subset]
 
-        # !!! Need to modify !!! 
-        # Switch args.ldos_length -> args.ldos_length and args.final_ldos_length 
-#        if (data_name == "test"):
-#            args.ldos_length = data_shape[-1]
-#            args.grid_pts = grid_pts
 
-#        self.grid_pts = grid_pts
 
-        # Consistency Checks
+        self.file_idxs = np.random.permutation(np.arange(self.num_files))
+        self.current_file = 0
+        self.current_sample = 0
+
+        self.barrier = mp.Barrier(self.args.num_data_workers)
+#        self.lock = torch.multiprocessing.Lock()
+
+        # Set the starting dataset
+
+#        self.lock.acquire()
+        self.reset_dataset()
+#        self.lock.release()
+
+
+
+
+
+
+
+
+
+
+
+
+    def reset_dataset(self):
+
+        # Clean out memory, because mmap brings those values into memory 
+#        del self.input_datasets
+#        del self.output_datasets
+
+#        self.input_datasets = []
+#        self.output_datasets = []
+
+        # Load Datasets
+#        for idx, path in enumerate(input_fpaths):    
+#            self.input_datasets[i] = np.load(path, mmap_mode=mmap_mode)
+
+#        for idx, path in enumerate(output_fpaths):      
+#            self.output_datasets[i] = np.load(path, mmap_mode=mmap_mode)
+     
+        # Input/Output reshape
+#        for i in range(self.num_files):
+#            self.input_datasets[i] = np.reshape(self.input_datasets[i], \
+#                                                self.input_shape)  
+                                              
+#            self.output_datasets[i] = np.reshape(self.output_datasets[i], \
+#                                                 self.output_shape)  
+          
+
+        print("Rank: %d, Reset dataset %d of %d for all workers. Current_sample: %d" % \
+                (hvd.rank(), self.current_file + 1, self.num_files, self.current_sample))
+
+        print("Rank: %d, Parent PID: %d, Current PID: %d" % \
+                (hvd.rank(), os.getppid(), os.getpid()))
+
+        # Lock threads for data reset
+#        self.lock.acquire();
+        
+#        print("Rank: %d, Reset dataset %d of %d for mp-locked workers." % \
+#                (hvd.rank(), self.current_file + 1, self.num_files))
+
+        if (self.current_file == self.num_files):
+            self.file_idxs = np.random.permutation(np.arange(self.num_files))
+            self.current_file = 0
+
+        # Load file into memory
+        self.input_dataset = np.load(self.input_fpaths[self.file_idxs[self.current_file]])
+        self.output_dataset = np.load(self.output_fpaths[self.file_idxs[self.current_file]])
+
+        # Reshape data
+        self.input_dataset = np.reshape(self.input_dataset, \
+                                        self.input_shape)
+        self.output_dataset = np.reshape(self.output_dataset, \
+                                         self.output_shape)
+
+        # Subset data
+        self.input_dataset = self.input_dataset[:, self.input_mask]
+        self.output_dataset = self.output_dataset[:, self.output_mask]
+
+        # Scale data
+        self.input_dataset = self.input_scaler.do_scaling_sample(self.input_dataset)
+        self.output_dataset = self.output_scaler.do_scaling_sample(self.output_dataset)
+
+#        self.mutex   = mp.Semaphore(1)
+#        self.barrier_sema = mp.Semaphore(0)
+
+#        self.barrier = mp.Barrier(self.args.num_data_workers)
+
+#        self.current_file += 1
+#        self.current_sample = 0
+
+#        self.lock.release()
+
 
 
     # Fetch a sample
     def __getitem__(self, idx):
-      
-        file_idx = idx // self.num_samples
+     
+        # idx to vector location
+#        file_idx = idx // self.num_samples
+#        sample_idx = idx % self.num_samples
+
+        # read data 
+#        sample_input = self.input_datasets[file_idx][sample_idx]
+#        sample_output = self.output_datasets[file_idx][sample_idx]
+
+        # subset and scale data
+#        scaled_input  = self.input_scaler.do_scaling_sample(sample_input[self.input_subset])
+#        scaled_output = self.output_scaler.do_scaling_sample(sample_output[self.output_subset])
+
+        # create torch tensor
+#        input_tensor  = torch.tensor(scaled_input, dtype=torch.float32)
+#        output_tensor = torch.tensor(scaled_output, dtype=torch.float32)
+ 
+        if (self.reset and self.current_sample >= (self.num_samples / hvd.size())):
+            #self.mp_complete = mp.Value('i', False, lock=False)
+
+            #self.lock.acquire()
+
+            print("Rank %d, Before PID:  %d" % (hvd.rank(), os.getpid()))
+
+            pid = self.barrier.wait()
+
+            print("Rank %d, Before PID: %d" % (hvd.rank(), pid))
+
+            #if (not self.mp_complete.value):
+            if (pid == 0):
+
+                print("Rank: %d, Entering reset datset %d" % (hvd.rank(), pid))
+                self.reset_dataset()
+
+            self.current_file += 1
+            self.current_sample = 0
+
+            print("Rank: %d, PID %d waiting or Done" % (hvd.rank(), pid))
+
+            self.barrier.wait()
+
+#            print("Rank: %d, Current_file Before: %d" % (hvd.rank(), self.current_file))
+
+#            self.mp_complete.value = True
+
+#            self.lock.release()
+
+#            self.barrier.acquire()
+#            self.barrier.release()
+
+#            print("Rank: %d, Current_file After: %d" % (hvd.rank(), self.current_file))
+        
+        self.current_sample += self.args.num_data_workers
         sample_idx = idx % self.num_samples
 
-        scaled_input  = self.input_scaler.do_scaling_sample(self.input_datasets[file_idx][sample_idx])
-        scaled_output = self.output_scaler.do_scaling_sample(self.output_datasets[file_idx][sample_idx])
+#        if (self.current_sample % 1000 == 0):
+#            print("CurrSample: %d, SampleIDX: %d" % (self.current_sample, sample_idx))
 
-        input_tensor  = torch.tensor(scaled_input).float()
-        output_tensor = torch.tensor(scaled_output).float()
+        input_tensor = torch.tensor(self.input_dataset[sample_idx, :], dtype=torch.float32)
+        output_tensor = torch.tensor(self.output_dataset[sample_idx, :], dtype=torch.float32)
 
         return input_tensor, output_tensor
+
 
     # Number of samples in dataset
     def __len__(self):
@@ -264,7 +420,7 @@ class Big_Data_Scaler:
 
         self.no_scaling         = not standardize and not normalize
 
-        print("\nCalculating scaling factors.")
+        print("Calculating scaling factors.")
         self.setup_scaling()
 
     
@@ -501,7 +657,7 @@ class Big_Data_Scaler:
         self.factors[1, factor_idx] = \
             count / (count + num_new_vals) * old_std ** 2 + \
             num_new_vals / (count + num_new_vals) * new_std ** 2 + \
-            (count * num_new_vals) / (count + num_new_vals) * \
+            (count * num_new_vals) / (count + num_new_vals) ** 2 * \
             (old_mean - new_mean) ** 2
 
         self.factors[1, factor_idx] = np.sqrt(self.factors[1, factor_idx])

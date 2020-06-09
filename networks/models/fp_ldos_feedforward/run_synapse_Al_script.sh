@@ -23,63 +23,73 @@ fi
 #DS=random
 DS=fp_ldos
 
+# Test Case
 MAT=Al
-NXYZ=200
-TMP=298K
+#TMP=298K
+TMP=933K
 GC=2.699
+NXYZ=200
 
 FPL=94
-
-#LDOSL=128
 LDOSL=250
 
 #SSHOT=5
-SSHOT=3
+#SSHOT=3
+SSHOTS="4"
 
 
 
 
 ### Optimizer/Training
 
-EPCS=250
+#EPCS=250
 #EPCS=100
-#EPCS=1
+#EPCS=10
+EPCS=2
 
 TBS=4000
 #BATS="16 32 64"
 #BATS="4000"
+#BS=1000
 BS=4000
 
 #LRS=".0005 .0001 .00005 .00001"
 #LRS=".0001 .00005 .00001"
-LRS=".0001 .00005 .00001"
+LR=.00001
 ES=.99999
 EP=8
 OP=4
 
-#LSTMIL="1 2 4 8"
+#LIL="6"
 LIL=1
 
-NUMW=2
+#NUMW=2
+NUMW=4
+#NUMWS="0 1 2 3 5 6 7 8"
 
 # Network
 WID=800
+#WID=300
 MIDLYS=2
+#MIDLYS=3
 AE=.8
 
 #   --model-lstm-network \
 #   --adam \
 #   --skip-connection \
+#   --big-charm-data \
 
 
-for LR in $LRS
+for SSHOT in $SSHOTS
 do
 
     ${EXE} -np ${GPUS} ${PYT} ${DRVR} \
         --dataset ${DS} \
-        --material ${MAT} \
         --epochs ${EPCS} \
+        --big-charm-data \
+        --no-testing \
         --adam \
+        --material ${MAT} \
         --nxyz ${NXYZ} \
         --temp ${TMP} \
         --gcc ${GC} \
@@ -108,7 +118,7 @@ do
 done
 
 
-
+#### Additional options
 
 #        --save-training-data \
 
@@ -119,310 +129,18 @@ done
 
 #        --power-spectrum-only \
 
-#    --no-hidden-state \
-
-#    --fp-row-scaling \
-#    --fp-standard-scaling \
-#    --ldos-max-only \
+#        --no-hidden-state \
 
 
 
+#        --ldos-max-only \
 
-############ FP LDOS Row
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --fp-row-scaling \
-#    --ldos-row-scaling \
-#    --fp-standard-scaling \
-#    --ldos-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fprow_fpstand_ldosrow_ldosstand.log
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --fp-row-scaling \
-#    --ldos-row-scaling \
-#    --fp-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fprow_fpstand_ldosrow_ldosmm.log
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --fp-row-scaling \
-#    --ldos-row-scaling \
-#    --ldos-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fprow_fpmm_ldosrow_ldosstand.log
-#
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --fp-row-scaling \
-#    --ldos-row-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fprow_fpmm_ldosrow_ldosmm.log
-#
-############ FP Row, LDOS Total
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --fp-row-scaling \
-#    --fp-standard-scaling \
-#    --ldos-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fprow_fpstand_ldostot_ldosstand.log
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --fp-row-scaling \
-#    --fp-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fprow_fpstand_ldostot_ldosmm.log
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --fp-row-scaling \
-#    --ldos-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fprow_fpmm_ldostot_ldosstand.log
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --fp-row-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fprow_fpmm_ldostot_ldosmm.log
-#
-#
-############ FP Tot, LDOS Row
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --ldos-row-scaling \
-#    --fp-standard-scaling \
-#    --ldos-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fptot_fpstand_ldosrow_ldosstand.log
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --ldos-row-scaling \
-#    --fp-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fptot_fpstand_ldosrow_ldosmm.log
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --ldos-row-scaling \
-#    --ldos-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fptot_fpmm_ldosrow_ldosstand.log
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --ldos-row-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fptot_fpmm_ldosrow_ldosmm.log
-#
-#
-#
-############ FP LDOS Tot
-#
-#
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --fp-standard-scaling \
-#    --ldos-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fptot_fpstand_ldostot_ldosstand.log
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --fp-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fptot_fpstand_ldostot_ldosmm.log
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    --ldos-standard-scaling \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fptot_fpmm_ldostot_ldosstand.log
-#
-#
-#${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-#    --dataset ${DS} \
-#    --epochs ${EPCS} \
-#    --model ${MDL} \
-#    --nxyz ${NXYZ} \
-#    --temp ${TM} \
-#    --gcc ${GC} \
-#    --optim-patience ${OP} \
-#    --early-patience ${EP} \
-#    --early-stopping ${ES} \
-#    --lr ${LR} \
-#    --num-snapshots ${SSHOT} \
-#    2>&1 | tee ./logs/fp_ldos_synapse_${GPUS}gpus_${TM}_${GC}gcc_${MDL}model_${SSHOT}snapshots_${EPCS}epochs_${NXYZ}nxyz_${LR}learnrate_fptot_fpmm_ldostot_ldosmm.log
-#
-#
-
-
-
-
-#    --fp-row-scaling \
-#    --ldos-row-scaling \
-#    --fp-standard-scaling \
-#    --ldos-standard-scaling \
-#    --fp-log \
-#    --ldos-log \
+#        --fp-row-scaling \
+#        --ldos-row-scaling \
+#        --fp-standard-scaling \
+#        --ldos-standard-scaling \
+#        --fp-log \
+#        --ldos-log \
 
 
 
