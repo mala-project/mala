@@ -182,6 +182,8 @@ parser.add_argument('--tb-ldos-comparisons', type=int, default=4, metavar='N',
 # Other options
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='disables CUDA training')
+parser.add_argument('--no-pinned-memory', action='store_true', default=False,
+                    help='do not use pinned memory for data staging')
 parser.add_argument('--num-data-workers', type=int, default=4, metavar='N',
                     help='number of data workers for async gpu data ' + \
                          'movement (default: 4)')
@@ -275,8 +277,13 @@ hvd.allreduce(torch.tensor(0), name='barrier')
 #args.writer = SummaryWriter(args.tb_output_dir)
 
 # num_workers for multiprocessed data loading
-kwargs = {'num_workers': args.num_data_workers, 'pin_memory': True} \
-        if args.cuda else {}
+if (args.cuda):
+    if (args.no_pinned_memory):
+        kwargs = {'num_workers': args.num_data_workers, 'pin_memory': False}
+    else:
+        kwargs = {'num_workers': args.num_data_workers, 'pin_memory': True}
+else:
+    kwargs = {}
 
 if (hvd.rank() == 0):
     print("Parser Arguments")
@@ -512,7 +519,7 @@ if (not args.no_testing):
 
 else:
     if (hvd.rank() == 0):
-        print("Rank: %d, Skip creating the test sampler/loader.")
+        print("Skip creating the test sampler/loader.")
 
     test_sampler = None
     test_loader = None
@@ -673,7 +680,7 @@ if (hvd.rank() == 0):
 
 tic = timeit.default_timer()
 
-if (args.no_testing):
+if (not args.no_testing):
     test_loss = 0.0
     if (hvd.rank() == 0):
         test_loss = trainer.test()
@@ -701,11 +708,13 @@ if (hvd.rank() == 0):
     print("\nSuccess!\n")
     print("\n\n---Results---\n")
     print("Total Epochs: \t\t%d" % (epoch))
-    print("Total Time: \t\t%4.4f" % (tot_toc - tot_tic))
-    print("Setup Time: \t\t%4.4f" % (setup_toc - setup_tic))
-    print("Train Time: \t\t%4.4f" % (train_time))
-    print("Valid Time: \t\t%4.4f" % (validation_time))
-    print(" Test Time: \t\t%4.4f\n\n" % (test_time))
+    print("Total Ranks: \t\t%d" % (hvd.size()))
+    print("--------------")
+    print("| Total Time: \t\t%4.4f" % (tot_toc - tot_tic))
+    print("| Setup Time: \t\t%4.4f" % (setup_toc - setup_tic))
+    print("| Train Time: \t\t%4.4f" % (train_time))
+    print("| Valid Time: \t\t%4.4f" % (validation_time))
+    print("|  Test Time: \t\t%4.4f\n\n" % (test_time))
 
 
 hvd.shutdown()

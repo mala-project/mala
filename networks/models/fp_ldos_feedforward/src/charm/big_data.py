@@ -85,6 +85,7 @@ class Big_Charm_Dataset(torch.utils.data.Dataset):
 
 
         tic = timeit.default_timer()
+        print("Input scaling.")
         self.input_scaler  = Big_Data_Scaler(input_fpaths, \
                                              num_samples, \
                                              input_sample_shape, \
@@ -97,6 +98,7 @@ class Big_Charm_Dataset(torch.utils.data.Dataset):
         hvd.allreduce(torch.tensor(0), name="barrier")
         
         tic = timeit.default_timer()
+        print("Output scaling.")
         self.output_scaler = Big_Data_Scaler(output_fpaths, \
                                              num_samples, \
                                              output_sample_shape, \
@@ -162,8 +164,11 @@ class Big_Charm_Dataset(torch.utils.data.Dataset):
 
         # Set the starting dataset
 
-#        self.lock.acquire()
+        self.input_dataset = None
+        self.output_dataset = None
+
         self.reset_dataset()
+#        self.lock.acquire()
 #        self.lock.release()
 
 
@@ -202,11 +207,11 @@ class Big_Charm_Dataset(torch.utils.data.Dataset):
 #                                                 self.output_shape)  
           
 
-        print("Rank: %d, Reset dataset %d of %d for all workers. Current_sample: %d" % \
-                (hvd.rank(), self.current_file + 1, self.num_files, self.current_sample))
+#        print("Rank: %d, Reset dataset %d of %d for all workers. Current_sample: %d" % \
+#                (hvd.rank(), self.current_file + 1, self.num_files, self.current_sample))
 
-        print("Rank: %d, Parent PID: %d, Current PID: %d" % \
-                (hvd.rank(), os.getppid(), os.getpid()))
+#        print("Rank: %d, Parent PID: %d, Current PID: %d" % \
+#                (hvd.rank(), os.getppid(), os.getpid()))
 
         # Lock threads for data reset
 #        self.lock.acquire();
@@ -217,6 +222,9 @@ class Big_Charm_Dataset(torch.utils.data.Dataset):
         if (self.current_file == self.num_files):
             self.file_idxs = np.random.permutation(np.arange(self.num_files))
             self.current_file = 0
+
+        del self.input_dataset
+        del self.output_dataset
 
         # Load file into memory
         self.input_dataset = np.load(self.input_fpaths[self.file_idxs[self.current_file]])
@@ -272,16 +280,16 @@ class Big_Charm_Dataset(torch.utils.data.Dataset):
 
             #self.lock.acquire()
 
-            print("Rank %d, Before PID:  %d" % (hvd.rank(), os.getpid()))
+#            print("Rank %d, Before PID:  %d" % (hvd.rank(), os.getpid()))
 
             pid = self.barrier.wait()
 
-            print("Rank %d, Before PID: %d" % (hvd.rank(), pid))
+            print("Rank %d, Reset PID: %d" % (hvd.rank(), pid))
 
             #if (not self.mp_complete.value):
             if (pid == 0):
 
-                print("Rank: %d, Entering reset datset %d" % (hvd.rank(), pid))
+                print("Rank: %d, Entering reset datset on PID %d" % (hvd.rank(), pid))
                 self.reset_dataset()
 
             self.current_file += 1
@@ -324,7 +332,7 @@ class Big_Charm_Dataset(torch.utils.data.Dataset):
 
 
 # Compressed Dataset
-#class Compressed_Dataset(torch.utils.data.Dataset):
+#class Big_Compressed_Dataset(torch.utils.data.Dataset):
 #
 #    def __init__(self, args, data_name, fp_data, ldos_data):
 #
@@ -492,52 +500,52 @@ class Big_Data_Scaler:
 
 
     # Scale batch (or full) data
-    def do_scaling_batch(self, x):
-
-        if (self.no_scaling):
-            return x
-
-        if (not self.element_scaling):
-            if (self.normalize):
-                return (x - self.factors[0, 0]) / (self.factors[1, 0] - self.factors[0, 0])
-            elif(self.standardize):
-                return (x - self.factors[0, 0]) / self.factors[1, 0]
-            else:
-                raise ValueError("\n\nBad scaling choices.\n\n")
- 
-        else:
-            if (self.normalize):
-                return (x - self.factors[0, :, None]) / (self.factors[1, :, None] - self.factors[0, :, None])
-            elif (self.standardize):
-                return (x - self.factors[0, :, None]) / self.factors[1, :, None]
-                
-            else:
-                raise ValueError("\n\nBad scaling choices.\n\n")
-
-
-    # Undo scaling of batch (or full) data
-    def undo_scaling_batch(self, x):
-
-        if (self.no_scaling):
-            return x
-
-        if (not self.element_scaling):
-            if (self.normalize):
-                return (x * (self.factors[1, 0] - self.factors[0, 0])) + self.factors[0, 0]
-            elif(self.standardize):
-                return (x * self.factors[1, 0]) + self.factors[1, 0]
-            else:
-                raise ValueError("\n\nBad scaling choices.\n\n")
- 
-        else:
-            if (self.normalize):
-                return (x * (self.factors[1, :, None] - self.factors[0, :, None])) + self.factors[0, :, None]
-            elif (self.standardize):
-                return (x * self.factors[1, :, None]) + self.factors[0, :, None]
-                
-            else:
-                raise ValueError("\n\nBad scaling choices.\n\n")
-
+#    def do_scaling_batch(self, x):
+#
+#        if (self.no_scaling):
+#            return x
+#
+#        if (not self.element_scaling):
+#            if (self.normalize):
+#                return (x - self.factors[0, 0]) / (self.factors[1, 0] - self.factors[0, 0])
+#            elif(self.standardize):
+#                return (x - self.factors[0, 0]) / self.factors[1, 0]
+#            else:
+#                raise ValueError("\n\nBad scaling choices.\n\n")
+# 
+#        else:
+#            if (self.normalize):
+#                return (x - self.factors[0, :, None]) / (self.factors[1, :, None] - self.factors[0, :, None])
+#            elif (self.standardize):
+#                return (x - self.factors[0, :, None]) / self.factors[1, :, None]
+#                
+#            else:
+#                raise ValueError("\n\nBad scaling choices.\n\n")
+#
+#
+#    # Undo scaling of batch (or full) data
+#    def undo_scaling_batch(self, x):
+#
+#        if (self.no_scaling):
+#            return x
+#
+#        if (not self.element_scaling):
+#            if (self.normalize):
+#                return (x * (self.factors[1, 0] - self.factors[0, 0])) + self.factors[0, 0]
+#            elif(self.standardize):
+#                return (x * self.factors[1, 0]) + self.factors[1, 0]
+#            else:
+#                raise ValueError("\n\nBad scaling choices.\n\n")
+# 
+#        else:
+#            if (self.normalize):
+#                return (x * (self.factors[1, :, None] - self.factors[0, :, None])) + self.factors[0, :, None]
+#            elif (self.standardize):
+#                return (x * self.factors[1, :, None]) + self.factors[0, :, None]
+#                
+#            else:
+#                raise ValueError("\n\nBad scaling choices.\n\n")
+#
 
 
 

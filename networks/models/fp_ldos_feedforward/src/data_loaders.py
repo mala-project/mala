@@ -364,12 +364,16 @@ def load_data_fp_ldos(args):
         "_snapshot%d.npy" % (args.validation_snapshot))
  
     hvd.allreduce(torch.tensor(0), name='barrier')
-    
-    print("Rank: %d, Reading test snapshot %d" % (hvd.rank(), args.test_snapshot))
-    test_fp_np = np.load(args.fp_dir + args.fp_data_fpath + \
-        "_snapshot%d.npy" % (args.test_snapshot))
-    test_ldos_np = np.load(args.ldos_dir + args.ldos_data_fpath + \
-        "_snapshot%d.npy" % (args.test_snapshot))
+  
+    if (not args.no_testing):
+        print("Rank: %d, Reading test snapshot %d" % (hvd.rank(), args.test_snapshot))
+        test_fp_np = np.load(args.fp_dir + args.fp_data_fpath + \
+            "_snapshot%d.npy" % (args.test_snapshot))
+        test_ldos_np = np.load(args.ldos_dir + args.ldos_data_fpath + \
+            "_snapshot%d.npy" % (args.test_snapshot))
+    else:
+        test_fp_np = None
+        test_ldos_np = None
 
     hvd.allreduce(torch.tensor(0), name='barrier')
    
@@ -383,7 +387,8 @@ def load_data_fp_ldos(args):
 
     full_train_fp_np = full_train_fp_np[:, :, :, :, fp_idxs]
     validation_fp_np = validation_fp_np[:, :, :, fp_idxs]
-    test_fp_np = test_fp_np[:, :, :, fp_idxs]
+    if (not args.no_testing):
+        test_fp_np = test_fp_np[:, :, :, fp_idxs]
 
 
     # Pick subset of LDOS vector that the user requested
@@ -395,11 +400,12 @@ def load_data_fp_ldos(args):
         
     full_train_ldos_np = full_train_ldos_np[:, :, :, :, ldos_idxs]
     validation_ldos_np = validation_ldos_np[:, :, :, ldos_idxs]
-    test_ldos_np = test_ldos_np[:, :, :, ldos_idxs]
+    if (not args.no_testing):
+        test_ldos_np = test_ldos_np[:, :, :, ldos_idxs]
 
 
-    fp_shape = test_fp_np.shape
-    ldos_shape = test_ldos_np.shape
+    fp_shape = validation_fp_np.shape
+    ldos_shape = validation_ldos_np.shape
 
     fp_pts = fp_shape[0] * fp_shape[1] * fp_shape[2]
     ldos_pts = ldos_shape[0] * ldos_shape[1] * ldos_shape[2]
@@ -443,9 +449,10 @@ def load_data_fp_ldos(args):
 
     validation_fp_np = validation_fp_np.reshape([args.validation_pts, args.fp_length])
     validation_ldos_np = validation_ldos_np.reshape([args.validation_pts, args.ldos_length])
-    
-    test_fp_np = test_fp_np.reshape([args.test_pts, args.fp_length])
-    test_ldos_np = test_ldos_np.reshape([args.test_pts, args.ldos_length])
+   
+    if (not args.no_testing):
+        test_fp_np = test_fp_np.reshape([args.test_pts, args.fp_length])
+        test_ldos_np = test_ldos_np.reshape([args.test_pts, args.ldos_length])
     
 
     # Scale fingerprints
@@ -550,12 +557,19 @@ def scale_data(args, data_name, \
                norm_scaling=False, max_only=False, \
                standard_scaling=False):
 
+    if (data_test == None and not args.calc_training_norm_only):
+        if (hvd.rank() == 0):
+            print("\n\nData_test is set as place holder. Scaler calculation is off.\n\n")
+        data_test = np.ones([1, data_train.shape[1]])
+    elif (data_test == None):
+        data_test = np.ones([1, data_train.shape[1]])
+
     if (len(data_train.shape) != 2 or len(data_validation.shape) != 2 or len(data_test.shape) != 2):
         if (hvd.rank() == 0):
             print("\nIssue in %s data shape lengths (train, valid, test): (%d, %d, %d), expected length 2. Exiting.\n\n" \
                 % (data_name, len(data_train.shape), len(data_validation.shape), len(data_test.shape)))
         exit(0);
-   
+  
     # Number of elements in each sample vector
     data_length = data_train.shape[1]
 

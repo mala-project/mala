@@ -17,10 +17,14 @@ import torch
 import pickle
 
 sys.path.append("../fp_ldos_feedforward/src")
-
 import fp_ldos_networks
 import train_networks
 import data_loaders
+
+sys.path.append("../fp_ldos_feedforward/src/charm")
+import big_data
+
+
 
 # Training settings
 parser = argparse.ArgumentParser(description='FP-LDOS Feedforward Network')
@@ -35,15 +39,15 @@ parser.add_argument('--elvls', type=int, default=250, metavar='ELVLS',
 parser.add_argument('--nxyz', type=int, default=200, metavar='GCC',
                     help='number of x/y/z elements (default: 200)')
 parser.add_argument('--snapshot', type=int, default=2, metavar='N',
-                    help='snapshot of temp/gcc pair to compare (default: 2)')
+                    help='snapshot of temp/gcc with DOS file for egrid (default: 2)')
 #parser.add_argument('--num-atoms', type=int, default=256, metavar='N',
 #                    help='number of atoms in the snapshot (default: 256)')
-parser.add_argument('--num-slices', type=int, default=4, metavar='N',
-                    help='number of density z slices to plot (default: 4)')
+#parser.add_argument('--num-slices', type=int, default=4, metavar='N',
+#                    help='number of density z slices to plot (default: 4)')
 #parser.add_argument('--no_convert', action='store_true', default=False,
 #                    help='Do not Convert units from Rydbergs')
-parser.add_argument('--log', action='store_true', default=False,
-                    help='Apply log function to densities')
+#parser.add_argument('--log', action='store_true', default=False,
+#                    help='Apply log function to densities')
 parser.add_argument('--integration', type=str, default="analytic", metavar='T',
                     choices=["analytic", "trapz", "simps", "quad"],
                     help='type of integration from {"trapz", "simps", "quad", "analytic"} (default: "analytic")')
@@ -121,14 +125,7 @@ if (hvd.rank() == 0):
 
 args.snapshots = np.min([len(args.fp_files), len(args.ldos_files)])
 
-
-
-
-
-#args.snapshots = 3;
-
-
-
+#args.snapshots = 1;
 
 
 #exit(0)
@@ -227,7 +224,9 @@ for idx, current_dir in enumerate(args.output_dirs):
     pred_ldos_fname = current_dir + "fp_ldos_predictions.npy"
 
 
-    if (not os.path.exists(pred_ldos_fname)):
+    if ("fp_ldos_dir" in current_dir):
+        print("Found dir: %s. Processing." % current_dir)
+    elif (not os.path.exists(pred_ldos_fname)):
         if (hvd.rank() == 0):
             print("Skipped %s! No predictions." % current_dir)
         continue;
@@ -243,30 +242,32 @@ for idx, current_dir in enumerate(args.output_dirs):
 #            print("Skipped %s! Bad elvls." % current_dir)
 #        continue;
 
+    fp_scaler_fname = glob(current_dir + "charm_input*")
+    ldos_scaler_fname = glob(current_dir + "charm_output*")
 
-    fp_factor_fname = glob(current_dir + "fp_row*.npy") 
-    ldos_factor_fname = glob(current_dir + "ldos_*.npy")
-    shift_fname = glob(current_dir + "log_shift.npy")
+#    fp_factor_fname = glob(current_dir + "fp_row*.npy") 
+#    ldos_factor_fname = glob(current_dir + "ldos_*.npy")
+#    shift_fname = glob(current_dir + "log_shift.npy")
 
     if (hvd.rank() == 0):
-        print("Found fp factor file: %s" % fp_factor_fname[0])
-        print("Found ldos factor file: %s" % ldos_factor_fname[0])
+        print("Found fp scaler file: %s" % fp_scaler_fname[0])
+        print("Found ldos scaler file: %s" % ldos_scaler_fname[0])
 
     # Normalization factors
-    fp_factors = np.load(fp_factor_fname[0])
-    ldos_factors = np.load(ldos_factor_fname[0])
+    fp_scaler = torch.load(fp_scaler_fname[0])
+    ldos_scaler = torch.load(ldos_scaler_fname[0])
 
 
-    fp_row_norms = "row" in fp_factor_fname[0]
-    fp_minmax_norms = "max" in fp_factor_fname[0]
+#    fp_row_norms = "row" in fp_factor_fname[0]
+#    fp_minmax_norms = "max" in fp_factor_fname[0]
 
-    ldos_row_norms = "row" in ldos_factor_fname[0]
-    ldos_minmax_norms = "max" in ldos_factor_fname[0]
+#    ldos_row_norms = "row" in ldos_factor_fname[0]
+#    ldos_minmax_norms = "max" in ldos_factor_fname[0]
 
 
     model_fpath = current_dir + "fp_ldos_model.pth"
-#    args_fpath = current_dir + "commandline_args.pth"
-    args_fpath = current_dir + "commandline_args.pkl"
+    args_fpath = current_dir + "commandline_args.pth"
+#    args_fpath = current_dir + "commandline_args.pkl"
 
     if (os.path.exists(model_fpath) and os.path.exists(args_fpath)):
         if (hvd.rank() == 0):
@@ -277,10 +278,10 @@ for idx, current_dir in enumerate(args.output_dirs):
     model = torch.load(model_fpath)
     model = model.eval()
 
-    #model_args = torch.load(args_fpath)
+    model_args = torch.load(args_fpath)
 
 #    margs_file = open(args_fpath, "rb")
-    model_args = pickle.load(open(args_fpath, "rb"))
+#    model_args = pickle.load(open(args_fpath, "rb"))
 #    margs_file.close()
 
 
@@ -289,11 +290,10 @@ for idx, current_dir in enumerate(args.output_dirs):
 #    exit(0);
 
 
+    old_fp = None
     old_ldos = None
     predictions = None
-
     inference_fp = None
-    old_fp = None
 
     for i in range(args.snapshots):
 
@@ -308,6 +308,7 @@ for idx, current_dir in enumerate(args.output_dirs):
         # Remove Coords
         inference_fp = inference_fp[:,:,:, 3:] 
         inference_fp = np.reshape(inference_fp, [model_args.grid_pts, model_args.fp_length])
+#        inference_fp = np.reshape(inference_fp, [args.nxyz ** 3, 91])
 
 #        print(fp_factors.shape)
 
@@ -315,10 +316,13 @@ for idx, current_dir in enumerate(args.output_dirs):
         if (hvd.rank() == 0):
             print("\nTransforming model input FPs")
         
-        for row in range(model_args.fp_length):
-            inference_fp[:, row] = (inference_fp[:, row] - fp_factors[0, row]) / fp_factors[1, row]
-       
-        if (i > 0):
+#        for row in range(model_args.fp_length):
+#            inference_fp[:, row] = (inference_fp[:, row] - fp_factors[0, row]) / fp_factors[1, row]
+
+        inference_fp = fp_scaler.do_scaling_sample(inference_fp)
+
+
+        if (False and i > 0):
             print("Old/New FP Diffs: ")
 
             for row in range(model_args.fp_length):
@@ -379,7 +383,7 @@ for idx, current_dir in enumerate(args.output_dirs):
 
 #        exit(0);
 
-        if (i > 0):
+        if (False and i > 0):
             print("Old/New LDOS Diffs: ")
 
             for row in range(model_args.ldos_length):
@@ -398,31 +402,36 @@ for idx, current_dir in enumerate(args.output_dirs):
 
 
         # Denormalizing LDOS
+#        if (hvd.rank() == 0):
+#            print("Denormalizing LDOS with row: %r, minmax: %r" % (ldos_row_norms, ldos_minmax_norms))
+
+#        if (ldos_row_norms):
+#            if(ldos_minmax_norms):
+#                for row, (minv, maxv) in enumerate(np.transpose(ldos_factors)):
+#                    pred_ldos.ldos[:, :, :, row] = (pred_ldos.ldos[:, :, :, row] * (maxv - minv)) + minv
+#            else:
+#                for row, (meanv, stdv) in enumerate(np.transpose(ldos_factors)):
+#                    pred_ldos.ldos[:, :, :, row] = (pred_ldos.ldos[:, :, :, row] * stdv) + meanv
+#        else:
+#            if(ldos_minmax_norms):
+#                for row, (minv, maxv) in enumerate(np.transpose(ldos_factors)):
+#                    pred_ldos.ldos = (pred_ldos.ldos * (maxv - minv)) + minv
+#            else:
+#                for row, (meanv, stdv) in enumerate(np.transpose(ldos_factors)):
+#                    pred_ldos.ldos = (pred_ldos.ldos * stdv) + meanv
+#
+#        if (len(shift_fname) != 0):
+#
+#            print("Reverting ldos log and shift")
+#            log_shift = np.load(shift_fname[0])
+#            pred_ldos.ldos = np.exp(pred_ldos.ldos) - log_shift
+
+
         if (hvd.rank() == 0):
-            print("Denormalizing LDOS with row: %r, minmax: %r" % (ldos_row_norms, ldos_minmax_norms))
+            print("Denormalizing LDOS with charm_scaler")
 
-        if (ldos_row_norms):
-            if(ldos_minmax_norms):
-                for row, (minv, maxv) in enumerate(np.transpose(ldos_factors)):
-                    pred_ldos.ldos[:, :, :, row] = (pred_ldos.ldos[:, :, :, row] * (maxv - minv)) + minv
-            else:
-                for row, (meanv, stdv) in enumerate(np.transpose(ldos_factors)):
-                    pred_ldos.ldos[:, :, :, row] = (pred_ldos.ldos[:, :, :, row] * stdv) + meanv
-        else:
-            if(ldos_minmax_norms):
-                for row, (minv, maxv) in enumerate(np.transpose(ldos_factors)):
-                    pred_ldos.ldos = (pred_ldos.ldos * (maxv - minv)) + minv
-            else:
-                for row, (meanv, stdv) in enumerate(np.transpose(ldos_factors)):
-                    pred_ldos.ldos = (pred_ldos.ldos * stdv) + meanv
+        pred_ldos.ldos = ldos_scaler.undo_scaling_sample(pred_ldos.ldos)
 
-        if (len(shift_fname) != 0):
-
-            print("Reverting ldos log and shift")
-            log_shift = np.load(shift_fname[0])
-            pred_ldos.ldos = np.exp(pred_ldos.ldos) - log_shift
-
-        
         pred_ldos.do_calcs()
 
 
