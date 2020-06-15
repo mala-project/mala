@@ -146,6 +146,8 @@ parser.add_argument('--big-data', action='store_true', default=False,
                     help='do not load data into memory (big data case)')
 parser.add_argument('--big-charm-data', action='store_true', default=False,
                     help='do not load data into memory (big charm data case)')
+parser.add_argument('--big-clustered-data', action='store_true', default=False,
+                    help='do not load data into memory and cluster data (big charm data case)')
 parser.add_argument('--material', type=str, default="Al", metavar='MAT',
                     help='material of snapshots to train on (default: "Al")')
 parser.add_argument('--temp', type=str, default="298K", metavar='T',
@@ -158,6 +160,13 @@ parser.add_argument('--no-testing', action='store_true', default=False,
                     help='only train with training/validation snapshots (i.e. test later)')
 parser.add_argument('--water', action='store_true', default=False,
                     help='train on water fp and ldos files')
+### Clustering
+parser.add_argument('--cluster-train-ratio', type=float, default=.05, metavar='N',
+                    help='how much training data to use for the compression fit(default: .05)')
+parser.add_argument('--cluster-sample-ratio', type=float, default=.1, metavar='N',
+                    help='portion of fp-ldos training to use from each cluster (default: .1)')
+parser.add_argument('--num-clusters', type=int, default=100, metavar='N',
+                    help='number of clusters for fp data (default: 100)')
 
 
 # Directory Locations
@@ -185,6 +194,9 @@ parser.add_argument('--no-cuda', action='store_true', default=False,
 parser.add_argument('--no-pinned-memory', action='store_true', default=False,
                     help='do not use pinned memory for data staging')
 parser.add_argument('--num-data-workers', type=int, default=4, metavar='N',
+                    help='number of data workers for async gpu data ' + \
+                         'movement (default: 4)')
+parser.add_argument('--num-test-workers', type=int, default=4, metavar='N',
                     help='number of data workers for async gpu data ' + \
                          'movement (default: 4)')
 parser.add_argument('--num-threads', type=int, default=32, metavar='N',
@@ -280,8 +292,10 @@ hvd.allreduce(torch.tensor(0), name='barrier')
 if (args.cuda):
     if (args.no_pinned_memory):
         kwargs = {'num_workers': args.num_data_workers, 'pin_memory': False}
+        test_kwargs = {'num_workers': args.num_test_workers, 'pin_memory': False}
     else:
         kwargs = {'num_workers': args.num_data_workers, 'pin_memory': True}
+        test_kwargs = {'num_workers': args.num_test_workers, 'pin_memory': True}
 else:
     kwargs = {}
 
@@ -401,17 +415,30 @@ elif (args.dataset == "fp_ldos" and args.big_charm_data):
         print("\n\nCreating train Charm dataset")
     hvd.allreduce(torch.tensor(0), name='barrier')
 
-    train_dataset       = big_data.Big_Charm_Dataset(args, \
-                                                     train_fp_fpaths, \
-                                                     train_ldos_fpaths, \
-                                                     args.nxyz ** 3, \
-                                                     input_shape, \
-                                                     output_shape, \
-                                                     input_subset, \
-                                                     output_subset, \
-                                                     input_scaler_kwargs, \
-                                                     output_scaler_kwargs) #, \
-                                                     #no_reset=False)
+    if (args.big_clustered_data):
+        train_dataset       = big_data.Big_Charm_Clustered_Dataset(args, \
+                                                                   train_fp_fpaths, \
+                                                                   train_ldos_fpaths, \
+                                                                   args.nxyz ** 3, \
+                                                                   input_shape, \
+                                                                   output_shape, \
+                                                                   input_subset, \
+                                                                   output_subset, \
+                                                                   input_scaler_kwargs, \
+                                                                   output_scaler_kwargs) #, \
+                                                                   #no_reset=False)
+    else:
+        train_dataset       = big_data.Big_Charm_Dataset(args, \
+                                                         train_fp_fpaths, \
+                                                         train_ldos_fpaths, \
+                                                         args.nxyz ** 3, \
+                                                         input_shape, \
+                                                         output_shape, \
+                                                         input_subset, \
+                                                         output_subset, \
+                                                         input_scaler_kwargs, \
+                                                         output_scaler_kwargs) #, \
+                                                         #no_reset=False)
 
     hvd.allreduce(torch.tensor(0), name='barrier')
     
@@ -429,9 +456,11 @@ elif (args.dataset == "fp_ldos" and args.big_charm_data):
                                                      output_subset) #, \
                                                      #mmap_mode=None)
     # Avoid recalculation of data scaler
-    validation_dataset.input_scaler = train_dataset.input_scaler
-    validation_dataset.output_scaler = train_dataset.output_scaler
-    
+#    validation_dataset.input_scaler = train_dataset.input_scaler
+#    validation_dataset.output_scaler = train_dataset.output_scaler
+ 
+    validation_dataset.set_scalers(train_dataset.input_scaler, train_dataset.output_scaler)
+
     hvd.allreduce(torch.tensor(0), name='barrier')
 
     if (hvd.rank() == 0):
@@ -449,8 +478,10 @@ elif (args.dataset == "fp_ldos" and args.big_charm_data):
                                                          output_subset) #, \
                                                          #mmap_mode=None)
     
-        test_dataset.input_scaler = train_dataset.input_scaler
-        test_dataset.output_scaler = train_dataset.output_scaler
+#        test_dataset.input_scaler = train_dataset.input_scaler
+#        test_dataset.output_scaler = train_dataset.output_scaler
+        
+        test_dataset.set_scalers(train_dataset.input_scaler, train_data.output_scaler)
     
     else:
         test_dataset = None
@@ -500,7 +531,7 @@ validation_loader = \
             validation_dataset, \
             batch_size=args.test_batch_size, \
             sampler=validation_sampler, \
-            **kwargs)
+            **test_kwargs)
 
 hvd.allreduce(torch.tensor(0), name='barrier')
 
@@ -515,7 +546,7 @@ if (not args.no_testing):
                 test_dataset, \
                 batch_size=args.test_batch_size, \
                 sampler=test_sampler, \
-                **kwargs)
+                **test_kwargs)
 
 else:
     if (hvd.rank() == 0):

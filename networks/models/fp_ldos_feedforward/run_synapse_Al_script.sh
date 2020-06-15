@@ -25,8 +25,8 @@ DS=fp_ldos
 
 # Test Case
 MAT=Al
-#TMP=298K
-TMP=933K
+TMP=298K
+#TMP=933K
 GC=2.699
 NXYZ=200
 
@@ -35,9 +35,19 @@ LDOSL=250
 
 #SSHOT=5
 #SSHOT=3
-SSHOTS="4"
+#SSHOTS="10"
+#SSHOTS="4 6 8 10"
 
+SSHOT=4
 
+#CLUSTERS="300"
+CLUSTER=200
+
+#CTRS=".01 .05 .1 .2 .4"
+CTR=.05
+
+#CSRS=".01 .05 .1 .2 .4"
+CSR=.4
 
 
 ### Optimizer/Training
@@ -47,11 +57,12 @@ SSHOTS="4"
 #EPCS=10
 EPCS=2
 
+#TBSS="4000 8000 16000 32000" 
 TBS=4000
 #BATS="16 32 64"
 #BATS="4000"
-#BS=1000
 BS=4000
+#BS=4000
 
 #LRS=".0005 .0001 .00005 .00001"
 #LRS=".0001 .00005 .00001"
@@ -63,9 +74,10 @@ OP=4
 #LIL="6"
 LIL=1
 
-#NUMW=2
-NUMW=4
+NUMW=1
+#NUMW=4
 #NUMWS="0 1 2 3 5 6 7 8"
+NUMTWS="1 2 4 8 16"
 
 # Network
 WID=800
@@ -77,16 +89,22 @@ AE=.8
 #   --model-lstm-network \
 #   --adam \
 #   --skip-connection \
+
 #   --big-charm-data \
+#   --big-clustered-data \
 
 
-for SSHOT in $SSHOTS
+for NUMTW in $NUMTWS
 do
 
     ${EXE} -np ${GPUS} ${PYT} ${DRVR} \
         --dataset ${DS} \
         --epochs ${EPCS} \
         --big-charm-data \
+        --num-clusters ${CLUSTER} \
+        --cluster-train-ratio ${CTR} \
+        --cluster-sample-ratio ${CSR} \
+        --no-pinned-memory \
         --no-testing \
         --adam \
         --material ${MAT} \
@@ -108,6 +126,7 @@ do
         --num-snapshots ${SSHOT} \
         --no-coords \
         --num-data-workers ${NUMW} \
+        --num-test-workers ${NUMTW} \
         --calc-training-norm-only \
         --fp-row-scaling \
         --fp-standard-scaling \
