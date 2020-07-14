@@ -21,9 +21,11 @@ import fp_ldos_networks
 import train_networks
 import data_loaders
 
+sys.path.append("../fp_ldos_feedforward/src/charm/clustering")
+import cluster_fingerprints
+
 sys.path.append("../fp_ldos_feedforward/src/charm")
 import big_data
-
 
 
 # Training settings
@@ -78,6 +80,9 @@ if (hvd.rank() == 0):
 
 
 tempv = int(args.temp[:-1])
+
+DFT_calculators.temp = tempv
+DFT_calculators.gcc  = float(args.gcc)
 #print("Tempv: %d" % tempv)
 
 #DFT_calculators.set_temp(tempv)
@@ -203,6 +208,9 @@ for i in range(args.snapshots):
     target_ldos.append(DFT_calculators.LDOS(dft_results[i], ldos_e_grid, args.ldos_files[i]))
     target_ldos[i].do_calcs()
 
+
+    print("TRUE BE: %4.4f, TARGET LDOS BE: %4.4f, DIFF %4.4f" % (true_eband[i], target_ldos[i].eband, (target_ldos[i].eband - true_eband[i])))
+
 #target_dos = qe_ldos.dos
 
 #target_dos_efermi = DFT_calculators.dos_2_efermi(target_dos, tempv, integration=args.integration)
@@ -216,12 +224,17 @@ if (hvd.rank() == 0):
 #hvd.shutdown();
 #exit(0);
 
+
+#models_idx = 0
+#models_limit = 1
+
 for idx, current_dir in enumerate(args.output_dirs):
 
     if (hvd.rank() == 0):
         print("\n\nPerforming inference for Model %d from output_dir: %s" % (idx, current_dir))
 
-    pred_ldos_fname = current_dir + "fp_ldos_predictions.npy"
+#    pred_ldos_fname = current_dir + "fp_ldos_predictions.npy"
+    pred_ldos_fname = current_dir + "fp_ldos_model.pth"
 
 
     if ("fp_ldos_dir" in current_dir):
@@ -230,6 +243,11 @@ for idx, current_dir in enumerate(args.output_dirs):
         if (hvd.rank() == 0):
             print("Skipped %s! No predictions." % current_dir)
         continue;
+
+#    if (models_idx >= models_limit):
+#        continue
+
+#    models_idx += 1
 
     # ML Predictions
 #    pred_ldos = np.load(current_dir + "fp_ldos_predictions.npy")

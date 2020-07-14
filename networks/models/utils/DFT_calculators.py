@@ -19,6 +19,7 @@ from functools import partial
 
 # Default temp (K)
 temp = 298
+#temp = 933
 
 # Default gcc
 gcc = 2.699
@@ -186,11 +187,11 @@ class LDOS:
                 (self.ldos.shape[0] * self.ldos.shape[1] * self.ldos.shape[2] * Br2AA**3)
 
         self.dos = DOS.from_ldos_data(self.dft, self.e_grid, self.ldos)
-        
+       
         self.e_fermi = dos_2_efermi(self.dos, \
                                     temperature=self.temperature, \
                                     integration=self.integration)
-        
+       
         self.eband = dos_2_eband(self.dos, \
                                  e_fermi=self.e_fermi, \
                                  temperature=self.temperature, \
