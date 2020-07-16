@@ -277,13 +277,6 @@ def load_data_random(args):
     return (train_dataset, validation_dataset, test_dataset)
 
 
-
-
-
-
-
-
-
 ###-----------------------------------------------------------------------###
 
 #

@@ -34,7 +34,9 @@ LDOSL=1
 #SSHOT=5
 #SSHOT=3
 
-SSHOT=10
+#SSHOT=10
+#SSHOT=26
+SSHOT=50
 
 
 
@@ -50,12 +52,13 @@ EPCS=250
 TBS=3125
 #BS=3125
 #BS=625
-BS=100
+BS=200
 
 
 # Learning rates
 #LRS=".0005 .0001 .00005 .00001"
-LRS=".0001 .00005 .00001 .000005 .000001"
+#LRS=".0001 .00005 .00001 .000005 .000001"
+LRS=".00001"
 #LR=.0001 
 
 # Necessary reduction in validation loss 
@@ -76,7 +79,7 @@ OP=4
 # then next to last layer is size ${LIL}
 # if ouptut size = 250 (ldos-case)
 # then next to last layer is size ${LIL} * 250
-LIL=20
+LIL=100
 
 # Asynch GPU data-loading
 NUMW=2
@@ -84,10 +87,10 @@ NUMW=2
 # Network
 
 #WIDS="20 50 100 200 300 400"
-WID=20
+WID=80
 
 #MIDLYSS="1 2 3 4 5 6"
-MIDLYS=2
+MIDLYS=3
 
 #MIDLYS=2
 AE=.8

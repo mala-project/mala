@@ -25,8 +25,8 @@ DS=fp_ldos
 
 # Test Case
 MAT=Al
-TMP=298K
-#TMP=933K
+#TMP=298K
+TMP=933K
 GC=2.699
 NXYZ=200
 
@@ -38,52 +38,62 @@ LDOSL=250
 #SSHOTS="10"
 #SSHOTS="4 6 8 10"
 
-SSHOT=4
+SSHOT=10
+#SSHOT=4
 
 #CLUSTERS="300"
-CLUSTER=200
+CLUSTER=400
 
 #CTRS=".01 .05 .1 .2 .4"
-CTR=.05
+CTR=.25
 
-#CSRS=".01 .05 .1 .2 .4"
-CSR=.4
+#CSRS=".01 .05 .1 .2 .4 .8 1.0"
+CSR=.1
 
 
 ### Optimizer/Training
 
-#EPCS=250
+EPCS=5000
 #EPCS=100
 #EPCS=10
-EPCS=2
+#EPCS=2
 
 #TBSS="4000 8000 16000 32000" 
 TBS=4000
 #BATS="16 32 64"
-#BATS="4000"
-BS=4000
+#BATS="1000 2000 8000"
+BS=1000
 #BS=4000
 
 #LRS=".0005 .0001 .00005 .00001"
-#LRS=".0001 .00005 .00001"
-LR=.00001
+LRS=".00005 .00001"
+#LR=.0005
 ES=.99999
+#ES=.99
 EP=8
 OP=4
+#EP=4
+#OP=2
 
 #LIL="6"
 LIL=1
 
 NUMW=1
-#NUMW=4
+#NUMW=16
 #NUMWS="0 1 2 3 5 6 7 8"
-NUMTWS="1 2 4 8 16"
+NUMTW=16
 
 # Network
-WID=800
+#WIDS="4000"
+#WID=800
+WID=4000
 #WID=300
+
+#MIDLYSS="4 5 6 7"
+#MIDLYSS="2 3"
+
+#MIDLYS=5
 MIDLYS=2
-#MIDLYS=3
 AE=.8
 
 #   --model-lstm-network \
@@ -93,8 +103,10 @@ AE=.8
 #   --big-charm-data \
 #   --big-clustered-data \
 
-
-for NUMTW in $NUMTWS
+#for BS in $BATS
+for LR in $LRS
+#for WID in $WIDS
+#for MIDLYS in $MIDLYSS
 do
 
     ${EXE} -np ${GPUS} ${PYT} ${DRVR} \

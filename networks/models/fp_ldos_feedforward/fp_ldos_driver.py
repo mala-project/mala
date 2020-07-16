@@ -68,6 +68,8 @@ parser.add_argument('--grad-clip', type=float, default=0.25, metavar='M',
 # Model
 parser.add_argument('--model-lstm-network', action='store_true', default=False,
                     help='use the lstm network')
+parser.add_argument('--model-gnn-network', action='store_true', default=False,
+                    help='use the gnn network')
 parser.add_argument('--stacked-auto', action='store_true', default=False,
                     help='use the stacked autoencoder layers')
 parser.add_argument('--deep-auto', action='store_true', default=False,
@@ -561,6 +563,8 @@ hvd.allreduce(torch.tensor(0), name='barrier')
 # Choose and create a Model
 if (args.model_lstm_network):
     model = fp_ldos_networks.FP_LDOS_LSTM_Net(args)
+elif (args.model_gnn_network):
+    raise ValueError("For James...")
 else:
     model = fp_ldos_networks.FP_LDOS_FF_Net(args)
 

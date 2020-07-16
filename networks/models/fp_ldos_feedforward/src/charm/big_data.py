@@ -468,7 +468,7 @@ class Big_Charm_Clustered_Dataset(torch.utils.data.Dataset):
             print("Clustering time %d: %4.4f" % (idx, toc - tic))
 
             for i in range(args.num_clusters):
-                self.samples_per_cluster[idx, i] = np.sum(self.clustered_inputs[idx, :] == i)
+                self.samples_per_cluster[idx, i] = np.sum(self.clustered_inputs[idx, :] == i, dtype=np.int64)
                
                 if (hvd.rank() == 0):
                     print("Cluster %d: %d" % (i, self.samples_per_cluster[idx, i]))
@@ -498,6 +498,8 @@ class Big_Charm_Clustered_Dataset(torch.utils.data.Dataset):
         self.output_dataset = None
         self.cluster_idxs = [None] * self.num_clusters
 
+        self.sampling_idxs = [None] * self.num_clusters
+        self.current_sampling_idx = [None] * self.num_clusters
 
 
         self.reset_dataset()
@@ -519,7 +521,7 @@ class Big_Charm_Clustered_Dataset(torch.utils.data.Dataset):
     # pick a sample within some cluster
     def get_clustered_idx(self, idx):
         
-        cluster = idx % self.num_clusters
+        cluster = int(idx % self.num_clusters)
         file_idx = self.file_idxs[self.current_file]
         num_cluster_samples = self.samples_per_cluster[file_idx, cluster]
 
@@ -537,12 +539,26 @@ class Big_Charm_Clustered_Dataset(torch.utils.data.Dataset):
                 bad_iters += 1
 
         # Must randomly select because subsampling and do not want to bias data choice
-        idx_within_cluster = np.random.randint(num_cluster_samples)
+#        idx_within_cluster = np.random.randint(num_cluster_samples)
 
+        front = self.sampling_idxs[cluster]
+#        print("Front: ", type(front))
 
+        back = self.current_sampling_idx[cluster] % num_cluster_samples
         
-        if (self.cluster_idxs[cluster].shape[0] != num_cluster_samples):
-            raise ValueError("\n\nRank: %d, Get IDX. New_File_Idx: %d, current_file: %d, Cluster id: %d, CIDS: %d, SPC: %d, SAMPLE: %d\n\n" % (hvd.rank(), file_idx, self.current_file, cluster, self.cluster_idxs[cluster].shape[0], num_cluster_samples, idx_within_cluster))
+#        print("Back: ", type(back), back)
+
+        back = int(back)
+
+        idx_within_cluster = front[back]
+
+        # remove chance of revisiting same sample within a sample
+#        idx_within_cluster = self.sampling_idxs[cluster][self.current_sampling_idx[cluster] % num_cluster_samples]
+
+        self.current_sampling_idx[cluster] += 1
+        
+#        if (self.cluster_idxs[cluster].shape[0] != num_cluster_samples):
+#            raise ValueError("\n\nRank: %d, Get IDX. New_File_Idx: %d, current_file: %d, Cluster id: %d, CIDS: %d, SPC: %d, SAMPLE: %d\n\n" % (hvd.rank(), file_idx, self.current_file, cluster, self.cluster_idxs[cluster].shape[0], num_cluster_samples, idx_within_cluster))
 
         # return the original fp sample idx given a cluster and idx_within_cluster
 #        return np.arange(self.num_samples)[self.clustered_inputs[file_idx, :] == cluster][idx_within_cluster]
@@ -578,12 +594,36 @@ class Big_Charm_Clustered_Dataset(torch.utils.data.Dataset):
         self.input_dataset = self.input_scaler.do_scaling_sample(self.input_dataset)
         self.output_dataset = self.output_scaler.do_scaling_sample(self.output_dataset)
 
+#        cidxs = mp.Manager().list(range(self.num_clusters))
+#        sidxs = mp.Manager().list(range(self.num_clusters))
+#        csidx = mp.Manager().list()
+
+#        def set_idx(i):
+#            cidxs[i] = np.arange(self.num_samples)[self.clustered_inputs[new_file_idx, :] == i]
+#            sidxs[i] = np.random.permutation(np.arange(self.samples_per_cluster[new_file_idx, i], dtype=np.int64))
+#            self.current_sampling_idx[i] = 0
+
+#        pool = mp.Pool()
+
+#        for i in range(self.num_clusters):
+#            pool.apply_async(set_idx, (i,))
+
+#        pool.close()
+
+#        for i in range(self.num_clusters):
+#            self.cluster_idxs[i] = cidxs[i]
+#            self.sampling_idxs[i] = sidxs[i]
+#            self.current_sampling_idx[i] = 0
+        
         # Reset cluster idxs for the new snapshot
         for i in range(self.num_clusters):
             self.cluster_idxs[i] = np.arange(self.num_samples)[self.clustered_inputs[new_file_idx, :] == i]
+            self.sampling_idxs[i] = np.random.permutation(np.arange(self.samples_per_cluster[new_file_idx, i], dtype=np.int64))
+            self.current_sampling_idx[i] = 0
 
-            if (self.cluster_idxs[i].shape[0] != self.samples_per_cluster[new_file_idx, i]):
-                raise ValueError("\n\nRank: %d, Reset dataset. New_File_Idx: %d, current_file: %d, Cluster id: %d, CIDS: %d, SPC: %d\n\n" % (hvd.rank(), new_file_idx, self.current_file, i, self.cluster_idxs[i].shape[0], self.samplers_per_cluster[new_file_idx, i]))
+
+#            if (self.cluster_idxs[i].shape[0] != self.samples_per_cluster[new_file_idx, i]):
+#                raise ValueError("\n\nRank: %d, Reset dataset. New_File_Idx: %d, current_file: %d, Cluster id: %d, CIDS: %d, SPC: %d\n\n" % (hvd.rank(), new_file_idx, self.current_file, i, self.cluster_idxs[i].shape[0], self.samplers_per_cluster[new_file_idx, i]))
 
     # Fetch a sample
     def __getitem__(self, idx):
