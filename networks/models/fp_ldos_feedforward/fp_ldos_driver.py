@@ -196,9 +196,9 @@ parser.add_argument('--no-pinned-memory', action='store_true', default=False,
 parser.add_argument('--num-data-workers', type=int, default=4, metavar='N',
                     help='number of data workers for async gpu data ' + \
                          'movement (default: 4)')
-parser.add_argument('--num-test-workers', type=int, default=4, metavar='N',
+parser.add_argument('--num-test-workers', type=int, default=16, metavar='N',
                     help='number of data workers for async gpu data ' + \
-                         'movement (default: 4)')
+                         'movement (default: 16)')
 parser.add_argument('--num-threads', type=int, default=32, metavar='N',
                     help='number of threads (default: 32)')
 parser.add_argument('--num-gpus', type=int, default=1, metavar='N',
