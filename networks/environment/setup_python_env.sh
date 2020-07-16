@@ -16,32 +16,33 @@ ${PYTHON} -m venv ../mlmm_env
 
 source ../mlmm_env/bin/activate
 
-${PIP} install numpy 
-${PIP} install scipy 
-${PIP} install matplotlib
-${PIP} install seaborn
+${PIP} install numpy==1.18.4
+${PIP} install scipy==1.4.1
+${PIP} install matplotlib==3.1.3
+${PIP} install seaborn==0.10.0
 
 # Use PyTorch
-${PIP} install torch
-${PIP} install torchvision
+${PIP} install torch==1.5.0
+${PIP} install torchvision==0.6.0
 
 # SYNAPSE CUDA VERSION 
 #${pip} install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
 
 # Logging 
-${PIP} install tensorboard
+${PIP} install tensorboard==2.1.0
 
 # Parallel support
-${PIP} install horovod
-${PIP} install mpi4py
+${PIP} install horovod==0.19.2
+${PIP} install mpi4py==3.0.3
 
 # Atomic Simulation Environment
-${PIP} install ase
+${PIP} install ase==3.19.0
 
 # Numeric Tools
-${PIP} install sklearn
-${PIP} install mpmath
-
+${PIP} install scikit-learn==0.19.2
+${PIP} install mpmath==1.1.0
+${PIP} install pqkmeans==1.0.4
+${PIP} install sympy==1.6
 
 
 
