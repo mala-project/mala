@@ -55,6 +55,9 @@ parser.add_argument('--snapshot-offset', type=int, default=0, metavar='N',
 #                    help='Do not Convert units from Rydbergs')
 #parser.add_argument('--log', action='store_true', default=False,
 #                    help='Apply log function to densities')
+
+parser.add_argument('--cpu', action='store_true', default=False,
+                    help='Run inference of a GPU trained model on a CPU machine.')
 parser.add_argument('--integration', type=str, default="analytic", metavar='T',
                     choices=["analytic", "trapz", "simps", "quad"],
                     help='type of integration from {"trapz", "simps", "quad", "analytic"} (default: "analytic")')
@@ -347,10 +350,17 @@ for idx, current_dir in enumerate(args.output_dirs):
     else:
         raise ValueError('No model/args path found.')
 
-    model = torch.load(model_fpath)
+    model_args = torch.load(args_fpath)
+   
+    if (args.cpu):
+        model = torch.load(model_fpath, map_location='cpu')
+        model_args.cuda = False
+    else:
+        model = torch.load(model_fpath)
+    
     model = model.eval()
 
-    model_args = torch.load(args_fpath)
+    
 
 #    margs_file = open(args_fpath, "rb")
 #    model_args = pickle.load(open(args_fpath, "rb"))
