@@ -158,6 +158,8 @@ parser.add_argument('--gcc', type=str, default="2.699", metavar='GCC',
                     help='density of snapshots to train on (default: "2.699")')
 parser.add_argument('--num-snapshots', type=int, default=1, metavar='N',
                     help='num snapshots per temp/gcc pair (default: 1)')
+parser.add_argument('--offset-snapshot', type=int, default=0, metavar='N',
+                    help='which snapshot offset to use for training data (default: 0)')
 parser.add_argument('--no-testing', action='store_true', default=False,
                     help='only train with training/validation snapshots (i.e. test later)')
 parser.add_argument('--water', action='store_true', default=False,
@@ -333,43 +335,53 @@ elif (args.dataset == "fp_ldos" and args.big_charm_data):
         print("\nLoading big charm data case.")
 
 
-    args.test_snapshot = args.num_snapshots - 1
-    args.validation_snapshot = args.num_snapshots - 2
+    args.test_snapshot = args.offset_snapshot + args.num_snapshots - 1
+    args.validation_snapshot = args.offset_snapshot + args.num_snapshots - 2
     args.num_train_snapshots = args.num_snapshots - 2
+
 
     if (args.num_train_snapshots < 1):
         args.num_train_snapshots = 1
-    if (args.validation_snapshot < 0):
-        args.validation_snapshot = 0
+    if (args.validation_snapshot < args.offset_snapshot):
+        args.validation_snapshot = args.offset_snapshot
 
-    
+
     args.fp_data_fpath = "/%s/%sgcc/%s_fp_%dx%dx%dgrid_%dcomps" % \
             (args.temp, args.gcc, args.material, args.nxyz, args.nxyz, args.nxyz, args.fp_length)
     args.ldos_data_fpath = "/%s/%sgcc/%s_ldos_%dx%dx%dgrid_%delvls" % \
             (args.temp, args.gcc, args.material, args.nxyz, args.nxyz, args.nxyz, args.ldos_length)
 
 
-    # gather all fpaths of training data
+    # gather all fpaths of training data 
+#    train_fp_fpaths = \
+#        sorted(glob(args.fp_dir + args.fp_data_fpath + \
+#             "_snapshot[%d-%d].npy" % (args.offset_snapshot, args.offset_snapshot + args.num_train_snapshots - 1)))
+#    train_ldos_fpaths = \
+#            sorted(glob(args.ldos_dir + args.ldos_data_fpath + \
+#            "_snapshot[%d-%d].npy" % (args.offset_snapshot, args.offset_snapshot + args.num_train_snapshots - 1)))
+
     train_fp_fpaths = \
-        sorted(glob(args.fp_dir + args.fp_data_fpath + \
-             "_snapshot[0-%d].npy" % (args.num_train_snapshots - 1)))
+        [args.fp_dir + args.fp_data_fpath + \
+             "_snapshot{}.npy".format(i) for i in range(args.offset_snapshot, args.offset_snapshot + args.num_train_snapshots)]
     train_ldos_fpaths = \
-        sorted(glob(args.ldos_dir + args.ldos_data_fpath + \
-             "_snapshot[0-%d].npy" % (args.num_train_snapshots - 1)))
+        [args.ldos_dir + args.ldos_data_fpath + \
+             "_snapshot{}.npy".format(i) for i in range(args.offset_snapshot, args.offset_snapshot + args.num_train_snapshots)]
+
+
 
     validation_fp_fpaths = \
         sorted(glob(args.fp_dir + args.fp_data_fpath + \
-             "_snapshot[%d].npy" % args.validation_snapshot))
+             "_snapshot%d.npy" % args.validation_snapshot))
     validation_ldos_fpaths = \
         sorted(glob(args.ldos_dir + args.ldos_data_fpath + \
-             "_snapshot[%d].npy" % args.validation_snapshot))
+             "_snapshot%d.npy" % args.validation_snapshot))
 
     test_fp_fpaths = \
         sorted(glob(args.fp_dir + args.fp_data_fpath + \
-             "_snapshot[%d].npy" % args.test_snapshot))
+             "_snapshot%d.npy" % args.test_snapshot))
     test_ldos_fpaths = \
         sorted(glob(args.ldos_dir + args.ldos_data_fpath + \
-             "_snapshot[%d].npy" % args.test_snapshot))
+             "_snapshot%d.npy" % args.test_snapshot))
 
     #        print(args.fp_dir + args.fp_data_fpath)
 
@@ -388,6 +400,8 @@ elif (args.dataset == "fp_ldos" and args.big_charm_data):
         for i in range(len(test_fp_fpaths)):
             print(test_fp_fpaths[i])
             print(test_ldos_fpaths[i])
+
+#    exit(1);
 
 
     # input/output sample shape in the file
