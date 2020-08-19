@@ -18,7 +18,7 @@ PROJECT_LIB_FOLDERS=" -L../../Modules -L../../KS_Solvers -L../../FFTXlib -L../..
 PROJECT_LIBS="-lqemod -lks_solvers -lqefft -lqela -lutil -ldftd3qe" 
 PROJECT_INC_FOLDERS="-I../../Modules -I../../FFTXlib -I../../LAXlib -I../../KS_Solvers -I../../UtilXlib"
 
-MKLLIBS="-lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64  -lmkl_intel_lp64  -lmkl_sequential -lmkl_core -L$MKL_ROOT/lib/intel64"
+MKLLIBS="-lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64  -lmkl_intel_lp64  -lmkl_sequential -lmkl_core -lmkl_avx512 -lmkl_def -L$MKL_ROOT/lib/intel64"
 
 f2py --f90exec=mpif90 --fcompiler=intelem -c total_energy.f90 -m total_energy $PROJECT_INC_FOLDERS $PROJECT_LIB_FOLDERS \
      $PROJECT_LIBS $PWOBJS $UTILOBJS $MODOBJS $MODOBJS2 $MKLLIBS $FOXLIBS ../../clib/clib.a 

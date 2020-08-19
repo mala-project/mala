@@ -302,6 +302,7 @@ if (args.cuda):
         test_kwargs = {'num_workers': args.num_test_workers, 'pin_memory': True}
 else:
     kwargs = {}
+    test_kwargs = {}
 
 if (hvd.rank() == 0):
     print("Parser Arguments")
