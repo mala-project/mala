@@ -1,6 +1,7 @@
 import numpy as np
 
 import os, sys
+import re
 from glob import glob
 import matplotlib
 import matplotlib.pyplot as plt
@@ -40,8 +41,12 @@ parser.add_argument('--elvls', type=int, default=250, metavar='ELVLS',
                     help='number of ldos energy levels (default: 250)')
 parser.add_argument('--nxyz', type=int, default=200, metavar='GCC',
                     help='number of x/y/z elements (default: 200)')
-parser.add_argument('--snapshot', type=int, default=2, metavar='N',
+parser.add_argument('--dos-snapshot', type=int, default=2, metavar='N',
                     help='snapshot of temp/gcc with DOS file for egrid (default: 2)')
+parser.add_argument('--max-snapshots', type=int, default=10, metavar='N',
+                    help='max number of inference snapshots due to memory restrictions (default: 10)')
+parser.add_argument('--snapshot-offset', type=int, default=0, metavar='N',
+                    help='which snapshot to begin inference (default: 0)')
 #parser.add_argument('--num-atoms', type=int, default=256, metavar='N',
 #                    help='number of atoms in the snapshot (default: 256)')
 #parser.add_argument('--num-slices', type=int, default=4, metavar='N',
@@ -66,7 +71,7 @@ parser.add_argument('--fp-dir', type=str, \
             metavar="str", help='path to fp data (QE .out files) directory (default: ../../training_data/fp_data)')
 parser.add_argument('--output-dir', type=str, \
             default="./inference_figs", \
-            metavar="str", help='path to output directory (default: ./prediction_figs)')
+            metavar="str", help='path to output directory (default: ./inference_figs)')
 
 args = parser.parse_args()
 
@@ -77,7 +82,17 @@ if (hvd.rank() == 0):
     print("\n\nBegin LDOS inference\n\n")
 
 
+# Liquid
+#fig_snapshots = [9]
 
+# Solid
+#fig_snapshots = [19]
+
+# Hybrid
+#fig_snapshots = [0, 19]
+
+# All
+fig_snapshots = [0,9,10,19]
 
 tempv = int(args.temp[:-1])
 
@@ -102,7 +117,9 @@ if (hvd.rank() == 0):
         print("Directory %d:  %s" % (idx, current_dir))
 
 # DFT
-args.dft_files = sorted(glob(args.fp_dir + "/%s/%sgcc/QE*.out" % (args.temp, args.gcc)))
+#args.dft_files = sorted(glob(args.fp_dir + "/%s/%sgcc/QE*.out" % (args.temp, args.gcc)))
+args.dft_files = glob(args.fp_dir + "/%s/%sgcc/QE*.out" % (args.temp, args.gcc))
+args.dft_files.sort(key=lambda f: int(re.sub('\D', '', f)))
 
 if (hvd.rank() == 0):
     print("\nProcessing these DFT files: ")
@@ -111,7 +128,9 @@ if (hvd.rank() == 0):
         print("DFT %d:  %s" % (idx, dft_file))
 
 # FP
-args.fp_files = sorted(glob(args.fp_dir + "/%s/%sgcc/*fp*.npy" % (args.temp, args.gcc)))
+#args.fp_files = sorted(glob(args.fp_dir + "/%s/%sgcc/*fp*.npy" % (args.temp, args.gcc)))
+args.fp_files = glob(args.fp_dir + "/%s/%sgcc/*fp*.npy" % (args.temp, args.gcc))
+args.fp_files.sort(key=lambda f: int(re.sub('\D', '', f)))
 
 if (hvd.rank() == 0):
     print("\nProcessing these FP files: ")
@@ -120,7 +139,9 @@ if (hvd.rank() == 0):
         print("FP %d:  %s" % (idx, fp_file))
 
 # LDOS
-args.ldos_files = sorted(glob(args.ldos_dir + "/%s/%sgcc/*ldos*.npy" % (args.temp, args.gcc)))
+#args.ldos_files = sorted(glob(args.ldos_dir + "/%s/%sgcc/*ldos*.npy" % (args.temp, args.gcc)))
+args.ldos_files = glob(args.ldos_dir + "/%s/%sgcc/*ldos*.npy" % (args.temp, args.gcc))
+args.ldos_files.sort(key=lambda f: int(re.sub('\D', '', f)))
 
 if (hvd.rank() == 0):
     print("\nProcessing these LDOS files: ")
@@ -128,12 +149,45 @@ if (hvd.rank() == 0):
     for idx, ldos_file in enumerate(args.ldos_files):
         print("LDOS %d:  %s" % (idx, ldos_file))
 
+
 args.snapshots = np.min([len(args.fp_files), len(args.ldos_files)])
 
-#args.snapshots = 1;
+
+if (args.snapshots > args.max_snapshots):
+    args.snapshots = args.max_snapshots
 
 
-#exit(0)
+# Testing
+#args.snapshot_offset = 0;
+#args.snapshot_offset = 10;
+#args.snapshots = 10;
+#exit(0);
+
+for i in range(args.snapshot_offset):
+    del args.dft_files[0]
+    del args.fp_files[0]
+    del args.ldos_files[0]
+    
+if (hvd.rank() == 0):
+    print("\nProcessing these DFT files: ")
+
+    for idx, dft_file in enumerate(args.dft_files):
+        print("DFT %d:  %s" % (idx, dft_file))
+    
+    print("\nProcessing these FP files: ")
+
+    for idx, fp_file in enumerate(args.fp_files):
+        print("FP %d:  %s" % (idx, fp_file))
+
+    print("\nProcessing these LDOS files: ")
+
+    for idx, ldos_file in enumerate(args.ldos_files):
+        print("LDOS %d:  %s" % (idx, ldos_file))
+
+#exit(0);
+
+
+
 
 dft_results = []
 
@@ -147,7 +201,7 @@ target_ldos = []
 for i in range(args.snapshots):
 
     if (hvd.rank() == 0):
-        print("\nCalculating True and Target DFT results for snapshot%d" % i)
+        print("\nCalculating True and Target DFT results for snapshot%d" % (i + args.snapshot_offset))
 
 #    dft_fname         = args.fp_dir + "/%s/%sgcc/QE_Al.scf.pw.snapshot%d.out" % \
 #            (args.temp, args.gcc, i)
@@ -156,7 +210,7 @@ for i in range(args.snapshots):
 #            (args.temp, args.gcc, args.nxyz, args.nxyz, args.nxyz, args.elvls, i)
 
     qe_dos_fname      = args.ldos_dir + "/%s/%sgcc/Al_dos_%delvls_snapshot%d.txt" % \
-            (args.temp, args.gcc, args.elvls, args.snapshot)
+            (args.temp, args.gcc, args.elvls, args.dos_snapshot)
 
     if (hvd.rank() == 0):
         print("Calculating DFT Eigen Results.")
@@ -316,7 +370,7 @@ for idx, current_dir in enumerate(args.output_dirs):
     for i in range(args.snapshots):
 
         if (hvd.rank() == 0):
-            print("\nWorking on Snapshot%d" % i)
+            print("\nWorking on Snapshot%d" % (i + args.snapshot_offset))
 
         old_fp = inference_fp
 
@@ -392,7 +446,7 @@ for idx, current_dir in enumerate(args.output_dirs):
 
             data_idx += num_samples
 
-            if (batch_idx % model_args.log_interval == 0 % model_args.log_interval and hvd.rank() == 0):
+            if (batch_idx % (model_args.log_interval * 10) == 0 % (model_args.log_interval * 10) and hvd.rank() == 0):
                 print("Test batch_idx %d of %d" % (batch_idx, len(inference_loader)))
 
 
@@ -501,6 +555,9 @@ for idx, current_dir in enumerate(args.output_dirs):
         print("\nPred/Target Error DOS L1_norm: ", np.linalg.norm((target_ldos[i].dos.dos - pred_ldos.dos.dos), ord=1))
         print("Pred/Target Error DOS L2_norm: ", np.linalg.norm((target_ldos[i].dos.dos - pred_ldos.dos.dos), ord=2))
         print("Pred/Target Error DOS Linf_norm: ", np.linalg.norm((target_ldos[i].dos.dos - pred_ldos.dos.dos), ord=np.inf))
+        
+        #dos_rmse = 
+        #print("Pred/Target Error DOS RMSE (Oxford): ", dos_rmse)
 
         print("\n\nBand Energy Comparisons")
         print("Pred BE: ", pred_ldos.eband)
@@ -531,156 +588,191 @@ for idx, current_dir in enumerate(args.output_dirs):
         print("Pred/True Eigen ENUM electron/Atom diff: ", (true_enum[i] - pred_ldos.enum) / dft_results[i].num_atoms)
 
 
-#    # Create output dir if it doesn't exist
-#    if not os.path.exists(args.output_dir):
-#        print("\nCreating output folder %s\n" % args.output_dir)
-#        os.makedirs(args.output_dir)
-# 
-#    matplotlib.rcdefaults()
+        file_format = 'jpg'
+
+        if (i + args.snapshot_offset) in fig_snapshots:
+            # Create output dir if it doesn't exist
+            if not os.path.exists(args.output_dir):
+                print("\nCreating output folder %s\n" % args.output_dir)
+                os.makedirs(args.output_dir)
+         
+            matplotlib.rcdefaults()
+            
+            # DOS and error plots
+           
+            fig, (ax0, ax1) = plt.subplots(2,1)
+            ax0.plot(dos_e_grid, true_dos[i].dos, "-k")
+            ax0.plot(ldos_e_grid, target_ldos[i].dos.dos, ":b")
+            ax0.plot(ldos_e_grid, pred_ldos.dos.dos, "--g")
+            ax0.legend(["True Eigen", "ML Target", "ML Prediction"])
+            ax0.set_ylabel("DOS")
+          
+            ax1.plot(ldos_e_grid, target_ldos[i].dos.dos - true_dos[i].dos[:-1], "-b")
+            ax1.plot(ldos_e_grid, pred_ldos.dos.dos - true_dos[i].dos[:-1], "-r")
+            ax1.legend(["Target DOS Error", "Pred DOS Error"])
+            ax1.set_xlabel("Energy (eV)")
+            ax1.set_ylabel("DOS Error")
+
+            plt.tight_layout()
+         
+            dos_fname = "/pred_target_true_dos_model%d_snapshot%d.%s" % (idx, (i + args.snapshot_offset), file_format)
+
+            plt.savefig(args.output_dir + dos_fname, format=file_format)
+        
+            print("\nDOS plot created, Model: %d, Snapshot: %d" % (idx, (i + args.snapshot_offset)))
+       
+
+
+            # Density Difference plots
+            fig, ax = plt.subplots(1, 1)
+
+            target_density = np.reshape(target_ldos[i].density, [args.nxyz ** 3])
+            pred_density = np.reshape(pred_ldos.density, [args.nxyz ** 3])
+
+
+#            ax.plot(target_ldos.density, target_ldos.density / target_ldos.density, 'k-')
+            ax.plot(target_density, pred_density - target_density, 'r.')
+            ax.legend(['ML Pred Density Errors'])
+            ax.set_xlabel('ML Target Electron Density (eV)')
+            ax.set_ylabel('Errors in Electron Density (eV)')
+
+            target_max = np.max(target_density)
+
+            ax.set_ylim([-1.0 * target_max, target_max])
+
+            plt.tight_layout()
+
+            density_fname = "/pred_target_density_diffs_model%d_snapshot%d.%s" % (idx, (i + args.snapshot_offset), file_format)
+
+            plt.savefig(args.output_dir + density_fname, format=file_format)
+
+            print("\nDensity diff plot created, Model: %d, Snapshot: %d" % (idx, (i + args.snapshot_offset)))
+
+#            exit(0);
+
+          # Density Error Slice Plots
+ 
+#          font = {'weight' : 'bold',
+#                  'size'   : 40}
 #
-#    # DOS and error plots
+#          matplotlib.rc('font', **font)
 #
-#    fig, (ax0, ax1) = plt.subplots(2,1)
-#    ax0.plot(dos_e_grid, true_dos.dos, "-k")
-#    ax0.plot(ldos_e_grid, target_ldos.dos.dos, ":b")
-#    ax0.plot(ldos_e_grid, pred_ldos.dos.dos, "--g")
-#    ax0.legend(["True Eigen", "ML Target", "ML Prediction"])
-#    ax0.set_ylabel("DOS")
+#          z_slices = np.round(np.linspace(0, target_ldos.ldos.shape[2] - 1, args.num_slices)).astype(int)
 #
-#    ax1.plot(ldos_e_grid, target_ldos.dos.dos - true_dos.dos[:-1], "-b")
-#    ax1.plot(ldos_e_grid, pred_ldos.dos.dos - true_dos.dos[:-1], "-r")
-#    ax1.legend(["Target DOS Error", "Pred DOS Error"])
-#    ax1.set_xlabel("Energy (eV)")
-#    ax1.set_ylabel("DOS Error")
+#          fig, ax = plt.subplots(args.num_slices,1)
 #
-#    plt.savefig(args.output_dir + "/pred_target_true_dos%d.eps" % idx, format='eps')
+#          fig.set_figheight(20 * args.num_slices)
+#          fig.set_figwidth(20)
 #
-#    print("\nDOS plot created")
+#          cbar_err_max = np.max(np.abs(pred_ldos.density - target_ldos.density))
 #
+#          for i in range(args.num_slices):
+#              
+#              gs = pred_ldos.cell_volume ** (1/3.)
 #
-#    # Density Error Slice Plots
+#              xgrid = np.linspace(0, target_ldos.ldos.shape[0], target_ldos.ldos.shape[0]) * gs
+#              ygrid = np.linspace(0, target_ldos.ldos.shape[1], target_ldos.ldos.shape[1]) * gs
 #
-#    font = {'weight' : 'bold',
-#            'size'   : 40}
+#              density_slice = np.abs(pred_ldos.density[:,:,z_slices[i]] - target_ldos.density[:,:,z_slices[i]])
 #
-#    matplotlib.rc('font', **font)
+#              if (args.log):
+#                  density_slice = np.log(density_slice)
 #
-#    z_slices = np.round(np.linspace(0, target_ldos.ldos.shape[2] - 1, args.num_slices)).astype(int)
+#              im = ax[i].contourf(xgrid, ygrid, density_slice, cmap="seismic")
+#              ax[i].set_title("Absolute Density Error Z-Slice at %3.1f" % (z_slices[i] * gs))
 #
-#    fig, ax = plt.subplots(args.num_slices,1)
+#              cbar = fig.colorbar(im, ax=ax[i])
+#              cbar.set_clim(0.0, cbar_err_max)
 #
-#    fig.set_figheight(20 * args.num_slices)
-#    fig.set_figwidth(20)
+#          #plt.tight_layout()
+#          
+#          
+#          if (args.log):
+#              density_fname = "/pred_target_error_density_log_model%d_snapshot%d.eps" % (idx, i)
+#          else:
+#              density_fname = "/pred_target_error_density_model%d_snapshot%d.eps" % (idx, i)
 #
-#    cbar_err_max = np.max(np.abs(pred_ldos.density - target_ldos.density))
-#
-#    for i in range(args.num_slices):
-#        
-#        gs = pred_ldos.cell_volume ** (1/3.)
-#
-#        xgrid = np.linspace(0, target_ldos.ldos.shape[0], target_ldos.ldos.shape[0]) * gs
-#        ygrid = np.linspace(0, target_ldos.ldos.shape[1], target_ldos.ldos.shape[1]) * gs
-#
-#        density_slice = np.abs(pred_ldos.density[:,:,z_slices[i]] - target_ldos.density[:,:,z_slices[i]])
-#
-#        if (args.log):
-#            density_slice = np.log(density_slice)
-#
-#        im = ax[i].contourf(xgrid, ygrid, density_slice, cmap="seismic")
-#        ax[i].set_title("Absolute Density Error Z-Slice at %3.1f" % (z_slices[i] * gs))
-#
-#        cbar = fig.colorbar(im, ax=ax[i])
-#        cbar.set_clim(0.0, cbar_err_max)
-#
-#    #plt.tight_layout()
-#    
-#    
-#    if (args.log):
-#        density_fname = "/pred_target_error_density_log%d.eps" % idx
-#    else:
-#        density_fname = "/pred_target_error_density%d.eps" % idx
-#
-#    plt.savefig(args.output_dir + density_fname, format='eps')
-#
-#
-#
-#    vmin_plot = 0.0
-#    vmax_plot = np.max([np.max(target_ldos.density), np.max(pred_ldos.density)])
-#
-#    fig, ax = plt.subplots(args.num_slices,1)
-#
-#    fig.set_figheight(20 * args.num_slices)
-#    fig.set_figwidth(20)
-#
-#    for i in range(args.num_slices):
-#        
-#        gs = pred_ldos.cell_volume ** (1/3.) 
-#
-#        xgrid = np.linspace(0, pred_ldos.ldos.shape[0], pred_ldos.ldos.shape[0]) * gs
-#        ygrid = np.linspace(0, pred_ldos.ldos.shape[1], pred_ldos.ldos.shape[1]) * gs
-#
-#        density_slice = pred_ldos.density[:,:,z_slices[i]] 
-#
-#        if (args.log):
-#            density_slice = np.log(density_slice)
-#
-#        im = ax[i].contourf(xgrid, ygrid, density_slice, vmin=vmin_plot, vmax=vmax_plot, cmap="seismic")
-#        ax[i].set_title("Pred Density Z-Slice at %3.1f" % (z_slices[i] * gs))
-#
-#        cbar = fig.colorbar(im, ax=ax[i])
-#        cbar.set_clim(0.0, vmax_plot)
-#
-#    #plt.tight_layout()
-#    
-#
-#    if (args.log):
-#        density_fname = "/pred_density_log%d.eps" % idx
-#    else:
-#        density_fname = "/pred_density%d.eps" % idx
-#
-#    plt.savefig(args.output_dir + density_fname, format='eps')
+#          plt.savefig(args.output_dir + density_fname, format='eps')
 #
 #
 #
-#    fig, ax = plt.subplots(args.num_slices,1)
+#          vmin_plot = 0.0
+#          vmax_plot = np.max([np.max(target_ldos.density), np.max(pred_ldos.density)])
 #
-#    fig.set_figheight(20 * args.num_slices)
-#    fig.set_figwidth(20)
+#          fig, ax = plt.subplots(args.num_slices,1)
 #
-#    for i in range(args.num_slices):
-#        
-#        gs = target_ldos.cell_volume ** (1/3.) 
+#          fig.set_figheight(20 * args.num_slices)
+#          fig.set_figwidth(20)
 #
-#        xgrid = np.linspace(0, target_ldos.ldos.shape[0], target_ldos.ldos.shape[0]) * gs
-#        ygrid = np.linspace(0, target_ldos.ldos.shape[1], target_ldos.ldos.shape[1]) * gs
+#          for i in range(args.num_slices):
+#              
+#              gs = pred_ldos.cell_volume ** (1/3.) 
 #
-#        density_slice = target_ldos.density[:,:,z_slices[i]] 
+#              xgrid = np.linspace(0, pred_ldos.ldos.shape[0], pred_ldos.ldos.shape[0]) * gs
+#              ygrid = np.linspace(0, pred_ldos.ldos.shape[1], pred_ldos.ldos.shape[1]) * gs
 #
-#        if (args.log):
-#            density_slice = np.log(density_slice)
+#              density_slice = pred_ldos.density[:,:,z_slices[i]] 
 #
-#        im = ax[i].contourf(xgrid, ygrid, density_slice, vmin=vmin_plot, vmax=vmax_plot, cmap="seismic")
-#        ax[i].set_title("Target Density Z-Slice at %3.1f" % (z_slices[i] * gs))
+#              if (args.log):
+#                  density_slice = np.log(density_slice)
 #
-#        cbar = fig.colorbar(im, ax=ax[i])
-#        cbar.set_clim(0.0, vmax_plot)
+#              im = ax[i].contourf(xgrid, ygrid, density_slice, vmin=vmin_plot, vmax=vmax_plot, cmap="seismic")
+#              ax[i].set_title("Pred Density Z-Slice at %3.1f" % (z_slices[i] * gs))
 #
-#    #plt.tight_layout()
-#    
-#    
-#    if (args.log):
-#        density_fname = "/target_density_log%d.eps" % idx
-#    else:
-#        density_fname = "/target_density%d.eps" % idx    
+#              cbar = fig.colorbar(im, ax=ax[i])
+#              cbar.set_clim(0.0, vmax_plot)
 #
-#    plt.savefig(args.output_dir + density_fname, format='eps')
+#          #plt.tight_layout()
+#          
 #
-#    print("Density plots created")
+#          if (args.log):
+#              density_fname = "/pred_density_log_model%d_snapshot%d.eps" % (idx, i)
+#          else:
+#              density_fname = "/pred_density_model%d_snapshot%d.eps" % (idx, i)
 #
-#    plt.close('all')
+#          plt.savefig(args.output_dir + density_fname, format='eps')
 #
-##    break
 #
+#
+#          fig, ax = plt.subplots(args.num_slices,1)
+#
+#          fig.set_figheight(20 * args.num_slices)
+#          fig.set_figwidth(20)
+#
+#          for i in range(args.num_slices):
+#              
+#              gs = target_ldos.cell_volume ** (1/3.) 
+#
+#              xgrid = np.linspace(0, target_ldos.ldos.shape[0], target_ldos.ldos.shape[0]) * gs
+#              ygrid = np.linspace(0, target_ldos.ldos.shape[1], target_ldos.ldos.shape[1]) * gs
+#
+#              density_slice = target_ldos.density[:,:,z_slices[i]] 
+
+          #    if (args.log):
+                  #        density_slice = np.log(density_slice)
+
+          #    im = ax[i].contourf(xgrid, ygrid, density_slice, vmin=vmin_plot, vmax=vmax_plot, cmap="seismic")
+          #    ax[i].set_title("Target Density Z-Slice at %3.1f" % (z_slices[i] * gs))
+
+          #    cbar = fig.colorbar(im, ax=ax[i])
+          #    cbar.set_clim(0.0, vmax_plot)
+
+          #plt.tight_layout()
+          
+          
+          #if (args.log):
+              #              density_fname = "/target_density_log_model%d_snapshot%d.eps" % (idx, i)
+#          else:
+              #              density_fname = "/target_density_model%d_snapshot%d.eps" % (idx, i)    
+
+#          plt.savefig(args.output_dir + density_fname, format='eps')
+
+#          print("Density plots created")
+
+            plt.close('all')
+
+#            break
+
 
 print("\n\nSuccess!\n\n")
 

@@ -18,8 +18,8 @@ from functools import partial
 
 
 # Default temp (K)
-temp = 298
-#temp = 933
+#temp = 298
+temp = 933
 
 # Default gcc
 gcc = 2.699
