@@ -125,7 +125,7 @@ args.dft_files = glob(args.fp_dir + "/%s/%sgcc/QE*.out" % (args.temp, args.gcc))
 args.dft_files.sort(key=lambda f: int(re.sub('\D', '', f)))
 
 if (hvd.rank() == 0):
-    print("\nProcessing these DFT files: ")
+    print("\nAvailable DFT files: ")
 
     for idx, dft_file in enumerate(args.dft_files):
         print("DFT %d:  %s" % (idx, dft_file))
@@ -136,7 +136,7 @@ args.fp_files = glob(args.fp_dir + "/%s/%sgcc/*fp*.npy" % (args.temp, args.gcc))
 args.fp_files.sort(key=lambda f: int(re.sub('\D', '', f)))
 
 if (hvd.rank() == 0):
-    print("\nProcessing these FP files: ")
+    print("\nAvailable FP files: ")
 
     for idx, fp_file in enumerate(args.fp_files):
         print("FP %d:  %s" % (idx, fp_file))
@@ -147,7 +147,7 @@ args.ldos_files = glob(args.ldos_dir + "/%s/%sgcc/*ldos*.npy" % (args.temp, args
 args.ldos_files.sort(key=lambda f: int(re.sub('\D', '', f)))
 
 if (hvd.rank() == 0):
-    print("\nProcessing these LDOS files: ")
+    print("\nAvailable LDOS files: ")
 
     for idx, ldos_file in enumerate(args.ldos_files):
         print("LDOS %d:  %s" % (idx, ldos_file))
@@ -643,8 +643,8 @@ for idx, current_dir in enumerate(args.output_dirs):
 #            ax.plot(target_ldos.density, target_ldos.density / target_ldos.density, 'k-')
             ax.plot(target_density, pred_density - target_density, 'r.')
             ax.legend(['ML Pred Density Errors'])
-            ax.set_xlabel('ML Target Electron Density (eV)')
-            ax.set_ylabel('Errors in Electron Density (eV)')
+            ax.set_xlabel('ML Target Electron Density ($e^{-}$/$A^{3}$)')
+            ax.set_ylabel('Errors in Electron Density ($e^{-}$/$A^{3}$)')
 
             target_max = np.max(target_density)
 
