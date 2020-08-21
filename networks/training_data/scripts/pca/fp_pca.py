@@ -37,6 +37,7 @@ print("Time: {}".format(end-start))
 # Find the scores for the centroids
 #centroids_transformed = ipca.transform(centroids)
 np.save("transformed_fingerprints.npy",data_transformed)
+np.save("fp_components.npy",ipca.components_)
 #np.save("transformed_centroids.npy", centroids_transformed)
 for v in ipca.explained_variance_ratio_:
     print(v)
