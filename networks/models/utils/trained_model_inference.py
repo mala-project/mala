@@ -156,8 +156,8 @@ if (hvd.rank() == 0):
 args.snapshots = np.min([len(args.fp_files), len(args.ldos_files)])
 
 
-if (args.snapshots > args.max_snapshots):
-    args.snapshots = args.max_snapshots
+#if (args.snapshots > args.max_snapshots):
+#    args.snapshots = args.max_snapshots
 
 
 # Testing
@@ -166,11 +166,19 @@ if (args.snapshots > args.max_snapshots):
 #args.snapshots = 10;
 #exit(0);
 
+for i in range(args.snapshot_offset + args.max_snapshots, args.snapshots):
+    del args.dft_files[args.snapshot_offset + args.max_snapshots]
+    del args.fp_files[args.snapshot_offset + args.max_snapshots]
+    del args.ldos_files[args.snapshot_offset + args.max_snapshots]
+
 for i in range(args.snapshot_offset):
     del args.dft_files[0]
     del args.fp_files[0]
     del args.ldos_files[0]
     
+if (args.snapshots > args.max_snapshots):
+    args.snapshots = args.max_snapshots
+
 if (hvd.rank() == 0):
     print("\nProcessing these DFT files: ")
 
