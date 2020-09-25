@@ -23,84 +23,139 @@ fi
 #DS=random
 DS=fp_ldos
 
-# Test Case
+
+
+
+###############################################################################
+###### PAPER -- Al 298K Optimized Case
 MAT=Al
-#TMP=298K
-TMP=933K
+TMP=298K
 GC=2.699
 NXYZ=200
-
 FPL=94
 LDOSL=250
 
-#SSHOT=5
-#SSHOT=3
-#SSHOTS="10"
-#SSHOTS="4 6 8 10"
+# Train - 1 snapshot, Valid - 1, Test - 1 
+SSHOT=3
+# Snapshot offset, train = 0th, validation = 1st, test = 2nd
+SNPOFF=0
 
-SSHOT=10
-#SSHOT=4
-
-#CLUSTERS="300"
-CLUSTER=400
-
-#CTRS=".01 .05 .1 .2 .4"
-CTR=.25
-
-#CSRS=".01 .05 .1 .2 .4 .8 1.0"
-CSR=.1
-
-
-### Optimizer/Training
-
-EPCS=5000
-#EPCS=100
-#EPCS=10
-#EPCS=2
-
-#TBSS="4000 8000 16000 32000" 
-TBS=4000
-#BATS="16 32 64"
-#BATS="1000 2000 8000"
+# Train Batch Size
 BS=1000
-#BS=4000
+# Valid/Test Batch Size
+TBS=4000
 
-#LRS=".0005 .0001 .00005 .00001"
-LRS=".00005 .00001"
-#LR=.0005
-ES=.99999
-#ES=.99
-EP=8
-OP=4
-#EP=4
-#OP=2
+# Learning Rate
+LR=.00001
 
-#LIL="6"
+## Network Parameters
+
+# Layer Width
+WID=800
+
+# Number of Mid Layers
+MIDLYS=2
+
+# Last Layer Scaling (e.g if LIL=2 and output_layer=250, then previous_layer=500)
 LIL=1
 
-NUMW=1
-#NUMW=16
-#NUMWS="0 1 2 3 5 6 7 8"
+
+###############################################################################
+###### PAPER -- Al 933K Optimized Case (Hybrid/Liquid/Solid)
+#MAT=Al
+#TMP=933K
+#GC=2.699
+#NXYZ=200
+#FPL=94
+#LDOSL=250
+
+## Train - 8 snapshots, Valid - 1, Test - 1 
+#SSHOT=10
+
+### Snapshot offset
+
+## Hybrid Model (6,7,8,9 Liquid / 10,11,12,13 Solid) Training, (14 Solid) Validation, (15 Solid) Test
+#SNPOFF=6
+
+## Liquid Model (0-7 Liquid) Training, (8) Validation, (9) Test
+#SNPOFF=0
+
+## Solid Model (10-17 Solid) Training, (18) Validation, (19) Test
+#SNPOFF=10
+
+
+## Train Batch Size
+#BS=1000
+## Valid/Test Batch Size
+#TBS=4000
+
+## Learning Rate
+#LR=.00005
+
+### Network Parameters
+
+## Layer Width
+#WID=4000
+
+## Number of Mid Layers
+#MIDLYS=2
+
+## Last Layer Scaling (e.g if LIL=2 and output_layer=250, then previous_layer=500)
+#LIL=1
+
+
+
+
+
+
+
+###############################################################################
+###### General Parameters
+
+
+## Optimizer/Training
+
+# Max Epochs
+EPCS=5000
+
+# Early Stopping Patience
+EP=8
+# Early Stopping Sufficient Decrease
+ES=.99999
+
+# Optimizer Learning Rate Schedule Patience
+OP=4
+
+## Accelerating / Experimental (Add "--big-clustered-data" option)
+
+# Number of PQ k-means Clusters 
+CLUSTER=400
+# PQ k-means Sample percentage (Higher is better k-means approximation)
+CSR=.1
+
+# Cluster/Train ratio (Higher is more samples trained per epoch)
+CTR=.25
+
+
+## Number of Data-Workers, if using big-charm-data use NUMW=1
+# Train
+#NUMW=1
+NUMW=16
+
+# Valid/Test
 NUMTW=16
 
-# Network
-#WIDS="4000"
-#WID=800
-WID=4000
-#WID=300
 
-#MIDLYSS="4 5 6 7"
-#MIDLYSS="2 3"
 
-#MIDLYS=5
-MIDLYS=2
-AE=.8
 
-#   --model-lstm-network \
-#   --adam \
-#   --skip-connection \
 
+
+
+
+## Big Data Case (i.e. many training snapshots)
 #   --big-charm-data \
+
+## Big Clustered Data Case (Accelerating many training snapshots, hyperparameter optimization)
 #   --big-clustered-data \
 
 #for BS in $BATS
@@ -113,6 +168,8 @@ do
         --dataset ${DS} \
         --epochs ${EPCS} \
         --big-charm-data \
+        --num-snapshots ${SSHOT} \
+        --offset-snapshot ${SNPOFF} \
         --num-clusters ${CLUSTER} \
         --cluster-train-ratio ${CTR} \
         --cluster-sample-ratio ${CSR} \
@@ -134,8 +191,6 @@ do
         --lstm-in-length ${LIL} \
         --ff-mid-layers ${MIDLYS} \
         --ff-width ${WID} \
-        --ae-factor ${AE} \
-        --num-snapshots ${SSHOT} \
         --no-coords \
         --num-data-workers ${NUMW} \
         --num-test-workers ${NUMTW} \
@@ -162,6 +217,7 @@ done
 
 #        --no-hidden-state \
 
+#        --ae-factor ${AE} \
 
 
 #        --ldos-max-only \
