@@ -8,6 +8,8 @@ import torch
 import torch.nn as nn
 import horovod.torch as hvd
 
+import transformers
+
 ###-----------------------------------------------------------------------###
 
 #
@@ -360,5 +362,33 @@ class FP_LDOS_LSTM_Net(nn.Module):
  
 
 
+class FP_LDOS_TRANSFORMER_Net(nn.Module):
+    
+    def init(self, args):
+        self.args = args 
+  
+
+    def init_hidden_train(self):
+        h0 = torch.empty(1)
+        c0 = torch.empty(1)
+        
+        h0.zero_()
+        c0.zero_()
+
+        return (h0, c0) 
 
 
+    def init_hidden_test(self):
+        h0 = torch.empty(1)
+        c0 = torch.empty(1)
+        
+        h0.zero_()
+        c0.zero_()
+
+        return (h0, c0) 
+
+
+    def forward(self, x, hidden = 0):
+        return (np.zeros(self.args.ldos_length), hidden)
+
+    

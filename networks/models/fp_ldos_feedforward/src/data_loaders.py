@@ -17,156 +17,149 @@ import horovod.torch as hvd
 ###-----------------------------------------------------------------------###
 
 # Big Data Dataset
-class Big_Dataset(torch.utils.data.Dataset):
-
-    def __init__(self, args, data_name):
-
-        fp_data_paths = []
-        ldos_data_paths = []
-
-        if (data_name == "train"):
-            if (hvd.rank() == 0):
-                print("Creating Big Data Train Dataset")
-
-            # Start at snapshot 0
-            self.num_snapshots = args.num_snapshots - 2
-            snapshot = 0
-
-        elif (data_name == "validation"):
-            if (hvd.rank() == 0):
-                print("Creating Big Data Validation Dataset")
-
-            # 2nd to last snapshot in the set of num_snapshots
-            self.num_snapshots = 1
-            snapshot = args.num_snapshots - 2
-
-        elif (data_name == "test"):
-            if (hvd.rank() == 0):
-                print("Creating Big Data Test Dataset")
-
-            # Last snapshot in the set of num_snapshots
-            self.num_snapshots = 1
-            snapshot = args.num_snapshots - 1
-        else:
-            if (hvd.rank() == 0):
-                print("\nInvalid Big Datset. Options are ['train', 'validation', or 'test'].\n\n")
-            exit(0);
-
-        fp_head = "/%s/%sgcc/%s_fp_%dx%dx%dgrid_%dcomps" % \
-                (args.temp, args.gcc, args.material, \
-                 args.nxyz, args.nxyz, args.nxyz, args.fp_length)
-        ldos_head = "/%s/%sgcc/%s_ldos_%dx%dx%dgrid_%delvls" % \
-                (args.temp, args.gcc, args.material, \
-                 args.nxyz, args.nxyz, args.nxyz, args.ldos_length)
-
-
-
-        for i in range(self.num_snapshots):
-            fp_data_paths.append(args.fp_dir + fp_head + \
-                    "_snapshot%d.npy" % (snapshot + i))
-            ldos_data_paths.append(args.ldos_dir + ldos_head + \
-                    "_snapshot%d.npy" % (snapshot + i))
-            
-        # List of numpy arrays to preserve mmap_mode
-        self.fp_dataset = [] 
-        self.ldos_dataset = []
-
-        # Load Datasets
-        for idx, path in enumerate(fp_data_paths):
-            self.fp_dataset.append(np.load(path, mmap_mode="r"))
-        for idx, path in enumerate(ldos_data_paths):
-            self.ldos_dataset.append(np.load(path, mmap_mode="r"))
-
-        # FP subset and reshape
-        fp_idxs = subset_fp(args)
-        for i in range(len(self.fp_dataset)):
-            self.fp_dataset[i] = self.fp_dataset[i][:,:,:,fp_idxs]
-
-            data_shape = self.fp_dataset[i].shape 
-
-            grid_pts = data_shape[0] * data_shape[1] * data_shape[2]
-
-            self.fp_dataset[i] = np.reshape(self.fp_dataset[i], [grid_pts, data_shape[3]])
-
-            self.fp_dataset[i] = self.fp_dataset[i]
-
-        # !!! Need to modify !!! 
-        # Switch args.fp_length -> args.fp_length and args.final_fp_length 
-        if (data_name == "test"):
-            args.fp_length = data_shape[-1]
-
-
-        # LDOS subset and reshape
-        ldos_idxs = subset_ldos(args)
-        for i in range(len(self.ldos_dataset)):
-            self.ldos_dataset[i] = self.ldos_dataset[i][:,:,:,ldos_idxs]
-
-            data_shape = self.ldos_dataset[i].shape 
-
-            grid_pts = data_shape[0] * data_shape[1] * data_shape[2]
-
-            self.ldos_dataset[i] = np.reshape(self.ldos_dataset[i], [grid_pts, data_shape[3]])
-            
-            self.ldos_dataset[i] = self.ldos_dataset[i]
-
-        # !!! Need to modify !!! 
-        # Switch args.ldos_length -> args.ldos_length and args.final_ldos_length 
-        if (data_name == "test"):
-            args.ldos_length = data_shape[-1]
-            args.grid_pts = grid_pts
-
-        self.grid_pts = grid_pts
-
-        # Consistency Checks
-        if (len(self.fp_dataset) != len(self.ldos_dataset)):
-            if (hvd.rank() == 0):
-                print("\nError. Num snapshots for fp and ldos inconsistent.\n\n")
-            exit(0);
-
-        for i in range(len(self.fp_dataset)):
-            if (self.fp_dataset[i].shape[0] != self.ldos_dataset[i].shape[0]):
-                if (hvd.rank() == 0):
-                    print("\nError. Snapshot %d, FP and LDOS dataset have different number of data points.\n\n" % i)
-                exit(0);
-
-            if (self.fp_dataset[0].shape[-1] != self.fp_dataset[i].shape[-1]):
-                if (hvd.rank() == 0):
-                    print("\nError. Snapshot %d, Fingerprint lengths are not consistent between snapshots.\n\n" % i)
-                exit(0);
-            
-            if (self.ldos_dataset[0].shape[-1] != self.ldos_dataset[i].shape[-1]):
-                if (hvd.rank() == 0):
-                    print("\nError. Snapshot %d, LDOS lengths are not consistent between snapshots.\n\n" % i)
-                exit(0);
-
-
-
-    # Fetch a sample
-    def __getitem__(self, idx):
-      
-#        print("idx: ", idx)
-
-        return torch.tensor(self.fp_dataset[idx // self.grid_pts][idx % self.grid_pts, :]).float(), \
-               torch.tensor(self.ldos_dataset[idx // self.grid_pts][idx % self.grid_pts, :]).float()
-
-#        print("input shape: ", t1.shape)
-#        print("output shape: ", t2.shape)
-
-
-#        return t1, t2
-
-
-    # Number of samples in dataset
-    def __len__(self):
-        return self.num_snapshots * self.grid_pts
-
-
-
-
-
-
-
-
+#class Big_Dataset(torch.utils.data.Dataset):
+#
+#    def __init__(self, args, data_name):
+#
+#        fp_data_paths = []
+#        ldos_data_paths = []
+#
+#        if (data_name == "train"):
+#            if (hvd.rank() == 0):
+#                print("Creating Big Data Train Dataset")
+#
+#            # Start at snapshot 0
+#            self.num_snapshots = args.num_snapshots - 2
+#            snapshot = 0
+#
+#        elif (data_name == "validation"):
+#            if (hvd.rank() == 0):
+#                print("Creating Big Data Validation Dataset")
+#
+#            # 2nd to last snapshot in the set of num_snapshots
+#            self.num_snapshots = 1
+#            snapshot = args.num_snapshots - 2
+#
+#        elif (data_name == "test"):
+#            if (hvd.rank() == 0):
+#                print("Creating Big Data Test Dataset")
+#
+#            # Last snapshot in the set of num_snapshots
+#            self.num_snapshots = 1
+#            snapshot = args.num_snapshots - 1
+#        else:
+#            if (hvd.rank() == 0):
+#                print("\nInvalid Big Datset. Options are ['train', 'validation', or 'test'].\n\n")
+#            exit(0);
+#
+#        fp_head = "/%s/%sgcc/%s_fp_%dx%dx%dgrid_%dcomps" % \
+#                (args.temp, args.gcc, args.material, \
+#                 args.nxyz, args.nxyz, args.nxyz, args.fp_length)
+#        ldos_head = "/%s/%sgcc/%s_ldos_%dx%dx%dgrid_%delvls" % \
+#                (args.temp, args.gcc, args.material, \
+#                 args.nxyz, args.nxyz, args.nxyz, args.ldos_length)
+#
+#
+#
+#        for i in range(self.num_snapshots):
+#            fp_data_paths.append(args.fp_dir + fp_head + \
+#                    "_snapshot%d.npy" % (snapshot + i))
+#            ldos_data_paths.append(args.ldos_dir + ldos_head + \
+#                    "_snapshot%d.npy" % (snapshot + i))
+#            
+#        # List of numpy arrays to preserve mmap_mode
+#        self.fp_dataset = [] 
+#        self.ldos_dataset = []
+#
+#        # Load Datasets
+#        for idx, path in enumerate(fp_data_paths):
+#            self.fp_dataset.append(np.load(path, mmap_mode="r"))
+#        for idx, path in enumerate(ldos_data_paths):
+#            self.ldos_dataset.append(np.load(path, mmap_mode="r"))
+#
+#        # FP subset and reshape
+#        fp_idxs = subset_fp(args)
+#        for i in range(len(self.fp_dataset)):
+#            self.fp_dataset[i] = self.fp_dataset[i][:,:,:,fp_idxs]
+#
+#            data_shape = self.fp_dataset[i].shape 
+#
+#            grid_pts = data_shape[0] * data_shape[1] * data_shape[2]
+#
+#            self.fp_dataset[i] = np.reshape(self.fp_dataset[i], [grid_pts, data_shape[3]])
+#
+#            self.fp_dataset[i] = self.fp_dataset[i]
+#
+#        # !!! Need to modify !!! 
+#        # Switch args.fp_length -> args.fp_length and args.final_fp_length 
+#        if (data_name == "test"):
+#            args.fp_length = data_shape[-1]
+#
+#
+#        # LDOS subset and reshape
+#        ldos_idxs = subset_ldos(args)
+#        for i in range(len(self.ldos_dataset)):
+#            self.ldos_dataset[i] = self.ldos_dataset[i][:,:,:,ldos_idxs]
+#
+#            data_shape = self.ldos_dataset[i].shape 
+#
+#            grid_pts = data_shape[0] * data_shape[1] * data_shape[2]
+#
+#            self.ldos_dataset[i] = np.reshape(self.ldos_dataset[i], [grid_pts, data_shape[3]])
+#            
+#            self.ldos_dataset[i] = self.ldos_dataset[i]
+#
+#        # !!! Need to modify !!! 
+#        # Switch args.ldos_length -> args.ldos_length and args.final_ldos_length 
+#        if (data_name == "test"):
+#            args.ldos_length = data_shape[-1]
+#            args.grid_pts = grid_pts
+#
+#        self.grid_pts = grid_pts
+#
+#        # Consistency Checks
+#        if (len(self.fp_dataset) != len(self.ldos_dataset)):
+#            if (hvd.rank() == 0):
+#                print("\nError. Num snapshots for fp and ldos inconsistent.\n\n")
+#            exit(0);
+#
+#        for i in range(len(self.fp_dataset)):
+#            if (self.fp_dataset[i].shape[0] != self.ldos_dataset[i].shape[0]):
+#                if (hvd.rank() == 0):
+#                    print("\nError. Snapshot %d, FP and LDOS dataset have different number of data points.\n\n" % i)
+#                exit(0);
+#
+#            if (self.fp_dataset[0].shape[-1] != self.fp_dataset[i].shape[-1]):
+#                if (hvd.rank() == 0):
+#                    print("\nError. Snapshot %d, Fingerprint lengths are not consistent between snapshots.\n\n" % i)
+#                exit(0);
+#            
+#            if (self.ldos_dataset[0].shape[-1] != self.ldos_dataset[i].shape[-1]):
+#                if (hvd.rank() == 0):
+#                    print("\nError. Snapshot %d, LDOS lengths are not consistent between snapshots.\n\n" % i)
+#                exit(0);
+#
+#
+#
+#    # Fetch a sample
+#    def __getitem__(self, idx):
+#      
+##        print("idx: ", idx)
+#
+#        return torch.tensor(self.fp_dataset[idx // self.grid_pts][idx % self.grid_pts, :]).float(), \
+#               torch.tensor(self.ldos_dataset[idx // self.grid_pts][idx % self.grid_pts, :]).float()
+#
+##        print("input shape: ", t1.shape)
+##        print("output shape: ", t2.shape)
+#
+#
+##        return t1, t2
+#
+#
+#    # Number of samples in dataset
+#    def __len__(self):
+#        return self.num_snapshots * self.grid_pts
+#
 
 ###-----------------------------------------------------------------------###
 
