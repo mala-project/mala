@@ -360,13 +360,51 @@ class FP_LDOS_LSTM_Net(nn.Module):
         x = x[:, -1, :]
         return (self.final_activation(x), hidden)
  
+###-----------------------------------------------------------------------###
 
-
+#
+# FP -> LDOS, TRANSFORMER Network
+#
+# Adapted from https://pytorch.org/tutorials/beginner/transformer_tutorial.html
 class FP_LDOS_TRANSFORMER_Net(nn.Module):
-    
-    def init(self, args):
+
+    def __init__(self, args):
+        super().__init__()
+
         self.args = args 
-  
+
+        self.dropout = .2
+
+        # must be divisor of fp_length
+        self.num_heads = 7
+
+#        input/hidden equal lengths
+#        self.num_hidden = 91
+#        self.num_tokens = 400
+
+        self.src_mask = None
+        self.pos_encoder = PositionalEncoding(self.args.fp_length, self.dropout)
+
+        encoder_layers = nn.TransformerEncoderLayer(self.args.fp_length, self.num_heads, self.args.fp_length, self.dropout)
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layers, self.args.ff_mid_layers)
+#        self.encoder = nn.Embedding(self.num_tokens, self.args.fp_length)
+
+        self.decoder = nn.Linear(self.args.fp_length, self.args.ldos_length)
+
+        self.init_weights()
+        
+    def generate_square_subsequent_mask(self, size):
+        mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
+        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+
+        return mask
+
+    def init_weights(self):
+        initrange = 0.1
+#        self.encoder.weight.data.uniform_(-initrange, initrange)
+        self.decoder.bias.data.zero_()
+        self.decoder.weight.data.uniform_(-initrange, initrange)
+
 
     def init_hidden_train(self):
         h0 = torch.empty(1)
@@ -389,6 +427,37 @@ class FP_LDOS_TRANSFORMER_Net(nn.Module):
 
 
     def forward(self, x, hidden = 0):
-        return (np.zeros(self.args.ldos_length), hidden)
 
-    
+        if self.src_mask is None or self.src_mask.size(0) != x.size(0):
+            device = x.device
+            mask = self.generate_square_subsequent_mask(x.size(0)).to(device)
+            self.src_mask = mask
+
+#        x = self.encoder(x) * math.sqrt(self.args.fp_length)
+        x = self.pos_encoder(x)
+        output = self.transformer_encoder(x, self.src_mask)
+        output = self.decoder(output)
+
+        return (output, hidden)
+
+class PositionalEncoding(nn.Module):
+
+    def __init__(self, d_model, dropout=0.1, max_len=400):
+        super(PositionalEncoding, self).__init__()
+        self.dropout = nn.Dropout(p=dropout)
+
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        
+        # Need to develop better form here.
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-np.log(10000.0) / d_model))
+        div_term2 = torch.exp(torch.arange(0, d_model - 1 , 2).float() * (-np.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term2)
+        
+        pe = pe.unsqueeze(0).transpose(0, 1)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        x = x + self.pe[:x.size(0), :]
+        return self.dropout(x)

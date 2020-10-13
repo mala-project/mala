@@ -44,7 +44,9 @@ ${PIP} install mpmath==1.1.0
 ${PIP} install pqkmeans==1.0.4
 ${PIP} install sympy==1.6
 
-
+# Outside Network Packages
+#${PIP} install transformers==3.2.0
+#${PIP} install e3nn
 
 ${PIP} list
 

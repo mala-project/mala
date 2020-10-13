@@ -324,7 +324,8 @@ if (args.dataset == "random"):
             data_loaders.load_data_random(args)
 
 # FP->LDOS, data fits in memory
-elif (args.dataset == "fp_ldos" and not args.big_data and not args.big_charm_data):
+#elif (args.dataset == "fp_ldos" and not args.big_data and not args.big_charm_data):
+elif (args.dataset == "fp_ldos" and not args.big_charm_data):
     train_dataset, validation_dataset, test_dataset = \
             data_loaders.load_data_fp_ldos(args)
 
