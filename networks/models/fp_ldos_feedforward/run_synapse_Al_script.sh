@@ -46,7 +46,8 @@ BS=1000
 TBS=4000
 
 # Learning Rate
-LR=.00001
+#LR=.00001
+LRS=".00001"
 
 ## Network Parameters
 
