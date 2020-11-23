@@ -20,6 +20,8 @@ class parameters_network(parameters_base):
 
     def __init__(self):
         self.nn_type = "feed-forward"
+        self.layer_sizes = [10,10,10]
+        self.loss_function_type = "cross_entropy"
 
 
 class parameters_descriptors(parameters_base):
@@ -37,6 +39,18 @@ class parameters_data(parameters_base):
         self.directory = "~/data"
 
 
+class parameters_training(parameters_base):
+    """Network training parameter subclass."""
+
+    def __init__(self):
+        self.trainingtype = "SGD"
+        self.learning_rate = 0.5
+        self.max_number_epochs = 100
+        # TODO: Find a better system for verbosity. Maybe a number.
+        self.verbosity = True
+        self.mini_batch_size = 10
+
+
 # TODO: Add keyword arguments that allow for a passing of the arguments in the constructor.
 
 class parameters():
@@ -48,6 +62,7 @@ class parameters():
         self.network = parameters_network()
         self.descriptors = parameters_descriptors()
         self.data = parameters_data()
+        self.training = parameters_training()
 
     def show(self):
         """Prints all the parameters bundled in this class."""

@@ -10,7 +10,10 @@ import gzip
 import pickle
 import numpy as np
 
+
 class data_mockup(data_base):
+    """Mock-Up data class that is supposed to work like the actual data classes going to be used for FP/LDOS data,
+    but operates on the MNIST data."""
     def __init__(self, p):
         self.parameters = p.data
         self.training_data_raw = []
@@ -19,12 +22,15 @@ class data_mockup(data_base):
         self.training_data = []
         self.validation_data = []
         self.test_data = []
-
+        self.nr_training_data = 0
+        self.nr_test_data = 0
+        self.nr_validation_data = 0
 
     def load_data(self):
         """Loads data from the specified directory."""
-        f = gzip.open(self.parameters.directory+'mnist.pkl.gz', 'rb')
-        self.training_data_raw, self.validation_data_raw, self.test_data_raw = pickle.load(f, encoding="latin1")
+        f = gzip.open(self.parameters.directory + 'mnist.pkl.gz', 'rb')
+        self.training_data_raw, self.validation_data_raw, self.test_data_raw = pickle.load(
+            f, encoding="latin1")
         f.close()
 
     def prepare_data(self):
@@ -43,15 +49,28 @@ class data_mockup(data_base):
         the training data and the validation / test data.  These formats
         turn out to be the most convenient for use in our neural network
         code."""
-        training_inputs = [np.reshape(x, (784, 1)) for x in self.training_data_raw[0]]
-        training_results = [self.vectorized_result(y) for y in self.training_data_raw[1]]
-        self.training_data = zip(training_inputs, training_results)
-        validation_inputs = [np.reshape(x, (784, 1)) for x in self.validation_data_raw[0]]
-        self.validation_data = zip(validation_inputs, self.validation_data_raw[1])
-        test_inputs = [np.reshape(x, (784, 1)) for x in self.test_data_raw[0]]
-        self.test_data = zip(test_inputs, self.test_data_raw[1])
+        training_inputs = [np.reshape(x, (784, 1))
+                           for x in self.training_data_raw[0]]
+        training_results = [self.vectorized_result(
+            y) for y in self.training_data_raw[1]]
+        self.training_data = np.array([training_inputs,training_results], dtype=object)
 
-    def vectorized_result(self,j):
+        validation_inputs = [np.reshape(x, (784, 1))
+                             for x in self.validation_data_raw[0]]
+        validation_results = [self.vectorized_result(
+            y) for y in self.validation_data_raw[1]]
+        self.validation_data = np.array([validation_inputs,validation_results], dtype=object)
+
+        test_inputs = [np.reshape(x, (784, 1)) for x in self.test_data_raw[0]]
+        test_results = [self.vectorized_result(
+            y) for y in self.test_data_raw[1]]
+        self.test_data = np.array([test_inputs,test_results], dtype=object)
+
+        self.nr_training_data = np.shape(self.training_data)[1]
+        self.nr_validation_data = np.shape(self.validation_data)[1]
+        self.nr_test_data = np.shape(self.test_data)[1]
+
+    def vectorized_result(self, j):
         """Return a 10-dimensional unit vector with a 1.0 in the jth
         position and zeroes elsewhere.  This is used to convert a digit
         (0...9) into a corresponding desired output from the neural
@@ -60,8 +79,25 @@ class data_mockup(data_base):
         e[j] = 1.0
         return e
 
+    def get_input_dimension(self):
+        """Returns the dimension of the input vector."""
+        return 784
 
+    def get_output_dimension(self):
+        """Returns the dimension of the output vector."""
+        return 10
 
+    def dbg_reduce_number_of_data_points(self, newtraining, newvalidation, newtest):
+        """For debugging purposes, we can reduce the amount of data we actually want to use to
+        train and validate the network. I realize this routine is not optimized at all,
+        but since this is really just for development tests I don't think it needs to be.
+        """
+        self.training_data.resize(2,newtraining)
+        self.validation_data.resize(2,newvalidation)
+        self.test_data.resize(2,newtest)
+        self.nr_training_data = np.shape(self.training_data)[1]
+        self.nr_validation_data = np.shape(self.validation_data)[1]
+        self.nr_test_data = np.shape(self.test_data)[1]
 
 if __name__ == "__main__":
     raise Exception(
