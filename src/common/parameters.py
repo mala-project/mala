@@ -12,29 +12,36 @@ class parameters_base():
 
     def show(self, indent=""):
         for v in vars(self):
-                print(indent+'%-15s: %s' % (v, getattr(self, v)))
+            print(indent + '%-15s: %s' % (v, getattr(self, v)))
+
 
 class parameters_network(parameters_base):
     """Neural Network parameter subclass."""
+
     def __init__(self):
         self.nn_type = "feed-forward"
 
+
 class parameters_descriptors(parameters_base):
     """Fingerprint descriptor parameter subclass."""
+
     def __init__(self):
         self.descriptor_type = "SNAP"
 
+
 class parameters_data(parameters_base):
     """Dataset interface parameter subclass."""
+
     def __init__(self):
         self.datatype = "FP+LDOS"
-        self.directory ="~/data"
+        self.directory = "~/data"
 
 
 # TODO: Add keyword arguments that allow for a passing of the arguments in the constructor.
 
 class parameters():
     """Parameter class for ML-DFT@CASUS."""
+
     def __init__(self):
         self.comment = 0
         '''Comment a used parameter dataset.'''
@@ -42,21 +49,19 @@ class parameters():
         self.descriptors = parameters_descriptors()
         self.data = parameters_data()
 
-
-
-
-
     def show(self):
         """Prints all the parameters bundled in this class."""
-        print("--- "+self.__doc__+" ---")
+        print("--- " + self.__doc__ + " ---")
         for v in vars(self):
             if (isinstance(getattr(self, v), parameters_base)):
                 parobject = getattr(self, v)
-                print("--- "+parobject.__doc__+" ---")
+                print("--- " + parobject.__doc__ + " ---")
                 parobject.show("\t")
             else:
                 print('%-15s: %s' % (v, getattr(self, v)))
 
+
 if __name__ == "__main__":
     p = parameters()
     p.show()
+    print("parameters.py - basic functions are working.")

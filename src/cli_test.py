@@ -1,5 +1,5 @@
 from common.parameters import parameters
-
+from datahandling.data_mockup import data_mockup
 
 '''
 This framework should be easily usable by instantiating and calling a couple of classes.
@@ -19,10 +19,10 @@ print("THIS IS ALL STILL WORK IN PROGRESS.")
 # PARAMETERS
 # All paramaters are handled from a central parameters class that contains subclasses.
 ####################
-used_parameters = parameters()
+test_parameters = parameters()
 # Modify parameters as you want...
-# used_parameters.network.nn_type = "A different neural network"
-
+test_parameters.data.directory = "/home/fiedlerl/data/mnist/"
+#used_parameters.network.nn_type = "A different neural network"
 
 
 ####################
@@ -30,8 +30,9 @@ used_parameters = parameters()
 # Read data to numpy arrays using OpenPMD.
 # For the fingerprints, snapshot creation has to take place here.
 ####################
-
-
+test_data = data_mockup(test_parameters)
+test_data.load_data()
+test_data.prepare_data()
 
 ####################
 # NETWORK SETUP
