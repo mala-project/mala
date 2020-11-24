@@ -34,12 +34,13 @@ class network(nn.Module):
     def initialize_as_feedforward(self):
         for i in range(0,self.number_of_layers-1):
             self.layers.append((nn.Linear(self.params.layer_sizes[i], self.params.layer_sizes[i+1])))
+            self.layers.append(nn.Sigmoid())
 
 
     def forward(self, input):
         if (self.params.nn_type == "feed-forward"):
-            for i in range(0,self.number_of_layers-1):
-                input = self.layers[i](input)
+            for layer in self.layers:
+                input = layer(input)
             return input
         else:
             raise Exception("Unsupported network architecture.")

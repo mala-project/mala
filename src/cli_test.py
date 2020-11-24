@@ -27,8 +27,8 @@ test_parameters = parameters()
 test_parameters.data.directory = "/home/fiedlerl/data/mnist/"
 test_parameters.comment = "Test run using MNIST."
 test_parameters.training.max_number_epochs = 100
-test_parameters.training.mini_batch_size = 9
-test_parameters.training.learning_rate = 0.3
+test_parameters.training.mini_batch_size = 10
+test_parameters.training.learning_rate = 3
 #used_parameters.network.nn_type = "A different neural network"
 
 ####################
@@ -47,7 +47,7 @@ print("Read data: DONE.")
 # Set up the network and trainer we want to use.
 ####################
 
-test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 30, data_handler.get_output_dimension()]
+test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
 test_network = network(test_parameters)
 test_trainer = trainer(test_parameters)
 print("Network setup: DONE.")
