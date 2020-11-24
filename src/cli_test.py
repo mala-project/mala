@@ -26,6 +26,9 @@ test_parameters = parameters()
 # Modify parameters as you want...
 test_parameters.data.directory = "/home/fiedlerl/data/mnist/"
 test_parameters.comment = "Test run using MNIST."
+test_parameters.training.max_number_epochs = 100
+test_parameters.training.mini_batch_size = 9
+test_parameters.training.learning_rate = 0.3
 #used_parameters.network.nn_type = "A different neural network"
 
 ####################
@@ -35,8 +38,8 @@ test_parameters.comment = "Test run using MNIST."
 ####################
 data_handler = data_mockup(test_parameters)
 data_handler.load_data()
-data_handler.prepare_data()
-data_handler.dbg_reduce_number_of_data_points(5000, 1000, 1000)
+# data_handler.prepare_data(less_training_pts=5000, less_validation_points=1000, less_test_points=1000)
+data_handler.prepare_data(less_training_pts=0, less_validation_points=0, less_test_points=0)
 print("Read data: DONE.")
 
 ####################
@@ -46,17 +49,16 @@ print("Read data: DONE.")
 
 test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 30, data_handler.get_output_dimension()]
 test_network = network(test_parameters)
-#test_trainer = trainer(test_parameters)
+test_trainer = trainer(test_parameters)
 print("Network setup: DONE.")
-
-
-print("Setup COMPLETE. \nParameters used for this experiment:")
-test_parameters.show()
 
 ####################
 # TRAINING
 # Train the network.
 ####################
+
+print("Starting training.")
+test_trainer.train_network(test_network, data_handler)
 
 ####################
 # SAVING
@@ -74,3 +76,11 @@ test_parameters.show()
 # (optional) POSTPROCESSING
 # Unclear if this can be done with this framework.
 ####################
+
+
+####################
+# Output parameters (=metadata)
+####################
+
+print("Execution complete. \nParameters used for this experiment:")
+test_parameters.show()

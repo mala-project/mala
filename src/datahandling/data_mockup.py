@@ -9,6 +9,8 @@ from .data_base import data_base
 import gzip
 import pickle
 import numpy as np
+import torch
+from torch.utils.data import TensorDataset
 
 
 class data_mockup(data_base):
@@ -19,9 +21,19 @@ class data_mockup(data_base):
         self.training_data_raw = []
         self.validation_data_raw = []
         self.test_data_raw = []
-        self.training_data = []
-        self.validation_data = []
-        self.test_data = []
+
+        self.training_data_inputs = []
+        self.validation_data_inputs = []
+        self.test_data_inputs = []
+
+        self.training_data_targets = []
+        self.validation_data_targets = []
+        self.test_data_targets = []
+
+        self.training_data_set = []
+        self.validation_data_set = []
+        self.test_data_set = []
+
         self.nr_training_data = 0
         self.nr_test_data = 0
         self.nr_validation_data = 0
@@ -33,7 +45,15 @@ class data_mockup(data_base):
             f, encoding="latin1")
         f.close()
 
-    def prepare_data(self):
+    def get_input_dimension(self):
+        """Returns the dimension of the input vector."""
+        return 784
+
+    def get_output_dimension(self):
+        """Returns the dimension of the output vector."""
+        return 10
+
+    def prepare_data(self, less_training_pts=0, less_validation_points=0, less_test_points=0):
         """Prepares the data to be used in an ML workflow:
         In particular, ``training_data`` is a list containing 50,000
         2-tuples ``(x, y)``.  ``x`` is a 784-dimensional numpy.ndarray
@@ -49,26 +69,38 @@ class data_mockup(data_base):
         the training data and the validation / test data.  These formats
         turn out to be the most convenient for use in our neural network
         code."""
-        training_inputs = [np.reshape(x, (784, 1))
-                           for x in self.training_data_raw[0]]
-        training_results = [self.vectorized_result(
-            y) for y in self.training_data_raw[1]]
-        self.training_data = np.array([training_inputs,training_results], dtype=object)
+        self.training_inputs = torch.from_numpy(np.squeeze([np.reshape(x, (784, 1))
+                            for x in self.training_data_raw[0]])).float()
+        self.training_results = torch.from_numpy(np.squeeze([self.vectorized_result(
+            y) for y in self.training_data_raw[1]])).float()
+        if (less_training_pts != 0):
+            self.training_inputs.resize_(less_training_pts, self.get_input_dimension())
+            self.training_results.resize_(less_training_pts, self.get_output_dimension())
 
-        validation_inputs = [np.reshape(x, (784, 1))
-                             for x in self.validation_data_raw[0]]
-        validation_results = [self.vectorized_result(
-            y) for y in self.validation_data_raw[1]]
-        self.validation_data = np.array([validation_inputs,validation_results], dtype=object)
+        self.validation_inputs = torch.from_numpy(np.squeeze([np.reshape(x, (784, 1))
+                            for x in self.validation_data_raw[0]])).float()
+        self.validation_results = torch.from_numpy(np.squeeze([self.vectorized_result(
+            y) for y in self.validation_data_raw[1]])).float()
+        if (less_validation_points != 0):
+            self.validation_inputs.resize_(less_validation_points, self.get_input_dimension())
+            self.validation_results.resize_(less_validation_points, self.get_output_dimension())
 
-        test_inputs = [np.reshape(x, (784, 1)) for x in self.test_data_raw[0]]
-        test_results = [self.vectorized_result(
-            y) for y in self.test_data_raw[1]]
-        self.test_data = np.array([test_inputs,test_results], dtype=object)
+        self.test_inputs = torch.from_numpy(np.squeeze([np.reshape(x, (784, 1))
+                            for x in self.test_data_raw[0]])).float()
+        self.test_results = torch.from_numpy(np.squeeze([self.vectorized_result(
+            y) for y in self.test_data_raw[1]])).float()
+        if (less_test_points != 0):
+            self.test_inputs.resize_(less_test_points, self.get_input_dimension())
+            self.test_results.resize_(less_test_points, self.get_output_dimension())
 
-        self.nr_training_data = np.shape(self.training_data)[1]
-        self.nr_validation_data = np.shape(self.validation_data)[1]
-        self.nr_test_data = np.shape(self.test_data)[1]
+
+        self.training_data_set = TensorDataset(self.training_inputs, self.training_results)
+        self.validation_data_set = TensorDataset(self.validation_inputs, self.validation_results)
+        self.test_data_set = TensorDataset(self.test_inputs, self.test_results)
+
+        self.nr_training_data = (self.training_inputs.size())[0]
+        self.nr_validation_data = (self.validation_inputs.size())[0]
+        self.nr_test_data = (self.test_inputs.size())[0]
 
     def vectorized_result(self, j):
         """Return a 10-dimensional unit vector with a 1.0 in the jth
@@ -78,26 +110,6 @@ class data_mockup(data_base):
         e = np.zeros((10, 1))
         e[j] = 1.0
         return e
-
-    def get_input_dimension(self):
-        """Returns the dimension of the input vector."""
-        return 784
-
-    def get_output_dimension(self):
-        """Returns the dimension of the output vector."""
-        return 10
-
-    def dbg_reduce_number_of_data_points(self, newtraining, newvalidation, newtest):
-        """For debugging purposes, we can reduce the amount of data we actually want to use to
-        train and validate the network. I realize this routine is not optimized at all,
-        but since this is really just for development tests I don't think it needs to be.
-        """
-        self.training_data.resize(2,newtraining)
-        self.validation_data.resize(2,newvalidation)
-        self.test_data.resize(2,newtest)
-        self.nr_training_data = np.shape(self.training_data)[1]
-        self.nr_validation_data = np.shape(self.validation_data)[1]
-        self.nr_test_data = np.shape(self.test_data)[1]
 
 if __name__ == "__main__":
     raise Exception(

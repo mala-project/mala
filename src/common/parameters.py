@@ -21,7 +21,7 @@ class parameters_network(parameters_base):
     def __init__(self):
         self.nn_type = "feed-forward"
         self.layer_sizes = [10,10,10]
-        self.loss_function_type = "cross_entropy"
+        self.loss_function_type = "mse"
 
 
 class parameters_descriptors(parameters_base):
