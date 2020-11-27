@@ -21,6 +21,10 @@ class parameters_network(parameters_base):
     def __init__(self):
         self.nn_type = "feed-forward"
         self.layer_sizes = [10,10,10]
+        """Includes the input layer, although no activation is applied to it."""
+        self.layer_activations = ["Sigmoid"]
+        """If the dimension of layer_activations is smaller than the dimension of
+        layer_sizes-1, than the first entry is used for all layers."""
         self.loss_function_type = "mse"
 
 

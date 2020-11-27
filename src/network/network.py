@@ -8,6 +8,7 @@ import torch.nn.functional as F
 
 
 
+
 class network(nn.Module):
     """Central network class for this framework. Based on pytorch.nn.Module."""
     def __init__(self, p):
@@ -16,8 +17,14 @@ class network(nn.Module):
         # initialize the parent class
         super(network, self).__init__()
 
+        # Mappings for parsing of the activation layers.
+        self.activation_mappings = {
+            "Sigmoid" : nn.Sigmoid,
+            "ReLU" : nn.ReLU,
+        }
+
         # initialize the layers
-        self.number_of_layers = len(self.params.layer_sizes)
+        self.number_of_layers = len(self.params.layer_sizes)-1
         self.layers = nn.ModuleList()
         if (self.params.nn_type == "feed-forward"):
             self.initialize_as_feedforward()
@@ -32,9 +39,21 @@ class network(nn.Module):
 
 
     def initialize_as_feedforward(self):
-        for i in range(0,self.number_of_layers-1):
+        # Check if multiple types of activations were selected or only one was passed to be used in the entire network.
+        use_only_one_activation_type = False
+        if (len(self.params.layer_activations) == 1):
+            use_only_one_activation_type = True
+        elif(len(self.params.layer_activations) < self.number_of_layers):
+            raise Exception("Not enough activation layers provided.")
+        for i in range(0,self.number_of_layers):
             self.layers.append((nn.Linear(self.params.layer_sizes[i], self.params.layer_sizes[i+1])))
-            self.layers.append(nn.Sigmoid())
+            try:
+                if (use_only_one_activation_type):
+                    self.layers.append(self.activation_mappings[self.params.layer_activations[0]]())
+                else:
+                    self.layers.append(self.activation_mappings[self.params.layer_activations[i]]())
+            except:
+                raise Exception("Invalid activation type seleceted.")
 
 
     def forward(self, input):

@@ -48,6 +48,7 @@ print("Read data: DONE.")
 ####################
 
 test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
+test_parameters.network.layer_activations = ["Sigmoid","Sigmoid"]
 test_network = network(test_parameters)
 test_trainer = trainer(test_parameters)
 print("Network setup: DONE.")
