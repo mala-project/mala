@@ -1,5 +1,6 @@
 from common.parameters import parameters
 from datahandling.data_mockup import data_mockup
+from datahandling.data_snap_ldos import data_snap_ldos
 from network.network import network
 from network.trainer import trainer
 
@@ -24,7 +25,9 @@ print("Welcome to ML-DFT@CASUS.")
 ####################
 test_parameters = parameters()
 # Modify parameters as you want...
-test_parameters.data.directory = "/home/fiedlerl/data/mnist/"
+test_parameters.data.directory = "/home/fiedlerl/data/test_fp_snap/"
+test_parameters.data.datatype = "QE+LDOS"
+test_parameters.data.qe_calc_list= ["0.4gcc/", "0.6gcc/"]
 test_parameters.comment = "Test run using MNIST."
 test_parameters.training.max_number_epochs = 100
 test_parameters.training.mini_batch_size = 10
@@ -36,10 +39,11 @@ test_parameters.training.learning_rate = 3
 # Read data to numpy arrays (later we are going to use OpenPMD for this)
 # For the fingerprints, snapshot creation has to take place here.
 ####################
-data_handler = data_mockup(test_parameters)
+# data_handler = data_mockup(test_parameters)
+data_handler = data_snap_ldos(test_parameters)
 data_handler.load_data()
 # data_handler.prepare_data(less_training_pts=5000, less_validation_points=1000, less_test_points=1000)
-data_handler.prepare_data(less_training_pts=0, less_validation_points=0, less_test_points=0)
+# data_handler.prepare_data(less_training_pts=0, less_validation_points=0, less_test_points=0)
 print("Read data: DONE.")
 
 ####################
