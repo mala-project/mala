@@ -39,8 +39,21 @@ class parameters_data(parameters_base):
     """Dataset interface parameter subclass."""
 
     def __init__(self):
-        self.datatype = "FP+LDOS"
+        self.datatype = "QE+LDOS"
+        """
+        Specifies the kind of input data we are working with.
+            Implemented so far:
+                - MNIST for the MNIST data set (for testing purposes).
+                - QE+LDOS for a dataset consisting of a Quantum espresso outfile and an LDOS file.
+        """
         self.directory = "~/data"
+        self.qe_calc_list = []
+        """
+        A list detailing all subdirectories, each containing a QE out file and
+        the calculated LDOS (using pp.x).
+        """
+
+
 
 
 class parameters_training(parameters_base):

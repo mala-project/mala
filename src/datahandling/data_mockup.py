@@ -18,6 +18,8 @@ class data_mockup(data_base):
     but operates on the MNIST data."""
     def __init__(self, p):
         self.parameters = p.data
+        if (self.parameters.datatype != "MNIST"):
+            raise Exception("Unsupported type of data. The mockup data handler can only operate with MNIST data.")
         self.training_data_raw = []
         self.validation_data_raw = []
         self.test_data_raw = []

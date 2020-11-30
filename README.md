@@ -3,17 +3,19 @@
 WIP: Building of a ML-DFT framework based on the one used in cooperation with Sandia, but with more usability and features.
 I have never programmed a ML framework before, so feel free to criticize my coding approach.
 
-## ToDo - Rewrite
+## Installation
 
-* Create sceleton code
-    * use cli_test.py to test the progress of the framework
-    * later also write a .yaml file for CI
-* Implement the interface to LAMMPS to calculate SNAP descriptors
-* Implement NN driver (and make it modular)
-* Implement a nice inference method
+__TODO__ Installation/setup script coming soon.
 
-## ToDo - future+maybeNotPossible
+Make sure you have the following python modules installed:
+* pytorch
+* numpy
+* scipy
 
-* Find a way to calculate LDOS from this python module
-* find a way to do some QE stuff from this module
-* switch to different, python based data generating code (e.g. GPAW) that is easily accessible
+Make sure you have lammps installed. For now that means:
+    * https://github.com/athomps/lammps/tree/compute-grid
+    * Compile the LAMMPS shared library with the SNAP package installed
+    * Make the shared library visible e.g. ln -s $LAMMPS/src/liblammps.so src/datahandling
+    * Make the LAMMPS lammps.py visible e.g. ln -s $LAMMPS/python/lammps.py src/datahandling
+
+__TODO__ Make the lammps part of the code more accesible.
