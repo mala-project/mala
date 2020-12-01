@@ -9,7 +9,6 @@ import os
 from pathlib import Path
 from .lammps_utils import *
 from lammps import lammps
-from mpi4py import MPI
 
 
 class data_snap_ldos(data_base):
@@ -116,23 +115,22 @@ class data_snap_ldos(data_base):
             }
         )
 
-        comm = MPI.COMM_WORLD
-        rank  = comm.Get_rank()
-        ranks = comm.Get_size()
-        comm.Barrier()
+        # Build the LAMMPS object.
         lmp = lammps(cmdargs=lmp_cmdargs)
-        comm.Barrier()
+
         # An empty string means that the user wants to use the standard input.
         if (self.parameters.lammps_compute_file == ""):
             filepath = __file__.split("data_snap_ldos")[0]
             self.parameters.lammps_compute_file = filepath+"in.bgrid.python"
+
+        # Do the LAMMPS calculation.    
         try:
             lmp.file(self.parameters.lammps_compute_file)
         except lammps.LAMMPSException:
             raise Exception("There was a problem during the SNAP calculation. Exiting.")
 
 
-        # Set things not accessible from LAMMPS
+        # # Set things not accessible from LAMMPS
         # First 3 cols are x, y, z, coords
         # ncols0 = 3
         #
