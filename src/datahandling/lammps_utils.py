@@ -1,4 +1,4 @@
-''' Collection of usefulk functions for working with
+''' Collection of useful functions for working with
 LAMMPS. Courtesy of the Sandia code. We have to talk
 about licensing maybe.'''
 
