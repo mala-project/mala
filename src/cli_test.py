@@ -3,7 +3,6 @@ from datahandling.data_mockup import data_mockup
 from datahandling.data_snap_ldos import data_snap_ldos
 from network.network import network
 from network.trainer import trainer
-
 '''
 This framework should be easily usable by instantiating and calling a couple of classes.
 This file is the central testing point to try out all new functions, as it serves as a command-line based testing interface.
@@ -27,7 +26,8 @@ test_parameters = parameters()
 # Modify parameters as you want...
 test_parameters.data.directory = "/home/fiedlerl/data/test_fp_snap/"
 test_parameters.data.datatype = "QE+LDOS"
-test_parameters.data.qe_calc_list= ["0.4gcc/", "0.6gcc/"]
+test_parameters.data.qe_calc_list= ["0.4gcc/"]#, "0.6gcc/"]
+test_parameters.data.dbg_grid_dimensions = [20,20,20]
 test_parameters.comment = "Test run using MNIST."
 test_parameters.training.max_number_epochs = 100
 test_parameters.training.mini_batch_size = 10
@@ -42,6 +42,8 @@ test_parameters.training.learning_rate = 3
 # data_handler = data_mockup(test_parameters)
 data_handler = data_snap_ldos(test_parameters)
 data_handler.load_data()
+data_handler.prepare_data()
+
 # data_handler.prepare_data(less_training_pts=5000, less_validation_points=1000, less_test_points=1000)
 # data_handler.prepare_data(less_training_pts=0, less_validation_points=0, less_test_points=0)
 print("Read data: DONE.")

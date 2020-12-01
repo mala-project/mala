@@ -29,11 +29,11 @@ class data_base():
 
     def get_input_dimension(self):
         """Returns the dimension of the input vector."""
-        raise Exception("prepare_data not implemented.")
+        raise Exception("get_input_dimension not implemented.")
 
     def get_output_dimension(self):
         """Returns the dimension of the output vector."""
-        raise Exception("prepare_data not implemented.")
+        raise Exception("get_output_dimension not implemented.")
 
     def dbg_reduce_number_of_data_points(self, newnumber):
         raise Exception("dbg_reduce_number_of_data_points not implemented.")

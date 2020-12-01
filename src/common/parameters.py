@@ -52,9 +52,26 @@ class parameters_data(parameters_base):
         A list detailing all subdirectories, each containing a QE out file and
         the calculated LDOS (using pp.x).
         """
-
-
-
+        self.twojmax = 10
+        """
+        SNAP creation: 2*jmax-parameter used for calculation of SNAP descriptors. Standard value
+        for jmax is 5, so standard value for twojmax is 10
+        """
+        self.rcutfac = 4.67637
+        """
+        SNAP creation: radius cutoff factor for the fingerprint sphere in Angstroms.
+        """
+        self.lammps_compute_file = ""
+        """
+        LAMMPS input file that is used to calculate the SNAP descriptors.
+        If this string is empty, the standard LAMMPS input file found in this
+        repository will be used (recommended).
+        """
+        self.dbg_grid_dimensions = ""
+        """
+        For debugging purposes smaller grid sizes than the ones specified in the
+        QE output can be used.
+        """
 
 class parameters_training(parameters_base):
     """Network training parameter subclass."""
