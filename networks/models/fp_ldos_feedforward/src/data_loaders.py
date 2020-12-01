@@ -829,5 +829,10 @@ def subset_fp(args):
 # Take subset of LDOS outputs
 # Current no option available
 def subset_ldos(args):
+    fstart = args.feat_start
+    fstop = args.feat_stop
 
-    return np.arange(args.ldos_length)
+    sub_idxs = np.arange(fstart, fstop)
+
+    return sub_idxs.astype(int)
+    #return np.arange(args.ldos_length)

@@ -38,6 +38,10 @@ import big_data
 parser = argparse.ArgumentParser(description='FP-LDOS Feedforward Network')
 
 # Training
+parser.add_argument('--feat_start', type=int, default=0, metavar='N',
+                    help='starting index for ldos features to use')
+parser.add_argument('--feat_stop', type=int, default=150, metavar='N',
+                    help='stopping index for ldos features to use')
 parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
 parser.add_argument('--test-batch-size', type=int, default=64, metavar='N',
@@ -98,8 +102,8 @@ parser.add_argument('--nxyz', type=int, default=200, metavar='N',
                     help='num elements along x,y,z dims (default: 200)')
 parser.add_argument('--fp-length', type=int, default=94, metavar='N',
                     help='number of coefficients in FPs (default: 94)')
-parser.add_argument('--ldos-length', type=int, default=250, metavar='N',
-                    help='number of energy levels in LDOS  (default: 250)')
+parser.add_argument('--ldos-length', type=int, default=150, metavar='N',
+                    help='number of energy levels in LDOS  (default: 150)')
 parser.add_argument('--no-coords', action='store_true', default=False,
                     help='do not use x/y/z coordinates in fp inputs')
 parser.add_argument('--no-bispectrum', action='store_true', default=False,

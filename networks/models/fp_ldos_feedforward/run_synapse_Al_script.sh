@@ -17,7 +17,12 @@ else
     GPUS=2
 fi
 
-
+if [ $5 ]
+then
+	LDOSL=$5
+else
+	LDOSL=250
+fi
 ### Input/Output
 
 #DS=random
@@ -33,7 +38,7 @@ TMP=298K
 GC=2.699
 NXYZ=200
 FPL=94
-LDOSL=250
+#LDOSL=250 #250
 
 # Train - 1 snapshot, Valid - 1, Test - 1 
 SSHOT=3
@@ -46,8 +51,8 @@ BS=1000
 TBS=4000
 
 # Learning Rate
-LR=.00001
-
+#LR=.00001
+LRS=".00001"
 ## Network Parameters
 
 # Layer Width
@@ -119,7 +124,7 @@ LIL=1
 EPCS=5000
 
 # Early Stopping Patience
-EP=8
+EP=5 #8
 # Early Stopping Sufficient Decrease
 ES=.99999
 
@@ -144,8 +149,30 @@ NUMW=16
 
 # Valid/Test
 NUMTW=16
+ 
+if [ $2 ]
+then
+	FTST=$2
+else
+	FTST=0
+fi
 
+if [ $3 ]
+then
+	FTSP=$3
+else
+	FTSP=250
+fi
 
+if [ $4 ]
+then
+	ID=$4
+else
+	ID=${RANDOM}
+fi
+
+#FTST=0 #50
+#FTSP=150 #150
 
 
 
@@ -165,7 +192,9 @@ for LR in $LRS
 do
 
     ${EXE} -np ${GPUS} ${PYT} ${DRVR} \
-        --dataset ${DS} \
+        --feat_start ${FTST} \
+	--feat_stop ${FTSP} \
+	--dataset ${DS} \
         --epochs ${EPCS} \
         --big-charm-data \
         --num-snapshots ${SSHOT} \
@@ -199,7 +228,7 @@ do
         --fp-standard-scaling \
         --ldos-norm-scaling \
         --ldos-max-only \
-        2>&1 | tee ./logs/fp_ldos_synapse_${MAT}_${GPUS}gpus_${TMP}_${GC}gcc_${FPL}fp_${LDOSL}ldos_${NXYZ}nxyz_${RANDOM}${RANDOM}.log
+        2>&1 | tee ./logs/fp_ldos_synapse_${MAT}_${TMP}_${GC}gcc_${FPL}fp_${LDOSL}ldos_${NXYZ}nxyz_${ID}.log
 
 done
 

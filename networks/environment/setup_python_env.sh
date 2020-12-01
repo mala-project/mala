@@ -22,11 +22,11 @@ ${PIP} install matplotlib==3.1.3
 ${PIP} install seaborn==0.10.0
 
 # Use PyTorch
-${PIP} install torch==1.5.0
-${PIP} install torchvision==0.6.0
+#${PIP} install torch==1.5.0
+#${PIP} install torchvision==0.6.0
 
 # SYNAPSE CUDA VERSION 
-#${pip} install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+${pip} install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
 
 # Logging 
 ${PIP} install tensorboard==2.1.0
