@@ -13,6 +13,8 @@ import argparse
 
 import horovod.torch as hvd
 
+from scipy.stats import gaussian_kde
+
 import torch
 
 import pickle
@@ -49,8 +51,8 @@ parser.add_argument('--snapshot-offset', type=int, default=0, metavar='N',
                     help='which snapshot to begin inference (default: 0)')
 #parser.add_argument('--num-atoms', type=int, default=256, metavar='N',
 #                    help='number of atoms in the snapshot (default: 256)')
-#parser.add_argument('--num-slices', type=int, default=4, metavar='N',
-#                    help='number of density z slices to plot (default: 4)')
+parser.add_argument('--num-slices', type=int, default=1, metavar='N',
+                    help='number of density z slices to plot (default: 1)')
 #parser.add_argument('--no_convert', action='store_true', default=False,
 #                    help='Do not Convert units from Rydbergs')
 #parser.add_argument('--log', action='store_true', default=False,
@@ -368,8 +370,6 @@ for idx, current_dir in enumerate(args.output_dirs):
     
     model = model.eval()
 
-    
-
 #    margs_file = open(args_fpath, "rb")
 #    model_args = pickle.load(open(args_fpath, "rb"))
 #    margs_file.close()
@@ -444,7 +444,7 @@ for idx, current_dir in enumerate(args.output_dirs):
 
         predictions = np.empty([model_args.grid_pts, model_args.ldos_length]) 
         hidden_n = model.test_hidden
-        data_idx = 0
+        data_idx = 0 
 
         for batch_idx, (data, target) in enumerate(inference_loader):
             
@@ -615,21 +615,37 @@ for idx, current_dir in enumerate(args.output_dirs):
                 os.makedirs(args.output_dir)
          
             matplotlib.rcdefaults()
+
+            font = {'weight': 'normal', 'size': 13}
+            matplotlib.rc('font', **font)
             
             # DOS and error plots
            
+            # Truncate dos
+            t_ldos_e_grid = ldos_e_grid[50:200]
+            t_target_dos = target_ldos[i].dos.dos[50:200]
+            t_pred_dos = pred_ldos.dos.dos[50:200]
+
+
+            print("Fermi Energy: ", target_ldos[i].e_fermi)
+
             fig, (ax0, ax1) = plt.subplots(2,1)
-            ax0.plot(dos_e_grid, true_dos[i].dos, "-k")
-            ax0.plot(ldos_e_grid, target_ldos[i].dos.dos, ":b")
-            ax0.plot(ldos_e_grid, pred_ldos.dos.dos, "--g")
-            ax0.legend(["True Eigen", "ML Target", "ML Prediction"])
-            ax0.set_ylabel("DOS")
+            #ax0.plot(dos_e_grid, true_dos[i].dos, "-k")
+            ax0.plot(t_ldos_e_grid, t_target_dos, "-k")
+            ax0.plot(t_ldos_e_grid, t_pred_dos, "--r")
+            ax0.plot([target_ldos[i].e_fermi, target_ldos[i].e_fermi], [80, 120], '-g')
+            ax0.legend(["DFT LDOS Target", "ML-DFT Prediction", "Fermi Energy"])
+            ax0.set_ylabel("DOS ($eV^{-1}$)")
+            
+            ax0.set_ylim([0, 200])
           
-            ax1.plot(ldos_e_grid, target_ldos[i].dos.dos - true_dos[i].dos[:-1], "-b")
-            ax1.plot(ldos_e_grid, pred_ldos.dos.dos - true_dos[i].dos[:-1], "-r")
-            ax1.legend(["Target DOS Error", "Pred DOS Error"])
+            #ax1.plot(ldos_e_grid, target_ldos[i].dos.dos - true_dos[i].dos[:-1], "-b")
+            ax1.plot(t_ldos_e_grid, t_pred_dos - t_target_dos, "-r")
+            ax1.legend(["ML-DFT Pred DOS Error"])
             ax1.set_xlabel("Energy (eV)")
-            ax1.set_ylabel("DOS Error")
+            ax1.set_ylabel("DOS Error ($eV^{-1}$)")
+            
+            ax1.set_ylim([-2.0, 2.0])
 
             plt.tight_layout()
          
@@ -647,16 +663,44 @@ for idx, current_dir in enumerate(args.output_dirs):
             target_density = np.reshape(target_ldos[i].density, [args.nxyz ** 3])
             pred_density = np.reshape(pred_ldos.density, [args.nxyz ** 3])
 
+            target_max = np.max(target_density)
+            target_max = .055
+           
+
+            density_err_max = np.max(np.abs(target_density - pred_density))
+            density_err_mean = np.mean(np.abs(target_density - pred_density))
+            density_err_std = np.std(np.abs(target_density - pred_density))
+
+            print("Density error max: ", density_err_max)
+            print("Density error mean: ", density_err_mean)
+            print("Density error std: ", density_err_std)
+
+
+            # Color heat map
+            idxs = np.arange(200**3)
+            idxs = np.random.choice(idxs, 10000, replace=False)
+
+            x_mod = target_density[idxs]
+            y_mod = pred_density[idxs]
+
+            xy = np.vstack([x_mod, y_mod])
+            z = gaussian_kde(xy)(xy)
+            
+
+
 
 #            ax.plot(target_ldos.density, target_ldos.density / target_ldos.density, 'k-')
-            ax.plot(target_density, pred_density - target_density, 'r.')
-            ax.legend(['ML Pred Density Errors'])
-            ax.set_xlabel('ML Target Electron Density ($e^{-}$/$A^{3}$)')
-            ax.set_ylabel('Errors in Electron Density ($e^{-}$/$A^{3}$)')
+#            ax.scatter(target_density, pred_density, c=z, s=100, edgecolor='')
+            im = ax.scatter(x_mod, y_mod, c=z, edgecolor='')
+            ax.plot([0, target_max], [0, target_max], 'k-')
+            ax.legend(['DFT LDOS Target Density', 'ML-DFT Pred Density Errors'])
+            ax.set_xlabel('DFT LDOS Target Electron Density ($e^{-}$/$A^{3}$)')
+            ax.set_ylabel('ML-DFT Pred Electron Density ($e^{-}$/$A^{3}$)')
 
-            target_max = np.max(target_density)
+#            cbar = fig.colorbar(im, ax=ax)
 
-            ax.set_ylim([-1.0 * target_max, target_max])
+            ax.set_xlim([0, target_max])
+            ax.set_ylim([0, target_max])
 
             plt.tight_layout()
 
@@ -752,38 +796,43 @@ for idx, current_dir in enumerate(args.output_dirs):
 #
 #
 #
-#          fig, ax = plt.subplots(args.num_slices,1)
-#
-#          fig.set_figheight(20 * args.num_slices)
-#          fig.set_figwidth(20)
-#
-#          for i in range(args.num_slices):
-#              
-#              gs = target_ldos.cell_volume ** (1/3.) 
-#
-#              xgrid = np.linspace(0, target_ldos.ldos.shape[0], target_ldos.ldos.shape[0]) * gs
-#              ygrid = np.linspace(0, target_ldos.ldos.shape[1], target_ldos.ldos.shape[1]) * gs
-#
-#              density_slice = target_ldos.density[:,:,z_slices[i]] 
+            
+#            fig, ax = plt.subplots(args.num_slices,1)
+
+#            z_slices = np.array([100])
+
+#            fig.set_figheight(20 * args.num_slices)
+#            fig.set_figwidth(20)
+
+#            for i in range(args.num_slices):
+              
+#                gs = target_ldos.cell_volume ** (1/3.) 
+
+#                xgrid = np.linspace(0, target_ldos.ldos.shape[0], target_ldos.ldos.shape[0]) * gs
+#                ygrid = np.linspace(0, target_ldos.ldos.shape[1], target_ldos.ldos.shape[1]) * gs
+
+#                density_slice = target_ldos.density[:,:,z_slices[i]] 
 
           #    if (args.log):
                   #        density_slice = np.log(density_slice)
 
-          #    im = ax[i].contourf(xgrid, ygrid, density_slice, vmin=vmin_plot, vmax=vmax_plot, cmap="seismic")
-          #    ax[i].set_title("Target Density Z-Slice at %3.1f" % (z_slices[i] * gs))
+                #im = ax[i].contourf(xgrid, ygrid, density_slice, vmin=vmin_plot, vmax=vmax_plot, cmap="seismic")
+#                im = ax[i].contourf(xgrid, ygrid, density_slice, cmap="seismic")
+                #ax[i].set_title("Target Density Z-Slice at %3.1f" % (z_slices[i] * gs))
 
-          #    cbar = fig.colorbar(im, ax=ax[i])
-          #    cbar.set_clim(0.0, vmax_plot)
+#                cbar = fig.colorbar(im, ax=ax[i])
+#                cbar.set_clim(0.0, vmax_plot)
 
-          #plt.tight_layout()
+#            plt.tight_layout()
           
           
           #if (args.log):
               #              density_fname = "/target_density_log_model%d_snapshot%d.eps" % (idx, i)
 #          else:
-              #              density_fname = "/target_density_model%d_snapshot%d.eps" % (idx, i)    
+            
+#            density_fname = "/target_density_model%d_snapshot%d.%s" % (idx, i, file_format)    
 
-#          plt.savefig(args.output_dir + density_fname, format='eps')
+#            plt.savefig(args.output_dir + density_fname, format=file_format)
 
 #          print("Density plots created")
 

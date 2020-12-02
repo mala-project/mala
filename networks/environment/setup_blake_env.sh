@@ -1,3 +1,12 @@
+module rm gcc
+module rm python
+module rm openmpi
+
+module load python/3.7.3
+module load openmpi/2.1.2/gcc/7.2.0
+module load cmake/3.12.3
+
+module list
 
 #### Sets up python env for the MLMM project
 
@@ -22,11 +31,11 @@ ${PIP} install matplotlib==3.1.3
 ${PIP} install seaborn==0.10.0
 
 # Use PyTorch
-#${PIP} install torch==1.5.0
-#${PIP} install torchvision==0.6.0
+${PIP} install torch==1.5.0
+${PIP} install torchvision==0.6.0
 
 # SYNAPSE CUDA VERSION 
-${pip} install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+#${pip} install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
 
 # Logging 
 ${PIP} install tensorboard==2.1.0
@@ -50,3 +59,4 @@ ${PIP} install sympy==1.6
 
 ${PIP} list
 
+source ../mlmm_env/bin/activate

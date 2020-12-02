@@ -33,15 +33,19 @@ sys.path.append('./src/charm')
 
 import big_data
 
-
+###############################################################################
 # Training settings
 parser = argparse.ArgumentParser(description='FP-LDOS Feedforward Network')
 
+<<<<<<< HEAD
 # Training
 parser.add_argument('--feat_start', type=int, default=0, metavar='N',
                     help='starting index for ldos features to use')
 parser.add_argument('--feat_stop', type=int, default=150, metavar='N',
                     help='stopping index for ldos features to use')
+=======
+### Training
+>>>>>>> 2c9e33ee970f13e9ab523d368cf1e1f6394fbc19
 parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
 parser.add_argument('--test-batch-size', type=int, default=64, metavar='N',
@@ -69,11 +73,14 @@ parser.add_argument('--grad-clip', type=float, default=0.25, metavar='M',
                     help='Optimizer momentum (default: 0.25)')
 
 
-# Model
+### Model
 parser.add_argument('--model-lstm-network', action='store_true', default=False,
-                    help='use the lstm network')
+                    help='use an lstm network')
 parser.add_argument('--model-gnn-network', action='store_true', default=False,
-                    help='use the gnn network')
+                    help='use a gnn network')
+parser.add_argument('--model-transformer-network', action='store_true', default=False,
+                    help='use a transformer network')
+
 parser.add_argument('--stacked-auto', action='store_true', default=False,
                     help='use the stacked autoencoder layers')
 parser.add_argument('--deep-auto', action='store_true', default=False,
@@ -97,7 +104,7 @@ parser.add_argument('--no-hidden-state', action='store_true', default=False,
                     help='do not use hidden/cell states for the LSTM')
 
 
-# Inputs/Outputs
+### Inputs/Outputs
 parser.add_argument('--nxyz', type=int, default=200, metavar='N',
                     help='num elements along x,y,z dims (default: 200)')
 parser.add_argument('--fp-length', type=int, default=94, metavar='N',
@@ -144,16 +151,17 @@ parser.add_argument('--ldos-log', action='store_true', default=False,
                     help='apply log function to ldos outputs before scaling')
 
 
-# Dataset Choice
+### Dataset Choice
 parser.add_argument('--dataset', type=str, default="random", metavar='DS',
                     help='dataset to train on (ex: "random", "fp_ldos") ' + \
                          '(default: "random")')
-parser.add_argument('--big-data', action='store_true', default=False,
-                    help='do not load data into memory (big data case)')
+#parser.add_argument('--big-data', action='store_true', default=False,
+#                    help='do not load data into memory (big data case)')
 parser.add_argument('--big-charm-data', action='store_true', default=False,
                     help='do not load data into memory (big charm data case)')
 parser.add_argument('--big-clustered-data', action='store_true', default=False,
                     help='do not load data into memory and cluster data (big charm data case)')
+
 parser.add_argument('--material', type=str, default="Al", metavar='MAT',
                     help='material of snapshots to train on (default: "Al")')
 parser.add_argument('--temp', type=str, default="298K", metavar='T',
@@ -177,7 +185,7 @@ parser.add_argument('--num-clusters', type=int, default=100, metavar='N',
                     help='number of clusters for fp data (default: 100)')
 
 
-# Directory Locations
+### Directory Locations
 parser.add_argument('--fp-dir', type=str, \
             default="../../training_data/fp_data", \
             metavar="str", help='path to fp data directory ' + \
@@ -190,13 +198,13 @@ parser.add_argument('--output-dir', type=str, default="./output",
             metavar="str", help='path to output directory ' + \
                                 '(default: ./output_fp_ldos)')
 
-# Tensorboard
+### Tensorboard
 parser.add_argument('--tb-ldos-comparisons', type=int, default=4, metavar='N',
                     help='num of ldos comparisons to make for ' + \
                          'tensorboard visualization (default: 4)')
 
 
-# Other options
+### Other options
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='disables CUDA training')
 parser.add_argument('--no-pinned-memory', action='store_true', default=False,
@@ -231,6 +239,9 @@ args.cuda = not args.no_cuda and torch.cuda.is_available()
 hvd.init()
 torch.manual_seed(args.seed)
 
+
+
+###############################################################################
 # WELCOME!
 if (hvd.rank() == 0):
     print("\n------------------------------------\n")
@@ -247,8 +258,6 @@ if (args.batch_size < hvd.size()):
     print("Changing batch_size from %d to %d (number of ranks)" % \
             (args.batch_size, hvd.size()))
     args.batch_size = hvd.size()
-
-#args.test_batch_size = args.batch_size
 
 if args.cuda:
     # Horovod: pin GPU to local rank.
@@ -314,6 +323,7 @@ if (hvd.rank() == 0):
         print ("%s: %s" % (arg, getattr(args, arg)))
 
 
+###############################################################################
 # Choose dataset
 
 # Random (For Debugging/Performance Scalability)
@@ -322,18 +332,19 @@ if (args.dataset == "random"):
             data_loaders.load_data_random(args)
 
 # FP->LDOS, data fits in memory
-elif (args.dataset == "fp_ldos" and not args.big_data and not args.big_charm_data):
+#elif (args.dataset == "fp_ldos" and not args.big_data and not args.big_charm_data):
+elif (args.dataset == "fp_ldos" and not args.big_charm_data):
     train_dataset, validation_dataset, test_dataset = \
             data_loaders.load_data_fp_ldos(args)
 
 # FP->LDOS, data does not fit in memory
-elif (args.dataset == "fp_ldos" and args.big_data):
-    if(hvd.rank() == 0):
-        print("Loading big data case. Disabling all data normalization.")
+#elif (args.dataset == "fp_ldos" and args.big_data):
+#    if(hvd.rank() == 0):
+#        print("Loading big data case. Disabling all data normalization.")
 
-    train_dataset       = data_loaders.Big_Dataset(args, "train")
-    validation_dataset  = data_loaders.Big_Dataset(args, "validation")
-    test_dataset        = data_loaders.Big_Dataset(args, "test")
+#    train_dataset       = data_loaders.Big_Dataset(args, "train")
+#    validation_dataset  = data_loaders.Big_Dataset(args, "validation")
+#    test_dataset        = data_loaders.Big_Dataset(args, "test")
    
 elif (args.dataset == "fp_ldos" and args.big_charm_data):
     if(hvd.rank() == 0):
@@ -526,6 +537,8 @@ hvd.allreduce(torch.tensor(0), name='barrier')
 
 
 
+###############################################################################
+# Build Pytorch Sampler/Loaders
 
 print("Rank: %d, Creating train sampler/loader" % hvd.rank())
 
@@ -579,13 +592,21 @@ else:
 hvd.allreduce(torch.tensor(0), name='barrier')
 
 
-# Choose and create a Model
+## Choose and create a Model
+
+# LSTM
 if (args.model_lstm_network):
     model = fp_ldos_networks.FP_LDOS_LSTM_Net(args)
+# GNN
 elif (args.model_gnn_network):
     raise ValueError("For James...")
+# TRANSFORMER
+elif (args.model_transformer_network):
+    model = fp_ldos_networks.FP_LDOS_TRANSFORMER_Net(args)
+# FEEDFORWARD
 else:
     model = fp_ldos_networks.FP_LDOS_FF_Net(args)
+
 
 # Set model hidden state
 model.train_hidden = model.init_hidden_train()

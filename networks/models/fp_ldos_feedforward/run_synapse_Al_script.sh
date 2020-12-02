@@ -53,6 +53,10 @@ TBS=4000
 # Learning Rate
 #LR=.00001
 LRS=".00001"
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2c9e33ee970f13e9ab523d368cf1e1f6394fbc19
 ## Network Parameters
 
 # Layer Width
