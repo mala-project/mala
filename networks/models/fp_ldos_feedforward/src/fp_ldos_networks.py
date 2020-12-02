@@ -57,7 +57,11 @@ class FP_LDOS_FF_Net(nn.Module):
                 self.fc_decode = nn.ModuleList(self.fc_decode)
 
         # Flat Feedforward
-        self.fc_width_width = nn.Linear(args.ff_width, args.ff_width) 
+        self.fc_width_width = []
+        for i in range(args.ff_mid_layers):
+            self.fc_width_width.append(nn.Linear(args.ff_width, args.ff_width))
+
+        self.fc_width_width = nn.ModuleList(self.fc_width_width)
 
         # Big Spiker
         self.fc_width_lstm_in = nn.Linear(args.ff_width, args.ldos_length * args.lstm_in_length)
@@ -111,7 +115,7 @@ class FP_LDOS_FF_Net(nn.Module):
 
         else:
             for i in range(self.args.ff_mid_layers):
-                x = self.activation(self.fc_width_width(x))
+                x = self.activation(self.fc_width_width[i](x))
        
         if (self.args.skip_connection):
             x = x + skip_x
