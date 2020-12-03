@@ -6,6 +6,8 @@
 * Make sure the compute-grid tree is checked out!
 * Compile the LAMMPS shared library with the SNAP package installed
     - cd into /path/to/lammps/src folder of LAMMPS
+    - make yes-snap
+    - (optional: check with make ps that snap was correctly added)
     - make mode=shlib mpi
 
 
