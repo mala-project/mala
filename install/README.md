@@ -12,4 +12,4 @@ Please install the following python packages (e.g. using pip):
 
 ##  LAMMPS
 
-This workflow needs the Large-scale Atomic/Molecular Massively Parallel Simulator (LAMMPS) for input data preprocessing. Plese refer to INSTALL_SNAP.md.
+This workflow needs the Large-scale Atomic/Molecular Massively Parallel Simulator (LAMMPS) for input data preprocessing. Please refer to INSTALL_SNAP.md.
