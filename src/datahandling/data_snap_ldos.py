@@ -61,7 +61,9 @@ class data_snap_ldos(data_base):
         if (self.parameters.datatype == "QE+LDOS"):
             for set in self.raw_input:
                 print("Calculating SNAP from atom/grid information at", set[0])
-                self.get_snap_from_atoms(set)
+                snap_data = self.get_snap_from_atoms(set)
+                # Now we have the SNAP and the LDOS data and have to put them together to input
+                # them into pytorch.
         else:
             raise Exception("Unsupported type of data. This data handler can only operate with QuantumEspresso and LDOS data at the moment.")
 
@@ -123,29 +125,40 @@ class data_snap_ldos(data_base):
             filepath = __file__.split("data_snap_ldos")[0]
             self.parameters.lammps_compute_file = filepath+"in.bgrid.python"
 
-        # Do the LAMMPS calculation.    
+        # Do the LAMMPS calculation.
         try:
             lmp.file(self.parameters.lammps_compute_file)
         except lammps.LAMMPSException:
             raise Exception("There was a problem during the SNAP calculation. Exiting.")
 
 
-        # # Set things not accessible from LAMMPS
+        # Set things not accessible from LAMMPS
         # First 3 cols are x, y, z, coords
-        # ncols0 = 3
-        #
-        # # Analytical relation for fingerprint length
-        # ncoeff = (self.parameters.twojmax+2)*(self.parameters.twojmax+3)*(self.parameters.twojmax+4)
-        # ncoeff = ncoeff // 24 # integer division
-        # self.fingerprint_length = ncols0+ncoeff
-        #
-        # # Extract data from LAMMPS calculation.
-        # bptr_np = extract_compute_np(lmp, "bgrid", 0, 2, (nz,ny,nx,fp_length))
-        #
-        # # switch from x-fastest to z-fastest order (swaps 0th and 2nd dimension)
-        # bptr_np = bptr_np.transpose([2,1,0,3])
-        # print("bptr_np shape = ",bptr_np.shape, flush=True)
+        ncols0 = 3
 
+        # Analytical relation for fingerprint length
+        ncoeff = (self.parameters.twojmax+2)*(self.parameters.twojmax+3)*(self.parameters.twojmax+4)
+        ncoeff = ncoeff // 24 # integer division
+        self.fingerprint_length = ncols0+ncoeff
+
+        # Extract data from LAMMPS calculation.
+        snap_descriptors_np = extract_compute_np(lmp, "bgrid", 0, 2, (set[3],set[2],set[1],self.fingerprint_length))
+
+        # switch from x-fastest to z-fastest order (swaps 0th and 2nd dimension)
+        snap_descriptors_np = snap_descriptors_np.transpose([2,1,0,3])
+
+        # The next two commands can be used to check whether the calculated SNAP descriptors
+        # are identical to the ones calculated with the Sandia workflow. They generally are.
+        # print("snap_descriptors_np shape = ",snap_descriptors_np.shape, flush=True)
+        # np.save(set[4]+"test.npy", snap_descriptors_np, allow_pickle=True)
+
+        return snap_descriptors_np
+
+    def get_input_dimension(self):
+        if (self.fingerprint_length != 0):
+            return self.fingerprint_length
+        else:
+            raise Exception("No fingerprints were calculated, cannot give input dimension.")
 
 if __name__ == "__main__":
     raise Exception(

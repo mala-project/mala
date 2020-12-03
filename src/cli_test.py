@@ -28,6 +28,7 @@ test_parameters.data.directory = "/home/fiedlerl/data/test_fp_snap/"
 test_parameters.data.datatype = "QE+LDOS"
 test_parameters.data.qe_calc_list= ["0.4gcc/"]#, "0.6gcc/"]
 test_parameters.data.dbg_grid_dimensions = [20,20,20]
+test_parameters.data.twojmax = 11
 test_parameters.comment = "Test run using MNIST."
 test_parameters.training.max_number_epochs = 100
 test_parameters.training.mini_batch_size = 10
