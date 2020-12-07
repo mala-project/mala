@@ -3,10 +3,14 @@ Base class for all data objects.
 '''
 
 
-class data_base():
+class handler_base():
     """Base class for all data objects."""
 
-    def __init__(self):
+    def __init__(self, p):
+        self.parameters = p.data
+        self.raw_input = []
+        self.raw_output = []
+
         self.training_data_set = []
         self.validation_data_set = []
         self.test_data_set = []

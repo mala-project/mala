@@ -1,6 +1,6 @@
 from common.parameters import parameters
-from datahandling.data_mockup import data_mockup
-from datahandling.data_snap_ldos import data_snap_ldos
+from datahandling.handler_interface import handler_interface
+from descriptors.descriptor_interface import descriptor_interface
 from network.network import network
 from network.trainer import trainer
 '''
@@ -24,15 +24,14 @@ print("Welcome to ML-DFT@CASUS.")
 ####################
 test_parameters = parameters()
 # Modify parameters as you want...
-test_parameters.data.directory = "/home/fiedlerl/data/test_fp_snap/"
-test_parameters.data.datatype = "QE+LDOS"
-test_parameters.data.qe_calc_list= ["0.4gcc/"]#, "0.6gcc/"]
-test_parameters.data.dbg_grid_dimensions = [20,20,20]
-test_parameters.data.twojmax = 11
-test_parameters.comment = "Test run using MNIST."
-test_parameters.training.max_number_epochs = 100
+test_parameters.data.datatype_in = "qe.out"
+test_parameters.data.datatype_out = "ldos.cube"
+test_parameters.descriptors.dbg_grid_dimensions = [20,20,20]
+test_parameters.descriptors.twojmax = 11
+test_parameters.training.max_number_epochs = 10
 test_parameters.training.mini_batch_size = 10
 test_parameters.training.learning_rate = 3
+test_parameters.comment = "Test run of ML-DFT@CASUS."
 #used_parameters.network.nn_type = "A different neural network"
 
 ####################
@@ -40,8 +39,11 @@ test_parameters.training.learning_rate = 3
 # Read data to numpy arrays (later we are going to use OpenPMD for this)
 # For the fingerprints, snapshot creation has to take place here.
 ####################
-# data_handler = data_mockup(test_parameters)
-data_handler = data_snap_ldos(test_parameters)
+descriptor_calculator = descriptor_interface(test_parameters)
+data_handler = handler_interface(test_parameters, descriptor_calculator=descriptor_calculator)
+# Add all the snapshots we want to read in to the list.
+data_handler.add_snapshot("QE_Al.scf.pw.out", "/home/fiedlerl/data/test_fp_snap/0.4gcc/", "temp", "/home/fiedlerl/data/test_fp_snap/0.4gcc/")
+data_handler.add_snapshot("QE_Al.scf.pw.out", "/home/fiedlerl/data/test_fp_snap/0.6gcc/", "temp", "/home/fiedlerl/data/test_fp_snap/0.6gcc/")
 data_handler.load_data()
 data_handler.prepare_data()
 
@@ -54,8 +56,8 @@ print("Read data: DONE.")
 # Set up the network and trainer we want to use.
 ####################
 
-test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
-test_parameters.network.layer_activations = ["Sigmoid","Sigmoid"]
+test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 30, 30, 30, data_handler.get_output_dimension()]
+test_parameters.network.layer_activations = ["Sigmoid"]
 test_network = network(test_parameters)
 test_trainer = trainer(test_parameters)
 print("Network setup: DONE.")

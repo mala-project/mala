@@ -33,44 +33,49 @@ class parameters_descriptors(parameters_base):
 
     def __init__(self):
         self.descriptor_type = "SNAP"
+        self.dbg_grid_dimensions = ""
+        """
+        For debugging purposes smaller grid sizes for descriptor creation than
+        the one used by QE.
+        """
+        self.twojmax = 10
+        """
+        SNAP calculation: 2*jmax-parameter used for calculation of SNAP descriptors. Standard value
+        for jmax is 5, so standard value for twojmax is 10
+        """
+        self.rcutfac = 4.67637
+        """
+        SNAP calculation: radius cutoff factor for the fingerprint sphere in Angstroms.
+        """
+        self.lammps_compute_file = ""
+        """
+        SNAP calculation: LAMMPS input file that is used to calculate the SNAP descriptors.
+        If this string is empty, the standard LAMMPS input file found in this
+        repository will be used (recommended).
+        """
 
 
 class parameters_data(parameters_base):
     """Dataset interface parameter subclass."""
 
     def __init__(self):
-        self.datatype = "QE+LDOS"
+        self.datatype_in = "qe.out"
         """
         Specifies the kind of input data we are working with.
             Implemented so far:
-                - MNIST for the MNIST data set (for testing purposes).
-                - QE+LDOS for a dataset consisting of a Quantum espresso outfile and an LDOS file.
+                - mnist for the MNIST data set (for testing purposes).
+                - qe.out for QuantumEspresso out files.
         """
-        self.directory = "~/data"
-        self.qe_calc_list = []
+        self.datatype_out = "ldos.cube"
         """
-        A list detailing all subdirectories, each containing a QE out file and
-        the calculated LDOS (using pp.x).
+        Specifies the kind of input data we are working with.
+            Implemented so far:
+                - mnist for the MNIST data set (for testing purposes).
+                - ldos.cube for cube files containing the LDOS.
         """
-        self.twojmax = 10
+        self.snapshot_directories_list = []
         """
-        SNAP creation: 2*jmax-parameter used for calculation of SNAP descriptors. Standard value
-        for jmax is 5, so standard value for twojmax is 10
-        """
-        self.rcutfac = 4.67637
-        """
-        SNAP creation: radius cutoff factor for the fingerprint sphere in Angstroms.
-        """
-        self.lammps_compute_file = ""
-        """
-        LAMMPS input file that is used to calculate the SNAP descriptors.
-        If this string is empty, the standard LAMMPS input file found in this
-        repository will be used (recommended).
-        """
-        self.dbg_grid_dimensions = ""
-        """
-        For debugging purposes smaller grid sizes than the ones specified in the
-        QE output can be used.
+        A list of all added snapshots.
         """
 
 class parameters_training(parameters_base):
