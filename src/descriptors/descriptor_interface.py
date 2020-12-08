@@ -1,3 +1,7 @@
+"""Interface for descriptor calculators. A descriptor calculator is used
+to encode information about the chemical neighborhood on the grid. (e.g.: SNAP)"""
+
+
 from .snap import snap
 
 

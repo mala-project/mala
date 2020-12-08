@@ -54,6 +54,16 @@ class parameters_descriptors(parameters_base):
         repository will be used (recommended).
         """
 
+class parameters_targets(parameters_base):
+    """Target quantity parsing parameter subclass."""
+
+    def __init__(self):
+        self.target_type = "LDOS"
+        self.dbg_grid_dimensions = ""
+        """
+        For debugging purposes smaller grid sizes for descriptor creation than
+        the one used by QE.
+        """
 
 class parameters_data(parameters_base):
     """Dataset interface parameter subclass."""
@@ -66,16 +76,20 @@ class parameters_data(parameters_base):
                 - mnist for the MNIST data set (for testing purposes).
                 - qe.out for QuantumEspresso out files.
         """
-        self.datatype_out = "ldos.cube"
+        self.datatype_out = "*.cube"
         """
         Specifies the kind of input data we are working with.
             Implemented so far:
                 - mnist for the MNIST data set (for testing purposes).
-                - ldos.cube for cube files containing the LDOS.
+                - *.cube for cube files containing e.g. the LDOS.
         """
         self.snapshot_directories_list = []
         """
         A list of all added snapshots.
+        """
+        self.ldos_gridsize = 0
+        """
+        Number of points in the energy grid that is used to calculate the LDOS.
         """
 
 class parameters_training(parameters_base):
@@ -100,6 +114,7 @@ class parameters():
         '''Comment a used parameter dataset.'''
         self.network = parameters_network()
         self.descriptors = parameters_descriptors()
+        self.targets = parameters_targets()
         self.data = parameters_data()
         self.training = parameters_training()
 

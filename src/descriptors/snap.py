@@ -4,7 +4,7 @@ import ase
 import ase.io
 from .lammps_utils import *
 from lammps import lammps
-from .descriptors_base import descriptor_base
+from .descriptor_base import descriptor_base
 
 class snap(descriptor_base):
     def __init__(self,p):
