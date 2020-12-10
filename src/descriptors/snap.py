@@ -28,10 +28,10 @@ class snap(descriptor_base):
         # We also need to know how big the grid is.
         # Iterating directly through the file is slow, but the
         # grid information is at the top (around line 200).
-        if (len(self.parameters.dbg_grid_dimensions)==3):
-            nx = self.parameters.dbg_grid_dimensions[0]
-            ny = self.parameters.dbg_grid_dimensions[1]
-            nz = self.parameters.dbg_grid_dimensions[2]
+        if (len(self.dbg_grid_dimensions)==3):
+            nx = self.dbg_grid_dimensions[0]
+            ny = self.dbg_grid_dimensions[1]
+            nz = self.dbg_grid_dimensions[2]
         else:
             qe_outfile = open(files[-1], "r")
             lines = qe_outfile.readlines()

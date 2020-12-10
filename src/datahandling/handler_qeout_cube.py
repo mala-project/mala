@@ -1,15 +1,15 @@
 '''
-Collects / calculates SNAP descriptors and LDOS data from a DFT calculation.
-Uses LAMMPS, so make sure it is available.
+Collects data from a QuantumEspresso calculation.
+Input data is read by reading the QuantumEspresso outfile.
+Output data is read by parsing multiple *.cube files.
 '''
 from .handler_base import handler_base
 import numpy as np
 
 class handler_qeout_cube(handler_base):
-    """Data handler for qe.out and ldos.cube files."""
+    """Data handler for qe.out and *.cube files."""
     def __init__(self, p, descriptor_calculator, target_parser):
         super(handler_qeout_cube,self).__init__(p)
-        self.fingerprint_length = 0
         self.descriptor_calculator = descriptor_calculator
         self.target_parser = target_parser
 
@@ -20,7 +20,7 @@ class handler_qeout_cube(handler_base):
         self.parameters.snapshot_directories_list.append([qe_out_file, qe_out_directory, cube_naming_scheme, cube_directory])
 
     def load_data(self):
-        """Loads data and transforms it into SNAP/LDOS data on the grid.
+        """Loads data and transforms it into descriptor / target data on the grid.
         At the end of this function we have two pytorch tensors holding the input and the output data."""
 
         # Load from every snapshot directory.
@@ -58,13 +58,13 @@ class handler_qeout_cube(handler_base):
 
 
     def get_input_dimension(self):
-        if (self.descriptor_calculator.fingerprint_length != 0):
+        if (self.descriptor_calculator.fingerprint_length > 0):
             return self.descriptor_calculator.fingerprint_length
         else:
             raise Exception("No descriptors were calculated, cannot give input dimension.")
 
     def get_output_dimension(self):
-        if (self.parameters.ldos_gridsize != 0):
+        if (self.parameters.ldos_gridsize > 0):
             return self.target_parser.target_length
         else:
             raise Exception("No targets were read, cannot give output dimension.")
@@ -72,4 +72,4 @@ class handler_qeout_cube(handler_base):
 
 if __name__ == "__main__":
     raise Exception(
-        "data_snap_ldos.py - test of basic functions not yet implemented.")
+        "handler_qeout_cube.py - test of basic functions not yet implemented.")

@@ -33,11 +33,6 @@ class parameters_descriptors(parameters_base):
 
     def __init__(self):
         self.descriptor_type = "SNAP"
-        self.dbg_grid_dimensions = ""
-        """
-        For debugging purposes smaller grid sizes for descriptor creation than
-        the one used by QE.
-        """
         self.twojmax = 10
         """
         SNAP calculation: 2*jmax-parameter used for calculation of SNAP descriptors. Standard value
@@ -59,11 +54,6 @@ class parameters_targets(parameters_base):
 
     def __init__(self):
         self.target_type = "LDOS"
-        self.dbg_grid_dimensions = ""
-        """
-        For debugging purposes smaller grid sizes for descriptor creation than
-        the one used by QE.
-        """
         self.ldos_gridsize = 0
         """
         Number of points in the energy grid that is used to calculate the LDOS.
@@ -92,17 +82,34 @@ class parameters_data(parameters_base):
         """
         A list of all added snapshots.
         """
+        self.data_splitting = [78,9,13]
+        """
+        Details how much of the data is used for training, validation and testing [%].
+        Note: This obviously means that the framework has to choose the data_splitting
+        based on its own, using e.g. clustering.
+        """
 
 class parameters_training(parameters_base):
     """Network training parameter subclass."""
 
     def __init__(self):
         self.trainingtype = "SGD"
+        """Training type to be used."""
         self.learning_rate = 0.5
         self.max_number_epochs = 100
         # TODO: Find a better system for verbosity. Maybe a number.
         self.verbosity = True
         self.mini_batch_size = 10
+
+class parameters_debug(parameters_base):
+    """Central debugging parameters. Can be used
+    to e.g. reduce number of data."""
+
+    def __init__(self):
+        self.grid_dimensions = []
+        """
+        Enforces a smaller grid size globally.
+        """
 
 
 # TODO: Add keyword arguments that allow for a passing of the arguments in the constructor.
@@ -118,6 +125,8 @@ class parameters():
         self.targets = parameters_targets()
         self.data = parameters_data()
         self.training = parameters_training()
+        self.debug = parameters_debug()
+
 
     def show(self):
         """Prints all the parameters bundled in this class."""
