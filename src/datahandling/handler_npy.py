@@ -92,41 +92,8 @@ class handler_npy(handler_base):
         self.raw_input = np.array(self.raw_input)
         self.raw_output = np.array(self.raw_output)
 
-        # All snapshots are in RAM now. Now we need to reshape into one long vector.
-        # We want to go from
+        # At this point, the snapshots are saved as an array of the dimension
         # number_of_snapshots x gridx x gridy x gridz x feature_length
-        # to
-        # (number_of_snapshots x gridx x gridy x gridz) x feature_length
-        datacount = self.grid_dimension[0]*self.grid_dimension[1]*self.grid_dimension[2]*nr_of_snapshots
-        self.raw_input = self.raw_input.reshape([datacount, self.get_input_dimension()])
-        self.raw_output = self.raw_output.reshape([datacount, self.get_output_dimension()])
-        self.raw_input = torch.from_numpy(self.raw_input).float()
-        self.raw_output = torch.from_numpy(self.raw_output).float()
-
-    def prepare_data(self):
-        # TODO: Clustering of the data before splitting it up.
-        if sum(self.parameters.data_splitting) > 100:
-            raise Exception("Will not attempt to use more than 100% of data.")
-
-        # Split data according to parameters.
-        # raw_input and raw_ouput are guaranteed to have the same first dimensions
-        # as they are calculated using the grid and the number of snapshots.
-        # We enforce that the grid size is equal in load_data().
-        self.nr_training_data = int(self.parameters.data_splitting[0]/100 *np.shape(self.raw_input)[0])
-        self.nr_validation_data = int(self.parameters.data_splitting[1]/100 *np.shape(self.raw_input)[0])
-        self.nr_test_data = int(self.parameters.data_splitting[2]/100 *np.shape(self.raw_input)[0])
-
-        # We need to make sure that really all of the data is used.
-        missing_data = (self.nr_training_data+self.nr_validation_data+self.nr_test_data)-np.shape(self.raw_input)[0]
-        self.nr_test_data += missing_data
-
-        index1 = self.nr_training_data
-        index2 = self.nr_training_data+self.nr_validation_data
-
-        self.training_data_set = TensorDataset(self.raw_input[0:2], self.raw_output[0:2])
-        self.validation_data_set = TensorDataset(self.raw_input[index1:index2], self.raw_output[index1:index2])
-        self.test_data_set = TensorDataset(self.raw_input[index2:], self.raw_output[index2:])
-
 
     def load_from_npy_file(self, file):
         loaded_array = np.load(file)

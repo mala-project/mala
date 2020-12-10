@@ -82,11 +82,38 @@ class parameters_data(parameters_base):
         """
         A list of all added snapshots.
         """
-        self.data_splitting = [78,9,13]
+        self.data_splitting_type = "random"
+        """Specify how the data for validation, test and training is splitted.
+        Currently implemented:
+            - random: split the data randomly, ignore snapshot boundaries.
+        """
+        self.data_splitting_percent = [0,0,0]
         """
         Details how much of the data is used for training, validation and testing [%].
-        Note: This obviously means that the framework has to choose the data_splitting
-        based on its own, using e.g. clustering.
+        """
+        self.data_splitting_snapshots = [0,0,0]
+        """
+        Details how much of the data is used for training, validation and testing [#snapshots].
+        """
+        self.input_normalization = "None"
+        """
+        Specifies how input quantities are normalized.
+        Options:
+            - "None": No normalization is applied.
+            - "standard": Standardization (Scale to mean 0, standard deviation 1)
+            - "min-max": Min-Max scaling (Scale to be in range 0...1)
+            - "element-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
+            - "element-min-max": Row Min-Max scaling (Scale to be in range 0...1)
+        """
+        self.output_normalization = "None"
+        """
+        Specifies how output quantities are normalized.
+        Options:
+            - "None": No normalization is applied.
+            - "standard": Standardization (Scale to mean 0, standard deviation 1)
+            - "min-max": Min-Max scaling (Scale to be in range 0...1)
+            - "element-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
+            - "element-min-max": Row Min-Max scaling (Scale to be in range 0...1)
         """
 
 class parameters_training(parameters_base):

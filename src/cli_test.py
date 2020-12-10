@@ -27,11 +27,18 @@ test_parameters = parameters()
 # Modify parameters as you want...
 test_parameters.data.datatype_in = "*.npy"
 test_parameters.data.datatype_out = "*.npy"
-test_parameters.targets.ldos_gridsize = 10
+test_parameters.data.data_splitting_percent = [80,10,10]
+test_parameters.data.input_normalization = "elem-wise-standard"
+test_parameters.data.output_normalization = "min-max"
+
 test_parameters.descriptors.twojmax = 11
-test_parameters.training.max_number_epochs = 200
+
+test_parameters.targets.ldos_gridsize = 10
+
+test_parameters.training.max_number_epochs = 20
 test_parameters.training.mini_batch_size = 10
 test_parameters.training.learning_rate = 7
+
 test_parameters.comment = "Test run of ML-DFT@CASUS."
 # test_parameters.debug.grid_dimensions = [200,100,1]
 
@@ -54,9 +61,6 @@ data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0small.npy",
 "/home/fiedlerl/data/test_fp_snap/2.699gcc/")
 data_handler.load_data()
 data_handler.prepare_data()
-
-# data_handler.prepare_data(less_training_pts=5000, less_validation_points=1000, less_test_points=1000)
-# data_handler.prepare_data(less_training_pts=0, less_validation_points=0, less_test_points=0)
 print("Read data: DONE.")
 
 ####################
@@ -64,7 +68,7 @@ print("Read data: DONE.")
 # Set up the network and trainer we want to use.
 ####################
 
-test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 30, 30, 30, data_handler.get_output_dimension()]
+test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100,  data_handler.get_output_dimension()]
 test_parameters.network.layer_activations = ["Sigmoid"]
 test_network = network(test_parameters)
 test_trainer = trainer(test_parameters)
