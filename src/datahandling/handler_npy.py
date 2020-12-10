@@ -100,14 +100,11 @@ class handler_npy(handler_base):
         datacount = self.grid_dimension[0]*self.grid_dimension[1]*self.grid_dimension[2]*nr_of_snapshots
         self.raw_input = self.raw_input.reshape([datacount, self.get_input_dimension()])
         self.raw_output = self.raw_output.reshape([datacount, self.get_output_dimension()])
-
-    def prepare_data(self):
-        # TODO: Clustering of the data before splitting it up.
-        np.random.shuffle(self.raw_input)
-        np.random.shuffle(self.raw_output)
         self.raw_input = torch.from_numpy(self.raw_input).float()
         self.raw_output = torch.from_numpy(self.raw_output).float()
 
+    def prepare_data(self):
+        # TODO: Clustering of the data before splitting it up.
         if sum(self.parameters.data_splitting) > 100:
             raise Exception("Will not attempt to use more than 100% of data.")
 
@@ -134,7 +131,6 @@ class handler_npy(handler_base):
     def load_from_npy_file(self, file):
         loaded_array = np.load(file)
         if (len(self.dbg_grid_dimensions) == 3):
-            np.save(file+"small",loaded_array[0:self.dbg_grid_dimensions[0],0:self.dbg_grid_dimensions[1],0:self.dbg_grid_dimensions[2],:])
             try:
                 return loaded_array[0:self.dbg_grid_dimensions[0],0:self.dbg_grid_dimensions[1],0:self.dbg_grid_dimensions[2],:]
             except:
