@@ -11,7 +11,7 @@ def handler_interface(params, descriptor_calculator = None, target_parser = None
         elif (target_parser is None):
             raise Exception("Using cube files as input requires the definition of a target parsers.")
         else:
-            return handler_qeout_cube(params, descriptor_calculator)
+            return handler_qeout_cube(params, descriptor_calculator, target_parser)
     if params.data.datatype_in == 'mnist' and params.data.datatype_out == 'mnist':
         return handler_mnist(params)
     else:

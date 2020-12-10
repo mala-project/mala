@@ -6,6 +6,7 @@
 class target_base():
     def __init__(self, p):
         self.parameters = p.targets
+        self.target_length = 0
 
     def read_from_cube(self):
         raise Exception("No function defined to read this quantity from a .cube file.")

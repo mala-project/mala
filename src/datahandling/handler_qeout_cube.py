@@ -9,16 +9,17 @@ import math
 
 class handler_qeout_cube(handler_base):
     """Data handler for qe.out and ldos.cube files."""
-    def __init__(self, p, descriptor_calculator, target_inter):
-        super(handler_qeout_ldoscube,self).__init__(p)
+    def __init__(self, p, descriptor_calculator, target_parser):
+        super(handler_qeout_cube,self).__init__(p)
         self.fingerprint_length = 0
         self.descriptor_calculator = descriptor_calculator
+        self.target_parser = target_parser
 
     def add_snapshot(self, qe_out_file, qe_out_directory, cube_naming_scheme, cube_directory):
         """Adds a snapshot to data handler. For this type of data,
         a QuantumEspresso outfile, an outfile from the LDOS calculation and
         a directory containing the cube files"""
-        self.parameters.snapshot_directories_list.append([qe_out_file, qe_out_directory, ldos_out_file, ldos_cube_directory])
+        self.parameters.snapshot_directories_list.append([qe_out_file, qe_out_directory, cube_naming_scheme, cube_directory])
 
     def load_data(self):
         """Loads data and transforms it into SNAP/LDOS data on the grid.
@@ -31,7 +32,7 @@ class handler_qeout_cube(handler_base):
             # Calculate the SNAP descriptors from the QE calculation.
             ##############
 
-            # print("Calculating SNAP descriptors for snapshot ", snapshot[0], "at ", snapshot[1])
+            # print("Calculating descriptors for snapshot ", snapshot[0], "at ", snapshot[1])
             # print(np.shape(self.descriptor_calculator.calculate_from_qe_out(snapshot[0], snapshot[1])))
 
             ##############
@@ -39,8 +40,8 @@ class handler_qeout_cube(handler_base):
             # Read the LDOS data.
             ##############
 
-            print("Reading LDOS for snapshot ", snapshot[2], "at ", snapshot[3])
-            self.read_ldos(snapshot[2], snapshot[3])
+            print("Reading targets for snapshot ", snapshot[2], "at ", snapshot[3])
+            self.target_parser.read_from_cube(snapshot[2], snapshot[3])
 
 
             # Here, raw_input only contains the file name given by ASE and the dimensions of the grd.
@@ -62,13 +63,13 @@ class handler_qeout_cube(handler_base):
         if (self.descriptor_calculator.fingerprint_length != 0):
             return self.descriptor_calculator.fingerprint_length
         else:
-            raise Exception("No fingerprints were calculated, cannot give input dimension.")
+            raise Exception("No descriptors were calculated, cannot give input dimension.")
 
     def get_output_dimension(self):
         if (self.parameters.ldos_gridsize != 0):
-            return self.parameters.ldos_gridsize
+            return self.target_parser.target_length
         else:
-            raise Exception("No energy grid specified, so the LDOS could not be calculated.")
+            raise Exception("No targets were read, cannot give output dimension.")
 
 
 if __name__ == "__main__":

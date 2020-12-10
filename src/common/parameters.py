@@ -64,6 +64,11 @@ class parameters_targets(parameters_base):
         For debugging purposes smaller grid sizes for descriptor creation than
         the one used by QE.
         """
+        self.ldos_gridsize = 0
+        """
+        Number of points in the energy grid that is used to calculate the LDOS.
+        """
+
 
 class parameters_data(parameters_base):
     """Dataset interface parameter subclass."""
@@ -86,10 +91,6 @@ class parameters_data(parameters_base):
         self.snapshot_directories_list = []
         """
         A list of all added snapshots.
-        """
-        self.ldos_gridsize = 0
-        """
-        Number of points in the energy grid that is used to calculate the LDOS.
         """
 
 class parameters_training(parameters_base):
