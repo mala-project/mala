@@ -28,7 +28,7 @@ test_parameters = parameters()
 test_parameters.data.datatype_in = "*.npy"
 test_parameters.data.datatype_out = "*.npy"
 test_parameters.data.data_splitting_percent = [80,10,10]
-test_parameters.data.input_normalization = "elem-wise-standard"
+test_parameters.data.input_normalization = "element-wise-standard"
 test_parameters.data.output_normalization = "min-max"
 
 test_parameters.descriptors.twojmax = 11

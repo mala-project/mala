@@ -113,7 +113,7 @@ class parameters_data(parameters_base):
             - "standard": Standardization (Scale to mean 0, standard deviation 1)
             - "min-max": Min-Max scaling (Scale to be in range 0...1)
             - "element-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
-            - "element-min-max": Row Min-Max scaling (Scale to be in range 0...1)
+            - "element-wise-min-max": Row Min-Max scaling (Scale to be in range 0...1)
         """
 
 class parameters_training(parameters_base):

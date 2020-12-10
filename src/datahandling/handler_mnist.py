@@ -17,28 +17,7 @@ class handler_mnist(handler_base):
     """Mock-Up data class that is supposed to work like the actual data classes going to be used for FP/LDOS data,
     but operates on the MNIST data."""
     def __init__(self, p):
-        self.parameters = p.data
-        if (self.parameters.datatype != "MNIST"):
-            raise Exception("Unsupported type of data. The mockup data handler can only operate with MNIST data.")
-        self.training_data_raw = []
-        self.validation_data_raw = []
-        self.test_data_raw = []
-
-        self.training_data_inputs = []
-        self.validation_data_inputs = []
-        self.test_data_inputs = []
-
-        self.training_data_targets = []
-        self.validation_data_targets = []
-        self.test_data_targets = []
-
-        self.training_data_set = []
-        self.validation_data_set = []
-        self.test_data_set = []
-
-        self.nr_training_data = 0
-        self.nr_test_data = 0
-        self.nr_validation_data = 0
+        super(handler_npy,self).__init__(p)
 
     def load_data(self):
         """Loads data from the specified directory."""

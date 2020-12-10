@@ -5,6 +5,7 @@ Base class for all data objects.
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset
+from .normalizations import normalize_three_tensors
 
 class handler_base():
     """Base class for all data objects."""
@@ -13,6 +14,14 @@ class handler_base():
         self.parameters = p.data
         self.raw_input = []
         self.raw_output = []
+
+        self.training_data_inputs = []
+        self.validation_data_inputs = []
+        self.test_data_inputs = []
+
+        self.training_data_outputs = []
+        self.validation_data_outputs = []
+        self.test_data_outputs = []
 
         self.training_data_set = []
         self.validation_data_set = []
@@ -28,13 +37,20 @@ class handler_base():
 
     def prepare_data(self):
         """Prepares the data to be used in an ML workflow (i.e. splitting, normalization, conversion of data structure)"""
-        # We nornmalize the data AFTER we split it because the splitting might be based on
-        # snapshot "borders", training, validation and test set will be composed of an
+        # NOTE: We nornmalize the data AFTER we split it because the splitting might be based on
+        # snapshot "borders", i.e. training, validation and test set will be composed of an
         # integer number of snapshots. Therefore we cannot convert the data into PyTorch
         # tensors of dimension (number_of_points,feature_length) until AFTER we have
         # split it, and normalization is more convenient after this conversion.
+
+        # Split from raw numpy arrays into three/six pytorch tensors.
         self.split_data()
-        # self.normalize_data()
+
+        # Normalize pytorch tensors.
+        self.normalize_data()
+
+        # Build dataset objects from pytorch tensors.
+        self.build_datasets()
 
     def save_prepared_data(self):
         """Saves the data after it was altered/preprocessed by the ML workflow. E.g. SNAP descriptor calculation."""
@@ -84,12 +100,24 @@ class handler_base():
         missing_data = (self.nr_training_data+self.nr_validation_data+self.nr_test_data)-np.shape(self.raw_input)[0]
         self.nr_test_data += missing_data
 
+        # Determine the indices at which to split.
         index1 = self.nr_training_data
         index2 = self.nr_training_data+self.nr_validation_data
 
-        self.training_data_set = TensorDataset(self.raw_input[0:index1], self.raw_output[0:index1])
-        self.validation_data_set = TensorDataset(self.raw_input[index1:index2], self.raw_output[index1:index2])
-        self.test_data_set = TensorDataset(self.raw_input[index2:], self.raw_output[index2:])
+        # Split the data into three sets, create a tensor for input and output.
+        self.training_data_inputs = torch.from_numpy(self.raw_input[0:index1]).float()
+        self.validation_data_inputs = torch.from_numpy(self.raw_input[index1:index2]).float()
+        self.test_data_inputs = torch.from_numpy(self.raw_input[index2:]).float()
+        self.training_data_outputs = torch.from_numpy(self.raw_output[0:index1]).float()
+        self.validation_data_outputs = torch.from_numpy(self.raw_output[index1:index2]).float()
+        self.test_data_outputs = torch.from_numpy(self.raw_output[index2:]).float()
+
+
+    def build_datasets(self):
+        """Takes the normalized training, test and validation data and builds data sets with them."""
+        self.training_data_set = TensorDataset(self.training_data_inputs, self.training_data_outputs)
+        self.validation_data_set = TensorDataset(self.validation_data_inputs, self.validation_data_outputs)
+        self.test_data_set = TensorDataset(self.test_data_inputs, self.test_data_outputs)
 
     def snapshot_to_tensor(self):
         """Transforms snapshot data from
@@ -100,19 +128,39 @@ class handler_base():
         datacount = self.grid_dimension[0]*self.grid_dimension[1]*self.grid_dimension[2]*len(self.parameters.snapshot_directories_list)
         self.raw_input = self.raw_input.reshape([datacount, self.get_input_dimension()])
         self.raw_output = self.raw_output.reshape([datacount, self.get_output_dimension()])
-        self.raw_input = torch.from_numpy(self.raw_input).float()
-        self.raw_output = torch.from_numpy(self.raw_output).float()
 
-    # def normalize_data(self):
-    #     """Normalizes the data, according to user input:
-    #         - "None": No normalization is applied.
-    #         - "standard": Standardization (Scale to mean 0, standard deviation 1)
-    #         - "min-max": Min-Max scaling (Scale to be in range 0...1)
-    #         - "element-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
-    #         - "element-min-max": Row Min-Max scaling (Scale to be in range 0...1)
-    #     """
+    def normalize_data(self):
+        """Normalizes the data, according to user input:
+            - "None": No normalization is applied.
+            - "standard": Standardization (Scale to mean 0, standard deviation 1)
+            - "min-max": Min-Max scaling (Scale to be in range 0...1)
+            - "element-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
+            - "element-wise-min-max": Row Min-Max scaling (Scale to be in range 0...1)
+        """
+        ####################
+        # Inputs.
+        ####################
 
+        # Parse options.
+        scale_standard = False
+        scale_max = False
+        use_row = False
+        if "standard" in self.parameters.input_normalization:
+            scale_standard = True
+        if "min-max" in self.parameters.input_normalization:
+            scale_max = True
+        if "element-wise" in self.parameters.input_normalization:
+            use_row = True
 
+        # Inform the user that something went wrong.
+        if scale_standard == False and scale_max == False:
+            print("No input data normalization is performed.")
+            return
+        if scale_standard == True and scale_max == True:
+            raise Exception("Invalid normalization parameters. Cannot perform standardization and min-max normalization at the same time.")
+
+        # Actual normalization.
+        normalize_three_tensors(self.training_data_inputs, self.validation_data_inputs, self.test_data_inputs, self.get_input_dimension(), scale_standard, scale_max, use_row)
 
 
 
