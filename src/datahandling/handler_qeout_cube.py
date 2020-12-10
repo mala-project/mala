@@ -4,8 +4,6 @@ Uses LAMMPS, so make sure it is available.
 '''
 from .handler_base import handler_base
 import numpy as np
-import glob
-import math
 
 class handler_qeout_cube(handler_base):
     """Data handler for qe.out and ldos.cube files."""
