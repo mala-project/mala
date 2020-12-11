@@ -1,15 +1,15 @@
-'''
-Collects data from a QuantumEspresso calculation.
-Input data is read by reading the QuantumEspresso outfile.
-Output data is read by parsing multiple *.cube files.
-'''
-from .handler_base import handler_base
+from .HanderBase import HandlerBase
 import numpy as np
 
-class handler_qeout_cube(handler_base):
-    """Data handler for qe.out and *.cube files."""
+
+class HandlerQEoutCube(HandlerBase):
+    """Collects data from a QuantumEspresso calculation.
+    Input data is read by reading the QuantumEspresso outfile.
+    Output data is read by parsing multiple *.cube files.
+    """
+
     def __init__(self, p, descriptor_calculator, target_parser):
-        super(handler_qeout_cube,self).__init__(p)
+        super(HandlerQEoutCube, self).__init__(p)
         self.descriptor_calculator = descriptor_calculator
         self.target_parser = target_parser
 
@@ -17,7 +17,8 @@ class handler_qeout_cube(handler_base):
         """Adds a snapshot to data handler. For this type of data,
         a QuantumEspresso outfile, an outfile from the LDOS calculation and
         a directory containing the cube files"""
-        self.parameters.snapshot_directories_list.append([qe_out_file, qe_out_directory, cube_naming_scheme, cube_directory])
+        self.parameters.snapshot_directories_list.append(
+            [qe_out_file, qe_out_directory, cube_naming_scheme, cube_directory])
 
     def load_data(self):
         """Loads data and transforms it into descriptor / target data on the grid.
@@ -41,35 +42,23 @@ class handler_qeout_cube(handler_base):
             print("Reading targets for snapshot ", snapshot[2], "at ", snapshot[3])
             self.target_parser.read_from_cube(snapshot[2], snapshot[3])
 
-
             # Here, raw_input only contains the file name given by ASE and the dimensions of the grd.
             # These are the input parameters we need for LAMMPS.
             # self.raw_input.append(self.get_atoms_from_qe(self.parameters.directory+sub))
-
-
-
-
 
     # def prepare_data(self):
     #     """Cuts input/output data into training, validation and test set.
     #     then adds the training, validation and test data to pytorch datahandlers
     #     to be used by the network."""
 
-
-
     def get_input_dimension(self):
-        if (self.descriptor_calculator.fingerprint_length > 0):
+        if self.descriptor_calculator.fingerprint_length > 0:
             return self.descriptor_calculator.fingerprint_length
         else:
             raise Exception("No descriptors were calculated, cannot give input dimension.")
 
     def get_output_dimension(self):
-        if (self.parameters.ldos_gridsize > 0):
+        if self.parameters.ldos_gridsize > 0:
             return self.target_parser.target_length
         else:
             raise Exception("No targets were read, cannot give output dimension.")
-
-
-if __name__ == "__main__":
-    raise Exception(
-        "handler_qeout_cube.py - test of basic functions not yet implemented.")

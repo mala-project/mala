@@ -1,14 +1,14 @@
-'''Class for calculation of SNAP descriptors'''
-
 import ase
 import ase.io
 from .lammps_utils import *
 from lammps import lammps
-from .descriptor_base import descriptor_base
+from .descriptor_base import DescriptorBase
 
-class snap(descriptor_base):
+
+class SNAP(DescriptorBase):
+    """Class for calculation of SNAP descriptors"""
     def __init__(self,p):
-        super(snap,self).__init__(p)
+        super(SNAP, self).__init__(p)
         self.in_format_ase = ""
 
     def calculate_from_qe_out(self, qe_out_file, qe_out_directory):
@@ -28,12 +28,12 @@ class snap(descriptor_base):
         # We also need to know how big the grid is.
         # Iterating directly through the file is slow, but the
         # grid information is at the top (around line 200).
-        if (len(self.dbg_grid_dimensions)==3):
+        if len(self.dbg_grid_dimensions)==3:
             nx = self.dbg_grid_dimensions[0]
             ny = self.dbg_grid_dimensions[1]
             nz = self.dbg_grid_dimensions[2]
         else:
-            qe_outfile = open(files[-1], "r")
+            qe_outfile = open(infile, "r")
             lines = qe_outfile.readlines()
             for line in lines:
                 if "FFT dimensions" in line:

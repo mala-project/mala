@@ -1,6 +1,6 @@
-from .handler_qeout_cube import handler_qeout_cube
+from .handler_qeout_cube import HandlerQEoutCube
 from .handler_mnist import handler_mnist
-from .handler_npy import handler_npy
+from .handler_npy import HandlerNpy
 
 
 def handler_interface(params, descriptor_calculator = None, target_parser = None):
@@ -14,12 +14,13 @@ def handler_interface(params, descriptor_calculator = None, target_parser = None
 
     # QuantumEspresso outfiles and *.cube files
     if params.data.datatype_in == 'qe.out' and params.data.datatype_out == '*.cube':
-        if (descriptor_calculator is None ):
-            raise Exception("Using QuantumEspresso outfiles as input requires the definition of a descriptor calcualtor.")
-        elif (target_parser is None):
+        if descriptor_calculator is None:
+            raise Exception("Using QuantumEspresso outfiles as input requires the definition of a descriptor "
+                            "calcualtor.")
+        elif target_parser is None:
             raise Exception("Using cube files as input requires the definition of a target parsers.")
         else:
-            return handler_qeout_cube(params, descriptor_calculator, target_parser)
+            return HandlerQEoutCube(params, descriptor_calculator, target_parser)
 
     #################################
     # Handlers that read data as is.
@@ -27,7 +28,7 @@ def handler_interface(params, descriptor_calculator = None, target_parser = None
 
     # Saved numpy arrays.
     if params.data.datatype_in == '*.npy' and params.data.datatype_out == '*.npy':
-        return handler_npy(params)
+        return HandlerNpy(params)
 
     # MNIST data.
     if params.data.datatype_in == 'mnist' and params.data.datatype_out == 'mnist':

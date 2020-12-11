@@ -1,27 +1,21 @@
-'''
-trainer.py contains the training class used to train a network.
-This could be absorbed into the network.py class and maybe it will be at some point
-or serve as a parent class for multiple trainers, should need be.
-'''
-
 import random
 import numpy as np
 import torch
 from torch import optim
 from torch.utils.data import DataLoader
 
-class trainer():
+
+class Trainer:
     """A class for training a neural network."""
 
     def __init__(self, p):
         # copy the parameters into the class.
         self.parameters = p.training
 
-
     def train_network(self, network, data):
         """Given a network and data, this network is trained on this data."""
         if (self.parameters.trainingtype == "SGD"):
-            optimizer = optim.SGD(network.parameters(), lr=self.parameters.learning_rate)
+            optimizer = optim.SGD(network.Parameters(), lr=self.parameters.learning_rate)
         else:
             raise Exception("Unsupported training method.")
         training_data_loader = DataLoader(data.training_data_set, batch_size = self.parameters.mini_batch_size, shuffle=True)
@@ -46,7 +40,8 @@ class trainer():
         print("Final test data loss: " ,tloss)
 
 
-    def process_mini_batch(self, network, optimizer, input_data, target_data):
+    @staticmethod
+    def process_mini_batch(network, optimizer, input_data, target_data):
         prediction = network.forward(input_data)
         loss = network.calculate_loss(prediction, target_data)
         loss.backward()
@@ -54,7 +49,8 @@ class trainer():
         optimizer.zero_grad()
 
     # FIXME: This seems inefficient.
-    def validate_network(self, network, vdl):
+    @staticmethod
+    def validate_network(network, vdl):
         network.eval()
         accuracies = []
         validation_loss = 0
@@ -65,8 +61,3 @@ class trainer():
                 # accuracies.append(network.classification_accuracy(prediction, y))
             # validation_accuracy = np.mean(accuracies)
         return validation_loss
-
-
-if __name__ == "__main__":
-    raise Exception(
-        "trainer.py - test of basic functions not yet implemented.")

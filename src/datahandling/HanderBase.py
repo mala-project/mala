@@ -1,13 +1,10 @@
-'''
-Base class for all data objects.
-'''
-
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset
 from .normalizations import normalize_three_tensors
 
-class handler_base():
+
+class HandlerBase:
     """Base class for all data objects."""
 
     def __init__(self, p):
@@ -15,28 +12,30 @@ class handler_base():
         self.raw_input = []
         self.raw_output = []
 
-        self.training_data_inputs = []
-        self.validation_data_inputs = []
-        self.test_data_inputs = []
+        self.training_data_inputs = torch.empty(0)
+        self.validation_data_inputs = torch.empty(0)
+        self.test_data_inputs = torch.empty(0)
 
-        self.training_data_outputs = []
-        self.validation_data_outputs = []
-        self.test_data_outputs = []
+        self.training_data_outputs = torch.empty(0)
+        self.validation_data_outputs = torch.empty(0)
+        self.test_data_outputs = torch.empty(0)
 
-        self.training_data_set = []
-        self.validation_data_set = []
-        self.test_data_set = []
+        self.training_data_set = torch.empty(0)
+        self.validation_data_set = torch.empty(0)
+        self.test_data_set = torch.empty(0)
 
         self.nr_training_data = 0
         self.nr_test_data = 0
         self.nr_validation_data = 0
+        self.grid_dimension = np.array([0, 0, 0])
 
     def load_data(self):
         """Loads data from the specified directory."""
         raise Exception("load_data not implemented.")
 
     def prepare_data(self):
-        """Prepares the data to be used in an ML workflow (i.e. splitting, normalization, conversion of data structure)"""
+        """Prepares the data to be used in an ML workflow (i.e. splitting, normalization,
+        conversion of data structure)"""
         # NOTE: We nornmalize the data AFTER we split it because the splitting might be based on
         # snapshot "borders", i.e. training, validation and test set will be composed of an
         # integer number of snapshots. Therefore we cannot convert the data into PyTorch
@@ -71,7 +70,7 @@ class handler_base():
         """Splits data into training, validation and test data sets.
         Performs a snapshot->pytorch tensor conversion, if necessary.
         """
-        if (self.parameters.data_splitting_type == "random"):
+        if self.parameters.data_splitting_type == "random":
             self.snapshot_to_tensor()
             self.split_data_randomly()
         else:
@@ -86,23 +85,25 @@ class handler_base():
         np.random.shuffle(self.raw_output)
 
         if sum(self.parameters.data_splitting_percent) != 100:
-            raise Exception("Could not split data randomly - will not attempt to use anything but 100% of provided data.")
+            raise Exception("Could not split data randomly - will not attempt to use anything but "
+                            "100% of provided data.")
 
         # Split data according to parameters.
         # raw_input and raw_ouput are guaranteed to have the same first dimensions
         # as they are calculated using the grid and the number of snapshots.
         # We enforce that the grid size is equal in load_data().
-        self.nr_training_data = int(self.parameters.data_splitting_percent[0]/100 *np.shape(self.raw_input)[0])
-        self.nr_validation_data = int(self.parameters.data_splitting_percent[1]/100 *np.shape(self.raw_input)[0])
-        self.nr_test_data = int(self.parameters.data_splitting_percent[2]/100 *np.shape(self.raw_input)[0])
+        self.nr_training_data = int(self.parameters.data_splitting_percent[0] / 100 * np.shape(self.raw_input)[0])
+        self.nr_validation_data = int(self.parameters.data_splitting_percent[1] / 100 * np.shape(self.raw_input)[0])
+        self.nr_test_data = int(self.parameters.data_splitting_percent[2] / 100 * np.shape(self.raw_input)[0])
 
         # We need to make sure that really all of the data is used.
-        missing_data = (self.nr_training_data+self.nr_validation_data+self.nr_test_data)-np.shape(self.raw_input)[0]
+        missing_data = (self.nr_training_data + self.nr_validation_data + self.nr_test_data) - np.shape(self.raw_input)[
+            0]
         self.nr_test_data += missing_data
 
         # Determine the indices at which to split.
         index1 = self.nr_training_data
-        index2 = self.nr_training_data+self.nr_validation_data
+        index2 = self.nr_training_data + self.nr_validation_data
 
         # Split the data into three sets, create a tensor for input and output.
         self.training_data_inputs = torch.from_numpy(self.raw_input[0:index1]).float()
@@ -111,7 +112,6 @@ class handler_base():
         self.training_data_outputs = torch.from_numpy(self.raw_output[0:index1]).float()
         self.validation_data_outputs = torch.from_numpy(self.raw_output[index1:index2]).float()
         self.test_data_outputs = torch.from_numpy(self.raw_output[index2:]).float()
-
 
     def build_datasets(self):
         """Takes the normalized training, test and validation data and builds data sets with them."""
@@ -125,7 +125,8 @@ class handler_base():
          to
          (number_of_snapshots x gridx x gridy x gridz) x feature_length.
         """
-        datacount = self.grid_dimension[0]*self.grid_dimension[1]*self.grid_dimension[2]*len(self.parameters.snapshot_directories_list)
+        datacount = self.grid_dimension[0] * \
+                    self.grid_dimension[1] * self.grid_dimension[2] * len(self.parameters.snapshot_directories_list)
         self.raw_input = self.raw_input.reshape([datacount, self.get_input_dimension()])
         self.raw_output = self.raw_output.reshape([datacount, self.get_output_dimension()])
 
@@ -153,18 +154,13 @@ class handler_base():
             use_row = True
 
         # Inform the user that something went wrong.
-        if scale_standard == False and scale_max == False:
+        if scale_standard is False and scale_max is False:
             print("No input data normalization is performed.")
             return
-        if scale_standard == True and scale_max == True:
-            raise Exception("Invalid normalization parameters. Cannot perform standardization and min-max normalization at the same time.")
+        if scale_standard is True and scale_max is True:
+            raise Exception("Invalid normalization parameters. Cannot perform standardization and "
+                            "min-max normalization at the same time.")
 
         # Actual normalization.
-        normalize_three_tensors(self.training_data_inputs, self.validation_data_inputs, self.test_data_inputs, self.get_input_dimension(), scale_standard, scale_max, use_row)
-
-
-
-
-if __name__ == "__main__":
-    d = data_base()
-    print("data_base.py - basic functions are working.")
+        normalize_three_tensors(self.training_data_inputs, self.validation_data_inputs, self.test_data_inputs,
+                                self.get_input_dimension(), scale_standard, scale_max, use_row)

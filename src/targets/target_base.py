@@ -1,9 +1,6 @@
-'''Base class for a target quantity parser. Target parsers read the target quantity
-(i.e. the quantity the NN will learn to predict) from a specified file format.'''
-
-
-
-class target_base():
+class TargetBase:
+    """Base class for a target quantity parser. Target parsers read the target quantity
+    (i.e. the quantity the NN will learn to predict) from a specified file format."""
     def __init__(self, p):
         self.parameters = p.targets
         self.target_length = 0

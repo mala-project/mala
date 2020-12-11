@@ -15,11 +15,11 @@ def normalize_three_tensors(tensor1, tensor2, tensor3, row_length, scale_standar
 
     # If we are not operating element-wise there is no need to recalculate
     # the "global values" all the time
-    if use_row != False:
-        if scale_standard == True:
+    if use_row:
+        if scale_standard:
             means = torch.mean([tensor1, tensor2, tensor3])
             stds = torch.std([tensor1, tensor2, tensor3])
-        if scale_max == True:
+        if scale_max:
             mins = torch.min([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
             maxs = torch.max([full_train_fp_np[row,:], validation_fp_np[row, :], test_fp_np[row, :]])
             for i in range(0,3):
@@ -27,8 +27,8 @@ def normalize_three_tensors(tensor1, tensor2, tensor3, row_length, scale_standar
                     raise Exception("Error in normalization, Max and Min are too close.")
 
     for row in range(0, row_length):
-        if scale_standard == True:
-            if use_rows == True:
+        if scale_standard:
+            if use_rows:
                 means = torch.mean([tensor1[row,:], tensor2[row,:], tensor3[row,:]])
                 stds = torch.std([tensor1[row,:], tensor2[row,:], tensor3[row,:]])
                 standardization(tensor1[row,:], means[0], stds[0])
@@ -39,7 +39,7 @@ def normalize_three_tensors(tensor1, tensor2, tensor3, row_length, scale_standar
                 standardization(tensor2, means[1], stds[1])
                 standardization(tensor3, means[2], stds[2])
         if scale_max:
-            if use_rows == True:
+            if use_rows:
                 mins = torch.min([tensor1[row,:], tensor2[row, :], tensor3[row, :]])
                 maxs = torch.max([tensor1[row,:], tensor2[row, :], tensor3[row, :]])
                 for i in range(0,3):

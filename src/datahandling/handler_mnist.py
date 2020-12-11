@@ -5,7 +5,7 @@ The code is copied from https://github.com/MichalDanielDobrzanski/DeepLearningPy
 contains code to accompany Micheal Nielsens Book on NN, but ported to Python3.
 '''
 
-from .handler_base import handler_base
+from .HanderBase import HandlerBase
 import gzip
 import pickle
 import numpy as np
@@ -13,7 +13,7 @@ import torch
 from torch.utils.data import TensorDataset
 
 
-class handler_mnist(handler_base):
+class handler_mnist(HandlerBase):
     """Mock-Up data class that is supposed to work like the actual data classes going to be used for FP/LDOS data,
     but operates on the MNIST data."""
     def __init__(self, p):

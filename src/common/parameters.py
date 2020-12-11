@@ -1,21 +1,16 @@
-'''
-parameters.py: Includes several classes that structure the parameters used within this framework.
-An object of the central parameters() class is the only thing you need to get start training (except from the data of course).
-'''
-
-
 # Subclasses that make up the final parameters class.
 
-class parameters_base():
+class ParametersBase:
     def __init__(self):
-        raise exception("Error: No constructor implemented.")
+        raise Exception("Error: No constructor implemented.")
 
     def show(self, indent=""):
         for v in vars(self):
             print(indent + '%-15s: %s' % (v, getattr(self, v)))
 
 
-class parameters_network(parameters_base):
+# noinspection PyMissingConstructor
+class ParametersNetwork(ParametersBase):
     """Neural Network parameter subclass."""
 
     def __init__(self):
@@ -28,7 +23,8 @@ class parameters_network(parameters_base):
         self.loss_function_type = "mse"
 
 
-class parameters_descriptors(parameters_base):
+# noinspection PyMissingConstructor
+class ParametersDescriptors(ParametersBase):
     """Fingerprint descriptor parameter subclass."""
 
     def __init__(self):
@@ -49,7 +45,9 @@ class parameters_descriptors(parameters_base):
         repository will be used (recommended).
         """
 
-class parameters_targets(parameters_base):
+
+# noinspection PyMissingConstructor
+class ParametersTargets(ParametersBase):
     """Target quantity parsing parameter subclass."""
 
     def __init__(self):
@@ -60,7 +58,8 @@ class parameters_targets(parameters_base):
         """
 
 
-class parameters_data(parameters_base):
+# noinspection PyMissingConstructor
+class ParametersData(ParametersBase):
     """Dataset interface parameter subclass."""
 
     def __init__(self):
@@ -116,7 +115,9 @@ class parameters_data(parameters_base):
             - "element-wise-min-max": Row Min-Max scaling (Scale to be in range 0...1)
         """
 
-class parameters_training(parameters_base):
+
+# noinspection PyMissingConstructor
+class ParametersTraining(ParametersBase):
     """Network training parameter subclass."""
 
     def __init__(self):
@@ -128,7 +129,9 @@ class parameters_training(parameters_base):
         self.verbosity = True
         self.mini_batch_size = 10
 
-class parameters_debug(parameters_base):
+
+# noinspection PyMissingConstructor
+class ParametersDebug(ParametersBase):
     """Central debugging parameters. Can be used
     to e.g. reduce number of data."""
 
@@ -141,25 +144,24 @@ class parameters_debug(parameters_base):
 
 # TODO: Add keyword arguments that allow for a passing of the arguments in the constructor.
 
-class parameters():
+class Parameters:
     """Parameter class for ML-DFT@CASUS."""
 
     def __init__(self):
         self.comment = 0
         '''Comment a used parameter dataset.'''
-        self.network = parameters_network()
-        self.descriptors = parameters_descriptors()
-        self.targets = parameters_targets()
-        self.data = parameters_data()
-        self.training = parameters_training()
-        self.debug = parameters_debug()
-
+        self.network = ParametersNetwork()
+        self.descriptors = ParametersDescriptors()
+        self.targets = ParametersTargets()
+        self.data = ParametersData()
+        self.training = ParametersTraining()
+        self.debug = ParametersDebug()
 
     def show(self):
         """Prints all the parameters bundled in this class."""
         print("--- " + self.__doc__ + " ---")
         for v in vars(self):
-            if (isinstance(getattr(self, v), parameters_base)):
+            if (isinstance(getattr(self, v), ParametersBase)):
                 parobject = getattr(self, v)
                 print("--- " + parobject.__doc__ + " ---")
                 parobject.show("\t")
@@ -168,6 +170,6 @@ class parameters():
 
 
 if __name__ == "__main__":
-    p = parameters()
+    p = Parameters()
     p.show()
     print("parameters.py - basic functions are working.")

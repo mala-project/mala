@@ -1,13 +1,13 @@
 '''Local density of states.'''
 
 from .cube_parser import read_cube
-from .target_base import target_base
+from .target_base import TargetBase
 import glob
 import math
 
-class ldos(target_base):
+class LDOS(TargetBase):
     def __init__(self,p):
-        super(ldos,self).__init__(p)
+        super(LDOS, self).__init__(p)
         self.target_length = self.parameters.ldos_gridsize
 
     def read_from_cube(self, file_name_scheme, dir):

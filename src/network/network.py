@@ -1,7 +1,3 @@
-'''
-network.py contains the neural network class used in this framework.
-'''
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,13 +5,13 @@ import torch.nn.functional as F
 
 
 
-class network(nn.Module):
+class Network(nn.Module):
     """Central network class for this framework. Based on pytorch.nn.Module."""
     def __init__(self, p):
         # copy the network params from the input parameter object
-        self.params = p.network
+        self.params = p.Network
         # initialize the parent class
-        super(network, self).__init__()
+        super(Network, self).__init__()
 
         # Mappings for parsing of the activation layers.
         self.activation_mappings = {
@@ -71,13 +67,8 @@ class network(nn.Module):
     # classification problems and the LDOS prediction is no classification
     # problem. Also it is slow.
 
-    def classification_accuracy(self, prediction, target):
+    @staticmethod
+    def classification_accuracy(prediction, target):
             prediction_arguments = torch.argmax(prediction, dim=1)
             target_arguments = torch.argmax(target, dim=1)
             return ((prediction_arguments == target_arguments).float()).mean()
-
-
-
-if __name__ == "__main__":
-    raise Exception(
-        "network.py - test of basic functions not yet implemented.")
