@@ -1,4 +1,4 @@
-'''Collection of normalization functions.'''
+"""Collection of normalization functions."""
 
 import torch
 
@@ -6,8 +6,8 @@ import torch
 def standardization(data, mean, std):
     data = (data - mean) / std
 
-def minmaxing(data, max, min):
-    data = (data - min) / (max - min)
+def minmaxing(data, maxval, minval):
+    data = (data - minval) / (maxval - minval)
 
 def normalize_three_tensors(tensor1, tensor2, tensor3, row_length, scale_standard, scale_max, use_row):
     """Normalizes three tensors at the same time. This is convenient for normalizing training, validation
