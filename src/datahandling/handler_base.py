@@ -35,7 +35,10 @@ class HandlerBase:
 
     def prepare_data(self):
         """Prepares the data to be used in an ML workflow (i.e. splitting, normalization,
-        conversion of data structure)"""
+        conversion of data structure).
+        Please be aware that this function will/might change the shape of raw_input/output, for
+        memory reasons. If you intend to use a data handler simply to preprocess and save data,
+        do not call this function!"""
         # NOTE: We nornmalize the data AFTER we split it because the splitting might be based on
         # snapshot "borders", i.e. training, validation and test set will be composed of an
         # integer number of snapshots. Therefore we cannot convert the data into PyTorch
@@ -130,8 +133,9 @@ class HandlerBase:
          to
          (number_of_snapshots x gridx x gridy x gridz) x feature_length.
         """
-        datacount = self.grid_dimension[0] * \
-                    self.grid_dimension[1] * self.grid_dimension[2] * len(self.parameters.snapshot_directories_list)
+        datacount = \
+            self.grid_dimension[0] * self.grid_dimension[1] * \
+            self.grid_dimension[2] * len(self.parameters.snapshot_directories_list)
         self.raw_input = self.raw_input.reshape([datacount, self.get_input_dimension()])
         self.raw_output = self.raw_output.reshape([datacount, self.get_output_dimension()])
 

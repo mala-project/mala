@@ -6,8 +6,8 @@ from .snap import SNAP
 
 
 def descriptor_interface(params):
-    '''Defines an interface which, based on the choices made by the user
-    in parameters, will always return the right kind of descriptor calculator.'''
+    """Defines an interface which, based on the choices made by the user
+    in parameters, will always return the right kind of descriptor calculator."""
     if params.descriptors.descriptor_type == 'SNAP':
         return SNAP(params)
     else:

@@ -25,8 +25,10 @@ def extract_compute_np(lmp, name, compute_type, result_type, array_shape):
     """
     # 1,2: Style (1) is per-atom compute, returns array type (2).
     ptr = lmp.extract_compute(name, compute_type, result_type)
-    if result_type == 0: return ptr  # No casting needed, lammps.py already works
-    if result_type == 2: ptr = ptr.contents
+    if result_type == 0:
+        return ptr  # No casting needed, lammps.py already works
+    if result_type == 2:
+        ptr = ptr.contents
     total_size = np.prod(array_shape)
     buffer_ptr = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double * total_size))
     array_np = np.frombuffer(buffer_ptr.contents, dtype=float)

@@ -59,6 +59,10 @@ data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0small.npy",
 "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
 "Al_ldos_200x200x200grid_250elvls_snapshot0small.npy",
 "/home/fiedlerl/data/test_fp_snap/2.699gcc/")
+data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0small_copy.npy",
+"/home/fiedlerl/data/test_fp_snap/2.699gcc/",
+"Al_ldos_200x200x200grid_250elvls_snapshot0small_copy.npy",
+"/home/fiedlerl/data/test_fp_snap/2.699gcc/")
 data_handler.load_data()
 data_handler.prepare_data()
 print("Read data: DONE.")

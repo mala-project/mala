@@ -93,11 +93,11 @@ class HandlerNpy(HandlerBase):
         loaded_array = np.load(file)
         if len(self.dbg_grid_dimensions) == 3:
             try:
-                return loaded_array[0:self.dbg_grid_dimensions[0], 0:self.dbg_grid_dimensions[1],
-                       0:self.dbg_grid_dimensions[2], :]
+                return loaded_array[0:self.dbg_grid_dimensions[0], 0:self.dbg_grid_dimensions[1],0:self.dbg_grid_dimensions[2], :]
             except:
                 print(
-                    "Could not use grid reduction, falling back to regular grid. Please check that the debug grid is not bigger than the actual grid.")
+                    "Could not use grid reduction, falling back to regular grid. Please check that the debug grid is "
+                    "not bigger than the actual grid.")
 
         else:
             return loaded_array

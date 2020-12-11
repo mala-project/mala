@@ -18,27 +18,26 @@ class Trainer:
             optimizer = optim.SGD(network.parameters(), lr=self.parameters.learning_rate)
         else:
             raise Exception("Unsupported training method.")
-        training_data_loader = DataLoader(data.training_data_set, batch_size = self.parameters.mini_batch_size, shuffle=True)
-        validation_data_loader = DataLoader(data.validation_data_set, batch_size = self.parameters.mini_batch_size*1)
-        test_data_loader = DataLoader(data.test_data_set, batch_size = self.parameters.mini_batch_size*1)
+        training_data_loader = DataLoader(data.training_data_set, batch_size=self.parameters.mini_batch_size,
+                                          shuffle=True)
+        validation_data_loader = DataLoader(data.validation_data_set, batch_size=self.parameters.mini_batch_size * 1)
+        test_data_loader = DataLoader(data.test_data_set, batch_size=self.parameters.mini_batch_size * 1)
 
         if (self.parameters.verbosity == True):
             vloss = self.validate_network(network, validation_data_loader)
-            print("Initial Guess - validation data loss: " ,vloss)
+            print("Initial Guess - validation data loss: ", vloss)
             tloss = self.validate_network(network, test_data_loader)
-            print("Initial Guess - test data loss: " ,tloss)
-
+            print("Initial Guess - test data loss: ", tloss)
 
         for epoch in range(self.parameters.max_number_epochs):
             network.train()
-            for input, output in training_data_loader:
-                self.process_mini_batch(network, optimizer, input, output)
-            if (self.parameters.verbosity == True):
+            for inputs, outputs in training_data_loader:
+                self.process_mini_batch(network, optimizer, inputs, outputs)
+            if self.parameters.verbosity == True:
                 vloss = self.validate_network(network, validation_data_loader)
-                print("Epoch: ",epoch,"validation data loss: " ,vloss)
+                print("Epoch: ", epoch, "validation data loss: ", vloss)
         tloss = self.validate_network(network, test_data_loader)
-        print("Final test data loss: " ,tloss)
-
+        print("Final test data loss: ", tloss)
 
     @staticmethod
     def process_mini_batch(network, optimizer, input_data, target_data):
@@ -55,7 +54,7 @@ class Trainer:
         accuracies = []
         validation_loss = 0
         with torch.no_grad():
-            for (x,y) in vdl:
+            for (x, y) in vdl:
                 prediction = network(x)
                 validation_loss += network.loss_func(prediction, y).item()
                 # accuracies.append(network.classification_accuracy(prediction, y))

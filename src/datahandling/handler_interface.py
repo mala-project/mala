@@ -3,9 +3,9 @@ from .handler_mnist import handler_mnist
 from .handler_npy import HandlerNpy
 
 
-def handler_interface(params, descriptor_calculator = None, target_parser = None):
-    '''Defines an interface which, based on the choices made by the user
-    in parameters, will always return the right kind of data handler.'''
+def handler_interface(params, descriptor_calculator=None, target_parser=None):
+    """Defines an interface which, based on the choices made by the user
+    in parameters, will always return the right kind of data handler."""
 
     #################################
     # Handlers that require descriptor calculators
