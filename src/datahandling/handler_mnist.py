@@ -5,7 +5,7 @@ The code is copied from https://github.com/MichalDanielDobrzanski/DeepLearningPy
 contains code to accompany Micheal Nielsens Book on NN, but ported to Python3.
 '''
 
-from .HanderBase import HandlerBase
+from .handler_base import HandlerBase
 import gzip
 import pickle
 import numpy as np

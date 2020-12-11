@@ -1,4 +1,4 @@
-from .HanderBase import HandlerBase
+from .handler_base import HandlerBase
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset
