@@ -9,7 +9,7 @@ class Network(nn.Module):
     """Central network class for this framework. Based on pytorch.nn.Module."""
     def __init__(self, p):
         # copy the network params from the input parameter object
-        self.params = p.Network
+        self.params = p.network
         # initialize the parent class
         super(Network, self).__init__()
 

@@ -1,9 +1,9 @@
-from common.parameters import parameters
+from common.parameters import Parameters
 from datahandling.handler_interface import handler_interface
 from descriptors.descriptor_interface import descriptor_interface
 from targets.target_interface import target_interface
-from network.network import network
-from network.trainer import trainer
+from network.network import Network
+from network.trainer import Trainer
 '''
 This framework should be easily usable by instantiating and calling a couple of classes.
 This file is the central testing point to try out all new functions, as it serves as a command-line based testing interface.
@@ -23,7 +23,7 @@ print("Welcome to ML-DFT@CASUS.")
 # PARAMETERS
 # All parameters are handled from a central parameters class that contains subclasses.
 ####################
-test_parameters = parameters()
+test_parameters = Parameters()
 # Modify parameters as you want...
 test_parameters.data.datatype_in = "*.npy"
 test_parameters.data.datatype_out = "*.npy"
@@ -68,10 +68,10 @@ print("Read data: DONE.")
 # Set up the network and trainer we want to use.
 ####################
 
-test_parameters.Network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
-test_parameters.Network.layer_activations = ["Sigmoid"]
-test_network = network(test_parameters)
-test_trainer = trainer(test_parameters)
+test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
+test_parameters.network.layer_activations = ["Sigmoid"]
+test_network = Network(test_parameters)
+test_trainer = Trainer(test_parameters)
 print("Network setup: DONE.")
 
 ####################

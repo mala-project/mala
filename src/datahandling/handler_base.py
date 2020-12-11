@@ -42,11 +42,16 @@ class HandlerBase:
         # tensors of dimension (number_of_points,feature_length) until AFTER we have
         # split it, and normalization is more convenient after this conversion.
 
+        # Before doing anything with the data, we make sure it's float32.
+        # Elsewise Pytorch will copy, not reference our data.
+        self.raw_input = self.raw_input.astype(np.float32)
+        self.raw_output = self.raw_output.astype(np.float32)
+
         # Split from raw numpy arrays into three/six pytorch tensors.
         self.split_data()
 
         # Normalize pytorch tensors.
-        self.normalize_data()
+        # self.normalize_data()
 
         # Build dataset objects from pytorch tensors.
         self.build_datasets()

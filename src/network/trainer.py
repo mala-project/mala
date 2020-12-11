@@ -15,7 +15,7 @@ class Trainer:
     def train_network(self, network, data):
         """Given a network and data, this network is trained on this data."""
         if (self.parameters.trainingtype == "SGD"):
-            optimizer = optim.SGD(network.Parameters(), lr=self.parameters.learning_rate)
+            optimizer = optim.SGD(network.parameters(), lr=self.parameters.learning_rate)
         else:
             raise Exception("Unsupported training method.")
         training_data_loader = DataLoader(data.training_data_set, batch_size = self.parameters.mini_batch_size, shuffle=True)
