@@ -5,6 +5,7 @@ from targets.target_interface import TargetInterface
 from network.network import Network
 from network.trainer import Trainer
 from network.hyperparameter_optimizer import HyperparameterOptimizer
+from network.optuna_parameter import OptunaParameter
 '''
 This framework should be easily usable by instantiating and calling a couple of classes.
 This file is the central testing point to try out all new functions, as it serves as a command-line based testing interface.
@@ -83,8 +84,10 @@ print("Network setup: DONE.")
 # one has to simply create a hyperparameter optimizer
 # and let it perform a "study".
 # This class is nothing more than a wrapper to optuna.
+# Via the hyperparameter_list one can add hyperparameters to be optimized.
 ####################
 
+test_parameters.hyperparameters.hyperparameter_list.append(OptunaParameter("float", "learning_rate", 0.0000001, 0.01))
 print("Starting Hyperparameter optimization.")
 test_hp_optimizer = HyperparameterOptimizer(test_parameters)
 test_hp_optimizer.perform_study(data_handler)

@@ -141,10 +141,10 @@ class ParametersHyperparameterOptinization(ParametersBase):
         """
         Controls how many trials optuna performs.
         """
-        # self.optimization_list
-        # """
-        #
-        # """
+        self.hyperparameter_list = []
+        """
+        List containing hyperparameters, that are then passed to optuna. 
+        """
 
 # noinspection PyMissingConstructor
 class ParametersDebug(ParametersBase):
@@ -156,7 +156,6 @@ class ParametersDebug(ParametersBase):
         """
         Enforces a smaller grid size globally.
         """
-
 
 # TODO: Add keyword arguments that allow for a passing of the arguments in the constructor.
 
