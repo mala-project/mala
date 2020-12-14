@@ -8,8 +8,8 @@ class HandlerQEoutCube(HandlerBase):
     Output data is read by parsing multiple *.cube files.
     """
 
-    def __init__(self, p, descriptor_calculator, target_parser, data_scaler):
-        super(HandlerQEoutCube, self).__init__(p, data_scaler)
+    def __init__(self, p, descriptor_calculator, target_parser, input_data_scaler, output_data_scaler):
+        super(HandlerQEoutCube, self).__init__(p, input_data_scaler, output_data_scaler)
         self.descriptor_calculator = descriptor_calculator
         self.target_parser = target_parser
 

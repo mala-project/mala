@@ -1,6 +1,7 @@
 from .handler_qeout_cube import HandlerQEoutCube
 from .handler_mnist import handler_mnist
 from .handler_npy import HandlerNpy
+from .data_scaler import DataScaler
 
 
 def HandlerInterface(params, descriptor_calculator=None, target_parser=None, data_scaler=None):
@@ -10,8 +11,9 @@ def HandlerInterface(params, descriptor_calculator=None, target_parser=None, dat
     # We ALWAYS require a scaling object.
     # If no scaling is requested by the user the scaler will simply do nothing.
 
-    if data_scaler is None:
-        raise Exception("No data scaler was specified.")
+    input_data_scaler = DataScaler(params.data.input_rescaling_type)
+    output_data_scaler = DataScaler(params.data.output_rescaling_type)
+    handler = None
 
     #################################
     # Handlers that require descriptor calculators
@@ -26,7 +28,7 @@ def HandlerInterface(params, descriptor_calculator=None, target_parser=None, dat
         elif target_parser is None:
             raise Exception("Using cube files as input requires the definition of a target parsers.")
         else:
-            return HandlerQEoutCube(params, descriptor_calculator, target_parser, data_scaler)
+            handler = HandlerQEoutCube(params, descriptor_calculator, target_parser, input_data_scaler, output_data_scaler)
 
     #################################
     # Handlers that read data as is.
@@ -34,12 +36,13 @@ def HandlerInterface(params, descriptor_calculator=None, target_parser=None, dat
 
     # Saved numpy arrays.
     if params.data.datatype_in == '*.npy' and params.data.datatype_out == '*.npy':
-        return HandlerNpy(params, data_scaler)
+        handler = HandlerNpy(params, input_data_scaler, output_data_scaler)
 
     # MNIST data.
     if params.data.datatype_in == 'mnist' and params.data.datatype_out == 'mnist':
-        return handler_mnist(params, data_scaler)
+        handler = handler_mnist(params, input_data_scaler, output_data_scaler)
 
-    # There is no point in proceeding without data.
+    if handler is not None:
+        return handler, input_data_scaler, output_data_scaler
     else:
         raise Exception("Unknown combination of input and output data requested.")

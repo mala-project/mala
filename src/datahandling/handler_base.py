@@ -6,7 +6,7 @@ from torch.utils.data import TensorDataset
 class HandlerBase:
     """Base class for all data objects."""
 
-    def __init__(self, p, data_scaler):
+    def __init__(self, p, input_data_scaler, output_data_scaler):
         self.parameters = p.data
         self.raw_input = []
         self.raw_output = []
@@ -27,7 +27,8 @@ class HandlerBase:
         self.nr_test_data = 0
         self.nr_validation_data = 0
         self.grid_dimension = np.array([0, 0, 0])
-        self.data_scaler = data_scaler
+        self.input_data_scaler = input_data_scaler
+        self.output_data_scaler = output_data_scaler
 
     def load_data(self):
         """Loads data from the specified directory."""
@@ -142,21 +143,16 @@ class HandlerBase:
     def scale_data(self):
         """Scales the data."""
 
-        print(self.training_data_inputs[0])
-        print(self.training_data_outputs[0])
+        # First, prepare the data scalers.
+        self.input_data_scaler.fit(self.training_data_inputs)
+        self.output_data_scaler.fit(self.training_data_outputs)
 
         # Inputs.
-
-        self.data_scaler.scale_input_tensor(self.training_data_inputs)
-        self.data_scaler.scale_input_tensor(self.validation_data_inputs)
-        self.data_scaler.scale_input_tensor(self.test_data_inputs)
+        self.training_data_inputs = self.input_data_scaler.transform(self.training_data_inputs)
+        self.validation_data_inputs = self.input_data_scaler.transform(self.validation_data_inputs)
+        self.test_data_inputs = self.input_data_scaler.transform(self.test_data_inputs)
 
         # Outputs.
-
-        self.data_scaler.scale_output_tensor(self.training_data_outputs)
-        self.data_scaler.scale_output_tensor(self.validation_data_outputs)
-        self.data_scaler.scale_output_tensor(self.test_data_outputs)
-
-        print(self.training_data_inputs[0])
-        print(self.training_data_outputs[0])
-
+        self.training_data_outputs = self.output_data_scaler.transform(self.training_data_outputs)
+        self.validation_data_outputs = self.output_data_scaler.transform(self.validation_data_outputs)
+        self.test_data_outputs = self.output_data_scaler.transform(self.test_data_outputs)

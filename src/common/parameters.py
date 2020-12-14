@@ -94,14 +94,6 @@ class ParametersData(ParametersBase):
         """
         Details how much of the data is used for training, validation and testing [#snapshots].
         """
-
-
-# noinspection PyMissingConstructor
-class ParametersScaling(ParametersBase):
-    """Data rescaling parameter subclass. Used to be part of the data handling subclass,
-    but it is better as its own class, because rescaling of data is needed for inference as well."""
-
-    def __init__(self):
         self.input_rescaling_type = "None"
         """
         Specifies how input quantities are normalized.
@@ -163,7 +155,6 @@ class Parameters:
         self.data = ParametersData()
         self.training = ParametersTraining()
         self.debug = ParametersDebug()
-        self.scaling = ParametersScaling()
 
     def show(self):
         """Prints all the parameters bundled in this class."""

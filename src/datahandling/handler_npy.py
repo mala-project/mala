@@ -7,8 +7,8 @@ from torch.utils.data import TensorDataset
 class HandlerNpy(HandlerBase):
     """Data handler for *.npy files."""
 
-    def __init__(self, p, data_scaler):
-        super(HandlerNpy, self).__init__(p, data_scaler)
+    def __init__(self, p, input_data_scaler, output_data_scaler):
+        super(HandlerNpy, self).__init__(p, input_data_scaler, output_data_scaler)
         self.input_dimension = 0
         self.output_dimension = 0
         self.dbg_grid_dimensions = p.debug.grid_dimensions
