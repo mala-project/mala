@@ -11,24 +11,33 @@ class Trainer:
     def __init__(self, p):
         # copy the parameters into the class.
         self.parameters = p.training
+        self.final_test_loss = float("inf")
 
     def train_network(self, network, data):
         """Given a network and data, this network is trained on this data."""
-        if (self.parameters.trainingtype == "SGD"):
+
+        # Choose an optimizer to use.
+        if self.parameters.trainingtype == "SGD":
             optimizer = optim.SGD(network.parameters(), lr=self.parameters.learning_rate)
+        elif self.parameters.trainingtype == "Adam":
+            optimizer = optim.Adam(network.parameters(), lr=self.parameters.learning_rate)
         else:
             raise Exception("Unsupported training method.")
+
+        # Prepare data loaders.
         training_data_loader = DataLoader(data.training_data_set, batch_size=self.parameters.mini_batch_size,
                                           shuffle=True)
         validation_data_loader = DataLoader(data.validation_data_set, batch_size=self.parameters.mini_batch_size * 1)
         test_data_loader = DataLoader(data.test_data_set, batch_size=self.parameters.mini_batch_size * 1)
 
-        if (self.parameters.verbosity == True):
+        # Calculate initial loss.
+        if self.parameters.verbosity == True:
             vloss = self.validate_network(network, validation_data_loader)
             print("Initial Guess - validation data loss: ", vloss)
             tloss = self.validate_network(network, test_data_loader)
             print("Initial Guess - test data loss: ", tloss)
 
+        # Perform and log training.
         for epoch in range(self.parameters.max_number_epochs):
             network.train()
             for inputs, outputs in training_data_loader:
@@ -36,7 +45,10 @@ class Trainer:
             if self.parameters.verbosity == True:
                 vloss = self.validate_network(network, validation_data_loader)
                 print("Epoch: ", epoch, "validation data loss: ", vloss)
+
+        # Calculate final loss.
         tloss = self.validate_network(network, test_data_loader)
+        self.final_test_loss = tloss
         print("Final test data loss: ", tloss)
 
     @staticmethod

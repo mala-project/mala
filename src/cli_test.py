@@ -4,6 +4,7 @@ from descriptors.descriptor_interface import DescriptorInterface
 from targets.target_interface import TargetInterface
 from network.network import Network
 from network.trainer import Trainer
+from network.hyperparameter_optimizer import HyperparameterOptimizer
 '''
 This framework should be easily usable by instantiating and calling a couple of classes.
 This file is the central testing point to try out all new functions, as it serves as a command-line based testing interface.
@@ -28,9 +29,10 @@ test_parameters.descriptors.twojmax = 11
 
 test_parameters.targets.ldos_gridsize = 10
 
-test_parameters.training.max_number_epochs = 20
-test_parameters.training.mini_batch_size = 10
-test_parameters.training.learning_rate = 7
+test_parameters.training.max_number_epochs = 40
+test_parameters.training.mini_batch_size = 40
+test_parameters.training.learning_rate = 0.00001
+test_parameters.training.trainingtype = "Adam"
 
 test_parameters.comment = "Test run of ML-DFT@CASUS."
 # test_parameters.debug.grid_dimensions = [200,100,1]
@@ -68,7 +70,7 @@ print("Read data: DONE.")
 ####################
 
 test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
-test_parameters.network.layer_activations = ["Sigmoid"]
+test_parameters.network.layer_activations = ["ReLU"]
 test_network = Network(test_parameters)
 test_trainer = Trainer(test_parameters)
 print("Network setup: DONE.")
@@ -80,6 +82,18 @@ print("Network setup: DONE.")
 
 print("Starting training.")
 test_trainer.train_network(test_network, data_handler)
+
+####################
+# HYPERPARAMETER OPTIMIZATION
+# In order to perform a hyperparameter optimization,
+# one has to simply create a hyperparameter optimizer
+# and let it perform a "study".
+# This class is nothing more than a wrapper to optuna.
+####################
+
+print("Starting Hyperparameter optimization.")
+test_hp_optimizer = HyperparameterOptimizer(test_parameters, test_trainer)
+test_hp_optimizer.perform_study(data_handler)
 
 ####################
 # SAVING

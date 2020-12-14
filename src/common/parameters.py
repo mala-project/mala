@@ -128,6 +128,22 @@ class ParametersTraining(ParametersBase):
         self.verbosity = True
         self.mini_batch_size = 10
 
+class ParametersHyperparameterOptinization(ParametersBase):
+    """Hyperparameter optimization subclass."""
+
+    def __init(self):
+        self.direction = 'minimize'
+        """
+        Controls whether we minimize or maximize the loss function.
+        """
+        self.n_trials = 100
+        """
+        Controls how many trials optuna performs.
+        """
+        # self.optimization_list
+        # """
+        #
+        # """
 
 # noinspection PyMissingConstructor
 class ParametersDebug(ParametersBase):
@@ -155,6 +171,7 @@ class Parameters:
         self.data = ParametersData()
         self.training = ParametersTraining()
         self.debug = ParametersDebug()
+        self.hyperparameters = ParametersHyperparameterOptinization()
 
     def show(self):
         """Prints all the parameters bundled in this class."""
