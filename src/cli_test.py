@@ -29,10 +29,12 @@ test_parameters.descriptors.twojmax = 11
 
 test_parameters.targets.ldos_gridsize = 10
 
-test_parameters.training.max_number_epochs = 40
+test_parameters.training.max_number_epochs = 10
 test_parameters.training.mini_batch_size = 40
 test_parameters.training.learning_rate = 0.00001
 test_parameters.training.trainingtype = "Adam"
+
+test_parameters.hyperparameters.n_trials = 20
 
 test_parameters.comment = "Test run of ML-DFT@CASUS."
 # test_parameters.debug.grid_dimensions = [200,100,1]
@@ -56,10 +58,10 @@ data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0small.npy",
 "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
 "Al_ldos_200x200x200grid_250elvls_snapshot0small.npy",
 "/home/fiedlerl/data/test_fp_snap/2.699gcc/")
-data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0small_copy.npy",
-"/home/fiedlerl/data/test_fp_snap/2.699gcc/",
-"Al_ldos_200x200x200grid_250elvls_snapshot0small_copy.npy",
-"/home/fiedlerl/data/test_fp_snap/2.699gcc/")
+# data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0small_copy.npy",
+# "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
+# "Al_ldos_200x200x200grid_250elvls_snapshot0small_copy.npy",
+# "/home/fiedlerl/data/test_fp_snap/2.699gcc/")
 data_handler.load_data()
 data_handler.prepare_data()
 print("Read data: DONE.")
@@ -76,15 +78,7 @@ test_trainer = Trainer(test_parameters)
 print("Network setup: DONE.")
 
 ####################
-# TRAINING
-# Train the network.
-####################
-
-print("Starting training.")
-test_trainer.train_network(test_network, data_handler)
-
-####################
-# HYPERPARAMETER OPTIMIZATION
+# (optional) HYPERPARAMETER OPTIMIZATION
 # In order to perform a hyperparameter optimization,
 # one has to simply create a hyperparameter optimizer
 # and let it perform a "study".
@@ -92,8 +86,18 @@ test_trainer.train_network(test_network, data_handler)
 ####################
 
 print("Starting Hyperparameter optimization.")
-test_hp_optimizer = HyperparameterOptimizer(test_parameters, test_trainer)
+test_hp_optimizer = HyperparameterOptimizer(test_parameters)
 test_hp_optimizer.perform_study(data_handler)
+print("Hyperparameter optimization: DONE.")
+
+####################
+# TRAINING
+# Train the network.
+####################
+
+print("Starting training.")
+test_trainer.train_network(test_network, data_handler)
+print("Training: DONE.")
 
 ####################
 # SAVING
@@ -111,7 +115,6 @@ test_hp_optimizer.perform_study(data_handler)
 # (optional) POSTPROCESSING
 # Unclear if this can be done with this framework.
 ####################
-
 
 ####################
 # Output parameters (=metadata)

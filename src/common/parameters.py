@@ -128,10 +128,11 @@ class ParametersTraining(ParametersBase):
         self.verbosity = True
         self.mini_batch_size = 10
 
+
 class ParametersHyperparameterOptinization(ParametersBase):
     """Hyperparameter optimization subclass."""
 
-    def __init(self):
+    def __init__(self):
         self.direction = 'minimize'
         """
         Controls whether we minimize or maximize the loss function.
@@ -170,8 +171,8 @@ class Parameters:
         self.targets = ParametersTargets()
         self.data = ParametersData()
         self.training = ParametersTraining()
-        self.debug = ParametersDebug()
         self.hyperparameters = ParametersHyperparameterOptinization()
+        self.debug = ParametersDebug()
 
     def show(self):
         """Prints all the parameters bundled in this class."""
