@@ -1,13 +1,12 @@
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset
-from .normalizations import normalize_three_tensors
 
 
 class HandlerBase:
     """Base class for all data objects."""
 
-    def __init__(self, p):
+    def __init__(self, p, data_scaler):
         self.parameters = p.data
         self.raw_input = []
         self.raw_output = []
@@ -28,6 +27,7 @@ class HandlerBase:
         self.nr_test_data = 0
         self.nr_validation_data = 0
         self.grid_dimension = np.array([0, 0, 0])
+        self.data_scaler = data_scaler
 
     def load_data(self):
         """Loads data from the specified directory."""
@@ -54,7 +54,7 @@ class HandlerBase:
         self.split_data()
 
         # Normalize pytorch tensors.
-        # self.normalize_data()
+        self.scale_data()
 
         # Build dataset objects from pytorch tensors.
         self.build_datasets()
@@ -139,37 +139,24 @@ class HandlerBase:
         self.raw_input = self.raw_input.reshape([datacount, self.get_input_dimension()])
         self.raw_output = self.raw_output.reshape([datacount, self.get_output_dimension()])
 
-    def normalize_data(self):
-        """Normalizes the data, according to user input:
-            - "None": No normalization is applied.
-            - "standard": Standardization (Scale to mean 0, standard deviation 1)
-            - "min-max": Min-Max scaling (Scale to be in range 0...1)
-            - "element-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
-            - "element-wise-min-max": Row Min-Max scaling (Scale to be in range 0...1)
-        """
-        ####################
+    def scale_data(self):
+        """Scales the data."""
+
+        print(self.training_data_inputs[0])
+        print(self.training_data_outputs[0])
+
         # Inputs.
-        ####################
 
-        # Parse options.
-        scale_standard = False
-        scale_max = False
-        use_row = False
-        if "standard" in self.parameters.input_normalization:
-            scale_standard = True
-        if "min-max" in self.parameters.input_normalization:
-            scale_max = True
-        if "element-wise" in self.parameters.input_normalization:
-            use_row = True
+        self.data_scaler.scale_input_tensor(self.training_data_inputs)
+        self.data_scaler.scale_input_tensor(self.validation_data_inputs)
+        self.data_scaler.scale_input_tensor(self.test_data_inputs)
 
-        # Inform the user that something went wrong.
-        if scale_standard is False and scale_max is False:
-            print("No input data normalization is performed.")
-            return
-        if scale_standard is True and scale_max is True:
-            raise Exception("Invalid normalization parameters. Cannot perform standardization and "
-                            "min-max normalization at the same time.")
+        # Outputs.
 
-        # Actual normalization.
-        normalize_three_tensors(self.training_data_inputs, self.validation_data_inputs, self.test_data_inputs,
-                                self.get_input_dimension(), scale_standard, scale_max, use_row)
+        self.data_scaler.scale_output_tensor(self.training_data_outputs)
+        self.data_scaler.scale_output_tensor(self.validation_data_outputs)
+        self.data_scaler.scale_output_tensor(self.test_data_outputs)
+
+        print(self.training_data_inputs[0])
+        print(self.training_data_outputs[0])
+

@@ -94,29 +94,36 @@ class ParametersData(ParametersBase):
         """
         Details how much of the data is used for training, validation and testing [#snapshots].
         """
-        self.input_normalization = "None"
+
+
+# noinspection PyMissingConstructor
+class ParametersScaling(ParametersBase):
+    """Data rescaling parameter subclass. Used to be part of the data handling subclass,
+    but it is better as its own class, because rescaling of data is needed for inference as well."""
+
+    def __init__(self):
+        self.input_rescaling_type = "None"
         """
         Specifies how input quantities are normalized.
         Options:
             - "None": No normalization is applied.
             - "standard": Standardization (Scale to mean 0, standard deviation 1)
-            - "min-max": Min-Max scaling (Scale to be in range 0...1)
-            - "element-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
-            - "element-min-max": Row Min-Max scaling (Scale to be in range 0...1)
+            - "normal": Min-Max scaling (Scale to be in range 0...1)
+            - "feature-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
+            - "feature-wise-normal": Row Min-Max scaling (Scale to be in range 0...1)
         """
-        self.output_normalization = "None"
+        self.output_rescaling_type = "None"
         """
         Specifies how output quantities are normalized.
         Options:
             - "None": No normalization is applied.
             - "standard": Standardization (Scale to mean 0, standard deviation 1)
-            - "min-max": Min-Max scaling (Scale to be in range 0...1)
-            - "element-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
-            - "element-wise-min-max": Row Min-Max scaling (Scale to be in range 0...1)
+            - "normal": Min-Max scaling (Scale to be in range 0...1)
+            - "feature-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
+            - "feature-wise-normal": Row Min-Max scaling (Scale to be in range 0...1)
         """
 
 
-# noinspection PyMissingConstructor
 class ParametersTraining(ParametersBase):
     """Network training parameter subclass."""
 
@@ -156,6 +163,7 @@ class Parameters:
         self.data = ParametersData()
         self.training = ParametersTraining()
         self.debug = ParametersDebug()
+        self.scaling = ParametersScaling()
 
     def show(self):
         """Prints all the parameters bundled in this class."""

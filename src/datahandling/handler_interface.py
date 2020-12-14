@@ -3,9 +3,15 @@ from .handler_mnist import handler_mnist
 from .handler_npy import HandlerNpy
 
 
-def handler_interface(params, descriptor_calculator=None, target_parser=None):
+def HandlerInterface(params, descriptor_calculator=None, target_parser=None, data_scaler=None):
     """Defines an interface which, based on the choices made by the user
     in parameters, will always return the right kind of data handler."""
+
+    # We ALWAYS require a scaling object.
+    # If no scaling is requested by the user the scaler will simply do nothing.
+
+    if data_scaler is None:
+        raise Exception("No data scaler was specified.")
 
     #################################
     # Handlers that require descriptor calculators
@@ -20,7 +26,7 @@ def handler_interface(params, descriptor_calculator=None, target_parser=None):
         elif target_parser is None:
             raise Exception("Using cube files as input requires the definition of a target parsers.")
         else:
-            return HandlerQEoutCube(params, descriptor_calculator, target_parser)
+            return HandlerQEoutCube(params, descriptor_calculator, target_parser, data_scaler)
 
     #################################
     # Handlers that read data as is.
@@ -28,11 +34,11 @@ def handler_interface(params, descriptor_calculator=None, target_parser=None):
 
     # Saved numpy arrays.
     if params.data.datatype_in == '*.npy' and params.data.datatype_out == '*.npy':
-        return HandlerNpy(params)
+        return HandlerNpy(params, data_scaler)
 
     # MNIST data.
     if params.data.datatype_in == 'mnist' and params.data.datatype_out == 'mnist':
-        return handler_mnist(params)
+        return handler_mnist(params, data_scaler)
 
     # There is no point in proceeding without data.
     else:

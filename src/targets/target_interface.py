@@ -1,7 +1,7 @@
 from .ldos import LDOS
 
 
-def target_interface(params):
+def TargetInterface(params):
     """Defines an interface which, based on the choices made by the user
     in parameters, will always return the right kind of target parser.
     Not necessary if preprocessed data is read."""
