@@ -1,8 +1,13 @@
+import warnings
 import ase
 import ase.io
 from .lammps_utils import *
-from lammps import lammps
 from .descriptor_base import DescriptorBase
+try:
+    from lammps import lammps
+except ModuleNotFoundError:
+    warnings.warn("You either don't have LAMMPS installed or it is not configured correctly. Using SNAP descriptors "
+                  "might still work, but trying to calculate SNAP descriptors from atomic positions will crash.")
 
 
 class SNAP(DescriptorBase):
@@ -18,6 +23,7 @@ class SNAP(DescriptorBase):
 
     def calculate_snap(self, infile, outdir):
         """Actual SNAP calculation."""
+        from lammps import lammps
         lammps_format = "lammps-data"
 
         # We get the atomic information by using ASE.
