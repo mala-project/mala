@@ -1,7 +1,5 @@
 from mldft.common.parameters import Parameters
 from mldft.datahandling.handler_interface import HandlerInterface
-from mldft.descriptors.descriptor_interface import DescriptorInterface
-from mldft.targets.target_interface import TargetInterface
 from mldft.network.hyperparameter_optimizer import HyperparameterOptimizer
 from mldft.network.optuna_parameter import OptunaParameter
 
