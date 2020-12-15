@@ -12,6 +12,7 @@ In order to run ML-DFT you have to have the following packages installed :
 * numpy
 * scipy
 * optuna
+* ase
 
 You can install python packages with 
 

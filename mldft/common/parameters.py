@@ -67,19 +67,21 @@ class ParametersData(ParametersBase):
 
     def __init__(self):
         super(ParametersData, self).__init__()
-        self.datatype_in = "qe.out"
+        self.datatype_in = "*.npy"
         """
         Specifies the kind of input data we are working with.
             Implemented so far:
                 - mnist for the MNIST data set (for testing purposes).
                 - qe.out for QuantumEspresso out files.
+                - *.npy for preprocessed input
         """
-        self.datatype_out = "*.cube"
+        self.datatype_out = "*.npy"
         """
         Specifies the kind of input data we are working with.
             Implemented so far:
                 - mnist for the MNIST data set (for testing purposes).
                 - *.cube for cube files containing e.g. the LDOS.
+                - *.npy for preprocessed output
         """
         self.snapshot_directories_list = []
         """
