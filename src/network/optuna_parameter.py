@@ -13,7 +13,7 @@ class OptunaParameter:
 
         # For now, only three types of hyperparameters are allowed:
         # Lists, floats and ints.
-        if self.opttype != "float" and self.opttype != "int" and self.opttype != "categorial":
+        if self.opttype != "float" and self.opttype != "int" and self.opttype != "categorical":
             raise Exception("Unsupported Hyperparameter type.")
 
     def get_parameter(self, trial: Trial):
@@ -21,7 +21,7 @@ class OptunaParameter:
             return self.get_float(trial)
         if self.opttype == "int":
             return self.get_int(trial)
-        if self.opttype == "categorial":
+        if self.opttype == "categorical":
             return self.get_categorical(trial)
         raise Exception("Wrong hyperparameter type.")
 
@@ -38,7 +38,7 @@ class OptunaParameter:
             raise Exception("Wrong hyperparameter type.")
 
     def get_categorical(self, trial: Trial):
-        if self.opttype == "categorial":
+        if self.opttype == "categorical":
             return trial.suggest_categorical(self.name, self.choices)
         else:
             raise Exception("Wrong hyperparameter type.")

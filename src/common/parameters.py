@@ -2,7 +2,7 @@
 
 class ParametersBase:
     def __init__(self):
-        raise Exception("Error: No constructor implemented.")
+        pass
 
     def show(self, indent=""):
         for v in vars(self):
@@ -14,6 +14,7 @@ class ParametersNetwork(ParametersBase):
     """Neural Network parameter subclass."""
 
     def __init__(self):
+        super(ParametersNetwork, self).__init__()
         self.nn_type = "feed-forward"
         self.layer_sizes = [10,10,10]
         """Includes the input layer, although no activation is applied to it."""
@@ -28,6 +29,7 @@ class ParametersDescriptors(ParametersBase):
     """Fingerprint descriptor parameter subclass."""
 
     def __init__(self):
+        super(ParametersDescriptors, self).__init__()
         self.descriptor_type = "SNAP"
         self.twojmax = 10
         """
@@ -51,6 +53,7 @@ class ParametersTargets(ParametersBase):
     """Target quantity parsing parameter subclass."""
 
     def __init__(self):
+        super(ParametersTargets, self).__init__()
         self.target_type = "LDOS"
         self.ldos_gridsize = 0
         """
@@ -63,6 +66,7 @@ class ParametersData(ParametersBase):
     """Dataset interface parameter subclass."""
 
     def __init__(self):
+        super(ParametersData, self).__init__()
         self.datatype_in = "qe.out"
         """
         Specifies the kind of input data we are working with.
@@ -120,6 +124,7 @@ class ParametersTraining(ParametersBase):
     """Network training parameter subclass."""
 
     def __init__(self):
+        super(ParametersTraining, self).__init__()
         self.trainingtype = "SGD"
         """Training type to be used."""
         self.learning_rate = 0.5
@@ -133,6 +138,7 @@ class ParametersHyperparameterOptinization(ParametersBase):
     """Hyperparameter optimization subclass."""
 
     def __init__(self):
+        super(ParametersHyperparameterOptinization, self).__init__()
         self.direction = 'minimize'
         """
         Controls whether we minimize or maximize the loss function.
@@ -141,24 +147,34 @@ class ParametersHyperparameterOptinization(ParametersBase):
         """
         Controls how many trials optuna performs.
         """
-        self.hyperparameter_list = []
+        self.hlist = []
         """
         List containing hyperparameters, that are then passed to optuna. 
         """
+    def show(self, indent=""):
+        for v in vars(self):
+            if v != "hlist":
+                print(indent + '%-15s: %s' % (v, getattr(self, v)))
+            if v == "hlist":
+                i = 0
+                for hyp in self.hlist:
+                    print(indent + '%-15s: %s' % ("hyperparameter #"+str(i), hyp.name))
+                    i += 1
 
-# noinspection PyMissingConstructor
+
 class ParametersDebug(ParametersBase):
     """Central debugging parameters. Can be used
     to e.g. reduce number of data."""
 
     def __init__(self):
+        super(ParametersDebug, self).__init__()
         self.grid_dimensions = []
         """
         Enforces a smaller grid size globally.
         """
 
-# TODO: Add keyword arguments that allow for a passing of the arguments in the constructor.
 
+# TODO: Add keyword arguments that allow for a passing of the arguments in the constructor.
 class Parameters:
     """Parameter class for ML-DFT@CASUS."""
 
@@ -177,7 +193,7 @@ class Parameters:
         """Prints all the parameters bundled in this class."""
         print("--- " + self.__doc__ + " ---")
         for v in vars(self):
-            if (isinstance(getattr(self, v), ParametersBase)):
+            if isinstance(getattr(self, v), ParametersBase):
                 parobject = getattr(self, v)
                 print("--- " + parobject.__doc__ + " ---")
                 parobject.show("\t")
