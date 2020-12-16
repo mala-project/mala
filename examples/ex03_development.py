@@ -1,18 +1,18 @@
-from common.parameters import Parameters
-from datahandling.handler_interface import HandlerInterface
-from descriptors.descriptor_interface import DescriptorInterface
-from targets.target_interface import TargetInterface
-from network.network import Network
-from network.trainer import Trainer
-from network.hyperparameter_optimizer import HyperparameterOptimizer
-from network.optuna_parameter import OptunaParameter
-'''
-This framework should be easily usable by instantiating and calling a couple of classes.
-This file is the central testing point to try out all new functions, as it serves as a command-line based testing interface.
-'''
+from mldft.common.parameters import Parameters
+from mldft.datahandling.handler_interface import HandlerInterface
+from mldft.descriptors.descriptor_interface import DescriptorInterface
+from mldft.targets.target_interface import TargetInterface
+from mldft.network.network import Network
+from mldft.network.trainer import Trainer
+from mldft.network.hyperparameter_optimizer import HyperparameterOptimizer
+from mldft.network.optuna_parameter import OptunaParameter
 
-print("THIS IS ALL STILL WORK IN PROGRESS.")
+"""
+ex3_development.py: development run script.
+"""
+
 print("Welcome to ML-DFT@CASUS.")
+print("Running ex3_development_script.py")
 
 ####################
 # PARAMETERS
@@ -135,5 +135,6 @@ print("Training: DONE.")
 # Output parameters (=metadata)
 ####################
 
-print("Execution complete. \nParameters used for this experiment:")
+print("Successfully ran ex2_hyperparameter_optimization.py.")
+print("Parameters used for this experiment:")
 test_parameters.show()
