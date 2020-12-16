@@ -22,19 +22,22 @@ pip install packagename
 
 For the installation of PyTorch you might also refer to https://pytorch.org/.
 
-Alternatively, you can install the required packages within a conda environment.
+#### Conda environment (optional)
+Alternatively to pip, you can install the required packages within a [conda](https://docs.conda.io/en/latest/miniconda.html) environment.
 
-In order to set up the necessary environment:
-
-1. create an environment `ml-dft-casus` with the help of [conda],
+Follow these steps to set up the necessary environment.
+1. Create an environment `ml-dft-casus`:
    ```
    conda env create -f environment.yaml
    ```
-2. activate the new environment with
+2. Activate the new environment:
    ```
    conda activate ml-dft-casus
    ```
-
+3. You can deactivate the environment with:
+    ```
+    conda deactivate
+    ```
 
 ###  LAMMPS (optional)
 
