@@ -22,6 +22,20 @@ pip install packagename
 
 For the installation of PyTorch you might also refer to https://pytorch.org/.
 
+Alternatively, you can install the required packages within a conda environment.
+
+In order to set up the necessary environment:
+
+1. create an environment `ml-dft-casus` with the help of [conda],
+   ```
+   conda env create -f environment.yaml
+   ```
+2. activate the new environment with
+   ```
+   conda activate ml-dft-casus
+   ```
+
+
 ###  LAMMPS (optional)
 
 This workflow uses the Large-scale Atomic/Molecular Massively Parallel Simulator (LAMMPS, https://lammps.sandia.gov/) for input data preprocessing. It is not necessary to install LAMMPS if you are you using this workflow with preprocessed data. If you need/want to install LAMMPS, please refer to INSTALL_SNAP.md.

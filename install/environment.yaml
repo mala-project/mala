@@ -1,0 +1,13 @@
+name: ml-dft-casus
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+dependencies:
+  - python>=3.6
+  - pip
+  - numpy
+  - scipy
+  - optuna
+  - ase
+  - pytorch
