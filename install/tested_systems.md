@@ -12,7 +12,9 @@
 * conda: not tested
 
 ### macOS
-* *Add Attilas setup here*
+* macOS 11.0.1 
+* pip: not tested
+* conda: Success!
 
 ## HPC clusters
 ### hemera5
