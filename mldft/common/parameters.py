@@ -75,6 +75,15 @@ class ParametersData(ParametersBase):
                 - qe.out for QuantumEspresso out files.
                 - *.npy for preprocessed input
         """
+        self.descriptors_contain_xyz = True
+        """
+        Legacy option. If true, it is assumed that the first three entries of the descriptor vector are the xyz 
+        coordinates and they are cut from the descriptor vector. If False, no such cutting is peformed.
+        """
+        self.input_memmap_mode = None
+        """
+        Numpy memmap option used for all the numpy.save operations on the input data.
+        """
         self.datatype_out = "*.npy"
         """
         Specifies the kind of input data we are working with.
@@ -82,6 +91,10 @@ class ParametersData(ParametersBase):
                 - mnist for the MNIST data set (for testing purposes).
                 - *.cube for cube files containing e.g. the LDOS.
                 - *.npy for preprocessed output
+        """
+        self.output_memmap_mode = None
+        """
+        Numpy memmap option used for all the numpy.save operations on the output data.
         """
         self.snapshot_directories_list = []
         """

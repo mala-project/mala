@@ -6,7 +6,7 @@ from mldft.targets.target_interface import TargetInterface
 
 
 """
-ex0_verify_installation.py: This example confirms whether or not your setup is correct.  
+ex00_verify_installation.py: This example confirms whether or not your setup is correct.  
 """
 
 print("Welcome to ML-DFT@CASUS.")

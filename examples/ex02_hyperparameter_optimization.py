@@ -4,11 +4,11 @@ from mldft.network.hyperparameter_optimizer import HyperparameterOptimizer
 from mldft.network.optuna_parameter import OptunaParameter
 
 """
-ex2_hyperparameter_optimization.py: Shows how a hyperparameter optimization can be done using this framework.
+ex02_hyperparameter_optimization.py: Shows how a hyperparameter optimization can be done using this framework.
 """
 
 print("Welcome to ML-DFT@CASUS.")
-print("Running ex2_hyperparameter_optimization.py")
+print("Running ex02_hyperparameter_optimization.py")
 
 ####################
 # PARAMETERS
@@ -41,15 +41,9 @@ test_parameters.comment = "Test run of ML-DFT@CASUS."
 data_handler, input_scaler, output_scaler = HandlerInterface(test_parameters)
 
 # Add all the snapshots we want to use in to the list.
-# We are going to use a little more data here than for the first example.
-data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0small.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
-                          "Al_ldos_200x200x200grid_250elvls_snapshot0small.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/")
-data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0small_copy.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
-                          "Al_ldos_200x200x200grid_250elvls_snapshot0small_copy.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/")
+data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/")
+data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/")
+data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/")
 data_handler.load_data()
 data_handler.prepare_data()
 print("Read data: DONE.")
@@ -86,6 +80,6 @@ test_hp_optimizer.perform_study(data_handler)
 test_hp_optimizer.set_optimal_parameters()
 print("Hyperparameter optimization: DONE.")
 
-print("Successfully ran ex2_hyperparameter_optimization.py.")
+print("Successfully ran ex02_hyperparameter_optimization.py.")
 print("Parameters used for this experiment:")
 test_parameters.show()

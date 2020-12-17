@@ -4,12 +4,12 @@ from mldft.network.network import Network
 from mldft.network.trainer import Trainer
 
 """
-ex1_run_singleshot.py: Shows how a neural network can be trained on material data using this framework.
+ex01_run_singleshot.py: Shows how a neural network can be trained on material data using this framework.
 It uses preprocessed data, that is read in from *.npy files.
 """
 
 print("Welcome to ML-DFT@CASUS.")
-print("Running ex1_run_singleshot.py")
+print("Running ex01_run_singleshot.py")
 
 ####################
 # PARAMETERS
@@ -40,10 +40,10 @@ test_parameters.training.trainingtype = "Adam"
 data_handler, input_scaler, output_scaler = HandlerInterface(test_parameters)
 
 # Add a snapshot we want to use in to the list.
-data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0small.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
-                          "Al_ldos_200x200x200grid_250elvls_snapshot0small.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/")
+data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/")
+data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/")
+data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/")
+
 data_handler.load_data()
 data_handler.prepare_data()
 print("Read data: DONE.")
@@ -71,6 +71,6 @@ test_trainer.train_network(test_network, data_handler)
 print("Training: DONE.")
 
 ####################
-print("Successfully ran ex1_run_singleshot.py.")
+print("Successfully ran ex01_run_singleshot.py.")
 print("Parameters used for this experiment:")
 test_parameters.show()

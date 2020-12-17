@@ -60,6 +60,26 @@ class HandlerBase:
         # Build dataset objects from pytorch tensors.
         self.build_datasets()
 
+    def save_loaded_data(self, directory=".", naming_scheme_input="snapshot_*_1.in",
+                         naming_scheme_output="snapshot_*_1.out", filetype="*.npy"):
+        """Saves the loaded snapshots. This fucntion will behave VERY unexpected after prepare data has been called."""
+
+        # Inputs.
+        nr_snapshots_inputs = np.shape(self.raw_input)[0]
+        print("Saving ", nr_snapshots_inputs, " snapshot inputs at", directory)
+        for i in range(0, nr_snapshots_inputs):
+            if filetype == "*.npy":
+                save_path = directory+naming_scheme_input.replace("*", str(i))
+                np.save(save_path, self.raw_input[i], allow_pickle=True)
+
+        # Outputs.
+        nr_snapshots_outputs = np.shape(self.raw_output)[0]
+        print("Saving ", nr_snapshots_outputs, " snapshot outputs at", directory)
+        for i in range(0, nr_snapshots_outputs):
+            if filetype == "*.npy":
+                save_path = directory+naming_scheme_output.replace("*", str(i))
+                np.save(save_path, self.raw_output[i], allow_pickle=True)
+
     def save_prepared_data(self):
         """Saves the data after it was altered/preprocessed by the ML workflow. E.g. SNAP descriptor calculation."""
         raise Exception("save_data not implemented.")
@@ -121,6 +141,10 @@ class HandlerBase:
         self.training_data_outputs = torch.from_numpy(self.raw_output[0:index1]).float()
         self.validation_data_outputs = torch.from_numpy(self.raw_output[index1:index2]).float()
         self.test_data_outputs = torch.from_numpy(self.raw_output[index2:]).float()
+
+    # def split_data_by_snapshot(self):
+    #     """This function splits the data by snapshot i.e. a certain number of snapshots is training,
+    #     validation and testing. So far this works rather crudely by using"""
 
     def build_datasets(self):
         """Takes the normalized training, test and validation data and builds data sets with them."""
