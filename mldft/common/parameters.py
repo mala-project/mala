@@ -178,6 +178,23 @@ class ParametersTraining(ParametersBase):
         is terminated:
         validation_loss < validation_loss_old * (1+early_stopping_threshold), or patience counter will go up.
         """
+        self.learning_rate_scheduler = None
+        """
+        Learning rate scheduler to be used. If not None, an instance of the corresponding pytorch class will be 
+        used to manage the learning rate schedule.
+        Options:
+            - None: No learning rate schedule will be used.
+            - ReduceLROnPlateau: The learning rate will be reduced when the validation loss is plateauing. 
+        """
+        self.learning_rate_decay = 0.1
+        """
+        Decay rate to be used in the learning rate (if the chosen scheduler supports that).
+        """
+        self.learning_rate_patience = 0
+        """
+        Patience parameter used in the learning rate schedule (how long the validation loss has to plateau before
+        the schedule takes effect).
+        """
 
 
 class ParametersHyperparameterOptinization(ParametersBase):
