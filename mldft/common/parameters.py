@@ -152,6 +152,18 @@ class ParametersHyperparameterOptinization(ParametersBase):
         self.hlist = []
         """
         List containing hyperparameters, that are then passed to optuna. 
+        Supported options so far include:
+            learning_rate (float): learning rate of the training algorithm
+            layer_activation_xxx (categorical): Activation function used for the feed forward network (see Netwok 
+                                            parameters for supported activation functions). Note that _xxx is only so 
+                                            that optuna will differentiate between variables. No reordering is performed
+                                             by our code; the order depends on the order in the list. _xxx can be 
+                                             essentially anything. Please note further that you need to either only 
+                                             request one acitvation function (for all layers) or one for specifically 
+                                             for each layer.
+            ff_neurons_layer_xxx(int): Number of neurons per a layer. Note that _xxx is only so that optuna will 
+                                        differentiate between variables. No reordering is performed by our code;
+                                        the order depends on the order in the list. _xxx can be essentially anything.
         """
     def show(self, indent=""):
         for v in vars(self):

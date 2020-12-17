@@ -61,19 +61,29 @@ print("Read data: DONE.")
 # and let it perform a "study".
 # This class is nothing more than a wrapper to optuna.
 # Via the hyperparameter_list one can add hyperparameters to be optimized.
-# The network architecture optimization is VERY preliminary at the moment.
+# Please not that you have to give specifications by hand for hyperparameters you do not want to optimize.
 ####################
 
 # Add hyperparameters we want to have optimized to the list.
 test_parameters.hyperparameters.hlist.append(OptunaParameter("float", "learning_rate", 0.0000001, 0.01))
-test_parameters.hyperparameters.hlist.append(OptunaParameter("int", "number_of_hidden_neurons", 10, 100))
+
+# We want a network with two layers, so we can just add two parameters for the number for neurons per layer.
+test_parameters.hyperparameters.hlist.append(OptunaParameter("int", "ff_neurons_layer_00", 10, 100))
+test_parameters.hyperparameters.hlist.append(OptunaParameter("int", "ff_neurons_layer_01", 10, 100))
+
+# W also want to optimize the choices for the activation functions at EACH layer. We can do this in a similarly manner.
 test_parameters.hyperparameters.hlist.append(
-    OptunaParameter("categorical", "layer_activations", choices=["ReLU", "Sigmoid"]))
+    OptunaParameter("categorical", "layer_activation_00", choices=["ReLU", "Sigmoid"]))
+test_parameters.hyperparameters.hlist.append(
+    OptunaParameter("categorical", "layer_activation_01", choices=["ReLU", "Sigmoid"]))
+test_parameters.hyperparameters.hlist.append(
+    OptunaParameter("categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"]))
 
 # Perform hyperparameter optimization.
 print("Starting Hyperparameter optimization.")
 test_hp_optimizer = HyperparameterOptimizer(test_parameters)
 test_hp_optimizer.perform_study(data_handler)
+test_hp_optimizer.set_optimal_parameters()
 print("Hyperparameter optimization: DONE.")
 
 print("Successfully ran ex2_hyperparameter_optimization.py.")
