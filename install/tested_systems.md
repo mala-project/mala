@@ -1,8 +1,16 @@
 # Successfully tested on
 
-## Pop!_OS
-
+## Personal machines 
+### Pop!_OS
 * Version: 20.10
+* Using pip
 
-## Ubuntu
+### Ubuntu
+* Version: 20.10
+* Using pip
+
+### macOS
+* *Add Attilas setup here*
+
+## HPC clusters
 

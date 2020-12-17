@@ -21,24 +21,31 @@ class Network(nn.Module):
         # initialize the layers
         self.number_of_layers = len(self.params.layer_sizes) - 1
         self.layers = nn.ModuleList()
-        if (self.params.nn_type == "feed-forward"):
+
+        # TODO: Deconvolute this into their own classes.
+        if self.params.nn_type == "feed-forward":
             self.initialize_as_feedforward()
         else:
             raise Exception("Unsupported network architecture.")
 
         # initialize the loss function
-        if (self.params.loss_function_type == "mse"):
+        if self.params.loss_function_type == "mse":
             self.loss_func = F.mse_loss
         else:
             raise Exception("Unsupported loss function.")
 
     def initialize_as_feedforward(self):
-        # Check if multiple types of activations were selected or only one was passed to be used in the entire network.
+        # Check if multiple types of activations were selected or only one was passed to be used in the entire network.#
+        # If multiple layers have been passed, their size needs to be correct.
+
         use_only_one_activation_type = False
         if len(self.params.layer_activations) == 1:
             use_only_one_activation_type = True
         elif len(self.params.layer_activations) < self.number_of_layers:
             raise Exception("Not enough activation layers provided.")
+
+        # Add the layers.
+        # As this is a feedforward layer we always add linear layers, and then an activation function
         for i in range(0, self.number_of_layers):
             self.layers.append((nn.Linear(self.params.layer_sizes[i], self.params.layer_sizes[i + 1])))
             try:
@@ -50,6 +57,8 @@ class Network(nn.Module):
                 raise Exception("Invalid activation type seleceted.")
 
     def forward(self, inputs):
+
+        # Forward propagate data.
         if self.params.nn_type == "feed-forward":
             for layer in self.layers:
                 inputs = layer(inputs)
