@@ -100,8 +100,10 @@ class HandlerBase:
         Performs a snapshot->pytorch tensor conversion, if necessary.
         """
         if self.parameters.data_splitting_type == "random":
-            self.snapshot_to_tensor()
+            self.raw_to_tensor()
             self.split_data_randomly()
+        elif self.parameters.data_splitting_type == "by_snapshot":
+            self.split_data_by_snapshot()
         else:
             raise Exception("Wrong parameter for data splitting provided.")
 
@@ -142,9 +144,88 @@ class HandlerBase:
         self.validation_data_outputs = torch.from_numpy(self.raw_output[index1:index2]).float()
         self.test_data_outputs = torch.from_numpy(self.raw_output[index2:]).float()
 
-    # def split_data_by_snapshot(self):
-    #     """This function splits the data by snapshot i.e. a certain number of snapshots is training,
-    #     validation and testing. So far this works rather crudely by using"""
+    def split_data_by_snapshot(self):
+        """This function splits the data by snapshot i.e. a certain number of snapshots is training,
+        validation and testing."""
+
+        # First, we need to find out how many snapshots we have for training, validation and testing.
+        self.nr_training_data = 0
+        self.nr_validation_data = 0
+        self.nr_test_data = 0
+
+        for snapshot_function in self.parameters.data_splitting_snapshots:
+            if snapshot_function == "tr":
+                self.nr_training_data += 1
+            elif snapshot_function == "te":
+                self.nr_test_data += 1
+            elif snapshot_function == "va":
+                self.nr_validation_data += 1
+            else:
+                raise Exception("Unknown option for snapshot splitting selected.")
+
+        # Now we need to check whether or not this input is believable.
+        nr_of_snapshots = len(self.parameters.snapshot_directories_list)
+        if nr_of_snapshots != (self.nr_training_data+self.nr_validation_data+self.nr_test_data):
+            raise Exception("Cannot split snapshots with specified splitting scheme, "
+                            "too few or too many options selected")
+        if self.nr_training_data == 0:
+            raise Exception("No training snapshots provided.")
+        if self.nr_validation_data == 0:
+            raise Exception("No validation snapshots provided.")
+        if self.nr_test_data == 0:
+            raise Exception("No testing snapshots provided.")
+
+        # Prepare temporary arrays for training, test and validation data
+
+        tmp_training_in = np.zeros((self.nr_training_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_input_dimension()), dtype=np.float32)
+        tmp_validation_in = np.zeros((self.nr_validation_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_input_dimension()), dtype=np.float32)
+        tmp_test_in = np.zeros((self.nr_test_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_input_dimension()), dtype=np.float32)
+
+        tmp_training_out = np.zeros((self.nr_training_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_output_dimension()), dtype=np.float32)
+        tmp_validation_out = np.zeros((self.nr_validation_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_output_dimension()), dtype=np.float32)
+        tmp_test_out = np.zeros((self.nr_test_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_output_dimension()), dtype=np.float32)
+
+        # Iterate through list that commands the splitting.
+        counter_training = 0
+        counter_validation = 0
+        counter_testing = 0
+        for i in range(0, nr_of_snapshots):
+            snapshot_function = self.parameters.data_splitting_snapshots[i]
+            if snapshot_function == "tr":
+                tmp_training_in[counter_training, :, :, :, :] = self.raw_input[i, :, :, :, :]
+                tmp_training_out[counter_training, :, :, :, :] = self.raw_output[i, :, :, :, :]
+                counter_training += 1
+            if snapshot_function == "va":
+                tmp_validation_in[counter_validation, :, :, :, :] = self.raw_input[i, :, :, :, :]
+                tmp_validation_out[counter_validation, :, :, :, :] = self.raw_output[i, :, :, :, :]
+                counter_validation += 1
+            if snapshot_function == "te":
+                tmp_test_in[counter_testing, :, :, :, :] = self.raw_input[i, :, :, :, :]
+                tmp_test_out[counter_testing, :, :, :, :] = self.raw_output[i, :, :, :, :]
+                counter_testing += 1
+
+        # Get the actual data count.
+        gridsize = self.grid_dimension[0] * self.grid_dimension[1] *  self.grid_dimension[2]
+        self.nr_training_data = gridsize * self.nr_training_data
+        self.nr_validation_data = gridsize * self.nr_validation_data
+        self.nr_test_data = gridsize * self.nr_test_data
+
+        # Reshape the temporary arrays.
+        tmp_training_in = tmp_training_in.reshape([self.nr_training_data, self.get_input_dimension()])
+        tmp_validation_in = tmp_validation_in.reshape([self.nr_validation_data, self.get_input_dimension()])
+        tmp_test_in = tmp_test_in.reshape([self.nr_test_data, self.get_input_dimension()])
+
+        tmp_training_out = tmp_training_out.reshape([self.nr_training_data, self.get_output_dimension()])
+        tmp_validation_out = tmp_validation_out.reshape([self.nr_validation_data, self.get_output_dimension()])
+        tmp_test_out = tmp_test_out.reshape([self.nr_test_data, self.get_output_dimension()])
+
+        # Create the tensors.
+        self.training_data_inputs = torch.from_numpy(tmp_training_in).float()
+        self.validation_data_inputs = torch.from_numpy(tmp_validation_in).float()
+        self.test_data_inputs = torch.from_numpy(tmp_test_in).float()
+        self.training_data_outputs = torch.from_numpy(tmp_training_out).float()
+        self.validation_data_outputs = torch.from_numpy(tmp_validation_out).float()
+        self.test_data_outputs = torch.from_numpy(tmp_test_out).float()
 
     def build_datasets(self):
         """Takes the normalized training, test and validation data and builds data sets with them."""
@@ -152,7 +233,7 @@ class HandlerBase:
         self.validation_data_set = TensorDataset(self.validation_data_inputs, self.validation_data_outputs)
         self.test_data_set = TensorDataset(self.test_data_inputs, self.test_data_outputs)
 
-    def snapshot_to_tensor(self):
+    def raw_to_tensor(self):
         """Transforms snapshot data from
         number_of_snapshots x gridx x gridy x gridz x feature_length
          to

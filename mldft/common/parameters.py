@@ -104,14 +104,19 @@ class ParametersData(ParametersBase):
         """Specify how the data for validation, test and training is splitted.
         Currently implemented:
             - random: split the data randomly, ignore snapshot boundaries.
+            - by_snapshot: split the data by snapshot boundaries.
         """
         self.data_splitting_percent = [0,0,0]
         """
         Details how much of the data is used for training, validation and testing [%].
         """
-        self.data_splitting_snapshots = [0,0,0]
+        self.data_splitting_snapshots = ["te", "te", "te"]
         """
-        Details how much of the data is used for training, validation and testing [#snapshots].
+        Details how (and which!) snapshots are used for what [#snapshots]:
+            - te: This snapshot will be a testing snapshot.
+            - tr: This snapshot will be a training snapshot.
+            - va: This snapshot will be a validation snapshot.
+        Please note that the length of this list and the number of snapshots must be identical.
         """
         self.input_rescaling_type = "None"
         """

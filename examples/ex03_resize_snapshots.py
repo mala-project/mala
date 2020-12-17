@@ -55,3 +55,4 @@ print("Read data: DONE.")
 data_handler.save_loaded_data(directory="/home/fiedlerl/data/test_fp_snap/2.699gcc/", filetype="*.npy",
                               naming_scheme_input="Al_debug_2k_nr*.in", naming_scheme_output="Al_debug_2k_nr*.out")
 print("Write data: DONE.")
+print("Successfully ran ex03_run_singleshot.py.")
