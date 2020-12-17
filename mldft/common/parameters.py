@@ -146,12 +146,38 @@ class ParametersTraining(ParametersBase):
     def __init__(self):
         super(ParametersTraining, self).__init__()
         self.trainingtype = "SGD"
-        """Training type to be used."""
+        """Training type to be used. Options at the moment:
+            - SGD: Stochastic gradient descent.
+            - Adam: Adam Optimization Algorithm 
+        """
         self.learning_rate = 0.5
+        """
+        Learning rate for chosen optimization algorithm.
+        """
         self.max_number_epochs = 100
+        """
+        Maximum number of epochs we train for.
+        """
         # TODO: Find a better system for verbosity. Maybe a number.
         self.verbosity = True
+        """
+        Determines if training output is shown during training.
+        """
         self.mini_batch_size = 10
+        """
+        Size of the mini batch for the optimization algorihm.
+        """
+        self.early_stopping_epochs = 0
+        """
+        Number of epochs the validation accuracy is allowed to not improve by at leastearly_stopping_threshold, before we
+        terminate. If 0, no early stopping is performed.
+        """
+        self.early_stopping_threshold = 0
+        """
+        If the validation accuracy does not improve by at least threshold for early_stopping_epochs epochs, training
+        is terminated:
+        validation_loss < validation_loss_old * (1+early_stopping_threshold), or patience counter will go up.
+        """
 
 
 class ParametersHyperparameterOptinization(ParametersBase):

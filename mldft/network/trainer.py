@@ -31,20 +31,34 @@ class Trainer:
         test_data_loader = DataLoader(data.test_data_set, batch_size=self.parameters.mini_batch_size * 1)
 
         # Calculate initial loss.
-        if self.parameters.verbosity == True:
-            vloss = self.validate_network(network, validation_data_loader)
+        vloss = self.validate_network(network, validation_data_loader)
+        tloss = self.validate_network(network, test_data_loader)
+        if self.parameters.verbosity:
             print("Initial Guess - validation data loss: ", vloss)
-            tloss = self.validate_network(network, test_data_loader)
             print("Initial Guess - test data loss: ", tloss)
 
         # Perform and log training.
+        patience_counter = 0
+        vloss_old = vloss
         for epoch in range(self.parameters.max_number_epochs):
             network.train()
             for inputs, outputs in training_data_loader:
                 self.process_mini_batch(network, optimizer, inputs, outputs)
-            if self.parameters.verbosity == True:
-                vloss = self.validate_network(network, validation_data_loader)
+            vloss = self.validate_network(network, validation_data_loader)
+            if self.parameters.verbosity:
                 print("Epoch: ", epoch, "validation data loss: ", vloss)
+            if self.parameters.early_stopping_epochs > 0:
+                if vloss < vloss_old * (1.0 + self.parameters.early_stopping_threshold):
+                    patience_counter = 0
+                    vloss_old = vloss
+                else:
+                    patience_counter += 1
+                    print("Validation accuracy has not improved enough.")
+                    if patience_counter >= self.parameters.early_stopping_epochs:
+                        if self.parameters.verbosity:
+                            print("Stopping the training, validation accuracy has not improved for", patience_counter,
+                                  "epochs.")
+                        break
 
         # Calculate final loss.
         tloss = self.validate_network(network, test_data_loader)
