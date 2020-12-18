@@ -22,7 +22,6 @@ class ObjectiveFeedForward(ObjectiveBase):
 
     def __call__(self, trial: Trial):
         # parse hyperparameter list.
-        print(self.optimize_layer_list, self.optimize_activation_list)
         if self.optimize_layer_list:
             self.params.network.layer_sizes = [self.data_handler.get_input_dimension()]
         if self.optimize_activation_list:

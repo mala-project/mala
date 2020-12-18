@@ -10,7 +10,7 @@ ex00_verify_installation.py: This example confirms whether or not your setup is 
 """
 
 print("Welcome to FESL.")
-print("Running ex0_verify_installation.py")
+print("Running ex00_verify_installation.py")
 
 test_parameters = Parameters()
 test_descriptors = DescriptorInterface(test_parameters)
