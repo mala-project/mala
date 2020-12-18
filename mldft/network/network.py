@@ -16,6 +16,7 @@ class Network(nn.Module):
         self.activation_mappings = {
             "Sigmoid": nn.Sigmoid,
             "ReLU": nn.ReLU,
+            "LeakyReLU": nn.LeakyReLU
         }
 
         # initialize the layers

@@ -16,11 +16,23 @@ class ParametersNetwork(ParametersBase):
     def __init__(self):
         super(ParametersNetwork, self).__init__()
         self.nn_type = "feed-forward"
-        self.layer_sizes = [10,10,10]
-        """Includes the input layer, although no activation is applied to it."""
+        """
+        Type of neural network. Supported types are:
+            - feed-forward.
+        """
+        self.layer_sizes = [10, 10, 10]
+        """
+        Includes the input layer, although no activation is applied to it.
+        """
         self.layer_activations = ["Sigmoid"]
-        """If the dimension of layer_activations is smaller than the dimension of
-        layer_sizes-1, than the first entry is used for all layers."""
+        """
+        If the dimension of layer_activations is smaller than the dimension of
+        layer_sizes-1, than the first entry is used for all layers.
+        Supported activation functions are: 
+            - Sigmoid
+            - ReLU
+            - LeakyReLU
+        """
         self.loss_function_type = "mse"
 
 
