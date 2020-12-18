@@ -7,3 +7,6 @@ class TargetBase:
 
     def read_from_cube(self):
         raise Exception("No function defined to read this quantity from a .cube file.")
+
+    def get_density(self):
+        raise Exception("No function to calculate or provide the density has been implemented for this target type.")

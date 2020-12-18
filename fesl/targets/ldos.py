@@ -1,10 +1,13 @@
 from .cube_parser import read_cube
 from .target_base import TargetBase
+import numpy as np
 import math
 
 
 class LDOS(TargetBase):
-    """Local density of states."""
+    """Local density of states.
+    Evaluation follow the outline and code provided in/by https://arxiv.org/abs/2010.04905.
+    """
     def __init__(self, p):
         super(LDOS, self).__init__(p)
         self.target_length = self.parameters.ldos_gridsize
@@ -39,15 +42,41 @@ class LDOS(TargetBase):
         # print(ldosfilelist)
 
     def calculate_energy(self, ldos_data):
-        """Calculates the total energy from given ldos_data. The ldos_data is expected to have the form
-        gridpoints x energygrid.
-        The evaluation follows the outline and code provided by https://arxiv.org/abs/2010.04905.
+        """Calculates the total energy from given ldos_data. The ldos_data can either
+        have the form
 
-        In this, the total energy is calculated as:
+        gridpoints x energygrid
+
+        or
+
+        gridx x gridy x gridz x energygrid.
+        The total energy is calculated as:
 
         E_tot[D](R) = E_b[D] - S_s[D]/beta - U[D] + E_xc[D]-V_xc[D]+V^ii(R)
         """
 
-        # Calculate beta.
+    def get_density(self, ldos_data):
+        """Calculates the electronic density. from given ldos_data. The ldos_data can either
+        have the form
+
+        gridpoints x energygrid
+
+        or
+
+        gridx x gridy x gridz x energygrid.
+        """
+
+        if len(np.shape(ldos_data)) == 2:
+            # We have the LDOS as gridpoints x energygrid, so no further operation is necessary.
+            pass
+        elif len(np.shape(ldos_data)) == 4:
+            # We have the LDOS as gridx x gridy x gridz x energygrid, so some reshaping needs to be done.
+            ldos_data.reshape([np.shape(ldos_data)[0]*np.shape(ldos_data)[1]*np.shape(ldos_data)[2],
+                               np.shape(ldos_data)[3]])
+            # We now have the LDOS as gridpoints x energygrid.
+
+        else:
+            raise Exception("Invalid LDOS array shape.")
+
 
 
