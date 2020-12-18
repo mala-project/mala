@@ -71,6 +71,18 @@ class ParametersTargets(ParametersBase):
         """
         Number of points in the energy grid that is used to calculate the LDOS.
         """
+        self.ldos_gridspacing_ev = 0.1
+        """
+        Gridspacing of the energy grid the LDOS is evaluated on [eV].
+        """
+        self.ldos_gridoffset_ev = -10
+        """
+        Lowest energy value on the LDOS energy grid [eV].
+        """
+        self.electronic_temperature_K = 298
+        """
+        Electronic temperature, at which this LDOS data has been generated / Will be approximated [K].
+        """
 
 
 # noinspection PyMissingConstructor

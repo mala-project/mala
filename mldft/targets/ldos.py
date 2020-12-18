@@ -1,6 +1,5 @@
 from .cube_parser import read_cube
 from .target_base import TargetBase
-import glob
 import math
 
 
@@ -38,3 +37,17 @@ class LDOS(TargetBase):
         # print(dir+file_name_scheme)
         # ldosfilelist = glob.glob(dir+file_name_scheme)
         # print(ldosfilelist)
+
+    def calculate_energy(self, ldos_data):
+        """Calculates the total energy from given ldos_data. The ldos_data is expected to have the form
+        gridpoints x energygrid.
+        The evaluation follows the outline and code provided by https://arxiv.org/abs/2010.04905.
+
+        In this, the total energy is calculated as:
+
+        E_tot[D](R) = E_b[D] - S_s[D]/beta - U[D] + E_xc[D]-V_xc[D]+V^ii(R)
+        """
+
+        # Calculate beta.
+
+
