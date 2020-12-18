@@ -1,13 +1,13 @@
-from mldft.common.parameters import Parameters
-from mldft.datahandling.handler_interface import HandlerInterface
-from mldft.network.hyperparameter_optimizer import HyperparameterOptimizer
-from mldft.network.optuna_parameter import OptunaParameter
+from fesl.common.parameters import Parameters
+from fesl.datahandling.handler_interface import HandlerInterface
+from fesl.network.hyperparameter_optimizer import HyperparameterOptimizer
+from fesl.network.optuna_parameter import OptunaParameter
 
 """
 ex02_hyperparameter_optimization.py: Shows how a hyperparameter optimization can be done using this framework.
 """
 
-print("Welcome to ML-DFT@CASUS.")
+print("Welcome to FESL.")
 print("Running ex02_hyperparameter_optimization.py")
 
 ####################

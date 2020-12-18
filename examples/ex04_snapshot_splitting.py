@@ -1,13 +1,13 @@
-from mldft.common.parameters import Parameters
-from mldft.datahandling.handler_interface import HandlerInterface
-from mldft.network.network import Network
-from mldft.network.trainer import Trainer
+from fesl.common.parameters import Parameters
+from fesl.datahandling.handler_interface import HandlerInterface
+from fesl.network.network import Network
+from fesl.network.trainer import Trainer
 
 """
 ex04_snapshot_splitting.py: Shows a more intiutive way of splitting up the data, i.e. snapshot splitting.
 """
 
-print("Welcome to ML-DFT@CASUS.")
+print("Welcome to FESL.")
 print("Running ex04_snapshot_splitting.py")
 
 ####################
