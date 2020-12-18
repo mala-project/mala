@@ -1,14 +1,14 @@
-from mldft.common.parameters import Parameters
-from mldft.datahandling.handler_interface import HandlerInterface
-from mldft.network.network import Network
-from mldft.network.trainer import Trainer
+from fesl.common.parameters import Parameters
+from fesl.datahandling.handler_interface import HandlerInterface
+from fesl.network.network import Network
+from fesl.network.trainer import Trainer
 
 """
 ex01_run_singleshot.py: Shows how a neural network can be trained on material data using this framework.
 It uses preprocessed data, that is read in from *.npy files.
 """
 
-print("Welcome to ML-DFT@CASUS.")
+print("Welcome to FESL.")
 print("Running ex01_run_singleshot.py")
 
 ####################

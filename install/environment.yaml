@@ -1,4 +1,4 @@
-name: ml-dft-casus
+name: fesl
 channels:
   - defaults
   - conda-forge

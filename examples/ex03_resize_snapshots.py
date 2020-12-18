@@ -1,12 +1,12 @@
-from mldft.common.parameters import Parameters
-from mldft.datahandling.handler_interface import HandlerInterface
+from fesl.common.parameters import Parameters
+from fesl.datahandling.handler_interface import HandlerInterface
 
 """
 ex03_run_singleshot.py: Demonstrate the file saving capabilites of a data loader to resize a snapshot for debugging
 purposes.
 """
 
-print("Welcome to ML-DFT@CASUS.")
+print("Welcome to FESL.")
 print("Running ex03_run_singleshot.py")
 
 ####################
