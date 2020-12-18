@@ -167,6 +167,10 @@ class ParametersTraining(ParametersBase):
         """
         Size of the mini batch for the optimization algorihm.
         """
+        self.weight_decay = 0
+        """
+        Weight decay for regularization. Always refers to L2 regularization.
+        """
         self.early_stopping_epochs = 0
         """
         Number of epochs the validation accuracy is allowed to not improve by at leastearly_stopping_threshold, before we

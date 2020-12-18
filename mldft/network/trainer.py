@@ -21,9 +21,11 @@ class Trainer:
 
         # Choose an optimizer to use.
         if self.parameters.trainingtype == "SGD":
-            self.optimizer = optim.SGD(network.parameters(), lr=self.parameters.learning_rate)
+            self.optimizer = optim.SGD(network.parameters(), lr=self.parameters.learning_rate,
+                                       weight_decay=self.parameters.weight_decay)
         elif self.parameters.trainingtype == "Adam":
-            self.optimizer = optim.Adam(network.parameters(), lr=self.parameters.learning_rate)
+            self.optimizer = optim.Adam(network.parameters(), lr=self.parameters.learning_rate,
+                                        weight_decay=self.parameters.weight_decay)
         else:
             raise Exception("Unsupported training method.")
 
