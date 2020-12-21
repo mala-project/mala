@@ -1,0 +1,28 @@
+import numpy as np
+from ase.units import kB
+
+
+def fermi_function(energy, fermi_energy, temperature_K, energy_units="eV"):
+    """
+    Calculates the fermi function
+    f(E) = 1 / (1 + e^((E-E_F)/(k_B*T)))
+    Input quantities:
+        - energy_units: Currently supported: "eV"
+        - energy: Energy for which the Fermi function is supposed to be calculated in energy_units
+        - fermi_energy: Fermi energy level in energy_units
+        - temperature_K: Temperature in K
+    """
+    if energy_units == "eV":
+        return fermi_function_eV(energy, fermi_energy, temperature_K)
+
+
+def fermi_function_eV(energy_ev, fermi_energy_ev, temperature_K):
+    """
+    Calculates the fermi function
+    f(E) = 1 / (1 + e^((E-E_F)/(k_B*T)))
+    Input quantities:
+        - energy_ev: Energy for which the Fermi function is supposed to be calculated in eV
+        - fermi_energy_ev: Fermi energy level in eV
+        - temperature_K: Temperature in K
+    """
+    return 1.0 / (1.0 + np.exp((energy_ev - fermi_energy_ev) / (kB * temperature_K)))

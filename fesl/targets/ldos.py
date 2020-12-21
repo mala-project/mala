@@ -1,5 +1,6 @@
 from .cube_parser import read_cube
 from .target_base import TargetBase
+from .calculation_helpers import fermi_function
 import numpy as np
 import math
 
@@ -55,15 +56,15 @@ class LDOS(TargetBase):
         E_tot[D](R) = E_b[D] - S_s[D]/beta - U[D] + E_xc[D]-V_xc[D]+V^ii(R)
         """
 
-    def get_density(self, ldos_data):
-        """Calculates the electronic density. from given ldos_data. The ldos_data can either
-        have the form
-
-        gridpoints x energygrid
-
-        or
-
-        gridx x gridy x gridz x energygrid.
+    def get_density(self, ldos_data, fermi_energy_ev, temperature_K):
+        """Calculates the electronic density, from given ldos_data.
+        Input variables:
+            - ldos_data - can either have the form
+                    gridpoints x energygrid
+                            or
+                    gridx x gridy x gridz x energygrid.
+            - fermi_energy_ev: Fermi energy for the system for which this LDOS data was calculated in eV
+            - temperature_K: Temperature of system in K
         """
 
         if len(np.shape(ldos_data)) == 2:
@@ -78,5 +79,10 @@ class LDOS(TargetBase):
         else:
             raise Exception("Invalid LDOS array shape.")
 
-
+        emin = self.parameters.ldos_gridoffset_ev
+        emax = self.parameters.ldos_gridsize*self.parameters.ldos_gridspacing_ev+self.parameters.ldos_gridoffset_ev
+        nr_elvls = self.parameters.ldos_gridsize
+        energy_values = np.linspace(emin, emax, nr_elvls)
+        fermi_values = fermi_function(energy_values, fermi_energy_ev, temperature_K, energy_units="eV")
+        print(fermi_values)
 
