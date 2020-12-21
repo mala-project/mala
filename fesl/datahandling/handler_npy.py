@@ -24,7 +24,7 @@ class HandlerNpy(HandlerBase):
         """Loads the data from saved numpy arrays into RAM"""
 
         # determine number of snapshots.
-        nr_of_snapshots = len(self.parameters.snapshot_directories_list)
+        self.nr_snapshots = len(self.parameters.snapshot_directories_list)
 
         # Read the snapshots into RAM.
         firstsnapshot = True
@@ -57,7 +57,7 @@ class HandlerNpy(HandlerBase):
                     raise Exception("Invalid snapshot entered at ", snapshot[0])
 
             # Now the snapshot input can be added.
-            self.raw_input.append(tmp)
+            self.raw_input_grid.append(tmp)
 
             ####################
             # Targets.
@@ -81,22 +81,31 @@ class HandlerNpy(HandlerBase):
                 raise Exception("Invalid snapshot entered at ", snapshot[2])
 
             # Now the snapshot output can be added.
-            self.raw_output.append(tmp_out)
+            self.raw_output_grid.append(tmp_out)
 
             if firstsnapshot:
                 firstsnapshot = False
 
-        self.raw_input = np.array(self.raw_input)
-        self.raw_output = np.array(self.raw_output)
+        self.grid_size = self.grid_dimension[0] * self.grid_dimension[1] * self.grid_dimension[2]
 
-        # At this point, the snapshots are saved as an array of the dimension
-        # number_of_snapshots x gridx x gridy x gridz x feature_length
+        self.raw_input_grid = np.array(self.raw_input_grid)
+        self.raw_output_grid = np.array(self.raw_output_grid)
+
+        # Before doing anything with the data, we make sure it's float32.
+        # Elsewise Pytorch will copy, not reference our data.
+        self.raw_input_grid = self.raw_input_grid.astype(np.float32)
+        self.raw_output_grid = self.raw_output_grid.astype(np.float32)
+
+        # Reshape from grid to datasize..
+
+        self.grid_to_datasize()
+
 
     def load_from_npy_file(self, file, mmapmode=None):
         loaded_array = np.load(file, mmap_mode=mmapmode)
         if len(self.dbg_grid_dimensions) == 3:
             try:
-                return loaded_array[0:self.dbg_grid_dimensions[0], 0:self.dbg_grid_dimensions[1],0:self.dbg_grid_dimensions[2], :]
+                return loaded_array[0:self.dbg_grid_dimensions[0], 0:self.dbg_grid_dimensions[1], 0:self.dbg_grid_dimensions[2], :]
             except:
                 print(
                     "Could not use grid reduction, falling back to regular grid. Please check that the debug grid is "

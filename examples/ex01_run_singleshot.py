@@ -18,6 +18,7 @@ print("Running ex01_run_singleshot.py")
 test_parameters = Parameters()
 test_parameters.data.datatype_in = "*.npy"
 test_parameters.data.datatype_out = "*.npy"
+test_parameters.data.data_splitting_type = "random"
 test_parameters.data.data_splitting_percent = [80, 10, 10]
 test_parameters.data.input_rescaling_type = "feature-wise-standard"
 test_parameters.data.output_rescaling_type = "normal"

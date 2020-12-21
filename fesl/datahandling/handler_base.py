@@ -8,9 +8,44 @@ class HandlerBase:
 
     def __init__(self, p, input_data_scaler, output_data_scaler):
         self.parameters = p.data
-        self.raw_input = []
-        self.raw_output = []
+        self.raw_input_grid = []
+        """
+        Input data (descriptors) in the form of 
+        
+        number_of_snapshots x gridx x gridy x gridz x feature_length.
+        
+        This array might be empty - depending on the form of input parser that is used.
+        It will always have the datatype np.float32.
+        """
+        self.raw_output_grid = []
+        """
+        Output data (targets) in the form of 
 
+        number_of_snapshots x gridx x gridy x gridz x feature_length.
+
+        This array might be empty - depending on the form of output parser that is used.
+        It will always have the datatype np.float32.
+        """
+        self.raw_input_datasize = np.zeros(1, dtype=np.float32)
+        """
+        Input data (descriptors) in the form of 
+
+        number_of_snapshots x (gridx x gridy x gridz) x feature_length.
+
+        This array will always have data after load_data, either because the data was directly read into it or 
+        because it was reshaped.
+        It will always have the datatype np.float32.
+        """
+        self.raw_output_datasize = np.zeros(1, dtype=np.float32)
+        """
+        Output data (targets) in the form of 
+
+        number_of_snapshots x (gridx x gridy x gridz) x feature_length.
+
+        This array will always have data after load_data, either because the data was directly read into it or 
+        because it was reshaped.
+        It will always have the datatype np.float32.
+        """
         self.training_data_inputs = torch.empty(0)
         self.validation_data_inputs = torch.empty(0)
         self.test_data_inputs = torch.empty(0)
@@ -23,15 +58,23 @@ class HandlerBase:
         self.validation_data_set = torch.empty(0)
         self.test_data_set = torch.empty(0)
 
+        self.nr_snapshots = 0
         self.nr_training_data = 0
         self.nr_test_data = 0
         self.nr_validation_data = 0
         self.grid_dimension = np.array([0, 0, 0])
+        self.grid_size = 0
         self.input_data_scaler = input_data_scaler
         self.output_data_scaler = output_data_scaler
 
     def load_data(self):
-        """Loads data from the specified directory."""
+        """Loads data from the specified directory.
+        The way this is done is provided by the base classes. At the end of load_data raw_input_datasize
+        and raw_output_datasize have exist with the dimensions
+
+        number_of_snapshots x (gridx x gridy x gridz) x feature_length.
+
+        """
         raise Exception("load_data not implemented.")
 
     def prepare_data(self):
@@ -46,11 +89,6 @@ class HandlerBase:
         # tensors of dimension (number_of_points,feature_length) until AFTER we have
         # split it, and normalization is more convenient after this conversion.
 
-        # Before doing anything with the data, we make sure it's float32.
-        # Elsewise Pytorch will copy, not reference our data.
-        self.raw_input = self.raw_input.astype(np.float32)
-        self.raw_output = self.raw_output.astype(np.float32)
-
         # Split from raw numpy arrays into three/six pytorch tensors.
         self.split_data()
 
@@ -61,24 +99,31 @@ class HandlerBase:
         self.build_datasets()
 
     def save_loaded_data(self, directory=".", naming_scheme_input="snapshot_*_1.in",
-                         naming_scheme_output="snapshot_*_1.out", filetype="*.npy"):
+                         naming_scheme_output="snapshot_*_1.out", filetype="*.npy", raw_data_kind="grid"):
         """Saves the loaded snapshots. This fucntion will behave VERY unexpected after prepare data has been called."""
 
+        if raw_data_kind != "grid" and raw_data_kind != "datasize":
+            raise Exception("Invalid raw data kind requested, could not save raw data.")
+
         # Inputs.
-        nr_snapshots_inputs = np.shape(self.raw_input)[0]
-        print("Saving ", nr_snapshots_inputs, " snapshot inputs at", directory)
-        for i in range(0, nr_snapshots_inputs):
+        print("Saving ", self.nr_snapshots, " snapshot inputs at", directory)
+        for i in range(0, self.nr_snapshots):
             if filetype == "*.npy":
                 save_path = directory+naming_scheme_input.replace("*", str(i))
-                np.save(save_path, self.raw_input[i], allow_pickle=True)
+                if raw_data_kind == "grid":
+                    np.save(save_path, self.raw_input_grid[i], allow_pickle=True)
+                if raw_data_kind == "datasize":
+                    np.save(save_path, self.raw_input_datasize[i], allow_pickle=True)
 
         # Outputs.
-        nr_snapshots_outputs = np.shape(self.raw_output)[0]
-        print("Saving ", nr_snapshots_outputs, " snapshot outputs at", directory)
-        for i in range(0, nr_snapshots_outputs):
+        print("Saving ", self.nr_snapshots, " snapshot outputs at", directory)
+        for i in range(0, self.nr_snapshots):
             if filetype == "*.npy":
                 save_path = directory+naming_scheme_output.replace("*", str(i))
-                np.save(save_path, self.raw_output[i], allow_pickle=True)
+                if raw_data_kind == "grid":
+                    np.save(save_path, self.raw_output_grid[i], allow_pickle=True)
+                if raw_data_kind == "datasize":
+                    np.save(save_path, self.raw_output_datasize[i], allow_pickle=True)
 
     def save_prepared_data(self):
         """Saves the data after it was altered/preprocessed by the ML workflow. E.g. SNAP descriptor calculation."""
@@ -100,7 +145,6 @@ class HandlerBase:
         Performs a snapshot->pytorch tensor conversion, if necessary.
         """
         if self.parameters.data_splitting_type == "random":
-            self.raw_to_tensor()
             self.split_data_randomly()
         elif self.parameters.data_splitting_type == "by_snapshot":
             self.split_data_by_snapshot()
@@ -112,24 +156,23 @@ class HandlerBase:
         of the data are used as test, validation and training data. This can lead
         to errors, since we do not enforce equal representation of certain clusters."""
 
-        np.random.shuffle(self.raw_input)
-        np.random.shuffle(self.raw_output)
+        tmp_in = self.raw_input_datasize.reshape([self.grid_size*self.nr_snapshots, self.get_input_dimension()])
+        tmp_out = self.raw_output_datasize.reshape(self.grid_size*self.nr_snapshots, self.get_output_dimension())
 
         if sum(self.parameters.data_splitting_percent) != 100:
             raise Exception("Could not split data randomly - will not attempt to use anything but "
                             "100% of provided data.")
 
         # Split data according to parameters.
-        # raw_input and raw_ouput are guaranteed to have the same first dimensions
+        # raw_input and raw_ouput are guaranteed to provide the same first dimensions
         # as they are calculated using the grid and the number of snapshots.
         # We enforce that the grid size is equal in load_data().
-        self.nr_training_data = int(self.parameters.data_splitting_percent[0] / 100 * np.shape(self.raw_input)[0])
-        self.nr_validation_data = int(self.parameters.data_splitting_percent[1] / 100 * np.shape(self.raw_input)[0])
-        self.nr_test_data = int(self.parameters.data_splitting_percent[2] / 100 * np.shape(self.raw_input)[0])
+        self.nr_training_data = int(self.parameters.data_splitting_percent[0] / 100 * np.shape(tmp_in)[0])
+        self.nr_validation_data = int(self.parameters.data_splitting_percent[1] / 100 * np.shape(tmp_in)[0])
+        self.nr_test_data = int(self.parameters.data_splitting_percent[2] / 100 * np.shape(tmp_in)[0])
 
         # We need to make sure that really all of the data is used.
-        missing_data = (self.nr_training_data + self.nr_validation_data + self.nr_test_data) - np.shape(self.raw_input)[
-            0]
+        missing_data = (self.nr_training_data + self.nr_validation_data + self.nr_test_data) - np.shape(tmp_in)[0]
         self.nr_test_data += missing_data
 
         # Determine the indices at which to split.
@@ -137,12 +180,12 @@ class HandlerBase:
         index2 = self.nr_training_data + self.nr_validation_data
 
         # Split the data into three sets, create a tensor for input and output.
-        self.training_data_inputs = torch.from_numpy(self.raw_input[0:index1]).float()
-        self.validation_data_inputs = torch.from_numpy(self.raw_input[index1:index2]).float()
-        self.test_data_inputs = torch.from_numpy(self.raw_input[index2:]).float()
-        self.training_data_outputs = torch.from_numpy(self.raw_output[0:index1]).float()
-        self.validation_data_outputs = torch.from_numpy(self.raw_output[index1:index2]).float()
-        self.test_data_outputs = torch.from_numpy(self.raw_output[index2:]).float()
+        self.training_data_inputs = torch.from_numpy(tmp_in[0:index1]).float()
+        self.validation_data_inputs = torch.from_numpy(tmp_in[index1:index2]).float()
+        self.test_data_inputs = torch.from_numpy(tmp_in[index2:]).float()
+        self.training_data_outputs = torch.from_numpy(tmp_out[0:index1]).float()
+        self.validation_data_outputs = torch.from_numpy(tmp_out[index1:index2]).float()
+        self.test_data_outputs = torch.from_numpy(tmp_out[index2:]).float()
 
     def split_data_by_snapshot(self):
         """This function splits the data by snapshot i.e. a certain number of snapshots is training,
@@ -177,13 +220,13 @@ class HandlerBase:
 
         # Prepare temporary arrays for training, test and validation data
 
-        tmp_training_in = np.zeros((self.nr_training_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_input_dimension()), dtype=np.float32)
-        tmp_validation_in = np.zeros((self.nr_validation_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_input_dimension()), dtype=np.float32)
-        tmp_test_in = np.zeros((self.nr_test_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_input_dimension()), dtype=np.float32)
+        tmp_training_in = np.zeros((self.nr_training_data, self.grid_size, self.get_input_dimension()), dtype=np.float32)
+        tmp_validation_in = np.zeros((self.nr_validation_data, self.grid_size, self.get_input_dimension()), dtype=np.float32)
+        tmp_test_in = np.zeros((self.nr_test_data, self.grid_size, self.get_input_dimension()), dtype=np.float32)
 
-        tmp_training_out = np.zeros((self.nr_training_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_output_dimension()), dtype=np.float32)
-        tmp_validation_out = np.zeros((self.nr_validation_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_output_dimension()), dtype=np.float32)
-        tmp_test_out = np.zeros((self.nr_test_data, self.grid_dimension[0],self.grid_dimension[1],self.grid_dimension[2], self.get_output_dimension()), dtype=np.float32)
+        tmp_training_out = np.zeros((self.nr_training_data, self.grid_size, self.get_output_dimension()), dtype=np.float32)
+        tmp_validation_out = np.zeros((self.nr_validation_data, self.grid_size, self.get_output_dimension()), dtype=np.float32)
+        tmp_test_out = np.zeros((self.nr_test_data, self.grid_size, self.get_output_dimension()), dtype=np.float32)
 
         # Iterate through list that commands the splitting.
         counter_training = 0
@@ -192,16 +235,16 @@ class HandlerBase:
         for i in range(0, nr_of_snapshots):
             snapshot_function = self.parameters.data_splitting_snapshots[i]
             if snapshot_function == "tr":
-                tmp_training_in[counter_training, :, :, :, :] = self.raw_input[i, :, :, :, :]
-                tmp_training_out[counter_training, :, :, :, :] = self.raw_output[i, :, :, :, :]
+                tmp_training_in[counter_training, :, :] = self.raw_input_datasize[i, :, :]
+                tmp_training_out[counter_training, :, :] = self.raw_output_datasize[i, :, :]
                 counter_training += 1
             if snapshot_function == "va":
-                tmp_validation_in[counter_validation, :, :, :, :] = self.raw_input[i, :, :, :, :]
-                tmp_validation_out[counter_validation, :, :, :, :] = self.raw_output[i, :, :, :, :]
+                tmp_validation_in[counter_validation, :, :] = self.raw_input_datasize[i, :, :]
+                tmp_validation_out[counter_validation, :, :] = self.raw_output_datasize[i, :, :]
                 counter_validation += 1
             if snapshot_function == "te":
-                tmp_test_in[counter_testing, :, :, :, :] = self.raw_input[i, :, :, :, :]
-                tmp_test_out[counter_testing, :, :, :, :] = self.raw_output[i, :, :, :, :]
+                tmp_test_in[counter_testing, :, :] = self.raw_input_datasize[i, :, :]
+                tmp_test_out[counter_testing, :, :] = self.raw_output_datasize[i, :, :]
                 counter_testing += 1
 
         # Get the actual data count.
@@ -233,18 +276,6 @@ class HandlerBase:
         self.validation_data_set = TensorDataset(self.validation_data_inputs, self.validation_data_outputs)
         self.test_data_set = TensorDataset(self.test_data_inputs, self.test_data_outputs)
 
-    def raw_to_tensor(self):
-        """Transforms snapshot data from
-        number_of_snapshots x gridx x gridy x gridz x feature_length
-         to
-         (number_of_snapshots x gridx x gridy x gridz) x feature_length.
-        """
-        datacount = \
-            self.grid_dimension[0] * self.grid_dimension[1] * \
-            self.grid_dimension[2] * len(self.parameters.snapshot_directories_list)
-        self.raw_input = self.raw_input.reshape([datacount, self.get_input_dimension()])
-        self.raw_output = self.raw_output.reshape([datacount, self.get_output_dimension()])
-
     def scale_data(self):
         """Scales the data."""
 
@@ -261,3 +292,12 @@ class HandlerBase:
         self.training_data_outputs = self.output_data_scaler.transform(self.training_data_outputs)
         self.validation_data_outputs = self.output_data_scaler.transform(self.validation_data_outputs)
         self.test_data_outputs = self.output_data_scaler.transform(self.test_data_outputs)
+
+    def grid_to_datasize(self):
+        """Transforms snapshot data from
+        number_of_snapshots x gridx x gridy x gridz x feature_length
+         to
+         (number_of_snapshots x gridx x gridy x gridz) x feature_length.
+        """
+        self.raw_input_datasize = self.raw_input_grid.reshape([self.nr_snapshots, self.grid_size, self.get_input_dimension()])
+        self.raw_output_datasize = self.raw_output_grid.reshape([self.nr_snapshots, self.grid_size, self.get_output_dimension()])
