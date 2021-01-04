@@ -37,15 +37,13 @@ import big_data
 # Training settings
 parser = argparse.ArgumentParser(description='FP-LDOS Feedforward Network')
 
-<<<<<<< HEAD
-# Training
+### Training
 parser.add_argument('--feat_start', type=int, default=0, metavar='N',
                     help='starting index for ldos features to use')
 parser.add_argument('--feat_stop', type=int, default=150, metavar='N',
                     help='stopping index for ldos features to use')
-=======
-### Training
->>>>>>> 2c9e33ee970f13e9ab523d368cf1e1f6394fbc19
+
+
 parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
 parser.add_argument('--test-batch-size', type=int, default=64, metavar='N',
