@@ -2,6 +2,7 @@ import numpy as np
 from ase.units import kB
 from scipy import integrate
 
+
 def integrate_values_on_grid(values, grid, axis=0, method="trapz"):
     """
     Integrates values on a given grid, using either the trapezoid or the simpson method.
@@ -18,6 +19,24 @@ def integrate_values_on_grid(values, grid, axis=0, method="trapz"):
         return integrate.simps(values, grid, axis=axis)
     else:
         raise Exception("Unknown integration method.")
+
+
+def integrate_values_on_spacing(values, spacing, axis=0, method="trapz"):
+    """
+    Integrates values assuming a uniform grid with a provided spacing, using either the trapezoid or the simpson method.
+    Input quantities:
+        - values: Values to be integrated.
+        - spacing: Spacing of the grid on which the integration is performed.
+        - axis: Axis along which the integration is performed. Default=0,
+        - method: Integration method to be used, can either be "trapz" for trapezoid or "simps" for Simpson method.
+    """
+    if method == "trapz":
+        return integrate.trapz(values, dx=spacing, axis=axis)
+    elif method == "simps":
+        return integrate.simps(values, dx=spacing, axis=axis)
+    else:
+        raise Exception("Unknown integration method.")
+
 
 def fermi_function(energy, fermi_energy, temperature_K, energy_units="eV"):
     """

@@ -1,6 +1,6 @@
 from .cube_parser import read_cube
 from .target_base import TargetBase
-from .calculation_helpers import fermi_function, integrate_values_on_grid
+from .calculation_helpers import *
 import numpy as np
 import math
 
@@ -12,6 +12,9 @@ class LDOS(TargetBase):
     def __init__(self, p):
         super(LDOS, self).__init__(p)
         self.target_length = self.parameters.ldos_gridsize
+        self.fermi_energy_ev = None
+        self.temperature_K = None
+        self.grid_spacing_Bohr = None
 
     def read_from_cube(self, file_name_scheme, directory):
         """Reads the LDOS data from multiple cube files located in the snapshot directory."""
@@ -56,28 +59,27 @@ class LDOS(TargetBase):
         E_tot[D](R) = E_b[D] - S_s[D]/beta - U[D] + E_xc[D]-V_xc[D]+V^ii(R)
         """
 
-
-    def get_density(self, ldos_data, fermi_energy_ev, temperature_K, conserve_dimensions=False):
+    def get_density(self, ldos_data, fermi_energy_ev, temperature_K, conserve_dimensions=False, integration_method="simps"):
         """Calculates the electronic density, from given ldos_data.
         Input variables:
             - ldos_data - can either have the form
                     gridpoints x energygrid
                             or
                     gridx x gridy x gridz x energygrid.
-            - fermi_energy_ev: Fermi energy for the system for which this LDOS data was calculated in eV
-            - temperature_K: Temperature of system in K
             - conserve_dimensions: If true, gridx x gridy x gridz x energygrid data will be transformed into data
-                of the same dimensions. If false, no such transformation will be done, and the result will be in
-                the shape of gridpoints x energygrid.
+                of dimensions gridx x gridy x gridz. If false, no such transformation will be done, and the result will be in
+                the shape of gridpoints.
+            - integration_method: Integration method to be used, can either be "trapz" for trapezoid or "simps" for Simpson method.
         """
 
         ldos_data_shape = np.shape(ldos_data)
         if len(ldos_data_shape) == 2:
             # We have the LDOS as gridpoints x energygrid, so no further operation is necessary.
+            ldos_data_used = ldos_data
             pass
         elif len(ldos_data_shape) == 4:
             # We have the LDOS as gridx x gridy x gridz x energygrid, so some reshaping needs to be done.
-            ldos_data = ldos_data.reshape([ldos_data_shape[0]*ldos_data_shape[1]*ldos_data_shape[2], ldos_data_shape[3]])
+            ldos_data_used = ldos_data.reshape([ldos_data_shape[0]*ldos_data_shape[1]*ldos_data_shape[2], ldos_data_shape[3]])
             # We now have the LDOS as gridpoints x energygrid.
 
         else:
@@ -92,8 +94,8 @@ class LDOS(TargetBase):
         energy_values = np.linspace(emin, emax, nr_elvls)
         fermi_values = fermi_function(energy_values, fermi_energy_ev, temperature_K, energy_units="eV")
 
-        density_values = integrate_values_on_grid(ldos_data * (energy_values * fermi_values), energy_values, axis=-1,
-                                                  method="simps")
+        density_values = integrate_values_on_grid(ldos_data_used * (energy_values * fermi_values), energy_values, axis=-1,
+                                                  method=integration_method)
 
         if len(ldos_data_shape) == 4 and conserve_dimensions is True:
             ldos_data_shape = list(ldos_data_shape)
@@ -101,4 +103,44 @@ class LDOS(TargetBase):
             density_values = density_values.reshape(ldos_data_shape)
 
         return density_values
+
+
+    def get_density_of_states(self, ldos_data, grid_spacing_bohr, integration_method="simps"):
+        """Calculates the density of states, from given ldos_data.
+        Input variables:
+            - ldos_data - This method can only be called if the LDOS data is presented in the form:
+                    gridx x gridy x gridz x energygrid.
+            - integration_method: Integration method to be used, can either be "trapz" for trapezoid or "simps" for Simpson method.
+        """
+
+        ldos_data_shape = np.shape(ldos_data)
+        if len(ldos_data_shape) != 4:
+            raise Exception("Invalid LDOS array shape (correct: x,y,z,energy)")
+
+        # We have the LDOS as gridx x gridy x gridz x energygrid, no further operation is necessary.
+        dos_values = ldos_data.copy()
+
+        # We integrate along the three axis in space.
+        # If there is only one point in a certain direction we do not integrate, but rather reduce in this direction.
+        # Integration over one point leads to zero.
+
+        # X
+        if ldos_data_shape[0] > 1:
+            dos_values = integrate_values_on_spacing(dos_values, grid_spacing_bohr, axis=0, method=integration_method)
+        else:
+            dos_values = np.reshape(dos_values, (ldos_data_shape[1], ldos_data_shape[2], ldos_data_shape[3]))
+
+        # Y
+        if ldos_data_shape[1] > 1:
+            dos_values = integrate_values_on_spacing(dos_values, grid_spacing_bohr, axis=0, method=integration_method)
+        else:
+            dos_values = np.reshape(dos_values, (ldos_data_shape[2], ldos_data_shape[3]))
+
+        # Z
+        if ldos_data_shape[2] > 1:
+            dos_values = integrate_values_on_spacing(dos_values, grid_spacing_bohr, axis=0, method=integration_method)
+        else:
+            dos_values = np.reshape(dos_values, ldos_data_shape[3])
+
+        return dos_values
 
