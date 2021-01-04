@@ -211,6 +211,10 @@ class ParametersTraining(ParametersBase):
         Patience parameter used in the learning rate schedule (how long the validation loss has to plateau before
         the schedule takes effect).
         """
+        self.use_gpu = False
+        """
+        Controls whether or not a GPU is used for training - provided there is one to use. 
+        """
 
 
 class ParametersHyperparameterOptinization(ParametersBase):
@@ -270,8 +274,10 @@ class Parameters:
     """Parameter class for ML-DFT@CASUS."""
 
     def __init__(self):
-        self.comment = 0
-        '''Comment a used parameter dataset.'''
+        self.comment = ""
+        '''
+        Comment a used parameter dataset.
+        '''
         self.network = ParametersNetwork()
         self.descriptors = ParametersDescriptors()
         self.targets = ParametersTargets()

@@ -15,9 +15,17 @@ class Trainer:
         self.optimizer = None
         self.scheduler = None
         self.network = None
+        self.use_gpu = False
 
     def train_network(self, network, data):
         """Given a network and data, this network is trained on this data."""
+
+        # See if we can and want to work on a GPU.
+        self.use_gpu = torch.cuda.is_available() and self.parameters.use_gpu
+
+        # If we choose to work on a GPU, we need to move the network to this GPU.
+        if self.use_gpu:
+            network.to('cuda')
 
         # Choose an optimizer to use.
         if self.parameters.trainingtype == "SGD":
@@ -65,6 +73,9 @@ class Trainer:
             # Process each mini batch and save the training loss.
             training_loss = 0
             for inputs, outputs in training_data_loader:
+                if self.use_gpu:
+               	        inputs = inputs.to('cuda')
+                        outputs = outputs.to('cuda')
                 training_loss += self.process_mini_batch(network, inputs, outputs)
 
             # Calculate the validation loss.
@@ -105,13 +116,15 @@ class Trainer:
         return loss.item()
 
     # FIXME: This seems inefficient.
-    @staticmethod
-    def validate_network(network, vdl):
+    def validate_network(self, network, vdl):
         network.eval()
         accuracies = []
         validation_loss = 0
         with torch.no_grad():
-            for (x, y) in vdl:
+            for x, y in vdl:
+                if self.use_gpu:
+                        x = x.to('cuda')
+                        y = y.to('cuda')
                 prediction = network(x)
                 validation_loss += network.calculate_loss(prediction, y).item()
                 # accuracies.append(network.classification_accuracy(prediction, y))
