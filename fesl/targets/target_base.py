@@ -13,3 +13,6 @@ class TargetBase:
 
     def get_density_of_states(self):
         raise Exception("No function to calculate or provide the density of states (DOS) has been implemented for this target type.")
+
+    def get_band_energy(self):
+        raise Exception("No function to calculate or provide the band energy has been implemented for this target type.")

@@ -1,6 +1,7 @@
 from .cube_parser import read_cube
 from .target_base import TargetBase
 from .calculation_helpers import *
+from .dos import DOS
 import numpy as np
 import math
 
@@ -12,9 +13,6 @@ class LDOS(TargetBase):
     def __init__(self, p):
         super(LDOS, self).__init__(p)
         self.target_length = self.parameters.ldos_gridsize
-        self.fermi_energy_ev = None
-        self.temperature_K = None
-        self.grid_spacing_Bohr = None
 
     def read_from_cube(self, file_name_scheme, directory):
         """Reads the LDOS data from multiple cube files located in the snapshot directory."""
@@ -59,8 +57,30 @@ class LDOS(TargetBase):
         E_tot[D](R) = E_b[D] - S_s[D]/beta - U[D] + E_xc[D]-V_xc[D]+V^ii(R)
         """
 
+    def get_band_energy(self, ldos_data, fermi_energy_eV, temperature_K, grid_spacing_bohr, integration_method="simps"):
+        """
+        Calculates the band energy, from given LDOS data.
+        Input variables:
+            - ldos_data - This method can only be called if the LDOS data is presented in the form:
+                    gridx x gridy x gridz x energygrid.
+        """
+
+        # The band energy is calculated using the band energy.
+        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr, integration_method=integration_method)
+
+        # We further process the DOS by using a static function of the DOS class.
+        emin = self.parameters.ldos_gridoffset_ev
+        emax = self.parameters.ldos_gridsize*self.parameters.ldos_gridspacing_ev+self.parameters.ldos_gridoffset_ev
+        nr_energy_levels = self.parameters.ldos_gridsize
+        band_energy = DOS.band_energy_from_dos(dos_data, emin, emax, nr_energy_levels, fermi_energy_eV, temperature_K,
+                                               integration_method=integration_method)
+
+        return band_energy
+
+
     def get_density(self, ldos_data, fermi_energy_ev, temperature_K, conserve_dimensions=False, integration_method="simps"):
-        """Calculates the electronic density, from given ldos_data.
+        """
+        Calculates the electronic density, from given LDOS data.
         Input variables:
             - ldos_data - can either have the form
                     gridpoints x energygrid
@@ -104,9 +124,8 @@ class LDOS(TargetBase):
 
         return density_values
 
-
     def get_density_of_states(self, ldos_data, grid_spacing_bohr, integration_method="simps"):
-        """Calculates the density of states, from given ldos_data.
+        """Calculates the density of states, from given LDOS data.
         Input variables:
             - ldos_data - This method can only be called if the LDOS data is presented in the form:
                     gridx x gridy x gridz x energygrid.
