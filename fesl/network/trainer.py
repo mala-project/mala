@@ -74,8 +74,8 @@ class Trainer:
             training_loss = 0
             for inputs, outputs in training_data_loader:
                 if self.use_gpu:
-               	        inputs = inputs.to('cuda')
-                        outputs = outputs.to('cuda')
+                    inputs = inputs.to('cuda')
+                    outputs = outputs.to('cuda')
                 training_loss += self.process_mini_batch(network, inputs, outputs)
 
             # Calculate the validation loss.
@@ -123,8 +123,8 @@ class Trainer:
         with torch.no_grad():
             for x, y in vdl:
                 if self.use_gpu:
-                        x = x.to('cuda')
-                        y = y.to('cuda')
+                    x = x.to('cuda')
+                    y = y.to('cuda')
                 prediction = network(x)
                 validation_loss += network.calculate_loss(prediction, y).item()
                 # accuracies.append(network.classification_accuracy(prediction, y))
