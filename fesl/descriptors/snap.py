@@ -16,6 +16,17 @@ class SNAP(DescriptorBase):
         super(SNAP, self).__init__(p)
         self.in_format_ase = ""
 
+    @staticmethod
+    def convert_units(array, in_units="None"):
+        """
+        Converts the units of an LDOS array. Can be used e.g. for post processing purposes.
+        This function always returns the LDOS in 1/eV.
+        """
+        if in_units == "None":
+            return array
+        else:
+            raise Exception("Unsupported unit for SNAP.")
+
     def calculate_from_qe_out(self, qe_out_file, qe_out_directory):
         """Calculates the SNAP descriptors given a QE outfile."""
         self.in_format_ase = "espresso-out"

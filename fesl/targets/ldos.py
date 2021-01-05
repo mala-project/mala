@@ -4,6 +4,7 @@ from .calculation_helpers import *
 from .dos import DOS
 import numpy as np
 import math
+from ase.units import Rydberg
 
 
 class LDOS(TargetBase):
@@ -13,6 +14,21 @@ class LDOS(TargetBase):
     def __init__(self, p):
         super(LDOS, self).__init__(p)
         self.target_length = self.parameters.ldos_gridsize
+
+    @staticmethod
+    def convert_units(array, in_units="1/eV"):
+        """
+        Converts the units of an LDOS array. Can be used e.g. for post processing purposes.
+        This function always returns the LDOS in 1/eV.
+        """
+        if in_units == "1/eV":
+            return array
+        elif in_units == "1/Ry":
+            return array / Rydberg
+        else:
+            print(in_units)
+            raise Exception("Unsupported unit for LDOS.")
+
 
     def read_from_cube(self, file_name_scheme, directory):
         """Reads the LDOS data from multiple cube files located in the snapshot directory."""
@@ -145,8 +161,10 @@ class LDOS(TargetBase):
         """Calculates the density of states, from given LDOS data.
         Input variables:
             - ldos_data - This method can only be called if the LDOS data is presented in the form:
-                    gridx x gridy x gridz x energygrid.
-            - integration_method: Integration method to be used, can either be "trapz" for trapezoid or "simps" for Simpson method.
+                    gridx x gridy x gridz x energygrid
+            - integration_method: Integration method to be used:
+                    - can either be "trapz" for trapezoid or "simps" for Simpson method or "summation" for a
+                    simple "integration by summation".
         """
 
         ldos_data_shape = np.shape(ldos_data)
@@ -160,23 +178,29 @@ class LDOS(TargetBase):
         # If there is only one point in a certain direction we do not integrate, but rather reduce in this direction.
         # Integration over one point leads to zero.
 
-        # X
-        if ldos_data_shape[0] > 1:
-            dos_values = integrate_values_on_spacing(dos_values, grid_spacing_bohr, axis=0, method=integration_method)
-        else:
-            dos_values = np.reshape(dos_values, (ldos_data_shape[1], ldos_data_shape[2], ldos_data_shape[3]))
+        if integration_method != "summation":
+            # X
+            if ldos_data_shape[0] > 1:
+                dos_values = integrate_values_on_spacing(dos_values, grid_spacing_bohr, axis=0, method=integration_method)
+            else:
+                dos_values = np.reshape(dos_values, (ldos_data_shape[1], ldos_data_shape[2], ldos_data_shape[3]))
+                dos_values *= grid_spacing_bohr
 
-        # Y
-        if ldos_data_shape[1] > 1:
-            dos_values = integrate_values_on_spacing(dos_values, grid_spacing_bohr, axis=0, method=integration_method)
-        else:
-            dos_values = np.reshape(dos_values, (ldos_data_shape[2], ldos_data_shape[3]))
+            # Y
+            if ldos_data_shape[1] > 1:
+                dos_values = integrate_values_on_spacing(dos_values, grid_spacing_bohr, axis=0, method=integration_method)
+            else:
+                dos_values = np.reshape(dos_values, (ldos_data_shape[2], ldos_data_shape[3]))
+                dos_values *= grid_spacing_bohr
 
-        # Z
-        if ldos_data_shape[2] > 1:
-            dos_values = integrate_values_on_spacing(dos_values, grid_spacing_bohr, axis=0, method=integration_method)
+            # Z
+            if ldos_data_shape[2] > 1:
+                dos_values = integrate_values_on_spacing(dos_values, grid_spacing_bohr, axis=0, method=integration_method)
+            else:
+                dos_values = np.reshape(dos_values, ldos_data_shape[3])
+                dos_values *= grid_spacing_bohr
         else:
-            dos_values = np.reshape(dos_values, ldos_data_shape[3])
+            dos_values = np.sum(ldos_data, axis=(0, 1, 2)) * (grid_spacing_bohr**3)
 
         return dos_values
 

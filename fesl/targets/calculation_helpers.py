@@ -2,7 +2,6 @@ import numpy as np
 from ase.units import kB
 from scipy import integrate
 
-
 def integrate_values_on_grid(values, grid, axis=0, method="trapz"):
     """
     Integrates values on a given grid, using either the trapezoid or the simpson method.

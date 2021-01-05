@@ -39,7 +39,7 @@ class DOS(TargetBase):
 
     @staticmethod
     def number_of_electrons_from_dos(dos_data, emin, emax, nr_energy_levels, fermi_energy_eV,
-                             temperature_K, integration_method):
+                             temperature_K, integration_method="simps"):
         """
         Calculates the number of electrons from DOS data (directly, independent of the source of this DOS data).
         """
@@ -55,7 +55,7 @@ class DOS(TargetBase):
 
     @staticmethod
     def band_energy_from_dos(dos_data, emin, emax, nr_energy_levels, fermi_energy_eV,
-                             temperature_K, integration_method):
+                             temperature_K, integration_method="simps"):
         """
         Calculates the band energy from DOS data (directly, independent of the source of this DOS data).
         """

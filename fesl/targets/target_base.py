@@ -16,3 +16,11 @@ class TargetBase:
 
     def get_band_energy(self):
         raise Exception("No function to calculate or provide the band energy has been implemented for this target type.")
+
+    @staticmethod
+    def convert_units(array, in_units="eV"):
+        raise Exception("No unit conversion method implemented for this target type.")
+
+    @staticmethod
+    def backconvert_units(array, out_units):
+        raise Exception("No unit back conversion method implemented for this target type.")
