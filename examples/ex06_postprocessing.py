@@ -54,24 +54,34 @@ grid_spacing_bohr = 0.153049
 # Density
 #####
 
-dens = ldos.get_density(data_handler.raw_output_datasize[0], fermi_energy_ev, temperature_k)
+dens = ldos.get_density(data_handler.raw_output_grid[0], fermi_energy_ev, temperature_k, conserve_dimensions=True)
 # For plotting we use the fact that the reduced datasets have dimensions of 200x10x1.
 if doplots:
-    print(data_handler.grid_dimension)
+    x_range = np.linspace(0, grid_spacing_bohr*np.shape(dens)[0], np.shape(dens)[0])
     for i in range(0, np.shape(dens)[1]):
         y_iso_line = []
         for j in range(0, np.shape(dens)[0]):
             y_iso_line.append(dens[j, i, 0])
-        plt.plot(y_iso_line)
-
+        descr = "y = "+str(i)
+        plt.plot(x_range, y_iso_line, label=descr)
+    plt.xlabel("x [Bohr]")
+    plt.ylabel("n [a.u.]")
+    plt.legend()
+    plt.show()
 
 #####
 # Density of states
 #####
 
-dos = ldos.get_density_of_states(data_handler.raw_output_datasize[0], grid_spacing_bohr)
+dos = ldos.get_density_of_states(data_handler.raw_output_grid[0], grid_spacing_bohr)
 if doplots:
-    plt.plot(dos)
+    e_range = np.linspace(test_parameters.targets.ldos_gridoffset_ev, test_parameters.targets.ldos_gridoffset_ev+
+                          test_parameters.targets.ldos_gridsize*test_parameters.targets.ldos_gridspacing_ev,
+                          test_parameters.targets.ldos_gridsize)
+    plt.plot(e_range, dos, label="DOS")
+    plt.xlabel("E [eV]")
+    plt.ylabel("D(E) [1/eV]")
+    plt.legend()
     plt.show()
 
 #####
@@ -87,7 +97,7 @@ print("Band energy [eV]: ", e_band)
 #####
 
 nr_electrons = ldos.get_number_of_electrons(data_handler.raw_output_grid[0], grid_spacing_bohr, fermi_energy_ev, temperature_k)
-print("# Electrons: ", nr_electrons)
+print("# of Electrons: ", nr_electrons)
 
 print("Successfully ran ex06_postprocessing.py.")
 print("Parameters used for this experiment:")

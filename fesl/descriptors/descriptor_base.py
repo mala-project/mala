@@ -9,3 +9,7 @@ class DescriptorBase:
     @staticmethod
     def convert_units(array, in_units="1/eV"):
         raise Exception("No unit conversion method implemented for this descriptor type.")
+
+    @staticmethod
+    def backconvert_units(array, out_units):
+        raise Exception("No unit back conversion method implemented for this descriptor type.")

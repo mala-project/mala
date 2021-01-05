@@ -194,21 +194,23 @@ class HandlerBase:
         print("Saving ", self.nr_snapshots, " snapshot inputs at", directory)
         for i in range(0, self.nr_snapshots):
             if filetype == "*.npy":
+                input_units = self.parameters.snapshot_directories_list[i].input_units
                 save_path = directory+naming_scheme_input.replace("*", str(i))
                 if raw_data_kind == "grid":
-                    np.save(save_path, self.raw_input_grid[i], allow_pickle=True)
+                    np.save(save_path, self.descriptor_calculator.backconvert_units(self.raw_input_grid[i], input_units), allow_pickle=True)
                 if raw_data_kind == "datasize":
-                    np.save(save_path, self.raw_input_datasize[i], allow_pickle=True)
+                    np.save(save_path, self.descriptor_calculator.backconvert_units(self.raw_input_datasize[i], input_units), allow_pickle=True)
 
         # Outputs.
         print("Saving ", self.nr_snapshots, " snapshot outputs at", directory)
         for i in range(0, self.nr_snapshots):
             if filetype == "*.npy":
+                output_units = self.parameters.snapshot_directories_list[i].output_units
                 save_path = directory+naming_scheme_output.replace("*", str(i))
                 if raw_data_kind == "grid":
-                    np.save(save_path, self.raw_output_grid[i], allow_pickle=True)
+                    np.save(save_path, self.target_parser.backconvert_units(self.raw_output_grid[i], output_units), allow_pickle=True)
                 if raw_data_kind == "datasize":
-                    np.save(save_path, self.raw_output_datasize[i], allow_pickle=True)
+                    np.save(save_path, self.target_parser.backconvert_units(self.raw_output_datasize[i], output_units), allow_pickle=True)
 
     def save_prepared_data(self):
         """Saves the data after it was altered/preprocessed by the ML workflow. E.g. SNAP descriptor calculation."""

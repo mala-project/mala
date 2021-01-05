@@ -29,6 +29,21 @@ class LDOS(TargetBase):
             print(in_units)
             raise Exception("Unsupported unit for LDOS.")
 
+    @staticmethod
+    def backconvert_units(array, out_units):
+        """
+        Converts the units of an LDOS array back from internal use to outside use.
+        Can be used e.g. for post processing purposes.
+        This function always accepts the LDOS in 1/eV and outputs them in the desired unit.
+        """
+        if out_units == "1/eV":
+            return array
+        elif out_units == "1/Ry":
+            return array * Rydberg
+        else:
+            print(out_units)
+            raise Exception("Unsupported unit for LDOS.")
+
 
     def read_from_cube(self, file_name_scheme, directory):
         """Reads the LDOS data from multiple cube files located in the snapshot directory."""
