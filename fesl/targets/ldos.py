@@ -63,9 +63,10 @@ class LDOS(TargetBase):
         Input variables:
             - ldos_data - This method can only be called if the LDOS data is presented in the form:
                     gridx x gridy x gridz x energygrid.
+            - integration_method: Integration method to be used, can either be "trapz" for trapezoid or "simps" for Simpson method.
         """
 
-        # The band energy is calculated using the band energy.
+        # The band energy is calculated using the DOS.
         dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr, integration_method=integration_method)
 
         # We further process the DOS by using a static function of the DOS class.
@@ -76,6 +77,22 @@ class LDOS(TargetBase):
                                                integration_method=integration_method)
 
         return band_energy
+
+    def get_number_of_electrons(self, ldos_data, grid_spacing_bohr, fermi_energy_eV, temperature_K, integration_method="simps"):
+        """
+        Calculates the number of electrons, from given DOS data.
+        Input variables:
+            - ldos_data - This method can only be called if the LDOS data is presented in the form:
+                    gridx x gridy x gridz x energygrid.
+        """
+        # The number of electrons is calculated using the DOS.
+        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr, integration_method=integration_method)
+
+        emin = self.parameters.ldos_gridoffset_ev
+        emax = self.parameters.ldos_gridsize*self.parameters.ldos_gridspacing_ev+self.parameters.ldos_gridoffset_ev
+        nr_energy_levels = self.parameters.ldos_gridsize
+        return DOS.number_of_electrons_from_dos(dos_data, emin, emax, nr_energy_levels, fermi_energy_eV,
+                             temperature_K, integration_method)
 
 
     def get_density(self, ldos_data, fermi_energy_ev, temperature_K, conserve_dimensions=False, integration_method="simps"):
