@@ -29,27 +29,27 @@ test_parameters.debug.grid_dimensions = [200, 10, 1]
 # We have to specify the directories we want to read the snapshots from.
 ####################
 
-data_handler, input_scaler, output_scaler = HandlerInterface(test_parameters)
+data_handler = HandlerInterface(test_parameters)
 
 # Add a snapshot we want to use in to the list.
 data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0.npy",
                           "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
                           "Al_ldos_200x200x200grid_250elvls_snapshot0.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/")
+                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",output_units="1/Ry")
 data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot1.npy",
                           "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
                           "Al_ldos_200x200x200grid_250elvls_snapshot1.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/")
+                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",output_units="1/Ry")
 data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot2.npy",
                           "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
                           "Al_ldos_200x200x200grid_250elvls_snapshot2.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/")
+                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",output_units="1/Ry")
 data_handler.load_data()
 print("Read data: DONE.")
 
 ####################
 # DATA OUTPUT
-# We save the unprepared data into *.npy files.
+# We save the "unprepared" data into *.npy files.
 ####################
 
 data_handler.save_loaded_data(directory="/home/fiedlerl/data/test_fp_snap/2.699gcc/", filetype="*.npy",

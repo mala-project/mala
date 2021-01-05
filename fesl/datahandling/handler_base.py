@@ -6,7 +6,7 @@ from torch.utils.data import TensorDataset
 class HandlerBase:
     """Base class for all data objects."""
 
-    def __init__(self, p, input_data_scaler, output_data_scaler):
+    def __init__(self, p, input_data_scaler, output_data_scaler, descriptor_calculator, target_parser):
         self.parameters = p.data
         self.raw_input_grid = []
         """
@@ -16,6 +16,7 @@ class HandlerBase:
         
         This array might be empty - depending on the form of input parser that is used.
         It will always have the datatype np.float32.
+        If needed, unit conversion is done on this data.
         """
         self.raw_output_grid = []
         """
@@ -25,6 +26,7 @@ class HandlerBase:
 
         This array might be empty - depending on the form of output parser that is used.
         It will always have the datatype np.float32.
+        If needed, unit conversion is done on this data.
         """
         self.raw_input_datasize = np.zeros(1, dtype=np.float32)
         """
@@ -35,6 +37,7 @@ class HandlerBase:
         This array will always have data after load_data, either because the data was directly read into it or 
         because it was reshaped.
         It will always have the datatype np.float32.
+        If needed, unit conversion is done on this data.
         """
         self.raw_output_datasize = np.zeros(1, dtype=np.float32)
         """
@@ -45,44 +48,125 @@ class HandlerBase:
         This array will always have data after load_data, either because the data was directly read into it or 
         because it was reshaped.
         It will always have the datatype np.float32.
+        If needed, unit conversion is done on this data.
         """
+
         self.training_data_inputs = torch.empty(0)
+        """
+        Torch tensor holding all scaled training data inputs.
+        """
+
         self.validation_data_inputs = torch.empty(0)
+        """
+        Torch tensor holding all scaled validation data inputs.
+        """
+
         self.test_data_inputs = torch.empty(0)
+        """
+        Torch tensor holding all scaled testing data inputs.
+        """
 
         self.training_data_outputs = torch.empty(0)
+        """
+        Torch tensor holding all scaled training data output.
+        """
+
         self.validation_data_outputs = torch.empty(0)
+        """
+        Torch tensor holding all scaled validation data output.
+        """
+
         self.test_data_outputs = torch.empty(0)
+        """
+        Torch tensor holding all scaled testing data output.
+        """
 
         self.training_data_set = torch.empty(0)
+        """
+        Torch dataset holding all scaled training data.
+        """
+
         self.validation_data_set = torch.empty(0)
+        """
+        Torch dataset holding all scaled validation data.
+        """
+
         self.test_data_set = torch.empty(0)
+        """
+        Torch dataset holding all scaled testing data.
+        """
 
         self.nr_snapshots = 0
+        """
+        Number of screenshots in this datahandler.
+        """
+
         self.nr_training_data = 0
+        """
+        Number of training data points.
+        """
         self.nr_test_data = 0
+        """
+        Number of testing data points.
+        """
+
         self.nr_validation_data = 0
+        """
+        Number of validation data points.
+        """
+
         self.grid_dimension = np.array([0, 0, 0])
+        """
+        Dimension of the real space grid uses in the underlying calculation, as list [x,y,z].
+        """
+
         self.grid_size = 0
+        """
+        Dimension of the real space grid uses in the underlying calculation, as integer x*y*z.
+        """
+
         self.input_data_scaler = input_data_scaler
+        """
+        Scaler object that can be used to scale input data. 
+        Scaling DOES NOT include unit conversion. Descriptor objects are used for that.
+        """
+
         self.output_data_scaler = output_data_scaler
+        """
+        Scaler object that can be used to scale output data. 
+        Scaling DOES NOT include unit conversion. Target objects are used for that.
+        """
+
+        self.target_parser = target_parser
+        """
+        Parses targets (physical quantities such as LDOS) and handles unit conversion.
+        """
+
+        self.descriptor_calculator = descriptor_calculator
+        """
+        Parses descriptors (e.g. SNAP) and handles unit conversion.
+        """
+
 
     def load_data(self):
         """Loads data from the specified directory.
         The way this is done is provided by the base classes. At the end of load_data raw_input_datasize
-        and raw_output_datasize have exist with the dimensions
+        and raw_output_datasize exist with the dimensions
 
-        number_of_snapshots x (gridx x gridy x gridz) x feature_length.
+        number_of_snapshots x (gridx x gridy x gridz) x feature_length
 
+        and in the correct units.
         """
         raise Exception("load_data not implemented.")
 
     def prepare_data(self):
-        """Prepares the data to be used in an ML workflow (i.e. splitting, normalization,
-        conversion of data structure).
-        Please be aware that this function will/might change the shape of raw_input/output, for
-        memory reasons. If you intend to use a data handler simply to preprocess and save data,
-        do not call this function!"""
+        """Prepares the data to be used in an ML workflow.
+        This includes the following operations:
+        1. Data splitting (in training, validation and testing).
+        2. Data scaling
+        3. Building of tensor data sets.
+        """
+
         # NOTE: We nornmalize the data AFTER we split it because the splitting might be based on
         # snapshot "borders", i.e. training, validation and test set will be composed of an
         # integer number of snapshots. Therefore we cannot convert the data into PyTorch
@@ -100,7 +184,8 @@ class HandlerBase:
 
     def save_loaded_data(self, directory=".", naming_scheme_input="snapshot_*_1.in",
                          naming_scheme_output="snapshot_*_1.out", filetype="*.npy", raw_data_kind="grid"):
-        """Saves the loaded snapshots. This fucntion will behave VERY unexpected after prepare data has been called."""
+        """Saves the loaded snapshots. Note that saving "datasize" type data might be in converted units,
+        if this function is called after prepare_data()."""
 
         if raw_data_kind != "grid" and raw_data_kind != "datasize":
             raise Exception("Invalid raw data kind requested, could not save raw data.")
@@ -109,21 +194,23 @@ class HandlerBase:
         print("Saving ", self.nr_snapshots, " snapshot inputs at", directory)
         for i in range(0, self.nr_snapshots):
             if filetype == "*.npy":
+                input_units = self.parameters.snapshot_directories_list[i].input_units
                 save_path = directory+naming_scheme_input.replace("*", str(i))
                 if raw_data_kind == "grid":
-                    np.save(save_path, self.raw_input_grid[i], allow_pickle=True)
+                    np.save(save_path, self.descriptor_calculator.backconvert_units(self.raw_input_grid[i], input_units), allow_pickle=True)
                 if raw_data_kind == "datasize":
-                    np.save(save_path, self.raw_input_datasize[i], allow_pickle=True)
+                    np.save(save_path, self.descriptor_calculator.backconvert_units(self.raw_input_datasize[i], input_units), allow_pickle=True)
 
         # Outputs.
         print("Saving ", self.nr_snapshots, " snapshot outputs at", directory)
         for i in range(0, self.nr_snapshots):
             if filetype == "*.npy":
+                output_units = self.parameters.snapshot_directories_list[i].output_units
                 save_path = directory+naming_scheme_output.replace("*", str(i))
                 if raw_data_kind == "grid":
-                    np.save(save_path, self.raw_output_grid[i], allow_pickle=True)
+                    np.save(save_path, self.target_parser.backconvert_units(self.raw_output_grid[i], output_units), allow_pickle=True)
                 if raw_data_kind == "datasize":
-                    np.save(save_path, self.raw_output_datasize[i], allow_pickle=True)
+                    np.save(save_path, self.target_parser.backconvert_units(self.raw_output_datasize[i], output_units), allow_pickle=True)
 
     def save_prepared_data(self):
         """Saves the data after it was altered/preprocessed by the ML workflow. E.g. SNAP descriptor calculation."""

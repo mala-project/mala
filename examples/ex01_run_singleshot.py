@@ -38,12 +38,12 @@ test_parameters.training.trainingtype = "Adam"
 # the data. The objects can be used after successful training for inference or plotting.
 ####################
 
-data_handler, input_scaler, output_scaler = HandlerInterface(test_parameters)
+data_handler = HandlerInterface(test_parameters)
 
 # Add a snapshot we want to use in to the list.
-data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/")
-data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/")
-data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/")
+data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/", output_units="1/Ry")
+data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/", output_units="1/Ry")
+data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
 
 data_handler.load_data()
 data_handler.prepare_data()

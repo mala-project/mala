@@ -8,15 +8,16 @@ class HandlerQEoutCube(HandlerBase):
     Output data is read by parsing multiple *.cube files.
     """
 
-    def __init__(self, p, descriptor_calculator, target_parser, input_data_scaler, output_data_scaler):
-        super(HandlerQEoutCube, self).__init__(p, input_data_scaler, output_data_scaler)
-        self.descriptor_calculator = descriptor_calculator
-        self.target_parser = target_parser
+    def __init__(self, p, input_data_scaler, output_data_scaler, descriptor_calculator, target_parser):
+        super(HandlerQEoutCube, self).__init__(p, input_data_scaler, output_data_scaler, descriptor_calculator,
+                                               target_parser)
 
-    def add_snapshot(self, qe_out_file, qe_out_directory, cube_naming_scheme, cube_directory):
+    def add_snapshot(self, qe_out_file, qe_out_directory, cube_naming_scheme, cube_directory,
+                     input_units=None, output_units="1/eV"):
         """Adds a snapshot to data handler. For this type of data,
         a QuantumEspresso outfile, an outfile from the LDOS calculation and
         a directory containing the cube files"""
+        # FIXME: Use the new snapshot class instead.
         self.parameters.snapshot_directories_list.append(
             [qe_out_file, qe_out_directory, cube_naming_scheme, cube_directory])
 

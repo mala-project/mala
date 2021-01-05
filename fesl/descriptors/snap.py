@@ -16,6 +16,28 @@ class SNAP(DescriptorBase):
         super(SNAP, self).__init__(p)
         self.in_format_ase = ""
 
+    @staticmethod
+    def convert_units(array, in_units="None"):
+        """
+        Converts the units of a SNAP descriptor. Since these do not really have units this function
+        does not really do anything.
+        """
+        if in_units == "None":
+            return array
+        else:
+            raise Exception("Unsupported unit for SNAP.")
+
+    @staticmethod
+    def backconvert_units(array, out_units):
+        """
+        Converts the units of a SNAP descriptor. Since these do not really have units this function
+        does not really do anything.
+        """
+        if out_units == "None":
+            return array
+        else:
+            raise Exception("Unsupported unit for SNAP.")
+
     def calculate_from_qe_out(self, qe_out_file, qe_out_directory):
         """Calculates the SNAP descriptors given a QE outfile."""
         self.in_format_ase = "espresso-out"
