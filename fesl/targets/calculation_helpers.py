@@ -151,9 +151,9 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid, temperature_
         ei_plus = energy_grid_edges[i+1]
         ei_minus = energy_grid_edges[i-1]
 
-        weights_vector[i] = (i0_plus-i0)*(1 + (ei-fermi_energy_ev)/(ei_plus-ei)) \
-                            + (i0-i0_minus)*(1-(ei-fermi_energy_ev)/(ei-ei_minus)) \
-                            - (i1_plus-i1) / (ei_plus-ei) + (i1 - i1_minus) /(ei - ei_minus)
+        weights_vector[i] = (i0_plus-i0)*(1 + ((ei-fermi_energy_ev)/(ei_plus-ei))) \
+                            + (i0-i0_minus)*(1-((ei-fermi_energy_ev)/(ei-ei_minus))) \
+                            - ((i1_plus-i1) / (ei_plus-ei)) +((i1 - i1_minus) /(ei - ei_minus))
 
         integral_value += weights_vector[i] * D[i]
 
