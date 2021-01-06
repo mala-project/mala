@@ -10,13 +10,17 @@ class DOS(TargetBase):
         super(DOS, self).__init__(p)
         self.target_length = self.parameters.ldos_gridsize
 
-    def get_band_energy(self, dos_data, fermi_energy_eV, temperature_K, integration_method="simps"):
+    def get_band_energy(self, dos_data, fermi_energy_eV=None, temperature_K=None, integration_method="simps"):
         """
         Calculates the band energy, from given DOS data.
         Input variables:
             - dos_data - This method can only be called if the DOS data is presented in the form:
                     [energygrid]
         """
+        if fermi_energy_eV is None:
+            fermi_energy_eV = self.fermi_energy_eV
+        if temperature_K is None:
+            temperature_K = self.temperature_K
 
         emin = self.parameters.ldos_gridoffset_ev
         emax = self.parameters.ldos_gridsize*self.parameters.ldos_gridspacing_ev+self.parameters.ldos_gridoffset_ev
@@ -24,13 +28,18 @@ class DOS(TargetBase):
         return self.band_energy_from_dos(dos_data, emin, emax, nr_energy_levels, fermi_energy_eV, temperature_K,
                                          integration_method)
 
-    def get_number_of_electrons(self, dos_data, fermi_energy_eV, temperature_K, integration_method="simps"):
+    def get_number_of_electrons(self, dos_data, fermi_energy_eV=None, temperature_K=None, integration_method="simps"):
         """
         Calculates the number of electrons, from given DOS data.
         Input variables:
             - dos_data - This method can only be called if the DOS data is presented in the form:
                     [energygrid]
         """
+        if fermi_energy_eV is None:
+            fermi_energy_eV = self.fermi_energy_eV
+        if temperature_K is None:
+            temperature_K = self.temperature_K
+
         emin = self.parameters.ldos_gridoffset_ev
         emax = self.parameters.ldos_gridsize*self.parameters.ldos_gridspacing_ev+self.parameters.ldos_gridoffset_ev
         nr_energy_levels = self.parameters.ldos_gridsize
@@ -52,7 +61,7 @@ class DOS(TargetBase):
             number_of_electrons = integrate_values_on_grid(dos_data * fermi_vals, energy_vals, axis=-1,
                                                method=integration_method)
         else:
-            # using regular integration.
+            # using analytical integration.
             number_of_electrons = analytical_integration(dos_data, "F0", "F1", fermi_energy_eV, energy_vals, temperature_K)
 
         return number_of_electrons
@@ -69,6 +78,14 @@ class DOS(TargetBase):
         fermi_vals = fermi_function(energy_vals, fermi_energy_eV, temperature_K)
 
         # Calculathe band energy.
-        band_energy = integrate_values_on_grid(dos_data * (energy_vals * fermi_vals), energy_vals, axis=-1,
+        if integration_method != "analytical":
+            # regular integration:
+            band_energy = integrate_values_on_grid(dos_data * (energy_vals * fermi_vals), energy_vals, axis=-1,
                                                method=integration_method)
+        # using analytical integration.
+        else:
+            number_of_electrons = analytical_integration(dos_data, "F0", "F1", fermi_energy_eV, energy_vals, temperature_K)
+            band_energy_minus_uN = analytical_integration(dos_data, "F1", "F2", fermi_energy_eV, energy_vals, temperature_K)
+            band_energy = band_energy_minus_uN+fermi_energy_eV*number_of_electrons
+
         return band_energy
