@@ -1,27 +1,10 @@
 import numpy as np
 from ase.units import kB
-from scipy import integrate
+from scipy import integrate, interpolate
 import mpmath as mp
 
-def integrate_values_on_grid(values, grid, axis=0, method="trapz"):
-    """
-    Integrates values on a given grid, using either the trapezoid or the simpson method.
-    Input quantities:
-        - values: Values to be integrated.
-        - grid: Grid on which the value is supposed to be integrated
-        - axis: Axis along which the integration is performed. Default=0,
-        - method: Integration method to be used, can either be "trapz" for trapezoid or "simps" for Simpson method.
-    """
 
-    if method == "trapz":
-        return integrate.trapz(values, grid, axis=axis)
-    elif method == "simps":
-        return integrate.simps(values, grid, axis=axis)
-    else:
-        raise Exception("Unknown integration method.")
-
-
-def integrate_values_on_spacing(values, spacing, axis=0, method="trapz"):
+def integrate_values_on_spacing(values, spacing, method, axis=0):
     """
     Integrates values assuming a uniform grid with a provided spacing, using either the trapezoid or the simpson method.
     Input quantities:
@@ -127,8 +110,14 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid, temperature_
     energy_grid_edges[0] = energy_grid[0] - spacing
     energy_grid_edges[-1] = energy_grid[-1] + spacing
 
+    if len(D.shape) > 1:
+        real_space_grid = D.shape[0]
+        integral_value = np.zeros(real_space_grid, dtype=np.float)
+    else:
+        real_space_grid = 1
+        integral_value = 0
+
     # Calculate the weights.
-    integral_value = 0
     for i in range(0, gridsize):
         # Calculate beta and x
         beta = 1 / (kB * temperature_k)
@@ -154,8 +143,10 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid, temperature_
         weights_vector[i] = (i0_plus-i0)*(1 + ((ei-fermi_energy_ev)/(ei_plus-ei))) \
                             + (i0-i0_minus)*(1-((ei-fermi_energy_ev)/(ei-ei_minus))) \
                             - ((i1_plus-i1) / (ei_plus-ei)) +((i1 - i1_minus) /(ei - ei_minus))
-
-        integral_value += weights_vector[i] * D[i]
-
+        if real_space_grid == 1:
+            integral_value += weights_vector[i] * D[i]
+        else:
+            for j in range(0, real_space_grid):
+                integral_value[j] += weights_vector[i] * D[j, i]
     return integral_value
 

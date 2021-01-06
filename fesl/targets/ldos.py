@@ -88,7 +88,7 @@ class LDOS(TargetBase):
         E_tot[D](R) = E_b[D] - S_s[D]/beta - U[D] + E_xc[D]-V_xc[D]+V^ii(R)
         """
 
-    def get_band_energy(self, ldos_data, fermi_energy_eV=None, temperature_K=None, grid_spacing_bohr=None, integration_method="simps"):
+    def get_band_energy(self, ldos_data, fermi_energy_eV=None, temperature_K=None, grid_spacing_bohr=None, integration_method="analytical"):
         """
         Calculates the band energy, from given LDOS data.
         Input variables:
@@ -116,7 +116,7 @@ class LDOS(TargetBase):
 
         return band_energy
 
-    def get_number_of_electrons(self, ldos_data, grid_spacing_bohr=None, fermi_energy_eV=None, temperature_K=None, integration_method="simps"):
+    def get_number_of_electrons(self, ldos_data, grid_spacing_bohr=None, fermi_energy_eV=None, temperature_K=None, integration_method="analytical"):
         """
         Calculates the number of electrons, from given DOS data.
         Input variables:
@@ -141,7 +141,7 @@ class LDOS(TargetBase):
                              temperature_K, integration_method)
 
 
-    def get_density(self, ldos_data, fermi_energy_ev=None, temperature_K=None, conserve_dimensions=False, integration_method="simps"):
+    def get_density(self, ldos_data, fermi_energy_ev=None, temperature_K=None, conserve_dimensions=False, integration_method="analytical"):
         """
         Calculates the electronic density, from given LDOS data.
         Input variables:
@@ -181,8 +181,15 @@ class LDOS(TargetBase):
         energy_values = np.linspace(emin, emax, nr_elvls)
         fermi_values = fermi_function(energy_values, fermi_energy_ev, temperature_K, energy_units="eV")
 
-        density_values = integrate_values_on_grid(ldos_data_used * (energy_values * fermi_values), energy_values, axis=-1,
-                                                  method=integration_method)
+        # Calculate the number of electrons.
+        if integration_method == "trapz":
+            density_values = integrate.trapz(ldos_data_used * fermi_values, energy_values, axis=-1)
+        elif integration_method == "simps":
+            density_values = integrate.simps(ldos_data_used * fermi_values, energy_values, axis=-1)
+        elif integration_method == "analytical":
+            density_values = analytical_integration(ldos_data_used, "F0", "F1", fermi_energy_ev, energy_values, temperature_K)
+        else:
+            raise Exception("Unknown integration method.")
 
         if len(ldos_data_shape) == 4 and conserve_dimensions is True:
             ldos_data_shape = list(ldos_data_shape)
@@ -191,7 +198,7 @@ class LDOS(TargetBase):
 
         return density_values
 
-    def get_density_of_states(self, ldos_data, grid_spacing_bohr=None, integration_method="simps"):
+    def get_density_of_states(self, ldos_data, grid_spacing_bohr=None, integration_method="summation"):
         """Calculates the density of states, from given LDOS data.
         Input variables:
             - ldos_data - This method can only be called if the LDOS data is presented in the form:
