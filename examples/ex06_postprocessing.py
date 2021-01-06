@@ -41,23 +41,20 @@ data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.
 # Our target data is LDOS data.
 ldos = TargetInterface(test_parameters)
 
+# We load additional information about the data using the output of the actual quantum espresso calculation.
+ldos.read_additional_calculation_data("qe.out", "./data/QE_Al.scf.pw.out")
+
 # Data is loaded.
 data_handler.load_data()
-
-# Since we start from preprocessed data we need to provide certain quantitites.
-# If we start from raw calculation data, these parameters could be read from there.
-fermi_energy_ev = 7.770345
-temperature_k = 298
-grid_spacing_bohr = 0.153049
 
 #####
 # Density
 #####
 
-dens = ldos.get_density(data_handler.raw_output_grid[0], fermi_energy_ev, temperature_k, conserve_dimensions=True)
+dens = ldos.get_density(data_handler.raw_output_grid[0], conserve_dimensions=True, integration_method="analytical")
 # For plotting we use the fact that the reduced datasets have dimensions of 200x10x1.
 if doplots:
-    x_range = np.linspace(0, grid_spacing_bohr*np.shape(dens)[0], np.shape(dens)[0])
+    x_range = np.linspace(0, ldos.grid_spacing_Bohr*np.shape(dens)[0], np.shape(dens)[0])
     for i in range(0, np.shape(dens)[1]):
         y_iso_line = []
         for j in range(0, np.shape(dens)[0]):
@@ -73,7 +70,7 @@ if doplots:
 # Density of states
 #####
 
-dos = ldos.get_density_of_states(data_handler.raw_output_grid[0], grid_spacing_bohr)
+dos = ldos.get_density_of_states(data_handler.raw_output_grid[0])
 if doplots:
     e_range = np.linspace(test_parameters.targets.ldos_gridoffset_ev, test_parameters.targets.ldos_gridoffset_ev+
                           test_parameters.targets.ldos_gridsize*test_parameters.targets.ldos_gridspacing_ev,
@@ -88,7 +85,7 @@ if doplots:
 # Band energies
 #####
 
-e_band = ldos.get_band_energy(data_handler.raw_output_grid[0], fermi_energy_ev, temperature_k, grid_spacing_bohr)
+e_band = ldos.get_band_energy(data_handler.raw_output_grid[0])
 print("Band energy [eV]: ", e_band)
 
 
@@ -96,7 +93,7 @@ print("Band energy [eV]: ", e_band)
 # Number of electrons
 #####
 
-nr_electrons = ldos.get_number_of_electrons(data_handler.raw_output_grid[0], grid_spacing_bohr, fermi_energy_ev, temperature_k)
+nr_electrons = ldos.get_number_of_electrons(data_handler.raw_output_grid[0])
 print("# of Electrons: ", nr_electrons)
 
 print("Successfully ran ex06_postprocessing.py.")
