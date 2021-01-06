@@ -47,9 +47,13 @@ class DOS(TargetBase):
         energy_vals = np.linspace(emin, emax, nr_energy_levels)
         fermi_vals = fermi_function(energy_vals, fermi_energy_eV, temperature_K)
 
-        # Calculathe band energy.
-        number_of_electrons = integrate_values_on_grid(dos_data * fermi_vals, energy_vals, axis=-1,
+        if integration_method != "analytical":
+            # regular integration:
+            number_of_electrons = integrate_values_on_grid(dos_data * fermi_vals, energy_vals, axis=-1,
                                                method=integration_method)
+        else:
+            # using regular integration.
+            number_of_electrons = analytical_integration(dos_data, "F0", "F1", fermi_energy_eV, energy_vals, temperature_K)
 
         return number_of_electrons
 

@@ -9,7 +9,7 @@ from ase.units import Rydberg
 
 class LDOS(TargetBase):
     """Local density of states.
-    Evaluation follow the outline and code provided in/by https://arxiv.org/abs/2010.04905.
+    Evaluation follow the outline and code provided in/by [1].
     """
     def __init__(self, p):
         super(LDOS, self).__init__(p)
@@ -187,7 +187,7 @@ class LDOS(TargetBase):
             raise Exception("Invalid LDOS array shape (correct: x,y,z,energy)")
 
         # We have the LDOS as gridx x gridy x gridz x energygrid, no further operation is necessary.
-        dos_values = ldos_data.copy()
+        dos_values = ldos_data#.copy()
 
         # We integrate along the three axis in space.
         # If there is only one point in a certain direction we do not integrate, but rather reduce in this direction.
