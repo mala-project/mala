@@ -11,3 +11,4 @@ dependencies:
   - optuna
   - ase
   - pytorch
+  - mpmath
