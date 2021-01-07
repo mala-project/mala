@@ -81,6 +81,16 @@ class HandlerBase:
         Torch tensor holding all scaled testing data output.
         """
 
+        self.inference_data_inputs = torch.empty(0)
+        """
+        Torch tensor holding all scaled inference data inputs.
+        """
+
+        self.inference_data_outputs = torch.empty(0)
+        """
+        Torch tensor holding all scaled inference data outputs.
+        """
+
         self.training_data_set = torch.empty(0)
         """
         Torch dataset holding all scaled training data.
@@ -160,7 +170,7 @@ class HandlerBase:
         raise Exception("load_data not implemented.")
 
     def prepare_data(self):
-        """Prepares the data to be used in an ML workflow.
+        """Prepares the data to be used in an ML workflow TRAINING.
         This includes the following operations:
         1. Data splitting (in training, validation and testing).
         2. Data scaling
@@ -181,6 +191,26 @@ class HandlerBase:
 
         # Build dataset objects from pytorch tensors.
         self.build_datasets()
+
+    def prepare_data_for_inference(self):
+        """
+        Prepares the data to be used in an ML workflow inference.
+        This includes the following operations:
+        1. Transformation to pytorch tensor.
+        2. Data scaling
+
+        It is always done by snapshot.
+        """
+
+        # Transform data to pytorch tensor.
+        self.inference_data_inputs = torch.from_numpy(self.raw_input_datasize).float()
+        self.inference_data_outputs = torch.from_numpy(self.raw_output_datasize).float()
+
+        # Scale the data.
+        self.inference_data_inputs = self.input_data_scaler.transform(self.inference_data_inputs)
+        self.inference_data_outputs = self.output_data_scaler.transform(self.inference_data_outputs)
+
+
 
     def save_loaded_data(self, directory=".", naming_scheme_input="snapshot_*_1.in",
                          naming_scheme_output="snapshot_*_1.out", filetype="*.npy", raw_data_kind="grid"):

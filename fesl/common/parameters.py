@@ -1,3 +1,5 @@
+import pickle
+
 # Subclasses that make up the final parameters class.
 
 class ParametersBase:
@@ -308,6 +310,31 @@ class Parameters:
                 parobject.show("\t")
             else:
                 print('%-15s: %s' % (v, getattr(self, v)))
+
+    def save(self, filename, save_format="pickle"):
+        """
+        Saves the Parameters object so that it can be accessed again at a later time.
+        """
+        if save_format == "pickle":
+            with open(filename, 'wb') as handle:
+                pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            raise Exception("Unsupported parameter save format.")
+
+    @classmethod
+    def load_from_file(cls, filename, save_format="pickle", no_snapshots=False):
+        """
+        Loads a saved Parameters object. If no_snapshots is True, the snapshot list will be emptied.
+        """
+        if save_format == "pickle":
+            with open(filename, 'rb') as handle:
+                loaded_parameters = pickle.load(handle)
+                if no_snapshots is True:
+                    loaded_parameters.data.snapshot_directories_list = []
+        else:
+            raise Exception("Unsupported parameter save format.")
+
+        return loaded_parameters
 
 
 if __name__ == "__main__":

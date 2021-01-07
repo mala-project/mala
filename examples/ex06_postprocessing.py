@@ -70,7 +70,7 @@ if doplots:
 # Density of states
 #####
 
-dos = ldos.get_density_of_states(data_handler.raw_output_grid[0])
+dos = ldos.get_density_of_states(data_handler.raw_output_datasize[0], integration_method="summation")
 if doplots:
     e_range = np.linspace(test_parameters.targets.ldos_gridoffset_ev, test_parameters.targets.ldos_gridoffset_ev+
                           test_parameters.targets.ldos_gridsize*test_parameters.targets.ldos_gridspacing_ev,

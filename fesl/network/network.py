@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import numpy as np
 
 class Network(nn.Module):
     """Central network class for this framework. Based on pytorch.nn.Module."""
@@ -67,8 +67,33 @@ class Network(nn.Module):
         else:
             raise Exception("Unsupported network architecture.")
 
+    def do_prediction(self, array):
+        """
+        Interface to do predictions. The data put in here is assumed to be scaled and in the right units.
+        So far it is mostly an interface to pytorch, but maybe at a later date it will be more.
+        """
+        self.eval()
+        return self(array)
+
     def calculate_loss(self, output, target):
         return self.loss_func(output, target)
+
+    def save_network(self, path_to_file):
+        """
+        Saves the network. This function serves as an interfaces to pytorchs own saving functionalities
+        AND possibly own saving needs.
+        """
+        torch.save(self.state_dict(), path_to_file)
+
+    @classmethod
+    def load_from_file(cls, params, path_to_file):
+        """
+        Loads a network from a file.
+        """
+        loaded_network = Network(params)
+        loaded_network.load_state_dict(torch.load(path_to_file))
+        loaded_network.eval()
+        return loaded_network
 
     # FIXME: Move to a different file, as this is only needed for
     # classification problems and the LDOS prediction is no classification

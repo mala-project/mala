@@ -88,7 +88,7 @@ class LDOS(TargetBase):
         E_tot[D](R) = E_b[D] - S_s[D]/beta - U[D] + E_xc[D]-V_xc[D]+V^ii(R)
         """
 
-    def get_band_energy(self, ldos_data, fermi_energy_eV=None, temperature_K=None, grid_spacing_bohr=None, integration_method="analytical"):
+    def get_band_energy(self, ldos_data, fermi_energy_eV=None, temperature_K=None, grid_spacing_bohr=None, grid_integration_method="summation", energy_integration_method="analytical"):
         """
         Calculates the band energy, from given LDOS data.
         Input variables:
@@ -105,18 +105,18 @@ class LDOS(TargetBase):
             grid_spacing_bohr = self.grid_spacing_Bohr
 
         # The band energy is calculated using the DOS.
-        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr, integration_method=integration_method)
+        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr, integration_method=grid_integration_method)
 
         # We further process the DOS by using a static function of the DOS class.
         emin = self.parameters.ldos_gridoffset_ev
         emax = self.parameters.ldos_gridsize*self.parameters.ldos_gridspacing_ev+self.parameters.ldos_gridoffset_ev
         nr_energy_levels = self.parameters.ldos_gridsize
         band_energy = DOS.band_energy_from_dos(dos_data, emin, emax, nr_energy_levels, fermi_energy_eV, temperature_K,
-                                               integration_method=integration_method)
+                                               integration_method=energy_integration_method)
 
         return band_energy
 
-    def get_number_of_electrons(self, ldos_data, grid_spacing_bohr=None, fermi_energy_eV=None, temperature_K=None, integration_method="analytical"):
+    def get_number_of_electrons(self, ldos_data, grid_spacing_bohr=None, fermi_energy_eV=None, temperature_K=None, grid_integration_method="summation", energy_integration_method="analytical"):
         """
         Calculates the number of electrons, from given DOS data.
         Input variables:
@@ -132,13 +132,13 @@ class LDOS(TargetBase):
             grid_spacing_bohr = self.grid_spacing_Bohr
 
 
-        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr, integration_method=integration_method)
+        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr, integration_method=grid_integration_method)
 
         emin = self.parameters.ldos_gridoffset_ev
         emax = self.parameters.ldos_gridsize*self.parameters.ldos_gridspacing_ev+self.parameters.ldos_gridoffset_ev
         nr_energy_levels = self.parameters.ldos_gridsize
         return DOS.number_of_electrons_from_dos(dos_data, emin, emax, nr_energy_levels, fermi_energy_eV,
-                             temperature_K, integration_method)
+                             temperature_K, energy_integration_method)
 
 
     def get_density(self, ldos_data, fermi_energy_ev=None, temperature_K=None, conserve_dimensions=False, integration_method="analytical"):
@@ -213,7 +213,10 @@ class LDOS(TargetBase):
 
         ldos_data_shape = np.shape(ldos_data)
         if len(ldos_data_shape) != 4:
-            raise Exception("Invalid LDOS array shape (correct: x,y,z,energy)")
+            if len(ldos_data_shape) != 2:
+                raise Exception("Unknown LDOS shape, cannot calculate DOS.")
+            elif integration_method != "summation":
+                raise Exception("If using a 2D LDOS array, you can only use summation as integration method.")
 
         # We have the LDOS as gridx x gridy x gridz x energygrid, no further operation is necessary.
         dos_values = ldos_data#.copy()
@@ -244,7 +247,10 @@ class LDOS(TargetBase):
                 dos_values = np.reshape(dos_values, ldos_data_shape[3])
                 dos_values *= grid_spacing_bohr
         else:
-            dos_values = np.sum(ldos_data, axis=(0, 1, 2)) * (grid_spacing_bohr**3)
+            if len(ldos_data_shape) == 4:
+                dos_values = np.sum(ldos_data, axis=(0, 1, 2)) * (grid_spacing_bohr ** 3)
+            if len(ldos_data_shape) == 2:
+                dos_values = np.sum(ldos_data, axis=0) * (grid_spacing_bohr ** 3)
 
         return dos_values
 
