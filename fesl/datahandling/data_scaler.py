@@ -1,4 +1,5 @@
 import torch
+import pickle
 
 
 class DataScaler:
@@ -76,6 +77,10 @@ class DataScaler:
         self.cantransform = True
 
     def transform(self, unscaled):
+        """
+        Transforms data from unscaled to scaled.
+        Unscaled means real world data, scaled means data as is used in the network.
+        """
 
         # First we need to find out if we even have to do anything.
         if self.scale_standard is False and self.scale_normal is False:
@@ -116,6 +121,10 @@ class DataScaler:
                     return unscaled
 
     def inverse_transform(self, scaled):
+        """
+        Transforms data from scaled to unscaled.
+        Unscaled means real world data, scaled means data as is used in the network.
+        """
 
         # First we need to find out if we even have to do anything.
         if self.scale_standard is False and self.scale_normal is False:
@@ -154,3 +163,26 @@ class DataScaler:
                 if self.scale_normal:
                     scaled = (scaled*(self.total_max - self.total_min)) + self.total_min
                     return scaled
+
+    def save(self, filename, save_format="pickle"):
+        """
+        Saves the Scaler object so that it can be accessed again at a later time.
+        """
+        if save_format == "pickle":
+            with open(filename, 'wb') as handle:
+                pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            raise Exception("Unsupported parameter save format.")
+
+    @classmethod
+    def load_from_file(cls, filename, save_format="pickle"):
+        """
+        Loads a saved Scaler object.
+        """
+        if save_format == "pickle":
+            with open(filename, 'rb') as handle:
+                loaded_scaler = pickle.load(handle)
+        else:
+            raise Exception("Unsupported parameter save format.")
+
+        return loaded_scaler
