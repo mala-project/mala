@@ -13,6 +13,7 @@ class TargetBase:
         self.temperature_K = None
         self.grid_spacing_Bohr = None
         self.number_of_electrons = None
+        self.band_energy_dft_calculation = None
 
     def read_from_cube(self):
         raise Exception("No function defined to read this quantity from a .cube file.")
@@ -48,6 +49,15 @@ class TargetBase:
                         self.number_of_electrons = np.float64(line.split('=')[1])
                     if "Fermi-Dirac smearing, width (Ry)=" in line:
                         self.temperature_K = np.float64(line.split('=')[2]) * Rydberg / kB
+                    if "xc contribution" in line:
+                        xc_contribution = float((line.split('=')[1]).split('Ry')[0])
+                        break
+                    if "one-electron contribution" in line:
+                        one_electron_contribution = float((line.split('=')[1]).split('Ry')[0])
+                    if "hartree contribution" in line:
+                        hartree_contribution = float((line.split('=')[1]).split('Ry')[0])
+            band_energy_Ry = one_electron_contribution + xc_contribution + hartree_contribution
+            self.band_energy_dft_calculation = band_energy_Ry*Rydberg
         else:
             raise Exception("Unsupported auxiliary file type.")
 
