@@ -17,17 +17,18 @@ def dos_analysis(dos, dos_data, integration, ref):
     fermi_dft = dos.fermi_energy_eV
 
     # self-consistent values.
-
-    fermi_sc = toms748(lambda fermi_sc: (dos.get_number_of_electrons(dos_data, fermi_energy_eV=fermi_sc,
-                                                                     integration_method=integration) - dos.number_of_electrons),
-                       a=-5, b=9)
+    fermi_sc = dos.get_self_consistent_fermi_energy_ev(dos_data, integration_method=integration)
     nr_electrons_sc = dos.get_number_of_electrons(dos_data, integration_method=integration, fermi_energy_eV=fermi_sc)
     e_band_sc = dos.get_band_energy(dos_data, integration_method=integration, fermi_energy_eV=fermi_sc)
 
     print("Used integration method: ", integration)
-    print("Method\t#Electrons\tE_band[eV]\tE_Fermi[eV]\tError_E_band[eV]")
-    print("DFT\t{0:12.4f}{1:12.4f}{2:12.4f}{3:12.4f}".format(nr_electrons_dft, e_band_dft, fermi_dft, e_band_dft - ref))
-    print("SC\t{0:12.4f}{1:12.4f}{2:12.4f}{3:12.4f}".format(nr_electrons_sc, e_band_sc, fermi_sc, e_band_sc - ref))
+    print(
+        "Fermi energy source\t#Electrons\tE_band[eV]\tE_Fermi[eV]\tError_E_band[eV]\tError_E_band[meV/atom]\tE_band("
+        "DFT)[eV]")
+    print("DFT", "\t", nr_electrons_dft, "\t", e_band_dft, "\t", fermi_dft, "\t", e_band_dft - ref, "\t",
+          (e_band_dft - ref) * (1000 / 256), "\t", ref)
+    print("SC", "\t", nr_electrons_sc, "\t", e_band_sc, "\t", fermi_sc, "\t", e_band_sc - ref, "\t",
+          (e_band_sc - ref) * (1000 / 256), "\t", ref)
 
 
 print("Welcome to FESL.")
@@ -44,7 +45,7 @@ eband_exact_ev = eband_exact_rydberg * Rydberg
 test_parameters = Parameters()
 test_parameters.targets.ldos_gridsize = 250
 test_parameters.targets.ldos_gridspacing_ev = 0.1
-test_parameters.targets.ldos_gridoffset_ev = -10
+test_parameters.targets.ldos_gridoffset_ev = -10.0
 
 # Create a DOS object and provide additional parameters.
 dos = DOS(test_parameters)

@@ -1,13 +1,19 @@
 from ase.units import Rydberg, Bohr, kB
 import ase.io
 import numpy as np
+from fesl.common.parameters import Parameters, ParametersTargets
 
 
 class TargetBase:
     """Base class for a target quantity parser. Target parsers read the target quantity
     (i.e. the quantity the NN will learn to predict) from a specified file format."""
     def __init__(self, p):
-        self.parameters = p.targets
+        if isinstance(p, Parameters):
+            self.parameters = p.targets
+        elif isinstance(p, ParametersTargets):
+            self.parameters = p
+        else:
+            raise Exception("Wrong type of parameters for Targets class.")
         self.target_length = 0
         self.fermi_energy_eV = None
         self.temperature_K = None
@@ -18,6 +24,9 @@ class TargetBase:
     def read_from_cube(self):
         raise Exception("No function defined to read this quantity from a .cube file.")
 
+    def read_from_qe_dos_txt(self):
+        raise Exception("No function defined to read this quantity from a qe.dos.txt file")
+
     def get_density(self):
         raise Exception("No function to calculate or provide the density has been implemented for this target type.")
 
@@ -26,6 +35,9 @@ class TargetBase:
 
     def get_band_energy(self):
         raise Exception("No function to calculate or provide the band energy has been implemented for this target type.")
+
+    def get_number_of_electrons(self):
+        raise Exception("No function to calculate or provide the number of electrons has been implemented for this target type.")
 
     def read_additional_calculation_data(self, data_type, path_to_file=""):
         """
