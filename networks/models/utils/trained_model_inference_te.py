@@ -7,7 +7,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 #import ldos_calc
-import DFT_calculators
+import DFT_calculators_te as DFT_calculators
 from functools import partial
 import argparse
 
