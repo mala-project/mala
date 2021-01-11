@@ -73,11 +73,11 @@ class ParametersTargets(ParametersBase):
         """
         Number of points in the energy grid that is used to calculate the LDOS.
         """
-        self.ldos_gridspacing_ev = 0.1
+        self.ldos_gridspacing_ev = 0
         """
         Gridspacing of the energy grid the LDOS is evaluated on [eV].
         """
-        self.ldos_gridoffset_ev = -10
+        self.ldos_gridoffset_ev = 0
         """
         Lowest energy value on the LDOS energy grid [eV].
         """

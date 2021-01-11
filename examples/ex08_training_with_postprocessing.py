@@ -3,6 +3,7 @@ from fesl.datahandling.handler_interface import HandlerInterface
 from fesl.datahandling.data_scaler import DataScaler
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
+from fesl.targets.dos import DOS
 import matplotlib.pyplot as plt
 """
 ex08_training_with_postprocessing.py: Uses FESL to first train a network, use this network to predict the LDOS and then
@@ -57,14 +58,16 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
     plt.show()
 
     # Calculate the Band energy.
-    band_energy_predicted = ldos_calculator.get_band_energy(predicted_ldos)
-    band_energy_actual = ldos_calculator.get_band_energy(actual_ldos)
-
+    # Use a DOS calculator to speed up processing.
+    # This is important for bigger (actual) DOS arrays.
+    dos_calculator = DOS.from_ldos(ldos_calculator)
+    band_energy_predicted = dos_calculator.get_band_energy(predicted_dos)
+    band_energy_actual = dos_calculator.get_band_energy(actual_dos)
     print("Band energy (actual, predicted, error)[eV]", band_energy_actual, band_energy_predicted, band_energy_predicted-band_energy_actual)
 
 
-    nr_electrons_predicted = ldos_calculator.get_number_of_electrons(predicted_ldos)
-    nr_electrons_actual = ldos_calculator.get_number_of_electrons(actual_ldos)
+    nr_electrons_predicted = dos_calculator.get_number_of_electrons(predicted_dos)
+    nr_electrons_actual = dos_calculator.get_number_of_electrons(actual_dos)
     print("Number of electrons (actual, predicted, error)[eV]", nr_electrons_actual, nr_electrons_predicted, nr_electrons_predicted-nr_electrons_actual)
 
 
