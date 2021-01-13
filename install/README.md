@@ -27,19 +27,22 @@ For the installation of PyTorch you might also refer to https://pytorch.org/.
 Alternatively to pip, you can install the required packages within a [conda](https://docs.conda.io/en/latest/miniconda.html) environment.
 
 Follow these steps to set up the necessary environment.
-1. Create an environment `ml-dft-casus`:
+1. Create an environment `fesl`:
    ```
    conda env create -f environment.yaml
    ```
 2. Activate the new environment:
    ```
-   conda activate ml-dft-casus
+   conda activate fesl
    ```
 3. You can deactivate the environment with:
     ```
     conda deactivate
     ```
-
+4. You can update your conda environment by making changes to environment.yaml:
+    ```
+    conda env update --name fesl  --file environment.yaml
+    ```
 ###  LAMMPS (optional)
 
 This workflow uses the Large-scale Atomic/Molecular Massively Parallel Simulator (LAMMPS, https://lammps.sandia.gov/) for input data preprocessing. It is not necessary to install LAMMPS if you are you using this workflow with preprocessed data. If you need/want to install LAMMPS, please refer to INSTALL_SNAP.md.
