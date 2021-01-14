@@ -1,11 +1,11 @@
-# ML-DFT@CASUS
+# FESL
 
-ML-DFT is a machine-learning based framework to enable multiscale modeling by bypassing computationally expensive density functional simulations. It is designed as a python package. This repository is structured as follows:
+FESL (Framework for Electronic Structure Learning) is a machine-learning based framework to enable multiscale modeling by bypassing computationally expensive density functional simulations. It is designed as a python package. This repository is structured as follows:
 
     * examples/ : contains useful examples to get you started with the package
     * install/ : contains informations and scripts for setting up this package on your machine
     * fesl/ : the source code itself
-    * test/ : several test scripts used durind development
+    * test/ : several test scripts used durind development, will hold tests for CI in the future
 
 ## Installation
 
