@@ -9,7 +9,7 @@ ML-DFT is a machine-learning based framework to enable multiscale modeling by by
 
 ## Installation
 
-Please refer to the install/ subdirectory.
+Please refer to the `install/` subdirectory.
 
 ## Running
 
