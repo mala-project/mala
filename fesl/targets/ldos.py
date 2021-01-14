@@ -45,7 +45,7 @@ class LDOS(TargetBase):
             print(out_units)
             raise Exception("Unsupported unit for LDOS.")
 
-    def read_from_cube(self, file_name_scheme, directory):
+    def read_from_cube(self, file_name_scheme, directory, ldos_units="1/eV"):
         """Reads the LDOS data from multiple cube files located in the snapshot directory."""
 
         # First determine how many digits the last file in the list of LDOS.cube files
@@ -61,18 +61,21 @@ class LDOS(TargetBase):
 
         # Iterate over the amount of specified LDOS input files.
         # QE is a Fortran code, so everything is 1 based.
+
+        ldos_data = []
+        print("Reading "+str(self.parameters.ldos_gridsize)+" LDOS files from"+directory+".")
         for i in range(1, self.parameters.ldos_gridsize + 1):
+            print(i)
             tmp_file_name = file_name_scheme
             tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
 
-            # Open the cube file
+            # Open the cube file#
             data, meta = read_cube(directory + tmp_file_name)
-            print(data)
-            quit()
+            data = self.convert_units(data, in_units=ldos_units)
+            ldos_data.append(data)
+        ldos_data = np.array(ldos_data)
+        return np.array(ldos_data)
 
-        # print(dir+file_name_scheme)
-        # ldosfilelist = glob.glob(dir+file_name_scheme)
-        # print(ldosfilelist)
 
     def calculate_energy(self, ldos_data):
         """Calculates the total energy from given ldos_data. The ldos_data can either
