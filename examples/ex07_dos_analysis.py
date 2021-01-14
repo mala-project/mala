@@ -54,7 +54,6 @@ dos.read_additional_calculation_data("qe.out", "./data/QE_Al.scf.pw.out")
 # Load a precalculated DOS file.
 dos_data = np.load("./data/Al_DOS_nr0.npy")
 
-dos_analysis(dos, dos_data, "quad", eband_exact_ev)
 dos_analysis(dos, dos_data, "analytical", eband_exact_ev)
 
 print("Successfully ran ex07_dos_analysis.py.")
