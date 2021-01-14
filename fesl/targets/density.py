@@ -1,7 +1,6 @@
 from .target_base import TargetBase
 from .calculation_helpers import *
-from scipy import integrate, interpolate
-from scipy.optimize import toms748
+from .cube_parser import read_cube
 
 
 class Density(TargetBase):
@@ -12,6 +11,14 @@ class Density(TargetBase):
         super(Density, self).__init__(p)
         # We operate on a per gridpoint basis. Per gridpoint, there is one value for the density (spin-unpolarized calculations).
         self.target_length = 1
+
+    def read_from_cube(self, file_name, directory):
+        """Reads the density data from cube file located in the snapshot directory."""
+
+        print("Reading density from .cube file in ", directory)
+        data, meta = read_cube(directory + file_name)
+        return data
+
 
     def get_number_of_electrons(self, density_data, grid_spacing_bohr=None, integration_method="summation"):
         """

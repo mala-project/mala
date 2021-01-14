@@ -62,10 +62,9 @@ class LDOS(TargetBase):
         # Iterate over the amount of specified LDOS input files.
         # QE is a Fortran code, so everything is 1 based.
 
-        ldos_data = []
+        ldos_data = np.zeros(())
         print("Reading "+str(self.parameters.ldos_gridsize)+" LDOS files from"+directory+".")
         for i in range(1, self.parameters.ldos_gridsize + 1):
-            print(i)
             tmp_file_name = file_name_scheme
             tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
 
@@ -73,7 +72,7 @@ class LDOS(TargetBase):
             data, meta = read_cube(directory + tmp_file_name)
             data = self.convert_units(data, in_units=ldos_units)
             ldos_data.append(data)
-        ldos_data = np.array(ldos_data)
+
         return np.array(ldos_data)
 
 
