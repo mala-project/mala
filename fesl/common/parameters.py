@@ -71,15 +71,15 @@ class ParametersTargets(ParametersBase):
         self.target_type = "LDOS"
         self.ldos_gridsize = 0
         """
-        Number of points in the energy grid that is used to calculate the LDOS.
+        Number of points in the energy grid that is used to calculate the (L)DOS.
         """
         self.ldos_gridspacing_ev = 0
         """
-        Gridspacing of the energy grid the LDOS is evaluated on [eV].
+        Gridspacing of the energy grid the (L)DOS is evaluated on [eV].
         """
         self.ldos_gridoffset_ev = 0
         """
-        Lowest energy value on the LDOS energy grid [eV].
+        Lowest energy value on the (L)DOS energy grid [eV].
         """
         self.electronic_temperature_K = 298
         """
