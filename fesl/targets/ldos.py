@@ -57,12 +57,12 @@ class LDOS(TargetBase):
         # ...
         # tmp.pp100ELEMENT_ldos.cube
 
+        # Find out the number of digits that are needed to encode this grid (by QE).
         digits = int(math.log10(self.parameters.ldos_gridsize)) + 1
+
 
         # Iterate over the amount of specified LDOS input files.
         # QE is a Fortran code, so everything is 1 based.
-
-        ldos_data = np.zeros(())
         print("Reading "+str(self.parameters.ldos_gridsize)+" LDOS files from"+directory+".")
         for i in range(1, self.parameters.ldos_gridsize + 1):
             tmp_file_name = file_name_scheme
@@ -70,10 +70,17 @@ class LDOS(TargetBase):
 
             # Open the cube file#
             data, meta = read_cube(directory + tmp_file_name)
-            data = self.convert_units(data, in_units=ldos_units)
-            ldos_data.append(data)
 
-        return np.array(ldos_data)
+            # Once we have read the first cube file, we know the dimensions of the LDOS and can prepare the array
+            # in which we want to store the LDOS.
+            if i == 1:
+                data_shape = np.shape(data)
+                ldos_data = np.zeros((data_shape[0], data_shape[1], data_shape[2], self.parameters.ldos_gridsize), dtype=np.float)
+
+            # Convert and then append the LDOS data.
+            data = self.convert_units(data, in_units=ldos_units)
+            ldos_data[:, :, :, i-1] = data[:, :, :]
+        return ldos_data
 
 
     def calculate_energy(self, ldos_data):
