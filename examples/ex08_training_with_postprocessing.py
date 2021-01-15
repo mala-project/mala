@@ -5,6 +5,7 @@ from fesl.network.network import Network
 from fesl.network.trainer import Trainer
 from fesl.targets.dos import DOS
 import matplotlib.pyplot as plt
+import numpy as np
 """
 ex08_training_with_postprocessing.py: Uses FESL to first train a network, use this network to predict the LDOS and then
 analyze the results of this prediction. This example is structured a little bit different than other examples. 
@@ -40,10 +41,8 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
     actual_ldos = inference_data_handler.inference_data_outputs[0]
 
     # Now we use the prediction to calculate the band energy and compare it to the one we would get from the outputs themselves.
-    predicted_ldos = oscaler.inverse_transform(predicted_ldos)
-    actual_ldos = oscaler.inverse_transform(actual_ldos)
-    predicted_ldos = predicted_ldos.detach().numpy()
-    actual_ldos = actual_ldos.detach().numpy()
+    predicted_ldos = oscaler.inverse_transform(predicted_ldos, as_numpy=True)
+    actual_ldos = oscaler.inverse_transform(actual_ldos, as_numpy=True)
 
     # Use the LDOS object to do postprocessing.
     ldos_calculator = inference_data_handler.target_parser

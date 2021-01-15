@@ -1,6 +1,6 @@
 import torch
 import pickle
-
+import numpy as np
 
 class DataScaler:
     """Scales input and output data. Sort of emulates the functionality
@@ -120,7 +120,7 @@ class DataScaler:
                     unscaled = (unscaled - self.total_min) / (self.total_max - self.total_min)
                     return unscaled
 
-    def inverse_transform(self, scaled):
+    def inverse_transform(self, scaled, as_numpy=False):
         """
         Transforms data from scaled to unscaled.
         Unscaled means real world data, scaled means data as is used in the network.
@@ -128,10 +128,10 @@ class DataScaler:
 
         # First we need to find out if we even have to do anything.
         if self.scale_standard is False and self.scale_normal is False:
-            return scaled
+            unscaled = scaled
 
         if self.cantransform is False:
-            return scaled
+            unscaled = scaled
 
         # Perform the actual scaling, but use no_grad to make sure
         # that the next couple of iterations stay untracked.
@@ -143,12 +143,10 @@ class DataScaler:
                 ##########################
 
                 if self.scale_standard:
-                    scaled = (scaled * self.stds) + self.means
-                    return scaled
+                    unscaled = (scaled * self.stds) + self.means
 
                 if self.scale_normal:
-                    scaled = (scaled*(self.maxs.values - self.mins.values)) + self.mins.values
-                    return scaled
+                    unscaled = (scaled*(self.maxs.values - self.mins.values)) + self.mins.values
 
             else:
 
@@ -157,12 +155,15 @@ class DataScaler:
                 ##########################
 
                 if self.scale_standard:
-                    scaled = (scaled * self.total_std) + self.total_mean
-                    return scaled
+                    unscaled = (scaled * self.total_std) + self.total_mean
 
                 if self.scale_normal:
-                    scaled = (scaled*(self.total_max - self.total_min)) + self.total_min
-                    return scaled
+                    unscaled = (scaled*(self.total_max - self.total_min)) + self.total_min
+#
+        if as_numpy:
+            return unscaled.detach().numpy().astype(np.float)
+        else:
+            return unscaled
 
     def save(self, filename, save_format="pickle"):
         """
