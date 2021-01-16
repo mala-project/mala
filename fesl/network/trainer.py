@@ -105,7 +105,6 @@ class Trainer:
                                       sampler=self.parameters.sampler["test_sampler"],**self.parameters.kwargs )
 
         # Calculate initial loss.
-        # add here the all reduce
         vloss = self.validate_network(network, validation_data_loader)
         tloss = self.validate_network(network, test_data_loader)
         #Collect and average all the losses from all the devices
@@ -138,7 +137,7 @@ class Trainer:
             # Calculate the validation loss.
             vloss = self.validate_network(network, validation_data_loader)
             if self.use_horovod:
-            vloss=self.average_validation(vloss,'average_loss')
+                vloss=self.average_validation(vloss,'average_loss')
             if self.parameters.verbosity:
                 print("Epoch: ", epoch, "validation data loss: ", vloss)
 
