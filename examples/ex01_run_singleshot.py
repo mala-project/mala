@@ -29,6 +29,9 @@ test_parameters.training.max_number_epochs = 20
 test_parameters.training.mini_batch_size = 40
 test_parameters.training.learning_rate = 0.00001
 test_parameters.training.trainingtype = "Adam"
+test_parameters.training.use_gpu = True
+test_parameters.training.use_horovod = True
+
 
 ####################
 # DATA

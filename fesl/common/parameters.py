@@ -229,6 +229,13 @@ class ParametersTraining(ParametersBase):
         """
         Controls whether or not a GPU is used for training - provided there is one to use. 
         """
+        self.use_horovod=False
+        #add comment
+        self.kwargs={}
+        #add comment
+        self.seed= 2021
+        #add comment(optional)
+        self.sampler={"train_sampler":None,"validate_sampler":None,"test_sampler":None}
 
 
 class ParametersHyperparameterOptinization(ParametersBase):
