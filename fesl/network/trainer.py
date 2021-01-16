@@ -15,6 +15,7 @@ class Trainer:
         self.optimizer = None
         self.scheduler = None
         self.network = None
+        self.batch_size=p.training.mini_batch_size
         self.use_gpu = False
         self.use_horovod=False
         
@@ -24,7 +25,7 @@ class Trainer:
 
         # See if we can and want to work on a GPU.
         self.use_gpu = torch.cuda.is_available() and self.parameters.use_gpu
-        #see if we want to use hor9ovod for multi GPU.
+        #see if we want to use horovod for multi GPU.
         if torch.cuda.device_count() == 1: # change to >1
             self.use_horovod= self.use_gpu and self.parameters.use_horovod
         if self.use_horovod:
@@ -36,7 +37,7 @@ class Trainer:
             # Using seeds to repreduce the same result
             torch.manual_seed(self.parameters.seed)
             torch.cuda.manual_seed(self.parameters.seed)
-           
+
   
 
         # If we choose to work on a GPU, we need to move the network to this GPU.
@@ -56,23 +57,28 @@ class Trainer:
         else:
             raise Exception("Unsupported training method.")
 
+        
         if self.use_horovod:
             self.parameters.kwargs = {'num_workers': 1, 'pin_memory': True}
+            self.batch_size=self.batch_size*hvd.size()
+
+            #Set the data sampler for multiGPU
             self.parameters.sampler["train_sampler"] = torch.utils.data.distributed.DistributedSampler(data.training_data_set, 
                                                                                                        num_replicas=hvd.size(), 
                                                                                                        rank=hvd.rank())
-            # add num_replicas and rank to the class)
+
             self.parameters.sampler["validate_sampler"] = torch.utils.data.distributed.DistributedSampler(data.validation_data_set, 
                                                                                                           num_replicas=hvd.size(), 
                                                                                                           rank=hvd.rank())
-            # 
+
             self.parameters.sampler["test_sampler"] =torch.utils.data.distributed.DistributedSampler(data.test_data_set, 
                                                                                                      num_replicas=hvd.size(), 
                                                                                                      rank=hvd.rank())
-            # broadcasting
+            # broadcaste parameters and optimizer state from root device to other devices
             hvd.broadcast_parameters(network.state_dict(), root_rank=0)
             hvd.broadcast_optimizer_state(self.optimizer, root_rank=0)
-            # add comment
+            
+            # Wraps the opimizer for multiGPU operation
             self.optimizer = hvd.DistributedOptimizer(self.optimizer,  
                                                       named_parameters=network.named_parameters(),
                                                       op = hvd.Adasum)
@@ -90,18 +96,22 @@ class Trainer:
             raise Exception("Unsupported learning rate schedule.")
 
         # Prepare data loaders.(look into mini-batch size)
-        training_data_loader = DataLoader(data.training_data_set, batch_size=self.parameters.mini_batch_size,
+        training_data_loader = DataLoader(data.training_data_set, batch_size=self.batch_size,
                                           sampler=self.parameters.sampler["train_sampler"],
                                           **self.parameters.kwargs ) #shuffle=True,
-        validation_data_loader = DataLoader(data.validation_data_set, batch_size=self.parameters.mini_batch_size * 1,
+        validation_data_loader = DataLoader(data.validation_data_set, batch_size=self.batch_size * 1,
                                             sampler=self.parameters.sampler["validate_sampler"],**self.parameters.kwargs )
-        test_data_loader = DataLoader(data.test_data_set, batch_size=self.parameters.mini_batch_size * 1,
+        test_data_loader = DataLoader(data.test_data_set, batch_size=self.batch_size * 1,
                                       sampler=self.parameters.sampler["test_sampler"],**self.parameters.kwargs )
 
         # Calculate initial loss.
         # add here the all reduce
         vloss = self.validate_network(network, validation_data_loader)
         tloss = self.validate_network(network, test_data_loader)
+        #Collect and average all the losses from all the devices
+        if self.use_horovod:
+            vloss=self.average_validation(vloss,'average_loss')
+            tloss=self.average_validation(tloss,'average_loss')
         if self.parameters.verbosity:
             print("Initial Guess - validation data loss: ", vloss)
             print("Initial Guess - test data loss: ", tloss)
@@ -127,6 +137,8 @@ class Trainer:
 
             # Calculate the validation loss.
             vloss = self.validate_network(network, validation_data_loader)
+            if self.use_horovod:
+            vloss=self.average_validation(vloss,'average_loss')
             if self.parameters.verbosity:
                 print("Epoch: ", epoch, "validation data loss: ", vloss)
 
@@ -151,6 +163,8 @@ class Trainer:
 
         # Calculate final loss.
         tloss = self.validate_network(network, test_data_loader)
+        if self.use_horovod:
+            tloss=self.average_validation(tloss,'average_loss')
         self.final_test_loss = tloss
         print("Final test data loss: ", tloss)
 
@@ -165,7 +179,7 @@ class Trainer:
     # FIXME: This seems inefficient.
     def validate_network(self, network, vdl):
         network.eval()
-        accuracies = []
+        #accuracies = []
         validation_loss = 0
         with torch.no_grad():
             for x, y in vdl:
@@ -177,3 +191,7 @@ class Trainer:
                 # accuracies.append(network.classification_accuracy(prediction, y))
             # validation_accuracy = np.mean(accuracies)
         return validation_loss
+    def average_validation(self,val,name):
+        tensor= torch.tensor(val)
+        avg_loss=hvd.allreduce(tensor,name=name)
+        return avg_loss.item()
