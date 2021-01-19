@@ -51,8 +51,6 @@ class TargetBase:
         if data_type == "qe.out":
             atoms = ase.io.read(path_to_file, format="espresso-out")
             vol = atoms.get_volume()
-            cell_volume = vol / (200 * 200 * 200 * Bohr ** 3)
-            self.grid_spacing_Bohr = cell_volume**(1/3)
             self.fermi_energy_eV = atoms.get_calculator().get_fermi_level()
 
             with open(path_to_file) as out:
@@ -68,6 +66,13 @@ class TargetBase:
                         one_electron_contribution = float((line.split('=')[1]).split('Ry')[0])
                     if "hartree contribution" in line:
                         hartree_contribution = float((line.split('=')[1]).split('Ry')[0])
+                    if "FFT dimensions" in line:
+                        dims = line.split("(")[1]
+                        dimx = int(dims.split(",")[0])
+                        dimy = int(dims.split(",")[1])
+                        dimz = int((dims.split(",")[2]).split(")")[0])
+            cell_volume = vol / (dimx * dimy * dimz * Bohr ** 3)
+            self.grid_spacing_Bohr = cell_volume ** (1 / 3)
             band_energy_Ry = one_electron_contribution + xc_contribution + hartree_contribution
             self.band_energy_dft_calculation = band_energy_Ry*Rydberg
         else:
