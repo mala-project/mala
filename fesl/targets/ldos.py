@@ -2,6 +2,7 @@ from .cube_parser import read_cube
 from .target_base import TargetBase
 from .calculation_helpers import *
 from .dos import DOS
+from .density import Density
 import numpy as np
 import math
 from ase.units import Rydberg
@@ -83,19 +84,65 @@ class LDOS(TargetBase):
         return ldos_data
 
 
-    def calculate_energy(self, ldos_data):
-        """Calculates the total energy from given ldos_data. The ldos_data can either
-        have the form
-
-        gridpoints x energygrid
-
-        or
-
-        gridx x gridy x gridz x energygrid.
-        The total energy is calculated as:
-
-        E_tot[D](R) = E_b[D] - S_s[D]/beta - U[D] + E_xc[D]-V_xc[D]+V^ii(R)
+    def get_total_energy(self, ldos_data=None, dos_data=None, density_data=None, fermi_energy_eV=None, temperature_K=None,
+                        grid_spacing_bohr=None, grid_integration_method="summation",
+                        energy_integration_method="analytical", shift_energy_grid=True, atoms_Angstrom=None,
+                         qe_input_data=None, qe_pseudopotentials=None):
         """
+        Calculates the total energy either from given LDOS data or given DOS and density data.
+        """
+
+        # Get relevant values from DFT calculation, if not otherwise specified.
+        if grid_spacing_bohr is None:
+            grid_spacing_bohr = self.grid_spacing_Bohr
+        if fermi_energy_eV is None:
+            fermi_energy_eV = self.fermi_energy_eV
+        if temperature_K is None:
+            temperature_K = self.temperature_K
+
+        # Check the input.
+        if ldos_data is None:
+            if dos_data is None or density_data is None:
+                raise Exception("No input data provided to caculate total energy. Provide EITHER LDOS OR DOS and density.")
+
+        # Calculate DOS data if need be.
+        if dos_data is None:
+            dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr=grid_spacing_bohr,
+                                                  integration_method=grid_integration_method)
+
+        # Calculate density data if need be.
+        if density_data is None:
+            density_data = self.get_density(ldos_data, fermi_energy_ev=fermi_energy_eV, temperature_K=temperature_K,
+                                             integration_method=energy_integration_method, shift_energy_grid=shift_energy_grid)
+
+        # Now we can create calculation objects to get the necessary quantities.
+        dos_calculator = DOS.from_ldos(self)
+        density_calculator = Density.from_ldos(self)
+
+        # With these calculator objects we can calculate all the necessary quantities to construct the total energy.
+        # (According to Eq. 9 in [1])
+        # Band energy (kinetic energy)
+        e_band = dos_calculator.get_band_energy(dos_data, fermi_energy_eV=fermi_energy_eV, temperature_K=temperature_K,
+                                                integration_method=energy_integration_method,
+                                                shift_energy_grid=shift_energy_grid)
+
+        # Smearing / Entropy contribution
+        e_entropy_contribution = dos_calculator.get_entropy_contribution(dos_data,fermi_energy_eV=fermi_energy_eV,
+                                                                         temperature_K=temperature_K,
+                                                                         integration_method=energy_integration_method,
+                                                                         shift_energy_grid=shift_energy_grid)
+
+        # Density based energy contributions (via QE)
+        e_rho_times_v_hxc, e_hartree,  e_xc, e_ewald \
+            = density_calculator.\
+            get_energy_contributions(density_data, qe_input_data=qe_input_data, atoms_Angstrom=atoms_Angstrom,
+                                     qe_pseudopotentials=qe_pseudopotentials)
+        e_total = e_band + e_rho_times_v_hxc + e_hartree + e_xc + e_ewald + e_entropy_contribution
+
+        return e_total
+
+
+
 
     def get_band_energy(self, ldos_data, fermi_energy_eV=None, temperature_K=None, grid_spacing_bohr=None,
                         grid_integration_method="summation", energy_integration_method="analytical",
