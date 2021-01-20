@@ -1,0 +1,3045 @@
+Loading module gcc/7.3.0 
+Loading module openmpi/2.1.2 
+Loading module fftw/3.3.8 
+Loading module lapack/3.8.0 
+Loading module blas/3.8.0 
+Loading module scalapack/2.0.2 
+Loading module qe/6casus 
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+
+     Program PWSCF v.6.6 starts on 19Jan2021 at 11:16:18 
+
+     This program is part of the open-source Quantum ESPRESSO suite
+     for quantum simulation of materials; please cite
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 29 465901 (2017);
+          URL http://www.quantum-espresso.org", 
+     in publications or presentations arising from this work. More details at
+     http://www.quantum-espresso.org/quote
+
+     Parallel version (MPI), running on    24 processors
+
+     MPI processes distributed on     1 nodes
+     R & G space division:  proc/nbgrp/npool/nimage =      24
+     Fft bands division:     nmany     =       1
+     Reading input from Al.pw.scf.in
+
+     Current dimensions of program PWSCF are:
+     Max number of different atomic species (ntypx) = 10
+     Max number of k-points (npk) =  40000
+     Max angular momentum in pseudopotentials (lmaxx) =  3
+
+     Subspace diagonalization in iterative solution of the eigenvalue problem:
+     one sub-group per band group will be used
+     scalapack distributed-memory algorithm (size of sub-group:  4*  4 procs)
+
+
+     Parallelization info
+     --------------------
+     sticks:   dense  smooth     PW     G-vecs:    dense   smooth      PW
+     Min         349     349     93                22645    22645    3127
+     Max         350     350     94                22646    22646    3130
+     Sum        8389    8389   2241               543493   543493   75083
+
+
+
+     bravais-lattice index     =            0
+     lattice parameter (alat)  =      16.2193  a.u.
+     unit-cell volume          =    4022.6908 (a.u.)^3
+     number of atoms/cell      =           36
+     number of atomic types    =            1
+     number of electrons       =       108.00
+     number of Kohn-Sham states=          200
+     kinetic-energy cutoff     =     100.0000  Ry
+     charge density cutoff     =     400.0000  Ry
+     convergence threshold     =      1.0E-08
+     mixing beta               =       0.7000
+     number of iterations used =            8  plain     mixing
+     Exchange-correlation= PBE
+                           (   1   4   3   4   0   0   0)
+
+     celldm(1)=  16.219258  celldm(2)=   0.000000  celldm(3)=   0.000000
+     celldm(4)=   0.000000  celldm(5)=   0.000000  celldm(6)=   0.000000
+
+     crystal axes: (cart. coord. in units of alat)
+               a(1) = (   1.000000   0.000000   0.000000 )  
+               a(2) = (   0.000000   1.000000   0.000000 )  
+               a(3) = (   0.000000   0.000000   0.942809 )  
+
+     reciprocal axes: (cart. coord. in units 2 pi/alat)
+               b(1) = (  1.000000  0.000000  0.000000 )  
+               b(2) = (  0.000000  1.000000  0.000000 )  
+               b(3) = (  0.000000  0.000000  1.060660 )  
+
+
+     PseudoPot. # 1 for Al read from file:
+     /home/fiedle09/tools/PPs/pbe/Al.pbe-n-rrkjus_psl.1.0.0.UPF
+     MD5 check sum: 942f0b55d6a815bb3632501e61c8a399
+     Pseudo is Ultrasoft + core correction, Zval =  3.0
+     Generated using "atomic" code by A. Dal Corso v.6.6
+     Using radial grid of 1135 points,  6 beta functions with: 
+                l(1) =   0
+                l(2) =   0
+                l(3) =   1
+                l(4) =   1
+                l(5) =   2
+                l(6) =   2
+     Q(r) pseudized with 0 coefficients 
+
+
+     atomic species   valence    mass     pseudopotential
+        Al             3.00    26.98154     Al( 1.00)
+
+     No symmetry found
+
+
+
+   Cartesian axes
+
+     site n.     atom                  positions (alat units)
+         1           Al  tau(   1) = (   0.0000000   0.0000000   0.0000000  )
+         2           Al  tau(   2) = (   0.6222359   0.4384556   0.4428098  )
+         3           Al  tau(   3) = (   0.8681086   0.3858602   0.1936777  )
+         4           Al  tau(   4) = (   0.2252277   0.4784427   0.3231502  )
+         5           Al  tau(   5) = (   0.5306853   0.6457863   0.0679626  )
+         6           Al  tau(   6) = (   0.6653874   0.4960109   0.7224841  )
+         7           Al  tau(   7) = (   0.8924775   0.1117923   0.6691547  )
+         8           Al  tau(   8) = (   0.2109680   0.8515736   0.0629285  )
+         9           Al  tau(   9) = (   0.4017652   0.1816010   0.4627768  )
+        10           Al  tau(  10) = (   0.3244703   0.4487090   0.5439238  )
+        11           Al  tau(  11) = (   0.9002750   0.4048163   0.5106156  )
+        12           Al  tau(  12) = (   0.7092972   0.7762081   0.6741923  )
+        13           Al  tau(  13) = (   0.9896818   0.2231526   0.3566452  )
+        14           Al  tau(  14) = (   0.1507202   0.2850104   0.6809159  )
+        15           Al  tau(  15) = (   0.2213726   0.1979631   0.1307575  )
+        16           Al  tau(  16) = (   0.0400998   0.5544385   0.0776533  )
+        17           Al  tau(  17) = (   0.2001708   0.5735534   0.7376009  )
+        18           Al  tau(  18) = (   0.9719229   0.7940483   0.6643282  )
+        19           Al  tau(  19) = (   0.7303371   0.1894330   0.3724162  )
+        20           Al  tau(  20) = (   0.7505443   0.5201234   0.9403882  )
+        21           Al  tau(  21) = (   0.6109248   0.2493710   0.8671255  )
+        22           Al  tau(  22) = (   0.7044897   0.5981651   0.2816693  )
+        23           Al  tau(  23) = (   0.5305379   0.2557016   0.2266297  )
+        24           Al  tau(  24) = (   0.2045175   0.0054984   0.6908630  )
+        25           Al  tau(  25) = (   0.7799670   0.1064646   0.0850697  )
+        26           Al  tau(  26) = (   0.6387707   0.2263488   0.6077162  )
+        27           Al  tau(  27) = (   0.3420532   0.4139289   0.9287604  )
+        28           Al  tau(  28) = (   0.5430771   0.0180055   0.2148335  )
+        29           Al  tau(  29) = (   0.3443341   0.7804809   0.2798267  )
+        30           Al  tau(  30) = (   0.1833343   0.9904088   0.3189499  )
+        31           Al  tau(  31) = (   0.7492178   0.9244814   0.3906121  )
+        32           Al  tau(  32) = (   0.4182014   0.1254235   0.7404016  )
+        33           Al  tau(  33) = (   0.4625478   0.6558151   0.5041429  )
+        34           Al  tau(  34) = (   0.4734741   0.9255702   0.5518476  )
+        35           Al  tau(  35) = (   0.8404145   0.7896813   0.0356464  )
+        36           Al  tau(  36) = (   0.9720077   0.7302859   0.3331096  )
+
+     number of k points=   112  Fermi-Dirac smearing, width (Ry)=  0.0019
+
+     Number of k-points >= 100: set verbosity='high' to print them.
+
+     Dense  grid:   543493 G-vectors     FFT dimensions: ( 108, 108, 100)
+
+     Estimated max dynamical RAM per process >       1.09 GB
+
+     Estimated total dynamical RAM >      26.25 GB
+
+     Initial potential from superposition of free atoms
+
+     starting charge  107.91755, renormalised to  108.00000
+     Starting wfcs are  144 randomized atomic wfcs +   56 random wfcs
+
+     total cpu time spent up to now is      371.2 secs
+
+     Self-consistent Calculation
+
+     iteration #  1     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  1.00E-02,  avg # of iterations =  7.0
+
+     total cpu time spent up to now is     3333.9 secs
+
+     total energy              =    -177.17472242 Ry
+     estimated scf accuracy    <       3.02098460 Ry
+
+     iteration #  2     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  2.80E-03,  avg # of iterations =  4.0
+
+     total cpu time spent up to now is     4709.2 secs
+
+     total energy              =    -173.53518830 Ry
+     estimated scf accuracy    <      47.62291642 Ry
+
+     iteration #  3     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  2.80E-03,  avg # of iterations =  2.4
+
+     total cpu time spent up to now is     6014.9 secs
+
+     total energy              =    -178.72324362 Ry
+     estimated scf accuracy    <       1.59236144 Ry
+
+     iteration #  4     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  1.47E-03,  avg # of iterations =  1.0
+
+     total cpu time spent up to now is     7003.1 secs
+
+     total energy              =    -178.95060442 Ry
+     estimated scf accuracy    <       0.25234059 Ry
+
+     iteration #  5     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  2.34E-04,  avg # of iterations =  2.9
+
+     total cpu time spent up to now is     8190.8 secs
+
+     total energy              =    -178.97451374 Ry
+     estimated scf accuracy    <       0.23821759 Ry
+
+     iteration #  6     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  2.21E-04,  avg # of iterations =  1.7
+
+     total cpu time spent up to now is     9267.3 secs
+
+     total energy              =    -179.00495703 Ry
+     estimated scf accuracy    <       0.01965554 Ry
+
+     iteration #  7     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     c_bands:  1 eigenvalues not converged
+     ethr =  1.82E-05,  avg # of iterations = 14.6
+
+     total cpu time spent up to now is    10676.8 secs
+
+     total energy              =    -179.00669127 Ry
+     estimated scf accuracy    <       0.01001403 Ry
+
+     iteration #  8     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  9.27E-06,  avg # of iterations =  2.0
+
+     total cpu time spent up to now is    11809.0 secs
+
+     total energy              =    -179.00805657 Ry
+     estimated scf accuracy    <       0.00445856 Ry
+
+     iteration #  9     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  4.13E-06,  avg # of iterations =  1.5
+
+     total cpu time spent up to now is    12852.4 secs
+
+     total energy              =    -179.00854863 Ry
+     estimated scf accuracy    <       0.00021522 Ry
+
+     iteration # 10     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  1.99E-07,  avg # of iterations =  2.0
+
+     total cpu time spent up to now is    13967.5 secs
+
+     total energy              =    -179.00857398 Ry
+     estimated scf accuracy    <       0.00009641 Ry
+
+     iteration # 11     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  8.93E-08,  avg # of iterations =  1.1
+
+     total cpu time spent up to now is    14961.6 secs
+
+     total energy              =    -179.00858396 Ry
+     estimated scf accuracy    <       0.00009772 Ry
+
+     iteration # 12     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  8.93E-08,  avg # of iterations =  1.0
+
+     total cpu time spent up to now is    15947.0 secs
+
+     total energy              =    -179.00859487 Ry
+     estimated scf accuracy    <       0.00000282 Ry
+
+     iteration # 13     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  2.61E-09,  avg # of iterations =  1.0
+
+     total cpu time spent up to now is    16935.0 secs
+
+     total energy              =    -179.00859481 Ry
+     estimated scf accuracy    <       0.00000653 Ry
+
+     iteration # 14     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  2.61E-09,  avg # of iterations =  1.0
+
+     total cpu time spent up to now is    17919.9 secs
+
+     total energy              =    -179.00859538 Ry
+     estimated scf accuracy    <       0.00000204 Ry
+
+     iteration # 15     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  1.89E-09,  avg # of iterations =  1.0
+
+     total cpu time spent up to now is    18906.6 secs
+
+     total energy              =    -179.00859561 Ry
+     estimated scf accuracy    <       0.00000032 Ry
+
+     iteration # 16     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  2.94E-10,  avg # of iterations =  1.0
+
+     total cpu time spent up to now is    19893.0 secs
+
+     total energy              =    -179.00859565 Ry
+     estimated scf accuracy    <       0.00000011 Ry
+
+     iteration # 17     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  1.06E-10,  avg # of iterations =  1.0
+
+     total cpu time spent up to now is    20878.6 secs
+
+     total energy              =    -179.00859566 Ry
+     estimated scf accuracy    <       0.00000004 Ry
+
+     iteration # 18     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  3.88E-11,  avg # of iterations =  1.0
+
+     total cpu time spent up to now is    21862.1 secs
+
+     total energy              =    -179.00859566 Ry
+     estimated scf accuracy    <       0.00000002 Ry
+
+     iteration # 19     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  2.21E-11,  avg # of iterations =  1.0
+
+     total cpu time spent up to now is    22846.5 secs
+
+     total energy              =    -179.00859566 Ry
+     estimated scf accuracy    <       0.00000001 Ry
+
+     iteration # 20     ecut=   100.00 Ry     beta= 0.70
+     Davidson diagonalization with overlap
+     ethr =  1.10E-11,  avg # of iterations =  1.0
+
+     total cpu time spent up to now is    23831.1 secs
+
+     End of self-consistent calculation
+
+     Number of k-points >= 100: set verbosity='high' to print the bands.
+
+     the Fermi energy is     7.5327 ev
+
+!    total energy              =    -179.00859567 Ry
+     estimated scf accuracy    <          1.7E-09 Ry
+     smearing contrib. (-TS)   =      -0.00243886 Ry
+     internal energy E=F+TS    =    -179.00615680 Ry
+
+     The total energy is F=E-TS. E is the sum of the following terms:
+     one-electron contribution =      83.67164706 Ry
+     hartree contribution      =      10.80127314 Ry
+     xc contribution           =     -95.48558928 Ry
+     ewald contribution        =    -177.99348773 Ry
+
+     convergence has been achieved in  20 iterations
+
+     Forces acting on atoms (cartesian axes, Ry/au):
+
+     atom    1 type  1   force =     0.09337281    0.08126323   -0.07041704
+     atom    2 type  1   force =    -0.10667857   -0.07948534    0.07416754
+     atom    3 type  1   force =    -0.02310642   -0.06033058    0.01710613
+     atom    4 type  1   force =    -0.09307456    0.02058845   -0.20351305
+     atom    5 type  1   force =    -0.13326202    0.08397070   -0.02984545
+     atom    6 type  1   force =    -0.10170689   -0.00700625   -0.22220717
+     atom    7 type  1   force =     0.02390679   -0.02178470    0.00308872
+     atom    8 type  1   force =     0.03571715   -0.04675889   -0.10190132
+     atom    9 type  1   force =    -0.09482141    0.01017837   -0.05972289
+     atom   10 type  1   force =     0.08117424   -0.14106093    0.12531462
+     atom   11 type  1   force =     0.00722992    0.13903090    0.11169814
+     atom   12 type  1   force =    -0.09756023    0.02918842    0.01583406
+     atom   13 type  1   force =     0.22745271   -0.17357901   -0.01933468
+     atom   14 type  1   force =    -0.05342173   -0.01161382    0.03349399
+     atom   15 type  1   force =    -0.01119332    0.00722222   -0.01933333
+     atom   16 type  1   force =     0.09318720    0.05387327   -0.05854776
+     atom   17 type  1   force =    -0.07261184    0.11535524    0.05684699
+     atom   18 type  1   force =     0.11488587   -0.00147532   -0.00971099
+     atom   19 type  1   force =     0.05418984   -0.03232818   -0.03227753
+     atom   20 type  1   force =     0.14129066   -0.01200869    0.12907432
+     atom   21 type  1   force =     0.03226121    0.06278869    0.12516059
+     atom   22 type  1   force =     0.05928041    0.19253069   -0.07410494
+     atom   23 type  1   force =    -0.11397446    0.31696473   -0.14304527
+     atom   24 type  1   force =    -0.14600576   -0.13688363   -0.03322004
+     atom   25 type  1   force =    -0.01509335    0.00904917    0.03898945
+     atom   26 type  1   force =     0.01354017   -0.03510982    0.06682281
+     atom   27 type  1   force =     0.02913535   -0.00042895    0.01855984
+     atom   28 type  1   force =    -0.07892647   -0.27089098   -0.03279157
+     atom   29 type  1   force =     0.08291591   -0.08359500    0.03424465
+     atom   30 type  1   force =    -0.07101698    0.03484310    0.08596146
+     atom   31 type  1   force =     0.05132301   -0.10644655    0.03498203
+     atom   32 type  1   force =     0.00300863    0.02820924    0.10538780
+     atom   33 type  1   force =     0.05892625    0.08244812    0.02376042
+     atom   34 type  1   force =     0.01459478   -0.02108448   -0.02221114
+     atom   35 type  1   force =    -0.05449951   -0.01728135    0.01894742
+     atom   36 type  1   force =     0.04956061   -0.00835208    0.01274320
+
+     Total force =     0.938318     Total SCF correction =     0.000055
+
+
+     Computing stress (Cartesian axis) and pressure
+
+          total   stress  (Ry/bohr**3)                   (kbar)     P=      268.35
+   0.00171215  -0.00011864   0.00017451          251.87      -17.45       25.67
+  -0.00011864   0.00199118  -0.00020838          -17.45      292.91      -30.65
+   0.00017451  -0.00020838   0.00176920           25.67      -30.65      260.26
+
+
+     Writing output data file /home/fiedle09/jobs/qe/Al36/for_fesl/Al.save/
+
+     init_run     :    369.92s CPU    370.72s WALL (       1 calls)
+     electrons    :  23429.04s CPU  23459.96s WALL (       1 calls)
+     forces       :    368.76s CPU    368.85s WALL (       1 calls)
+     stress       :    453.40s CPU    453.53s WALL (       1 calls)
+
+     Called by init_run:
+     wfcinit      :    368.62s CPU    369.39s WALL (       1 calls)
+     potinit      :      0.24s CPU      0.25s WALL (       1 calls)
+     hinit0       :      0.49s CPU      0.50s WALL (       1 calls)
+
+     Called by electrons:
+     c_bands      :  21129.66s CPU  21155.55s WALL (      20 calls)
+     sum_band     :   2289.95s CPU   2294.64s WALL (      20 calls)
+     v_of_rho     :      0.93s CPU      0.94s WALL (      21 calls)
+     newd         :      8.73s CPU      9.03s WALL (      21 calls)
+     mix_rho      :      0.18s CPU      0.19s WALL (      20 calls)
+
+     Called by c_bands:
+     init_us_2    :     43.11s CPU     43.20s WALL (    4816 calls)
+     cegterg      :  20979.80s CPU  21004.76s WALL (    2240 calls)
+
+     Called by *egterg:
+     cdiaghg      :    404.99s CPU    405.60s WALL (    7747 calls)
+     h_psi        :  10053.90s CPU  10074.30s WALL (    7859 calls)
+     s_psi        :   3931.53s CPU   3932.25s WALL (    7859 calls)
+     g_psi        :      6.58s CPU      6.63s WALL (    5507 calls)
+
+     Called by h_psi:
+     h_psi:calbec :   4119.20s CPU   4120.29s WALL (    7859 calls)
+     vloc_psi     :   1985.14s CPU   2003.26s WALL (    7859 calls)
+     add_vuspsi   :   3936.39s CPU   3937.24s WALL (    7859 calls)
+
+     General routines
+     calbec       :   6383.68s CPU   6385.22s WALL (   10659 calls)
+     fft          :      0.69s CPU      0.70s WALL (     256 calls)
+     ffts         :      0.04s CPU      0.05s WALL (      20 calls)
+     fftw         :   2249.02s CPU   2268.79s WALL ( 2493510 calls)
+
+     Parallel routines
+     fft_scatt_xy :    154.28s CPU    155.87s WALL ( 2493786 calls)
+     fft_scatt_yz :    684.72s CPU    692.30s WALL ( 2493786 calls)
+
+     PWSCF        :      6h50m CPU      6h51m WALL
+
+
+   This run was terminated on:  18: 8:13  19Jan2021            
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+
+     Program DOS v.6.6 starts on 19Jan2021 at 18: 8:14 
+
+     This program is part of the open-source Quantum ESPRESSO suite
+     for quantum simulation of materials; please cite
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 29 465901 (2017);
+          URL http://www.quantum-espresso.org", 
+     in publications or presentations arising from this work. More details at
+     http://www.quantum-espresso.org/quote
+
+     Parallel version (MPI), running on    24 processors
+
+     MPI processes distributed on     1 nodes
+     R & G space division:  proc/nbgrp/npool/nimage =      24
+     Fft bands division:     nmany     =       1
+
+     Reading xml data from directory:
+
+     /home/fiedle09/jobs/qe/Al36/for_fesl/Al.save/
+
+     IMPORTANT: XC functional enforced from input :
+     Exchange-correlation= PBE
+                           (   1   4   3   4   0   0   0)
+     Any further DFT definition will be discarded
+     Please, verify this is what you really want
+
+
+     Parallelization info
+     --------------------
+     sticks:   dense  smooth     PW     G-vecs:    dense   smooth      PW
+     Min         349     349     93                22645    22645    3127
+     Max         350     350     94                22646    22646    3130
+     Sum        8389    8389   2241               543493   543493   75083
+
+
+     Gaussian broadening (read from input): ngauss,degauss=   0    0.200000
+
+
+     DOS          :      1.89s CPU      2.18s WALL
+
+
+   This run was terminated on:  18: 8:16  19Jan2021            
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+
+     Program POST-PROC v.6.6 starts on 19Jan2021 at 18: 8:17 
+
+     This program is part of the open-source Quantum ESPRESSO suite
+     for quantum simulation of materials; please cite
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 29 465901 (2017);
+          URL http://www.quantum-espresso.org", 
+     in publications or presentations arising from this work. More details at
+     http://www.quantum-espresso.org/quote
+
+     Parallel version (MPI), running on    24 processors
+
+     MPI processes distributed on     1 nodes
+     R & G space division:  proc/nbgrp/npool/nimage =      24
+     Fft bands division:     nmany     =       1
+
+     Reading xml data from directory:
+
+     /home/fiedle09/jobs/qe/Al36/for_fesl/Al.save/
+
+     IMPORTANT: XC functional enforced from input :
+     Exchange-correlation= PBE
+                           (   1   4   3   4   0   0   0)
+     Any further DFT definition will be discarded
+     Please, verify this is what you really want
+
+
+     Parallelization info
+     --------------------
+     sticks:   dense  smooth     PW     G-vecs:    dense   smooth      PW
+     Min         349     349     93                22645    22645    3127
+     Max         350     350     94                22646    22646    3130
+     Sum        8389    8389   2241               543493   543493   75083
+
+
+     Calling punch_plot, plot_num =   3
+
+     Energy = -10.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp001
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -9.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp002
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -9.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp003
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -9.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp004
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -9.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp005
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -9.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp006
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -9.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp007
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -9.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp008
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -9.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp009
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -9.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp010
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -9.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp011
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -8.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp012
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -8.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp013
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -8.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp014
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -8.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp015
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -8.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp016
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -8.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp017
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -8.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp018
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -8.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp019
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -8.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp020
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -8.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp021
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -7.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp022
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -7.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp023
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -7.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp024
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -7.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp025
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -7.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp026
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -7.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp027
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -7.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp028
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -7.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp029
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -7.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp030
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -7.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp031
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -6.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp032
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -6.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp033
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -6.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp034
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -6.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp035
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -6.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp036
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -6.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp037
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -6.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp038
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -6.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp039
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -6.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp040
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -6.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp041
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -5.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp042
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -5.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp043
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -5.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp044
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -5.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp045
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -5.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp046
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -5.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp047
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -5.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp048
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -5.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp049
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -5.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp050
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -5.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp051
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -4.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp052
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -4.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp053
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -4.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp054
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -4.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp055
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -4.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp056
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -4.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp057
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -4.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp058
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -4.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp059
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -4.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp060
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -4.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp061
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -3.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp062
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -3.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp063
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -3.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp064
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -3.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp065
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -3.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp066
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -3.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp067
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -3.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp068
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -3.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp069
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -3.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp070
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -3.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp071
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -2.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp072
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -2.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp073
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -2.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp074
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -2.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp075
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -2.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp076
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -2.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp077
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -2.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp078
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -2.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp079
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -2.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp080
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -2.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp081
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -1.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp082
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -1.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp083
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -1.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp084
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -1.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp085
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -1.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp086
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -1.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp087
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -1.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp088
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -1.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp089
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -1.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp090
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -1.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp091
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -0.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp092
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -0.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp093
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -0.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp094
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -0.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp095
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -0.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp096
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -0.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp097
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -0.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp098
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -0.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp099
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -0.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp100
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  -0.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp101
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   0.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp102
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   0.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp103
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   0.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp104
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   0.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp105
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   0.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp106
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   0.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp107
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   0.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp108
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   0.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp109
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   0.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp110
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   1.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp111
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   1.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp112
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   1.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp113
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   1.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp114
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   1.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp115
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   1.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp116
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   1.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp117
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   1.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp118
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   1.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp119
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   1.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp120
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   2.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp121
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   2.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp122
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   2.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp123
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   2.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp124
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   2.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp125
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   2.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp126
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   2.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp127
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   2.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp128
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   2.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp129
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   2.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp130
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   3.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp131
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   3.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp132
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   3.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp133
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   3.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp134
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   3.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp135
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   3.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp136
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   3.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp137
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   3.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp138
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   3.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp139
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   3.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp140
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   4.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp141
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   4.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp142
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   4.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp143
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   4.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp144
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   4.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp145
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   4.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp146
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   4.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp147
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   4.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp148
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   4.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp149
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   4.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp150
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   5.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp151
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   5.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp152
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   5.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp153
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   5.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp154
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   5.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp155
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   5.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp156
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   5.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp157
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   5.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp158
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   5.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp159
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   5.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp160
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   6.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp161
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   6.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp162
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   6.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp163
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   6.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp164
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   6.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp165
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   6.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp166
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   6.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp167
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   6.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp168
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   6.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp169
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   6.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp170
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   7.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp171
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   7.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp172
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   7.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp173
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   7.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp174
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   7.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp175
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   7.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp176
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   7.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp177
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   7.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp178
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   7.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp179
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   7.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp180
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   8.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp181
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   8.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp182
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   8.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp183
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   8.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp184
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   8.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp185
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   8.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp186
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   8.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp187
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   8.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp188
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   8.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp189
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   8.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp190
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   9.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp191
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   9.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp192
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   9.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp193
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   9.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp194
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   9.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp195
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   9.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp196
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   9.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp197
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   9.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp198
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   9.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp199
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =   9.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp200
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  10.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp201
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  10.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp202
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  10.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp203
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  10.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp204
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  10.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp205
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  10.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp206
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  10.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp207
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  10.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp208
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  10.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp209
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  10.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp210
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  11.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp211
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  11.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp212
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  11.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp213
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  11.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp214
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  11.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp215
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  11.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp216
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  11.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp217
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  11.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp218
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  11.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp219
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  11.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp220
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  12.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp221
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  12.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp222
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  12.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp223
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  12.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp224
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  12.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp225
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  12.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp226
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  12.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp227
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  12.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp228
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  12.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp229
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  12.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp230
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  13.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp231
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  13.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp232
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  13.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp233
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  13.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp234
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  13.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp235
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  13.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp236
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  13.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp237
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  13.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp238
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  13.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp239
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  13.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp240
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  14.00000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp241
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  14.10000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp242
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  14.20000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp243
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  14.30000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp244
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  14.40000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp245
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  14.50000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp246
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  14.60000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp247
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  14.70000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp248
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  14.80000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp249
+
+     Calling punch_plot, plot_num =   3
+
+     Energy =  14.90000 eV, broadening =   0.20000eV
+     Writing data to file  tmp.pp250
+     Reading data from file  tmp.pp001
+
+     Writing data to be plotted to file tmp.pp001Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp002
+
+     Writing data to be plotted to file tmp.pp002Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp003
+
+     Writing data to be plotted to file tmp.pp003Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp004
+
+     Writing data to be plotted to file tmp.pp004Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp005
+
+     Writing data to be plotted to file tmp.pp005Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp006
+
+     Writing data to be plotted to file tmp.pp006Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp007
+
+     Writing data to be plotted to file tmp.pp007Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp008
+
+     Writing data to be plotted to file tmp.pp008Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp009
+
+     Writing data to be plotted to file tmp.pp009Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp010
+
+     Writing data to be plotted to file tmp.pp010Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp011
+
+     Writing data to be plotted to file tmp.pp011Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp012
+
+     Writing data to be plotted to file tmp.pp012Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp013
+
+     Writing data to be plotted to file tmp.pp013Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp014
+
+     Writing data to be plotted to file tmp.pp014Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp015
+
+     Writing data to be plotted to file tmp.pp015Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp016
+
+     Writing data to be plotted to file tmp.pp016Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp017
+
+     Writing data to be plotted to file tmp.pp017Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp018
+
+     Writing data to be plotted to file tmp.pp018Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp019
+
+     Writing data to be plotted to file tmp.pp019Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp020
+
+     Writing data to be plotted to file tmp.pp020Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp021
+
+     Writing data to be plotted to file tmp.pp021Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp022
+
+     Writing data to be plotted to file tmp.pp022Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp023
+
+     Writing data to be plotted to file tmp.pp023Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp024
+
+     Writing data to be plotted to file tmp.pp024Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp025
+
+     Writing data to be plotted to file tmp.pp025Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp026
+
+     Writing data to be plotted to file tmp.pp026Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp027
+
+     Writing data to be plotted to file tmp.pp027Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp028
+
+     Writing data to be plotted to file tmp.pp028Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp029
+
+     Writing data to be plotted to file tmp.pp029Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp030
+
+     Writing data to be plotted to file tmp.pp030Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp031
+
+     Writing data to be plotted to file tmp.pp031Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp032
+
+     Writing data to be plotted to file tmp.pp032Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp033
+
+     Writing data to be plotted to file tmp.pp033Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp034
+
+     Writing data to be plotted to file tmp.pp034Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp035
+
+     Writing data to be plotted to file tmp.pp035Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp036
+
+     Writing data to be plotted to file tmp.pp036Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp037
+
+     Writing data to be plotted to file tmp.pp037Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp038
+
+     Writing data to be plotted to file tmp.pp038Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp039
+
+     Writing data to be plotted to file tmp.pp039Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp040
+
+     Writing data to be plotted to file tmp.pp040Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp041
+
+     Writing data to be plotted to file tmp.pp041Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp042
+
+     Writing data to be plotted to file tmp.pp042Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp043
+
+     Writing data to be plotted to file tmp.pp043Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp044
+
+     Writing data to be plotted to file tmp.pp044Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp045
+
+     Writing data to be plotted to file tmp.pp045Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp046
+
+     Writing data to be plotted to file tmp.pp046Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp047
+
+     Writing data to be plotted to file tmp.pp047Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp048
+
+     Writing data to be plotted to file tmp.pp048Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp049
+
+     Writing data to be plotted to file tmp.pp049Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp050
+
+     Writing data to be plotted to file tmp.pp050Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp051
+
+     Writing data to be plotted to file tmp.pp051Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp052
+
+     Writing data to be plotted to file tmp.pp052Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp053
+
+     Writing data to be plotted to file tmp.pp053Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp054
+
+     Writing data to be plotted to file tmp.pp054Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp055
+
+     Writing data to be plotted to file tmp.pp055Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp056
+
+     Writing data to be plotted to file tmp.pp056Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp057
+
+     Writing data to be plotted to file tmp.pp057Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp058
+
+     Writing data to be plotted to file tmp.pp058Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp059
+
+     Writing data to be plotted to file tmp.pp059Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp060
+
+     Writing data to be plotted to file tmp.pp060Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp061
+
+     Writing data to be plotted to file tmp.pp061Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp062
+
+     Writing data to be plotted to file tmp.pp062Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp063
+
+     Writing data to be plotted to file tmp.pp063Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp064
+
+     Writing data to be plotted to file tmp.pp064Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp065
+
+     Writing data to be plotted to file tmp.pp065Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp066
+
+     Writing data to be plotted to file tmp.pp066Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp067
+
+     Writing data to be plotted to file tmp.pp067Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp068
+
+     Writing data to be plotted to file tmp.pp068Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp069
+
+     Writing data to be plotted to file tmp.pp069Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp070
+
+     Writing data to be plotted to file tmp.pp070Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp071
+
+     Writing data to be plotted to file tmp.pp071Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp072
+
+     Writing data to be plotted to file tmp.pp072Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp073
+
+     Writing data to be plotted to file tmp.pp073Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp074
+
+     Writing data to be plotted to file tmp.pp074Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp075
+
+     Writing data to be plotted to file tmp.pp075Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp076
+
+     Writing data to be plotted to file tmp.pp076Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp077
+
+     Writing data to be plotted to file tmp.pp077Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp078
+
+     Writing data to be plotted to file tmp.pp078Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp079
+
+     Writing data to be plotted to file tmp.pp079Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp080
+
+     Writing data to be plotted to file tmp.pp080Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp081
+
+     Writing data to be plotted to file tmp.pp081Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp082
+
+     Writing data to be plotted to file tmp.pp082Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp083
+
+     Writing data to be plotted to file tmp.pp083Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp084
+
+     Writing data to be plotted to file tmp.pp084Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp085
+
+     Writing data to be plotted to file tmp.pp085Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp086
+
+     Writing data to be plotted to file tmp.pp086Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp087
+
+     Writing data to be plotted to file tmp.pp087Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp088
+
+     Writing data to be plotted to file tmp.pp088Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp089
+
+     Writing data to be plotted to file tmp.pp089Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp090
+
+     Writing data to be plotted to file tmp.pp090Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp091
+
+     Writing data to be plotted to file tmp.pp091Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp092
+
+     Writing data to be plotted to file tmp.pp092Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp093
+
+     Writing data to be plotted to file tmp.pp093Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp094
+
+     Writing data to be plotted to file tmp.pp094Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp095
+
+     Writing data to be plotted to file tmp.pp095Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp096
+
+     Writing data to be plotted to file tmp.pp096Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp097
+
+     Writing data to be plotted to file tmp.pp097Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp098
+
+     Writing data to be plotted to file tmp.pp098Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp099
+
+     Writing data to be plotted to file tmp.pp099Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp100
+
+     Writing data to be plotted to file tmp.pp100Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp101
+
+     Writing data to be plotted to file tmp.pp101Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp102
+
+     Writing data to be plotted to file tmp.pp102Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp103
+
+     Writing data to be plotted to file tmp.pp103Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp104
+
+     Writing data to be plotted to file tmp.pp104Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp105
+
+     Writing data to be plotted to file tmp.pp105Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp106
+
+     Writing data to be plotted to file tmp.pp106Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp107
+
+     Writing data to be plotted to file tmp.pp107Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp108
+
+     Writing data to be plotted to file tmp.pp108Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp109
+
+     Writing data to be plotted to file tmp.pp109Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp110
+
+     Writing data to be plotted to file tmp.pp110Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp111
+
+     Writing data to be plotted to file tmp.pp111Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp112
+
+     Writing data to be plotted to file tmp.pp112Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp113
+
+     Writing data to be plotted to file tmp.pp113Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp114
+
+     Writing data to be plotted to file tmp.pp114Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp115
+
+     Writing data to be plotted to file tmp.pp115Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp116
+
+     Writing data to be plotted to file tmp.pp116Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp117
+
+     Writing data to be plotted to file tmp.pp117Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp118
+
+     Writing data to be plotted to file tmp.pp118Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp119
+
+     Writing data to be plotted to file tmp.pp119Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp120
+
+     Writing data to be plotted to file tmp.pp120Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp121
+
+     Writing data to be plotted to file tmp.pp121Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp122
+
+     Writing data to be plotted to file tmp.pp122Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp123
+
+     Writing data to be plotted to file tmp.pp123Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp124
+
+     Writing data to be plotted to file tmp.pp124Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp125
+
+     Writing data to be plotted to file tmp.pp125Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp126
+
+     Writing data to be plotted to file tmp.pp126Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp127
+
+     Writing data to be plotted to file tmp.pp127Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp128
+
+     Writing data to be plotted to file tmp.pp128Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp129
+
+     Writing data to be plotted to file tmp.pp129Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp130
+
+     Writing data to be plotted to file tmp.pp130Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp131
+
+     Writing data to be plotted to file tmp.pp131Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp132
+
+     Writing data to be plotted to file tmp.pp132Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp133
+
+     Writing data to be plotted to file tmp.pp133Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp134
+
+     Writing data to be plotted to file tmp.pp134Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp135
+
+     Writing data to be plotted to file tmp.pp135Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp136
+
+     Writing data to be plotted to file tmp.pp136Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp137
+
+     Writing data to be plotted to file tmp.pp137Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp138
+
+     Writing data to be plotted to file tmp.pp138Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp139
+
+     Writing data to be plotted to file tmp.pp139Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp140
+
+     Writing data to be plotted to file tmp.pp140Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp141
+
+     Writing data to be plotted to file tmp.pp141Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp142
+
+     Writing data to be plotted to file tmp.pp142Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp143
+
+     Writing data to be plotted to file tmp.pp143Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp144
+
+     Writing data to be plotted to file tmp.pp144Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp145
+
+     Writing data to be plotted to file tmp.pp145Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp146
+
+     Writing data to be plotted to file tmp.pp146Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp147
+
+     Writing data to be plotted to file tmp.pp147Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp148
+
+     Writing data to be plotted to file tmp.pp148Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp149
+
+     Writing data to be plotted to file tmp.pp149Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp150
+
+     Writing data to be plotted to file tmp.pp150Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp151
+
+     Writing data to be plotted to file tmp.pp151Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp152
+
+     Writing data to be plotted to file tmp.pp152Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp153
+
+     Writing data to be plotted to file tmp.pp153Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp154
+
+     Writing data to be plotted to file tmp.pp154Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp155
+
+     Writing data to be plotted to file tmp.pp155Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp156
+
+     Writing data to be plotted to file tmp.pp156Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp157
+
+     Writing data to be plotted to file tmp.pp157Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp158
+
+     Writing data to be plotted to file tmp.pp158Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp159
+
+     Writing data to be plotted to file tmp.pp159Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp160
+
+     Writing data to be plotted to file tmp.pp160Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp161
+
+     Writing data to be plotted to file tmp.pp161Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp162
+
+     Writing data to be plotted to file tmp.pp162Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp163
+
+     Writing data to be plotted to file tmp.pp163Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp164
+
+     Writing data to be plotted to file tmp.pp164Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp165
+
+     Writing data to be plotted to file tmp.pp165Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp166
+
+     Writing data to be plotted to file tmp.pp166Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp167
+
+     Writing data to be plotted to file tmp.pp167Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp168
+
+     Writing data to be plotted to file tmp.pp168Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp169
+
+     Writing data to be plotted to file tmp.pp169Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp170
+
+     Writing data to be plotted to file tmp.pp170Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp171
+
+     Writing data to be plotted to file tmp.pp171Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp172
+
+     Writing data to be plotted to file tmp.pp172Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp173
+
+     Writing data to be plotted to file tmp.pp173Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp174
+
+     Writing data to be plotted to file tmp.pp174Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp175
+
+     Writing data to be plotted to file tmp.pp175Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp176
+
+     Writing data to be plotted to file tmp.pp176Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp177
+
+     Writing data to be plotted to file tmp.pp177Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp178
+
+     Writing data to be plotted to file tmp.pp178Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp179
+
+     Writing data to be plotted to file tmp.pp179Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp180
+
+     Writing data to be plotted to file tmp.pp180Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp181
+
+     Writing data to be plotted to file tmp.pp181Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp182
+
+     Writing data to be plotted to file tmp.pp182Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp183
+
+     Writing data to be plotted to file tmp.pp183Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp184
+
+     Writing data to be plotted to file tmp.pp184Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp185
+
+     Writing data to be plotted to file tmp.pp185Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp186
+
+     Writing data to be plotted to file tmp.pp186Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp187
+
+     Writing data to be plotted to file tmp.pp187Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp188
+
+     Writing data to be plotted to file tmp.pp188Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp189
+
+     Writing data to be plotted to file tmp.pp189Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp190
+
+     Writing data to be plotted to file tmp.pp190Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp191
+
+     Writing data to be plotted to file tmp.pp191Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp192
+
+     Writing data to be plotted to file tmp.pp192Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp193
+
+     Writing data to be plotted to file tmp.pp193Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp194
+
+     Writing data to be plotted to file tmp.pp194Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp195
+
+     Writing data to be plotted to file tmp.pp195Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp196
+
+     Writing data to be plotted to file tmp.pp196Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp197
+
+     Writing data to be plotted to file tmp.pp197Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp198
+
+     Writing data to be plotted to file tmp.pp198Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp199
+
+     Writing data to be plotted to file tmp.pp199Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp200
+
+     Writing data to be plotted to file tmp.pp200Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp201
+
+     Writing data to be plotted to file tmp.pp201Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp202
+
+     Writing data to be plotted to file tmp.pp202Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp203
+
+     Writing data to be plotted to file tmp.pp203Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp204
+
+     Writing data to be plotted to file tmp.pp204Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp205
+
+     Writing data to be plotted to file tmp.pp205Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp206
+
+     Writing data to be plotted to file tmp.pp206Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp207
+
+     Writing data to be plotted to file tmp.pp207Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp208
+
+     Writing data to be plotted to file tmp.pp208Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp209
+
+     Writing data to be plotted to file tmp.pp209Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp210
+
+     Writing data to be plotted to file tmp.pp210Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp211
+
+     Writing data to be plotted to file tmp.pp211Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp212
+
+     Writing data to be plotted to file tmp.pp212Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp213
+
+     Writing data to be plotted to file tmp.pp213Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp214
+
+     Writing data to be plotted to file tmp.pp214Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp215
+
+     Writing data to be plotted to file tmp.pp215Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp216
+
+     Writing data to be plotted to file tmp.pp216Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp217
+
+     Writing data to be plotted to file tmp.pp217Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp218
+
+     Writing data to be plotted to file tmp.pp218Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp219
+
+     Writing data to be plotted to file tmp.pp219Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp220
+
+     Writing data to be plotted to file tmp.pp220Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp221
+
+     Writing data to be plotted to file tmp.pp221Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp222
+
+     Writing data to be plotted to file tmp.pp222Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp223
+
+     Writing data to be plotted to file tmp.pp223Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp224
+
+     Writing data to be plotted to file tmp.pp224Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp225
+
+     Writing data to be plotted to file tmp.pp225Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp226
+
+     Writing data to be plotted to file tmp.pp226Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp227
+
+     Writing data to be plotted to file tmp.pp227Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp228
+
+     Writing data to be plotted to file tmp.pp228Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp229
+
+     Writing data to be plotted to file tmp.pp229Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp230
+
+     Writing data to be plotted to file tmp.pp230Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp231
+
+     Writing data to be plotted to file tmp.pp231Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp232
+
+     Writing data to be plotted to file tmp.pp232Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp233
+
+     Writing data to be plotted to file tmp.pp233Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp234
+
+     Writing data to be plotted to file tmp.pp234Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp235
+
+     Writing data to be plotted to file tmp.pp235Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp236
+
+     Writing data to be plotted to file tmp.pp236Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp237
+
+     Writing data to be plotted to file tmp.pp237Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp238
+
+     Writing data to be plotted to file tmp.pp238Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp239
+
+     Writing data to be plotted to file tmp.pp239Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp240
+
+     Writing data to be plotted to file tmp.pp240Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp241
+
+     Writing data to be plotted to file tmp.pp241Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp242
+
+     Writing data to be plotted to file tmp.pp242Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp243
+
+     Writing data to be plotted to file tmp.pp243Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp244
+
+     Writing data to be plotted to file tmp.pp244Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp245
+
+     Writing data to be plotted to file tmp.pp245Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp246
+
+     Writing data to be plotted to file tmp.pp246Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp247
+
+     Writing data to be plotted to file tmp.pp247Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp248
+
+     Writing data to be plotted to file tmp.pp248Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp249
+
+     Writing data to be plotted to file tmp.pp249Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+     Reading data from file  tmp.pp250
+
+     Writing data to be plotted to file tmp.pp250Al_ldos.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+
+     POST-PROC    :      8h27m CPU      9h46m WALL
+
+
+   This run was terminated on:   3:54:34  20Jan2021            
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav25.so': librxe-rdmav25.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav25.so': libmlx4-rdmav25.so: cannot open shared object file: No such file or directory
+
+     Program POST-PROC v.6.6 starts on 20Jan2021 at  3:54:35 
+
+     This program is part of the open-source Quantum ESPRESSO suite
+     for quantum simulation of materials; please cite
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 29 465901 (2017);
+          URL http://www.quantum-espresso.org", 
+     in publications or presentations arising from this work. More details at
+     http://www.quantum-espresso.org/quote
+
+     Parallel version (MPI), running on    24 processors
+
+     MPI processes distributed on     1 nodes
+     R & G space division:  proc/nbgrp/npool/nimage =      24
+     Fft bands division:     nmany     =       1
+
+     Reading xml data from directory:
+
+     /home/fiedle09/jobs/qe/Al36/for_fesl/Al.save/
+
+     IMPORTANT: XC functional enforced from input :
+     Exchange-correlation= PBE
+                           (   1   4   3   4   0   0   0)
+     Any further DFT definition will be discarded
+     Please, verify this is what you really want
+
+
+     Parallelization info
+     --------------------
+     sticks:   dense  smooth     PW     G-vecs:    dense   smooth      PW
+     Min         349     349     93                22645    22645    3127
+     Max         350     350     94                22646    22646    3130
+     Sum        8389    8389   2241               543493   543493   75083
+
+
+     Calling punch_plot, plot_num =   0
+     Writing data to file  tmp.pp
+     Reading data from file  tmp.pp
+
+     Writing data to be plotted to file Al_dens.cube
+     Plot Type: 3D                     Output format: Gaussian cube
+
+     POST-PROC    :      3.76s CPU      4.16s WALL
+
+
+   This run was terminated on:   3:54:39  20Jan2021            
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=

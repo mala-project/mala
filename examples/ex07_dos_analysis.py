@@ -1,7 +1,6 @@
 from fesl.common.parameters import Parameters
 from fesl.targets.dos import DOS
 import numpy as np
-from scipy.optimize import toms748
 from ase.units import Rydberg
 
 """

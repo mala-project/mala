@@ -80,6 +80,13 @@ is not necessary to install LAMMPS if you are you using this workflow with
 preprocessed data. If you need/want to install LAMMPS, please refer to
 `INSTALL_LAMMPS.md`.
 
+### Total energy module (optional)
+
+It is possible to utilize Quantum Espresso to calculate the total energy of a given system using python bindings. 
+This provides an additional post-processing capability, but is not necessarily needed for using this workflow. 
+If you want to use this module, please refer to `INSTALL_TE_QE.md`.
+
+
 ## Installing the FESL package
 
 1. Make sure that all prerequisites are fulfilled (see above)

@@ -34,6 +34,39 @@ def fermi_function(energy, fermi_energy, temperature_K, energy_units="eV"):
     if energy_units == "eV":
         return fermi_function_eV(energy, fermi_energy, temperature_K)
 
+def entropy_multiplicator(energy, fermi_energy, temperature_K, energy_units="eV"):
+    """
+    Calculates the multiplicator function for the entropy integral:
+    f(E)*log(f(E))+(1-f(E)*log(1-f(E))
+    """
+    if len(np.shape(energy)) > 0:
+        dim = np.shape(energy)[0]
+        multiplicator = np.zeros(dim, dtype=np.float)
+        for i in range(0, np.shape(energy)[0]):
+            fermi_val = fermi_function(energy[i], fermi_energy, temperature_K, energy_units=energy_units)
+            if fermi_val == 1.0:
+                secondterm = 0.0
+            else:
+                secondterm = (1 - fermi_val) * np.log(1 - fermi_val)
+            if fermi_val == 0.0:
+                firsterm = 0.0
+            else:
+                firsterm = fermi_val * np.log(fermi_val)
+            multiplicator[i] = firsterm + secondterm
+    else:
+        fermi_val = fermi_function(energy, fermi_energy, temperature_K, energy_units=energy_units)
+        if fermi_val == 1.0:
+            secondterm = 0.0
+        else:
+            secondterm = (1 - fermi_val) * np.log(1 - fermi_val)
+        if fermi_val == 0.0:
+            firsterm = 0.0
+        else:
+            firsterm = fermi_val * np.log(fermi_val)
+        multiplicator = firsterm + secondterm
+
+    return multiplicator
+
 
 def fermi_function_eV(energy_ev, fermi_energy_ev, temperature_K):
     """
@@ -45,6 +78,10 @@ def fermi_function_eV(energy_ev, fermi_energy_ev, temperature_K):
         - temperature_K: Temperature in K
     """
     return 1.0 / (1.0 + np.exp((energy_ev - fermi_energy_ev) / (kB * temperature_K)))
+
+
+def get_beta(temperature_K):
+    return 1 / (kB * temperature_K)
 
 
 def get_f0_value(x, beta):
@@ -63,7 +100,7 @@ def get_f2_value(x, beta):
 
 
 def get_s0_value(x, beta):
-    results = (-1.0*x*mp.polylog(1, -1.0*mp.exp(x)) - 2.0*mp.polylog(2, -1.0*mp.exp(x))) / (beta*beta)
+    results = (-1.0*x*mp.polylog(1, -1.0*mp.exp(x)) + 2.0*mp.polylog(2, -1.0*mp.exp(x))) / (beta*beta)
     return results
 
 
