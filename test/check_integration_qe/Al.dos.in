@@ -1,0 +1,9 @@
+&dos
+ outdir='/home/fiedle09/jobs/qe/Al36/for_fesl',
+ prefix='Al',
+ Emin=-10.0,
+ Emax=15.0,
+ DeltaE=0.1,
+ degauss=0.2,
+ fildos='Al.dos'
+/
