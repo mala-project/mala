@@ -11,4 +11,5 @@ setup(
     packages=["fesl"],
     zip_safe=False,
     install_requires=open('requirements.txt').read().splitlines(),
+    python_requires='<3.9',
 )
