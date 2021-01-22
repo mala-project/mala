@@ -3,7 +3,13 @@ import numpy as np
 import torch
 from torch import optim
 from torch.utils.data import DataLoader
-import horovod.torch as hvd
+import warnings
+try:
+    import horovod.torch as hvd
+except ModuleNotFoundError:
+    warnings.warn("You either don't have Horovod installed or it is not configured correctly. You can still "
+              "train networks, but attempting to set parameters.training.use_horovod = True WILL cause a crash.")
+
 
 class Trainer:
     """A class for training a neural network."""
@@ -25,12 +31,15 @@ class Trainer:
 
         # See if we can and want to work on a GPU.
         self.use_gpu = torch.cuda.is_available() and self.parameters.use_gpu
-        #see if we want to use horovod for multi GPU.
-        if torch.cuda.device_count() == 1: # change to >1
-            self.use_horovod= self.use_gpu and self.parameters.use_horovod
+
+        # This is a place where additional checks could be placed.
+        self.use_horovod= self.parameters.use_horovod
+
+        # See if we want to use horovod.
         if self.use_horovod:
             # Initialize horovod
             hvd.init()
+
             # pin GPU to local rank
             torch.cuda.set_device(hvd.local_rank())
 
