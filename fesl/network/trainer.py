@@ -40,12 +40,14 @@ class Trainer:
             # Initialize horovod
             hvd.init()
 
-            # pin GPU to local rank
-            torch.cuda.set_device(hvd.local_rank())
+            if self.use_gpu:
+                # pin GPU to local rank
+                torch.cuda.set_device(hvd.local_rank())
 
             # Using seeds to repreduce the same result
             torch.manual_seed(self.parameters.seed)
-            torch.cuda.manual_seed(self.parameters.seed)
+            if self.use_gpu:
+                torch.cuda.manual_seed(self.parameters.seed)
 
   
 
@@ -68,7 +70,7 @@ class Trainer:
 
         
         if self.use_horovod:
-            self.parameters.kwargs = {'num_workers': 1, 'pin_memory': True}
+            self.parameters.kwargs = {'num_workers': 0, 'pin_memory': True}
             self.batch_size=self.batch_size*hvd.size()
 
             #Set the data sampler for multiGPU
@@ -83,14 +85,16 @@ class Trainer:
             self.parameters.sampler["test_sampler"] =torch.utils.data.distributed.DistributedSampler(data.test_data_set, 
                                                                                                      num_replicas=hvd.size(), 
                                                                                                      rank=hvd.rank())
+
             # broadcaste parameters and optimizer state from root device to other devices
             hvd.broadcast_parameters(network.state_dict(), root_rank=0)
             hvd.broadcast_optimizer_state(self.optimizer, root_rank=0)
-            
+
             # Wraps the opimizer for multiGPU operation
             self.optimizer = hvd.DistributedOptimizer(self.optimizer,  
                                                       named_parameters=network.named_parameters(),
-                                                      op = hvd.Adasum)
+                                                      op = hvd.Average)
+
 
         # Instantiate the learning rate scheduler, if necessary.
         if self.parameters.learning_rate_scheduler == "ReduceLROnPlateau":
@@ -108,10 +112,13 @@ class Trainer:
         training_data_loader = DataLoader(data.training_data_set, batch_size=self.batch_size,
                                           sampler=self.parameters.sampler["train_sampler"],
                                           **self.parameters.kwargs ) #shuffle=True,
+
         validation_data_loader = DataLoader(data.validation_data_set, batch_size=self.batch_size * 1,
                                             sampler=self.parameters.sampler["validate_sampler"],**self.parameters.kwargs )
+
         test_data_loader = DataLoader(data.test_data_set, batch_size=self.batch_size * 1,
                                       sampler=self.parameters.sampler["test_sampler"],**self.parameters.kwargs )
+
 
         # Calculate initial loss.
         vloss = self.validate_network(network, validation_data_loader)
@@ -135,14 +142,12 @@ class Trainer:
             # Process each mini batch and save the training loss.
             training_loss = 0
             # train sampler 
-        
             self.parameters.sampler["train_sampler"].set_epoch(epoch)
             for inputs, outputs in training_data_loader:
                 if self.use_gpu:
                     inputs = inputs.to('cuda')
                     outputs = outputs.to('cuda')
                 training_loss += self.process_mini_batch(network, inputs, outputs)
-
             # Calculate the validation loss.
             vloss = self.validate_network(network, validation_data_loader)
             if self.use_horovod:
