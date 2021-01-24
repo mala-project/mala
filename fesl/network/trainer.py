@@ -55,6 +55,12 @@ class Trainer:
         if self.use_gpu:
             network.to('cuda')
 
+        # Scale the learning rate according to horovod. 
+        if self.use_horovod:
+                if hvd.size > 1:
+                        print("Rescaling learning rate because multiple workers are used for training.")
+                        self.parameters.learning_rate = self.parameters.learning_rate * hvd.size() 
+
         # Choose an optimizer to use.
         if self.parameters.trainingtype == "SGD":
             self.optimizer = optim.SGD(network.parameters(), lr=self.parameters.learning_rate,
@@ -123,6 +129,7 @@ class Trainer:
         # Calculate initial loss.
         vloss = self.validate_network(network, validation_data_loader)
         tloss = self.validate_network(network, test_data_loader)
+        print(hvd.rank(), vloss)
         #Collect and average all the losses from all the devices
         if self.use_horovod:
             vloss=self.average_validation(vloss,'average_loss')
@@ -206,5 +213,5 @@ class Trainer:
         return validation_loss
     def average_validation(self,val,name):
         tensor= torch.tensor(val)
-        avg_loss=hvd.allreduce(tensor,name=name)
+        avg_loss=hvd.allreduce(tensor,name=name, op=hvd.Sum)
         return avg_loss.item()
