@@ -16,7 +16,7 @@ class ObjectiveFeedForward(ObjectiveBase):
 
 
     def __call__(self, trial: Trial):
-
+        super(ObjectiveFeedForward).__call__(trial)
         # Perform training and report best test loss back to optuna.
         test_network = Network(self.params)
         test_trainer = Trainer(self.params)

@@ -53,6 +53,7 @@ class ObjectiveBase:
         if self.optimize_layer_list:
             self.params.network.layer_sizes.append(self.data_handler.get_output_dimension())
 
+    @abstractmethod
     def set_optimal_parameters(self, study):
         """Sets the optimal parameters, needs to be implemented by child classes."""
         raise Exception("No set_optimal_parameters implemented.")

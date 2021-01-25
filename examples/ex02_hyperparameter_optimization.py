@@ -24,10 +24,10 @@ test_parameters.descriptors.twojmax = 11
 test_parameters.targets.ldos_gridsize = 10
 test_parameters.network.layer_activations = ["ReLU"]
 test_parameters.training.max_number_epochs = 20
-test_parameters.training.mini_batch_size = 40
+test_parameters.training.mini_batch_size = 512
 test_parameters.training.learning_rate = 0.00001
 test_parameters.training.trainingtype = "Adam"
-test_parameters.hyperparameters.n_trials = 20
+test_parameters.hyperparameters.n_trials = 100
 test_parameters.comment = "Test run of ML-DFT@CASUS."
 
 
@@ -73,6 +73,10 @@ test_parameters.hyperparameters.hlist.append(
 test_parameters.hyperparameters.hlist.append(
     OptunaParameter("categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"]))
 
+test_parameters.network.nn_type = "feed-forward"
+test_parameters.network.hyper_param_opt_type = "no-training-surrogate"
+test_parameters.training.use_gpu = True
+
 # Perform hyperparameter optimization.
 print("Starting Hyperparameter optimization.")
 test_hp_optimizer = HyperparameterOptimizer(test_parameters)
@@ -82,4 +86,5 @@ print("Hyperparameter optimization: DONE.")
 
 print("Successfully ran ex02_hyperparameter_optimization.py.")
 print("Parameters used for this experiment:")
+
 test_parameters.show()
