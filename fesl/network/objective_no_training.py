@@ -2,6 +2,8 @@ import numpy as np
 import torch
 from optuna import Trial
 from torch import Tensor
+import torch.cuda.profiler as profiler
+
 from torch.utils.data import DataLoader
 
 from fesl.common.parameters import Parameters
@@ -30,16 +32,17 @@ class NoTrainingObjective(ObjectiveBase):
         loader = DataLoader(self.data_handler.training_data_set,
                             batch_size=self.params.training.mini_batch_size,
                             shuffle=True)
-        jac = NoTrainingObjective._get_batch_jacobian(net, loader, device)
 
         # also train to see how good this metric actually is
         trainer = Trainer(self.params)
         trainer.train_network(net, self.data_handler)
         actual_loss = trainer.final_test_loss
 
+        profiler.start()
+        jac = NoTrainingObjective._get_batch_jacobian(net, loader, device)
         # Loss = - score!
-        surrogate_loss = - NoTrainingObjective._calc_score(jac.cpu().numpy())
-
+        surrogate_loss = - NoTrainingObjective._calc_score(jac)
+        profiler.stop()
         self.samples.append((actual_loss, surrogate_loss))
         return surrogate_loss
 
@@ -65,13 +68,36 @@ class NoTrainingObjective(ObjectiveBase):
         return jacobian
 
     @staticmethod
-    def _calc_score(jacobian: np.array):
-        # No pytorch implementation for corrcoeff so use numpy
-        correlations = np.corrcoef(jacobian)
-        eigen_values, _ = np.linalg.eig(correlations)
-        eigen_values = eigen_values.astype(np.float32)
-        k = 1e-5
-        return -np.sum(np.log(eigen_values + k) + 1. / (eigen_values+k))
+    def corrcoef(x):
+        # Pytorch implementation of np.corrcoef
+        mean_x = torch.mean(x, 1, True)
+        xm = x.sub(mean_x.expand_as(x))
+        c = xm.mm(xm.t())
+        c = c / (x.size(1) - 1)
+
+        # normalize covariance matrix
+        d = torch.diag(c)
+        stddev = torch.pow(d, 0.5)
+        c = c.div(stddev.expand_as(c))
+        c = c.div(stddev.expand_as(c).t())
+
+        # clamp between -1 and 1
+        # probably not necessary but numpy does it
+        c = torch.clamp(c, -1.0, 1.0)
+
+        return c
+
+    @staticmethod
+    def _calc_score(jacobian: Tensor):
+        correlations = NoTrainingObjective.corrcoef(jacobian)
+        eigen_values, _ = torch.eig(correlations)
+        # Only consider the real valued part, imaginary part is rounding artefact
+        eigen_values = eigen_values.type(torch.float32)
+        # Needed for numerical stability. 1e-4 instead of 1e-5 in reference as the torchs eigenvalue solver on GPU
+        # seems to have bigger rounding errors than numpy, resulting in slightly larger negative Eigenvalues
+        k = 1e-4
+        v = -torch.sum(torch.log(eigen_values + k) + 1. / (eigen_values+k))
+        return v
 
     def set_optimal_parameters(self, study):
         # abuse this for getting some insight
