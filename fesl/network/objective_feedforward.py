@@ -19,7 +19,7 @@ class ObjectiveFeedForward(ObjectiveBase):
                 self.optimize_layer_list = True
             elif "layer_activation" in par.name:
                 self.optimize_activation_list = True
-
+            
     def __call__(self, trial: Trial):
         # parse hyperparameter list.
         if self.optimize_layer_list:
@@ -36,6 +36,9 @@ class ObjectiveFeedForward(ObjectiveBase):
             elif "ff_neurons_layer" in par.name:
                 if self.params.network.nn_type == "feed-forward":
                     self.params.network.layer_sizes.append(par.get_parameter(trial))
+            elif "trainingtype" in par.name:
+                self.params.training.trainingtype= par.get_parameter(trial)
+
             else:
                 print("Optimization of hyperparameter ", par.name, "not supported at the moment.")
         if self.optimize_layer_list:
@@ -62,6 +65,7 @@ class ObjectiveFeedForward(ObjectiveBase):
                 self.params.network.layer_sizes.append(study.best_params[par])
             elif "layer_activation" in par:
                 self.params.network.layer_activations.append(study.best_params[par])
-
+            elif "trainingtype" in par:
+                self.params.training.trainingtype= study.best_params[par]
         if self.optimize_layer_list:
             self.params.network.layer_sizes.append(self.data_handler.get_output_dimension())

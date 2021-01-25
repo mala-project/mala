@@ -1,10 +1,10 @@
 from fesl.common.parameters import Parameters
 from fesl.datahandling.handler_interface import HandlerInterface
-from fesl.network.hyperparameter_optimizer import HyperparameterOptimizer
-from fesl.network.optuna_parameter import OptunaParameter
+from fesl.network.OAT_hyperparameter_optimiser import OAT_HyperOpt
+from fesl.network.OAT_parameter import OA_Parameter
 
 """
-ex02_hyperparameter_optimization.py: Shows how a hyperparameter optimization can be done using this framework.
+ex09_hyperparameter_optimization.py: Shows how a hyperparameter optimization can be done using this framework.
 """
 
 print("Welcome to FESL.")
@@ -57,27 +57,28 @@ print("Read data: DONE.")
 # Via the hyperparameter_list one can add hyperparameters to be optimized.
 # Please not that you have to give specifications by hand for hyperparameters you do not want to optimize.
 ####################
-
 test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, 100, data_handler.get_output_dimension()]
 
+# Add hyperparameters we want to have optimized to the list.
+# test_parameters.hyperparameters.hlist.append(OptunaParameter("float", "learning_rate", 0.0000001, 0.01))
 test_parameters.hyperparameters.hlist.append(
-    OptunaParameter("categorical", "trainingtype", choices=["Adam", "SGD"]))
+    OA_Parameter("categorical", "trainingtype", choices=["Adam", "SGD"]))
 
-# We also want to optimize the choices for the activation functions at EACH layer. We can do this in a similarly manner.
+# We want to optimize the choices for the activation functions at EACH layer. We can do this in a similarly manner.
 test_parameters.hyperparameters.hlist.append(
-    OptunaParameter("categorical", "layer_activation_00", choices=["ReLU", "Sigmoid"]))
+    OA_Parameter("categorical", "layer_activation_00", choices=["ReLU", "Sigmoid"]))
 test_parameters.hyperparameters.hlist.append(
-    OptunaParameter("categorical", "layer_activation_01", choices=["ReLU", "Sigmoid"]))
+    OA_Parameter("categorical", "layer_activation_01", choices=["ReLU", "Sigmoid"]))
 test_parameters.hyperparameters.hlist.append(
-    OptunaParameter("categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"]))
+    OA_Parameter("categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"]))
 
 # Perform hyperparameter optimization.
 print("Starting Hyperparameter optimization.")
-test_hp_optimizer = HyperparameterOptimizer(test_parameters)
+test_hp_optimizer = OAT_HyperOpt(test_parameters)
 test_hp_optimizer.perform_study(data_handler)
 test_hp_optimizer.set_optimal_parameters()
 print("Hyperparameter optimization: DONE.")
 
-print("Successfully ran ex02_hyperparameter_optimization.py.")
+print("Successfully ran ex09_OAT_hyperparameter_optimization.py.")
 print("Parameters used for this experiment:")
 test_parameters.show()
