@@ -21,7 +21,7 @@ class OAT_HyperOpt:
 
     def perform_study(self, data_handler):
         self.objective= OA_ObjectiveFeedForward(self.params, data_handler)
-        print(self.orthogonal_arr)
+        
         self.trial_losses=  [self.objective(row) for row in self.orthogonal_arr]
 
     @property
@@ -29,8 +29,16 @@ class OAT_HyperOpt:
         arrayclass= oa.arraydata_t(self.n_levels, self.N_runs, self.strength, self.n_factors)
         arraylist= [arrayclass.create_root()]
 
+        #extending the orthogonal array
+        options=oa.OAextend()
+        options.setAlgorithmAuto(arrayclass)
+
         for _ in range(self.strength+1, self.n_factors+1):
-            arraylist= oa.extend_arraylist(arraylist, arrayclass)
+            arraylist_extensions = oa.extend_arraylist(arraylist, arrayclass, options)
+            dd = np.array([a.Defficiency() for a in arraylist_extensions])
+            idxs = np.argsort(dd)
+            arraylist = [ arraylist_extensions[ii] for ii in idxs]
+
         return np.unique(np.array(arraylist[0]), axis=0)
 
     def set_optimal_parameters(self):
@@ -38,6 +46,7 @@ class OAT_HyperOpt:
         #Getting the best trial based on the test errors
         idx= self.trial_losses.index(min(self.trial_losses))
         self.best_trial= self.orthogonal_arr[idx]
-        print("The best parameters",self.best_trial)
+        print("Orthogonal Array:")
+        print(self.orthogonal_arr)
         print("Final test loss:",self.trial_losses[idx])
         self.objective.set_optimal_parameters(self.best_trial)
