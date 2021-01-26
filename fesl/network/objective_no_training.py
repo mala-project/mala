@@ -76,7 +76,6 @@ class NoTrainingObjective(ObjectiveBase):
         xm = x.sub(mean_x.expand_as(x))
         c = xm.mm(xm.t())
         c = c / (x.size(1) - 1)
-
         # normalize covariance matrix
         d = torch.diag(c)
         stddev = torch.pow(d, 0.5)
@@ -106,6 +105,7 @@ class NoTrainingObjective(ObjectiveBase):
         a = np.array(self.samples).T
         fig, axs = plt.subplots()
         axs.scatter(x = a[0,:], y = a[1, :])
+        np.save("last_run.npy", a)
         axs.set_xlabel("training loss")
         axs.set_ylabel("surrogate loss")
         axs.set_title("surrogate vs training loss")
