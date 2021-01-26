@@ -38,11 +38,13 @@ class NoTrainingObjective(ObjectiveBase):
         trainer.train_network(net, self.data_handler)
         actual_loss = trainer.final_test_loss
 
-        profiler.start()
+        if self.params.training.use_gpu:
+            profiler.start()
         jac = NoTrainingObjective._get_batch_jacobian(net, loader, device)
         # Loss = - score!
         surrogate_loss = - NoTrainingObjective._calc_score(jac)
-        profiler.stop()
+        if self.params.training.use_gpu:
+            profiler.stop()
         self.samples.append((actual_loss, surrogate_loss))
         return surrogate_loss
 
