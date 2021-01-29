@@ -42,10 +42,14 @@ class NoTrainingObjective(ObjectiveBase):
             profiler.start()
         jac = NoTrainingObjective._get_batch_jacobian(net, loader, device)
         # Loss = - score!
-        surrogate_loss = - NoTrainingObjective._calc_score(jac)
+        surrogate_loss = 10000
+        try:
+            surrogate_loss = - NoTrainingObjective._calc_score(jac)
+            self.samples.append((actual_loss, surrogate_loss))
+        except:
+            print("Got a NaN, ignoring sample.")
         if self.params.training.use_gpu:
             profiler.stop()
-        self.samples.append((actual_loss, surrogate_loss))
         return surrogate_loss
 
 
