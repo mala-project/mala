@@ -69,6 +69,10 @@ class DOS(TargetBase):
 
         return np.array(return_dos_values)
 
+    def get_energy_grid(self):
+        return np.arange(self.parameters.ldos_gridoffset_ev, self.parameters.ldos_gridoffset_ev+self.parameters.ldos_gridsize*self.parameters.ldos_gridspacing_ev,self.parameters.ldos_gridspacing_ev)
+
+
     def get_band_energy(self, dos_data, fermi_energy_eV=None, temperature_K=None, integration_method="analytical", shift_energy_grid=True):
         """
         Calculates the band energy, from given DOS data.

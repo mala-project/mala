@@ -84,6 +84,9 @@ class LDOS(TargetBase):
         return ldos_data
 
 
+    def get_energy_grid(self):
+        return np.arange(self.parameters.ldos_gridoffset_ev, self.parameters.ldos_gridoffset_ev+self.parameters.ldos_gridsize*self.parameters.ldos_gridspacing_ev,self.parameters.ldos_gridspacing_ev)
+
     def get_total_energy(self, ldos_data=None, dos_data=None, density_data=None, fermi_energy_eV=None, temperature_K=None,
                         grid_spacing_bohr=None, grid_integration_method="summation",
                         energy_integration_method="analytical", shift_energy_grid=True, atoms_Angstrom=None,

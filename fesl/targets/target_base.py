@@ -120,6 +120,9 @@ class TargetBase:
     def set_pseudopotential_path(self, newpath):
         self.qe_input_data["pseudo_dir"] = newpath
 
+    def get_energy_grid(self):
+        raise Exception("No method implement to calculate an energy grid.")
+
     @staticmethod
     def convert_units(array, in_units="eV"):
         raise Exception("No unit conversion method implemented for this target type.")
