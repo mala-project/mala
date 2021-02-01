@@ -14,14 +14,43 @@ class LDOS(TargetBase):
     """
 
     def __init__(self, p):
+        """Constructor.
+
+        Returns a LDOS object.
+
+        Parameters
+        ----------
+        p : fesl.common.parameters.Parameters
+            A Parameters object.
+
+        Returns
+        -------
+        fesl.targets.ldos.LDOS
+            A LDOS object.
+        """
         super(LDOS, self).__init__(p)
         self.target_length = self.parameters.ldos_gridsize
 
     @staticmethod
     def convert_units(array, in_units="1/eV"):
-        """
-        Converts the units of an LDOS array. Can be used e.g. for post processing purposes.
-        This function always returns the LDOS in 1/eV.
+        """Converts units of an array to FESL units.
+
+        Converts the units of a given array to FESL units, i.e. 1/eV.
+
+        Parameters
+        ----------
+        array : numpy array or list
+            The array the unit conversion is performed upon.
+        in_units : str
+            The units of the original array. Default is "1/eV". Supported units:
+                "1/eV" (no unit conversion is done, as this is the FESL default unit as well.)
+                "1/Ry"
+
+        Returns
+        -------
+        numpy array or list
+            Array in the units 1/eV.
+
         """
         if in_units == "1/eV":
             return array
@@ -33,10 +62,24 @@ class LDOS(TargetBase):
 
     @staticmethod
     def backconvert_units(array, out_units):
-        """
-        Converts the units of an LDOS array back from internal use to outside use.
-        Can be used e.g. for post processing purposes.
-        This function always accepts the LDOS in 1/eV and outputs them in the desired unit.
+        """Converts units of array from FESL units to desired units.
+
+        Converts the units of a given array from FESL units (i.e. 1/eV) to desired units, e.g. 1/Ry
+
+        Parameters
+        ----------
+        array : numpy array or list
+            The array the unit conversion is performed upon.
+        out_units : str
+            The units one wants to the array to convert to. Supported units:
+                "1/eV" (no unit conversion is done, as this is the FESL default unit as well.)
+                "1/Ry"
+
+        Returns
+        -------
+        numpy array or list
+            Array in the units specified by out_unit.
+
         """
         if out_units == "1/eV":
             return array
