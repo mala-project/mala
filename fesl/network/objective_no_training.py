@@ -2,7 +2,6 @@ import numpy as np
 import torch
 from optuna import Trial
 from torch import Tensor
-from torch.autograd import profiler
 from torch.utils.data import DataLoader
 
 from fesl.common.parameters import Parameters
@@ -35,14 +34,19 @@ class NoTrainingObjective(ObjectiveBase):
 
         jac = NoTrainingObjective._get_batch_jacobian(net, loader, device)
         # Loss = - score!
-        surrogate_loss = - NoTrainingObjective._calc_score(jac)
+        surrogate_loss = 10000
+        try:
+            surrogate_loss = - NoTrainingObjective._calc_score(jac)
 
-        # also train to see how good this metric actually is
-        trainer = Trainer(self.params)
-        trainer.train_network(net, self.data_handler)
-        actual_loss = trainer.final_test_loss
+            # also train to see how good this metric actually is
+            trainer = Trainer(self.params)
+            trainer.train_network(net, self.data_handler)
+            actual_loss = trainer.final_test_loss
 
-        self.samples.append((actual_loss, surrogate_loss))
+            self.samples.append((actual_loss, surrogate_loss))
+        except:
+            print("Got a NaN, ignoring sample.")
+
         return surrogate_loss
 
 
@@ -103,6 +107,7 @@ class NoTrainingObjective(ObjectiveBase):
         a = np.array(self.samples).T
         fig, axs = plt.subplots()
         axs.scatter(x = a[0,:], y = a[1, :])
+        np.save("last_run.npy", a)
         axs.set_xlabel("training loss")
         axs.set_ylabel("surrogate loss")
         axs.set_title("surrogate vs training loss")
