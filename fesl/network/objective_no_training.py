@@ -2,8 +2,7 @@ import numpy as np
 import torch
 from optuna import Trial
 from torch import Tensor
-import torch.cuda.profiler as profiler
-
+from torch.autograd import profiler
 from torch.utils.data import DataLoader
 
 from fesl.common.parameters import Parameters
@@ -33,16 +32,16 @@ class NoTrainingObjective(ObjectiveBase):
                             batch_size=self.params.training.mini_batch_size,
                             shuffle=True)
 
+
+        jac = NoTrainingObjective._get_batch_jacobian(net, loader, device)
+        # Loss = - score!
+        surrogate_loss = - NoTrainingObjective._calc_score(jac)
+
         # also train to see how good this metric actually is
         trainer = Trainer(self.params)
         trainer.train_network(net, self.data_handler)
         actual_loss = trainer.final_test_loss
 
-        profiler.start()
-        jac = NoTrainingObjective._get_batch_jacobian(net, loader, device)
-        # Loss = - score!
-        surrogate_loss = - NoTrainingObjective._calc_score(jac)
-        profiler.stop()
         self.samples.append((actual_loss, surrogate_loss))
         return surrogate_loss
 
