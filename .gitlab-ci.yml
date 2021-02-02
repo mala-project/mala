@@ -44,3 +44,23 @@ test-workflow:
   needs: [setup-fesl, test-basic-functions]
   only:
     - master
+
+pages:
+  stage: deploy
+  image: python:3.7-alpine
+  before_script:
+  - pip install -U pip
+  - pip install -U sphinx
+  - pip install -U sphinx_rtd_theme
+  - pip install -U recommonmark
+  script:
+  - sphinx-apidoc -o docs/source/api fesl
+  - sphinx-build -b html -d docs/_build/doctrees docs/source docs/_build/html
+  after_script:
+  - mv docs/_build/html public
+  artifacts:
+    paths:
+    - public
+  only:
+#  - master
+  - documentation
