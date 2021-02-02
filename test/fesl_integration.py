@@ -1,4 +1,5 @@
-import matplotlib.pyplot as plt
+import scipy as sp
+from fesl.targets.calculation_helpers import *
 import numpy as np
 from fesl.targets.ldos import LDOS
 from fesl.targets.density import Density
@@ -30,18 +31,60 @@ path_to_dens_npy = data_path+"Al_dens.npy"
 numpy_arrays = True
 
 
-# Define the error margins and the parameters used for the experiments.
-rel_error_margin_number_of_electrons = 0.005
-rel_error_margin_density = 0.005
-rel_error_margin_dos = 0.005
+# Define the parameters used for the experiments.
 test_parameters = Parameters()
 test_parameters.targets.ldos_gridsize = 250
 test_parameters.targets.ldos_gridspacing_ev = 0.1
 test_parameters.targets.ldos_gridoffset_ev = -10
 
+#  Test our implementation of the analytical integration of [1]
+def check_analytical_integration(accuracy):
+
+    # Values used for the test.
+    energies = np.array([6.83, 7.11])
+    gridsize = 2
+    e_fermi = 7.0
+    temp = 298
+
+    # Calculate the analytical values.
+    beta = 1 / (kB * temp)
+    x = beta * (energies - e_fermi)
+    fi_0 = np.zeros(gridsize, dtype=np.float)
+    fi_1 = np.zeros(gridsize, dtype=np.float)
+    fi_2 = np.zeros(gridsize, dtype=np.float)
+    for i in range(0, gridsize):
+
+        # Calculate beta and x
+        fi_0[i] = get_f0_value(x[i], beta)
+        fi_1[i] = get_f1_value(x[i], beta)
+        fi_2[i] = get_f2_value(x[i], beta)
+    aint_0 = fi_0[1] - fi_0[0]
+    aint_1 = fi_1[1] - fi_1[0]
+    aint_2 = fi_2[1] - fi_2[0]
+
+    # Calculate the numerically approximated values.
+    qint_0, abserr = sp.integrate.quad(
+        lambda e: fermi_function_eV(e, e_fermi, temp),
+        energies[0], energies[-1])
+    qint_1, abserr = sp.integrate.quad(
+        lambda e: (e - e_fermi) * fermi_function_eV(e, e_fermi, temp),
+        energies[0], energies[-1])
+    qint_2, abserr = sp.integrate.quad(
+        lambda e: (e - e_fermi) ** 2 * fermi_function_eV(e, e_fermi, temp),
+        energies[0], energies[-1])
+
+    # Calculate the errors.
+    error0 = np.abs(aint_0 - qint_0)
+    error1 = np.abs(aint_1 - qint_1)
+    error2 = np.abs(aint_2 - qint_2)
+
+    # Analyze the errors.
+    if error0 > accuracy or error1 > accuracy or error2 > accuracy:
+        return False
+    return True
 
 # Integrate the QE density (Al.dens) over spatial grid. Does this yield the correct number of electrons?
-def qe_dens_to_nr_of_electrons():
+def qe_dens_to_nr_of_electrons(accuracy):
     # Create a calculator.
     dens_calculator = Density(test_parameters)
     dens_calculator.read_additional_calculation_data("qe.out",path_to_out)
@@ -62,13 +105,13 @@ def qe_dens_to_nr_of_electrons():
     print("Relative error number of electrons: ", rel_error)
 
     # Check against the constraints we put upon ourselves.
-    if rel_error < rel_error_margin_number_of_electrons:
+    if rel_error < accuracy:
         return True
     else:
         return False
 
 # Integrate QE LDOS over energy grid. Does this yield the correct density (when compared to Al.dens)?
-def qe_ldos_to_density():
+def qe_ldos_to_density(accuracy):
     # Create a calculator.abs()
     ldos_calculator = LDOS(test_parameters)
     ldos_calculator.read_additional_calculation_data("qe.out",path_to_out)
@@ -94,14 +137,14 @@ def qe_ldos_to_density():
     print("Relative error for sum of density: ", rel_error)
 
     # Check against the constraints we put upon ourselves.
-    if rel_error < rel_error_margin_number_of_electrons:
+    if rel_error < accuracy:
         return True
     else:
         return False
 
 
 # Integrate the QE LDOS over spatial grid. Does this yield the corrected LDOS (when compared to Al.dos)?
-def qe_ldos_to_dos():
+def qe_ldos_to_dos(accuracy):
     # Create the necessary calculators.
     ldos_calculator = LDOS(test_parameters)
     ldos_calculator.read_additional_calculation_data("qe.out",path_to_out)
@@ -125,18 +168,23 @@ def qe_ldos_to_dos():
     print("Relative error for sum of DOS: ", rel_error)
 
     # Check against the constraints we put upon ourselves.
-    if rel_error < rel_error_margin_dos:
+    if rel_error < accuracy:
         return True
     else:
         return False
 
 
+if __name__ == "__main__":
 
+    # Run the tests.
+    test1 = check_analytical_integration(0.0000001)
+    print("Check if analytical integration works in theory - success?:", test1)
 
-# Run the tests.
-test1 = qe_dens_to_nr_of_electrons()
-print("Integrate QE density over spatial grid and get correct number of electrons compared to QE - success?:", test1)
-test1 = qe_ldos_to_density()
-print("Integrate QE LDOS over energy grid and get correct density compared to QE - succes?:", test1)
-test1 = qe_ldos_to_dos()
-print("Integrate QE LDOS over spatial grid and get correct DOS compared to QE - success:", test1)
+    test1 = qe_dens_to_nr_of_electrons(0.0000001)
+    print("Integrate QE density over spatial grid and get correct number of electrons compared to QE - success?:", test1)
+
+    test1 = qe_ldos_to_density(0.0000001)
+    print("Integrate QE LDOS over energy grid and get correct density compared to QE - succes?:", test1)
+
+    test1 = qe_ldos_to_dos(0.0000001)
+    print("Integrate QE LDOS over spatial grid and get correct DOS compared to QE - success:", test1)

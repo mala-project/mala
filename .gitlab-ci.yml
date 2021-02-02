@@ -1,0 +1,46 @@
+stages:
+  - build
+  - test-basic
+  - test-advanced
+  - deploy
+
+.module_setup: &module_setup
+    - apt-get install -q -y gcc g++ python3-dev && apt-get clean
+    - pip install -r requirements.txt
+    - pip install -e .
+    - pip install torch==1.7.1+cpu torchvision==0.8.2+cpu torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
+
+setup-fesl:
+  stage: build
+  image: continuumio/anaconda3:latest
+  before_script:
+    - *module_setup
+  script:
+    - python3 examples/ex00_verify_installation.py
+#  after_script:
+  only:
+    - master
+
+test-basic-functions:
+  stage: test-basic
+  image: continuumio/anaconda3:latest
+  script:
+    - *module_setup
+    - cd test
+    - python3 fesl_tests.py
+    - cd ..
+  needs: [setup-fesl]
+  only:
+    - master
+
+test-workflow:
+  stage: test-advanced
+  image: continuumio/anaconda3:latest
+  script:
+    - *module_setup
+    - cd examples
+    - python3 ex99_verify_all_examples.py
+    - cd ..
+  needs: [setup-fesl, test-basic-functions]
+  only:
+    - master
