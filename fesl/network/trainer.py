@@ -11,6 +11,7 @@ class Trainer:
     def __init__(self, p):
         # copy the parameters into the class.
         self.parameters = p.training
+        self.initial_test_loss = float("inf")
         self.final_test_loss = float("inf")
         self.optimizer = None
         self.scheduler = None
@@ -61,6 +62,7 @@ class Trainer:
         if self.parameters.verbosity:
             print("Initial Guess - validation data loss: ", vloss)
             print("Initial Guess - test data loss: ", tloss)
+        self.initial_test_loss = tloss
 
         # Perform and log training.
         patience_counter = 0
@@ -115,18 +117,14 @@ class Trainer:
         self.optimizer.zero_grad()
         return loss.item()
 
-    # FIXME: This seems inefficient.
     def validate_network(self, network, vdl):
         network.eval()
-        accuracies = []
-        validation_loss = 0
+        validation_loss = []
         with torch.no_grad():
             for x, y in vdl:
                 if self.use_gpu:
                     x = x.to('cuda')
                     y = y.to('cuda')
                 prediction = network(x)
-                validation_loss += network.calculate_loss(prediction, y).item()
-                # accuracies.append(network.classification_accuracy(prediction, y))
-            # validation_accuracy = np.mean(accuracies)
-        return validation_loss
+                validation_loss.append(network.calculate_loss(prediction, y).item())
+        return np.mean(validation_loss)

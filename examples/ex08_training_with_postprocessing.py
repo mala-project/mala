@@ -18,7 +18,7 @@ cell for this example.
 """
 
 # Uses a trained network to make a prediction.
-def use_trained_network(network_path, params_path, input_scaler_path, output_scaler_path):
+def use_trained_network(network_path, params_path, input_scaler_path, output_scaler_path, doplots, accuracy = 0.05):
 
     # First we load Parameters and network.
     new_parameters = Parameters.load_from_file(params_path, no_snapshots=True)
@@ -48,13 +48,16 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
     ldos_calculator = inference_data_handler.target_parser
     ldos_calculator.read_additional_calculation_data("qe.out", "./data/QE_Al.scf.pw.out")
 
-    # Plot the DOS.
+    # Calculate the DOS.
     actual_dos = ldos_calculator.get_density_of_states(actual_ldos)
     predicted_dos = ldos_calculator.get_density_of_states(predicted_ldos)
-    plt.plot(actual_dos, label="actual")
-    plt.plot(predicted_dos, label="predicted")
-    plt.legend()
-    plt.show()
+
+    # Plot the DOS.
+    if doplots:
+        plt.plot(actual_dos, label="actual")
+        plt.plot(predicted_dos, label="predicted")
+        plt.legend()
+        plt.show()
 
     # Calculate the Band energy.
     # Use a DOS calculator to speed up processing.
@@ -63,15 +66,19 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
     band_energy_predicted = dos_calculator.get_band_energy(predicted_dos)
     band_energy_actual = dos_calculator.get_band_energy(actual_dos)
     print("Band energy (actual, predicted, error)[eV]", band_energy_actual, band_energy_predicted, band_energy_predicted-band_energy_actual)
-
+    if np.abs(band_energy_predicted-band_energy_actual) > accuracy:
+        return False
 
     nr_electrons_predicted = dos_calculator.get_number_of_electrons(predicted_dos)
     nr_electrons_actual = dos_calculator.get_number_of_electrons(actual_dos)
     print("Number of electrons (actual, predicted, error)[eV]", nr_electrons_actual, nr_electrons_predicted, nr_electrons_predicted-nr_electrons_actual)
+    if np.abs(band_energy_predicted-band_energy_actual) > accuracy:
+        return False
+    return True
 
 
 # Trains a network.
-def initial_training(network_path, params_path, input_scaler_path, output_scaler_path):
+def initial_training(network_path, params_path, input_scaler_path, output_scaler_path, desired_loss_improvement_factor=1):
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that contains subclasses.
@@ -143,19 +150,34 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
     test_network.save_network(network_path)
     data_handler.input_data_scaler.save(input_scaler_path)
     data_handler.output_data_scaler.save(output_scaler_path)
+    if desired_loss_improvement_factor*test_trainer.initial_test_loss < test_trainer.final_test_loss:
+        return False
+    else:
+        return True
 
-print("Welcome to FESL.")
-print("Running ex08_training_with_postprocessing.py")
+def run_example08(dotraining, doinference, doplots=True):
+    print("Welcome to FESL.")
+    print("Running ex08_training_with_postprocessing.py")
 
-# Choose the paths where the network and the parameters for it should be saved.
-params_path = "./data/ex08_params.pkl"
-network_path = "./data/ex08_network.pth"
-input_scaler_path = "./data/ex08_iscaler.pkl"
-output_scaler_path = "./data/ex08_oscaler.pkl"
+    # Choose the paths where the network and the parameters for it should be saved.
+    params_path = "./data/ex08_params.pkl"
+    network_path = "./data/ex08_network.pth"
+    input_scaler_path = "./data/ex08_iscaler.pkl"
+    output_scaler_path = "./data/ex08_oscaler.pkl"
 
-# Training was already done, but can be run again by uncommenting the next line.
-# initial_training(network_path, params_path, input_scaler_path, output_scaler_path)
-# Prediction and analysis using an already trained network.
-use_trained_network(network_path, params_path, input_scaler_path, output_scaler_path)
+    training_return = True
+    inference_return = True
+    if dotraining:
+        training_return = initial_training(network_path, params_path, input_scaler_path, output_scaler_path)
+    if doinference:
+        inference_return = use_trained_network(network_path, params_path, input_scaler_path, output_scaler_path, doplots)
 
-print("Successfully ran ex08_training_with_postprocessing.py.")
+    return training_return and inference_return
+
+if __name__ == "__main__":
+    if run_example08(False, True):
+        print("Successfully ran ex08_training_with_postprocessing.py.")
+    else:
+        raise Exception("Ran ex08_training_with_postprocessing but something was off. If you haven't changed any parameters in "
+                        "the example, there might be a problem with your installation.")
+
