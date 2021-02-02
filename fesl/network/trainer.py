@@ -24,6 +24,7 @@ class Trainer:
         self.batch_size=p.training.mini_batch_size
         self.use_gpu = False
         self.use_horovod=False
+        self.use_compression=False
         
 
     def train_network(self, network, data):
@@ -34,6 +35,7 @@ class Trainer:
 
         # This is a place where additional checks could be placed.
         self.use_horovod= self.parameters.use_horovod
+
 
         # See if we want to use horovod.
         if self.use_horovod:
@@ -56,11 +58,14 @@ class Trainer:
         if self.use_gpu:
             network.to('cuda')
 
+            self.parameters.kwargs ['pin_memory']=True
+
         # Scale the learning rate according to horovod. 
         if self.use_horovod:
-                if hvd.size() > 1:
-                        print("Rescaling learning rate because multiple workers are used for training.")
-                        self.parameters.learning_rate = self.parameters.learning_rate * hvd.size() 
+            if hvd.size() > 1:
+                print("Rescaling learning rate because multiple workers are used for training.")
+                self.parameters.learning_rate = self.parameters.learning_rate * hvd.size() 
+                self.use_compression= self.parameters.use_compression
 
         # Choose an optimizer to use.
         if self.parameters.trainingtype == "SGD":
@@ -77,7 +82,12 @@ class Trainer:
 
 
         if self.use_horovod:
-            self.parameters.kwargs = {'num_workers': 0, 'pin_memory': True}
+            #scaling the batch size for multiGPU per node
+            self.batch_size= self.batch_size*hvd.local_size()
+
+
+            compression = hvd.Compression.fp16 if self.use_compression else hvd.Compression.none
+
 
             #Set the data sampler for multiGPU
             self.parameters.sampler["train_sampler"] = torch.utils.data.distributed.DistributedSampler(data.training_data_set,
@@ -99,6 +109,7 @@ class Trainer:
             # Wraps the opimizer for multiGPU operation
             self.optimizer = hvd.DistributedOptimizer(self.optimizer,  
                                                       named_parameters=network.named_parameters(),
+                                                      compression=compression,
                                                       op = hvd.Average)
 
 
@@ -150,7 +161,8 @@ class Trainer:
             # Process each mini batch and save the training loss.
             training_loss = 0
             # train sampler 
-            self.parameters.sampler["train_sampler"].set_epoch(epoch)
+            if self.use_horovod:
+                self.parameters.sampler["train_sampler"].set_epoch(epoch) 
             for inputs, outputs in training_data_loader:
                 if self.use_gpu:
                     inputs = inputs.to('cuda')

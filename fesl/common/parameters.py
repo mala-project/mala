@@ -230,8 +230,10 @@ class ParametersTraining(ParametersBase):
         Controls whether or not a GPU is used for training - provided there is one to use. 
         """
         self.use_horovod=False
+
+        self.use_compression=False
         #add comment
-        self.kwargs={}
+        self.kwargs={'num_workers': 0, 'pin_memory': False}
         #add comment
         self.seed= 2021
         #add comment(optional)

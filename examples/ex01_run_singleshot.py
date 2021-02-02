@@ -2,7 +2,7 @@ from fesl.common.parameters import Parameters
 from fesl.datahandling.handler_interface import HandlerInterface
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
-
+import torch.multiprocessing as mp 
 """
 ex01_run_singleshot.py: Shows how a neural network can be trained on material data using this framework.
 It uses preprocessed data, that is read in from *.npy files.
@@ -31,7 +31,7 @@ test_parameters.training.learning_rate = 0.00001
 test_parameters.training.trainingtype = "Adam"
 test_parameters.training.use_gpu = True
 test_parameters.training.use_horovod = True
-
+test_parameters.training.use_compression= True 
 
 ####################
 # DATA
@@ -59,6 +59,7 @@ print("Read data: DONE.")
 
 
 test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
+
 
 # Setup network and trainer.
 test_network = Network(test_parameters)
