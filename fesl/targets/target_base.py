@@ -20,6 +20,22 @@ class TargetBase:
         self.grid_spacing_Bohr = None
         self.number_of_electrons = None
         self.band_energy_dft_calculation = None
+        self.grid_dimensions = [0, 0, 0]
+        self.atoms = None
+        self.qe_input_data = {
+                "occupations": 'smearing',
+                "calculation": 'scf',
+                "restart_mode": 'from_scratch',
+                "prefix": 'FESL',
+                "pseudo_dir": None,
+                "outdir": './',
+                "ibrav": None,
+                "smearing": 'fermi-dirac',
+                "degauss": None,
+                "ecutrho": None,
+                "ecutwfc": None,
+        }
+        self.qe_pseudopotentials = {}
 
     def read_from_cube(self):
         raise Exception("No function defined to read this quantity from a .cube file.")
@@ -39,6 +55,9 @@ class TargetBase:
     def get_number_of_electrons(self):
         raise Exception("No function to calculate or provide the number of electrons has been implemented for this target type.")
 
+    def get_total_energy(self):
+        raise Exception("No function to calculate or provide the number of electons has been implemented for this target type.")
+
     def read_additional_calculation_data(self, data_type, path_to_file=""):
         """
         Reads in additional input about a calculation. This is e.g. necessary when we operate with preprocessed
@@ -49,13 +68,13 @@ class TargetBase:
             - path_to_file: Path to the file that is used.
         """
         if data_type == "qe.out":
-            atoms = ase.io.read(path_to_file, format="espresso-out")
-            vol = atoms.get_volume()
-            cell_volume = vol / (200 * 200 * 200 * Bohr ** 3)
-            self.grid_spacing_Bohr = cell_volume**(1/3)
-            self.fermi_energy_eV = atoms.get_calculator().get_fermi_level()
+            self.atoms = ase.io.read(path_to_file, format="espresso-out")
+            vol = self.atoms.get_volume()
+            self.fermi_energy_eV = self.atoms.get_calculator().get_fermi_level()
 
             with open(path_to_file) as out:
+                pseudolinefound = False
+                lastpseudo = None
                 for line in out:
                     if "number of electrons       =" in line:
                         self.number_of_electrons = np.float64(line.split('=')[1])
@@ -68,10 +87,41 @@ class TargetBase:
                         one_electron_contribution = float((line.split('=')[1]).split('Ry')[0])
                     if "hartree contribution" in line:
                         hartree_contribution = float((line.split('=')[1]).split('Ry')[0])
+                    if "FFT dimensions" in line:
+                        dims = line.split("(")[1]
+                        self.grid_dimensions[0] = int(dims.split(",")[0])
+                        self.grid_dimensions[1] = int(dims.split(",")[1])
+                        self.grid_dimensions[2] = int((dims.split(",")[2]).split(")")[0])
+                    if "bravais-lattice index" in line:
+                        self.qe_input_data["ibrav"] = int(line.split("=")[1])
+                    if "kinetic-energy cutoff" in line:
+                        self.qe_input_data["ecutwfc"] = float((line.split("=")[1]).split("Ry")[0])
+                    if "charge density cutoff" in line:
+                        self.qe_input_data["ecutrho"] = float((line.split("=")[1]).split("Ry")[0])
+                    if "smearing, width" in line:
+                        self.qe_input_data["degauss"] = float(line.split("=")[-1])
+                    if pseudolinefound:
+                        self.qe_pseudopotentials[lastpseudo.strip()] = line.split("/")[-1].strip()
+                        pseudolinefound = False
+                        lastpseudo = None
+                    if "PseudoPot." in line:
+                        pseudolinefound = True
+                        lastpseudo = (line.split("for")[1]).split("read")[0]
+
+
+
+            cell_volume = vol / (self.grid_dimensions[0] * self.grid_dimensions[1] * self.grid_dimensions[2] * Bohr ** 3)
+            self.grid_spacing_Bohr = cell_volume ** (1 / 3)
             band_energy_Ry = one_electron_contribution + xc_contribution + hartree_contribution
             self.band_energy_dft_calculation = band_energy_Ry*Rydberg
         else:
             raise Exception("Unsupported auxiliary file type.")
+
+    def set_pseudopotential_path(self, newpath):
+        self.qe_input_data["pseudo_dir"] = newpath
+
+    def get_energy_grid(self):
+        raise Exception("No method implement to calculate an energy grid.")
 
     @staticmethod
     def convert_units(array, in_units="eV"):

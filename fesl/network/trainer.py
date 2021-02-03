@@ -149,6 +149,7 @@ class Trainer:
         if self.parameters.verbosity:
             print("Initial Guess - validation data loss: ", vloss)
             print("Initial Guess - test data loss: ", tloss)
+        self.initial_test_loss = tloss
 
         # Perform and log training.
         patience_counter = 0
@@ -168,6 +169,7 @@ class Trainer:
                     inputs = inputs.to('cuda')
                     outputs = outputs.to('cuda')
                 training_loss += self.process_mini_batch(network, inputs, outputs)
+
             # Calculate the validation loss.
             vloss = self.validate_network(network, validation_data_loader)
             if self.use_horovod:

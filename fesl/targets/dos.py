@@ -2,6 +2,7 @@ from .target_base import TargetBase
 from .calculation_helpers import *
 from scipy import integrate, interpolate
 from scipy.optimize import toms748
+from ase.units import Rydberg
 
 
 class DOS(TargetBase):
@@ -11,6 +12,35 @@ class DOS(TargetBase):
     def __init__(self, p):
         super(DOS, self).__init__(p)
         self.target_length = self.parameters.ldos_gridsize
+
+    @staticmethod
+    def convert_units(array, in_units="1/eV"):
+        """
+        Converts the units of an LDOS array. Can be used e.g. for post processing purposes.
+        This function always returns the LDOS in 1/eV.
+        """
+        if in_units == "1/eV":
+            return array
+        elif in_units == "1/Ry":
+            return array / Rydberg
+        else:
+            print(in_units)
+            raise Exception("Unsupported unit for LDOS.")
+
+    @staticmethod
+    def backconvert_units(array, out_units):
+        """
+        Converts the units of an LDOS array back from internal use to outside use.
+        Can be used e.g. for post processing purposes.
+        This function always accepts the LDOS in 1/eV and outputs them in the desired unit.
+        """
+        if out_units == "1/eV":
+            return array
+        elif out_units == "1/Ry":
+            return array * Rydberg
+        else:
+            print(out_units)
+            raise Exception("Unsupported unit for LDOS.")
 
     def read_from_qe_dos_txt(self, file_name, directory):
         """
@@ -38,6 +68,10 @@ class DOS(TargetBase):
                         i += 1
 
         return np.array(return_dos_values)
+
+    def get_energy_grid(self):
+        return np.arange(self.parameters.ldos_gridoffset_ev, self.parameters.ldos_gridoffset_ev+self.parameters.ldos_gridsize*self.parameters.ldos_gridspacing_ev,self.parameters.ldos_gridspacing_ev)
+
 
     def get_band_energy(self, dos_data, fermi_energy_eV=None, temperature_K=None, integration_method="analytical", shift_energy_grid=True):
         """
@@ -74,6 +108,24 @@ class DOS(TargetBase):
         return self.__number_of_electrons_from_dos(dos_data, emin, emax, self.parameters.ldos_gridspacing_ev, fermi_energy_eV,
                                                    temperature_K, integration_method, shift_energy_grid)
 
+    def get_entropy_contribution(self, dos_data, fermi_energy_eV=None, temperature_K=None, integration_method="analytical", shift_energy_grid=True):
+        """
+        Calculates the contribution of the entropy to the total energy, from given DOS data.
+        Input variables:
+            - dos_data - This method can only be called if the DOS data is presented in the form:
+                    [energygrid]
+        """
+        if fermi_energy_eV is None:
+            fermi_energy_eV = self.fermi_energy_eV
+        if temperature_K is None:
+            temperature_K = self.temperature_K
+        emin = self.parameters.ldos_gridoffset_ev
+        emax = self.parameters.ldos_gridsize*self.parameters.ldos_gridspacing_ev+self.parameters.ldos_gridoffset_ev
+        return self.__entropy_contribution_from_dos(dos_data, emin, emax, self.parameters.ldos_gridspacing_ev, fermi_energy_eV,
+                                                   temperature_K, integration_method, shift_energy_grid)
+
+
+
     def get_self_consistent_fermi_energy_ev(self, dos_data, temperature_K=None, integration_method="analytical", shift_energy_grid=True):
         """
         Calculates the "self-consistent Fermi energy", i.e. the fermi energy for which integrating over the DOS
@@ -92,6 +144,11 @@ class DOS(TargetBase):
                                                         - self.number_of_electrons), a=emin, b=emax)
         return fermi_energy_sc
 
+    def get_density_of_states(self, dos_data):
+        """If the target is the DOS, recovering the DOS is rather trivial."""
+        return dos_data
+
+
     @classmethod
     def from_ldos(cls, ldos_object):
         """
@@ -104,6 +161,10 @@ class DOS(TargetBase):
         return_dos_object.grid_spacing_Bohr = ldos_object.grid_spacing_Bohr
         return_dos_object.number_of_electrons = ldos_object.number_of_electrons
         return_dos_object.band_energy_dft_calculation = ldos_object.band_energy_dft_calculation
+        return_dos_object.atoms = ldos_object.atoms
+        return_dos_object.qe_input_data = ldos_object.qe_input_data
+        return_dos_object.qe_pseudopotentials = ldos_object.qe_pseudopotentials
+
         return return_dos_object
 
 
@@ -173,3 +234,41 @@ class DOS(TargetBase):
             raise Exception("Unknown integration method.")
 
         return band_energy
+
+    @staticmethod
+    def __entropy_contribution_from_dos(dos_data, emin, emax, energy_grid_spacing, fermi_energy_eV,
+                               temperature_K, integration_method, shift_energy_grid):
+        """
+        Calculates the entropy contribution to the total energy from DOS data (directly,
+        independent of the source of this DOS data).
+        More specifically, this gives -\beta^-1*S_S
+        """
+
+        # Calculate the energy levels and the Fermi function.
+        if shift_energy_grid and integration_method == "analytical":
+            emin += energy_grid_spacing
+            emax += energy_grid_spacing
+        energy_vals = np.arange(emin, emax, energy_grid_spacing)
+        fermi_vals = fermi_function(energy_vals, fermi_energy_eV, temperature_K)
+
+        # Calculate the entropy contribution to the energy.
+        if integration_method == "trapz":
+            multiplicator = entropy_multiplicator(energy_vals, fermi_energy_eV, temperature_K)
+            entropy_contribution = integrate.trapz(dos_data * multiplicator, energy_vals, axis=-1)
+            entropy_contribution /= get_beta(temperature_K)
+        elif integration_method == "simps":
+            multiplicator = entropy_multiplicator(energy_vals, fermi_energy_eV, temperature_K)
+            entropy_contribution = integrate.simps(dos_data * multiplicator, energy_vals, axis=-1)
+            entropy_contribution /= get_beta(temperature_K)
+        elif integration_method == "quad":
+            dos_pointer = interpolate.interp1d(energy_vals, dos_data)
+            entropy_contribution, abserr = integrate.quad(
+                lambda e: dos_pointer(e) * entropy_multiplicator(e, fermi_energy_eV, temperature_K),
+                energy_vals[0], energy_vals[-1], limit=500, points=fermi_energy_eV)
+            entropy_contribution /= get_beta(temperature_K)
+        elif integration_method == "analytical":
+            entropy_contribution = analytical_integration(dos_data, "S0", "S1", fermi_energy_eV, energy_vals, temperature_K)
+        else:
+            raise Exception("Unknown integration method.")
+
+        return entropy_contribution

@@ -1,58 +1,86 @@
 from fesl.common.parameters import Parameters
 from fesl.datahandling.handler_interface import HandlerInterface
+import numpy as np
 
 """
 ex03_run_singleshot.py: Demonstrate the file saving capabilites of a data loader to resize a snapshot for debugging
 purposes.
 """
+def run_example03(data_path, accuracy=10**-10):
+    print("Welcome to FESL.")
+    print("Running ex03_run_singleshot.py")
 
-print("Welcome to FESL.")
-print("Running ex03_run_singleshot.py")
+    ####################
+    # PARAMETERS
+    # We only need to specify the correct input data format and the resizing grid.
+    ####################
+    test_parameters = Parameters()
+    test_parameters.data.datatype_in = "*.npy"
+    test_parameters.data.datatype_out = "*.npy"
+    test_parameters.data.input_memmap_mode = "r"
+    test_parameters.data.output_memmap_mode = "r"
 
-####################
-# PARAMETERS
-# We only need to specify the correct input data format and the resizing grid.
-####################
-test_parameters = Parameters()
-test_parameters.data.datatype_in = "*.npy"
-test_parameters.data.datatype_out = "*.npy"
-test_parameters.data.input_memmap_mode = "r"
-test_parameters.data.output_memmap_mode = "r"
+    # We want to resize certain data files, so we don't want any kind of cutting operation performed.
+    test_parameters.data.descriptors_contain_xyz = False
+    test_parameters.debug.grid_dimensions = [200, 10, 1]
 
-# We want to resize certain data files, so we don't want any kind of cutting operation performed.
-test_parameters.data.descriptors_contain_xyz = False
-test_parameters.debug.grid_dimensions = [200, 10, 1]
+    ####################
+    # DATA INPUT
+    # Read data into RAM.
+    # We have to specify the directories we want to read the snapshots from.
+    ####################
 
-####################
-# DATA INPUT
-# Read data into RAM.
-# We have to specify the directories we want to read the snapshots from.
-####################
+    data_handler = HandlerInterface(test_parameters)
 
-data_handler = HandlerInterface(test_parameters)
+    # Add a snapshot we want to use in to the list.
+    data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0.npy",
+                              data_path,
+                              "Al_ldos_200x200x200grid_250elvls_snapshot0.npy",
+                              data_path,output_units="1/Ry")
+    data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot1.npy",
+                              data_path,
+                              "Al_ldos_200x200x200grid_250elvls_snapshot1.npy",
+                              data_path,output_units="1/Ry")
+    data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot2.npy",
+                              data_path,
+                              "Al_ldos_200x200x200grid_250elvls_snapshot2.npy",
+                              data_path,output_units="1/Ry")
+    data_handler.load_data()
+    print("Read data: DONE.")
 
-# Add a snapshot we want to use in to the list.
-data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
-                          "Al_ldos_200x200x200grid_250elvls_snapshot0.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",output_units="1/Ry")
-data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot1.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
-                          "Al_ldos_200x200x200grid_250elvls_snapshot1.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",output_units="1/Ry")
-data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot2.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",
-                          "Al_ldos_200x200x200grid_250elvls_snapshot2.npy",
-                          "/home/fiedlerl/data/test_fp_snap/2.699gcc/",output_units="1/Ry")
-data_handler.load_data()
-print("Read data: DONE.")
+    ####################
+    # DATA OUTPUT
+    # We save the "unprepared" data into *.npy files.
+    ####################
 
-####################
-# DATA OUTPUT
-# We save the "unprepared" data into *.npy files.
-####################
+    data_handler.save_loaded_data(directory="./data/", filetype="*.npy",
+                                  naming_scheme_input="test_Al_debug_2k_nr*.in", naming_scheme_output="test_Al_debug_2k_nr*.out")
+    print("Write data: DONE.")
 
-data_handler.save_loaded_data(directory="/home/fiedlerl/data/test_fp_snap/2.699gcc/", filetype="*.npy",
-                              naming_scheme_input="Al_debug_2k_nr*.in", naming_scheme_output="Al_debug_2k_nr*.out")
-print("Write data: DONE.")
-print("Successfully ran ex03_run_singleshot.py.")
+    # Verify that the we got the correct results.
+    # Since we work with float32 internally, there will be some difference, that will scale with
+    # data size. So we need to divide by the amount of data.
+    data_backup = np.load("./data/Al_debug_2k_nr0.in.npy")
+    data_calculated = np.load("./data/test_Al_debug_2k_nr0.in.npy")
+    diffin = (np.abs(np.sum(data_backup) - np.sum(data_calculated)))/\
+             (np.sum(data_backup) *test_parameters.debug.grid_dimensions[0]*
+              test_parameters.debug.grid_dimensions[1]*test_parameters.debug.grid_dimensions[2])
+
+    data_backup = np.load("./data/Al_debug_2k_nr0.out.npy")
+    data_calculated = np.load("./data/test_Al_debug_2k_nr0.out.npy")
+    diffout = (np.abs(np.sum(data_backup) - np.sum(data_calculated)))/\
+             (np.sum(data_backup)*test_parameters.debug.grid_dimensions[0]*
+              test_parameters.debug.grid_dimensions[1]*test_parameters.debug.grid_dimensions[2])
+
+    if diffin > accuracy or diffout > accuracy:
+        return False
+    else:
+        return True
+
+
+if __name__ == "__main__":
+    if run_example03("/home/fiedlerl/data/Al256/SandiaQE/2.699gcc/"):
+        print("Successfully ran ex03_run_singleshot.py.")
+    else:
+        raise Exception("Ran ex03_run_singleshot but something was off. If you haven't changed any parameters in "
+                        "the example, there might be a problem with your installation.")
