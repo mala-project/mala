@@ -7,7 +7,7 @@ from ex06_postprocessing import run_example06
 from ex07_dos_analysis import run_example07
 from ex08_training_with_postprocessing import run_example08
 from ex09_get_total_energy import run_example09
-
+from ex10_advanced_hyperparameter_optimization import run_example10
 
 """
 ex99_verify_all_examples.py: This example confirms whether or not the examples run CORRECTLY. That is, even though they
@@ -80,6 +80,13 @@ try:
 except:
     print("Could not run example09, most likely because of missing QE installation.")
 
+# Example 10: Novel hyperparameter optimization techniques.
+if run_example10():
+    print("Successfully ran ex02_hyperparameter_optimization.py.")
+else:
+    raise Exception(
+        "Ran ex02_hyperparameter_optimization but something was off. If you haven't changed any parameters in "
+        "the example, there might be a problem with your installation.")
 
 
 

@@ -271,6 +271,18 @@ class ParametersHyperparameterOptinization(ParametersBase):
                                         differentiate between variables. No reordering is performed by our code;
                                         the order depends on the order in the list. _xxx can be essentially anything.
         """
+        self.hyper_opt_method = "optuna"
+        """
+        Method used for hyperparameter optimization. Currently supported:
+            - "optuna" : Use optuna for the hyperparameter optimization.
+            - "oat" : Use orthogonal array tuning (currently limited to categorical hyperparemeters. Range analysis is 
+            currently done by simply choosing the lowesr loss. 
+            - "notraining" : Using a NAS without training, based on jacobians. 
+        """
+
+
+
+
     def show(self, indent=""):
         for v in vars(self):
             if v != "hlist":

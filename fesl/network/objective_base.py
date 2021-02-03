@@ -1,26 +1,8 @@
-from abc import abstractmethod
-
 from optuna import Trial
-
-from fesl.common.parameters import Parameters
-from fesl.network.optuna_parameter import OptunaParameter
-
-
-def copy_training_parameters(parameters: Parameters, trial: Trial) -> Parameters:
-    """Mutates passed parameters ¯\_(ツ)_/¯"""
-    par: OptunaParameter
-    for par in parameters.hyperparameters.hlist:
-        if par.name == "learning_rate":
-            parameters.training.learning_rate = par.get_parameter(trial)
-        elif "layer_activation" in par.name:
-            parameters.network.layer_activations.append(par.get_parameter(trial))
-        elif "ff_neurons_layer" in par.name:
-            if parameters.network.nn_type == "feed-forward":
-                parameters.network.layer_sizes.append(par.get_parameter(trial))
-        else:
-            raise Exception(f"Optimization of hyperparameter {par.name} not supported at the moment.")
-    return parameters
-
+from .hyperparameter_optuna import HyperparameterOptuna
+from .hyperparameter_oat import HyperparameterOAT
+from .network import Network
+from .trainer import Trainer
 
 class ObjectiveBase:
     """Wraps the training process."""
@@ -38,22 +20,65 @@ class ObjectiveBase:
             self.params.hyperparameters.hlist
         ))
 
-    @abstractmethod
-    def __call__(self, trial: Trial):
+        self.trial_type = self.params.hyperparameters.hyper_opt_method
+
+    def __call__(self, trial):
         """Call needs to be implemented by child classes"""
 
-        # parse hyperparameter list.
+        # Parse the parameters included in the trial.
+        self.parse_trial(trial)
+
+        # Perform training and report best test loss.
+        test_network = Network(self.params)
+        test_trainer = Trainer(self.params)
+        test_trainer.train_network(test_network, self.data_handler)
+        return test_trainer.final_test_loss
+
+    def parse_trial(self, trial):
+        if self.trial_type == "optuna":
+            self.parse_trial_optuna(trial)
+        elif self.trial_type == "oat":
+            self.parse_trial_oat(trial)
+        else:
+            raise Exception("Cannot parse trial, unknown hyperparameter optimization method.")
+
+    def parse_trial_optuna(self, trial: Trial):
+        """
+        Parse an optuna style trial into the params attribute.
+        """
+
+
         if self.optimize_layer_list:
             self.params.network.layer_sizes = [self.data_handler.get_input_dimension()]
         if self.optimize_activation_list:
             self.params.network.layer_activations = []
 
-        copy_training_parameters(self.params, trial)
-
+        par: HyperparameterOptuna
+        for par in self.params.hyperparameters.hlist:
+            if par.name == "learning_rate":
+                self.params.training.learning_rate = par.get_parameter(trial)
+            elif "layer_activation" in par.name:
+                self.params.network.layer_activations.append(par.get_parameter(trial))
+            elif "ff_neurons_layer" in par.name:
+                if self.params.network.nn_type == "feed-forward":
+                    self.params.network.layer_sizes.append(par.get_parameter(trial))
+            elif "trainingtype" in par.name:
+                self.params.training.trainingtype = par.get_parameter(trial)
+            else:
+                raise Exception("Optimization of hyperparameter ", par.name, "not supported at the moment.")
         if self.optimize_layer_list:
             self.params.network.layer_sizes.append(self.data_handler.get_output_dimension())
 
-    @abstractmethod
-    def set_optimal_parameters(self, study):
-        """Sets the optimal parameters, needs to be implemented by child classes."""
-        raise Exception("No set_optimal_parameters implemented.")
+
+    def parse_trial_oat(self, trial):
+        if self.optimize_activation_list:
+            self.params.network.layer_activations = []
+
+        par: HyperparameterOAT
+        for factor_idx, par in enumerate(self.params.hyperparameters.hlist):
+            if "layer_activation" in par.name:
+                self.params.network.layer_activations.append(par.get_parameter(trial,factor_idx))
+            elif "trainingtype" in par.name:
+                self.params.training.trainingtype= par.get_parameter(trial, factor_idx)
+            else:
+                raise Exception("Optimization of hyperparameter ", par.name, "not supported at the moment.")

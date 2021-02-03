@@ -1,7 +1,4 @@
-import oapackage as oa
-
-
-class OA_Parameter:
+class HyperparameterOAT:
     def __init__(self, opttype="categorical", name="", choices=[]):
         self.name = name
         self.opttype = opttype
