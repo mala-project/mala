@@ -10,10 +10,18 @@ from ..common.parameters import Parameters
 
 class ObjectiveFeedForward(ObjectiveBase):
     """Wraps the training process."""
-
     def __init__(self, p, dh):
         super(ObjectiveFeedForward, self).__init__(p, dh)
 
+        # We need to find out if we have to reparametrize the lists with the layers and the activations.
+        self.optimize_layer_list = False
+        self.optimize_activation_list = False
+        par: OptunaParameter
+        for par in self.params.hyperparameters.hlist:
+            if "ff_neurons_layer" in par.name:
+                self.optimize_layer_list = True
+            elif "layer_activation" in par.name:
+                self.optimize_activation_list = True
 
     def __call__(self, trial: Trial):
         super(ObjectiveFeedForward).__call__(trial)
@@ -38,6 +46,7 @@ class ObjectiveFeedForward(ObjectiveBase):
                 self.params.network.layer_sizes.append(study.best_params[par])
             elif "layer_activation" in par:
                 self.params.network.layer_activations.append(study.best_params[par])
-
+            elif "trainingtype" in par:
+                self.params.training.trainingtype= study.best_params[par]
         if self.optimize_layer_list:
             self.params.network.layer_sizes.append(self.data_handler.get_output_dimension())

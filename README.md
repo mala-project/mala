@@ -22,3 +22,7 @@ You can familiarize yourself with the usage of this package by running the examp
 ## References
 
 [1] Ellis, J. A., Cangi, A., Modine, N. A., Stephens, J. A., Thompson, A. P., & Rajamanickam, S. (2020). Accelerating Finite-temperature Kohn-Sham Density Functional Theory with Deep Neural Networks. arXiv preprint arXiv:2010.04905. https://arxiv.org/abs/2010.04905.
+
+
+
+Added from develop
