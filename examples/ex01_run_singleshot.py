@@ -61,7 +61,7 @@ def run_example01(desired_loss_improvement_factor=1):
     # Set up the network and trainer we want to use.
     ####################
 
-test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
+    test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
 
     test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
 
