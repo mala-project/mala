@@ -32,7 +32,7 @@ Build Quantum Espresso
 2.  Make sure you have the necessary modules loaded (``gcc``,
     ``openmpi``).
 3.  Set up the environment using
-    ``source total_energy_module_env_gnu.sh.``
+    ``source total_energy_module_env_gnu.sh.``.
 4.  In order for this module to work, your QE installation has to be
     linked against custom compiled LAPACK and BLAS libraries. If you
     have LAPACK/BLAS already installed somewhere on your system, QE will
@@ -50,17 +50,17 @@ Build Quantum Espresso
        ``*.a`` files (e.g. ``lapack.a`` to ``liblapack.a``
 
 5.  Add ``-fallow-argument-mismatch`` at the end of line 105
-    (``F90FLAGS``) in ``q-e/install/make.inc.in``
+    (``F90FLAGS``) in ``q-e/install/make.inc.in``.
 6.  Run ``./configure`` in the q-e directory.
 7.  Afterwards, configure the make input for LAPACK:
 
     1. Add ``-fallow-argument-mismatch`` to line 20 (``OPTS``) in
-       ``q-e/install/make_lapack.inc``
+       ``q-e/install/make_lapack.inc``.
     2. Add ``-fPIC`` to line 22 (``NOOPT``) in
-       ``q-e/install/make_lapack.inc``
+       ``q-e/install/make_lapack.inc``.
 
 8.  Run ``make all`` (use ``make -j8 all`` for a faster compilation
-    process)
+    process).
 
     1. I (L. Fiedler) had to clean and recompile in the middle of the
        compilation process; that might be due to a problem with the
