@@ -37,6 +37,8 @@ class ParametersNetwork(ParametersBase):
         """
         self.loss_function_type = "mse"
 
+        self.hyper_param_opt_type = "training"
+
 
 # noinspection PyMissingConstructor
 class ParametersDescriptors(ParametersBase):

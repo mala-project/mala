@@ -157,7 +157,6 @@ class HandlerBase:
         Parses descriptors (e.g. SNAP) and handles unit conversion.
         """
 
-
     def load_data(self):
         """Loads data from the specified directory.
         The way this is done is provided by the base classes. At the end of load_data raw_input_datasize
