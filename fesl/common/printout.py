@@ -9,9 +9,12 @@ def set_horovod_status(new_value):
     use_horovod = new_value
 
 
-def printout(string : str):
+def printout(*values, sep=' '):
+    outstring = ''
+    for v in values:
+        outstring += v+sep
     if use_horovod is False:
-        print(string)
+        print(outstring)
     else:
         if hvd.rank() == 0:
-            print(string)
+            print(outstring)
