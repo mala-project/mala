@@ -1,6 +1,6 @@
 # Build Python Module to run QE "v of rho" subroutines
 
-All the files described here can be found in the subfolder `total_energy_module`.
+All the files described here can be found in the subfolder `install/total_energy_module/`.
 
 ## Using GNU and the mlmm_env environment on Blake
 
@@ -13,7 +13,7 @@ All the files described here can be found in the subfolder `total_energy_module`
 3. Make sure you have the necessary modules loaded (`gcc`, `python`, `openmpi`).
 4. Patch the QE source so that the FoX project is built with `-fPIC`:
    1. change to the `q-e/install/m4` folder
-   2. `patch < x\_ac\_qe\_f90.m4.patch`
+   2. `patch < x_ac_qe_f90.m4.patch`
 5. Copy `total_energy.f90` to `q-e/PW/src`. This file contains the Fortran 90 code
    that `f2py` will create a Python binding to.
 
