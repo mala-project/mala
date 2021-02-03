@@ -1,4 +1,5 @@
 from fesl.common.parameters import Parameters
+from fesl.common.parameters import printout
 from fesl.datahandling.handler_interface import HandlerInterface
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
@@ -7,8 +8,8 @@ from fesl.network.trainer import Trainer
 ex04_snapshot_splitting.py: Shows a more intiutive way of splitting up the data, i.e. snapshot splitting.
 """
 def run_example04(desired_loss_improvement_factor=1):
-    print("Welcome to FESL.")
-    print("Running ex04_snapshot_splitting.py")
+    printout("Welcome to FESL.")
+    printout("Running ex04_snapshot_splitting.py")
 
     ####################
     # PARAMETERS
@@ -46,7 +47,7 @@ def run_example04(desired_loss_improvement_factor=1):
 
     data_handler.load_data()
     data_handler.prepare_data()
-    print("Read data: DONE.")
+    printout("Read data: DONE.")
 
     ####################
     # NETWORK SETUP
@@ -59,19 +60,19 @@ def run_example04(desired_loss_improvement_factor=1):
     # Setup network and trainer.
     test_network = Network(test_parameters)
     test_trainer = Trainer(test_parameters)
-    print("Network setup: DONE.")
+    printout("Network setup: DONE.")
 
     ####################
     # TRAINING
     # Train the network.
     ####################
 
-    print("Starting training.")
+    printout("Starting training.")
     test_trainer.train_network(test_network, data_handler)
-    print("Training: DONE.")
+    printout("Training: DONE.")
 
     ####################
-    print("Parameters used for this experiment:")
+    printout("Parameters used for this experiment:")
     test_parameters.show()
 
     if desired_loss_improvement_factor*test_trainer.initial_test_loss < test_trainer.final_test_loss:
@@ -81,7 +82,7 @@ def run_example04(desired_loss_improvement_factor=1):
 
 if __name__ == "__main__":
     if run_example04():
-        print("Successfully ran ex04_snapshot_splitting.")
+        printout("Successfully ran ex04_snapshot_splitting.")
     else:
         raise Exception("Ran ex04_snapshot_splitting but something was off. If you haven't changed any parameters in "
                         "the example, there might be a problem with your installation.")

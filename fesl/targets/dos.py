@@ -3,6 +3,7 @@ from .calculation_helpers import *
 from scipy import integrate, interpolate
 from scipy.optimize import toms748
 from ase.units import Rydberg
+from fesl.common.parameters import printout
 
 
 class DOS(TargetBase):
@@ -24,7 +25,7 @@ class DOS(TargetBase):
         elif in_units == "1/Ry":
             return array / Rydberg
         else:
-            print(in_units)
+            printout(in_units)
             raise Exception("Unsupported unit for LDOS.")
 
     @staticmethod
@@ -39,7 +40,7 @@ class DOS(TargetBase):
         elif out_units == "1/Ry":
             return array * Rydberg
         else:
-            print(out_units)
+            printout(out_units)
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_qe_dos_txt(self, file_name, directory):

@@ -1,4 +1,5 @@
 from fesl.common.parameters import Parameters
+from fesl.common.parameters import printout
 from fesl.datahandling.handler_interface import HandlerInterface
 from fesl.network.hyper_opt_interface import HyperOptInterface
 from fesl.network.network import Network
@@ -10,8 +11,8 @@ ex10_advanced_hyperparameter_optimization.py: Shows how recent developments in h
 in FESL (OAT / training-free NAS).
 """
 
-print("Welcome to FESL.")
-print("Running ex02_hyperparameter_optimization.py")
+printout("Welcome to FESL.")
+printout("Running ex02_hyperparameter_optimization.py")
 
 
 def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", last_optuna_study = None):
@@ -52,7 +53,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", la
     data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
     data_handler.load_data()
     data_handler.prepare_data()
-    print("Read data: DONE.")
+    printout("Read data: DONE.")
 
     ####################
     # HYPERPARAMETER OPTIMIZATION
@@ -88,7 +89,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", la
         tmp_hp_optimizer.add_hyperparameter("categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"])
 
     # Perform hyperparameter optimization.
-    print("Starting Hyperparameter optimization.")
+    printout("Starting Hyperparameter optimization.")
     if hyper_optimizer == "oat" or hyper_optimizer == "optuna":
         test_hp_optimizer.perform_study(data_handler)
         if hyper_optimizer == "optuna":
@@ -99,15 +100,15 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", la
         else:
             test_hp_optimizer.perform_study(data_handler,trial_list=tmp_hp_optimizer.orthogonal_arr)
     test_hp_optimizer.set_optimal_parameters()
-    print("Hyperparameter optimization: DONE.")
+    printout("Hyperparameter optimization: DONE.")
 
     test_network = Network(test_parameters)
     test_trainer = Trainer(test_parameters)
-    print("Network setup: DONE.")
+    printout("Network setup: DONE.")
     test_trainer.train_network(test_network, data_handler)
-    print("Training: DONE.")
+    printout("Training: DONE.")
 
-    print("Parameters used for this experiment:")
+    printout("Parameters used for this experiment:")
     test_parameters.show()
     if hyper_optimizer == "optuna":
         return test_trainer.final_test_loss, last_optuna_study
@@ -125,13 +126,13 @@ def run_example10(desired_std = 0.1):
     if np.std(results) < desired_std:
         return True
     else:
-        print(results)
-        print(np.std(results))
+        printout(results)
+        printout(np.std(results))
         return False
 
 if __name__ == "__main__":
     if run_example10():
-        print("Successfully ran ex10_advanced_hyperparameter_optimization.py.")
+        printout("Successfully ran ex10_advanced_hyperparameter_optimization.py.")
     else:
         raise Exception("Ran ex10_advanced_hyperparameter_optimization but something was off. If you haven't changed any parameters in "
                         "the example, there might be a problem with your installation.")

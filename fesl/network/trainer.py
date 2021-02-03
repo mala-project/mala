@@ -4,6 +4,7 @@ import torch
 from torch import optim
 from torch.utils.data import DataLoader
 import warnings
+from fesl.common.parameters import printout
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -39,10 +40,8 @@ class Trainer:
 
         # See if we want to use horovod.
         if self.use_horovod:
-            # Initialize horovod
-            hvd.init()
             if self.use_gpu:
-                print("size=", hvd.size(), "global_rank=", hvd.rank(), "local_rank=", hvd.local_rank(), "device=",
+                printout("size=", hvd.size(), "global_rank=", hvd.rank(), "local_rank=", hvd.local_rank(), "device=",
                       torch.cuda.get_device_name(hvd.local_rank()))
                 # pin GPU to local rank
                 torch.cuda.set_device(hvd.local_rank())
@@ -63,7 +62,7 @@ class Trainer:
         # Scale the learning rate according to horovod. 
         if self.use_horovod:
             if hvd.size() > 1:
-                print("Rescaling learning rate because multiple workers are used for training.")
+                printout("Rescaling learning rate because multiple workers are used for training.")
                 self.parameters.learning_rate = self.parameters.learning_rate * hvd.size() 
                 self.use_compression= self.parameters.use_compression
 
@@ -143,12 +142,12 @@ class Trainer:
 
         #Collect and average all the losses from all the devices
         if self.use_horovod:
-            print(hvd.rank(), vloss)
+            printout(hvd.rank(), vloss)
             vloss=self.average_validation(vloss,'average_loss')
             tloss=self.average_validation(tloss,'average_loss')
         if self.parameters.verbosity:
-            print("Initial Guess - validation data loss: ", vloss)
-            print("Initial Guess - test data loss: ", tloss)
+            printout("Initial Guess - validation data loss: ", vloss)
+            printout("Initial Guess - test data loss: ", tloss)
         self.initial_test_loss = tloss
 
         # Perform and log training.
@@ -175,7 +174,7 @@ class Trainer:
             if self.use_horovod:
                 vloss=self.average_validation(vloss,'average_loss')
             if self.parameters.verbosity:
-                print("Epoch: ", epoch, "validation data loss: ", vloss)
+                printout("Epoch: ", epoch, "validation data loss: ", vloss)
 
             # If a scheduler is used, update it.
             if self.scheduler is not None:
@@ -189,10 +188,10 @@ class Trainer:
                     vloss_old = vloss
                 else:
                     patience_counter += 1
-                    print("Validation accuracy has not improved enough.")
+                    printout("Validation accuracy has not improved enough.")
                     if patience_counter >= self.parameters.early_stopping_epochs:
                         if self.parameters.verbosity:
-                            print("Stopping the training, validation accuracy has not improved for", patience_counter,
+                            printout("Stopping the training, validation accuracy has not improved for", patience_counter,
                                   "epochs.")
                         break
 
@@ -201,7 +200,7 @@ class Trainer:
         if self.use_horovod:
             tloss=self.average_validation(tloss,'average_loss')
         self.final_test_loss = tloss
-        print("Final test data loss: ", tloss)
+        printout("Final test data loss: ", tloss)
 
     def process_mini_batch(self, network, input_data, target_data):
         prediction = network.forward(input_data)

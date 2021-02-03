@@ -1,5 +1,6 @@
 from .handler_base import HandlerBase
 import numpy as np
+from fesl.common.parameters import printout
 
 
 class HandlerQEoutCube(HandlerBase):
@@ -40,7 +41,7 @@ class HandlerQEoutCube(HandlerBase):
             # Read the LDOS data.
             ##############
 
-            print("Reading targets for snapshot ", snapshot[2], "at ", snapshot[3])
+            printout("Reading targets for snapshot ", snapshot[2], "at ", snapshot[3])
             self.target_parser.read_from_cube(snapshot[2], snapshot[3])
 
             # Here, raw_input only contains the file name given by ASE and the dimensions of the grd.

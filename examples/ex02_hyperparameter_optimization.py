@@ -1,4 +1,5 @@
 from fesl.common.parameters import Parameters
+from fesl.common.parameters import printout
 from fesl.datahandling.handler_interface import HandlerInterface
 from fesl.network.hyper_opt_interface import HyperOptInterface
 from fesl.network.network import Network
@@ -8,8 +9,8 @@ from fesl.network.trainer import Trainer
 ex02_hyperparameter_optimization.py: Shows how a hyperparameter optimization can be done using this framework.
 """
 def run_example02(desired_loss_improvement_factor=1):
-    print("Welcome to FESL.")
-    print("Running ex02_hyperparameter_optimization.py")
+    printout("Welcome to FESL.")
+    printout("Running ex02_hyperparameter_optimization.py")
 
     ####################
     # PARAMETERS
@@ -47,7 +48,7 @@ def run_example02(desired_loss_improvement_factor=1):
     data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
     data_handler.load_data()
     data_handler.prepare_data()
-    print("Read data: DONE.")
+    printout("Read data: DONE.")
 
     ####################
     # HYPERPARAMETER OPTIMIZATION
@@ -73,10 +74,10 @@ def run_example02(desired_loss_improvement_factor=1):
     test_hp_optimizer.add_hyperparameter("categorical", "layer_activation_02", choices=["ReLU", "Sigmoid"])
 
     # Perform hyperparameter optimization.
-    print("Starting Hyperparameter optimization.")
+    printout("Starting Hyperparameter optimization.")
     test_hp_optimizer.perform_study(data_handler)
     test_hp_optimizer.set_optimal_parameters()
-    print("Hyperparameter optimization: DONE.")
+    printout("Hyperparameter optimization: DONE.")
 
     ####################
     # TRAINING
@@ -85,11 +86,11 @@ def run_example02(desired_loss_improvement_factor=1):
 
     test_network = Network(test_parameters)
     test_trainer = Trainer(test_parameters)
-    print("Network setup: DONE.")
+    printout("Network setup: DONE.")
     test_trainer.train_network(test_network, data_handler)
-    print("Training: DONE.")
+    printout("Training: DONE.")
 
-    print("Parameters used for this experiment:")
+    printout("Parameters used for this experiment:")
     test_parameters.show()
 
     if desired_loss_improvement_factor*test_trainer.initial_test_loss < test_trainer.final_test_loss:
@@ -100,7 +101,7 @@ def run_example02(desired_loss_improvement_factor=1):
 
 if __name__ == "__main__":
     if run_example02():
-        print("Successfully ran ex02_hyperparameter_optimization.py.")
+        printout("Successfully ran ex02_hyperparameter_optimization.py.")
     else:
         raise Exception("Ran ex02_hyperparameter_optimization but something was off. If you haven't changed any parameters in "
                         "the example, there might be a problem with your installation.")

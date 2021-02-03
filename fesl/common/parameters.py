@@ -1,4 +1,11 @@
 import pickle
+import warnings
+from .printout import printout, set_horovod_status
+try:
+    import horovod.torch as hvd
+except ModuleNotFoundError:
+    warnings.warn("You either don't have Horovod installed or it is not configured correctly. You can still "
+              "train networks, but attempting to set parameters.training.use_horovod = True WILL cause a crash.")
 
 # Subclasses that make up the final parameters class.
 
@@ -8,7 +15,7 @@ class ParametersBase:
 
     def show(self, indent=""):
         for v in vars(self):
-            print(indent + '%-15s: %s' % (v, getattr(self, v)))
+            printout(indent + '%-15s: %s' % (v, getattr(self, v)))
 
 
 # noinspection PyMissingConstructor
@@ -239,6 +246,17 @@ class ParametersTraining(ParametersBase):
         #add comment(optional)
         self.sampler={"train_sampler":None,"validate_sampler":None,"test_sampler":None}
 
+    @property
+    def use_horovod(self):
+        printout("Getting value...")
+        return self._use_horovod
+
+    @use_horovod.setter
+    def use_horovod(self, value):
+        if value:
+            hvd.init()
+        set_horovod_status(value)
+        self._use_horovod = value
 
 class ParametersHyperparameterOptinization(ParametersBase):
     """Hyperparameter optimization subclass."""
@@ -284,11 +302,11 @@ class ParametersHyperparameterOptinization(ParametersBase):
     def show(self, indent=""):
         for v in vars(self):
             if v != "hlist":
-                print(indent + '%-15s: %s' % (v, getattr(self, v)))
+                printout(indent + '%-15s: %s' % (v, getattr(self, v)))
             if v == "hlist":
                 i = 0
                 for hyp in self.hlist:
-                    print(indent + '%-15s: %s' % ("hyperparameter #"+str(i), hyp.name))
+                    printout(indent + '%-15s: %s' % ("hyperparameter #"+str(i), hyp.name))
                     i += 1
 
 
@@ -323,14 +341,14 @@ class Parameters:
 
     def show(self):
         """Prints all the parameters bundled in this class."""
-        print("--- " + self.__doc__ + " ---")
+        printout("--- " + self.__doc__ + " ---")
         for v in vars(self):
             if isinstance(getattr(self, v), ParametersBase):
                 parobject = getattr(self, v)
-                print("--- " + parobject.__doc__ + " ---")
+                printout("--- " + parobject.__doc__ + " ---")
                 parobject.show("\t")
             else:
-                print('%-15s: %s' % (v, getattr(self, v)))
+                printout('%-15s: %s' % (v, getattr(self, v)))
 
     def save(self, filename, save_format="pickle"):
         """
@@ -361,4 +379,4 @@ class Parameters:
 if __name__ == "__main__":
     p = Parameters()
     p.show()
-    print("parameters.py - basic functions are working.")
+    printout("parameters.py - basic functions are working.")

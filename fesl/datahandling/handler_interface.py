@@ -1,5 +1,4 @@
 from .handler_qeout_cube import HandlerQEoutCube
-from .handler_mnist import handler_mnist
 from .handler_npy import HandlerNpy
 from .data_scaler import DataScaler
 from fesl.descriptors.descriptor_interface import DescriptorInterface

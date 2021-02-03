@@ -1,6 +1,7 @@
 from fesl.common.parameters import Parameters
 from fesl.targets.ldos import LDOS
 from fesl.targets.dos import DOS
+from fesl.common.parameters import printout
 import numpy as np
 
 """
@@ -39,17 +40,17 @@ def run_example09(accuracy = 50):
 
     # The LDOS calculator can accept preprocessed data.
     total_energy = ldos_calculator.get_total_energy(dos_data=dos_data, density_data=dens_data, fermi_energy_eV=fermi_energy_sc)
-    print("FESL total energy: ", total_energy, " eV")
-    print("QE total energy: -2435.503721357 eV")
+    printout("FESL total energy: ", total_energy, " eV")
+    printout("QE total energy: -2435.503721357 eV")
     if np.abs(total_energy + 2435.503721357) > accuracy:
         return False
-    print("Parameters used for this experiment:")
+    printout("Parameters used for this experiment:")
     test_parameters.show()
     return True
 
 if __name__ == "__main__":
     if run_example09():
-        print("Successfully ran ex09_get_total_energy.py.")
+        printout("Successfully ran ex09_get_total_energy.py.")
     else:
         raise Exception(
             "Ran ex09_get_total_energy but something was off. If you haven't changed any parameters in "

@@ -1,4 +1,5 @@
 from fesl.common.parameters import Parameters
+from fesl.common.parameters import printout
 from fesl.datahandling.handler_interface import HandlerInterface
 from fesl.targets.target_interface import TargetInterface
 import matplotlib.pyplot as plt
@@ -8,9 +9,9 @@ ex06_postprocessing.py: Shows how the LDOS can be post processed.
 """
 
 def run_example06(doplots = True, accuracy = 0.00001):
-    print("Welcome to FESL.")
-    print("Running ex06_postprocessing.py")
-    print("The physical quantities calculated in this example will seem wrong, since only a fraction of a DFT simulation "
+    printout("Welcome to FESL.")
+    printout("Running ex06_postprocessing.py")
+    printout("The physical quantities calculated in this example will seem wrong, since only a fraction of a DFT simulation "
           "cell is used.")
 
     ####################
@@ -84,7 +85,7 @@ def run_example06(doplots = True, accuracy = 0.00001):
     #####
 
     e_band = ldos.get_band_energy(data_handler.raw_output_grid[0])
-    print("Band energy [eV]: ", e_band)
+    printout("Band energy [eV]: ", e_band)
     # Result should be around 7.505614018562486
     if np.abs(7.505614018562486 - e_band) > accuracy:
         return False
@@ -94,19 +95,19 @@ def run_example06(doplots = True, accuracy = 0.00001):
     #####
 
     nr_electrons = ldos.get_number_of_electrons(data_handler.raw_output_grid[0])
-    print("# of Electrons: ", nr_electrons)
+    printout("# of Electrons: ", nr_electrons)
     # Result should be around 2.236611809011879
     if np.abs(2.236611809011879 - nr_electrons) > accuracy:
         return False
 
-    print("Successfully ran ex06_postprocessing.py.")
-    print("Parameters used for this experiment:")
+    printout("Successfully ran ex06_postprocessing.py.")
+    printout("Parameters used for this experiment:")
     test_parameters.show()
     return True
 
 if __name__ == "__main__":
     if run_example06():
-        print("Successfully ran ex06_postprocessing.py.")
+        printout("Successfully ran ex06_postprocessing.py.")
     else:
         raise Exception("Ran ex06_postprocessing but something was off. If you haven't changed any parameters in "
                         "the example, there might be a problem with your installation.")

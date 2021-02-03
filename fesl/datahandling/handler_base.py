@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset
+from fesl.common.parameters import printout
 
 
 class HandlerBase:
@@ -220,7 +221,7 @@ class HandlerBase:
             raise Exception("Invalid raw data kind requested, could not save raw data.")
 
         # Inputs.
-        print("Saving ", self.nr_snapshots, " snapshot inputs at", directory)
+        printout("Saving ", self.nr_snapshots, " snapshot inputs at", directory)
         for i in range(0, self.nr_snapshots):
             if filetype == "*.npy":
                 input_units = self.parameters.snapshot_directories_list[i].input_units
@@ -231,7 +232,7 @@ class HandlerBase:
                     np.save(save_path, self.descriptor_calculator.backconvert_units(self.raw_input_datasize[i], input_units), allow_pickle=True)
 
         # Outputs.
-        print("Saving ", self.nr_snapshots, " snapshot outputs at", directory)
+        printout("Saving ", self.nr_snapshots, " snapshot outputs at", directory)
         for i in range(0, self.nr_snapshots):
             if filetype == "*.npy":
                 output_units = self.parameters.snapshot_directories_list[i].output_units

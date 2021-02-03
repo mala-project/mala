@@ -1,6 +1,7 @@
 from .handler_base import HandlerBase
 from .snapshot import Snapshot
 import numpy as np
+from fesl.common.parameters import printout
 import torch
 from torch.utils.data import TensorDataset
 
@@ -36,7 +37,7 @@ class HandlerNpy(HandlerBase):
             # Descriptors.
             ####################
 
-            print("Reading descriptors from ", snapshot.input_npy_file, "at", snapshot.input_npy_directory)
+            printout("Reading descriptors from ", snapshot.input_npy_file, "at", snapshot.input_npy_directory)
             tmp = self.load_from_npy_file(snapshot.input_npy_directory + snapshot.input_npy_file,
                                           mmapmode=self.parameters.input_memmap_mode)
 
@@ -68,7 +69,7 @@ class HandlerNpy(HandlerBase):
             # Targets.
             ####################
 
-            print("Reading targets from ", snapshot.output_npy_file, "at", snapshot.output_npy_directory)
+            printout("Reading targets from ", snapshot.output_npy_file, "at", snapshot.output_npy_directory)
             tmp_out = self.load_from_npy_file(snapshot.output_npy_directory + snapshot.output_npy_file,
                                               mmapmode=self.parameters.output_memmap_mode)
 
@@ -112,7 +113,7 @@ class HandlerNpy(HandlerBase):
             try:
                 return loaded_array[0:self.dbg_grid_dimensions[0], 0:self.dbg_grid_dimensions[1], 0:self.dbg_grid_dimensions[2], :]
             except:
-                print(
+                printout(
                     "Could not use grid reduction, falling back to regular grid. Please check that the debug grid is "
                     "not bigger than the actual grid.")
 

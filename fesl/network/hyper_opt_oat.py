@@ -2,6 +2,7 @@ import oapackage as oa
 from .hyper_opt_base import HyperOptBase
 from .objective_base import ObjectiveBase
 import numpy as np
+from fesl.common.parameters import printout
 
 
 class HyperOptOAT(HyperOptBase):
@@ -20,7 +21,7 @@ class HyperOptOAT(HyperOptBase):
         number_of_trial = 0
         self.objective = ObjectiveBase(self.params, data_handler)
         for row in self.orthogonal_arr:
-            print("Trial number", number_of_trial)
+            printout("Trial number", number_of_trial)
             self.trial_losses.append(self.objective(row))
             number_of_trial += 1
 

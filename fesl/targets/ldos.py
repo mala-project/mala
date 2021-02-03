@@ -6,6 +6,7 @@ from .density import Density
 import numpy as np
 import math
 from ase.units import Rydberg
+from fesl.common.parameters import printout
 
 
 class LDOS(TargetBase):
@@ -57,7 +58,7 @@ class LDOS(TargetBase):
         elif in_units == "1/Ry":
             return array / Rydberg
         else:
-            print(in_units)
+            printout(in_units)
             raise Exception("Unsupported unit for LDOS.")
 
     @staticmethod
@@ -86,7 +87,7 @@ class LDOS(TargetBase):
         elif out_units == "1/Ry":
             return array * Rydberg
         else:
-            print(out_units)
+            printout(out_units)
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_cube(self, file_name_scheme, directory, ldos_units="1/eV"):
@@ -107,7 +108,7 @@ class LDOS(TargetBase):
 
         # Iterate over the amount of specified LDOS input files.
         # QE is a Fortran code, so everything is 1 based.
-        print("Reading "+str(self.parameters.ldos_gridsize)+" LDOS files from"+directory+".")
+        printout("Reading "+str(self.parameters.ldos_gridsize)+" LDOS files from"+directory+".")
         for i in range(1, self.parameters.ldos_gridsize + 1):
             tmp_file_name = file_name_scheme
             tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
