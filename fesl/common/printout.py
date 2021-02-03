@@ -12,7 +12,7 @@ def set_horovod_status(new_value):
 def printout(*values, sep=' '):
     outstring = ''
     for v in values:
-        outstring += v+sep
+        outstring += str(v)+sep
     if use_horovod is False:
         print(outstring)
     else:
