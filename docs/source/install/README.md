@@ -101,3 +101,11 @@ If you want to use this module, please refer to [Build Python Module](INSTALL_TE
 3. Go to the `examples` folder and run `ex0_verify_installation.py` to make
 sure the setup was successful.
 4. Enjoy!
+
+
+### Build documentation locally (optional)
+
+1. Change into `docs/source` folder.
+2. Run `make apidocs`.
+3. Run `make html`. This creates a `_build` folder inside `docs`.
+4. Open `docs/_build/html/index.html`.
