@@ -50,6 +50,11 @@ autodoc_mock_imports = [
     'torch',
     'numpy',
     'scipy',
+    'oapackage',
+    'matplotlib',
+    'horovod',
+    'lammps',
+    'total_energy',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
