@@ -66,5 +66,5 @@ pages:
     paths:
     - public
   only:
-#  - master
+  - master
   - documentation
