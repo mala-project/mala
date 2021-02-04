@@ -1,4 +1,4 @@
-Build Python Module to run QE “v of rho” subroutines
+Python bindings to Quantum Espresso
 ====================================================
 
 All the files described here can be found in the subfolder
