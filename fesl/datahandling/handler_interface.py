@@ -1,5 +1,4 @@
 from .handler_qeout_cube import HandlerQEoutCube
-from .handler_mnist import handler_mnist
 from .handler_npy import HandlerNpy
 from .data_scaler import DataScaler
 from fesl.descriptors.descriptor_interface import DescriptorInterface
@@ -32,10 +31,6 @@ def HandlerInterface(params, input_data_scaler=None, output_data_scaler=None, ta
     # Saved numpy arrays.
     if params.data.datatype_in == '*.npy' and params.data.datatype_out == '*.npy':
         handler = HandlerNpy(params, input_data_scaler, output_data_scaler, descriptor_calculator, target_parser)
-
-    # MNIST data.
-    if params.data.datatype_in == 'mnist' and params.data.datatype_out == 'mnist':
-        handler = handler_mnist(params, input_data_scaler, output_data_scaler)
 
     if handler is not None:
         return handler

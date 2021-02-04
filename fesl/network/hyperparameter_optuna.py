@@ -1,7 +1,7 @@
 from optuna.trial import Trial
 
 
-class OptunaParameter:
+class HyperparameterOptuna:
     """Represents an optuna parameter."""
 
     def __init__(self, opttype="float", name="", low=0, high=0, choices=[]):

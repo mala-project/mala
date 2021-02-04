@@ -5,6 +5,7 @@ from fesl.targets.ldos import LDOS
 from fesl.targets.density import Density
 from fesl.targets.dos import DOS
 from fesl.common.parameters import Parameters
+from fesl.common.parameters import printout
 
 # In order to test the integration capabilities of FESL we need a QuantumEspresso
 # calculation containing the following:
@@ -102,7 +103,7 @@ def qe_dens_to_nr_of_electrons(accuracy):
 
     # Calculate relative error.
     rel_error = np.abs(nr_fesl-nr_dft) / nr_dft
-    print("Relative error number of electrons: ", rel_error)
+    printout("Relative error number of electrons: ", rel_error)
 
     # Check against the constraints we put upon ourselves.
     if rel_error < accuracy:
@@ -134,7 +135,7 @@ def qe_ldos_to_density(accuracy):
 
     # Calculate relative error.
     rel_error = np.abs(density_fesl_sum-density_dft_sum) / density_dft_sum
-    print("Relative error for sum of density: ", rel_error)
+    printout("Relative error for sum of density: ", rel_error)
 
     # Check against the constraints we put upon ourselves.
     if rel_error < accuracy:
@@ -165,7 +166,7 @@ def qe_ldos_to_dos(accuracy):
     dos_fesl_sum = dos_fesl.sum()
     dos_dft_sum = dos_dft.sum()
     rel_error = np.abs(dos_fesl_sum-dos_dft_sum) / dos_dft_sum
-    print("Relative error for sum of DOS: ", rel_error)
+    printout("Relative error for sum of DOS: ", rel_error)
 
     # Check against the constraints we put upon ourselves.
     if rel_error < accuracy:
@@ -178,13 +179,13 @@ if __name__ == "__main__":
 
     # Run the tests.
     test1 = check_analytical_integration(0.0000001)
-    print("Check if analytical integration works in theory - success?:", test1)
+    printout("Check if analytical integration works in theory - success?:", test1)
 
     test1 = qe_dens_to_nr_of_electrons(0.0000001)
-    print("Integrate QE density over spatial grid and get correct number of electrons compared to QE - success?:", test1)
+    printout("Integrate QE density over spatial grid and get correct number of electrons compared to QE - success?:", test1)
 
     test1 = qe_ldos_to_density(0.0000001)
-    print("Integrate QE LDOS over energy grid and get correct density compared to QE - succes?:", test1)
+    printout("Integrate QE LDOS over energy grid and get correct density compared to QE - succes?:", test1)
 
     test1 = qe_ldos_to_dos(0.0000001)
-    print("Integrate QE LDOS over spatial grid and get correct DOS compared to QE - success:", test1)
+    printout("Integrate QE LDOS over spatial grid and get correct DOS compared to QE - success:", test1)

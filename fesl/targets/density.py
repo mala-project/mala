@@ -4,6 +4,7 @@ from .cube_parser import read_cube
 import warnings
 import ase.io
 from ase.units import Rydberg
+from fesl.common.parameters import printout
 try:
     import total_energy as te
 except ModuleNotFoundError:
@@ -25,7 +26,7 @@ class Density(TargetBase):
     def read_from_cube(self, file_name, directory):
         """Reads the density data from cube file located in the snapshot directory."""
 
-        print("Reading density from .cube file in ", directory)
+        printout("Reading density from .cube file in ", directory)
         data, meta = read_cube(directory + file_name)
         return data
 
@@ -131,12 +132,12 @@ class Density(TargetBase):
         # are the atomic positions. But no other parameter can currently be changed in between runs...
         # There should be some kind of de-initialization function that allows for this.
         if Density.te_mutex is False:
-            print("FESL: Starting QuantumEspresso to get density-based energy contributions.")
+            printout("FESL: Starting QuantumEspresso to get density-based energy contributions.")
             te.initialize()
             Density.te_mutex = True
-            print("FESL: QuantumEspresso setup done.")
+            printout("FESL: QuantumEspresso setup done.")
         else:
-            print("FESL: QuantumEspresso is already running. Except for the atomic positions, no new parameters will be used.")
+            printout("FESL: QuantumEspresso is already running. Except for the atomic positions, no new parameters will be used.")
 
 
         # Before we proceed, some sanity checks are necessary.

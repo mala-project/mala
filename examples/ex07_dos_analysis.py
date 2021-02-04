@@ -1,4 +1,5 @@
 from fesl.common.parameters import Parameters
+from fesl.common.parameters import printout
 from fesl.targets.dos import DOS
 import numpy as np
 from ase.units import Rydberg
@@ -20,19 +21,19 @@ def dos_analysis(dos, dos_data, integration, ref):
     nr_electrons_sc = dos.get_number_of_electrons(dos_data, integration_method=integration, fermi_energy_eV=fermi_sc)
     e_band_sc = dos.get_band_energy(dos_data, integration_method=integration, fermi_energy_eV=fermi_sc)
 
-    print("Used integration method: ", integration)
-    print(
+    printout("Used integration method: ", integration)
+    printout(
         "Fermi energy source\t#Electrons\tE_band[eV]\tE_Fermi[eV]\tError_E_band[eV]\tError_E_band[meV/atom]\tE_band("
         "DFT)[eV]")
-    print("DFT", "\t", nr_electrons_dft, "\t", e_band_dft, "\t", fermi_dft, "\t", e_band_dft - ref, "\t",
+    printout("DFT", "\t", nr_electrons_dft, "\t", e_band_dft, "\t", fermi_dft, "\t", e_band_dft - ref, "\t",
           (e_band_dft - ref) * (1000 / 256), "\t", ref)
-    print("SC", "\t", nr_electrons_sc, "\t", e_band_sc, "\t", fermi_sc, "\t", e_band_sc - ref, "\t",
+    printout("SC", "\t", nr_electrons_sc, "\t", e_band_sc, "\t", fermi_sc, "\t", e_band_sc - ref, "\t",
           (e_band_sc - ref) * (1000 / 256), "\t", ref)
     return (e_band_sc - ref) * (1000 / 256)
 
 def run_example07(accuracy_meV_per_atom = 120.0):
-    print("Welcome to FESL.")
-    print("Running ex07_dos_analysis.py")
+    printout("Welcome to FESL.")
+    printout("Running ex07_dos_analysis.py")
 
     # This is done manually at the moment.
     eband_exact_rydberg = 737.79466828 + 4.78325172 - 554.11311050
@@ -58,14 +59,14 @@ def run_example07(accuracy_meV_per_atom = 120.0):
     if error_band_energy > accuracy_meV_per_atom:
         return False
 
-    print("Successfully ran ex07_dos_analysis.py.")
-    print("Parameters used for this experiment:")
+    printout("Successfully ran ex07_dos_analysis.py.")
+    printout("Parameters used for this experiment:")
     test_parameters.show()
     return True
 
 if __name__ == "__main__":
     if run_example07():
-        print("Successfully ran ex07_dos_analysis.py.")
+        printout("Successfully ran ex07_dos_analysis.py.")
     else:
         raise Exception("Ran ex07_dos_analysis but something was off. If you haven't changed any parameters in "
                         "the example, there might be a problem with your installation.")

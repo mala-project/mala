@@ -1,4 +1,5 @@
 from fesl.common.parameters import Parameters
+from fesl.common.parameters import printout
 from fesl.datahandling.handler_interface import HandlerInterface
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
@@ -8,10 +9,12 @@ ex01_run_singleshot.py: Shows how a neural network can be trained on material da
 It uses preprocessed data, that is read in from *.npy files.
 """
 
+printout("Welcome to FESL.")
+printout("Running ex01_run_singleshot.py")
 
 def run_example01(desired_loss_improvement_factor=1):
-    print("Welcome to FESL.")
-    print("Running ex01_run_singleshot.py")
+    printout("Welcome to FESL.")
+    printout("Running ex01_run_singleshot.py")
 
     ####################
     # PARAMETERS
@@ -31,6 +34,9 @@ def run_example01(desired_loss_improvement_factor=1):
     test_parameters.training.mini_batch_size = 40
     test_parameters.training.learning_rate = 0.00001
     test_parameters.training.trainingtype = "Adam"
+    test_parameters.training.use_gpu = False
+    test_parameters.training.use_horovod = False
+    test_parameters.training.use_compression= False 
 
     ####################
     # DATA
@@ -49,32 +55,33 @@ def run_example01(desired_loss_improvement_factor=1):
 
     data_handler.load_data()
     data_handler.prepare_data()
-    print("Read data: DONE.")
+    printout("Read data: DONE.")
 
     ####################
     # NETWORK SETUP
     # Set up the network and trainer we want to use.
     ####################
 
+    test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
 
     test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
 
     # Setup network and trainer.
     test_network = Network(test_parameters)
     test_trainer = Trainer(test_parameters)
-    print("Network setup: DONE.")
+    printout("Network setup: DONE.")
 
     ####################
     # TRAINING
     # Train the network.
     ####################
 
-    print("Starting training.")
+    printout("Starting training.")
     test_trainer.train_network(test_network, data_handler)
-    print("Training: DONE.")
+    printout("Training: DONE.")
 
     ####################
-    print("Parameters used for this experiment:")
+    printout("Parameters used for this experiment:")
     test_parameters.show()
 
     if desired_loss_improvement_factor*test_trainer.initial_test_loss < test_trainer.final_test_loss:
@@ -85,7 +92,7 @@ def run_example01(desired_loss_improvement_factor=1):
 
 if __name__ == "__main__":
     if run_example01():
-        print("Successfully ran ex01_run_singleshot.")
+        printout("Successfully ran ex01_run_singleshot.")
     else:
         raise Exception("Ran ex01_run_singleshot but something was off. If you haven't changed any parameters in "
                         "the example, there might be a problem with your installation.")

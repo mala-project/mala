@@ -1,6 +1,7 @@
 import torch
 import pickle
 import numpy as np
+from fesl.common.parameters import printout
 
 class DataScaler:
     """Scales input and output data. Sort of emulates the functionality
@@ -35,7 +36,7 @@ class DataScaler:
         if "feature-wise" in self.typestring:
             self.feature_wise = True
         if self.scale_standard is False and self.scale_normal is False:
-            print("No data rescaling will be performed.")
+            printout("No data rescaling will be performed.")
             return
         if self.scale_standard is True and self.scale_normal is True:
             raise Exception("Invalid input data rescaling.")

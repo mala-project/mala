@@ -3,6 +3,13 @@ import numpy as np
 import torch
 from torch import optim
 from torch.utils.data import DataLoader
+import warnings
+from fesl.common.parameters import printout
+try:
+    import horovod.torch as hvd
+except ModuleNotFoundError:
+    warnings.warn("You either don't have Horovod installed or it is not configured correctly. You can still "
+              "train networks, but attempting to set parameters.training.use_horovod = True WILL cause a crash.")
 
 
 class Trainer:
@@ -11,12 +18,15 @@ class Trainer:
     def __init__(self, p):
         # copy the parameters into the class.
         self.parameters = p.training
-        self.initial_test_loss = float("inf")
         self.final_test_loss = float("inf")
         self.optimizer = None
         self.scheduler = None
         self.network = None
+        self.batch_size=p.training.mini_batch_size
         self.use_gpu = False
+        self.use_horovod=False
+        self.use_compression=False
+        
 
     def train_network(self, network, data):
         """Given a network and data, this network is trained on this data."""
@@ -24,19 +34,83 @@ class Trainer:
         # See if we can and want to work on a GPU.
         self.use_gpu = torch.cuda.is_available() and self.parameters.use_gpu
 
+        # This is a place where additional checks could be placed.
+        self.use_horovod= self.parameters.use_horovod
+
+
+        # See if we want to use horovod.
+        if self.use_horovod:
+            if self.use_gpu:
+                printout("size=", hvd.size(), "global_rank=", hvd.rank(), "local_rank=", hvd.local_rank(), "device=",
+                      torch.cuda.get_device_name(hvd.local_rank()))
+                # pin GPU to local rank
+                torch.cuda.set_device(hvd.local_rank())
+
+            # Using seeds to repreduce the same result
+            torch.manual_seed(self.parameters.seed)
+            if self.use_gpu:
+                torch.cuda.manual_seed(self.parameters.seed)
+
+  
+
         # If we choose to work on a GPU, we need to move the network to this GPU.
         if self.use_gpu:
             network.to('cuda')
+
+            self.parameters.kwargs ['pin_memory']=True
+
+        # Scale the learning rate according to horovod. 
+        if self.use_horovod:
+            if hvd.size() > 1:
+                printout("Rescaling learning rate because multiple workers are used for training.")
+                self.parameters.learning_rate = self.parameters.learning_rate * hvd.size() 
+                self.use_compression= self.parameters.use_compression
 
         # Choose an optimizer to use.
         if self.parameters.trainingtype == "SGD":
             self.optimizer = optim.SGD(network.parameters(), lr=self.parameters.learning_rate,
                                        weight_decay=self.parameters.weight_decay)
+
         elif self.parameters.trainingtype == "Adam":
             self.optimizer = optim.Adam(network.parameters(), lr=self.parameters.learning_rate,
                                         weight_decay=self.parameters.weight_decay)
+                                        
+
         else:
             raise Exception("Unsupported training method.")
+
+
+        if self.use_horovod:
+            #scaling the batch size for multiGPU per node
+            self.batch_size= self.batch_size*hvd.local_size()
+
+
+            compression = hvd.Compression.fp16 if self.use_compression else hvd.Compression.none
+
+
+            #Set the data sampler for multiGPU
+            self.parameters.sampler["train_sampler"] = torch.utils.data.distributed.DistributedSampler(data.training_data_set,
+                                                                                                       num_replicas=hvd.size(),
+                                                                                                       rank=hvd.rank())
+
+            self.parameters.sampler["validate_sampler"] = torch.utils.data.distributed.DistributedSampler(data.validation_data_set,
+                                                                                                          num_replicas=hvd.size(),
+                                                                                                          rank=hvd.rank())
+
+            self.parameters.sampler["test_sampler"] =torch.utils.data.distributed.DistributedSampler(data.test_data_set,
+                                                                                                     num_replicas=hvd.size(),
+                                                                                                     rank=hvd.rank())
+
+            # broadcaste parameters and optimizer state from root device to other devices
+            hvd.broadcast_parameters(network.state_dict(), root_rank=0)
+            hvd.broadcast_optimizer_state(self.optimizer, root_rank=0)
+
+            # Wraps the opimizer for multiGPU operation
+            self.optimizer = hvd.DistributedOptimizer(self.optimizer,  
+                                                      named_parameters=network.named_parameters(),
+                                                      compression=compression,
+                                                      op = hvd.Average)
+
 
         # Instantiate the learning rate scheduler, if necessary.
         if self.parameters.learning_rate_scheduler == "ReduceLROnPlateau":
@@ -50,18 +124,30 @@ class Trainer:
         else:
             raise Exception("Unsupported learning rate schedule.")
 
-        # Prepare data loaders.
-        training_data_loader = DataLoader(data.training_data_set, batch_size=self.parameters.mini_batch_size,
-                                          shuffle=True)
-        validation_data_loader = DataLoader(data.validation_data_set, batch_size=self.parameters.mini_batch_size * 1)
-        test_data_loader = DataLoader(data.test_data_set, batch_size=self.parameters.mini_batch_size * 1)
+        # Prepare data loaders.(look into mini-batch size)
+        training_data_loader = DataLoader(data.training_data_set, batch_size=self.batch_size,
+                                          sampler=self.parameters.sampler["train_sampler"],
+                                          **self.parameters.kwargs ) #shuffle=True,
+
+        validation_data_loader = DataLoader(data.validation_data_set, batch_size=self.batch_size * 1,
+                                            sampler=self.parameters.sampler["validate_sampler"],**self.parameters.kwargs )
+
+        test_data_loader = DataLoader(data.test_data_set, batch_size=self.batch_size * 1,
+                                      sampler=self.parameters.sampler["test_sampler"],**self.parameters.kwargs )
+
 
         # Calculate initial loss.
         vloss = self.validate_network(network, validation_data_loader)
         tloss = self.validate_network(network, test_data_loader)
+
+        #Collect and average all the losses from all the devices
+        if self.use_horovod:
+            printout(hvd.rank(), vloss)
+            vloss=self.average_validation(vloss,'average_loss')
+            tloss=self.average_validation(tloss,'average_loss')
         if self.parameters.verbosity:
-            print("Initial Guess - validation data loss: ", vloss)
-            print("Initial Guess - test data loss: ", tloss)
+            printout("Initial Guess - validation data loss: ", vloss)
+            printout("Initial Guess - test data loss: ", tloss)
         self.initial_test_loss = tloss
 
         # Perform and log training.
@@ -74,6 +160,9 @@ class Trainer:
 
             # Process each mini batch and save the training loss.
             training_loss = 0
+            # train sampler 
+            if self.use_horovod:
+                self.parameters.sampler["train_sampler"].set_epoch(epoch) 
             for inputs, outputs in training_data_loader:
                 if self.use_gpu:
                     inputs = inputs.to('cuda')
@@ -82,8 +171,10 @@ class Trainer:
 
             # Calculate the validation loss.
             vloss = self.validate_network(network, validation_data_loader)
+            if self.use_horovod:
+                vloss=self.average_validation(vloss,'average_loss')
             if self.parameters.verbosity:
-                print("Epoch: ", epoch, "validation data loss: ", vloss)
+                printout("Epoch: ", epoch, "validation data loss: ", vloss)
 
             # If a scheduler is used, update it.
             if self.scheduler is not None:
@@ -97,17 +188,19 @@ class Trainer:
                     vloss_old = vloss
                 else:
                     patience_counter += 1
-                    print("Validation accuracy has not improved enough.")
+                    printout("Validation accuracy has not improved enough.")
                     if patience_counter >= self.parameters.early_stopping_epochs:
                         if self.parameters.verbosity:
-                            print("Stopping the training, validation accuracy has not improved for", patience_counter,
+                            printout("Stopping the training, validation accuracy has not improved for", patience_counter,
                                   "epochs.")
                         break
 
         # Calculate final loss.
         tloss = self.validate_network(network, test_data_loader)
+        if self.use_horovod:
+            tloss=self.average_validation(tloss,'average_loss')
         self.final_test_loss = tloss
-        print("Final test data loss: ", tloss)
+        printout("Final test data loss: ", tloss)
 
     def process_mini_batch(self, network, input_data, target_data):
         prediction = network.forward(input_data)
@@ -128,3 +221,8 @@ class Trainer:
                 prediction = network(x)
                 validation_loss.append(network.calculate_loss(prediction, y).item())
         return np.mean(validation_loss)
+
+    def average_validation(self,val,name):
+        tensor= torch.tensor(val)
+        avg_loss=hvd.allreduce(tensor,name=name, op=hvd.Average)
+        return avg_loss.item()

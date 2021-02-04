@@ -1,4 +1,5 @@
 from fesl.common.parameters import Parameters
+from fesl.common.parameters import printout
 from fesl.datahandling.handler_interface import HandlerInterface
 import numpy as np
 
@@ -7,8 +8,8 @@ ex03_run_singleshot.py: Demonstrate the file saving capabilites of a data loader
 purposes.
 """
 def run_example03(data_path, accuracy=10**-10):
-    print("Welcome to FESL.")
-    print("Running ex03_run_singleshot.py")
+    printout("Welcome to FESL.")
+    printout("Running ex03_run_singleshot.py")
 
     ####################
     # PARAMETERS
@@ -46,7 +47,7 @@ def run_example03(data_path, accuracy=10**-10):
                               "Al_ldos_200x200x200grid_250elvls_snapshot2.npy",
                               data_path,output_units="1/Ry")
     data_handler.load_data()
-    print("Read data: DONE.")
+    printout("Read data: DONE.")
 
     ####################
     # DATA OUTPUT
@@ -55,7 +56,7 @@ def run_example03(data_path, accuracy=10**-10):
 
     data_handler.save_loaded_data(directory="./data/", filetype="*.npy",
                                   naming_scheme_input="test_Al_debug_2k_nr*.in", naming_scheme_output="test_Al_debug_2k_nr*.out")
-    print("Write data: DONE.")
+    printout("Write data: DONE.")
 
     # Verify that the we got the correct results.
     # Since we work with float32 internally, there will be some difference, that will scale with
@@ -80,7 +81,7 @@ def run_example03(data_path, accuracy=10**-10):
 
 if __name__ == "__main__":
     if run_example03("/home/fiedlerl/data/Al256/SandiaQE/2.699gcc/"):
-        print("Successfully ran ex03_run_singleshot.py.")
+        printout("Successfully ran ex03_run_singleshot.py.")
     else:
         raise Exception("Ran ex03_run_singleshot but something was off. If you haven't changed any parameters in "
                         "the example, there might be a problem with your installation.")

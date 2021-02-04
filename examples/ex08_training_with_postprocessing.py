@@ -1,4 +1,5 @@
 from fesl.common.parameters import Parameters
+from fesl.common.parameters import printout
 from fesl.datahandling.handler_interface import HandlerInterface
 from fesl.datahandling.data_scaler import DataScaler
 from fesl.network.network import Network
@@ -65,13 +66,13 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
     dos_calculator = DOS.from_ldos(ldos_calculator)
     band_energy_predicted = dos_calculator.get_band_energy(predicted_dos)
     band_energy_actual = dos_calculator.get_band_energy(actual_dos)
-    print("Band energy (actual, predicted, error)[eV]", band_energy_actual, band_energy_predicted, band_energy_predicted-band_energy_actual)
+    printout("Band energy (actual, predicted, error)[eV]", band_energy_actual, band_energy_predicted, band_energy_predicted-band_energy_actual)
     if np.abs(band_energy_predicted-band_energy_actual) > accuracy:
         return False
 
     nr_electrons_predicted = dos_calculator.get_number_of_electrons(predicted_dos)
     nr_electrons_actual = dos_calculator.get_number_of_electrons(actual_dos)
-    print("Number of electrons (actual, predicted, error)[eV]", nr_electrons_actual, nr_electrons_predicted, nr_electrons_predicted-nr_electrons_actual)
+    printout("Number of electrons (actual, predicted, error)[eV]", nr_electrons_actual, nr_electrons_predicted, nr_electrons_predicted-nr_electrons_actual)
     if np.abs(band_energy_predicted-band_energy_actual) > accuracy:
         return False
     return True
@@ -118,7 +119,7 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
 
     data_handler.load_data()
     data_handler.prepare_data()
-    print("Read data: DONE.")
+    printout("Read data: DONE.")
 
     ####################
     # NETWORK SETUP
@@ -130,16 +131,16 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
     # Setup network and trainer.
     test_network = Network(test_parameters)
     test_trainer = Trainer(test_parameters)
-    print("Network setup: DONE.")
+    printout("Network setup: DONE.")
 
     ####################
     # TRAINING
     # Train the network.
     ####################
 
-    print("Starting training.")
+    printout("Starting training.")
     test_trainer.train_network(test_network, data_handler)
-    print("Training: DONE.")
+    printout("Training: DONE.")
 
     ####################
     # SAVING
@@ -156,8 +157,8 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
         return True
 
 def run_example08(dotraining, doinference, doplots=True):
-    print("Welcome to FESL.")
-    print("Running ex08_training_with_postprocessing.py")
+    printout("Welcome to FESL.")
+    printout("Running ex08_training_with_postprocessing.py")
 
     # Choose the paths where the network and the parameters for it should be saved.
     params_path = "./data/ex08_params.pkl"
@@ -176,7 +177,7 @@ def run_example08(dotraining, doinference, doplots=True):
 
 if __name__ == "__main__":
     if run_example08(False, True):
-        print("Successfully ran ex08_training_with_postprocessing.py.")
+        printout("Successfully ran ex08_training_with_postprocessing.py.")
     else:
         raise Exception("Ran ex08_training_with_postprocessing but something was off. If you haven't changed any parameters in "
                         "the example, there might be a problem with your installation.")

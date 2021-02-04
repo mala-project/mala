@@ -1,4 +1,5 @@
 from fesl.common.parameters import Parameters
+from fesl.common.parameters import printout
 from fesl.descriptors.snap import SNAP
 import numpy as np
 
@@ -7,8 +8,8 @@ ex05_create_snap_descriptors.py: Shows how the framework can be used to create S
 Quantum Espresso runfile. No training will/has to be performed for this experiment. 
 """
 def run_example05(accuracy = 0.000001):
-    print("Welcome to FESL.")
-    print("Running ex05_create_snap_descriptors.py")
+    printout("Welcome to FESL.")
+    printout("Running ex05_create_snap_descriptors.py")
 
     ####################
     # PARAMETERS
@@ -38,7 +39,7 @@ def run_example05(accuracy = 0.000001):
 
 if __name__ == "__main__":
     if run_example05():
-        print("Successfully ran ex05_create_snap_descriptors.")
+        printout("Successfully ran ex05_create_snap_descriptors.")
     else:
         raise Exception(
             "Ran ex05_create_snap_descriptors but something was off. If you haven't changed any parameters in "
