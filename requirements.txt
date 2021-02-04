@@ -6,3 +6,4 @@ mpmath
 numpy
 optuna
 scipy
+oapackage
