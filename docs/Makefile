@@ -20,4 +20,4 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 apidocs:
-	sphinx-apidoc -o source/api ../fesl
+	sphinx-apidoc -f -o source/api ../fesl
