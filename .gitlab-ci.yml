@@ -59,7 +59,7 @@ pages:
   - pip install -U recommonmark
   script:
   - sphinx-apidoc -o docs/source/api fesl
-  - sphinx-build -b html -d docs/_build/doctrees docs/source docs/_build/html
+  - sphinx-build -W -b html -d docs/_build/doctrees docs/source docs/_build/html
   after_script:
   - mv docs/_build/html public
   artifacts:
