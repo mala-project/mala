@@ -24,6 +24,11 @@ Welcome to FESL's documentation!
 
    api/modules
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributing
+
+   CONTRIBUTE
 
 Indices and tables
 ==================
