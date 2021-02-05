@@ -24,6 +24,8 @@ class DataScaler:
         self.total_min = torch.tensor(float('inf'))
         self.cantransform = False
 
+        self.total_data_count = 0
+
     def parse_typestring(self):
         self.scale_standard = False
         self.scale_normal = False
@@ -41,7 +43,12 @@ class DataScaler:
         if self.scale_standard is True and self.scale_normal is True:
             raise Exception("Invalid input data rescaling.")
 
-    def add_snapshot_to_fit(self, unscaled):
+    def start_incremental_fitting(self):
+        self.total_data_count = 0
+
+
+
+    def incremental_fit(self, unscaled):
         if self.scale_standard is False and self.scale_normal is False:
             return
         else:
@@ -81,8 +88,27 @@ class DataScaler:
                     ##########################
 
                     if self.scale_standard:
-                        self.total_mean = torch.mean(unscaled)
-                        self.total_std = torch.std(unscaled)
+                        current_data_count = list(unscaled.size())[0]*list(unscaled.size())[1]
+
+                        new_mean = torch.mean(unscaled)
+                        new_std = torch.std(unscaled)
+
+                        old_mean = self.total_mean
+                        old_std = self.total_std
+
+
+                        self.total_mean = \
+                            self.total_data_count / (self.total_data_count + current_data_count) * old_mean + \
+                            current_data_count / (self.total_data_count + current_data_count) * new_mean
+
+                        self.total_std = \
+                            self.total_data_count / (self.total_data_count + current_data_count) * old_std ** 2 + \
+                            current_data_count / (self.total_data_count + current_data_count) * new_std ** 2 + \
+                            (self.total_data_count * current_data_count) / (self.total_data_count + current_data_count) ** 2 * \
+                            (old_mean - new_mean) ** 2
+
+                        self.total_std = torch.sqrt(self.total_std)
+
 
                     if self.scale_normal:
                         new_max = torch.max(unscaled)
@@ -95,7 +121,7 @@ class DataScaler:
 
 
 
-    def set_datascaler_initialized(self):
+    def finish_incremental_fitting(self):
         self.cantransform = True
 
     def fit(self, unscaled):
