@@ -212,7 +212,7 @@ class DataScaler:
                     return unscaled
 
                 if self.scale_normal:
-                    unscaled = (unscaled - self.mins.values) / (self.maxs.values - self.mins.values)
+                    unscaled = (unscaled - self.mins) / (self.maxs - self.mins)
                     return unscaled
 
             else:

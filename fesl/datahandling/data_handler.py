@@ -2,6 +2,7 @@ from torch.utils.data import TensorDataset
 
 from .data_scaler import DataScaler
 from .snapshot import Snapshot
+from .lazy_load_dataset import LazyLoadDataset
 from fesl.common.parameters import Parameters
 from fesl.targets.target_interface import TargetInterface
 from fesl.descriptors.descriptor_interface import DescriptorInterface
@@ -383,7 +384,29 @@ class DataHandler:
     def build_datasets(self):
         # Depending whether or not we are using lazy loading or RAM the datasets have to be initialized quite differently.
         if self.parameters.use_lazy_loading:
-            pass
+
+            # Create the lazy loading data sets.
+            self.training_data_set = LazyLoadDataset(self.get_input_dimension(), self.get_output_dimension(), self.input_data_scaler, self.output_data_scaler,
+                                                     self.descriptor_calculator, self.target_calculator,
+                                                     self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz)
+            self.validation_data_set = LazyLoadDataset(self.get_input_dimension(), self.get_output_dimension(), self.input_data_scaler, self.output_data_scaler,
+                                                       self.descriptor_calculator, self.target_calculator,
+                                                       self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz)
+            self.test_data_set = LazyLoadDataset(self.get_input_dimension(), self.get_output_dimension(), self.input_data_scaler, self.output_data_scaler,
+                                                 self.descriptor_calculator, self.target_calculator,
+                                                 self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz)
+
+            # Add snapshots to the lazy loading data sets.
+            i = 0
+            for snapshot in self.parameters.snapshot_directories_list:
+                if self.parameters.data_splitting_snapshots[i] =="tr":
+                    self.training_data_set.add_snapshot_to_dataset(snapshot)
+                if self.parameters.data_splitting_snapshots[i] =="va":
+                    self.validation_data_set.add_snapshot_to_dataset(snapshot)
+                if self.parameters.data_splitting_snapshots[i] =="te":
+                    self.test_data_set.add_snapshot_to_dataset(snapshot)
+                i += 1
+
         else:
             # We iterate through the snapshots and add the validation data and test data.
             self.test_data_inputs = []
@@ -447,7 +470,6 @@ class DataHandler:
             self.training_data_set = TensorDataset(self.training_data_inputs, self.training_data_outputs)
             self.validation_data_set = TensorDataset(self.validation_data_inputs, self.validation_data_outputs)
             self.test_data_set = TensorDataset(self.test_data_inputs, self.test_data_outputs)
-
     # def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type, units, desired_dimensions):
 
     def raw_numpy_to_converted_numpy(self, numpy_array, data_type="in", units=None):

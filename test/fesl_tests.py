@@ -1,6 +1,6 @@
 from fesl_integration import check_analytical_integration, qe_dens_to_nr_of_electrons, qe_ldos_to_density, qe_ldos_to_dos
 from tensor_memory import test_tensor_memory
-from lazy_loading_scaling import test_lazy_loading
+from lazy_loading_tests import test_lazy_loading
 from fesl.common.parameters import printout
 
 

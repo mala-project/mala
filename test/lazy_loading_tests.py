@@ -13,7 +13,7 @@ def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
     test_parameters = Parameters()
     test_parameters.data.datatype_in = "*.npy"
     test_parameters.data.datatype_out = "*.npy"
-    test_parameters.data.data_splitting_snapshots = ["tr", "tr"]#, "tr", "tr"]
+    test_parameters.data.data_splitting_snapshots = ["tr", "tr", "tr", "va", "te"]
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
     test_parameters.data.output_rescaling_type = "normal"
     test_parameters.data.data_splitting_type = "by_snapshot"
@@ -36,6 +36,7 @@ def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
     # DATA
     ####################
 
+    dataset_tester = []
     results = []
     for scalingtype in ["standard", "normal", "feature-wise-standard", "feature-wise-normal"]:
         comparison = []
@@ -55,6 +56,12 @@ def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
                                       output_units="1/Ry")
             data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path, "Al_debug_2k_nr1.out.npy", data_path,
                                       output_units="1/Ry")
+            data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path, "Al_debug_2k_nr2.out.npy", data_path,
+                                      output_units="1/Ry")
+            data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path, "Al_debug_2k_nr1.out.npy", data_path,
+                                      output_units="1/Ry")
+            data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path, "Al_debug_2k_nr2.out.npy", data_path,
+                                      output_units="1/Ry")
             data_handler.prepare_data()
             if scalingtype == "standard":
                 # The lazy-loading STD equation (and to a smaller amount the mean equation) is having some small accurcay issue that
@@ -68,6 +75,7 @@ def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
                 this_result.append(data_handler.input_data_scaler.total_min)
                 this_result.append(data_handler.output_data_scaler.total_max)
                 this_result.append(data_handler.output_data_scaler.total_min)
+                dataset_tester.append((data_handler.training_data_set[3998:4002])[0].sum())
             if scalingtype == "feature-wise-standard":
                 # The lazy-loading STD equation (and to a smaller amount the mean equation) is having some small accurcay issue that
                 # I presume to be due to numerical constraints. To make a meaningful comparison it is wise to scale the value here.
@@ -93,11 +101,13 @@ def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
             printout(entry[0])
             printout(val1, val2, val3, val4)
             return False
+    if dataset_tester[0] - dataset_tester[1] > accuracy:
+        return False
     return True
 
 if __name__ == "__main__":
-    test1 = test_lazy_loading_test()
-    printout("Check if lazy loading and RAM based scaling gets the same results? - success?:", test1)
+    test1 = test_lazy_loading()
+    printout("Check if lazy loading and RAM implementation get the same results? - success?:", test1)
 
 
 

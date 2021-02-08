@@ -249,7 +249,6 @@ class ParametersTraining(ParametersBase):
 
     @property
     def use_horovod(self):
-        printout("Getting value...")
         return self._use_horovod
 
     @use_horovod.setter
