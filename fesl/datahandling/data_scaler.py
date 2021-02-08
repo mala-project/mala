@@ -60,8 +60,31 @@ class DataScaler:
                     ##########################
 
                     if self.scale_standard:
-                        self.means = torch.mean(unscaled, 0, keepdim=True)
-                        self.stds = torch.std(unscaled, 0, keepdim=True)
+                        new_mean = torch.mean(unscaled, 0, keepdim=True)
+                        new_std = torch.std(unscaled, 0, keepdim=True)
+
+                        current_data_count = list(unscaled.size())[0]#*list(unscaled.size())[1]
+
+                        old_mean = self.means
+                        old_std = self.stds
+
+                        if list(self.means.size())[0] > 0:
+                            self.means = \
+                                self.total_data_count / (self.total_data_count + current_data_count) * old_mean + \
+                                current_data_count / (self.total_data_count + current_data_count) * new_mean
+                        else:
+                            self.means = new_mean
+                        if list(self.stds.size())[0] > 0:
+                            self.stds = \
+                                self.total_data_count / (self.total_data_count + current_data_count) * old_std ** 2 + \
+                                current_data_count / (self.total_data_count + current_data_count) * new_std ** 2 + \
+                                (self.total_data_count * current_data_count) / (self.total_data_count + current_data_count) ** 2 * \
+                                (old_mean - new_mean) ** 2
+
+                            self.stds = torch.sqrt(self.stds)
+                        else:
+                            self.stds = new_std
+                        self.total_data_count += current_data_count
 
                     if self.scale_normal:
                         new_maxs = torch.max(unscaled, 0, keepdim=True)
@@ -101,6 +124,8 @@ class DataScaler:
                             self.total_data_count / (self.total_data_count + current_data_count) * old_mean + \
                             current_data_count / (self.total_data_count + current_data_count) * new_mean
 
+                        # This equation is taken from the Sandia code. It presumably works, but it gets slighly different results.
+                        # Maybe we should check it at some point . I think it is merely an issue of numerical accuracy.
                         self.total_std = \
                             self.total_data_count / (self.total_data_count + current_data_count) * old_std ** 2 + \
                             current_data_count / (self.total_data_count + current_data_count) * new_std ** 2 + \
@@ -141,8 +166,8 @@ class DataScaler:
                         self.stds = torch.std(unscaled, 0, keepdim=True)
 
                     if self.scale_normal:
-                        self.maxs = torch.max(unscaled, 0, keepdim=True)
-                        self.mins = torch.min(unscaled, 0, keepdim=True)
+                        self.maxs = torch.max(unscaled, 0, keepdim=True).values
+                        self.mins = torch.min(unscaled, 0, keepdim=True).values
 
                 else:
 
