@@ -108,7 +108,7 @@ class DataScaler:
                             (old_mean - new_mean) ** 2
 
                         self.total_std = torch.sqrt(self.total_std)
-
+                        self.total_data_count += current_data_count
 
                     if self.scale_normal:
                         new_max = torch.max(unscaled)
