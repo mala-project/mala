@@ -127,7 +127,7 @@ class Trainer:
         # Prepare data loaders.(look into mini-batch size)
         training_data_loader = DataLoader(data.training_data_set, batch_size=self.batch_size,
                                           sampler=self.parameters.sampler["train_sampler"],
-                                          **self.parameters.kwargs ) #shuffle=True,
+                                          **self.parameters.kwargs, shuffle=True)
 
         validation_data_loader = DataLoader(data.validation_data_set, batch_size=self.batch_size * 1,
                                             sampler=self.parameters.sampler["validate_sampler"],**self.parameters.kwargs )
@@ -162,12 +162,23 @@ class Trainer:
             training_loss = 0
             # train sampler 
             if self.use_horovod:
-                self.parameters.sampler["train_sampler"].set_epoch(epoch) 
-            for inputs, outputs in training_data_loader:
+                self.parameters.sampler["train_sampler"].set_epoch(epoch)
+
+            nr_of_batches = (data.nr_training_data // self.batch_size)+1
+            oldprogress = 0
+            for batchid, (inputs, outputs) in enumerate(training_data_loader):
                 if self.use_gpu:
+
                     inputs = inputs.to('cuda')
                     outputs = outputs.to('cuda')
                 training_loss += self.process_mini_batch(network, inputs, outputs)
+
+                # Output of the progress, this can be useful for tests if an epoch takes forever and one is not
+                # sure if something went wrong or everythin is simply taking a while.
+                progress = 100*batchid/nr_of_batches
+                if progress - oldprogress > 10:
+                    printout("{0:10.2f} % of epoch finished".format(progress))
+                    oldprogress = progress
 
             # Calculate the validation loss.
             vloss = self.validate_network(network, validation_data_loader)

@@ -5,6 +5,9 @@ import torch
 
 
 # This test compares the data scaling using the regular scaling procedure and the lazy-loading one (incremental fitting).
+from fesl.network.network import Network
+from fesl.network.trainer import Trainer
+
 
 def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
     ####################
@@ -20,13 +23,11 @@ def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
     test_parameters.descriptors.twojmax = 11
     test_parameters.targets.ldos_gridsize = 10
     test_parameters.network.layer_activations = ["LeakyReLU"]
-    test_parameters.training.max_number_epochs = 10
+    test_parameters.training.max_number_epochs = 3
     test_parameters.training.mini_batch_size = 512
     test_parameters.training.learning_rate = 0.00001
     test_parameters.training.trainingtype = "Adam"
-    test_parameters.hyperparameters.n_trials = 20
-    test_parameters.comment = "Test run of ML-DFT@CASUS."
-    test_parameters.hyperparameters.hyper_opt_method = "optuna"
+    test_parameters.comment = "Lazy loading test."
     test_parameters.network.nn_type = "feed-forward"
     test_parameters.training.use_gpu = True
     test_parameters.data.use_lazy_loading = False
@@ -38,6 +39,7 @@ def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
 
     dataset_tester = []
     results = []
+    training_tester = []
     for scalingtype in ["standard", "normal", "feature-wise-standard", "feature-wise-normal"]:
         comparison = []
         comparison.append(scalingtype)
@@ -71,11 +73,21 @@ def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
                 this_result.append(data_handler.output_data_scaler.total_mean/data_handler.nr_training_data)
                 this_result.append(data_handler.output_data_scaler.total_std/data_handler.nr_training_data)
             if scalingtype == "normal":
+                torch.manual_seed(2002)
                 this_result.append(data_handler.input_data_scaler.total_max)
                 this_result.append(data_handler.input_data_scaler.total_min)
                 this_result.append(data_handler.output_data_scaler.total_max)
                 this_result.append(data_handler.output_data_scaler.total_min)
                 dataset_tester.append((data_handler.training_data_set[3998:4002])[0].sum())
+                test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100,
+                                                       data_handler.get_output_dimension()]
+
+                # Setup network and trainer.
+                test_network = Network(test_parameters)
+                test_trainer = Trainer(test_parameters)
+                test_trainer.train_network(test_network, data_handler)
+                training_tester.append(test_trainer.final_test_loss-test_trainer.initial_test_loss)
+
             if scalingtype == "feature-wise-standard":
                 # The lazy-loading STD equation (and to a smaller amount the mean equation) is having some small accurcay issue that
                 # I presume to be due to numerical constraints. To make a meaningful comparison it is wise to scale the value here.
@@ -103,6 +115,9 @@ def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
             return False
     if dataset_tester[0] - dataset_tester[1] > accuracy:
         return False
+    if training_tester[0] - training_tester[1] > accuracy:
+        return False
+
     return True
 
 if __name__ == "__main__":
