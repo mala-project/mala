@@ -1,3 +1,5 @@
+from torch.utils.data import TensorDataset
+
 from .data_scaler import DataScaler
 from .snapshot import Snapshot
 from fesl.common.parameters import Parameters
@@ -126,7 +128,9 @@ class DataHandler:
 
 
         # Build Datasets.
-        # self.build_datasets()
+        printout("Build datasets.")
+        self.build_datasets()
+        printout("Build dataset done.")
 
 
     def check_snapshots(self):
@@ -209,17 +213,17 @@ class DataHandler:
                 else:
                     raise Exception("Unknown option for snapshot splitting selected.")
 
-            # # Now we need to check whether or not this input is believable.
-            # nr_of_snapshots = len(self.parameters.snapshot_directories_list)
-            # if nr_of_snapshots != (self.nr_training_data + self.nr_validation_data + self.nr_test_data):
-            #     raise Exception("Cannot split snapshots with specified splitting scheme, "
-            #                     "too few or too many options selected")
-            # if self.nr_training_data == 0:
-            #     raise Exception("No training snapshots provided.")
-            # if self.nr_validation_data == 0:
-            #     raise Exception("No validation snapshots provided.")
-            # if self.nr_test_data == 0:
-            #     raise Exception("No testing snapshots provided.")
+            # Now we need to check whether or not this input is believable.
+            nr_of_snapshots = len(self.parameters.snapshot_directories_list)
+            if nr_of_snapshots != (self.nr_training_data + self.nr_validation_data + self.nr_test_data):
+                raise Exception("Cannot split snapshots with specified splitting scheme, "
+                                "too few or too many options selected")
+            if self.nr_training_data == 0:
+                raise Exception("No training snapshots provided.")
+            if self.nr_validation_data == 0:
+                raise Exception("No validation snapshots provided.")
+            if self.nr_test_data == 0:
+                raise Exception("No testing snapshots provided.")
 
         else:
             raise Exception("Wrong parameter for data splitting provided.")
@@ -278,7 +282,7 @@ class DataHandler:
                     tmp = tmp.reshape([self.grid_size, self.get_input_dimension()])
                     tmp = torch.from_numpy(tmp).float()
                     self.input_data_scaler.incremental_fit(tmp)
-                    i += 1
+                i += 1
             self.input_data_scaler.finish_incremental_fitting()
 
         else:
@@ -296,7 +300,7 @@ class DataHandler:
                     tmp = np.array(tmp)
                     tmp *= self.descriptor_calculator.convert_units(1, snapshot.input_units)
                     self.training_data_inputs.append(tmp)
-                    i += 1
+                i += 1
 
             # The scalers will later operate on torch Tensors so we have to make sure they are fitted on
             # torch Tensors as well. Preprocessing the numpy data as follows does NOT load it into memory, see
@@ -306,6 +310,7 @@ class DataHandler:
             self.training_data_inputs = self.training_data_inputs.reshape([self.nr_training_data, self.get_input_dimension()])
             self.training_data_inputs = torch.from_numpy(self.training_data_inputs).float()
             self.input_data_scaler.fit(self.training_data_inputs)
+            self.training_data_inputs = self.input_data_scaler.transform(self.training_data_inputs)
 
         printout("Input scaler parametrized.")
         # ##################
@@ -344,7 +349,7 @@ class DataHandler:
                     tmp = tmp.reshape([self.grid_size, self.get_output_dimension()])
                     tmp = torch.from_numpy(tmp).float()
                     self.output_data_scaler.incremental_fit(tmp)
-                    i += 1
+                i += 1
             self.output_data_scaler.finish_incremental_fitting()
 
         else:
@@ -360,7 +365,7 @@ class DataHandler:
                     tmp = np.array(tmp)
                     tmp *= self.target_calculator.convert_units(1, snapshot.output_units)
                     self.training_data_outputs.append(tmp)
-                    i += 1
+                i += 1
 
             # The scalers will later operate on torch Tensors so we have to make sure they are fitted on
             # torch Tensors as well. Preprocessing the numpy data as follows does NOT load it into memory, see
@@ -370,10 +375,105 @@ class DataHandler:
             self.training_data_outputs = self.training_data_outputs.reshape([self.nr_training_data, self.get_output_dimension()])
             self.training_data_outputs = torch.from_numpy(self.training_data_outputs).float()
             self.output_data_scaler.fit(self.training_data_outputs)
+            self.training_data_outputs = self.output_data_scaler.transform(self.training_data_outputs)
 
         printout("Output scaler parametrized.")
 
 
+    def build_datasets(self):
+        # Depending whether or not we are using lazy loading or RAM the datasets have to be initialized quite differently.
+        if self.parameters.use_lazy_loading:
+            pass
+        else:
+            # We iterate through the snapshots and add the validation data and test data.
+            self.test_data_inputs = []
+            self.validation_data_inputs = []
+            self.test_data_outputs = []
+            self.validation_data_outputs = []
+            i = 0
+            # We need to perform the data scaling over the entirety of the training data.
+            for snapshot in self.parameters.snapshot_directories_list:
+
+                # Data scaling is only performed on the training data sets.
+                if self.parameters.data_splitting_snapshots[i] == "va" or self.parameters.data_splitting_snapshots[i] == "te":
+                    tmp = self.load_from_npy_file(snapshot.input_npy_directory + snapshot.input_npy_file,
+                                                  mmapmode='r')
+                    if self.parameters.descriptors_contain_xyz:
+                        tmp = tmp[:, :, :, 3:]
+                    tmp = np.array(tmp)
+                    tmp *= self.descriptor_calculator.convert_units(1, snapshot.input_units)
+                    if self.parameters.data_splitting_snapshots[i] == "va":
+                        self.validation_data_inputs.append(tmp)
+                    if self.parameters.data_splitting_snapshots[i] == "te":
+                        self.test_data_inputs.append(tmp)
+                    tmp = self.load_from_npy_file(snapshot.output_npy_directory + snapshot.output_npy_file,
+                                                  mmapmode='r')
+                    tmp = np.array(tmp)
+                    tmp *= self.target_calculator.convert_units(1, snapshot.output_units)
+                    if self.parameters.data_splitting_snapshots[i] == "va":
+                        self.validation_data_outputs.append(tmp)
+                    if self.parameters.data_splitting_snapshots[i] == "te":
+                        self.test_data_outputs.append(tmp)
+
+                i += 1
+
+            # I know this would be more elegant with the member functions typed below. But I am pretty sure
+            # that that would create a temporary copy of the arrays, and that could overload the RAM
+            # in cases where lazy loading is technically not even needed.
+            self.test_data_inputs = np.array(self.test_data_inputs)
+            self.test_data_inputs = self.test_data_inputs.astype(np.float32)
+            self.test_data_inputs = self.test_data_inputs.reshape([self.nr_test_data, self.get_input_dimension()])
+            self.test_data_inputs = torch.from_numpy(self.test_data_inputs).float()
+            self.test_data_inputs = self.input_data_scaler.transform(self.test_data_inputs)
+
+            self.validation_data_inputs = np.array(self.validation_data_inputs)
+            self.validation_data_inputs = self.validation_data_inputs.astype(np.float32)
+            self.validation_data_inputs = self.validation_data_inputs.reshape([self.nr_validation_data, self.get_input_dimension()])
+            self.validation_data_inputs = torch.from_numpy(self.validation_data_inputs).float()
+            self.validation_data_inputs = self.input_data_scaler.transform(self.validation_data_inputs)
+
+            self.test_data_outputs = np.array(self.test_data_outputs)
+            self.test_data_outputs = self.test_data_outputs.astype(np.float32)
+            self.test_data_outputs = self.test_data_outputs.reshape([self.nr_test_data, self.get_output_dimension()])
+            self.test_data_outputs = torch.from_numpy(self.test_data_outputs).float()
+            self.test_data_outputs = self.output_data_scaler.transform(self.test_data_outputs)
+
+            self.validation_data_outputs = np.array(self.validation_data_outputs)
+            self.validation_data_outputs = self.validation_data_outputs.astype(np.float32)
+            self.validation_data_outputs = self.validation_data_outputs.reshape([self.nr_validation_data, self.get_output_dimension()])
+            self.validation_data_outputs = torch.from_numpy(self.validation_data_outputs).float()
+            self.validation_data_outputs = self.output_data_scaler.transform(self.validation_data_outputs)
+
+            self.training_data_set = TensorDataset(self.training_data_inputs, self.training_data_outputs)
+            self.validation_data_set = TensorDataset(self.validation_data_inputs, self.validation_data_outputs)
+            self.test_data_set = TensorDataset(self.test_data_inputs, self.test_data_outputs)
+
+    # def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type, units, desired_dimensions):
+
+    def raw_numpy_to_converted_numpy(self, numpy_array, data_type="in", units=None):
+        if data_type == "in":
+            if units is not None:
+                numpy_array *= self.descriptor_calculator.convert_units(1, units)
+            return numpy_array
+        elif data_type == "out":
+            if units is not None:
+                numpy_array *= self.target_calculator.convert_units(1, units)
+            return numpy_array
+        else:
+            raise Exception("Please choose either \"in\" or \"out\" for this function.")
+
+    def converted_numpy_to_scaled_tensor(self, numpy_array, desired_dimensions=None, data_type="in"):
+        numpy_array = numpy_array.astype(np.float32)
+        if desired_dimensions is not None:
+            numpy_array = numpy_array.reshape(desired_dimensions)
+        numpy_array = torch.from_numpy(numpy_array).float()
+        if data_type == "in":
+            numpy_array = self.input_data_scaler.transform(numpy_array)
+        elif data_type == "out":
+            numpy_array = self.output_data_scaler.transform(numpy_array)
+        else:
+            raise Exception("Please choose either \"in\" or \"out\" for this function.")
+        return numpy_array
 
     def get_input_dimension(self):
         """Returns the dimension of the input vector."""
