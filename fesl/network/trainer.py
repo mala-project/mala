@@ -186,12 +186,16 @@ class Trainer:
                 #     printout("{0:10.2f} % of epoch finished".format(progress))
                 #     oldprogress = progress
 
-            # Calculate the validation loss.
+            # Calculate the validation loss. and output it.
             vloss = self.validate_network(network, validation_data_loader)
             if self.use_horovod:
                 vloss=self.average_validation(vloss,'average_loss')
             if self.parameters.verbosity:
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
+
+            # Mix the DataSets up (this function only does something in the lazy loading case).
+            if self.parameters.use_shuffling_for_samplers:
+                data.mix_datasets()
 
             # If a scheduler is used, update it.
             if self.scheduler is not None:

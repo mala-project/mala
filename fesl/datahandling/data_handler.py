@@ -17,6 +17,20 @@ class DataHandler:
     """
 
     def __init__(self, p: Parameters, target_calculator=None, descriptor_calculator=None, input_data_scaler=None, output_data_scaler=None):
+        """
+
+        Parameters
+        ----------
+        p : fesl.common.parameters.Parameters
+        descriptor_calculator : fesl.descriptors.descriptor_base.DescriptorBase or derivative
+            Used to do unit conversion on input data. If None, then one will be created by this class.
+        target_calculator : fesl.targets.target_base.TargetBase or derivative
+            Used to do unit conversion on output data. If None, then one will be created by this class.
+        input_data_scaler : fesl.datahandling.data_scaler.DataScaler
+            Used to scale the input data. If None, then one will be created by this class.
+        output_data_scaler : fesl.datahandling.data_scaler.DataScaler
+            Used to scale the output data. If None, then one will be created by this class.
+        """
         self.parameters = p.data
         self.dbg_grid_dimensions = p.debug.grid_dimensions
         self.use_horovod = p.use_horovod
@@ -83,9 +97,25 @@ class DataHandler:
     def add_snapshot(self, input_npy_file, input_npy_directory, output_npy_file, output_npy_directory,
                      input_units="None", output_units="1/eV"):
         """
-        Adds a snapshot to data handler. For this type of data,
-        a QuantumEspresso outfile, an outfile from the LDOS calculation and
-        a directory containing the cube files
+        Adds a snapshot to data handler.
+
+        Parameters
+        ----------
+        input_npy_file : string
+            File with saved numpy input array.
+        input_npy_directory : string
+            Directory containing input_npy_directory.
+        output_npy_file : string
+            File with saved numpy output array.
+        output_npy_directory : string
+            Directory containing output_npy_file.
+        input_units : string
+            Units of input data. See descriptor classes to see which units are supported.
+        output_units : string
+            Units of output data. See target classes to see which units are supported.
+        Returns
+        -------
+
         """
         snapshot = Snapshot(input_npy_file, input_npy_directory, input_units, output_npy_file, output_npy_directory,
                                        output_units)
@@ -107,10 +137,15 @@ class DataHandler:
 
     def prepare_data(self, reparametrize_scaler=True):
         """
-
+        Prepares the data to be used in a training process,.
+        This includes:
+            - Checking snapshots for consistency
+            - Parametrizing the DataScalers (if desired)
+            - Building DataSet objects.
         Parameters
         ----------
-        reparametrize_scaler
+        reparametrize_scaler : bool
+            If True (default), the DataScalers are parametrized based on the training data.
 
         Returns
         -------
@@ -119,25 +154,78 @@ class DataHandler:
         # Do a consistency check of the snapshots so that we don't run into an error later.
         # If there is an error, check_snapshots() will raise an exception.
         printout("Checking the snapshots and your inputs for consistency.")
-        self.check_snapshots()
+        self.__check_snapshots()
         printout("Consistency check successful.")
 
         # Parametrize the scalers, if needed.
         printout("Initializing the data scalers.")
         if reparametrize_scaler:
-            self.parametrize_scalers()
+            self.__parametrize_scalers()
         printout("Data scalers initialized.")
 
 
         # Build Datasets.
         printout("Build datasets.")
-        self.build_datasets()
+        self.__build_datasets()
         printout("Build dataset done.")
 
-
-    def check_snapshots(self):
+    def mix_datasets(self):
         """
-        Checks whether or not the numpy files in the snapshot directories are consistent.
+        Mixes the ordering with which the snapshots are read (in the lazy-loading case).
+        Returns
+        -------
+
+        """
+        if self.parameters.use_lazy_loading:
+            self.validation_data_set.mix_datasets()
+            self.test_data_set.mix_datasets()
+            self.training_data_set.mix_datasets()
+
+
+    def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type, units, convert3Dto1D=False):
+        """
+        Transforms a raw numpy array containing inputs or outputs into a scaled torch tensor with the right units,
+        i.e. a tensor that can simply be put into a FESL network.
+        Parameters
+        ----------
+        numpy_array : np.array
+            Array that is to be converted.
+        data_type : string
+            Either "in" or "out", depending if input or output data is processed.
+        units : string
+            Units of the data that is processed.
+        convert3Dto1D : bool
+            If True (default: False), then a (x,y,z,dim) array is transformed into a (x*y*z,dim) array.
+        Returns
+        -------
+        converted_tensor: torch.Tensor
+            The fully converted and scaled tensor.
+        """
+        # Check parameters for consistency.
+        if data_type != "in" and data_type != "out":
+            raise Exception("Please specify either \"in\" or \"out\" as data_type.")
+
+        # Convert units of numpy array.
+        numpy_array = self.__raw_numpy_to_converted_numpy(numpy_array, data_type, units)
+
+        # If desired, the dimensions can be changed.
+        if convert3Dto1D:
+            if data_type == "in":
+                data_dimension = self.get_input_dimension()
+            else:
+                data_dimension = self.get_output_dimension()
+            desired_dimensions = [self.grid_size, data_dimension]
+        else:
+            desired_dimensions = None
+
+        # Convert numpy array to scaled tensor a network can work with.
+        numpy_array = self.__converted_numpy_to_scaled_tensor(numpy_array, desired_dimensions, data_type)
+        return numpy_array
+
+
+    def __check_snapshots(self):
+        """
+        Checks the snapshots for consistency. If inconsistencies are found, an exception is thrown.
         Returns
         -------
         """
@@ -151,8 +239,8 @@ class DataHandler:
             ####################
 
             printout("Checking descriptor file ", snapshot.input_npy_file, "at", snapshot.input_npy_directory)
-            tmp = self.load_from_npy_file(snapshot.input_npy_directory + snapshot.input_npy_file,
-                                          mmapmode='r')
+            tmp = self.__load_from_npy_file(snapshot.input_npy_directory + snapshot.input_npy_file,
+                                            mmapmode='r')
 
             # We have to cut xyz information, if we have xyz information in the descriptors.
             if self.parameters.descriptors_contain_xyz:
@@ -180,8 +268,8 @@ class DataHandler:
             ####################
 
             printout("Checking targets file ", snapshot.output_npy_file, "at", snapshot.output_npy_directory)
-            tmp_out = self.load_from_npy_file(snapshot.output_npy_directory + snapshot.output_npy_file,
-                                              mmapmode='r')
+            tmp_out = self.__load_from_npy_file(snapshot.output_npy_directory + snapshot.output_npy_file,
+                                                mmapmode='r')
 
             # The first snapshot determines the data size to be used.
             # We need to make sure that snapshot size is consistent.
@@ -238,7 +326,21 @@ class DataHandler:
 
 
 
-    def load_from_npy_file(self, file, mmapmode=None):
+    def __load_from_npy_file(self, file, mmapmode=None):
+        """
+        Loads a numpy array from a file.
+        Parameters
+        ----------
+        file : string
+            File from which the numpy array is loaded.
+        mmapmode : string
+            memory map mode that is used for loading; see numpy documentation for more details.
+
+        Returns
+        -------
+        loaded_array : numpy.array
+            The loaded array.
+        """
         loaded_array = np.load(file, mmap_mode=mmapmode)
         if len(self.dbg_grid_dimensions) == 3:
             try:
@@ -252,7 +354,12 @@ class DataHandler:
             return loaded_array
 
 
-    def parametrize_scalers(self):
+    def __parametrize_scalers(self):
+        """
+        Uses the training data to parametrize the DataScalers.
+        Returns
+        -------
+        """
 
         ##################
         # Inputs.
@@ -270,8 +377,8 @@ class DataHandler:
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
                 if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.load_from_npy_file(snapshot.input_npy_directory + snapshot.input_npy_file,
-                                                  mmapmode='r')
+                    tmp = self.__load_from_npy_file(snapshot.input_npy_directory + snapshot.input_npy_file,
+                                                    mmapmode='r')
                     if self.parameters.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
 
@@ -295,8 +402,8 @@ class DataHandler:
 
                 # Data scaling is only performed on the training data sets.
                 if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.load_from_npy_file(snapshot.input_npy_directory + snapshot.input_npy_file,
-                                                  mmapmode='r')
+                    tmp = self.__load_from_npy_file(snapshot.input_npy_directory + snapshot.input_npy_file,
+                                                    mmapmode='r')
                     if self.parameters.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
                     tmp = np.array(tmp)
@@ -340,8 +447,8 @@ class DataHandler:
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
                 if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.load_from_npy_file(snapshot.output_npy_directory + snapshot.output_npy_file,
-                                                  mmapmode='r')
+                    tmp = self.__load_from_npy_file(snapshot.output_npy_directory + snapshot.output_npy_file,
+                                                    mmapmode='r')
                     # The scalers will later operate on torch Tensors so we have to make sure they are fitted on
                     # torch Tensors as well. Preprocessing the numpy data as follows does NOT load it into memory, see
                     # test/tensor_memory.py
@@ -362,8 +469,8 @@ class DataHandler:
 
                 # Data scaling is only performed on the training data sets.
                 if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.load_from_npy_file(snapshot.output_npy_directory + snapshot.output_npy_file,
-                                                  mmapmode='r')
+                    tmp = self.__load_from_npy_file(snapshot.output_npy_directory + snapshot.output_npy_file,
+                                                    mmapmode='r')
                     tmp = np.array(tmp)
                     tmp *= self.target_calculator.convert_units(1, snapshot.output_units)
                     self.training_data_outputs.append(tmp)
@@ -382,8 +489,12 @@ class DataHandler:
         printout("Output scaler parametrized.")
 
 
-    def build_datasets(self):
-        # Depending whether or not we are using lazy loading or RAM the datasets have to be initialized quite differently.
+    def __build_datasets(self):
+        """
+        Builds the DataSets that are used during training.
+        Returns
+        -------
+        """
         if self.parameters.use_lazy_loading:
 
             # Create the lazy loading data sets.
@@ -408,9 +519,9 @@ class DataHandler:
                     self.test_data_set.add_snapshot_to_dataset(snapshot)
                 i += 1
 
-            self.training_data_set.prepare_datasets()
-            self.validation_data_set.prepare_datasets()
-            self.test_data_set.prepare_datasets()
+            self.training_data_set.mix_datasets()
+            self.validation_data_set.mix_datasets()
+            self.test_data_set.mix_datasets()
         else:
             # We iterate through the snapshots and add the validation data and test data.
             self.test_data_inputs = []
@@ -423,8 +534,8 @@ class DataHandler:
 
                 # Data scaling is only performed on the training data sets.
                 if self.parameters.data_splitting_snapshots[i] == "va" or self.parameters.data_splitting_snapshots[i] == "te":
-                    tmp = self.load_from_npy_file(snapshot.input_npy_directory + snapshot.input_npy_file,
-                                                  mmapmode='r')
+                    tmp = self.__load_from_npy_file(snapshot.input_npy_directory + snapshot.input_npy_file,
+                                                    mmapmode='r')
                     if self.parameters.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
                     tmp = np.array(tmp)
@@ -433,8 +544,8 @@ class DataHandler:
                         self.validation_data_inputs.append(tmp)
                     if self.parameters.data_splitting_snapshots[i] == "te":
                         self.test_data_inputs.append(tmp)
-                    tmp = self.load_from_npy_file(snapshot.output_npy_directory + snapshot.output_npy_file,
-                                                  mmapmode='r')
+                    tmp = self.__load_from_npy_file(snapshot.output_npy_directory + snapshot.output_npy_file,
+                                                    mmapmode='r')
                     tmp = np.array(tmp)
                     tmp *= self.target_calculator.convert_units(1, snapshot.output_units)
                     if self.parameters.data_splitting_snapshots[i] == "va":
@@ -476,30 +587,24 @@ class DataHandler:
             self.test_data_set = TensorDataset(self.test_data_inputs, self.test_data_outputs)
 
 
-    def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type, units, convert3Dto1D=False):
-
-        # Check parameters for consistency.
-        if data_type != "in" and data_type != "out":
-            raise Exception("Please specify either \"in\" or \"out\" as data_type.")
-
-        # Convert units of numpy array.
-        numpy_array = self.__raw_numpy_to_converted_numpy(numpy_array, data_type, units)
-
-        # If desired, the dimensions can be changed.
-        if convert3Dto1D:
-            if data_type == "in":
-                data_dimension = self.get_input_dimension()
-            else:
-                data_dimension = self.get_output_dimension()
-            desired_dimensions = [self.grid_size, data_dimension]
-        else:
-            desired_dimensions = None
-
-        # Convert numpy array to scaled tensor a network can work with.
-        numpy_array = self.__converted_numpy_to_scaled_tensor(numpy_array, desired_dimensions, data_type)
-        return numpy_array
 
     def __raw_numpy_to_converted_numpy(self, numpy_array, data_type="in", units=None):
+        """
+        Transforms a raw numpy array containing inputs or outputs into a numpy array with the correct units..
+        Parameters
+        ----------
+        numpy_array : numpy.array
+            Array that is to be converted.
+        data_type : string
+            Either "in" or "out", depending if input or output data is processed (Default: "in").
+        units : string
+            Units of the data that is processed (Default: None)
+        Returns
+        -------
+        converted_array: numpy.array
+            The converted numpy array.
+        """
+
         if data_type == "in":
             if data_type == "in" and self.parameters.descriptors_contain_xyz:
                 numpy_array = numpy_array[:, :, :, 3:]
@@ -514,6 +619,21 @@ class DataHandler:
             raise Exception("Please choose either \"in\" or \"out\" for this function.")
 
     def __converted_numpy_to_scaled_tensor(self, numpy_array, desired_dimensions=None, data_type="in"):
+        """
+        Transforms a numpy array containing inputs or outputs into a scaled torch tensor,
+        i.e. a tensor that can simply be put into a FESL network. No unit conversion.
+        Parameters
+        ----------
+        numpy_array : np.array
+            Array that is to be converted to a torch tensor.
+        data_type : string
+            Either "in" or "out", depending if input or output data is processed.
+        Returns
+        -------
+        converted_tensor: torch.Tensor
+            The fully converted and scaled tensor.
+        """
+
         numpy_array = numpy_array.astype(np.float32)
         if desired_dimensions is not None:
             numpy_array = numpy_array.reshape(desired_dimensions)
@@ -527,9 +647,23 @@ class DataHandler:
         return numpy_array
 
     def get_input_dimension(self):
-        """Returns the dimension of the input vector."""
+        """
+        Returns the dimension of the input vector.
+
+        Returns
+        -------
+        input_dimension : int
+            Dimension of the input vector.
+        """
         return self.input_dimension
 
     def get_output_dimension(self):
-        """Returns the dimension of the output vector."""
+        """
+        Returns the dimension of the output vector.
+
+        Returns
+        -------
+        output_dimension : int
+            Dimension of the output vector.
+        """
         return self.output_dimension
