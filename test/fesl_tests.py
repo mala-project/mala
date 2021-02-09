@@ -1,6 +1,6 @@
 from fesl_integration import check_analytical_integration, qe_dens_to_nr_of_electrons, qe_ldos_to_density, qe_ldos_to_dos
 from tensor_memory import test_tensor_memory
-from lazy_loading_tests import test_lazy_loading
+from lazy_loading_basic import test_lazy_loading_basic
 from fesl.common.parameters import printout
 
 
@@ -57,7 +57,7 @@ else:
 # Scaling test.
 ######################
 
-if test_lazy_loading():
+if test_lazy_loading_basic():
     printout("test_lazy_loading suceeded.")
 else:
     raise Exception("test_lazy_loading failed.")

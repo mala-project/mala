@@ -19,6 +19,7 @@ class DataHandler:
     def __init__(self, p: Parameters, target_calculator=None, descriptor_calculator=None, input_data_scaler=None, output_data_scaler=None):
         self.parameters = p.data
         self.dbg_grid_dimensions = p.debug.grid_dimensions
+        self.use_horovod = p.use_horovod
         self.training_data_set = None
 
         self.validation_data_set = None
@@ -388,13 +389,13 @@ class DataHandler:
             # Create the lazy loading data sets.
             self.training_data_set = LazyLoadDataset(self.get_input_dimension(), self.get_output_dimension(), self.input_data_scaler, self.output_data_scaler,
                                                      self.descriptor_calculator, self.target_calculator,
-                                                     self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz)
+                                                     self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz, self.use_horovod)
             self.validation_data_set = LazyLoadDataset(self.get_input_dimension(), self.get_output_dimension(), self.input_data_scaler, self.output_data_scaler,
                                                        self.descriptor_calculator, self.target_calculator,
-                                                       self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz)
+                                                       self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz, self.use_horovod)
             self.test_data_set = LazyLoadDataset(self.get_input_dimension(), self.get_output_dimension(), self.input_data_scaler, self.output_data_scaler,
                                                  self.descriptor_calculator, self.target_calculator,
-                                                 self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz)
+                                                 self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz, self.use_horovod)
 
             # Add snapshots to the lazy loading data sets.
             i = 0
@@ -410,7 +411,6 @@ class DataHandler:
             self.training_data_set.prepare_datasets()
             self.validation_data_set.prepare_datasets()
             self.test_data_set.prepare_datasets()
-
         else:
             # We iterate through the snapshots and add the validation data and test data.
             self.test_data_inputs = []

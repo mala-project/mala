@@ -9,7 +9,7 @@ from fesl.network.network import Network
 from fesl.network.trainer import Trainer
 
 
-def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
+def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
     ####################
     # PARAMETERS
     ####################
@@ -124,7 +124,7 @@ def test_lazy_loading(data_path="../examples/data/", accuracy=0.001):
     return True
 
 if __name__ == "__main__":
-    test1 = test_lazy_loading()
+    test1 = test_lazy_loading_basic()
     printout("Check if lazy loading and RAM implementation get the same results? - success?:", test1)
 
 

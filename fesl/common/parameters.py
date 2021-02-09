@@ -44,6 +44,7 @@ class ParametersNetwork(ParametersBase):
         """
         self.loss_function_type = "mse"
 
+        self.manual_seed = None
 
 # noinspection PyMissingConstructor
 class ParametersDescriptors(ParametersBase):
@@ -237,26 +238,13 @@ class ParametersTraining(ParametersBase):
         """
         Controls whether or not a GPU is used for training - provided there is one to use. 
         """
-        self.use_horovod=False
-
         self.use_compression=False
         #add comment
         self.kwargs={'num_workers': 0, 'pin_memory': False}
-        #add comment
-        self.seed= 2021
         #add comment(optional)
         self.sampler={"train_sampler":None,"validate_sampler":None,"test_sampler":None}
 
-    @property
-    def use_horovod(self):
-        return self._use_horovod
-
-    @use_horovod.setter
-    def use_horovod(self, value):
-        if value:
-            hvd.init()
-        set_horovod_status(value)
-        self._use_horovod = value
+        self.use_shuffling_for_samplers = True
 
 class ParametersHyperparameterOptinization(ParametersBase):
     """Hyperparameter optimization subclass."""
@@ -338,6 +326,18 @@ class Parameters:
         self.training = ParametersTraining()
         self.hyperparameters = ParametersHyperparameterOptinization()
         self.debug = ParametersDebug()
+        self.use_horovod=False
+
+    @property
+    def use_horovod(self):
+        return self._use_horovod
+
+    @use_horovod.setter
+    def use_horovod(self, value):
+        if value:
+            hvd.init()
+        set_horovod_status(value)
+        self._use_horovod = value
 
     def show(self):
         """Prints all the parameters bundled in this class."""

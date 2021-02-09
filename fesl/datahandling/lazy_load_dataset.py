@@ -4,10 +4,15 @@ from fesl.datahandling.snapshot import Snapshot
 from fesl.common.printout import printout
 import numpy as np
 import random
+try:
+    import horovod.torch as hvd
+except ModuleNotFoundError:
+    # Warning is thrown by Parameters class
+    pass
 
 class LazyLoadDataset(torch.utils.data.Dataset):
     def __init__(self, input_dimension, output_dimension, input_data_scaler, output_data_scaler, descriptor_calculator,
-                 target_calculator, grid_dimensions, grid_size, descriptors_contain_xyz):
+                 target_calculator, grid_dimensions, grid_size, descriptors_contain_xyz, use_horovod):
         self.snapshot_list = []
         self.input_dimension = input_dimension
         self.output_dimension = output_dimension
@@ -23,6 +28,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.currently_loaded_file = 0
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)
+        self.use_horovod = use_horovod
 
     def add_snapshot_to_dataset(self, snapshot: Snapshot):
         self.snapshot_list.append(snapshot)
@@ -30,8 +36,13 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.total_size = self.number_of_snapshots*self.grid_size
 
     def prepare_datasets(self):
-        random.shuffle(self.snapshot_list)
+        used_perm = torch.randperm(self.number_of_snapshots)
+        if self.use_horovod:
+            hvd.allreduce(torch.tensor(0), name='barrier')
+            used_perm = hvd.broadcast(used_perm, 0)
+        self.snapshot_list = [self.snapshot_list[i] for i in used_perm]
         self.get_new_data(0)
+
 
     def get_new_data(self, file_index):
         # Load the data into RAM.
@@ -57,6 +68,9 @@ class LazyLoadDataset(torch.utils.data.Dataset):
 
         # Save which data we have currently loaded.
         self.currently_loaded_file = file_index
+        # if self.number_of_snapshots > 1:
+        #     print(hvd.rank(), file_index)
+
 
 
 
