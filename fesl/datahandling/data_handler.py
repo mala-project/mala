@@ -407,6 +407,10 @@ class DataHandler:
                     self.test_data_set.add_snapshot_to_dataset(snapshot)
                 i += 1
 
+            self.training_data_set.prepare_datasets()
+            self.validation_data_set.prepare_datasets()
+            self.test_data_set.prepare_datasets()
+
         else:
             # We iterate through the snapshots and add the validation data and test data.
             self.test_data_inputs = []

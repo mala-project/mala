@@ -124,10 +124,17 @@ class Trainer:
         else:
             raise Exception("Unsupported learning rate schedule.")
 
+        # If lazy loading is used we do not shuffle the data points on their own, but rather shuffle them
+        # by shuffling the files themselves and then reading file by file per epoch.
+        # This shuffling is done in the dataset themselves.
+        do_shuffle = True
+        if data.parameters.use_lazy_loading:
+            do_shuffle = False
+
         # Prepare data loaders.(look into mini-batch size)
         training_data_loader = DataLoader(data.training_data_set, batch_size=self.batch_size,
                                           sampler=self.parameters.sampler["train_sampler"],
-                                          **self.parameters.kwargs, shuffle=True)
+                                          **self.parameters.kwargs, shuffle=do_shuffle)
 
         validation_data_loader = DataLoader(data.validation_data_set, batch_size=self.batch_size * 1,
                                             sampler=self.parameters.sampler["validate_sampler"],**self.parameters.kwargs )
