@@ -1,6 +1,6 @@
 from fesl.common.parameters import Parameters
 from fesl.common.parameters import printout
-from fesl.datahandling.handler_interface import HandlerInterface
+from fesl.datahandling.data_handler import DataHandler
 from fesl.network.hyper_opt_interface import HyperOptInterface
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
@@ -19,7 +19,8 @@ def run_example02(desired_loss_improvement_factor=1):
     test_parameters = Parameters()
     test_parameters.data.datatype_in = "*.npy"
     test_parameters.data.datatype_out = "*.npy"
-    test_parameters.data.data_splitting_percent = [80, 10, 10]
+    test_parameters.data.data_splitting_type = "by_snapshot"
+    test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
     test_parameters.data.output_rescaling_type = "normal"
     test_parameters.descriptors.twojmax = 11
@@ -40,13 +41,12 @@ def run_example02(desired_loss_improvement_factor=1):
     # The Handlerinterface will also return input and output scaler objects. These are used internally to scale
     # the data. The objects can be used after successful training for inference or plotting.
     ####################
-    data_handler = HandlerInterface(test_parameters)
+    data_handler = DataHandler(test_parameters)
 
     # Add all the snapshots we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/", output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/", output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
-    data_handler.load_data()
     data_handler.prepare_data()
     printout("Read data: DONE.")
 

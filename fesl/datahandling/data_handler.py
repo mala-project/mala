@@ -474,10 +474,35 @@ class DataHandler:
             self.training_data_set = TensorDataset(self.training_data_inputs, self.training_data_outputs)
             self.validation_data_set = TensorDataset(self.validation_data_inputs, self.validation_data_outputs)
             self.test_data_set = TensorDataset(self.test_data_inputs, self.test_data_outputs)
-    # def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type, units, desired_dimensions):
 
-    def raw_numpy_to_converted_numpy(self, numpy_array, data_type="in", units=None):
+
+    def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type, units, convert3Dto1D=False):
+
+        # Check parameters for consistency.
+        if data_type != "in" and data_type != "out":
+            raise Exception("Please specify either \"in\" or \"out\" as data_type.")
+
+        # Convert units of numpy array.
+        numpy_array = self.__raw_numpy_to_converted_numpy(numpy_array, data_type, units)
+
+        # If desired, the dimensions can be changed.
+        if convert3Dto1D:
+            if data_type == "in":
+                data_dimension = self.get_input_dimension()
+            else:
+                data_dimension = self.get_output_dimension()
+            desired_dimensions = [self.grid_size, data_dimension]
+        else:
+            desired_dimensions = None
+
+        # Convert numpy array to scaled tensor a network can work with.
+        numpy_array = self.__converted_numpy_to_scaled_tensor(numpy_array, desired_dimensions, data_type)
+        return numpy_array
+
+    def __raw_numpy_to_converted_numpy(self, numpy_array, data_type="in", units=None):
         if data_type == "in":
+            if data_type == "in" and self.parameters.descriptors_contain_xyz:
+                numpy_array = numpy_array[:, :, :, 3:]
             if units is not None:
                 numpy_array *= self.descriptor_calculator.convert_units(1, units)
             return numpy_array
@@ -488,7 +513,7 @@ class DataHandler:
         else:
             raise Exception("Please choose either \"in\" or \"out\" for this function.")
 
-    def converted_numpy_to_scaled_tensor(self, numpy_array, desired_dimensions=None, data_type="in"):
+    def __converted_numpy_to_scaled_tensor(self, numpy_array, desired_dimensions=None, data_type="in"):
         numpy_array = numpy_array.astype(np.float32)
         if desired_dimensions is not None:
             numpy_array = numpy_array.reshape(desired_dimensions)

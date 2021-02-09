@@ -18,7 +18,6 @@ class HandlerQEoutCube(HandlerBase):
         """Adds a snapshot to data handler. For this type of data,
         a QuantumEspresso outfile, an outfile from the LDOS calculation and
         a directory containing the cube files"""
-        # FIXME: Use the new snapshot class instead.
         self.parameters.snapshot_directories_list.append(
             [qe_out_file, qe_out_directory, cube_naming_scheme, cube_directory])
 

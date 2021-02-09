@@ -1,6 +1,6 @@
 from fesl.common.parameters import Parameters
 from fesl.common.parameters import printout
-from fesl.datahandling.handler_interface import HandlerInterface
+from fesl.datahandling.data_handler import DataHandler
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
 
@@ -38,14 +38,12 @@ def run_example04(desired_loss_improvement_factor=1):
     # the data. The objects can be used after successful training for inference or plotting.
     ####################
 
-    data_handler = HandlerInterface(test_parameters)
+    data_handler = DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/", output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/", output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
-
-    data_handler.load_data()
     data_handler.prepare_data()
     printout("Read data: DONE.")
 

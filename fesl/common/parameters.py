@@ -133,17 +133,17 @@ class ParametersData(ParametersBase):
         """
         A list of all added snapshots.
         """
-        self.data_splitting_type = "random"
+        self.data_splitting_type = "by_snapshot"
         """Specify how the data for validation, test and training is splitted.
         Currently implemented:
-            - random: split the data randomly, ignore snapshot boundaries.
+            - random: (CURRENTLY UNSUPPORTED) split the data randomly, ignore snapshot boundaries.
             - by_snapshot: split the data by snapshot boundaries.
         """
         self.data_splitting_percent = [0,0,0]
         """
         Details how much of the data is used for training, validation and testing [%].
         """
-        self.data_splitting_snapshots = ["te", "te", "te"]
+        self.data_splitting_snapshots = ["tr", "va", "te"]
         """
         Details how (and which!) snapshots are used for what [#snapshots]:
             - te: This snapshot will be a testing snapshot.

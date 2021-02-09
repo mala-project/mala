@@ -83,10 +83,10 @@ except:
 
 # Example 10: Novel hyperparameter optimization techniques.
 if run_example10():
-    printout("Successfully ran ex02_hyperparameter_optimization.py.")
+    printout("Successfully ran ex10_advanced_hyperparameter_optimization.py.")
 else:
     raise Exception(
-        "Ran ex02_hyperparameter_optimization but something was off. If you haven't changed any parameters in "
+        "Ran ex10_advanced_hyperparameter_optimization but something was off. If you haven't changed any parameters in "
         "the example, there might be a problem with your installation.")
 
 
