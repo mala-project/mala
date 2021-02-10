@@ -9,6 +9,12 @@ class Network(nn.Module):
     def __init__(self, p):
         # copy the network params from the input parameter object
         self.params = p.network
+
+        # if the user has planted a seed (for comparibility purposes) we should use it.
+        if self.params.manual_seed is not None:
+            torch.manual_seed(self.params.manual_seed)
+            torch.cuda.manual_seed(self.params.manual_seed)
+
         # initialize the parent class
         super(Network, self).__init__()
 

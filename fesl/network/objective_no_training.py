@@ -4,7 +4,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 
 from fesl.common.parameters import Parameters
-from fesl.datahandling.handler_base import HandlerBase
+from fesl.datahandling.data_handler import DataHandler
 from fesl.network.network import Network
 from fesl.network.objective_base import ObjectiveBase
 from fesl.common.parameters import printout
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 class ObjectiveNoTraining(ObjectiveBase):
 
-    def __init__(self, search_parameters: Parameters, data_handler: HandlerBase, trial_type):
+    def __init__(self, search_parameters: Parameters, data_handler: DataHandler, trial_type):
         super(ObjectiveNoTraining, self).__init__(search_parameters, data_handler)
         self.trial_type = trial_type
 

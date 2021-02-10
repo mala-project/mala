@@ -18,11 +18,13 @@ class DataScaler:
         self.stds = torch.empty(0)
         self.maxs = torch.empty(0)
         self.mins = torch.empty(0)
-        self.total_mean = torch.empty(0)
-        self.total_std = torch.empty(0)
-        self.total_max = torch.empty(0)
-        self.total_min = torch.empty(0)
+        self.total_mean = torch.tensor(0)
+        self.total_std = torch.tensor(0)
+        self.total_max = torch.tensor(float('-inf'))
+        self.total_min = torch.tensor(float('inf'))
         self.cantransform = False
+
+        self.total_data_count = 0
 
     def parse_typestring(self):
         self.scale_standard = False
@@ -41,6 +43,112 @@ class DataScaler:
         if self.scale_standard is True and self.scale_normal is True:
             raise Exception("Invalid input data rescaling.")
 
+    def start_incremental_fitting(self):
+        self.total_data_count = 0
+
+
+
+    def incremental_fit(self, unscaled):
+        if self.scale_standard is False and self.scale_normal is False:
+            return
+        else:
+            with torch.no_grad():
+                if self.feature_wise:
+
+                    ##########################
+                    # Feature-wise-scaling
+                    ##########################
+
+                    if self.scale_standard:
+                        new_mean = torch.mean(unscaled, 0, keepdim=True)
+                        new_std = torch.std(unscaled, 0, keepdim=True)
+
+                        current_data_count = list(unscaled.size())[0]#*list(unscaled.size())[1]
+
+                        old_mean = self.means
+                        old_std = self.stds
+
+                        if list(self.means.size())[0] > 0:
+                            self.means = \
+                                self.total_data_count / (self.total_data_count + current_data_count) * old_mean + \
+                                current_data_count / (self.total_data_count + current_data_count) * new_mean
+                        else:
+                            self.means = new_mean
+                        if list(self.stds.size())[0] > 0:
+                            self.stds = \
+                                self.total_data_count / (self.total_data_count + current_data_count) * old_std ** 2 + \
+                                current_data_count / (self.total_data_count + current_data_count) * new_std ** 2 + \
+                                (self.total_data_count * current_data_count) / (self.total_data_count + current_data_count) ** 2 * \
+                                (old_mean - new_mean) ** 2
+
+                            self.stds = torch.sqrt(self.stds)
+                        else:
+                            self.stds = new_std
+                        self.total_data_count += current_data_count
+
+                    if self.scale_normal:
+                        new_maxs = torch.max(unscaled, 0, keepdim=True)
+                        if list(self.maxs.size())[0] > 0:
+                            for i in range(list(new_maxs.values.size())[1]):
+                                if new_maxs.values[0,i] > self.maxs[i]:
+                                    self.maxs[i] = new_maxs.values[0,i]
+                        else:
+                            self.maxs = new_maxs.values[0,:]
+
+
+                        new_mins = torch.min(unscaled, 0, keepdim=True)
+                        if list(self.mins.size())[0] > 0:
+                            for i in range(list(new_mins.values.size())[1]):
+                                if new_mins.values[0,i] < self.mins[i]:
+                                    self.mins[i] = new_mins.values[0,i]
+                        else:
+                            self.mins = new_mins.values[0,:]
+
+                else:
+
+                    ##########################
+                    # Total scaling
+                    ##########################
+
+                    if self.scale_standard:
+                        current_data_count = list(unscaled.size())[0]*list(unscaled.size())[1]
+
+                        new_mean = torch.mean(unscaled)
+                        new_std = torch.std(unscaled)
+
+                        old_mean = self.total_mean
+                        old_std = self.total_std
+
+
+                        self.total_mean = \
+                            self.total_data_count / (self.total_data_count + current_data_count) * old_mean + \
+                            current_data_count / (self.total_data_count + current_data_count) * new_mean
+
+                        # This equation is taken from the Sandia code. It presumably works, but it gets slighly different results.
+                        # Maybe we should check it at some point . I think it is merely an issue of numerical accuracy.
+                        self.total_std = \
+                            self.total_data_count / (self.total_data_count + current_data_count) * old_std ** 2 + \
+                            current_data_count / (self.total_data_count + current_data_count) * new_std ** 2 + \
+                            (self.total_data_count * current_data_count) / (self.total_data_count + current_data_count) ** 2 * \
+                            (old_mean - new_mean) ** 2
+
+                        self.total_std = torch.sqrt(self.total_std)
+                        self.total_data_count += current_data_count
+
+                    if self.scale_normal:
+                        new_max = torch.max(unscaled)
+                        if new_max > self.total_max:
+                            self.total_max = new_max
+
+                        new_min = torch.min(unscaled)
+                        if new_min < self.total_min:
+                            self.total_min = new_min
+
+
+
+    def finish_incremental_fitting(self):
+        self.cantransform = True
+
     def fit(self, unscaled):
         """Compute the quantities used for scaling."""
         if self.scale_standard is False and self.scale_normal is False:
@@ -58,8 +166,8 @@ class DataScaler:
                         self.stds = torch.std(unscaled, 0, keepdim=True)
 
                     if self.scale_normal:
-                        self.maxs = torch.max(unscaled, 0, keepdim=True)
-                        self.mins = torch.min(unscaled, 0, keepdim=True)
+                        self.maxs = torch.max(unscaled, 0, keepdim=True).values
+                        self.mins = torch.min(unscaled, 0, keepdim=True).values
 
                 else:
 
@@ -88,7 +196,7 @@ class DataScaler:
             return unscaled
 
         if self.cantransform is False:
-            return unscaled
+            raise Exception("Transformation cannot be done, this DataScaler was never initialized")
 
         # Perform the actual scaling, but use no_grad to make sure
         # that the next couple of iterations stay untracked.
@@ -104,7 +212,7 @@ class DataScaler:
                     return unscaled
 
                 if self.scale_normal:
-                    unscaled = (unscaled - self.mins.values) / (self.maxs.values - self.mins.values)
+                    unscaled = (unscaled - self.mins) / (self.maxs - self.mins)
                     return unscaled
 
             else:
@@ -132,7 +240,7 @@ class DataScaler:
             unscaled = scaled
 
         if self.cantransform is False:
-            unscaled = scaled
+            raise Exception("Backtransformation cannot be done, this DataScaler was never initialized")
 
         # Perform the actual scaling, but use no_grad to make sure
         # that the next couple of iterations stay untracked.
