@@ -519,9 +519,11 @@ class DataHandler:
                     self.test_data_set.add_snapshot_to_dataset(snapshot)
                 i += 1
 
-            self.training_data_set.mix_datasets()
-            self.validation_data_set.mix_datasets()
-            self.test_data_set.mix_datasets()
+            # I don't think we need to mix them here. We can use the standard ordering for the first epoch
+            # and mix it up after.
+            # self.training_data_set.mix_datasets()
+            # self.validation_data_set.mix_datasets()
+            # self.test_data_set.mix_datasets()
         else:
             # We iterate through the snapshots and add the validation data and test data.
             self.test_data_inputs = []

@@ -54,7 +54,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.number_of_snapshots = 0
         self.total_size = 0
         self.descriptors_contain_xyz = descriptors_contain_xyz
-        self.currently_loaded_file = 0
+        self.currently_loaded_file = None
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)
         self.use_horovod = use_horovod

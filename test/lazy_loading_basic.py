@@ -2,7 +2,7 @@ from fesl.common.parameters import Parameters
 from fesl.common.printout import printout
 from fesl.datahandling.data_handler import DataHandler
 import torch
-
+import numpy as np
 
 # This test compares the data scaling using the regular scaling procedure and the lazy-loading one (incremental fitting).
 from fesl.network.network import Network
@@ -116,10 +116,10 @@ def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
             printout(entry[0])
             printout(val1, val2, val3, val4)
             return False
-    if dataset_tester[0] - dataset_tester[1] > accuracy:
+    if torch.abs(dataset_tester[0] - dataset_tester[1]) > accuracy:
         printout(dataset_tester[0], dataset_tester[1])
         return False
-    if training_tester[0] - training_tester[1] > accuracy:
+    if np.abs(training_tester[0] - training_tester[1]) > accuracy:
         printout(training_tester[0], training_tester[1])
         return False
 
