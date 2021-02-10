@@ -1,7 +1,6 @@
 stages:
   - build
-  - test-basic
-  - test-advanced
+  - test
   - deploy
 
 .module_setup: &module_setup
@@ -20,10 +19,11 @@ setup-fesl:
 #  after_script:
   only:
     - master
+    - speedup-CI
     - pipelinetest
 
 test-basic-functions:
-  stage: test-basic
+  stage: test
   image: continuumio/anaconda3:latest
   script:
     - *module_setup
@@ -33,19 +33,21 @@ test-basic-functions:
   needs: [setup-fesl]
   only:
     - master
+    - speedup-CI
 #    - pipelinetest
 
 test-workflow:
-  stage: test-advanced
+  stage: test
   image: continuumio/anaconda3:latest
   script:
     - *module_setup
     - cd examples
     - python3 ex99_verify_all_examples.py
     - cd ..
-  needs: [setup-fesl, test-basic-functions]
+  needs: [setup-fesl]
   only:
     - master
+    - speedup-CI
 #    - pipelinetest
 
 
@@ -66,5 +68,5 @@ pages:
     paths:
     - public
   only:
-  - master
+#  - master
   - documentation

@@ -1,6 +1,6 @@
 from fesl.common.parameters import Parameters
 from fesl.common.parameters import printout
-from fesl.datahandling.handler_interface import HandlerInterface
+from fesl.datahandling.data_handler import DataHandler
 from fesl.datahandling.data_scaler import DataScaler
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
@@ -29,27 +29,26 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
     # We need to make sure that the same scaling is used.
     iscaler = DataScaler.load_from_file(input_scaler_path)
     oscaler = DataScaler.load_from_file(output_scaler_path)
-    inference_data_handler = HandlerInterface(new_parameters, input_data_scaler=iscaler, output_data_scaler=oscaler)
+    inference_data_handler = DataHandler(new_parameters, input_data_scaler=iscaler, output_data_scaler=oscaler)
 
     # Now we can add and load a snapshot to test our new data.
     # Note that we use prepare_data_for_inference instead of the regular prepare_data function.
-    inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
-    inference_data_handler.load_data()
-    inference_data_handler.prepare_data_for_inference()
+    raw_inputs = np.load("./data/Al_debug_2k_nr2.in.npy")
+    inputs = inference_data_handler.raw_numpy_to_converted_scaled_tensor(raw_inputs, "in", None)
 
     # Now we can make a prediction.
-    predicted_ldos = new_network.do_prediction(inference_data_handler.inference_data_inputs[0])
-    actual_ldos = inference_data_handler.inference_data_outputs[0]
+    predicted_ldos = new_network.do_prediction(inputs)
 
     # Now we use the prediction to calculate the band energy and compare it to the one we would get from the outputs themselves.
     predicted_ldos = oscaler.inverse_transform(predicted_ldos, as_numpy=True)
-    actual_ldos = oscaler.inverse_transform(actual_ldos, as_numpy=True)
 
     # Use the LDOS object to do postprocessing.
-    ldos_calculator = inference_data_handler.target_parser
+    ldos_calculator = inference_data_handler.target_calculator
     ldos_calculator.read_additional_calculation_data("qe.out", "./data/QE_Al.scf.pw.out")
 
-    # Calculate the DOS.
+    # Calculate the DOS, for reference also the exact DOS.
+    raw_outputs = np.load("./data/Al_debug_2k_nr2.out.npy")
+    actual_ldos = ldos_calculator.convert_units(raw_outputs, "1/Ry")
     actual_dos = ldos_calculator.get_density_of_states(actual_ldos)
     predicted_dos = ldos_calculator.get_density_of_states(predicted_ldos)
 
@@ -110,14 +109,13 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
     # the data. The objects can be used after successful training for inference or plotting.
     ####################
 
-    data_handler = HandlerInterface(test_parameters)
+    data_handler = DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/", output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/", output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
 
-    data_handler.load_data()
     data_handler.prepare_data()
     printout("Read data: DONE.")
 

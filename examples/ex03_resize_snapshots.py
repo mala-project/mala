@@ -1,6 +1,6 @@
 from fesl.common.parameters import Parameters
 from fesl.common.parameters import printout
-from fesl.datahandling.handler_interface import HandlerInterface
+from fesl.datahandling.data_handler import DataHandler
 import numpy as np
 
 """
@@ -31,7 +31,7 @@ def run_example03(data_path, accuracy=10**-10):
     # We have to specify the directories we want to read the snapshots from.
     ####################
 
-    data_handler = HandlerInterface(test_parameters)
+    data_handler = DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0.npy",

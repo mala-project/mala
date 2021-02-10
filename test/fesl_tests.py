@@ -1,5 +1,7 @@
 from fesl_integration import check_analytical_integration, qe_dens_to_nr_of_electrons, qe_ldos_to_density, qe_ldos_to_dos
 from tensor_memory import test_tensor_memory
+from lazy_loading_basic import test_lazy_loading_basic
+from lazy_loading_horovod_benchmark import lazy_loading_horovod_benchmark
 from fesl.common.parameters import printout
 
 
@@ -51,3 +53,23 @@ else:
 #     printout("test_total_energy suceeded.")
 # else:
 #     raise Exception("test_total_energy failed.")
+
+######################
+# Scaling test.
+######################
+
+if test_lazy_loading_basic():
+    printout("test_lazy_loading suceeded.")
+else:
+    raise Exception("test_lazy_loading failed.")
+
+######################
+# Lazy loading and horovod tests. This cannot yet be included in the
+# automated test suite because we don't install horovod there.
+######################
+
+try:
+    if lazy_loading_horovod_benchmark():
+        printout("test_lazy_loading suceeded.")
+except:
+    pass
