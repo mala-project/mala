@@ -5,6 +5,8 @@ from fesl.network.hyper_opt_interface import HyperOptInterface
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
 import numpy as np
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()+"Al256_reduced/"
 
 """
 ex10_advanced_hyperparameter_optimization.py: Shows how recent developments in hyperparameter optimization techniques can be used
@@ -12,7 +14,7 @@ in FESL (OAT / training-free NAS).
 """
 
 printout("Welcome to FESL.")
-printout("Running ex02_hyperparameter_optimization.py")
+printout("Running ex10_advanced_hyperparameter_optimization.py")
 
 
 def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", last_optuna_study = None):
@@ -48,9 +50,9 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", la
     data_handler = DataHandler(test_parameters)
 
     # Add all the snapshots we want to use in to the list.
-    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/", output_units="1/Ry")
-    data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/", output_units="1/Ry")
-    data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path, "Al_debug_2k_nr0.out.npy", data_path, output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path, "Al_debug_2k_nr1.out.npy", data_path, output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path, "Al_debug_2k_nr2.out.npy", data_path, output_units="1/Ry")
     data_handler.prepare_data()
     printout("Read data: DONE.")
 

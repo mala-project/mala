@@ -178,9 +178,9 @@ class DataHandler:
         """
         if self.parameters.use_lazy_loading:
             self.validation_data_set.mix_datasets()
-            self.test_data_set.mix_datasets()
             self.training_data_set.mix_datasets()
-
+            if self.test_data_set is not None:
+                self.test_data_set.mix_datasets()
 
     def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type, units, convert3Dto1D=False):
         """
@@ -221,6 +221,24 @@ class DataHandler:
         # Convert numpy array to scaled tensor a network can work with.
         numpy_array = self.__converted_numpy_to_scaled_tensor(numpy_array, desired_dimensions, data_type)
         return numpy_array
+
+
+    def resize_snapshots_for_debugging(self, directory="./", filetype="*.npy",
+                                       naming_scheme_input="test_Al_debug_2k_nr*.in",
+                                       naming_scheme_output="test_Al_debug_2k_nr*.out"):
+        i = 0
+        snapshot : Snapshot
+        for snapshot in self.parameters.snapshot_directories_list:
+            tmp_array = self.__load_from_npy_file(snapshot.input_npy_directory+snapshot.input_npy_file)
+            tmp_file_name = naming_scheme_input
+            tmp_file_name = tmp_file_name.replace("*", str(i))
+            np.save(directory+tmp_file_name+".npy", tmp_array)
+
+            tmp_array = self.__load_from_npy_file(snapshot.output_npy_directory+snapshot.output_npy_file)
+            tmp_file_name = naming_scheme_output
+            tmp_file_name = tmp_file_name.replace("*", str(i))
+            np.save(directory+tmp_file_name+".npy", tmp_array)
+            i += 1
 
 
     def __check_snapshots(self):
@@ -313,7 +331,7 @@ class DataHandler:
             if self.nr_validation_data == 0:
                 raise Exception("No validation snapshots provided.")
             if self.nr_test_data == 0:
-                raise Exception("No testing snapshots provided.")
+                printout("Running FESL without test data. If this is not what you wanted, please revise the input script.")
 
         else:
             raise Exception("Wrong parameter for data splitting provided.")
@@ -504,9 +522,10 @@ class DataHandler:
             self.validation_data_set = LazyLoadDataset(self.get_input_dimension(), self.get_output_dimension(), self.input_data_scaler, self.output_data_scaler,
                                                        self.descriptor_calculator, self.target_calculator,
                                                        self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz, self.use_horovod)
-            self.test_data_set = LazyLoadDataset(self.get_input_dimension(), self.get_output_dimension(), self.input_data_scaler, self.output_data_scaler,
-                                                 self.descriptor_calculator, self.target_calculator,
-                                                 self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz, self.use_horovod)
+            if self.nr_test_data != 0:
+                self.test_data_set = LazyLoadDataset(self.get_input_dimension(), self.get_output_dimension(), self.input_data_scaler, self.output_data_scaler,
+                                                  self.descriptor_calculator, self.target_calculator,
+                                                     self.grid_dimension, self.grid_size, self.parameters.descriptors_contain_xyz, self.use_horovod)
 
             # Add snapshots to the lazy loading data sets.
             i = 0
@@ -526,10 +545,12 @@ class DataHandler:
             # self.test_data_set.mix_datasets()
         else:
             # We iterate through the snapshots and add the validation data and test data.
-            self.test_data_inputs = []
             self.validation_data_inputs = []
-            self.test_data_outputs = []
             self.validation_data_outputs = []
+            if self.nr_test_data != 0:
+                self.test_data_inputs = []
+                self.test_data_outputs = []
+
             i = 0
             # We need to perform the data scaling over the entirety of the training data.
             for snapshot in self.parameters.snapshot_directories_list:
@@ -560,11 +581,12 @@ class DataHandler:
             # I know this would be more elegant with the member functions typed below. But I am pretty sure
             # that that would create a temporary copy of the arrays, and that could overload the RAM
             # in cases where lazy loading is technically not even needed.
-            self.test_data_inputs = np.array(self.test_data_inputs)
-            self.test_data_inputs = self.test_data_inputs.astype(np.float32)
-            self.test_data_inputs = self.test_data_inputs.reshape([self.nr_test_data, self.get_input_dimension()])
-            self.test_data_inputs = torch.from_numpy(self.test_data_inputs).float()
-            self.test_data_inputs = self.input_data_scaler.transform(self.test_data_inputs)
+            if self.nr_test_data != 0:
+                self.test_data_inputs = np.array(self.test_data_inputs)
+                self.test_data_inputs = self.test_data_inputs.astype(np.float32)
+                self.test_data_inputs = self.test_data_inputs.reshape([self.nr_test_data, self.get_input_dimension()])
+                self.test_data_inputs = torch.from_numpy(self.test_data_inputs).float()
+                self.test_data_inputs = self.input_data_scaler.transform(self.test_data_inputs)
 
             self.validation_data_inputs = np.array(self.validation_data_inputs)
             self.validation_data_inputs = self.validation_data_inputs.astype(np.float32)
@@ -572,11 +594,12 @@ class DataHandler:
             self.validation_data_inputs = torch.from_numpy(self.validation_data_inputs).float()
             self.validation_data_inputs = self.input_data_scaler.transform(self.validation_data_inputs)
 
-            self.test_data_outputs = np.array(self.test_data_outputs)
-            self.test_data_outputs = self.test_data_outputs.astype(np.float32)
-            self.test_data_outputs = self.test_data_outputs.reshape([self.nr_test_data, self.get_output_dimension()])
-            self.test_data_outputs = torch.from_numpy(self.test_data_outputs).float()
-            self.test_data_outputs = self.output_data_scaler.transform(self.test_data_outputs)
+            if self.nr_test_data != 0:
+                self.test_data_outputs = np.array(self.test_data_outputs)
+                self.test_data_outputs = self.test_data_outputs.astype(np.float32)
+                self.test_data_outputs = self.test_data_outputs.reshape([self.nr_test_data, self.get_output_dimension()])
+                self.test_data_outputs = torch.from_numpy(self.test_data_outputs).float()
+                self.test_data_outputs = self.output_data_scaler.transform(self.test_data_outputs)
 
             self.validation_data_outputs = np.array(self.validation_data_outputs)
             self.validation_data_outputs = self.validation_data_outputs.astype(np.float32)
@@ -586,7 +609,9 @@ class DataHandler:
 
             self.training_data_set = TensorDataset(self.training_data_inputs, self.training_data_outputs)
             self.validation_data_set = TensorDataset(self.validation_data_inputs, self.validation_data_outputs)
-            self.test_data_set = TensorDataset(self.test_data_inputs, self.test_data_outputs)
+
+            if self.nr_test_data != 0:
+                self.test_data_set = TensorDataset(self.test_data_inputs, self.test_data_outputs)
 
 
 

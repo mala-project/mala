@@ -24,7 +24,8 @@ class Trainer:
         self.use_gpu = False
         self.use_horovod=p.use_horovod
         self.use_compression=False
-        
+        self.initial_test_loss = 0
+        self.final_test_loss = 0
 
     def train_network(self, network, data):
         """Given a network and data, this network is trained on this data."""
@@ -96,7 +97,8 @@ class Trainer:
                                                                                                           num_replicas=hvd.size(),
                                                                                                           rank=hvd.rank())
 
-            self.parameters.sampler["test_sampler"] =torch.utils.data.distributed.DistributedSampler(data.test_data_set,
+            if data.test_data_set is not None:
+                self.parameters.sampler["test_sampler"] =torch.utils.data.distributed.DistributedSampler(data.test_data_set,
                                                                                                      num_replicas=hvd.size(),
                                                                                                      rank=hvd.rank())
 
@@ -138,21 +140,26 @@ class Trainer:
         validation_data_loader = DataLoader(data.validation_data_set, batch_size=self.batch_size * 1,
                                             sampler=self.parameters.sampler["validate_sampler"],**self.parameters.kwargs )
 
-        test_data_loader = DataLoader(data.test_data_set, batch_size=self.batch_size * 1,
-                                      sampler=self.parameters.sampler["test_sampler"],**self.parameters.kwargs )
+        if data.test_data_set is not None:
+            test_data_loader = DataLoader(data.test_data_set, batch_size=self.batch_size * 1,
+                                          sampler=self.parameters.sampler["test_sampler"],**self.parameters.kwargs )
 
 
         # Calculate initial loss.
+        tloss = None
         vloss = self.validate_network(network, validation_data_loader)
-        tloss = self.validate_network(network, test_data_loader)
+        if data.test_data_set is not None:
+            tloss = self.validate_network(network, test_data_loader)
 
         #Collect and average all the losses from all the devices
         if self.use_horovod:
             vloss=self.average_validation(vloss,'average_loss')
-            tloss=self.average_validation(tloss,'average_loss')
+            if data.test_data_set is not None:
+                tloss=self.average_validation(tloss,'average_loss')
         if self.parameters.verbosity:
             printout("Initial Guess - validation data loss: ", vloss)
-            printout("Initial Guess - test data loss: ", tloss)
+            if data.test_data_set is not None:
+                printout("Initial Guess - test data loss: ", tloss)
         self.initial_test_loss = tloss
 
         # Perform and log training.
@@ -217,9 +224,11 @@ class Trainer:
                         break
 
         # Calculate final loss.
-        tloss = self.validate_network(network, test_data_loader)
-        if self.use_horovod:
-            tloss=self.average_validation(tloss,'average_loss')
+        tloss = None
+        if data.test_data_set is not None:
+            tloss = self.validate_network(network, test_data_loader)
+            if self.use_horovod:
+                tloss=self.average_validation(tloss,'average_loss')
         self.final_test_loss = tloss
         printout("Final test data loss: ", tloss)
 

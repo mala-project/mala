@@ -7,6 +7,8 @@ from fesl.network.trainer import Trainer
 from fesl.targets.dos import DOS
 import matplotlib.pyplot as plt
 import numpy as np
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()+"Al256_reduced/"
 """
 ex08_training_with_postprocessing.py: Uses FESL to first train a network, use this network to predict the LDOS and then
 analyze the results of this prediction. This example is structured a little bit different than other examples. 
@@ -33,7 +35,7 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
 
     # Now we can add and load a snapshot to test our new data.
     # Note that we use prepare_data_for_inference instead of the regular prepare_data function.
-    raw_inputs = np.load("./data/Al_debug_2k_nr2.in.npy")
+    raw_inputs = np.load(data_path+"Al_debug_2k_nr2.in.npy")
     inputs = inference_data_handler.raw_numpy_to_converted_scaled_tensor(raw_inputs, "in", None)
 
     # Now we can make a prediction.
@@ -44,10 +46,10 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
 
     # Use the LDOS object to do postprocessing.
     ldos_calculator = inference_data_handler.target_calculator
-    ldos_calculator.read_additional_calculation_data("qe.out", "./data/QE_Al.scf.pw.out")
+    ldos_calculator.read_additional_calculation_data("qe.out", data_path+"QE_Al.scf.pw.out")
 
     # Calculate the DOS, for reference also the exact DOS.
-    raw_outputs = np.load("./data/Al_debug_2k_nr2.out.npy")
+    raw_outputs = np.load(data_path+"Al_debug_2k_nr2.out.npy")
     actual_ldos = ldos_calculator.convert_units(raw_outputs, "1/Ry")
     actual_dos = ldos_calculator.get_density_of_states(actual_ldos)
     predicted_dos = ldos_calculator.get_density_of_states(predicted_ldos)
@@ -112,9 +114,9 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
     data_handler = DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
-    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/", output_units="1/Ry")
-    data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/", output_units="1/Ry")
-    data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path, "Al_debug_2k_nr0.out.npy", data_path, output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path, "Al_debug_2k_nr1.out.npy", data_path, output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path, "Al_debug_2k_nr2.out.npy", data_path, output_units="1/Ry")
 
     data_handler.prepare_data()
     printout("Read data: DONE.")

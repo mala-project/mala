@@ -1,9 +1,11 @@
 from fesl.common.parameters import Parameters
 from fesl.common.parameters import printout
-from fesl.datahandling.data_handler import DataHandler
 from fesl.targets.target_interface import TargetInterface
 import matplotlib.pyplot as plt
 import numpy as np
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()+"Al256_reduced/"
+
 """
 ex06_postprocessing.py: Shows how the LDOS can be post processed. 
 """
@@ -34,10 +36,10 @@ def run_example06(doplots = True, accuracy = 0.00001):
     ldos = TargetInterface(test_parameters)
 
     # We load additional information about the data using the output of the actual quantum espresso calculation.
-    ldos.read_additional_calculation_data("qe.out", "./data/QE_Al.scf.pw.out")
+    ldos.read_additional_calculation_data("qe.out", data_path+"QE_Al.scf.pw.out")
 
     # The LDOS data needs to be converted; we got it from a QE calculation.
-    ldos_data = ldos.convert_units(np.load("./data/Al_debug_2k_nr0.out.npy"), in_units="1/Ry")
+    ldos_data = ldos.convert_units(np.load(data_path+"Al_debug_2k_nr0.out.npy"), in_units="1/Ry")
 
     #####
     # Density
