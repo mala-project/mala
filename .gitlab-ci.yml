@@ -4,7 +4,14 @@ stages:
   - deploy
 
 .module_setup: &module_setup
-    - apt-get install -q -y gcc g++ python3-dev libz-dev swig && apt-get clean
+    - apt-get install -q -y gcc g++ python3-dev libz-dev swig git-lfs && apt-get clean
+    - cd ../
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data  fesl_data_repo
+    - cd fesl_data_repo
+    - git lfs install
+    - bash ../fesl/install/data_repo_link/link_data_repo.sh `pwd`
+    - cd ../
+    - cd fesl
     - pip install -r requirements.txt
     - pip install -e .
     - pip install torch==1.7.1+cpu torchvision==0.8.2+cpu torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html

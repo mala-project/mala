@@ -117,3 +117,15 @@ $ pip install -U recommonmark
 3. Run `make html`. This creates a `_build` folder inside `docs`. You may also want to use `make html SPHINXOPTS="-W"` sometimes. This treats warnings as errors and stops the output at first occurence of an error (useful for debugging rST syntax).
 4. Open `docs/_build/html/index.html`.
 5. `make clean` if required (e.g. after fixing erros) and building again
+
+
+## Downloading and adding example data
+
+The examples and tests need additional data to run. The FESL team provides a data repository, that can be downloaded 
+from https://gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data. After downloading it, the data repository
+needs to be linked to the FESL repository by using
+```sh
+$ cd ~/path/to/this/git/root/directory
+$ bash install/data_repo_link/link_data_repo.sh ~/path/to/data/repo
+```
+Afterwards, all the examples and tests will run out-of-the.box.

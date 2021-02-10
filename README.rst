@@ -26,11 +26,6 @@ Running
 You can familiarize yourself with the usage of this package by running
 the examples in the ``example/`` folder.
 
-Data
-----
-
-*coming soon*
-
 References
 ----------
 

@@ -2,6 +2,8 @@ from fesl.common.parameters import Parameters
 from fesl.common.parameters import printout
 from fesl.descriptors.snap import SNAP
 import numpy as np
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()
 
 """
 ex05_create_snap_descriptors.py: Shows how the framework can be used to create SNAP descriptors, from a
@@ -29,8 +31,8 @@ def run_example05(accuracy = 0.000001):
     ####################
 
     test_descriptors = SNAP(test_parameters)
-    snap_data = test_descriptors.calculate_from_qe_out("QE_Al.scf.pw.out", "./data/")
-    snap_data_backup = np.load("./data/Al_snap_from_qe.npy")
+    snap_data = test_descriptors.calculate_from_qe_out("QE_Al.scf.pw.out", data_path+"Al256/")
+    snap_data_backup = np.load(data_path+"Al256_reduced/"+"Al_snap_from_qe.npy")
     diff = np.abs(np.sum(snap_data_backup) - np.sum(snap_data))
     if diff > accuracy:
         return False

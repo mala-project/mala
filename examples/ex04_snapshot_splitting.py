@@ -3,6 +3,8 @@ from fesl.common.parameters import printout
 from fesl.datahandling.data_handler import DataHandler
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()+"Al256_reduced/"
 
 """
 ex04_snapshot_splitting.py: Shows a more intiutive way of splitting up the data, i.e. snapshot splitting.
@@ -41,9 +43,9 @@ def run_example04(desired_loss_improvement_factor=1):
     data_handler = DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
-    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/", output_units="1/Ry")
-    data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/", output_units="1/Ry")
-    data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path, "Al_debug_2k_nr0.out.npy", data_path, output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path, "Al_debug_2k_nr1.out.npy", data_path, output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path, "Al_debug_2k_nr2.out.npy", data_path, output_units="1/Ry")
     data_handler.prepare_data()
     printout("Read data: DONE.")
 

@@ -3,6 +3,8 @@ from tensor_memory import test_tensor_memory
 from lazy_loading_basic import test_lazy_loading_basic
 from lazy_loading_horovod_benchmark import lazy_loading_horovod_benchmark
 from fesl.common.parameters import printout
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()+"Al256_reduced/"
 
 
 ''''
@@ -14,7 +16,7 @@ standard_accuracy = 10**-10
 # Memory tests (obsolete).
 ######################
 
-if test_tensor_memory("../examples/data/Al_debug_2k_nr0.in.npy", standard_accuracy):
+if test_tensor_memory(data_path+"Al_debug_2k_nr0.in.npy", standard_accuracy):
     printout("test_tensor_memory suceeded.")
 else:
     raise Exception("test_tensor_memory failed.")
@@ -58,7 +60,7 @@ else:
 # Scaling test.
 ######################
 
-if test_lazy_loading_basic():
+if test_lazy_loading_basic(data_path=data_path):
     printout("test_lazy_loading suceeded.")
 else:
     raise Exception("test_lazy_loading failed.")
@@ -69,7 +71,7 @@ else:
 ######################
 
 try:
-    if lazy_loading_horovod_benchmark():
+    if lazy_loading_horovod_benchmark(data_path=data_path):
         printout("test_lazy_loading suceeded.")
 except:
-    pass
+    printout("Could not perform lazy loading horovod test, most likely because horovod was not installed.")
