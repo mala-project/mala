@@ -117,8 +117,10 @@ def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
             printout(val1, val2, val3, val4)
             return False
     if dataset_tester[0] - dataset_tester[1] > accuracy:
+        printout(dataset_tester[0], dataset_tester[1])
         return False
     if training_tester[0] - training_tester[1] > accuracy:
+        printout(training_tester[0], training_tester[1])
         return False
 
     return True
