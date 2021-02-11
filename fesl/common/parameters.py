@@ -354,6 +354,9 @@ class Parameters:
         """
         Saves the Parameters object so that it can be accessed again at a later time.
         """
+        if self.use_horovod:
+            if hvd.rank() != 0:
+                return
         if save_format == "pickle":
             with open(filename, 'wb') as handle:
                 pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)

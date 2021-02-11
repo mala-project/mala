@@ -2,12 +2,19 @@ import torch
 import pickle
 import numpy as np
 from fesl.common.parameters import printout
+try:
+    import horovod.torch as hvd
+except ModuleNotFoundError:
+    # Warning is thrown by parameters class
+    pass
+
 
 class DataScaler:
     """Scales input and output data. Sort of emulates the functionality
     of the scikit-learn library, but by implementing the class by ourselves we have more freedom."""
 
-    def __init__(self, typestring):
+    def __init__(self, typestring, use_horovod = False):
+        self.use_horovod = use_horovod
         self.typestring = typestring
         self.scale_standard = False
         self.scale_normal = False
@@ -278,6 +285,10 @@ class DataScaler:
         """
         Saves the Scaler object so that it can be accessed again at a later time.
         """
+        # If we use horovod, only save the network on root.
+        if self.use_horovod:
+            if hvd.rank() != 0:
+                return
         if save_format == "pickle":
             with open(filename, 'wb') as handle:
                 pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
