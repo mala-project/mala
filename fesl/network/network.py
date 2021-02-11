@@ -2,12 +2,18 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+try:
+    import horovod.torch as hvd
+except ModuleNotFoundError:
+    # Warning is thrown by parameters class
+    pass
 
 class Network(nn.Module):
     """Central network class for this framework. Based on pytorch.nn.Module."""
 
     def __init__(self, p):
         # copy the network params from the input parameter object
+        self.use_horovod = p.use_horovod
         self.params = p.network
 
         # if the user has planted a seed (for comparibility purposes) we should use it.
@@ -89,6 +95,10 @@ class Network(nn.Module):
         Saves the network. This function serves as an interfaces to pytorchs own saving functionalities
         AND possibly own saving needs.
         """
+        # If we use horovod, only save the network on root.
+        if self.use_horovod:
+            if hvd.rank() != 0:
+                return
         torch.save(self.state_dict(), path_to_file)
 
     @classmethod

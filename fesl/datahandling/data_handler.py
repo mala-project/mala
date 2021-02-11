@@ -42,11 +42,11 @@ class DataHandler:
 
         self.input_data_scaler = input_data_scaler
         if self.input_data_scaler is None:
-            self.input_data_scaler = DataScaler(self.parameters.input_rescaling_type)
+            self.input_data_scaler = DataScaler(self.parameters.input_rescaling_type, use_horovod=self.use_horovod)
 
         self.output_data_scaler = output_data_scaler
         if self.output_data_scaler is None:
-            self.output_data_scaler = DataScaler(self.parameters.output_rescaling_type)
+            self.output_data_scaler = DataScaler(self.parameters.output_rescaling_type, use_horovod=self.use_horovod)
 
         self.target_calculator = target_calculator
         if self.target_calculator is None:
