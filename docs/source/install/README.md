@@ -7,7 +7,7 @@ This document details the manual installation of the FESL package.
 ### Python version
 
 FESL itself is not bound to a certain python version, as long as the package requirements for FESL can be met by the 
-version of myour choosing. FESL has been sucessfully tested for python 3.8.5. 
+version of your choice. FESL has been successfully tested for python 3.8.5. 
 If you intend to use the optional Quantum Espresso total energy module or LAMMPS and install these software packages
 yourself the necessary python bindings will be created for your python version. If you operate on a machine that 
 provides pre-installed versions of these packages (e.g. on an HPC cluster), you need to adhere to the python version 
