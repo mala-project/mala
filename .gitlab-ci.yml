@@ -26,7 +26,7 @@ setup-fesl:
 #  after_script:
   only:
     - master
-    - speedup-CI
+    - improve-CI
     - pipelinetest
 
 setup-docs:
@@ -45,7 +45,7 @@ test-basic-functions:
   needs: [setup-fesl]
   only:
     - master
-    - speedup-CI
+    - improve-CI
 #    - pipelinetest
 
 test-workflow:
@@ -59,7 +59,7 @@ test-workflow:
   needs: [setup-fesl]
   only:
     - master
-    - speedup-CI
+    - improve-CI
 #    - pipelinetest
 
 test-docstrings:
@@ -73,7 +73,7 @@ test-docstrings:
   needs: [setup-docs]
   only:
     - master
-    - speedup-CI
+    - improve-CI
     - documentation
     - fix_docstrings
     - /^fix_docstrings_in_.*$/
@@ -99,7 +99,7 @@ pages:
     always
   only:
   - master
-  - speedup-CI
+  - improve-CI
   - documentation
   - fix_docstrings
   - /^fix_docstrings_in_.*$/
