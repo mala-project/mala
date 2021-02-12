@@ -29,6 +29,11 @@ setup-fesl:
     - speedup-CI
     - pipelinetest
 
+setup-docs:
+  stage: build
+  script:
+    - echo "Docs setup."
+
 test-basic-functions:
   stage: test
   image: continuumio/anaconda3:latest
@@ -65,8 +70,10 @@ test-docstrings:
     - pip install -qU pydocstyle
   script:
     - pydocstyle --convention=numpy fesl
+  needs: [setup-docs]
   only:
     - master
+    - speedup-CI
     - documentation
     - fix_docstrings
     - /^fix_docstrings_in_.*$/
@@ -84,6 +91,7 @@ pages:
   - sphinx-build -b html -d docs/_build/doctrees docs/source docs/_build/html
   after_script:
   - mv docs/_build/html public
+  needs: [test-docstrings]
   artifacts:
     paths:
     - public
@@ -91,6 +99,7 @@ pages:
     always
   only:
   - master
+  - speedup-CI
   - documentation
   - fix_docstrings
   - /^fix_docstrings_in_.*$/
