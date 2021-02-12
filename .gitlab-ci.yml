@@ -57,6 +57,19 @@ test-workflow:
     - speedup-CI
 #    - pipelinetest
 
+test-docstrings:
+  stage: test
+  image: python:3.7-alpine
+  before_script:
+    - pip install -qU pip
+    - pip install -qU pydocstyle
+  script:
+    - pydocstyle --convention=numpy fesl
+  only:
+    - master
+    - documentation
+    - fix_docstrings
+    - /^fix_docstrings_in_.*$/
 
 pages:
   stage: deploy
@@ -68,12 +81,16 @@ pages:
   - pip install -qU recommonmark
   script:
   - sphinx-apidoc -o docs/source/api fesl
-  - sphinx-build -W -b html -d docs/_build/doctrees docs/source docs/_build/html
+  - sphinx-build -b html -d docs/_build/doctrees docs/source docs/_build/html
   after_script:
   - mv docs/_build/html public
   artifacts:
     paths:
     - public
+  when:
+    always
   only:
-#  - master
+  - master
   - documentation
+  - fix_docstrings
+  - /^fix_docstrings_in_.*$/
