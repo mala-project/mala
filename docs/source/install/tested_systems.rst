@@ -13,7 +13,7 @@ Pop!_OS
 
   * python version: 3.8.6
   * Installation successful: Yes
-* LAMMPS: Yes, installed using [Setting up LAMMPS](INSTALL_LAMMPS.md)
+* LAMMPS: Yes, installed using :doc:`Setting up LAMMPS <INSTALL_LAMMPS>`
 * Quantum Espresso: [Python bindings to Quantum Espresso](INSTALL_TE_QE.md)
 
 Ubuntu
