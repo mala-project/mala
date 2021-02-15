@@ -69,7 +69,7 @@ Follow the steps below to set up the necessary environment.
 desired version in `environment.yaml`:
    ```yaml
        dependencies:
-      - python>=3.8.5
+      - python>=yourversionhere
    ``` 
 2. Create an environment `fesl`:
    ```sh

@@ -38,7 +38,7 @@ macOS
   * Installation successful: Not tested
 * conda:
 
-  * python version: ?
+  * python version: 3.8.5
   * Installation successful: Not tested
 
 HPC clusters
