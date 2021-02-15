@@ -97,6 +97,7 @@ pages:
   before_script:
   - pip --version
   - pip cache list
+  - pip cache dir
   - pip install -qU pip
   - pip install -qU sphinx
   - pip install -qU sphinx_rtd_theme
