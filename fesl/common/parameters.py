@@ -172,7 +172,7 @@ class ParametersData(ParametersBase):
             - "feature-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
             - "feature-wise-normal": Row Min-Max scaling (Scale to be in range 0...1)
         """
-        self.use_lazy_loading = True
+        self.use_lazy_loading = False
 
 
 class ParametersTraining(ParametersBase):
