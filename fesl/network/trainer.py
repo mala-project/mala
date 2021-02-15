@@ -9,6 +9,7 @@ try:
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
+import time
 
 class Trainer:
     """A class for training a neural network."""
@@ -31,7 +32,7 @@ class Trainer:
         """Given a network and data, this network is trained on this data."""
 
         # See if we can and want to work on a GPU.
-        # self.use_gpu = torch.cuda.is_available() and self.parameters.use_gpu
+        self.use_gpu = torch.cuda.is_available() and self.parameters.use_gpu
 
         # This is a place where additional checks could be placed.
         # self.use_horovod= self.parameters.use_horovod
@@ -166,6 +167,7 @@ class Trainer:
         patience_counter = 0
         vloss_old = vloss
         for epoch in range(self.parameters.max_number_epochs):
+            start_time = time.time()
 
             # Prepare model for training.
             network.train()
@@ -208,7 +210,6 @@ class Trainer:
             if self.scheduler is not None:
                 if self.parameters.learning_rate_scheduler == "ReduceLROnPlateau":
                     self.scheduler.step(vloss)
-
             # If early stopping is used, check if we need to do something.
             if self.parameters.early_stopping_epochs > 0:
                 if vloss < vloss_old * (1.0 + self.parameters.early_stopping_threshold):
@@ -222,6 +223,7 @@ class Trainer:
                             printout("Stopping the training, validation accuracy has not improved for", patience_counter,
                                   "epochs.")
                         break
+            printout("Time for epoch[s]:", time.time() - start_time)
 
         # Calculate final loss.
         tloss = None
