@@ -4,6 +4,16 @@ This document details the manual installation of the FESL package.
 
 ## Prerequisites
 
+### Python version
+
+FESL itself is not bound to a certain python version, as long as the package requirements for FESL can be met by the 
+version of your choice. FESL has been successfully tested for python 3.8.5. 
+If you intend to use the optional Quantum Espresso total energy module or LAMMPS and install these software packages
+yourself the necessary python bindings will be created for your python version. If you operate on a machine that 
+provides pre-installed versions of these packages (e.g. on an HPC cluster), you need to adhere to the python version 
+for which these python bindings have been created. A list of machines on which FESL was tested can be found in
+[Successfully tested on](tested_systems.rst).
+
 ### Python packages
 
 In order to run FESL you have to have the following packages installed:
@@ -54,21 +64,26 @@ For other ways to install PyTorch you might also refer to <https://pytorch.org/>
 
 Alternatively to pip, you can install the required packages within a
 [conda](https://docs.conda.io/en/latest/miniconda.html) environment.
-
-Follow these steps to set up the necessary environment.
-1. Create an environment `fesl`:
+Follow the steps below to set up the necessary environment.
+1. (optional) If needed, specify the python version you want to use in this environment by replacing `3.6` with your 
+desired version in `environment.yaml`:
+   ```yaml
+       dependencies:
+      - python>=yourversionhere
+   ``` 
+2. Create an environment `fesl`:
    ```sh
    $ conda env create -f environment.yaml
    ```
-2. Activate the new environment:
+3. Activate the new environment:
    ```sh
    $ conda activate fesl
    ```
-3. You can deactivate the environment with:
+4. You can deactivate the environment with:
     ```sh
     $ conda deactivate
     ```
-4. You can update your conda environment by making changes to environment.yaml:
+5. You can update your conda environment by making changes to environment.yaml:
     ```sh
     $ conda env update --name fesl  --file environment.yaml
     ```
