@@ -43,8 +43,9 @@ def run_example09(accuracy = 50):
     # The LDOS calculator can accept preprocessed data.
     total_energy = ldos_calculator.get_total_energy(dos_data=dos_data, density_data=dens_data, fermi_energy_eV=fermi_energy_sc)
     printout("FESL total energy: ", total_energy, " eV")
-    printout("QE total energy: -2435.503721357 eV")
-    if np.abs(total_energy + 2435.503721357) > accuracy:
+    printout("QE total energy: ", ldos_calculator.total_energy_dft_calculation, "eV")
+    if np.abs(total_energy - ldos_calculator.total_energy_dft_calculation) > accuracy:
+        print(np.abs(total_energy - ldos_calculator.total_energy_dft_calculation))
         return False
     printout("Parameters used for this experiment:")
     test_parameters.show()
