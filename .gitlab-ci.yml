@@ -84,7 +84,6 @@ test-workflow:
 
 test-docstrings:
   stage: test
-  image: python:3.7-alpine
   before_script:
     - pip --version
     - pip cache list
