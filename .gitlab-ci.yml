@@ -37,10 +37,12 @@ setup-fesl:
   before_script:
     - pip cache list
     - pip cache dir
+    - pwd
     - *module_setup
+    - pwd
     - pip cache list
   script:
-    - python3 examples/ex00_verify_installation.py
+    - python examples/ex00_verify_installation.py
 #  after_script:
   only:
     - master
