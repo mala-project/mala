@@ -37,6 +37,11 @@ import big_data
 # Training settings
 parser = argparse.ArgumentParser(description='FP-LDOS Feedforward Network')
 
+
+### Model ID
+parser.add_argument('--id', default=0, metavar='I', help='hyperparameter being optimized')
+parser.add_argument('--temp_val', default=0, metavar='V', help='value of hyperparameter being optimized')
+
 ### Training
 parser.add_argument('--feat_start', type=int, default=0, metavar='N',
                     help='starting index for ldos features to use')
@@ -162,7 +167,7 @@ parser.add_argument('--big-clustered-data', action='store_true', default=False,
 
 parser.add_argument('--material', type=str, default="Al", metavar='MAT',
                     help='material of snapshots to train on (default: "Al")')
-parser.add_argument('--temp', type=str, default="298K", metavar='T',
+parser.add_argument('--temp', default="298K", metavar='T',
                     help='temperature of snapshots to train on (default: "298K")')
 parser.add_argument('--gcc', type=str, default="2.699", metavar='GCC',
                     help='density of snapshots to train on (default: "2.699")')
@@ -274,7 +279,7 @@ if (hvd.rank() == 0 and not args.cuda):
 torch.set_num_threads(args.num_threads)
 
 # Create output directories if they do not exist
-args.model_dir = args.output_dir + "/fp_ldos_dir_" + args.timestamp
+args.model_dir = args.output_dir + "/fp_ldos_dir_" + args.temp_val + "_" + args.id # + "_" + args.id_val# args.timestamp
 
 args.tb_output_dir = args.model_dir + "/tb_" + args.dataset + "_" + \
         "fp_ldos_" + str(args.nxyz) + "nxyz_" + \

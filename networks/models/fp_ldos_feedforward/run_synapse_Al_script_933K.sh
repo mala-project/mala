@@ -33,58 +33,58 @@ DS=fp_ldos
 
 ###############################################################################
 ###### PAPER -- Al 298K Optimized Case
-MAT=Al
-TMP=298K
-GC=2.699
-NXYZ=200
-FPL=94
+#MAT=Al
+#TMP=298K
+#GC=2.699
+#NXYZ=200
+#FPL=94
 #LDOSL=250 #250
 
 # Train - 1 snapshot, Valid - 1, Test - 1 
-SSHOT=3
+#SSHOT=3
 # Snapshot offset, train = 0th, validation = 1st, test = 2nd
-SNPOFF=0
+#SNPOFF=0
 
 # *** Train Batch Size
 #BATS="100 250 500 1000 2000"
-BS=1000
+#BS=1000
 
 # Valid/Test Batch Size
-TBS=4000
+#TBS=4000
 
 # *** Learning Rate
-LR=.00001
+#LR=.00001
 #LRS=".000001 .00001 .0001 .001 .01"
 
 ## Network Parameters
 
 # *** Layer Width
-WID=400 # 800
+#WID=400 #1000 # 800
 #WIDS="100 200 400 800 1000"
 
 # *** Number of Mid Layers
-MIDLYS=1
+#MIDLYS=1
 #MIDLYSS="1 2 4 8 16"
 # *** Last Layer Scaling (e.g if LIL=2 and output_layer=250, then previous_layer=500)
 #LIL=1
-LILS="1 2 3 4 5"
+#LILS="1 2 3 4 5"
 
 ###############################################################################
 ###### PAPER -- Al 933K Optimized Case (Hybrid/Liquid/Solid)
-#MAT=Al
-#TMP=933K
-#GC=2.699
-#NXYZ=200
-#FPL=94
-#LDOSL=250
+MAT=Al
+TMP=933K
+GC=2.699
+NXYZ=200
+FPL=94
+LDOSL=250
 
 ## Train - 8 snapshots, Valid - 1, Test - 1 
-#SSHOT=10
+SSHOT=10
 
 ### Snapshot offset
 
 ## Hybrid Model (6,7,8,9 Liquid / 10,11,12,13 Solid) Training, (14 Solid) Validation, (15 Solid) Test
-#SNPOFF=6
+SNPOFF=6
 
 ## Liquid Model (0-7 Liquid) Training, (8) Validation, (9) Test
 #SNPOFF=0
@@ -95,22 +95,23 @@ LILS="1 2 3 4 5"
 
 ## Train Batch Size
 #BS=1000
+BATS="1000 2000 4000 8000"
 ## Valid/Test Batch Size
-#TBS=4000
+TBS=4000
 
 ## Learning Rate
-#LR=.00005
+LR=.00005
 
 ### Network Parameters
 
 ## Layer Width
-#WID=4000
-
+WID=4000
+#WIDS="400 800 1200 2000 4000"
 ## Number of Mid Layers
-#MIDLYS=2
+MIDLYS=2
 
 ## Last Layer Scaling (e.g if LIL=2 and output_layer=250, then previous_layer=500)
-#LIL=1
+LIL=1
 
 
 
@@ -188,20 +189,22 @@ fi
 ## Big Clustered Data Case (Accelerating many training snapshots, hyperparameter optimization)
 #   --big-clustered-data \
 
-#for BS in $BATS
+for BS in $BATS
 #for LR in $LRS
 #for WID in $WIDS
 #for MIDLYS in $MIDLYSS
-for LIL in $LILS
+#for LIL in $LILS
 do
-#    ID=BS_${BS}
+    ID=BS_${BS}
 #    ID=LR_${LR}
 #    ID=WID_${WID}
 #    ID=MIDLYS_${MIDLYS}
-    ID=LIL_${LIL}
+#    ID=LIL_${LIL}
     ${EXE} -np ${GPUS} ${PYT} ${DRVR} \
         --feat_start ${FTST} \
 	--feat_stop ${FTSP} \
+	--id ${ID} \
+	--temp_val ${TMP} \
 	--dataset ${DS} \
         --epochs ${EPCS} \
         --big-charm-data \
