@@ -359,7 +359,7 @@ class Parameters:
                 return
         if save_format == "pickle":
             with open(filename, 'wb') as handle:
-                pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(self, handle, protocol=4)
         else:
             raise Exception("Unsupported parameter save format.")
 
