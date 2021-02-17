@@ -90,6 +90,8 @@ class Network(nn.Module):
     def calculate_loss(self, output, target):
         return self.loss_func(output, target)
 
+    # FIXME: This guarentees downwards compatibility, but it is ugly.
+    #  Rather enforce the right package versions in the repo.
     def save_network(self, path_to_file):
         """
         Saves the network. This function serves as an interfaces to pytorchs own saving functionalities
@@ -99,7 +101,7 @@ class Network(nn.Module):
         if self.use_horovod:
             if hvd.rank() != 0:
                 return
-        torch.save(self.state_dict(), path_to_file)
+        torch.save(self.state_dict(), path_to_file, _use_new_zipfile_serialization=False)
 
     @classmethod
     def load_from_file(cls, params, path_to_file):
