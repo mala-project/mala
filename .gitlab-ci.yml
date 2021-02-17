@@ -37,6 +37,7 @@ setup-fesl:
   before_script:
     - pip cache list
     - pip cache dir
+    - pip --version
     - pwd
     - *module_setup
     - pwd
