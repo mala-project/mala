@@ -1,10 +1,12 @@
+default:
+  image: registry.hzdr.de/multiscale-wdm/surrogate-models/fesl/fesl
+
 stages:
   - build
   - test
   - deploy
 
 .module_setup: &module_setup
-    - apt-get install -q -y gcc g++ python3-dev libz-dev swig git-lfs && apt-get clean
     - cd ../
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data  fesl_data_repo
     - cd fesl_data_repo
@@ -12,85 +14,19 @@ stages:
     - bash ../fesl/install/data_repo_link/link_data_repo.sh `pwd`
     - cd ../
     - cd fesl
-    - pip install -r requirements.txt
+    - conda env create -f install/fesl_cpu_environment.yml
+    - conda activate fesl-cpu
     - pip install -e .
-    - pip install torch==1.7.1+cpu torchvision==0.8.2+cpu torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
 
 setup-fesl:
   stage: build
-  image: continuumio/anaconda3:latest
   before_script:
     - *module_setup
   script:
-    - python3 examples/ex00_verify_installation.py
+    - python examples/ex00_verify_installation.py
 #  after_script:
   only:
     - master
-    - speedup-CI
+    - conda-CI
     - pipelinetest
 
-test-basic-functions:
-  stage: test
-  image: continuumio/anaconda3:latest
-  script:
-    - *module_setup
-    - cd test
-    - python3 fesl_tests.py
-    - cd ..
-  needs: [setup-fesl]
-  only:
-    - master
-    - speedup-CI
-#    - pipelinetest
-
-test-workflow:
-  stage: test
-  image: continuumio/anaconda3:latest
-  script:
-    - *module_setup
-    - cd examples
-    - python3 ex99_verify_all_examples.py
-    - cd ..
-  needs: [setup-fesl]
-  only:
-    - master
-    - speedup-CI
-#    - pipelinetest
-
-test-docstrings:
-  stage: test
-  image: python:3.7-alpine
-  before_script:
-    - pip install -qU pip
-    - pip install -qU pydocstyle
-  script:
-    - pydocstyle --convention=numpy fesl
-  only:
-    - master
-    - documentation
-    - fix_docstrings
-    - /^fix_docstrings_in_.*$/
-
-pages:
-  stage: deploy
-  image: python:3.7-alpine
-  before_script:
-  - pip install -qU pip
-  - pip install -qU sphinx
-  - pip install -qU sphinx_rtd_theme
-  - pip install -qU recommonmark
-  script:
-  - sphinx-apidoc -o docs/source/api fesl
-  - sphinx-build -b html -d docs/_build/doctrees docs/source docs/_build/html
-  after_script:
-  - mv docs/_build/html public
-  artifacts:
-    paths:
-    - public
-  when:
-    always
-  only:
-  - master
-  - documentation
-  - fix_docstrings
-  - /^fix_docstrings_in_.*$/
