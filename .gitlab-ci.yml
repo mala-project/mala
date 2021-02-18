@@ -15,7 +15,7 @@ stages:
     - cd ../
     - cd fesl
     - conda env create -f install/fesl_cpu_environment.yml
-    - conda activate fesl-cpu
+    - source activate fesl-cpu
     - pip install -e .
 
 setup-fesl:
