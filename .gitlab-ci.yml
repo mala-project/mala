@@ -11,7 +11,6 @@ cache:
   paths:
     - conda/pkgs
     - .cache/pip
-  key: ${CI_JOB_STAGE}
 
 stages:
   - build
@@ -27,6 +26,9 @@ stages:
     - cd ../
     - cd fesl
     - conda env create -f install/fesl_cpu_environment.yml
+    - du -sh conda/pkgs
+    - conda clean --tarballs --yes
+    - du -sh conda/pkgs
     - source activate fesl-cpu
     - pip install -q -e .
 
