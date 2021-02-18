@@ -28,7 +28,11 @@ stages:
     - cd fesl
     - conda env create -f install/fesl_cpu_environment.yml
     - source activate fesl-cpu
-    - pip install -e .
+    - pip install -q -e .
+    - ls conda/pkgs
+    - ls .cache/pip
+    - conda info
+
 
 setup-fesl:
   stage: build
