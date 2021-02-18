@@ -7,25 +7,32 @@ variables:
   CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/conda/pkgs"
   PIP_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/pip"
 
+cache:
+  paths:
+    - conda/pkgs
+    - .cache/pip
+  policy: pull
+
 stages:
   - setup
   - test
   - deploy
 
 .module_setup: &module_setup
-    - cd ../
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data  fesl_data_repo
-    - cd fesl_data_repo
-    - git lfs install
-    - bash ../fesl/install/data_repo_link/link_data_repo.sh `pwd`
-    - cd ../
-    - cd fesl
-    - conda env create -f install/fesl_cpu_environment.yml
-    - du -sh conda/pkgs
-    - conda clean --tarballs --yes
-    - du -sh conda/pkgs
-    - source activate fesl-cpu
-    - pip install -q -e .
+  - conda env create -f install/fesl_cpu_environment.yml
+  - du -sh conda/pkgs
+  - conda clean --tarballs --yes
+  - du -sh conda/pkgs
+  - source activate fesl-cpu
+  - pip install -q -e .
+
+.data_setup: &data_setup
+  - cd ..
+  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data  fesl_data_repo
+  - cd fesl_data_repo
+  - git lfs install
+  - bash ../fesl/install/data_repo_link/link_data_repo.sh `pwd`
+  - cd ../fesl
 
 setup-fesl:
   stage: setup
@@ -33,8 +40,10 @@ setup-fesl:
     paths:
       - conda/pkgs
       - .cache/pip
+    policy: pull-push
   before_script:
     - *module_setup
+    - *data_setup
   script:
     - python examples/ex00_verify_installation.py
   only:
@@ -44,13 +53,12 @@ setup-fesl:
 
 test-basic-functions:
   stage: test
-  cache:
-    policy: pull
-  script:
+  before_script:
     - *module_setup
+    - *data_setup
+  script:
     - cd test
     - python fesl_tests.py
-    - cd ..
   needs: [setup-fesl]
   only:
     - master
