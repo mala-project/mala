@@ -4,12 +4,12 @@ default:
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
 variables:
-  #CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/conda/pkgs"
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/conda/pkgs"
+  PIP_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/pip"
 
 cache:
   paths:
-    #- conda/pkgs
+    - conda/pkgs
     - .cache/pip
   key: ${CI_JOB_STAGE}
 
@@ -19,9 +19,6 @@ stages:
   - deploy
 
 .module_setup: &module_setup
-    - ls -lah
-    #- du -sh conda/pkgs
-    #- du -sh .cache/pip
     - cd ../
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data  fesl_data_repo
     - cd fesl_data_repo
@@ -32,7 +29,6 @@ stages:
     - conda env create -f install/fesl_cpu_environment.yml
     - source activate fesl-cpu
     - pip install -q -e .
-    - conda clean -a
 
 
 setup-fesl:
@@ -41,7 +37,13 @@ setup-fesl:
     - *module_setup
   script:
     - python examples/ex00_verify_installation.py
-#  after_script:
+  after_script:
+      # Remove all untarred directories.
+  #  - pwd
+  #  - ls -lah
+  #  - du -sh conda/pkgs
+  #  - find conda/pkgs/ -mindepth 1 -maxdepth 1 -type d -exec rm -r {} \;
+  #  - du -sh conda/pkgs
   only:
     - master
     - conda-CI
