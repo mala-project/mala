@@ -13,7 +13,7 @@ cache:
     - .cache/pip
 
 stages:
-  - build
+  - setup
   - test
   - deploy
 
@@ -33,7 +33,7 @@ stages:
     - pip install -q -e .
 
 setup-fesl:
-  stage: build
+  stage: setup
   before_script:
     - *module_setup
   script:
