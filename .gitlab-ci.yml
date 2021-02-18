@@ -7,11 +7,6 @@ variables:
   CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/conda/pkgs"
   PIP_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/pip"
 
-cache:
-  paths:
-    - conda/pkgs
-    - .cache/pip
-
 stages:
   - setup
   - test
@@ -34,6 +29,10 @@ stages:
 
 setup-fesl:
   stage: setup
+  cache:
+    paths:
+      - conda/pkgs
+      - .cache/pip
   before_script:
     - *module_setup
   script:
