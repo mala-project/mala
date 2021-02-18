@@ -32,21 +32,29 @@ stages:
     - source activate fesl-cpu
     - pip install -q -e .
 
-
 setup-fesl:
   stage: build
   before_script:
     - *module_setup
   script:
     - python examples/ex00_verify_installation.py
-  after_script:
-      # Remove all untarred directories.
-  #  - pwd
-  #  - ls -lah
-  #  - du -sh conda/pkgs
-  #  - find conda/pkgs/ -mindepth 1 -maxdepth 1 -type d -exec rm -r {} \;
-  #  - du -sh conda/pkgs
   only:
     - master
     - conda-CI
     - pipelinetest
+
+test-basic-functions:
+  stage: test
+  cache:
+    policy: pull
+  script:
+    - *module_setup
+    - cd test
+    - python fesl_tests.py
+    - cd ..
+  needs: [setup-fesl]
+  only:
+    - master
+    - speedup-CI
+    - conda-CI
+#    - pipelinetest
