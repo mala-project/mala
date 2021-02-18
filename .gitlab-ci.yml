@@ -1,6 +1,18 @@
 default:
   image: registry.hzdr.de/multiscale-wdm/surrogate-models/fesl/fesl
 
+# Change pip's cache directory to be inside the project directory since we can
+# only cache local items.
+variables:
+  CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/conda/pkgs"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - conda/pkgs
+    - .cache/pip
+  key: ${CI_JOB_STAGE}
+
 stages:
   - build
   - test
@@ -29,4 +41,3 @@ setup-fesl:
     - master
     - conda-CI
     - pipelinetest
-
