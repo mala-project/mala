@@ -95,7 +95,7 @@ class DataHandler:
 
 
     def add_snapshot(self, input_npy_file, input_npy_directory, output_npy_file=None, output_npy_directory=None,
-                     input_units="None", output_units="1/eV"):
+                     input_units="None", output_units="1/eV", calculation_output_file=""):
         """
         Adds a snapshot to data handler.
 
@@ -113,12 +113,15 @@ class DataHandler:
             Units of input data. See descriptor classes to see which units are supported.
         output_units : string
             Units of output data. See target classes to see which units are supported.
+        calculation_output_file : string
+            File with the output of the original snapshot calculation. This is only needed when testing multiple
+            snapshots.
         Returns
         -------
 
         """
         snapshot = Snapshot(input_npy_file, input_npy_directory, input_units, output_npy_file, output_npy_directory,
-                                       output_units)
+                                       output_units, calculation_output_file)
         self.parameters.snapshot_directories_list.append(snapshot)
 
 
@@ -248,6 +251,9 @@ class DataHandler:
             np.save(directory+tmp_file_name+".npy", tmp_array)
             i += 1
 
+
+    def get_snapshot_calculation_output(self, snapshot_number):
+        return self.parameters.snapshot_directories_list[snapshot_number].calculation_output
 
     def __check_snapshots(self):
         """
