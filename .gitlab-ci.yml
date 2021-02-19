@@ -1,8 +1,8 @@
 default:
   image: registry.hzdr.de/multiscale-wdm/surrogate-models/fesl/fesl
 
-# Change pip's cache directory to be inside the project directory since we can
-# only cache local items.
+# Change pip's cache and conda's package directories to be inside the project
+# directory since we can only cache local items.
 variables:
   CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/conda/pkgs"
   PIP_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/pip"
@@ -18,11 +18,9 @@ stages:
   - test
   - deploy
 
-.module_setup: &module_setup
-  - conda env create -f install/fesl_cpu_environment.yml
-  - du -sh conda/pkgs
+.env_setup: &env_setup
+  - conda env create -q -f install/fesl_cpu_environment.yml
   - conda clean --tarballs --yes
-  - du -sh conda/pkgs
   - source activate fesl-cpu
   - pip install -q -e .
 
@@ -42,7 +40,7 @@ setup-fesl:
       - .cache/pip
     policy: pull-push
   before_script:
-    - *module_setup
+    - *env_setup
     - *data_setup
   script:
     - python examples/ex00_verify_installation.py
@@ -54,7 +52,7 @@ setup-fesl:
 test-basic-functions:
   stage: test
   before_script:
-    - *module_setup
+    - *env_setup
     - *data_setup
   script:
     - cd test
