@@ -88,7 +88,8 @@ class Network(nn.Module):
         So far it is mostly an interface to pytorch, but maybe at a later date it will be more.
         """
         self.eval()
-        return self(array)
+        with torch.no_grad():
+            return self(array)
 
     def calculate_loss(self, output, target):
         return self.loss_func(output, target)

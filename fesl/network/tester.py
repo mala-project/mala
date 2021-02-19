@@ -3,7 +3,6 @@ import torch
 from torch import optim
 from torch.utils.data import DataLoader
 from fesl.common.parameters import printout
-from .runner import Runner
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -11,7 +10,7 @@ except ModuleNotFoundError:
     pass
 import time
 
-class Trainer(Runner):
+class Tester:
     """A class for training a neural network."""
 
     def __init__(self, p):
@@ -28,6 +27,8 @@ class Trainer(Runner):
         self.initial_test_loss = 0
         self.final_test_loss = 0
 
+    def test_snapshot(self, snapshot_number):
+        pass
     def train_network(self, network, data):
         """Given a network and data, this network is trained on this data."""
 

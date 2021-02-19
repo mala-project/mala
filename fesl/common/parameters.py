@@ -178,11 +178,11 @@ class ParametersData(ParametersBase):
         self.use_lazy_loading = False
 
 
-class ParametersTraining(ParametersBase):
-    """Network training parameter subclass."""
+class ParametersRunning(ParametersBase):
+    """Network running parameter subclass."""
 
     def __init__(self):
-        super(ParametersTraining, self).__init__()
+        super(ParametersRunning, self).__init__()
         self.trainingtype = "SGD"
         """Training type to be used. Options at the moment:
             - SGD: Stochastic gradient descent.
@@ -322,7 +322,7 @@ class Parameters:
         self.descriptors = ParametersDescriptors()
         self.targets = ParametersTargets()
         self.data = ParametersData()
-        self.training = ParametersTraining()
+        self.training = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptinization()
         self.debug = ParametersDebug()
         self.use_horovod=False
