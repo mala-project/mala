@@ -161,7 +161,7 @@ class DataHandler:
         # than we can definitely not reparametrize the DataScalers.
         if self.nr_training_data == 0:
             reparametrize_scaler = False
-            if self.input_data_scaler.cantransform is False or self.output_data_scaler.cantransform:
+            if self.input_data_scaler.cantransform is False or self.output_data_scaler.cantransform is False:
                 raise Exception("In inference mode, the DataHandler needs parametrized DataScalers, #"
                                 "while you provided unparametrized DataScalers.")
 

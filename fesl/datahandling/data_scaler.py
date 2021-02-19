@@ -303,7 +303,6 @@ class DataScaler:
         if save_format == "pickle":
             with open(filename, 'rb') as handle:
                 loaded_scaler = pickle.load(handle)
-                loaded_scaler.cantransform = True
         else:
             raise Exception("Unsupported parameter save format.")
 
