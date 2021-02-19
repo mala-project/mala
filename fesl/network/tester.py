@@ -40,21 +40,23 @@ class Tester(Runner):
 
 
     def test_snapshot(self, snapshot_number):
-        cur_tuple = (self.data.test_data_set[snapshot_number*self.data.grid_size:(snapshot_number+1)*self.data.grid_size])
-        print(cur_tuple[0].sum(), cur_tuple[1].sum())
+        actual_outputs = self.data.output_data_scaler.inverse_transform(
+            (self.data.test_data_set[snapshot_number*self.data.grid_size:(snapshot_number+1)*self.data.grid_size])[1],
+            as_numpy = True)
         snapshot_start = snapshot_number*self.number_of_batches_per_snapshot
         snapshot_end = (snapshot_number+1)*self.number_of_batches_per_snapshot
 
         device = "cuda" if  self.use_gpu else "cpu"
-        predicted_outputs = torch.zeros(self.data.grid_size, self.data.get_input_dimension(), device=device)
+        predicted_outputs = torch.zeros(self.data.grid_size, self.data.get_output_dimension(), device=device)
 
         cur_batch = 0
         for batch_idx, (inputs, outputs) in enumerate(self.test_data_loader):
             if batch_idx >= snapshot_start and batch_idx < snapshot_end:
-                predicted_outputs[cur_batch*self.batch_size:(cur_batch+1)*self.batch_size, :] = predicted_outputs
+                predicted_outputs[cur_batch*self.batch_size:(cur_batch+1)*self.batch_size, :] = outputs
                 cur_batch += 1
-        print(predicted_outputs.sum())
-        pass
+
+        predicted_outputs = self.data.output_data_scaler.inverse_transform(predicted_outputs, as_numpy=True)
+        return actual_outputs, predicted_outputs
 
     def __check_and_adjust_batch_size(self, datasize):
         if datasize % self.batch_size != 0:
