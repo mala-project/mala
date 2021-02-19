@@ -11,16 +11,16 @@ except ModuleNotFoundError:
 import time
 
 class Tester:
-    """A class for training a neural network."""
+    """A class for testing a neural network. It enables easy inference throughout a test set."""
 
     def __init__(self, p):
         # copy the parameters into the class.
-        self.parameters = p.training
+        self.parameters = p.running
         self.final_test_loss = float("inf")
         self.optimizer = None
         self.scheduler = None
         self.network = None
-        self.batch_size=p.training.mini_batch_size
+        self.batch_size=p.running.mini_batch_size
         self.use_gpu = p.use_gpu
         self.use_horovod=p.use_horovod
         self.use_compression=False

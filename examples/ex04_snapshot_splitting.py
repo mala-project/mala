@@ -27,10 +27,10 @@ def run_example04(desired_loss_improvement_factor=1):
     test_parameters.descriptors.twojmax = 11
     test_parameters.targets.ldos_gridsize = 10
     test_parameters.network.layer_activations = ["ReLU"]
-    test_parameters.training.max_number_epochs = 20
-    test_parameters.training.mini_batch_size = 40
-    test_parameters.training.learning_rate = 0.00001
-    test_parameters.training.trainingtype = "Adam"
+    test_parameters.running.max_number_epochs = 20
+    test_parameters.running.mini_batch_size = 40
+    test_parameters.running.learning_rate = 0.00001
+    test_parameters.running.trainingtype = "Adam"
 
     ####################
     # DATA

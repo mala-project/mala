@@ -322,7 +322,7 @@ class Parameters:
         self.descriptors = ParametersDescriptors()
         self.targets = ParametersTargets()
         self.data = ParametersData()
-        self.training = ParametersRunning()
+        self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptinization()
         self.debug = ParametersDebug()
         self.use_horovod=False

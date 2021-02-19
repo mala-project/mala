@@ -27,7 +27,7 @@ class ObjectiveNoTraining(ObjectiveBase):
 
         # Load the batchesand get the jacobian.
         loader = DataLoader(self.data_handler.training_data_set,
-                            batch_size=self.params.training.mini_batch_size,
+                            batch_size=self.params.running.mini_batch_size,
                             shuffle=True)
         jac = ObjectiveNoTraining._get_batch_jacobian(net, loader, device)
 

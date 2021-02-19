@@ -95,10 +95,10 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
     test_parameters.descriptors.twojmax = 11
     test_parameters.targets.ldos_gridsize = 10
     test_parameters.network.layer_activations = ["ReLU"]
-    test_parameters.training.max_number_epochs = 400
-    test_parameters.training.mini_batch_size = 40
-    test_parameters.training.learning_rate = 0.00001
-    test_parameters.training.trainingtype = "Adam"
+    test_parameters.running.max_number_epochs = 400
+    test_parameters.running.mini_batch_size = 40
+    test_parameters.running.learning_rate = 0.00001
+    test_parameters.running.trainingtype = "Adam"
     test_parameters.targets.ldos_gridsize = 250
     test_parameters.targets.ldos_gridspacing_ev = 0.1
     test_parameters.targets.ldos_gridoffset_ev = -10
