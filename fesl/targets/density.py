@@ -10,7 +10,7 @@ try:
 except ModuleNotFoundError:
     warnings.warn("You either don't have the QuantumEspresso total_energy python module installed or it is not "
                   "configured correctly. Using a density calculator will still mostly work, but trying to "
-                  "access the total energy of a system WILL fail.", stacklevel=3)
+                  "access the total energy of a system WILL fail.", stacklevel=2)
 
 
 class Density(TargetBase):

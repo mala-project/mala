@@ -4,6 +4,7 @@ from fesl.datahandling.data_handler import DataHandler
 from fesl.datahandling.data_scaler import DataScaler
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
+from fesl.network.tester import Tester
 from fesl.targets.dos import DOS
 import matplotlib.pyplot as plt
 import numpy as np
@@ -35,22 +36,22 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
 
     # Now we can add and load a snapshot to test our new data.
     # Note that we use prepare_data_for_inference instead of the regular prepare_data function.
-    raw_inputs = np.load(data_path+"Al_debug_2k_nr2.in.npy")
-    inputs = inference_data_handler.raw_numpy_to_converted_scaled_tensor(raw_inputs, "in", None)
+    new_parameters.data.data_splitting_snapshots = ["te"]
+    inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path, "Al_debug_2k_nr2.out.npy", data_path, output_units="1/Ry")
+    inference_data_handler.prepare_data()
 
-    # Now we can make a prediction.
-    predicted_ldos = new_network.do_prediction(inputs)
+    # The Tester class is the testing analogon to the training class.
+    tester = Tester(new_parameters)
+    tester.set_data(new_network, inference_data_handler)
 
-    # Now we use the prediction to calculate the band energy and compare it to the one we would get from the outputs themselves.
-    predicted_ldos = oscaler.inverse_transform(predicted_ldos, as_numpy=True)
-    # Use the LDOS object to do postprocessing.
+    # We only have one snapshots, so we are interested in the results of the first snapshot.
+    actual_ldos, predicted_ldos = tester.test_snapshot(0)
+
+    # We will use the LDOS calculator to do some preprocessing.
     ldos_calculator = inference_data_handler.target_calculator
     ldos_calculator.read_additional_calculation_data("qe.out", data_path+"QE_Al.scf.pw.out")
 
-    # Calculate the DOS, for reference also the exact DOS.
-    raw_outputs = np.load(data_path+"Al_debug_2k_nr2.out.npy")
-    actual_ldos = ldos_calculator.convert_units(raw_outputs, "1/Ry")
-    print(predicted_ldos.sum(), actual_ldos.sum())
+    # Get and investigate the DOS.
     actual_dos = ldos_calculator.get_density_of_states(actual_ldos)
     predicted_dos = ldos_calculator.get_density_of_states(predicted_ldos)
 
