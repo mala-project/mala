@@ -43,7 +43,6 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
 
     # Now we use the prediction to calculate the band energy and compare it to the one we would get from the outputs themselves.
     predicted_ldos = oscaler.inverse_transform(predicted_ldos, as_numpy=True)
-
     # Use the LDOS object to do postprocessing.
     ldos_calculator = inference_data_handler.target_calculator
     ldos_calculator.read_additional_calculation_data("qe.out", data_path+"QE_Al.scf.pw.out")
@@ -51,6 +50,7 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
     # Calculate the DOS, for reference also the exact DOS.
     raw_outputs = np.load(data_path+"Al_debug_2k_nr2.out.npy")
     actual_ldos = ldos_calculator.convert_units(raw_outputs, "1/Ry")
+    print(predicted_ldos.sum(), actual_ldos.sum())
     actual_dos = ldos_calculator.get_density_of_states(actual_ldos)
     predicted_dos = ldos_calculator.get_density_of_states(predicted_ldos)
 

@@ -52,7 +52,9 @@ class Tester(Runner):
         cur_batch = 0
         for batch_idx, (inputs, outputs) in enumerate(self.test_data_loader):
             if batch_idx >= snapshot_start and batch_idx < snapshot_end:
-                predicted_outputs[cur_batch*self.batch_size:(cur_batch+1)*self.batch_size, :] = outputs
+                if self.use_gpu:
+                    inputs = inputs.to('cuda')
+                predicted_outputs[cur_batch*self.batch_size:(cur_batch+1)*self.batch_size, :] = self.network(inputs)
                 cur_batch += 1
 
         predicted_outputs = self.data.output_data_scaler.inverse_transform(predicted_outputs, as_numpy=True)
