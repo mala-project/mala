@@ -35,7 +35,6 @@ class Network(nn.Module):
         self.number_of_layers = len(self.params.layer_sizes) - 1
         self.layers = nn.ModuleList()
 
-        # TODO: Deconvolute this into their own classes.
         if self.params.nn_type == "feed-forward":
             self.initialize_as_feedforward()
         else:
@@ -46,6 +45,10 @@ class Network(nn.Module):
             self.loss_func = F.mse_loss
         else:
             raise Exception("Unsupported loss function.")
+
+        # Once everything is done, we can move the Network on the target device.
+        if p.use_gpu:
+            self.to('cuda')
 
     def initialize_as_feedforward(self):
         # Check if multiple types of activations were selected or only one was passed to be used in the entire network.#

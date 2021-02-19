@@ -22,7 +22,7 @@ class Trainer:
         self.scheduler = None
         self.network = None
         self.batch_size=p.training.mini_batch_size
-        self.use_gpu = False
+        self.use_gpu = p.use_gpu
         self.use_horovod=p.use_horovod
         self.use_compression=False
         self.initial_test_loss = 0
@@ -30,9 +30,6 @@ class Trainer:
 
     def train_network(self, network, data):
         """Given a network and data, this network is trained on this data."""
-
-        # See if we can and want to work on a GPU.
-        self.use_gpu = torch.cuda.is_available() and self.parameters.use_gpu
 
         # This is a place where additional checks could be placed.
         # self.use_horovod= self.parameters.use_horovod
@@ -48,8 +45,6 @@ class Trainer:
 
         # If we choose to work on a GPU, we need to move the network to this GPU.
         if self.use_gpu:
-            network.to('cuda')
-
             self.parameters.kwargs ['pin_memory']=True
 
         # Scale the learning rate according to horovod. 
