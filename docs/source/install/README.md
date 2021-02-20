@@ -6,11 +6,11 @@ This document details the manual installation of the FESL package.
 
 ### Python version
 
-FESL itself is not bound to a certain python version, as long as the package requirements for FESL can be met by the 
-version of your choice. FESL has been successfully tested for python 3.8.5. 
+FESL itself is not bound to a certain python version, as long as the package requirements for FESL can be met by the
+version of your choice. FESL has been successfully tested for python 3.8.5.
 If you intend to use the optional Quantum Espresso total energy module or LAMMPS and install these software packages
-yourself the necessary python bindings will be created for your python version. If you operate on a machine that 
-provides pre-installed versions of these packages (e.g. on an HPC cluster), you need to adhere to the python version 
+yourself the necessary python bindings will be created for your python version. If you operate on a machine that
+provides pre-installed versions of these packages (e.g. on an HPC cluster), you need to adhere to the python version
 for which these python bindings have been created. A list of machines on which FESL was tested can be found in
 [Successfully tested on](tested_systems.rst).
 
@@ -65,15 +65,16 @@ For other ways to install PyTorch you might also refer to <https://pytorch.org/>
 Alternatively to pip, you can install the required packages within a
 [conda](https://docs.conda.io/en/latest/miniconda.html) environment.
 Follow the steps below to set up the necessary environment.
-1. (optional) If needed, specify the python version you want to use in this environment by replacing `3.6` with your 
-desired version in `environment.yaml`:
-   ```yaml
-       dependencies:
-      - python>=yourversionhere
+
+1. (optional) If needed, specify the python version you want to use in this
+environment by replacing `3.6` with your desired version in `environment.yml`:
+   ```yml
+   dependencies:
+     - python>=yourversionhere
    ``` 
 2. Create an environment `fesl`:
    ```sh
-   $ conda env create -f environment.yaml
+   $ conda env create -f environment.yml
    ```
 3. Activate the new environment:
    ```sh
@@ -83,9 +84,9 @@ desired version in `environment.yaml`:
     ```sh
     $ conda deactivate
     ```
-5. You can update your conda environment by making changes to environment.yaml:
+5. You can update your conda environment by making changes to environment.yml:
     ```sh
-    $ conda env update --name fesl  --file environment.yaml
+    $ conda env update --name fesl  --file environment.yml
     ```
 ###  LAMMPS (optional)
 
@@ -136,7 +137,7 @@ $ pip install -U recommonmark
 
 ## Downloading and adding example data
 
-The examples and tests need additional data to run. The FESL team provides a data repository, that can be downloaded 
+The examples and tests need additional data to run. The FESL team provides a data repository, that can be downloaded
 from https://gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data. After downloading it, the data repository
 needs to be linked to the FESL repository by using
 ```sh
