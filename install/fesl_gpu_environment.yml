@@ -1,0 +1,4 @@
+name: fesl-gpu
+channels:
+  - defaults
+  - conda-forge
