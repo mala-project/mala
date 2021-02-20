@@ -1,8 +1,7 @@
-name: fesl
+name: fesl-cpu
 channels:
   - defaults
   - conda-forge
-  - pytorch
 dependencies:
   - python>=3.6
   - pip
@@ -10,5 +9,7 @@ dependencies:
   - scipy
   - optuna
   - ase
-  - pytorch
+  - pytorch-cpu
   - mpmath
+  - pip:
+    - oapackage
