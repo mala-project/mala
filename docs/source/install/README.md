@@ -12,7 +12,7 @@ If you intend to use the optional Quantum Espresso total energy module or LAMMPS
 yourself the necessary python bindings will be created for your python version. If you operate on a machine that
 provides pre-installed versions of these packages (e.g. on an HPC cluster), you need to adhere to the python version
 for which these python bindings have been created. A list of machines on which FESL was tested can be found in
-[Successfully tested on](tested_systems.rst).
+[Successfully tested on](tested_systems).
 
 ### Python packages
 
@@ -21,6 +21,7 @@ In order to run FESL you have to have the following packages installed:
 * torch (PyTorch)
 * numpy
 * scipy
+* oapackage
 * optuna
 * ase
 * mpmath
@@ -64,6 +65,18 @@ For other ways to install PyTorch you might also refer to <https://pytorch.org/>
 
 Alternatively to pip, you can install the required packages within a
 [conda](https://docs.conda.io/en/latest/miniconda.html) environment.
+We provide four different environment files, depending on the architecture and
+ganularity of dependencies specified (find them in the `install` folder)
+We use the explicit versions for our reproducible and tested builds. Feel free to
+start off with a basic environment file specifing only the direct dependcies (these
+files will likely install newer versions of all depencencies, but we can not
+guarantee that everything will work then).
+
+| dependency granularity: | basic                           | explicit                   |
+|-------------------------|---------------------------------|----------------------------|
+| CPU                     | `fesl_cpu_base_environment.yml` | `fesl_cpu_environment.yml` |
+| GPU                     | `fesl_gpu_base_environment.yml` | `fesl_gpu_environment.yml` |
+
 Follow the steps below to set up the necessary environment.
 
 1. (optional) If needed, specify the python version you want to use in this
@@ -71,7 +84,7 @@ environment by replacing `3.6` with your desired version in `environment.yml`:
    ```yml
    dependencies:
      - python>=yourversionhere
-   ``` 
+   ```
 2. Create an environment `fesl`:
    ```sh
    $ conda env create -f environment.yml
