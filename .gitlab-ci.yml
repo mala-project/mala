@@ -74,3 +74,73 @@ test-workflow:
   only:
     - master
     - conda-CI
+
+#### documentation
+
+setup-docs:
+  stage: setup
+  image: python:3.7
+  cache:
+    key: docs-cache
+    paths:
+      - .cache/pip
+  script:
+    - pip install -qU pip
+    - pip install -qU pydocstyle
+    - pip install -qU sphinx
+    - pip install -qU sphinx_rtd_theme
+    - pip install -qU recommonmark
+    - pip install -qU sphinx-markdown-tables
+
+test-docstrings:
+  stage: test
+  image: python:3.7
+  cache:
+    key: docs-cache
+    paths:
+      - .cache/pip
+  before_script:
+    - pip cache list
+    - pip install -qU pip
+    - pip install -qU pydocstyle
+  script:
+    - pydocstyle --convention=numpy fesl
+  needs: [setup-docs]
+  only:
+    - master
+    - conda-CI
+    - documentation
+    - fix_docstrings
+    - /^fix_docstrings_in_.*$/
+
+pages:
+  stage: deploy
+  image: python:3.7
+  cache:
+    key: docs-cache
+    paths:
+      - .cache/pip
+  before_script:
+  - pip cache list
+  - pip install -qU pip
+  - pip install -qU sphinx
+  - pip install -qU sphinx_rtd_theme
+  - pip install -qU recommonmark
+  - pip install -qU sphinx-markdown-tables
+  script:
+  - sphinx-apidoc -o docs/source/api fesl
+  - sphinx-build -b html -d docs/_build/doctrees docs/source docs/_build/html
+  after_script:
+  - mv docs/_build/html public
+  needs: [test-docstrings]
+  artifacts:
+    paths:
+    - public
+  when:
+    always
+  only:
+  - master
+  - conda-CI
+  - documentation
+  - fix_docstrings
+  - /^fix_docstrings_in_.*$/
