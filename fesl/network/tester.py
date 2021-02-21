@@ -40,25 +40,24 @@ class Tester(Runner):
 
 
     def test_snapshot(self, snapshot_number):
-        actual_outputs = self.data.output_data_scaler.inverse_transform(
-            (self.data.test_data_set[snapshot_number*self.data.grid_size:(snapshot_number+1)*self.data.grid_size])[1],
-            as_numpy = True)
-        snapshot_start = snapshot_number*self.number_of_batches_per_snapshot
-        snapshot_end = (snapshot_number+1)*self.number_of_batches_per_snapshot
+       actual_outputs = self.data.output_data_scaler.inverse_transform(
+            (
+            self.data.test_data_set[snapshot_number * self.data.grid_size:(snapshot_number + 1) * self.data.grid_size])[
+                1],
+            as_numpy=True)
 
-        device = "cuda" if  self.use_gpu else "cpu"
-        predicted_outputs = torch.zeros(self.data.grid_size, self.data.get_output_dimension(), device=device)
+       predicted_outputs = np.zeros((self.data.grid_size, self.data.get_output_dimension()))
 
-        cur_batch = 0
-        for batch_idx, (inputs, outputs) in enumerate(self.test_data_loader):
-            if batch_idx >= snapshot_start and batch_idx < snapshot_end:
-                if self.use_gpu:
-                    inputs = inputs.to('cuda')
-                predicted_outputs[cur_batch*self.batch_size:(cur_batch+1)*self.batch_size, :] = self.network(inputs)
-                cur_batch += 1
+       offset = snapshot_number * self.data.grid_size
+       for i in range(0, self.number_of_batches_per_snapshot):
+           inputs, outputs = self.data.test_data_set[offset+(i * self.batch_size):offset+((i + 1) * self.batch_size)]
+           if self.use_gpu:
+               inputs = inputs.to('cuda')
+           predicted_outputs[i * self.batch_size:(i + 1) * self.batch_size, \
+           :] = self.data.output_data_scaler.inverse_transform(self.network(inputs).to('cpu'), as_numpy=True)
 
-        predicted_outputs = self.data.output_data_scaler.inverse_transform(predicted_outputs, as_numpy=True)
-        return actual_outputs, predicted_outputs
+       return actual_outputs, predicted_outputs
+
 
     def __check_and_adjust_batch_size(self, datasize):
         if datasize % self.batch_size != 0:
