@@ -138,6 +138,7 @@ Install the prerequisites:
 $ pip install -U sphinx
 $ pip install -U sphinx_rtd_theme
 $ pip install -U recommonmark
+$ pip intsall -U sphinx-markdown-tables
 ```
 
 1. Change into `docs/source` folder.
