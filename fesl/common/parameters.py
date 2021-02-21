@@ -336,7 +336,7 @@ class Parameters:
 
     @property
     def use_gpu(self):
-        return self._use_horovod
+        return self._use_gpu
 
     @use_gpu.setter
     def use_gpu(self, value):
