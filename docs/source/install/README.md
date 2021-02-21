@@ -66,11 +66,10 @@ For other ways to install PyTorch you might also refer to <https://pytorch.org/>
 Alternatively to pip, you can install the required packages within a
 [conda](https://docs.conda.io/en/latest/miniconda.html) environment.
 We provide four different environment files, depending on the architecture and
-ganularity of dependencies specified (find them in the `install` folder)
-We use the explicit versions for our reproducible and tested builds. Feel free to
-start off with a basic environment file specifing only the direct dependcies (these
-files will likely install newer versions of all depencencies, but we can not
-guarantee that everything will work then).
+ganularity of dependencies specified (find them in the `install` folder).
+We use the explicit environment files for our reproducible and tested builds. Feel free to
+start off with a basic environment file specifing only the direct dependencies (these
+files will likely install newer versions of (sub-)dependencies and we cannot guarantee everything to work).
 
 | dependency granularity: | basic                           | explicit                   |
 |-------------------------|---------------------------------|----------------------------|
