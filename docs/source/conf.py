@@ -32,6 +32,7 @@ author = 'HZDR'
 # ones.
 extensions = [
     'recommonmark',
+    'sphinx_markdown_tables',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
@@ -78,6 +79,10 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
+
+source_parsers = {
+    '.md': 'recommonmark.parser.CommonMarkParser',
+}
 
 # The suffix of source file names.
 source_suffix = {

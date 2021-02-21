@@ -1,89 +1,138 @@
+default:
+  image: registry.hzdr.de/multiscale-wdm/surrogate-models/fesl/fesl
+
+# Change pip's cache and conda's package directories to be inside the project
+# directory since we can only cache local items.
+variables:
+  CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/conda/pkgs"
+  PIP_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/pip"
+
+cache:
+  paths:
+    - conda/pkgs
+    - .cache/pip
+  policy: pull
+
 stages:
-  - build
+  - setup
   - test
   - deploy
 
-.module_setup: &module_setup
-    - apt-get install -q -y gcc g++ python3-dev libz-dev swig git-lfs && apt-get clean
-    - cd ../
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data  fesl_data_repo
-    - cd fesl_data_repo
-    - git lfs install
-    - bash ../fesl/install/data_repo_link/link_data_repo.sh `pwd`
-    - cd ../
-    - cd fesl
-    - pip install -r requirements.txt
-    - pip install -e .
-    - pip install torch==1.7.1+cpu torchvision==0.8.2+cpu torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
+.env_setup: &env_setup
+  - conda env create -q -f install/fesl_cpu_environment.yml
+  - conda clean --tarballs --yes
+  - source activate fesl-cpu
+  - pip install -q -e .
+
+.data_setup: &data_setup
+  - cd ..
+  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data  fesl_data_repo
+  - cd fesl_data_repo
+  - git lfs install
+  - bash ../fesl/install/data_repo_link/link_data_repo.sh `pwd`
+  - cd ../fesl
 
 setup-fesl:
-  stage: build
-  image: continuumio/anaconda3:latest
+  stage: setup
+  cache:
+    paths:
+      - conda/pkgs
+      - .cache/pip
+    policy: pull-push
   before_script:
-    - *module_setup
+    - *env_setup
+    - *data_setup
   script:
-    - python3 examples/ex00_verify_installation.py
-#  after_script:
+    - python examples/ex00_verify_installation.py
   only:
     - master
-    - speedup-CI
-    - pipelinetest
+    - conda-CI
 
 test-basic-functions:
   stage: test
-  image: continuumio/anaconda3:latest
+  before_script:
+    - *env_setup
+    - *data_setup
   script:
-    - *module_setup
     - cd test
-    - python3 fesl_tests.py
-    - cd ..
+    - python fesl_tests.py
   needs: [setup-fesl]
   only:
     - master
-    - speedup-CI
-#    - pipelinetest
+    - conda-CI
 
 test-workflow:
   stage: test
-  image: continuumio/anaconda3:latest
+  before_script:
+    - *env_setup
+    - *data_setup
   script:
-    - *module_setup
     - cd examples
-    - python3 ex99_verify_all_examples.py
+    - python ex99_verify_all_examples.py
     - cd ..
   needs: [setup-fesl]
   only:
     - master
-    - speedup-CI
-#    - pipelinetest
+    - conda-CI
+
+#### documentation
+
+setup-docs:
+  stage: setup
+  image: python:3.7
+  cache:
+    key: docs-cache
+    paths:
+      - .cache/pip
+  script:
+    - pip install -qU pip
+    - pip install -qU pydocstyle
+    - pip install -qU sphinx
+    - pip install -qU sphinx_rtd_theme
+    - pip install -qU recommonmark
+    - pip install -qU sphinx-markdown-tables
 
 test-docstrings:
   stage: test
-  image: python:3.7-alpine
+  image: python:3.7
+  cache:
+    key: docs-cache
+    paths:
+      - .cache/pip
   before_script:
+    - pip cache list
     - pip install -qU pip
     - pip install -qU pydocstyle
   script:
     - pydocstyle --convention=numpy fesl
+  needs: [setup-docs]
   only:
     - master
+    - conda-CI
     - documentation
     - fix_docstrings
     - /^fix_docstrings_in_.*$/
 
 pages:
   stage: deploy
-  image: python:3.7-alpine
+  image: python:3.7
+  cache:
+    key: docs-cache
+    paths:
+      - .cache/pip
   before_script:
+  - pip cache list
   - pip install -qU pip
   - pip install -qU sphinx
   - pip install -qU sphinx_rtd_theme
   - pip install -qU recommonmark
+  - pip install -qU sphinx-markdown-tables
   script:
   - sphinx-apidoc -o docs/source/api fesl
   - sphinx-build -b html -d docs/_build/doctrees docs/source docs/_build/html
   after_script:
   - mv docs/_build/html public
+  needs: [test-docstrings]
   artifacts:
     paths:
     - public
@@ -91,6 +140,7 @@ pages:
     always
   only:
   - master
+  - conda-CI
   - documentation
   - fix_docstrings
   - /^fix_docstrings_in_.*$/
