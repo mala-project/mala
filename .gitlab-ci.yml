@@ -47,7 +47,6 @@ setup-fesl:
   only:
     - master
     - conda-CI
-    - pipelinetest
 
 test-basic-functions:
   stage: test
@@ -60,6 +59,18 @@ test-basic-functions:
   needs: [setup-fesl]
   only:
     - master
-    - speedup-CI
     - conda-CI
-#    - pipelinetest
+
+test-workflow:
+  stage: test
+  before_script:
+    - *env_setup
+    - *data_setup
+  script:
+    - cd examples
+    - python ex99_verify_all_examples.py
+    - cd ..
+  needs: [setup-fesl]
+  only:
+    - master
+    - conda-CI
