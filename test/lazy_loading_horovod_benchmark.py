@@ -5,6 +5,8 @@ from fesl.network.network import Network
 from fesl.network.trainer import Trainer
 import numpy as np
 import time
+from data_repo_path import get_data_repo_path
+data_path_Al = get_data_repo_path()+"Al256_reduced/"
 
 
 
@@ -108,7 +110,7 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/", accuracy=0.000
     return True
 
 if __name__ == "__main__":
-    test1 = lazy_loading_horovod_benchmark()
+    test1 = lazy_loading_horovod_benchmark(data_path=data_path_Al)
     printout("Benchmark of lazy loading, horovod and ? - success?:", test1)
 
 

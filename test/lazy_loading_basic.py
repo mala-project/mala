@@ -7,6 +7,8 @@ import numpy as np
 # This test compares the data scaling using the regular scaling procedure and the lazy-loading one (incremental fitting).
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
+from data_repo_path import get_data_repo_path
+data_path_Al = get_data_repo_path()+"Al256_reduced/"
 
 
 def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
@@ -126,7 +128,7 @@ def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
     return True
 
 if __name__ == "__main__":
-    test1 = test_lazy_loading_basic()
+    test1 = test_lazy_loading_basic(data_path=data_path_Al)
     printout("Check if lazy loading and RAM implementation get the same results? - success?:", test1)
 
 

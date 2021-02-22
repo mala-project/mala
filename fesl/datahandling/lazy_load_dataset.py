@@ -58,6 +58,15 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)
         self.use_horovod = use_horovod
+        self.return_outputs_directly = False
+
+    @property
+    def return_outputs_directly(self):
+        return self._return_outputs_directly
+
+    @return_outputs_directly.setter
+    def return_outputs_directly(self, value):
+        self._return_outputs_directly = value
 
     def add_snapshot_to_dataset(self, snapshot: Snapshot):
         """
@@ -112,13 +121,15 @@ class LazyLoadDataset(torch.utils.data.Dataset):
 
         self.output_data = self.output_data.reshape([self.grid_size, self.output_dimension])
         self.output_data *= self.target_calculator.convert_units(1, self.snapshot_list[file_index].output_units)
-        self.output_data = np.array(self.output_data)
-        self.output_data = self.output_data.astype(np.float32)
-        self.output_data = torch.from_numpy(self.output_data).float()
-        self.output_data = self.output_data_scaler.transform(self.output_data)
+        if self.return_outputs_directly is False:
+            self.output_data = np.array(self.output_data)
+            self.output_data = self.output_data.astype(np.float32)
+            self.output_data = torch.from_numpy(self.output_data).float()
+            self.output_data = self.output_data_scaler.transform(self.output_data)
 
         # Save which data we have currently loaded.
         self.currently_loaded_file = file_index
+
 
     def __getitem__(self, idx):
         """

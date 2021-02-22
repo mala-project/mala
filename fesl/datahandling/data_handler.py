@@ -255,6 +255,10 @@ class DataHandler:
     def get_snapshot_calculation_output(self, snapshot_number):
         return self.parameters.snapshot_directories_list[snapshot_number].calculation_output
 
+    def prepare_for_testing(self):
+        if self.parameters.use_lazy_loading:
+            self.test_data_set.return_outputs_directly = True
+
     def __check_snapshots(self):
         """
         Checks the snapshots for consistency. If inconsistencies are found, an exception is thrown.

@@ -40,23 +40,27 @@ class Tester(Runner):
 
 
     def test_snapshot(self, snapshot_number):
-       actual_outputs = self.data.output_data_scaler.inverse_transform(
-            (
-            self.data.test_data_set[snapshot_number * self.data.grid_size:(snapshot_number + 1) * self.data.grid_size])[
-                1],
-            as_numpy=True)
+        self.data.prepare_for_testing()
+        if self.data.parameters.use_lazy_loading:
+            actual_outputs = (self.data.test_data_set[snapshot_number * self.data.grid_size:(snapshot_number + 1) * self.data.grid_size])[1]
+        else:
+            actual_outputs = self.data.output_data_scaler.inverse_transform(
+                (
+                self.data.test_data_set[snapshot_number * self.data.grid_size:(snapshot_number + 1) * self.data.grid_size])[
+                    1],
+                as_numpy=True)
 
-       predicted_outputs = np.zeros((self.data.grid_size, self.data.get_output_dimension()))
+        predicted_outputs = np.zeros((self.data.grid_size, self.data.get_output_dimension()))
 
-       offset = snapshot_number * self.data.grid_size
-       for i in range(0, self.number_of_batches_per_snapshot):
-           inputs, outputs = self.data.test_data_set[offset+(i * self.batch_size):offset+((i + 1) * self.batch_size)]
-           if self.use_gpu:
-               inputs = inputs.to('cuda')
-           predicted_outputs[i * self.batch_size:(i + 1) * self.batch_size, \
-           :] = self.data.output_data_scaler.inverse_transform(self.network(inputs).to('cpu'), as_numpy=True)
+        offset = snapshot_number * self.data.grid_size
+        for i in range(0, self.number_of_batches_per_snapshot):
+            inputs, outputs = self.data.test_data_set[offset+(i * self.batch_size):offset+((i + 1) * self.batch_size)]
+            if self.use_gpu:
+                inputs = inputs.to('cuda')
+            predicted_outputs[i * self.batch_size:(i + 1) * self.batch_size, \
+                :] = self.data.output_data_scaler.inverse_transform(self.network(inputs).to('cpu'), as_numpy=True)
 
-       return actual_outputs, predicted_outputs
+        return actual_outputs, predicted_outputs
 
 
     def __check_and_adjust_batch_size(self, datasize):

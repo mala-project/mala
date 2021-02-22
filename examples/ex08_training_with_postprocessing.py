@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al256_reduced/"
+param_path = get_data_repo_path()+"example08_data/"
 """
 ex08_training_with_postprocessing.py: Uses FESL to first train a network, use this network to predict the LDOS and then
 analyze the results of this prediction. This example is structured a little bit different than other examples. 
@@ -26,6 +27,11 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
 
     # First we load Parameters and network.
     new_parameters = Parameters.load_from_file(params_path, no_snapshots=True)
+
+    # Inference should ALWAYS be done with lazy loading activated, even if training was not.
+    new_parameters.data.use_lazy_loading = True
+
+    # Now we can build the network.
     new_network = Network.load_from_file(new_parameters, network_path)
 
     # We use a data handler object to read the data we want to investigate.
@@ -162,10 +168,17 @@ def run_example08(dotraining, doinference, doplots=True):
     printout("Running ex08_training_with_postprocessing.py")
 
     # Choose the paths where the network and the parameters for it should be saved.
-    params_path = "./data/ex08_params.pkl"
-    network_path = "./data/ex08_network.pth"
-    input_scaler_path = "./data/ex08_iscaler.pkl"
-    output_scaler_path = "./data/ex08_oscaler.pkl"
+    if dotraining is False:
+        params_path = param_path+"ex08_params.pkl"
+        network_path = param_path+"ex08_network.pth"
+        input_scaler_path = param_path+"ex08_iscaler.pkl"
+        output_scaler_path = param_path+"ex08_oscaler.pkl"
+    else:
+        params_path = "./ex08_params.pkl"
+        network_path = "./ex08_network.pth"
+        input_scaler_path = "./ex08_iscaler.pkl"
+        output_scaler_path = "./ex08_oscaler.pkl"
+
 
     training_return = True
     inference_return = True
