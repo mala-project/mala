@@ -120,7 +120,7 @@ class DataConverter:
             printout("Calculating descriptors for ", snapshot[0], "at ",
                      snapshot[1])
             tmp_output = self.descriptor_calculator.\
-                calculate_snap(snapshot[1]+snapshot[0], snapshot[1])
+                calculate_from_qe_out(snapshot[1]+snapshot[0], snapshot[1])
 
             snapshot_name = naming_scheme
             snapshot_name = snapshot_name.replace("*", str(i))
