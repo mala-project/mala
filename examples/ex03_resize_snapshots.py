@@ -36,8 +36,9 @@ def run_example03(accuracy=10**-10):
                               data_path+"Al256/",
                               "Al_ldos_200x200x200grid_250elvls_snapshot0.npy",
                               data_path+"Al256/",output_units="1/Ry")
-    data_handler.resize_snapshots_for_debugging(directory="./data/", filetype="*.npy",
-                                  naming_scheme_input="test_Al_debug_2k_nr*.in", naming_scheme_output="test_Al_debug_2k_nr*.out")
+    data_handler.resize_snapshots_for_debugging(directory="./data/",
+                                                naming_scheme_input="test_Al_debug_2k_nr*.in",
+                                                naming_scheme_output="test_Al_debug_2k_nr*.out")
     printout("Write data: DONE.")
 
     # Verify that the we got the correct results.
