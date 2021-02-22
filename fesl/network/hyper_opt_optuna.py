@@ -4,7 +4,9 @@ from .objective_base import ObjectiveBase
 
 
 class HyperOptOptuna(HyperOptBase):
-    """Perform hyperparameter optimization using optuna."""
+    """
+    Hyperparameter optimizer using Optuna.
+    """
 
     def __init__(self, p):
         super(HyperOptOptuna,self).__init__(p)

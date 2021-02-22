@@ -1,18 +1,42 @@
 from abc import abstractmethod, ABC
-
 from .hyperparameter_interface import HyperparameterInterface
 
 
 class HyperOptBase(ABC):
-    """Base class for hyperparameter optimization."""
+    """Base class for hyperparameter optimizater."""
 
     def __init__(self, params):
+        """
+        Create a hyperparameter optimizer object.
+
+        Parameters
+        ----------
+        params : fesl.common.parametes.Parameters
+            Parameters used to create this hyperparameter optimizer.
+        """
         self.params = params
 
-    def add_hyperparameter(self, opttype="float", name="", low=0, high=0, choices=[]):
-        self.params.hyperparameters.hlist.append(HyperparameterInterface(self.params.hyperparameters.hyper_opt_method,
-                                                                         opttype=opttype, name=name, low=low,
-                                                                         high=high, choices=choices))
+    def add_hyperparameter(self, opttype="float", name="", low=0, high=0,
+                           choices=[]):
+        """
+        Add a
+        Parameters
+        ----------
+        opttype
+        name
+        low
+        high
+        choices
+        """
+        self.params.\
+            hyperparameters.hlist.append(
+                HyperparameterInterface(self.params.hyperparameters.
+                                        hyper_opt_method,
+                                        opttype=opttype,
+                                        name=name,
+                                        low=low,
+                                        high=high,
+                                        choices=choices))
 
     def clear_hyperparameters(self):
         self.params.hyperparameters.hlist = []
