@@ -58,6 +58,15 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)
         self.use_horovod = use_horovod
+        self.return_outputs_directly = False
+
+    @property
+    def return_outputs_directly(self):
+        return self._return_outputs_directly
+
+    @return_outputs_directly.setter
+    def return_outputs_directly(self, value):
+        self._return_outputs_directly = value
 
     def add_snapshot_to_dataset(self, snapshot: Snapshot):
         """
@@ -112,13 +121,15 @@ class LazyLoadDataset(torch.utils.data.Dataset):
 
         self.output_data = self.output_data.reshape([self.grid_size, self.output_dimension])
         self.output_data *= self.target_calculator.convert_units(1, self.snapshot_list[file_index].output_units)
-        self.output_data = np.array(self.output_data)
-        self.output_data = self.output_data.astype(np.float32)
-        self.output_data = torch.from_numpy(self.output_data).float()
-        self.output_data = self.output_data_scaler.transform(self.output_data)
+        if self.return_outputs_directly is False:
+            self.output_data = np.array(self.output_data)
+            self.output_data = self.output_data.astype(np.float32)
+            self.output_data = torch.from_numpy(self.output_data).float()
+            self.output_data = self.output_data_scaler.transform(self.output_data)
 
         # Save which data we have currently loaded.
         self.currently_loaded_file = file_index
+
 
     def __getitem__(self, idx):
         """
@@ -133,11 +144,37 @@ class LazyLoadDataset(torch.utils.data.Dataset):
             The requested inputs and outputs
         """
         # Get item can be called with an int or a slice.
-        file_index = idx // self.grid_size
-        index_in_file = idx % self.grid_size
-        if file_index != self.currently_loaded_file:
-            self.get_new_data(file_index)
-        return self.input_data[index_in_file], self.output_data[index_in_file]
+        if isinstance(idx, int):
+            file_index = idx // self.grid_size
+            index_in_file = idx % self.grid_size
+
+            # Find out if new data is needed.
+            if file_index != self.currently_loaded_file:
+                self.get_new_data(file_index)
+            return self.input_data[index_in_file], self.output_data[index_in_file]
+
+        elif isinstance(idx, slice):
+            # If a slice is requested, we have to find out if t spans files.
+            file_index_start = idx.start // self.grid_size
+            index_in_file_start = idx.start % self.grid_size
+            file_index_stop = idx.stop // self.grid_size
+            index_in_file_stop = idx.stop % self.grid_size
+
+            # If it does, we cannot deliver.
+            # Take care though, if a full snapshot is requested, the stop index will point to the wrong file.
+            if file_index_start != file_index_stop:
+                if index_in_file_stop == 0:
+                    index_in_file_stop = self.grid_size
+                else:
+                    raise Exception("Lazy loading currently only supports slices in one file. "
+                                    "You have requested a slice over two files.")
+
+            # Find out if new data is needed.
+            file_index = file_index_start
+            if file_index != self.currently_loaded_file:
+                self.get_new_data(file_index)
+            return self.input_data[index_in_file_start:index_in_file_stop], \
+                   self.output_data[index_in_file_start:index_in_file_stop]
 
     def __len__(self):
         """

@@ -5,6 +5,8 @@ from fesl.network.network import Network
 from fesl.network.trainer import Trainer
 import numpy as np
 import time
+from data_repo_path import get_data_repo_path
+data_path_Al = get_data_repo_path()+"Al256_reduced/"
 
 
 
@@ -24,9 +26,9 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/", accuracy=0.000
     test_parameters.data.output_rescaling_type = "normal"
     test_parameters.data.data_splitting_type = "by_snapshot"
     test_parameters.network.layer_activations = ["LeakyReLU"]
-    test_parameters.training.max_number_epochs = 20
-    test_parameters.training.mini_batch_size = 500
-    test_parameters.training.trainingtype = "Adam"
+    test_parameters.running.max_number_epochs = 20
+    test_parameters.running.mini_batch_size = 500
+    test_parameters.running.trainingtype = "Adam"
     test_parameters.comment = "Horovod / lazy loading benchmark."
     test_parameters.network.nn_type = "feed-forward"
     test_parameters.network.manual_seed = 2021
@@ -38,7 +40,7 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/", accuracy=0.000
     for hvduse in [False, True]:
         for ll in [True, False]:
             start_time = time.time()
-            test_parameters.training.learning_rate = 0.00001
+            test_parameters.running.learning_rate = 0.00001
             test_parameters.data.use_lazy_loading = ll
             test_parameters.use_horovod = hvduse
             data_handler = DataHandler(test_parameters)
@@ -108,7 +110,7 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/", accuracy=0.000
     return True
 
 if __name__ == "__main__":
-    test1 = lazy_loading_horovod_benchmark()
+    test1 = lazy_loading_horovod_benchmark(data_path=data_path_Al)
     printout("Benchmark of lazy loading, horovod and ? - success?:", test1)
 
 

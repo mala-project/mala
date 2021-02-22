@@ -1,9 +1,9 @@
-import random
 import numpy as np
 import torch
 from torch import optim
 from torch.utils.data import DataLoader
 from fesl.common.parameters import printout
+from .runner import Runner
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -11,45 +11,24 @@ except ModuleNotFoundError:
     pass
 import time
 
-class Trainer:
+class Trainer(Runner):
     """A class for training a neural network."""
 
     def __init__(self, p):
         # copy the parameters into the class.
-        self.parameters = p.training
+        super(Trainer, self).__init__(p)
         self.final_test_loss = float("inf")
         self.optimizer = None
         self.scheduler = None
-        self.network = None
-        self.batch_size=p.training.mini_batch_size
-        self.use_gpu = False
-        self.use_horovod=p.use_horovod
-        self.use_compression=False
-        self.initial_test_loss = 0
-        self.final_test_loss = 0
 
     def train_network(self, network, data):
         """Given a network and data, this network is trained on this data."""
 
-        # See if we can and want to work on a GPU.
-        self.use_gpu = torch.cuda.is_available() and self.parameters.use_gpu
+        # Prepare horovod to run.
+        super(Trainer, self).prepare_to_run()
 
-        # This is a place where additional checks could be placed.
-        # self.use_horovod= self.parameters.use_horovod
-
-
-        # See if we want to use horovod.
-        if self.use_horovod:
-            if self.use_gpu:
-                printout("size=", hvd.size(), "global_rank=", hvd.rank(), "local_rank=", hvd.local_rank(), "device=",
-                      torch.cuda.get_device_name(hvd.local_rank()))
-                # pin GPU to local rank
-                torch.cuda.set_device(hvd.local_rank())
-
-        # If we choose to work on a GPU, we need to move the network to this GPU.
+        # Configure keyword arguments for DataSampler.
         if self.use_gpu:
-            network.to('cuda')
-
             self.parameters.kwargs ['pin_memory']=True
 
         # Scale the learning rate according to horovod. 
@@ -57,8 +36,6 @@ class Trainer:
             if hvd.size() > 1:
                 printout("Rescaling learning rate because multiple workers are used for training.")
                 self.parameters.learning_rate = self.parameters.learning_rate * hvd.size()
-
-                self.use_compression= self.parameters.use_compression
 
         # Choose an optimizer to use.
         if self.parameters.trainingtype == "SGD":

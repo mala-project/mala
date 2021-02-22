@@ -146,3 +146,11 @@ cython_debug/
 
 # aspell
 *.bak
+
+# data files
+*.in
+*.out
+*.npy
+/examples/data_repo_path.py
+*.pkl
+*.pth

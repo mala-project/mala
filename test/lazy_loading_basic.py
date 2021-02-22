@@ -7,6 +7,8 @@ import numpy as np
 # This test compares the data scaling using the regular scaling procedure and the lazy-loading one (incremental fitting).
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
+from data_repo_path import get_data_repo_path
+data_path_Al = get_data_repo_path()+"Al256_reduced/"
 
 
 def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
@@ -23,13 +25,13 @@ def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
     test_parameters.descriptors.twojmax = 11
     test_parameters.targets.ldos_gridsize = 10
     test_parameters.network.layer_activations = ["LeakyReLU"]
-    test_parameters.training.max_number_epochs = 3
-    test_parameters.training.mini_batch_size = 512
-    test_parameters.training.learning_rate = 0.00001
-    test_parameters.training.trainingtype = "Adam"
+    test_parameters.running.max_number_epochs = 3
+    test_parameters.running.mini_batch_size = 512
+    test_parameters.running.learning_rate = 0.00001
+    test_parameters.running.trainingtype = "Adam"
     test_parameters.comment = "Lazy loading test."
     test_parameters.network.nn_type = "feed-forward"
-    test_parameters.training.use_gpu = True
+    test_parameters.running.use_gpu = True
     test_parameters.data.use_lazy_loading = False
 
 
@@ -126,7 +128,7 @@ def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
     return True
 
 if __name__ == "__main__":
-    test1 = test_lazy_loading_basic()
+    test1 = test_lazy_loading_basic(data_path=data_path_Al)
     printout("Check if lazy loading and RAM implementation get the same results? - success?:", test1)
 
 

@@ -5,7 +5,10 @@ try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     warnings.warn("You either don't have Horovod installed or it is not configured correctly. You can still "
-              "train networks, but attempting to set parameters.training.use_horovod = True WILL cause a crash.")
+              "train networks, but attempting to set parameters.training.use_horovod = True WILL cause a crash."
+                  , stacklevel=3)
+import torch
+
 
 # Subclasses that make up the final parameters class.
 
@@ -175,11 +178,11 @@ class ParametersData(ParametersBase):
         self.use_lazy_loading = False
 
 
-class ParametersTraining(ParametersBase):
-    """Network training parameter subclass."""
+class ParametersRunning(ParametersBase):
+    """Network running parameter subclass."""
 
     def __init__(self):
-        super(ParametersTraining, self).__init__()
+        super(ParametersRunning, self).__init__()
         self.trainingtype = "SGD"
         """Training type to be used. Options at the moment:
             - SGD: Stochastic gradient descent.
@@ -233,10 +236,6 @@ class ParametersTraining(ParametersBase):
         """
         Patience parameter used in the learning rate schedule (how long the validation loss has to plateau before
         the schedule takes effect).
-        """
-        self.use_gpu = False
-        """
-        Controls whether or not a GPU is used for training - provided there is one to use. 
         """
         self.use_compression=False
         #add comment
@@ -323,10 +322,32 @@ class Parameters:
         self.descriptors = ParametersDescriptors()
         self.targets = ParametersTargets()
         self.data = ParametersData()
-        self.training = ParametersTraining()
+        self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptinization()
         self.debug = ParametersDebug()
         self.use_horovod=False
+        """
+        Controls whether or not horovod is used for parallelization of training. 
+        """
+        self.use_gpu = False
+        """
+        Controls whether or not a GPU is used for network and training - provided there is one to use. 
+        """
+
+    @property
+    def use_gpu(self):
+        return self._use_gpu
+
+    @use_gpu.setter
+    def use_gpu(self, value):
+        if value is False:
+            self._use_gpu = False
+        if value is True:
+            if torch.cuda.is_available():
+                self._use_gpu = True
+            else:
+                warnings.warn("GPU requested, but no GPU found. FESL will operate with CPU only.", stacklevel=3)
+
 
     @property
     def use_horovod(self):

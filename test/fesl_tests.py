@@ -4,6 +4,7 @@ from lazy_loading_basic import test_lazy_loading_basic
 from lazy_loading_horovod_benchmark import lazy_loading_horovod_benchmark
 from fesl.common.parameters import printout
 from data_repo_path import get_data_repo_path
+from inference_test import run_inference_test
 data_path = get_data_repo_path()+"Al256_reduced/"
 
 
@@ -75,3 +76,12 @@ try:
         printout("test_lazy_loading suceeded.")
 except:
     printout("Could not perform lazy loading horovod test, most likely because horovod was not installed.")
+
+######################
+# Inference tests.
+######################
+
+if run_inference_test():
+    printout("run_inference_test test suceeded.")
+else:
+    raise Exception("run_inference_test failed.")

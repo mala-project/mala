@@ -94,8 +94,8 @@ class DataHandler:
         """
 
 
-    def add_snapshot(self, input_npy_file, input_npy_directory, output_npy_file, output_npy_directory,
-                     input_units="None", output_units="1/eV"):
+    def add_snapshot(self, input_npy_file, input_npy_directory, output_npy_file=None, output_npy_directory=None,
+                     input_units="None", output_units="1/eV", calculation_output_file=""):
         """
         Adds a snapshot to data handler.
 
@@ -113,12 +113,15 @@ class DataHandler:
             Units of input data. See descriptor classes to see which units are supported.
         output_units : string
             Units of output data. See target classes to see which units are supported.
+        calculation_output_file : string
+            File with the output of the original snapshot calculation. This is only needed when testing multiple
+            snapshots.
         Returns
         -------
 
         """
         snapshot = Snapshot(input_npy_file, input_npy_directory, input_units, output_npy_file, output_npy_directory,
-                                       output_units)
+                                       output_units, calculation_output_file)
         self.parameters.snapshot_directories_list.append(snapshot)
 
 
@@ -156,6 +159,14 @@ class DataHandler:
         printout("Checking the snapshots and your inputs for consistency.")
         self.__check_snapshots()
         printout("Consistency check successful.")
+
+        # If the DataHandler is used for inference, i.e. no training or validation snapshots have been provided,
+        # than we can definitely not reparametrize the DataScalers.
+        if self.nr_training_data == 0:
+            reparametrize_scaler = False
+            if self.input_data_scaler.cantransform is False or self.output_data_scaler.cantransform is False:
+                raise Exception("In inference mode, the DataHandler needs parametrized DataScalers, #"
+                                "while you provided unparametrized DataScalers.")
 
         # Parametrize the scalers, if needed.
         printout("Initializing the data scalers.")
@@ -240,6 +251,13 @@ class DataHandler:
             np.save(directory+tmp_file_name+".npy", tmp_array)
             i += 1
 
+
+    def get_snapshot_calculation_output(self, snapshot_number):
+        return self.parameters.snapshot_directories_list[snapshot_number].calculation_output
+
+    def prepare_for_testing(self):
+        if self.parameters.use_lazy_loading:
+            self.test_data_set.return_outputs_directly = True
 
     def __check_snapshots(self):
         """
@@ -326,12 +344,19 @@ class DataHandler:
             if nr_of_snapshots != (self.nr_training_data + self.nr_validation_data + self.nr_test_data):
                 raise Exception("Cannot split snapshots with specified splitting scheme, "
                                 "too few or too many options selected")
-            if self.nr_training_data == 0:
+            if self.nr_training_data == 0 and self.nr_test_data == 0:
                 raise Exception("No training snapshots provided.")
-            if self.nr_validation_data == 0:
+            if self.nr_validation_data == 0 and self.nr_test_data == 0:
                 raise Exception("No validation snapshots provided.")
+            if self.nr_training_data == 0 and self.nr_test_data != 0:
+                printout("DataHandler prepared for inference. No training possible with this setup. "
+                         "If this is not what you wanted, please revise the input script.")
+                if self.nr_validation_data != 0:
+                    printout("As this DataHandler can only be used for inference, the validation data you have"
+                             "provided will be ignored.")
             if self.nr_test_data == 0:
-                printout("Running FESL without test data. If this is not what you wanted, please revise the input script.")
+                printout("Running FESL without test data. If this is not what you wanted, "
+                         "please revise the input script.")
 
         else:
             raise Exception("Wrong parameter for data splitting provided.")
@@ -607,9 +632,10 @@ class DataHandler:
             self.validation_data_outputs = torch.from_numpy(self.validation_data_outputs).float()
             self.validation_data_outputs = self.output_data_scaler.transform(self.validation_data_outputs)
 
-            self.training_data_set = TensorDataset(self.training_data_inputs, self.training_data_outputs)
-            self.validation_data_set = TensorDataset(self.validation_data_inputs, self.validation_data_outputs)
-
+            if self.nr_training_data != 0:
+                self.training_data_set = TensorDataset(self.training_data_inputs, self.training_data_outputs)
+            if self.nr_validation_data != 0:
+                self.validation_data_set = TensorDataset(self.validation_data_inputs, self.validation_data_outputs)
             if self.nr_test_data != 0:
                 self.test_data_set = TensorDataset(self.test_data_inputs, self.test_data_outputs)
 
