@@ -16,8 +16,6 @@ def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
     # PARAMETERS
     ####################
     test_parameters = Parameters()
-    test_parameters.data.datatype_in = "*.npy"
-    test_parameters.data.datatype_out = "*.npy"
     test_parameters.data.data_splitting_snapshots = ["tr", "tr", "tr", "va", "te"]
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
     test_parameters.data.output_rescaling_type = "normal"

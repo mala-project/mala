@@ -24,8 +24,6 @@ def run_example01(desired_loss_improvement_factor=1):
     # All parameters are handled from a central parameters class that contains subclasses.
     ####################
     test_parameters = Parameters()
-    test_parameters.data.datatype_in = "*.npy"
-    test_parameters.data.datatype_out = "*.npy"
     test_parameters.data.data_splitting_type = "by_snapshot"
     test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
     test_parameters.data.input_rescaling_type = "feature-wise-standard"

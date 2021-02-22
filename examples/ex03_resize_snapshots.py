@@ -18,10 +18,6 @@ def run_example03(accuracy=10**-10):
     # We only need to specify the correct input data format and the resizing grid.
     ####################
     test_parameters = Parameters()
-    test_parameters.data.datatype_in = "*.npy"
-    test_parameters.data.datatype_out = "*.npy"
-    test_parameters.data.input_memmap_mode = "r"
-    test_parameters.data.output_memmap_mode = "r"
 
     # We want to resize certain data files, so we don't want any kind of cutting operation performed.
     test_parameters.data.descriptors_contain_xyz = False

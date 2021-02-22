@@ -23,8 +23,6 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", la
     # All parameters are handled from a central parameters class that contains subclasses.
     ####################
     test_parameters = Parameters()
-    test_parameters.data.datatype_in = "*.npy"
-    test_parameters.data.datatype_out = "*.npy"
     test_parameters.data.data_splitting_percent = [80, 10, 10]
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
     test_parameters.data.output_rescaling_type = "normal"
