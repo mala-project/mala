@@ -29,7 +29,7 @@ def printout(*values, sep=' '):
 
     Parameters
     ----------
-    values : list
+    values
         Values to be printed.
 
     sep : string
