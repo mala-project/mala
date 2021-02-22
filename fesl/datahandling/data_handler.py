@@ -15,9 +15,7 @@ class DataHandler:
     """
     Loads and scales dara. Can only process numpy arrays at the moment.
 
-
-    Loads and scales dara. Can only process numpy arrays at the moment. Data
-    that is not in a numpy array can be converted using the DataConverter
+    Data that is not in a numpy array can be converted using the DataConverter
     class.
     """
 

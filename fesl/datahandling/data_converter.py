@@ -22,7 +22,8 @@ class DataConverter:
     def __init__(self, parameters, descriptor_calculator=None,
                  target_calculator=None):
         """
-        Create an instances of the DataConverter class
+        Create an instances of the DataConverter class.
+
         Parameters
         ----------
         parameters : fesl.common.parameters.Parameters
@@ -51,7 +52,7 @@ class DataConverter:
     def add_snapshot_qeout_cube(self, qe_out_file, qe_out_directory,
                                 cube_naming_scheme, cube_directory):
         """
-        Adds a Quantum Espresso snapshot to the list of conversion list.
+        Add a Quantum Espresso snapshot to the list of conversion list.
 
         Please not that a Quantum Espresso snapshot consists of:
 
@@ -82,6 +83,7 @@ class DataConverter:
         Convert the snapshots in the list to numpy arrays.
 
         These can then be used by FESL.
+
         Parameters
         ----------
         save_path : string
