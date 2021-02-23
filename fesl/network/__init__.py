@@ -2,4 +2,4 @@
 from .network import Network
 from .tester import Tester
 from .trainer import Trainer
-from .hyperparameter_interface import HyperparameterInterface
+from .hyper_opt_interface import HyperOptInterface

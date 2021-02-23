@@ -219,6 +219,7 @@ class Density(TargetBase):
                 - E_xc
                 - e_Ewald
         """
+        import total_energy as te
         if create_file:
             # If not otherwise specified, use values as read in.
             if qe_input_data is None:

@@ -1,11 +1,5 @@
-from fesl.common.parameters import Parameters
-from fesl.common.parameters import printout
-from fesl.datahandling.data_handler import DataHandler
-from fesl.datahandling.data_scaler import DataScaler
-from fesl.network.network import Network
-from fesl.network.trainer import Trainer
-from fesl.network.tester import Tester
-from fesl.targets.dos import DOS
+import fesl
+from fesl import printout
 import matplotlib.pyplot as plt
 import numpy as np
 from data_repo_path import get_data_repo_path
@@ -26,19 +20,19 @@ cell for this example.
 def use_trained_network(network_path, params_path, input_scaler_path, output_scaler_path, doplots, accuracy = 0.05):
 
     # First we load Parameters and network.
-    new_parameters = Parameters.load_from_file(params_path, no_snapshots=True)
+    new_parameters = fesl.Parameters.load_from_file(params_path, no_snapshots=True)
 
     # Inference should ALWAYS be done with lazy loading activated, even if training was not.
     new_parameters.data.use_lazy_loading = True
 
     # Now we can build the network.
-    new_network = Network.load_from_file(new_parameters, network_path)
+    new_network = fesl.Network.load_from_file(new_parameters, network_path)
 
     # We use a data handler object to read the data we want to investigate.
     # We need to make sure that the same scaling is used.
-    iscaler = DataScaler.load_from_file(input_scaler_path)
-    oscaler = DataScaler.load_from_file(output_scaler_path)
-    inference_data_handler = DataHandler(new_parameters, input_data_scaler=iscaler, output_data_scaler=oscaler)
+    iscaler = fesl.DataScaler.load_from_file(input_scaler_path)
+    oscaler = fesl.DataScaler.load_from_file(output_scaler_path)
+    inference_data_handler = fesl.DataHandler(new_parameters, input_data_scaler=iscaler, output_data_scaler=oscaler)
 
     # Now we can add and load a snapshot to test our new data.
     # Note that we use prepare_data_for_inference instead of the regular prepare_data function.
@@ -47,7 +41,7 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
     inference_data_handler.prepare_data()
 
     # The Tester class is the testing analogon to the training class.
-    tester = Tester(new_parameters)
+    tester = fesl.Tester(new_parameters)
     tester.set_data(new_network, inference_data_handler)
 
     # We only have one snapshots, so we are interested in the results of the first snapshot.
@@ -71,7 +65,7 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
     # Calculate the Band energy.
     # Use a DOS calculator to speed up processing.
     # This is important for bigger (actual) DOS arrays.
-    dos_calculator = DOS.from_ldos(ldos_calculator)
+    dos_calculator = fesl.DOS.from_ldos(ldos_calculator)
     band_energy_predicted = dos_calculator.get_band_energy(predicted_dos)
     band_energy_actual = dos_calculator.get_band_energy(actual_dos)
     printout("Band energy (actual, predicted, error)[eV]", band_energy_actual, band_energy_predicted, band_energy_predicted-band_energy_actual)
@@ -92,7 +86,7 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
     # PARAMETERS
     # All parameters are handled from a central parameters class that contains subclasses.
     ####################
-    test_parameters = Parameters()
+    test_parameters = fesl.Parameters()
     test_parameters.data.data_splitting_type = "by_snapshot"
     test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
@@ -116,7 +110,7 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
     # the data. The objects can be used after successful training for inference or plotting.
     ####################
 
-    data_handler = DataHandler(test_parameters)
+    data_handler = fesl.DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path, "Al_debug_2k_nr0.out.npy", data_path, output_units="1/Ry")
@@ -134,8 +128,8 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
     test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, data_handler.get_output_dimension()]
 
     # Setup network and trainer.
-    test_network = Network(test_parameters)
-    test_trainer = Trainer(test_parameters)
+    test_network = fesl.Network(test_parameters)
+    test_trainer = fesl.Trainer(test_parameters)
     printout("Network setup: DONE.")
 
     ####################

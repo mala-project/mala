@@ -1,6 +1,5 @@
-from fesl.common.parameters import Parameters
-from fesl.common.parameters import printout
-from fesl.targets.target_interface import TargetInterface
+import fesl
+from fesl import printout
 import matplotlib.pyplot as plt
 import numpy as np
 from data_repo_path import get_data_repo_path
@@ -20,7 +19,7 @@ def run_example06(doplots = True, accuracy = 0.00001):
     # PARAMETERS
     # All parameters are handled from a central parameters class that contains subclasses.
     ####################
-    test_parameters = Parameters()
+    test_parameters = fesl.Parameters()
     test_parameters.targets.target_type = "LDOS"
     test_parameters.targets.ldos_gridsize = 250
     test_parameters.targets.ldos_gridspacing_ev = 0.1
@@ -33,7 +32,7 @@ def run_example06(doplots = True, accuracy = 0.00001):
     ####################
 
     # Our target data is LDOS data.
-    ldos = TargetInterface(test_parameters)
+    ldos = fesl.TargetInterface(test_parameters)
 
     # We load additional information about the data using the output of the actual quantum espresso calculation.
     ldos.read_additional_calculation_data("qe.out", data_path+"QE_Al.scf.pw.out")

@@ -1,9 +1,5 @@
-from fesl.common.parameters import Parameters
-from fesl.common.parameters import printout
-from fesl.datahandling.data_handler import DataHandler
-from fesl.network.hyper_opt_interface import HyperOptInterface
-from fesl.network.network import Network
-from fesl.network.trainer import Trainer
+import fesl
+from fesl import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al256_reduced/"
@@ -22,7 +18,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", la
     # PARAMETERS
     # All parameters are handled from a central parameters class that contains subclasses.
     ####################
-    test_parameters = Parameters()
+    test_parameters = fesl.Parameters()
     test_parameters.data.data_splitting_percent = [80, 10, 10]
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
     test_parameters.data.output_rescaling_type = "normal"
@@ -45,7 +41,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", la
     # The Handlerinterface will also return input and output scaler objects. These are used internally to scale
     # the data. The objects can be used after successful training for inference or plotting.
     ####################
-    data_handler = DataHandler(test_parameters)
+    data_handler = fesl.DataHandler(test_parameters)
 
     # Add all the snapshots we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path, "Al_debug_2k_nr0.out.npy", data_path, output_units="1/Ry")
@@ -64,7 +60,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", la
     # Please not that you have to give specifications by hand for hyperparameters you do not want to optimize.
     ####################
 
-    test_hp_optimizer = HyperOptInterface(test_parameters)
+    test_hp_optimizer = fesl.HyperOptInterface(test_parameters)
     test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100, 100, data_handler.get_output_dimension()]
 
 
@@ -81,7 +77,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", la
         if input_creator_notraining == "optuna" and last_optuna_study is None:
             input_creator_notraining = "oat"
         tmp_parameters.hyperparameters.hyper_opt_method = input_creator_notraining
-        tmp_hp_optimizer = HyperOptInterface(tmp_parameters)
+        tmp_hp_optimizer = fesl.HyperOptInterface(tmp_parameters)
         tmp_hp_optimizer.add_hyperparameter("categorical", "trainingtype", choices=["Adam", "SGD"])
         tmp_hp_optimizer.add_hyperparameter("categorical", "layer_activation_00", choices=["ReLU", "Sigmoid"])
         tmp_hp_optimizer.add_hyperparameter("categorical", "layer_activation_01", choices=["ReLU", "Sigmoid"])
@@ -101,8 +97,8 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat", la
     test_hp_optimizer.set_optimal_parameters()
     printout("Hyperparameter optimization: DONE.")
 
-    test_network = Network(test_parameters)
-    test_trainer = Trainer(test_parameters)
+    test_network = fesl.Network(test_parameters)
+    test_trainer = fesl.Trainer(test_parameters)
     printout("Network setup: DONE.")
     test_trainer.train_network(test_network, data_handler)
     printout("Training: DONE.")

@@ -1,6 +1,5 @@
-from fesl.common.parameters import Parameters
-from fesl.common.parameters import printout
-from fesl.datahandling.data_handler import DataHandler
+import fesl
+from fesl import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()
@@ -17,7 +16,7 @@ def run_example03(accuracy=10**-10):
     # PARAMETERS
     # We only need to specify the correct input data format and the resizing grid.
     ####################
-    test_parameters = Parameters()
+    test_parameters = fesl.Parameters()
 
     # We want to resize certain data files, so we don't want any kind of cutting operation performed.
     test_parameters.data.descriptors_contain_xyz = False
@@ -29,7 +28,7 @@ def run_example03(accuracy=10**-10):
     # We have to specify the directories we want to read the snapshots from.
     ####################
 
-    data_handler = DataHandler(test_parameters)
+    data_handler = fesl.DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0.npy",

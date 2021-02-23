@@ -1,9 +1,5 @@
-from fesl.common.parameters import Parameters
-from fesl.common.parameters import printout
-from fesl.datahandling.data_handler import DataHandler
-from fesl.network.hyper_opt_interface import HyperOptInterface
-from fesl.network.network import Network
-from fesl.network.trainer import Trainer
+import fesl
+from fesl import printout
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al256_reduced/"
 
@@ -18,7 +14,7 @@ def run_example02(desired_loss_improvement_factor=1):
     # PARAMETERS
     # All parameters are handled from a central parameters class that contains subclasses.
     ####################
-    test_parameters = Parameters()
+    test_parameters = fesl.Parameters()
     test_parameters.data.data_splitting_type = "by_snapshot"
     test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
@@ -41,7 +37,7 @@ def run_example02(desired_loss_improvement_factor=1):
     # The Handlerinterface will also return input and output scaler objects. These are used internally to scale
     # the data. The objects can be used after successful training for inference or plotting.
     ####################
-    data_handler = DataHandler(test_parameters)
+    data_handler = fesl.DataHandler(test_parameters)
 
     # Add all the snapshots we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path, "Al_debug_2k_nr0.out.npy", data_path, output_units="1/Ry")
@@ -60,7 +56,7 @@ def run_example02(desired_loss_improvement_factor=1):
     # Please not that you have to give specifications by hand for hyperparameters you do not want to optimize.
     ####################
 
-    test_hp_optimizer = HyperOptInterface(test_parameters)
+    test_hp_optimizer = fesl.HyperOptInterface(test_parameters)
     # Add hyperparameters we want to have optimized to the list.
     test_hp_optimizer.add_hyperparameter("float", "learning_rate", 0.0000001, 0.01)
 
@@ -84,8 +80,8 @@ def run_example02(desired_loss_improvement_factor=1):
     # Train wit these new parameters.
     ####################
 
-    test_network = Network(test_parameters)
-    test_trainer = Trainer(test_parameters)
+    test_network = fesl.Network(test_parameters)
+    test_trainer = fesl.Trainer(test_parameters)
     printout("Network setup: DONE.")
     test_trainer.train_network(test_network, data_handler)
     printout("Training: DONE.")
