@@ -112,6 +112,7 @@ test-docstrings:
     - documentation
     - fix_docstrings
     - /^fix_docstrings_in_.*$/
+    - 210222_LF_FixDocstrings
 
 pages:
   stage: deploy
