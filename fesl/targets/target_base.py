@@ -1,3 +1,4 @@
+"""Base class for all target calculators."""
 from ase.units import Rydberg, Bohr, kB
 import ase.io
 import numpy as np

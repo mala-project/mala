@@ -1,3 +1,6 @@
+"""Snapshot class."""
+
+
 class Snapshot:
     """
     Represents a snapshot on a hard drive.

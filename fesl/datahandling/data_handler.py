@@ -1,3 +1,4 @@
+"""DataHandler class that loads and scales data."""
 from torch.utils.data import TensorDataset
 
 from .data_scaler import DataScaler

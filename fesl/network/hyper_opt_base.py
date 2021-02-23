@@ -1,3 +1,4 @@
+"""Base class for all hyperparameter optimizers."""
 from abc import abstractmethod, ABC
 from .hyperparameter_interface import HyperparameterInterface
 

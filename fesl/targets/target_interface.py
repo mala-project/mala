@@ -1,3 +1,4 @@
+"""Interface function for getting Targets."""
 from .ldos import LDOS
 from .dos import DOS
 from .density import Density

@@ -1,3 +1,4 @@
+"""Objective function for all training based hyperparameter optimizations."""
 from optuna import Trial
 from .hyperparameter_optuna import HyperparameterOptuna
 from .hyperparameter_oat import HyperparameterOAT

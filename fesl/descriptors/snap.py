@@ -1,3 +1,4 @@
+"""SNAP descriptor class."""
 import warnings
 import ase
 import ase.io

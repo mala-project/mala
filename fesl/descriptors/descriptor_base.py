@@ -1,3 +1,4 @@
+"""Base class for all descriptor calculators."""
 class DescriptorBase:
     """
     Base class for all descriptors available in FESL.

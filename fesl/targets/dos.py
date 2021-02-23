@@ -1,3 +1,4 @@
+"""DOS calculation class."""
 from .target_base import TargetBase
 from .calculation_helpers import *
 from scipy import integrate, interpolate

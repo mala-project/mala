@@ -1,3 +1,4 @@
+"""Interface to get correct hyperparameter optimizer."""
 from .hyper_opt_notraining import HyperOptNoTraining
 from .hyper_opt_oat import HyperOptOAT
 from .hyper_opt_optuna import HyperOptOptuna

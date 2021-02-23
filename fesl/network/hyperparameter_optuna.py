@@ -1,3 +1,4 @@
+"""Hyperparameter to use with optuna."""
 from optuna.trial import Trial
 
 

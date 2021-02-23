@@ -1,3 +1,4 @@
+"""Functions for safely printing in parallel."""
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:

@@ -1,3 +1,4 @@
+"""Hyperparameter optimizer working without training."""
 import optuna
 
 from .hyper_opt_base import HyperOptBase

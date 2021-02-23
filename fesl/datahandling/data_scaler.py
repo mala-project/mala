@@ -1,3 +1,4 @@
+"""DataScaler class for scaling DFT data."""
 import torch
 import pickle
 import numpy as np

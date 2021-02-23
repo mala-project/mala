@@ -1,3 +1,4 @@
+"""DataConverter class for converting snapshots into numpy arrays."""
 from fesl.common.parameters import printout
 from fesl.descriptors.descriptor_interface import DescriptorInterface
 from fesl.targets.target_interface import TargetInterface

@@ -1,3 +1,4 @@
+"""Interface function to get the correct type of hyperparameter."""
 from .hyperparameter_oat import HyperparameterOAT
 from .hyperparameter_optuna import HyperparameterOptuna
 

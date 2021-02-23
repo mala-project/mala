@@ -1,3 +1,4 @@
+"""DataSet for lazy-loading."""
 import torch
 from torch.utils.data import Dataset
 from fesl.datahandling.snapshot import Snapshot

@@ -1,3 +1,4 @@
+"""Hyperparameter optimizer using orthogonal array tuning."""
 import oapackage as oa
 from .hyper_opt_base import HyperOptBase
 from .objective_base import ObjectiveBase

@@ -1,3 +1,4 @@
+"""LDOS calculation class."""
 from .cube_parser import read_cube
 from .target_base import TargetBase
 from .calculation_helpers import *

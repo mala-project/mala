@@ -1,3 +1,4 @@
+"""Hyperparameter to use with OAT."""
 class HyperparameterOAT:
     """Represents a hyperparameter for OAT."""
 

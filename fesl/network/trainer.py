@@ -1,3 +1,4 @@
+"""Trainer class for training a network."""
 import numpy as np
 import torch
 from torch import optim

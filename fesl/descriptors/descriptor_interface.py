@@ -1,3 +1,4 @@
+"""Interface functions to automatically get descriptors."""
 from .snap import SNAP
 
 

@@ -1,3 +1,4 @@
+"""Helper functions for several calculation tasks (such as integration)."""
 import numpy as np
 from ase.units import kB
 from scipy import integrate, interpolate
