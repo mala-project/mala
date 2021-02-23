@@ -36,7 +36,7 @@ class ParametersBase:
 
 class ParametersNetwork(ParametersBase):
     """
-    Contains all parameters necessary for constructing a neural network.
+    Parameters necessary for constructing a neural network.
 
     Attributes
     ----------
@@ -82,7 +82,7 @@ class ParametersNetwork(ParametersBase):
 
 class ParametersDescriptors(ParametersBase):
     """
-    Contains all parameters necessary for calculating/parsing descriptors.
+    Parameters necessary for calculating/parsing input descriptors.
 
     Attributes
     ----------
@@ -116,7 +116,7 @@ class ParametersDescriptors(ParametersBase):
 
 class ParametersTargets(ParametersBase):
     """
-    Contains all parameters necessary for calculating/parsing output quantites.
+    Parameters necessary for calculating/parsing output quantites.
 
     Attributes
     ----------
@@ -146,7 +146,7 @@ class ParametersTargets(ParametersBase):
 
 class ParametersData(ParametersBase):
     """
-    Contains all parameters necessary for loading and preprocessing data.
+    Parameters necessary for loading and preprocessing data.
 
     Attributes
     ----------
@@ -221,7 +221,7 @@ class ParametersData(ParametersBase):
 
 class ParametersRunning(ParametersBase):
     """
-    Contains parameters needed for network runs (train, test or inference).
+    Parameters needed for network runs (train, test or inference).
 
     Some of these parameters only apply to either the train or test or
     inference case.
@@ -323,7 +323,7 @@ class ParametersRunning(ParametersBase):
 
 class ParametersHyperparameterOptimization(ParametersBase):
     """
-    Parameters used for hyperparameter optimization.
+    Hyperparameter optimization parameters.
 
     Attributes
     ----------
@@ -399,7 +399,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
 
 class ParametersDebug(ParametersBase):
     """
-    Container for all debugging parameters.
+    All debugging parameters.
 
     Attributes
     ----------
@@ -416,7 +416,7 @@ class ParametersDebug(ParametersBase):
 
 class Parameters:
     """
-    Contains all parameter FESL needs to perform its various tasks.
+    All parameter FESL needs to perform its various tasks.
 
     Attributes
     ----------
@@ -491,11 +491,11 @@ class Parameters:
 
     def show(self):
         """Print name and values of all attributes of this object."""
-        printout("--- " + self.__doc__ + " ---")
+        printout("--- " + self.__doc__.split("\n")[1] + " ---")
         for v in vars(self):
             if isinstance(getattr(self, v), ParametersBase):
                 parobject = getattr(self, v)
-                printout("--- " + parobject.__doc__ + " ---")
+                printout("--- " + parobject.__doc__.split("\n")[1] + " ---")
                 parobject.show("\t")
             else:
                 printout('%-15s: %s' % (v, getattr(self, v)))
