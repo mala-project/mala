@@ -70,7 +70,7 @@ class DataConverter:
         cube_naming_scheme : string
             Naming scheme for the LDOS .cube files.
 
-        cube_directory :
+        cube_directory : string
             Directory containing the LDOS .cube files.
         """
         self.__snapshots_to_convert.append([qe_out_file, qe_out_directory,
