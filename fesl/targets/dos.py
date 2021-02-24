@@ -49,7 +49,7 @@ class DOS(TargetBase):
         if in_units == "1/eV":
             return array
         elif in_units == "1/Ry":
-            return array / Rydberg
+            return array * (1/Rydberg)
         else:
             printout(in_units)
             raise Exception("Unsupported unit for LDOS.")

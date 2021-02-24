@@ -13,7 +13,7 @@ network_path = param_path+"ex08_network.pth"
 input_scaler_path = param_path+"ex08_iscaler.pkl"
 output_scaler_path = param_path+"ex08_oscaler.pkl"
 
-def test_inference(accuracy = 1e-16, use_lazy_loading = False):
+def test_inference(accuracy_prediction = 1e-16, accuracy_actual = 1e-16, use_lazy_loading = False):
     # First we load Parameters and network.
     new_parameters = Parameters.load_from_file(params_path, no_snapshots=True)
     new_parameters.data.data_splitting_snapshots = ["te", "te", "te"]
@@ -43,34 +43,49 @@ def test_inference(accuracy = 1e-16, use_lazy_loading = False):
         new_parameters.running.mini_batch_size = n
         tester = Tester(new_parameters)
         tester.set_data(new_network, inference_data_handler)
-        for i in range(0,inference_data_handler.nr_snapshots):
-            raw_outputs = inference_data_handler.target_calculator.convert_units(np.load(data_path+"Al_debug_2k_nr"+str(i)+".out.npy"), in_units="1/Ry")
+        for i in range(0, inference_data_handler.nr_snapshots):
+            # Get values with current framework.
+            actual_ldos, predicted_ldos = tester.test_snapshot(i)
+
+            # Confirm that unit conversion does not introduce any errors.
+            from_file_1 = inference_data_handler.target_calculator.convert_units(np.load(data_path+"Al_debug_2k_nr"+str(i)+".out.npy"), in_units="1/Ry")
+            from_file_2 = np.load(data_path+"Al_debug_2k_nr"+str(i)+".out.npy")*inference_data_handler.target_calculator.convert_units(1, in_units="1/Ry")
+            error = np.abs(from_file_1.sum()-from_file_2.sum())
+            if error > 0:
+                printout("Accuracy not met for unit coversion with error being {0}".format(error))
+                printout("Batchsize: {0}, lazy loading: {1}".format(n, new_parameters.data.use_lazy_loading))
+
+
+            # Compare actual_ldos with file directly.
+            # This is the only comparison that counts.
+            from_file = inference_data_handler.target_calculator.convert_units(np.load(data_path+"Al_debug_2k_nr"+str(i)+".out.npy"), in_units="1/Ry")
+            error = np.abs(actual_ldos.sum()-from_file.sum())
+            if error > accuracy_actual:
+                printout("Accuracy not met for raw data with error being {0}".format(error))
+                printout("Batchsize: {0}, lazy loading: {1}".format(n, new_parameters.data.use_lazy_loading))
+                return False
+
+            # Test if prediction still works.
             raw_predicted_outputs = np.load(data_path+"Al_debug_2k_nr"+str(i)+".in.npy")
             raw_predicted_outputs = inference_data_handler.raw_numpy_to_converted_scaled_tensor(raw_predicted_outputs, "in", None)
             raw_predicted_outputs = new_network.do_prediction(raw_predicted_outputs)
             raw_predicted_outputs = inference_data_handler.output_data_scaler.inverse_transform(raw_predicted_outputs, as_numpy=True)
-
-            actual_ldos, predicted_ldos  = tester.test_snapshot(i)
-            # print(actual_ldos.sum(), raw_outputs.sum(), actual_ldos.sum()-raw_outputs.sum())
-            # print(predicted_ldos.sum(), raw_predicted_outputs.sum(), predicted_ldos.sum()-raw_predicted_outputs.sum())
-            if np.abs(predicted_ldos.sum()-raw_predicted_outputs.sum()) > accuracy:
-                printout("Accuracy not met for prediction with accuracy being {0}".format(np.abs(predicted_ldos.sum()-raw_predicted_outputs.sum())))
+            error = np.abs(predicted_ldos.sum()-raw_predicted_outputs.sum())
+            if error > accuracy_prediction:
+                printout("Accuracy not met for prediction with error being {0}".format(error))
                 printout("Parameters are batchsize: {0}, lazy loading: {1}".format(n, new_parameters.data.use_lazy_loading))
                 return False
-            if np.abs(actual_ldos.sum()-raw_outputs.sum()) > accuracy:
-                printout("Accuracy not met for raw data with accuracy being {0}".format(np.abs(actual_ldos.sum()-raw_outputs.sum())))
-                printout("Batchsize: {0}, lazy loading: {1}".format(n, new_parameters.data.use_lazy_loading))
-                return False
+
     return True
 
 
 def run_inference_test():
     # Without lazy loading, there is a bigger numerical error in the actual outputs.
     # This is due to the fact that we scale and rescale data on 32 byte float arrays; lazy loading is therefore
-    # drastically advised.
-    if test_inference(accuracy=1e-6, use_lazy_loading=False) is False:
+    # drastically advised for inference/testing purposes.
+    if test_inference(accuracy_prediction=0, accuracy_actual=5e-7, use_lazy_loading=False) is False:
         return False
-    if test_inference(accuracy=1e-12, use_lazy_loading=True) is False:
+    if test_inference(accuracy_prediction=0, accuracy_actual=0, use_lazy_loading=True) is False:
         return False
     return True
 
