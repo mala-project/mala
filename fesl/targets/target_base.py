@@ -182,10 +182,10 @@ class TargetBase:
             self.grid_spacing_Bohr = cell_volume ** (1 / 3)
             band_energy_Ry = one_electron_contribution + \
                 xc_contribution + hartree_contribution
-            if internal_energy is not None:
-                self.total_energy_dft_calculation = internal_energy*Rydberg
-            else:
-                self.total_energy_dft_calculation = total_energy*Rydberg
+            # if internal_energy is not None:
+            #     self.total_energy_dft_calculation = internal_energy*Rydberg
+            # else:
+            self.total_energy_dft_calculation = total_energy*Rydberg
             self.band_energy_dft_calculation = band_energy_Ry*Rydberg
         else:
             raise Exception("Unsupported auxiliary file type.")
