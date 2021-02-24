@@ -51,17 +51,17 @@ def test_inference(accuracy = 1e-16, use_lazy_loading = False):
             raw_predicted_outputs = inference_data_handler.output_data_scaler.inverse_transform(raw_predicted_outputs, as_numpy=True)
 
             actual_ldos, predicted_ldos  = tester.test_snapshot(i)
-            # print(actual_ldos.sum(), raw_outputs.sum(), actual_ldos.sum()-raw_outputs.sum())
-            # print(predicted_ldos.sum(), raw_predicted_outputs.sum(), predicted_ldos.sum()-raw_predicted_outputs.sum())
+            print(actual_ldos.sum(), raw_outputs.sum(), actual_ldos.sum()-raw_outputs.sum())
+            print(predicted_ldos.sum(), raw_predicted_outputs.sum(), predicted_ldos.sum()-raw_predicted_outputs.sum())
             if np.abs(predicted_ldos.sum()-raw_predicted_outputs.sum()) > accuracy:
                 printout("Accuracy not met for prediction with accuracy being {0}".format(np.abs(predicted_ldos.sum()-raw_predicted_outputs.sum())))
                 printout("Parameters are batchsize: {0}, lazy loading: {1}".format(n, new_parameters.data.use_lazy_loading))
-                return False
+                # return False
             if np.abs(actual_ldos.sum()-raw_outputs.sum()) > accuracy:
                 printout("Accuracy not met for raw data with accuracy being {0}".format(np.abs(actual_ldos.sum()-raw_outputs.sum())))
                 printout("Batchsize: {0}, lazy loading: {1}".format(n, new_parameters.data.use_lazy_loading))
-                return False
-    return True
+                # return False
+    return False
 
 
 def run_inference_test():

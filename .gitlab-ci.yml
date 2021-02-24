@@ -47,6 +47,7 @@ setup-fesl:
   only:
     - master
     - conda-CI
+    - pipelinetest
 
 test-basic-functions:
   stage: test
@@ -60,6 +61,8 @@ test-basic-functions:
   only:
     - master
     - conda-CI
+    - pipelinetest
+
 
 test-workflow:
   stage: test
