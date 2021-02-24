@@ -51,9 +51,9 @@ def check_analytical_integration(accuracy):
     # Calculate the analytical values.
     beta = 1 / (kB * temp)
     x = beta * (energies - e_fermi)
-    fi_0 = np.zeros(gridsize, dtype=np.float)
-    fi_1 = np.zeros(gridsize, dtype=np.float)
-    fi_2 = np.zeros(gridsize, dtype=np.float)
+    fi_0 = np.zeros(gridsize, dtype=np.float64)
+    fi_1 = np.zeros(gridsize, dtype=np.float64)
+    fi_2 = np.zeros(gridsize, dtype=np.float64)
     for i in range(0, gridsize):
 
         # Calculate beta and x
