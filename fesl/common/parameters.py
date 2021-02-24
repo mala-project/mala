@@ -44,7 +44,7 @@ class ParametersNetwork(ParametersBase):
         Type of the neural network that will be used. Currently supported is
         only feed-forward, which is also the default
 
-    layer_activations : list
+    layer_sizes : list
         A list of integers detailing the sizes of the layer of the neural
         network. Please note that the input layer is included therein.
         Default: [10,10,0]
