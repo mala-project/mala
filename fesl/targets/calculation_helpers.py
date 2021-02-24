@@ -93,7 +93,7 @@ def entropy_multiplicator(energy, fermi_energy, temperature_K,
     """
     if len(np.shape(energy)) > 0:
         dim = np.shape(energy)[0]
-        multiplicator = np.zeros(dim, dtype=np.float)
+        multiplicator = np.zeros(dim, dtype=np.float64)
         for i in range(0, np.shape(energy)[0]):
             fermi_val = fermi_function(energy[i], fermi_energy, temperature_K, energy_units=energy_units)
             if fermi_val == 1.0:
@@ -323,9 +323,9 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid, temperature_
         raise Exception("Could not calculate analytical intergal, wrong choice of auxiliary functions.")
 
     # Construct the weight vector.
-    weights_vector = np.zeros(energy_grid.shape, dtype=np.float)
+    weights_vector = np.zeros(energy_grid.shape, dtype=np.float64)
     gridsize = energy_grid.shape[0]
-    energy_grid_edges = np.zeros(energy_grid.shape[0]+2, dtype=np.float)
+    energy_grid_edges = np.zeros(energy_grid.shape[0]+2, dtype=np.float64)
     energy_grid_edges[1:-1] = energy_grid
     spacing = (energy_grid[1]-energy_grid[0])
     energy_grid_edges[0] = energy_grid[0] - spacing
@@ -333,7 +333,7 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid, temperature_
 
     if len(D.shape) > 1:
         real_space_grid = D.shape[0]
-        integral_value = np.zeros(real_space_grid, dtype=np.float)
+        integral_value = np.zeros(real_space_grid, dtype=np.float64)
     else:
         real_space_grid = 1
         integral_value = 0

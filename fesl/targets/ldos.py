@@ -51,7 +51,7 @@ class LDOS(TargetBase):
         if in_units == "1/eV":
             return array
         elif in_units == "1/Ry":
-            return array / Rydberg
+            return array * (1/Rydberg)
         else:
             printout(in_units)
             raise Exception("Unsupported unit for LDOS.")
@@ -137,7 +137,7 @@ class LDOS(TargetBase):
             # in which we want to store the LDOS.
             if i == 1:
                 data_shape = np.shape(data)
-                ldos_data = np.zeros((data_shape[0], data_shape[1], data_shape[2], self.parameters.ldos_gridsize), dtype=np.float)
+                ldos_data = np.zeros((data_shape[0], data_shape[1], data_shape[2], self.parameters.ldos_gridsize), dtype=np.float64)
 
             # Convert and then append the LDOS data.
             data = self.convert_units(data, in_units=ldos_units)
