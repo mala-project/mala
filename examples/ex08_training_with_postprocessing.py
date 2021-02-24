@@ -1,12 +1,16 @@
 from fesl.common.parameters import Parameters
 from fesl.common.parameters import printout
-from fesl.datahandling.handler_interface import HandlerInterface
+from fesl.datahandling.data_handler import DataHandler
 from fesl.datahandling.data_scaler import DataScaler
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
+from fesl.network.tester import Tester
 from fesl.targets.dos import DOS
 import matplotlib.pyplot as plt
 import numpy as np
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()+"Al256_reduced/"
+param_path = get_data_repo_path()+"example08_data/"
 """
 ex08_training_with_postprocessing.py: Uses FESL to first train a network, use this network to predict the LDOS and then
 analyze the results of this prediction. This example is structured a little bit different than other examples. 
@@ -23,33 +27,37 @@ def use_trained_network(network_path, params_path, input_scaler_path, output_sca
 
     # First we load Parameters and network.
     new_parameters = Parameters.load_from_file(params_path, no_snapshots=True)
+
+    # Inference should ALWAYS be done with lazy loading activated, even if training was not.
+    new_parameters.data.use_lazy_loading = True
+
+    # Now we can build the network.
     new_network = Network.load_from_file(new_parameters, network_path)
 
     # We use a data handler object to read the data we want to investigate.
     # We need to make sure that the same scaling is used.
     iscaler = DataScaler.load_from_file(input_scaler_path)
     oscaler = DataScaler.load_from_file(output_scaler_path)
-    inference_data_handler = HandlerInterface(new_parameters, input_data_scaler=iscaler, output_data_scaler=oscaler)
+    inference_data_handler = DataHandler(new_parameters, input_data_scaler=iscaler, output_data_scaler=oscaler)
 
     # Now we can add and load a snapshot to test our new data.
     # Note that we use prepare_data_for_inference instead of the regular prepare_data function.
-    inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
-    inference_data_handler.load_data()
-    inference_data_handler.prepare_data_for_inference()
+    new_parameters.data.data_splitting_snapshots = ["te"]
+    inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path, "Al_debug_2k_nr2.out.npy", data_path, output_units="1/Ry")
+    inference_data_handler.prepare_data()
 
-    # Now we can make a prediction.
-    predicted_ldos = new_network.do_prediction(inference_data_handler.inference_data_inputs[0])
-    actual_ldos = inference_data_handler.inference_data_outputs[0]
+    # The Tester class is the testing analogon to the training class.
+    tester = Tester(new_parameters)
+    tester.set_data(new_network, inference_data_handler)
 
-    # Now we use the prediction to calculate the band energy and compare it to the one we would get from the outputs themselves.
-    predicted_ldos = oscaler.inverse_transform(predicted_ldos, as_numpy=True)
-    actual_ldos = oscaler.inverse_transform(actual_ldos, as_numpy=True)
+    # We only have one snapshots, so we are interested in the results of the first snapshot.
+    actual_ldos, predicted_ldos = tester.test_snapshot(0)
 
-    # Use the LDOS object to do postprocessing.
-    ldos_calculator = inference_data_handler.target_parser
-    ldos_calculator.read_additional_calculation_data("qe.out", "./data/QE_Al.scf.pw.out")
+    # We will use the LDOS calculator to do some preprocessing.
+    ldos_calculator = inference_data_handler.target_calculator
+    ldos_calculator.read_additional_calculation_data("qe.out", data_path+"QE_Al.scf.pw.out")
 
-    # Calculate the DOS.
+    # Get and investigate the DOS.
     actual_dos = ldos_calculator.get_density_of_states(actual_ldos)
     predicted_dos = ldos_calculator.get_density_of_states(predicted_ldos)
 
@@ -94,10 +102,10 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
     test_parameters.descriptors.twojmax = 11
     test_parameters.targets.ldos_gridsize = 10
     test_parameters.network.layer_activations = ["ReLU"]
-    test_parameters.training.max_number_epochs = 400
-    test_parameters.training.mini_batch_size = 40
-    test_parameters.training.learning_rate = 0.00001
-    test_parameters.training.trainingtype = "Adam"
+    test_parameters.running.max_number_epochs = 400
+    test_parameters.running.mini_batch_size = 40
+    test_parameters.running.learning_rate = 0.00001
+    test_parameters.running.trainingtype = "Adam"
     test_parameters.targets.ldos_gridsize = 250
     test_parameters.targets.ldos_gridspacing_ev = 0.1
     test_parameters.targets.ldos_gridoffset_ev = -10
@@ -110,14 +118,13 @@ def initial_training(network_path, params_path, input_scaler_path, output_scaler
     # the data. The objects can be used after successful training for inference or plotting.
     ####################
 
-    data_handler = HandlerInterface(test_parameters)
+    data_handler = DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
-    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/", output_units="1/Ry")
-    data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/", output_units="1/Ry")
-    data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path, "Al_debug_2k_nr0.out.npy", data_path, output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path, "Al_debug_2k_nr1.out.npy", data_path, output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path, "Al_debug_2k_nr2.out.npy", data_path, output_units="1/Ry")
 
-    data_handler.load_data()
     data_handler.prepare_data()
     printout("Read data: DONE.")
 
@@ -161,10 +168,17 @@ def run_example08(dotraining, doinference, doplots=True):
     printout("Running ex08_training_with_postprocessing.py")
 
     # Choose the paths where the network and the parameters for it should be saved.
-    params_path = "./data/ex08_params.pkl"
-    network_path = "./data/ex08_network.pth"
-    input_scaler_path = "./data/ex08_iscaler.pkl"
-    output_scaler_path = "./data/ex08_oscaler.pkl"
+    if dotraining is False:
+        params_path = param_path+"ex08_params.pkl"
+        network_path = param_path+"ex08_network.pth"
+        input_scaler_path = param_path+"ex08_iscaler.pkl"
+        output_scaler_path = param_path+"ex08_oscaler.pkl"
+    else:
+        params_path = "./ex08_params.pkl"
+        network_path = "./ex08_network.pth"
+        input_scaler_path = "./ex08_iscaler.pkl"
+        output_scaler_path = "./ex08_oscaler.pkl"
+
 
     training_return = True
     inference_return = True

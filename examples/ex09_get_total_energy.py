@@ -3,6 +3,8 @@ from fesl.targets.ldos import LDOS
 from fesl.targets.dos import DOS
 from fesl.common.parameters import printout
 import numpy as np
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()+"Al36/"
 
 """
 ex09_get_total_energy.py: Shows how FESL can be used to get the total energy of a system. For this, QuantumEspresso
@@ -26,13 +28,13 @@ def run_example09(accuracy = 50):
     # Set up a calculator and use it.
     ####################
     ldos_calculator = LDOS(test_parameters)
-    ldos_calculator.read_additional_calculation_data("qe.out", "./data/total_energy_data/Al.pw.scf.out")
+    ldos_calculator.read_additional_calculation_data("qe.out", data_path+"Al.pw.scf.out")
 
     # Note: This repo only contains ONE pseudopotential. If you work with different elements, you will have to get
     # additional pseudopotentials.
-    ldos_calculator.set_pseudopotential_path("./data/total_energy_data/")
-    dos_data = np.load("./data/total_energy_data/Al_dos.npy")
-    dens_data = np.load("./data/total_energy_data/Al_dens.npy")
+    ldos_calculator.set_pseudopotential_path(data_path)
+    dos_data = np.load(data_path+"Al_dos.npy")
+    dens_data = np.load(data_path+"Al_dens.npy")
 
     # To get best results, it is advised to get the self-consistent fermi energy.
     dos_calculator = DOS.from_ldos(ldos_calculator)
@@ -41,8 +43,9 @@ def run_example09(accuracy = 50):
     # The LDOS calculator can accept preprocessed data.
     total_energy = ldos_calculator.get_total_energy(dos_data=dos_data, density_data=dens_data, fermi_energy_eV=fermi_energy_sc)
     printout("FESL total energy: ", total_energy, " eV")
-    printout("QE total energy: -2435.503721357 eV")
-    if np.abs(total_energy + 2435.503721357) > accuracy:
+    printout("QE total energy: ", ldos_calculator.total_energy_dft_calculation, "eV")
+    if np.abs(total_energy - ldos_calculator.total_energy_dft_calculation) > accuracy:
+        print(np.abs(total_energy - ldos_calculator.total_energy_dft_calculation))
         return False
     printout("Parameters used for this experiment:")
     test_parameters.show()

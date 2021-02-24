@@ -3,6 +3,8 @@ from fesl.common.parameters import printout
 from fesl.targets.dos import DOS
 import numpy as np
 from ase.units import Rydberg
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()+"Al256/"
 
 """
 ex07_dos_analysis.py: Shows how the FESL code can be used to further process the DOS. 
@@ -50,10 +52,10 @@ def run_example07(accuracy_meV_per_atom = 120.0):
 
     # Create a DOS object and provide additional parameters.
     dos = DOS(test_parameters)
-    dos.read_additional_calculation_data("qe.out", "./data/QE_Al.scf.pw.out")
+    dos.read_additional_calculation_data("qe.out", data_path+"QE_Al.scf.pw.out")
 
     # Load a precalculated DOS file.
-    dos_data = np.load("./data/Al_DOS_nr0.npy")
+    dos_data = np.load(data_path+"Al_DOS_nr0.npy")
 
     error_band_energy = dos_analysis(dos, dos_data, "analytical", eband_exact_ev)
     if error_band_energy > accuracy_meV_per_atom:

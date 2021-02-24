@@ -32,12 +32,14 @@ author = 'HZDR'
 # ones.
 extensions = [
     'recommonmark',
+    'sphinx_markdown_tables',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
 ]
 
 napoleon_google_docstring = False
@@ -50,6 +52,11 @@ autodoc_mock_imports = [
     'torch',
     'numpy',
     'scipy',
+    'oapackage',
+    'matplotlib',
+    'horovod',
+    'lammps',
+    'total_energy',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -71,7 +78,11 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = []
+
+source_parsers = {
+    '.md': 'recommonmark.parser.CommonMarkParser',
+}
 
 # The suffix of source file names.
 source_suffix = {

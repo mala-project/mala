@@ -5,7 +5,10 @@ try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     warnings.warn("You either don't have Horovod installed or it is not configured correctly. You can still "
-              "train networks, but attempting to set parameters.training.use_horovod = True WILL cause a crash.")
+              "train networks, but attempting to set parameters.training.use_horovod = True WILL cause a crash."
+                  , stacklevel=3)
+import torch
+
 
 # Subclasses that make up the final parameters class.
 
@@ -44,6 +47,7 @@ class ParametersNetwork(ParametersBase):
         """
         self.loss_function_type = "mse"
 
+        self.manual_seed = None
 
 # noinspection PyMissingConstructor
 class ParametersDescriptors(ParametersBase):
@@ -133,17 +137,17 @@ class ParametersData(ParametersBase):
         """
         A list of all added snapshots.
         """
-        self.data_splitting_type = "random"
+        self.data_splitting_type = "by_snapshot"
         """Specify how the data for validation, test and training is splitted.
         Currently implemented:
-            - random: split the data randomly, ignore snapshot boundaries.
+            - random: (CURRENTLY UNSUPPORTED) split the data randomly, ignore snapshot boundaries.
             - by_snapshot: split the data by snapshot boundaries.
         """
         self.data_splitting_percent = [0,0,0]
         """
         Details how much of the data is used for training, validation and testing [%].
         """
-        self.data_splitting_snapshots = ["te", "te", "te"]
+        self.data_splitting_snapshots = ["tr", "va", "te"]
         """
         Details how (and which!) snapshots are used for what [#snapshots]:
             - te: This snapshot will be a testing snapshot.
@@ -171,13 +175,14 @@ class ParametersData(ParametersBase):
             - "feature-wise-standard": Row Standardization (Scale to mean 0, standard deviation 1)
             - "feature-wise-normal": Row Min-Max scaling (Scale to be in range 0...1)
         """
+        self.use_lazy_loading = False
 
 
-class ParametersTraining(ParametersBase):
-    """Network training parameter subclass."""
+class ParametersRunning(ParametersBase):
+    """Network running parameter subclass."""
 
     def __init__(self):
-        super(ParametersTraining, self).__init__()
+        super(ParametersRunning, self).__init__()
         self.trainingtype = "SGD"
         """Training type to be used. Options at the moment:
             - SGD: Stochastic gradient descent.
@@ -232,31 +237,13 @@ class ParametersTraining(ParametersBase):
         Patience parameter used in the learning rate schedule (how long the validation loss has to plateau before
         the schedule takes effect).
         """
-        self.use_gpu = False
-        """
-        Controls whether or not a GPU is used for training - provided there is one to use. 
-        """
-        self.use_horovod=False
-
         self.use_compression=False
         #add comment
         self.kwargs={'num_workers': 0, 'pin_memory': False}
-        #add comment
-        self.seed= 2021
         #add comment(optional)
         self.sampler={"train_sampler":None,"validate_sampler":None,"test_sampler":None}
 
-    @property
-    def use_horovod(self):
-        printout("Getting value...")
-        return self._use_horovod
-
-    @use_horovod.setter
-    def use_horovod(self, value):
-        if value:
-            hvd.init()
-        set_horovod_status(value)
-        self._use_horovod = value
+        self.use_shuffling_for_samplers = True
 
 class ParametersHyperparameterOptinization(ParametersBase):
     """Hyperparameter optimization subclass."""
@@ -335,9 +322,43 @@ class Parameters:
         self.descriptors = ParametersDescriptors()
         self.targets = ParametersTargets()
         self.data = ParametersData()
-        self.training = ParametersTraining()
+        self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptinization()
         self.debug = ParametersDebug()
+        self.use_horovod=False
+        """
+        Controls whether or not horovod is used for parallelization of training. 
+        """
+        self.use_gpu = False
+        """
+        Controls whether or not a GPU is used for network and training - provided there is one to use. 
+        """
+
+    @property
+    def use_gpu(self):
+        return self._use_gpu
+
+    @use_gpu.setter
+    def use_gpu(self, value):
+        if value is False:
+            self._use_gpu = False
+        if value is True:
+            if torch.cuda.is_available():
+                self._use_gpu = True
+            else:
+                warnings.warn("GPU requested, but no GPU found. FESL will operate with CPU only.", stacklevel=3)
+
+
+    @property
+    def use_horovod(self):
+        return self._use_horovod
+
+    @use_horovod.setter
+    def use_horovod(self, value):
+        if value:
+            hvd.init()
+        set_horovod_status(value)
+        self._use_horovod = value
 
     def show(self):
         """Prints all the parameters bundled in this class."""
@@ -354,9 +375,12 @@ class Parameters:
         """
         Saves the Parameters object so that it can be accessed again at a later time.
         """
+        if self.use_horovod:
+            if hvd.rank() != 0:
+                return
         if save_format == "pickle":
             with open(filename, 'wb') as handle:
-                pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(self, handle, protocol=4)
         else:
             raise Exception("Unsupported parameter save format.")
 

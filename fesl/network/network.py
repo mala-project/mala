@@ -2,13 +2,25 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+try:
+    import horovod.torch as hvd
+except ModuleNotFoundError:
+    # Warning is thrown by parameters class
+    pass
 
 class Network(nn.Module):
     """Central network class for this framework. Based on pytorch.nn.Module."""
 
     def __init__(self, p):
         # copy the network params from the input parameter object
+        self.use_horovod = p.use_horovod
         self.params = p.network
+
+        # if the user has planted a seed (for comparibility purposes) we should use it.
+        if self.params.manual_seed is not None:
+            torch.manual_seed(self.params.manual_seed)
+            torch.cuda.manual_seed(self.params.manual_seed)
+
         # initialize the parent class
         super(Network, self).__init__()
 
@@ -23,7 +35,6 @@ class Network(nn.Module):
         self.number_of_layers = len(self.params.layer_sizes) - 1
         self.layers = nn.ModuleList()
 
-        # TODO: Deconvolute this into their own classes.
         if self.params.nn_type == "feed-forward":
             self.initialize_as_feedforward()
         else:
@@ -34,6 +45,10 @@ class Network(nn.Module):
             self.loss_func = F.mse_loss
         else:
             raise Exception("Unsupported loss function.")
+
+        # Once everything is done, we can move the Network on the target device.
+        if p.use_gpu:
+            self.to('cuda')
 
     def initialize_as_feedforward(self):
         # Check if multiple types of activations were selected or only one was passed to be used in the entire network.#
@@ -73,17 +88,24 @@ class Network(nn.Module):
         So far it is mostly an interface to pytorch, but maybe at a later date it will be more.
         """
         self.eval()
-        return self(array)
+        with torch.no_grad():
+            return self(array)
 
     def calculate_loss(self, output, target):
         return self.loss_func(output, target)
 
+    # FIXME: This guarentees downwards compatibility, but it is ugly.
+    #  Rather enforce the right package versions in the repo.
     def save_network(self, path_to_file):
         """
         Saves the network. This function serves as an interfaces to pytorchs own saving functionalities
         AND possibly own saving needs.
         """
-        torch.save(self.state_dict(), path_to_file)
+        # If we use horovod, only save the network on root.
+        if self.use_horovod:
+            if hvd.rank() != 0:
+                return
+        torch.save(self.state_dict(), path_to_file, _use_new_zipfile_serialization=False)
 
     @classmethod
     def load_from_file(cls, params, path_to_file):

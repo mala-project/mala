@@ -4,7 +4,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 
 from fesl.common.parameters import Parameters
-from fesl.datahandling.handler_base import HandlerBase
+from fesl.datahandling.data_handler import DataHandler
 from fesl.network.network import Network
 from fesl.network.objective_base import ObjectiveBase
 from fesl.common.parameters import printout
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 class ObjectiveNoTraining(ObjectiveBase):
 
-    def __init__(self, search_parameters: Parameters, data_handler: HandlerBase, trial_type):
+    def __init__(self, search_parameters: Parameters, data_handler: DataHandler, trial_type):
         super(ObjectiveNoTraining, self).__init__(search_parameters, data_handler)
         self.trial_type = trial_type
 
@@ -23,12 +23,11 @@ class ObjectiveNoTraining(ObjectiveBase):
 
         # Build the network.
         net = Network(self.params)
-        device = "cuda" if torch.cuda.is_available() and self.params.training.use_gpu else "cpu"
-        net.to(device)
+        device = "cuda" if  self.params.use_gpu else "cpu"
 
         # Load the batchesand get the jacobian.
         loader = DataLoader(self.data_handler.training_data_set,
-                            batch_size=self.params.training.mini_batch_size,
+                            batch_size=self.params.running.mini_batch_size,
                             shuffle=True)
         jac = ObjectiveNoTraining._get_batch_jacobian(net, loader, device)
 
@@ -36,7 +35,7 @@ class ObjectiveNoTraining(ObjectiveBase):
         surrogate_loss = float('inf')
         try:
             surrogate_loss = - ObjectiveNoTraining._calc_score(jac)
-            surrogate_loss = surrogate_loss.detach().numpy().astype(np.float)
+            surrogate_loss = surrogate_loss.detach().numpy().astype(np.float64)
         except:
             printout("Got a NaN, ignoring sample.")
         return surrogate_loss

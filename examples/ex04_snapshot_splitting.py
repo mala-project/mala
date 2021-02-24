@@ -1,8 +1,10 @@
 from fesl.common.parameters import Parameters
 from fesl.common.parameters import printout
-from fesl.datahandling.handler_interface import HandlerInterface
+from fesl.datahandling.data_handler import DataHandler
 from fesl.network.network import Network
 from fesl.network.trainer import Trainer
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()+"Al256_reduced/"
 
 """
 ex04_snapshot_splitting.py: Shows a more intiutive way of splitting up the data, i.e. snapshot splitting.
@@ -25,10 +27,10 @@ def run_example04(desired_loss_improvement_factor=1):
     test_parameters.descriptors.twojmax = 11
     test_parameters.targets.ldos_gridsize = 10
     test_parameters.network.layer_activations = ["ReLU"]
-    test_parameters.training.max_number_epochs = 20
-    test_parameters.training.mini_batch_size = 40
-    test_parameters.training.learning_rate = 0.00001
-    test_parameters.training.trainingtype = "Adam"
+    test_parameters.running.max_number_epochs = 20
+    test_parameters.running.mini_batch_size = 40
+    test_parameters.running.learning_rate = 0.00001
+    test_parameters.running.trainingtype = "Adam"
 
     ####################
     # DATA
@@ -38,14 +40,12 @@ def run_example04(desired_loss_improvement_factor=1):
     # the data. The objects can be used after successful training for inference or plotting.
     ####################
 
-    data_handler = HandlerInterface(test_parameters)
+    data_handler = DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
-    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/", output_units="1/Ry")
-    data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", "./data/", "Al_debug_2k_nr1.out.npy", "./data/", output_units="1/Ry")
-    data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", "./data/", "Al_debug_2k_nr2.out.npy", "./data/", output_units="1/Ry")
-
-    data_handler.load_data()
+    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path, "Al_debug_2k_nr0.out.npy", data_path, output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path, "Al_debug_2k_nr1.out.npy", data_path, output_units="1/Ry")
+    data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path, "Al_debug_2k_nr2.out.npy", data_path, output_units="1/Ry")
     data_handler.prepare_data()
     printout("Read data: DONE.")
 

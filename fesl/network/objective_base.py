@@ -56,14 +56,14 @@ class ObjectiveBase:
         par: HyperparameterOptuna
         for par in self.params.hyperparameters.hlist:
             if par.name == "learning_rate":
-                self.params.training.learning_rate = par.get_parameter(trial)
+                self.params.running.learning_rate = par.get_parameter(trial)
             elif "layer_activation" in par.name:
                 self.params.network.layer_activations.append(par.get_parameter(trial))
             elif "ff_neurons_layer" in par.name:
                 if self.params.network.nn_type == "feed-forward":
                     self.params.network.layer_sizes.append(par.get_parameter(trial))
             elif "trainingtype" in par.name:
-                self.params.training.trainingtype = par.get_parameter(trial)
+                self.params.running.trainingtype = par.get_parameter(trial)
             else:
                 raise Exception("Optimization of hyperparameter ", par.name, "not supported at the moment.")
         if self.optimize_layer_list:
@@ -79,6 +79,6 @@ class ObjectiveBase:
             if "layer_activation" in par.name:
                 self.params.network.layer_activations.append(par.get_parameter(trial,factor_idx))
             elif "trainingtype" in par.name:
-                self.params.training.trainingtype= par.get_parameter(trial, factor_idx)
+                self.params.running.trainingtype= par.get_parameter(trial, factor_idx)
             else:
                 raise Exception("Optimization of hyperparameter ", par.name, "not supported at the moment.")

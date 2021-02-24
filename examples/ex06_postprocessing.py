@@ -1,9 +1,11 @@
 from fesl.common.parameters import Parameters
 from fesl.common.parameters import printout
-from fesl.datahandling.handler_interface import HandlerInterface
 from fesl.targets.target_interface import TargetInterface
 import matplotlib.pyplot as plt
 import numpy as np
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()+"Al256_reduced/"
+
 """
 ex06_postprocessing.py: Shows how the LDOS can be post processed. 
 """
@@ -19,38 +21,31 @@ def run_example06(doplots = True, accuracy = 0.00001):
     # All parameters are handled from a central parameters class that contains subclasses.
     ####################
     test_parameters = Parameters()
+    test_parameters.targets.target_type = "LDOS"
     test_parameters.targets.ldos_gridsize = 250
     test_parameters.targets.ldos_gridspacing_ev = 0.1
     test_parameters.targets.ldos_gridoffset_ev = -10
 
-
     ####################
     # DATA
     # Read data into RAM.
-    # We have to specify the directories we want to read the snapshots from.
-    # The Handlerinterface will also return input and output scaler objects. These are used internally to scale
-    # the data. The objects can be used after successful training for inference or plotting.
+    # For this test we can simply read in the numpy arrays and convert them using the LDOS class.
     ####################
-
-    data_handler = HandlerInterface(test_parameters)
-
-    # Add a snapshot we want to use in to the list.
-    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", "./data/", "Al_debug_2k_nr0.out.npy", "./data/")
 
     # Our target data is LDOS data.
     ldos = TargetInterface(test_parameters)
 
     # We load additional information about the data using the output of the actual quantum espresso calculation.
-    ldos.read_additional_calculation_data("qe.out", "./data/QE_Al.scf.pw.out")
+    ldos.read_additional_calculation_data("qe.out", data_path+"QE_Al.scf.pw.out")
 
-    # Data is loaded.
-    data_handler.load_data()
+    # The LDOS data needs to be converted; we got it from a QE calculation.
+    ldos_data = ldos.convert_units(np.load(data_path+"Al_debug_2k_nr0.out.npy"), in_units="1/Ry")
 
     #####
     # Density
     #####
 
-    dens = ldos.get_density(data_handler.raw_output_grid[0], conserve_dimensions=True, integration_method="analytical")
+    dens = ldos.get_density(ldos_data, conserve_dimensions=True, integration_method="analytical")
     # For plotting we use the fact that the reduced datasets have dimensions of 200x10x1.
     if doplots:
         x_range = np.linspace(0, ldos.grid_spacing_Bohr*np.shape(dens)[0], np.shape(dens)[0])
@@ -69,7 +64,7 @@ def run_example06(doplots = True, accuracy = 0.00001):
     # Density of states
     #####
 
-    dos = ldos.get_density_of_states(data_handler.raw_output_datasize[0], integration_method="summation")
+    dos = ldos.get_density_of_states(ldos_data, integration_method="summation")
     if doplots:
         e_range = np.linspace(test_parameters.targets.ldos_gridoffset_ev, test_parameters.targets.ldos_gridoffset_ev+
                               test_parameters.targets.ldos_gridsize*test_parameters.targets.ldos_gridspacing_ev,
@@ -84,20 +79,20 @@ def run_example06(doplots = True, accuracy = 0.00001):
     # Band energies
     #####
 
-    e_band = ldos.get_band_energy(data_handler.raw_output_grid[0])
+    e_band = ldos.get_band_energy(ldos_data)
     printout("Band energy [eV]: ", e_band)
-    # Result should be around 7.505614018562486
-    if np.abs(7.505614018562486 - e_band) > accuracy:
+    # Result should be around 0.5516523883883581
+    if np.abs(0.5516523883883581 - e_band) > accuracy:
         return False
 
     #####
     # Number of electrons
     #####
 
-    nr_electrons = ldos.get_number_of_electrons(data_handler.raw_output_grid[0])
+    nr_electrons = ldos.get_number_of_electrons(ldos_data)
     printout("# of Electrons: ", nr_electrons)
-    # Result should be around 2.236611809011879
-    if np.abs(2.236611809011879 - nr_electrons) > accuracy:
+    # Result should be around 0.16438792929832854
+    if np.abs(0.16438792929832854 - nr_electrons) > accuracy:
         return False
 
     printout("Successfully ran ex06_postprocessing.py.")

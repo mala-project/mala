@@ -26,17 +26,18 @@ else:
 
 # Example 2: Perform a hyperparameter optimization.
 if run_example02():
-    printout("Successfully ran ex01_run_singleshot.")
+    printout("Successfully ran ex02_hyperparameter_optimization.")
 else:
-    raise Exception("Ran ex01_run_singleshot but something was off. If you haven't changed any parameters in "
+    raise Exception("Ran ex02_hyperparameter_optimization but something was off. If you haven't changed any parameters in "
                     "the example, there might be a problem with your installation.")
 
 
 # Example 3: Resizing of snapshots. Omitted for now, because it depends on data.
 try:
-    run_example03("/home/fiedlerl/data/Al256/SandiaQE/2.699gcc/")
-except:
-    printout("Could not run example03, did you provide a correct data path?")
+    if run_example03():
+        printout("Successfully ran ex03_resize_snapshots.")
+except FileNotFoundError:
+    printout("Could not run ex03_resize_snapshots, most likely because data was missing.")
 
 # Example 4: Like example 1, but with snapshot splitting.
 if run_example04():
@@ -48,8 +49,8 @@ else:
 # Example 5: SNAP calculation. Ommitted for now, because it depends on LAMMPS installation.
 try:
     run_example05()
-except:
-    printout("Could not run example09, most likely because of missing LAMMPS installation.")
+except ModuleNotFoundError:
+    printout("Could not run example05, most likely because of missing LAMMPS installation.")
 
 
 
@@ -69,7 +70,7 @@ else:
                     "the example, there might be a problem with your installation.")
 
 # Example 8: Train a network, do a prediction and process this prediction.
-if run_example08(False, True,doplots=False):
+if run_example08(True, True,doplots=False):
     printout("Successfully ran ex08_training_with_postprocessing.py.")
 else:
     raise Exception("Ran ex08_training_with_postprocessing but something was off. If you haven't changed any parameters in "
@@ -78,15 +79,15 @@ else:
 # Example 9: Calculation of the total energy. Ommitted for now, because it depends on a custom QE installation.
 try:
     run_example09()
-except:
+except ModuleNotFoundError:
     printout("Could not run example09, most likely because of missing QE installation.")
 
 # Example 10: Novel hyperparameter optimization techniques.
 if run_example10():
-    printout("Successfully ran ex02_hyperparameter_optimization.py.")
+    printout("Successfully ran ex10_advanced_hyperparameter_optimization.py.")
 else:
     raise Exception(
-        "Ran ex02_hyperparameter_optimization but something was off. If you haven't changed any parameters in "
+        "Ran ex10_advanced_hyperparameter_optimization but something was off. If you haven't changed any parameters in "
         "the example, there might be a problem with your installation.")
 
 

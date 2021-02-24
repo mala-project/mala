@@ -6,6 +6,7 @@ from fesl.targets.density import Density
 from fesl.targets.dos import DOS
 from fesl.common.parameters import Parameters
 from fesl.common.parameters import printout
+from data_repo_path import get_data_repo_path
 
 # In order to test the integration capabilities of FESL we need a QuantumEspresso
 # calculation containing the following:
@@ -18,7 +19,7 @@ from fesl.common.parameters import printout
 # to develop this script). It uses an Al supercell with 36 atoms and a
 # 6x6x6 k-grid.
 
-data_path = "/home/fiedlerl/data/Al36/for_fesl/"
+data_path = get_data_repo_path()+"Al36/"
 path_to_out = data_path+"Al.pw.scf.out"
 path_to_ldos_qe = [data_path, "tmp.pp*Al_ldos.cube"]
 path_to_dos_qe = [data_path, "Al.dos"]
