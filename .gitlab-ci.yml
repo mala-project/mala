@@ -111,6 +111,7 @@ test-docstrings:
     - conda-CI
     - documentation
     - fix_docstrings
+    - 210222_LF_FixDocstrings
     - /^fix_docstrings_in_.*$/
 
 pages:
@@ -143,4 +144,5 @@ pages:
   - conda-CI
   - documentation
   - fix_docstrings
+  - 210222_LF_FixDocstrings
   - /^fix_docstrings_in_.*$/

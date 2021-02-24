@@ -1,6 +1,5 @@
-from fesl.common.parameters import Parameters
-from fesl.common.parameters import printout
-from fesl.datahandling.data_handler import DataHandler
+import fesl
+from fesl import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()
@@ -17,11 +16,7 @@ def run_example03(accuracy=10**-10):
     # PARAMETERS
     # We only need to specify the correct input data format and the resizing grid.
     ####################
-    test_parameters = Parameters()
-    test_parameters.data.datatype_in = "*.npy"
-    test_parameters.data.datatype_out = "*.npy"
-    test_parameters.data.input_memmap_mode = "r"
-    test_parameters.data.output_memmap_mode = "r"
+    test_parameters = fesl.Parameters()
 
     # We want to resize certain data files, so we don't want any kind of cutting operation performed.
     test_parameters.data.descriptors_contain_xyz = False
@@ -33,15 +28,16 @@ def run_example03(accuracy=10**-10):
     # We have to specify the directories we want to read the snapshots from.
     ####################
 
-    data_handler = DataHandler(test_parameters)
+    data_handler = fesl.DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot0.npy",
                               data_path+"Al256/",
                               "Al_ldos_200x200x200grid_250elvls_snapshot0.npy",
                               data_path+"Al256/",output_units="1/Ry")
-    data_handler.resize_snapshots_for_debugging(directory="./data/", filetype="*.npy",
-                                  naming_scheme_input="test_Al_debug_2k_nr*.in", naming_scheme_output="test_Al_debug_2k_nr*.out")
+    data_handler.resize_snapshots_for_debugging(directory="./data/",
+                                                naming_scheme_input="test_Al_debug_2k_nr*.in",
+                                                naming_scheme_output="test_Al_debug_2k_nr*.out")
     printout("Write data: DONE.")
 
     # Verify that the we got the correct results.

@@ -1,22 +1,32 @@
+"""Neural network for FESL."""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by parameters class
     pass
 
+
 class Network(nn.Module):
-    """Central network class for this framework. Based on pytorch.nn.Module."""
+    """Central network class for this framework, based on pytorch.nn.Module."""
 
-    def __init__(self, p):
+    def __init__(self, params):
+        """
+        Create a Network object, representing a neural network.
+
+        Parameters
+        ----------
+        params : fesl.common.parametes.Parameters
+            Parameters used to create this neural network.
+        """
         # copy the network params from the input parameter object
-        self.use_horovod = p.use_horovod
-        self.params = p.network
+        self.use_horovod = params.use_horovod
+        self.params = params.network
 
-        # if the user has planted a seed (for comparibility purposes) we should use it.
+        # if the user has planted a seed (for comparibility purposes) we
+        # should use it.
         if self.params.manual_seed is not None:
             torch.manual_seed(self.params.manual_seed)
             torch.cuda.manual_seed(self.params.manual_seed)
@@ -36,7 +46,7 @@ class Network(nn.Module):
         self.layers = nn.ModuleList()
 
         if self.params.nn_type == "feed-forward":
-            self.initialize_as_feedforward()
+            self.__initialize_as_feedforward()
         else:
             raise Exception("Unsupported network architecture.")
 
@@ -46,12 +56,15 @@ class Network(nn.Module):
         else:
             raise Exception("Unsupported loss function.")
 
-        # Once everything is done, we can move the Network on the target device.
-        if p.use_gpu:
+        # Once everything is done, we can move the Network on the target
+        # device.
+        if params.use_gpu:
             self.to('cuda')
 
-    def initialize_as_feedforward(self):
-        # Check if multiple types of activations were selected or only one was passed to be used in the entire network.#
+    def __initialize_as_feedforward(self):
+        """Initialize this network as a feed-forward network."""
+        # Check if multiple types of activations were selected or only one
+        # was passed to be used in the entire network.#
         # If multiple layers have been passed, their size needs to be correct.
 
         use_only_one_activation_type = False
@@ -61,19 +74,35 @@ class Network(nn.Module):
             raise Exception("Not enough activation layers provided.")
 
         # Add the layers.
-        # As this is a feedforward layer we always add linear layers, and then an activation function
+        # As this is a feedforward layer we always add linear layers, and then
+        # an activation function
         for i in range(0, self.number_of_layers):
-            self.layers.append((nn.Linear(self.params.layer_sizes[i], self.params.layer_sizes[i + 1])))
+            self.layers.append((nn.Linear(self.params.layer_sizes[i],
+                                          self.params.layer_sizes[i + 1])))
             try:
                 if use_only_one_activation_type:
-                    self.layers.append(self.activation_mappings[self.params.layer_activations[0]]())
+                    self.layers.append(self.activation_mappings[self.params.
+                                       layer_activations[0]]())
                 else:
-                    self.layers.append(self.activation_mappings[self.params.layer_activations[i]]())
+                    self.layers.append(self.activation_mappings[self.params.
+                                       layer_activations[i]]())
             except:
                 raise Exception("Invalid activation type seleceted.")
 
     def forward(self, inputs):
+        """
+        Perform a forward pass through the network.
 
+        Parameters
+        ----------
+        inputs : torch.Tensor
+            Input array for which the forward pass is to be performed.
+
+        Returns
+        -------
+        predicted_array : torch.Tensor
+            Predicted outputs of array.
+        """
         # Forward propagate data.
         if self.params.nn_type == "feed-forward":
             for layer in self.layers:
@@ -84,45 +113,91 @@ class Network(nn.Module):
 
     def do_prediction(self, array):
         """
-        Interface to do predictions. The data put in here is assumed to be scaled and in the right units.
-        So far it is mostly an interface to pytorch, but maybe at a later date it will be more.
+        Predict the output values for an input array..
+
+        Interface to do predictions. The data put in here is assumed to be a
+        scaled torch.Tensor and in the right units. Be aware that this will
+        pass the entire array through the network, which might be very
+        demanding in terms of RAM.
+
+        Parameters
+        ----------
+        array : torch.Tensor
+            Input array for which the prediction is to be performed.
+
+        Returns
+        -------
+        predicted_array : torch.Tensor
+            Predicted outputs of array.
+
         """
         self.eval()
         with torch.no_grad():
             return self(array)
 
     def calculate_loss(self, output, target):
+        """
+        Calculate the loss for a predicted output and target.
+
+        Parameters
+        ----------
+        output : torch.Tensor
+            Predicted output.
+
+        target : torch.Tensor.
+            Actual output.
+
+        Returns
+        -------
+        loss_val : float
+            Loss value for output and target.
+
+        """
         return self.loss_func(output, target)
 
     # FIXME: This guarentees downwards compatibility, but it is ugly.
     #  Rather enforce the right package versions in the repo.
     def save_network(self, path_to_file):
         """
-        Saves the network. This function serves as an interfaces to pytorchs own saving functionalities
-        AND possibly own saving needs.
+        Save the network.
+
+        This function serves as an interfaces to pytorchs own saving
+        functionalities AND possibly own saving needs.
+
+        Parameters
+        ----------
+        path_to_file : string
+            Path to the file in which the network should be saved.
         """
         # If we use horovod, only save the network on root.
         if self.use_horovod:
             if hvd.rank() != 0:
                 return
-        torch.save(self.state_dict(), path_to_file, _use_new_zipfile_serialization=False)
+        torch.save(self.state_dict(), path_to_file,
+                   _use_new_zipfile_serialization=False)
 
     @classmethod
     def load_from_file(cls, params, path_to_file):
         """
-        Loads a network from a file.
+        Load a network from a file.
+
+        Parameters
+        ----------
+        params : fesl.common.parameters.Parameters
+            Parameters object with which the network should be created.
+            Has to be compatible to the network architecture. This is usually
+            enforced by using the same Parameters object (and saving/loading
+            it to)
+
+        path_to_file : string
+            Path to the file from which the network should be loaded.
+
+        Returns
+        -------
+        loaded_network : Network
+            The network that was loaded from the file.
         """
         loaded_network = Network(params)
         loaded_network.load_state_dict(torch.load(path_to_file))
         loaded_network.eval()
         return loaded_network
-
-    # FIXME: Move to a different file, as this is only needed for
-    # classification problems and the LDOS prediction is no classification
-    # problem. Also it is slow.
-
-    @staticmethod
-    def classification_accuracy(prediction, target):
-        prediction_arguments = torch.argmax(prediction, dim=1)
-        target_arguments = torch.argmax(target, dim=1)
-        return ((prediction_arguments == target_arguments).float()).mean()

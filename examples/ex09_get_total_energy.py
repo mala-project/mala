@@ -1,7 +1,5 @@
-from fesl.common.parameters import Parameters
-from fesl.targets.ldos import LDOS
-from fesl.targets.dos import DOS
-from fesl.common.parameters import printout
+import fesl
+from fesl import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
@@ -18,7 +16,7 @@ def run_example09(accuracy = 50):
     # PARAMETERS
     # All parameters are handled from a central parameters class that contains subclasses.
     ####################
-    test_parameters = Parameters()
+    test_parameters = fesl.Parameters()
     test_parameters.targets.ldos_gridsize = 250
     test_parameters.targets.ldos_gridspacing_ev = 0.1
     test_parameters.targets.ldos_gridoffset_ev = -10.0
@@ -27,7 +25,7 @@ def run_example09(accuracy = 50):
     # CALCULATORS
     # Set up a calculator and use it.
     ####################
-    ldos_calculator = LDOS(test_parameters)
+    ldos_calculator = fesl.LDOS(test_parameters)
     ldos_calculator.read_additional_calculation_data("qe.out", data_path+"Al.pw.scf.out")
 
     # Note: This repo only contains ONE pseudopotential. If you work with different elements, you will have to get
@@ -37,7 +35,7 @@ def run_example09(accuracy = 50):
     dens_data = np.load(data_path+"Al_dens.npy")
 
     # To get best results, it is advised to get the self-consistent fermi energy.
-    dos_calculator = DOS.from_ldos(ldos_calculator)
+    dos_calculator = fesl.DOS.from_ldos(ldos_calculator)
     fermi_energy_sc = dos_calculator.get_self_consistent_fermi_energy_ev(dos_data)
 
     # The LDOS calculator can accept preprocessed data.

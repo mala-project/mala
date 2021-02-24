@@ -1,6 +1,5 @@
-from fesl.common.parameters import Parameters
-from fesl.common.parameters import printout
-from fesl.targets.dos import DOS
+import fesl
+from fesl import printout
 import numpy as np
 from ase.units import Rydberg
 from data_repo_path import get_data_repo_path
@@ -45,13 +44,13 @@ def run_example07(accuracy_meV_per_atom = 120.0):
     # PARAMETERS
     # All parameters are handled from a central parameters class that contains subclasses.
     ####################
-    test_parameters = Parameters()
+    test_parameters = fesl.Parameters()
     test_parameters.targets.ldos_gridsize = 250
     test_parameters.targets.ldos_gridspacing_ev = 0.1
     test_parameters.targets.ldos_gridoffset_ev = -10.0
 
     # Create a DOS object and provide additional parameters.
-    dos = DOS(test_parameters)
+    dos = fesl.DOS(test_parameters)
     dos.read_additional_calculation_data("qe.out", data_path+"QE_Al.scf.pw.out")
 
     # Load a precalculated DOS file.

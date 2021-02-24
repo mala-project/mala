@@ -1,13 +1,16 @@
-"""Interface for descriptor calculators. A descriptor calculator is used
-to encode information about the chemical neighborhood on the grid. (e.g.: SNAP)"""
-
-
+"""Interface functions to automatically get descriptors."""
 from .snap import SNAP
 
 
 def DescriptorInterface(params):
-    """Defines an interface which, based on the choices made by the user
-    in parameters, will always return the right kind of descriptor calculator."""
+    """
+    Return a DescriptorBase object that adheres to the parameters provided.
+
+    Parameters
+    ----------
+    params : fesl.common.parameters.Parameters
+        Parameters for which a DescriptorBase object is desired.
+    """
     if params.descriptors.descriptor_type == 'SNAP':
         return SNAP(params)
     else:

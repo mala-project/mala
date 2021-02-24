@@ -1,6 +1,5 @@
-from fesl.common.parameters import Parameters
-from fesl.common.parameters import printout
-from fesl.descriptors.snap import SNAP
+import fesl
+from fesl import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()
@@ -19,7 +18,7 @@ def run_example05(accuracy = 0.000001):
     # We do, however, define a smaller debug grid as to make sure that this calculation does not take
     # too long.
     ####################
-    test_parameters = Parameters()
+    test_parameters = fesl.Parameters()
     test_parameters.descriptors.descriptor_type = "SNAP"
     test_parameters.descriptors.twojmax = 10
     test_parameters.descriptors.rcutfac = 4.67637
@@ -30,7 +29,7 @@ def run_example05(accuracy = 0.000001):
     # We use a SNAP object to calculate the SNAP descriptors from a QE file.
     ####################
 
-    test_descriptors = SNAP(test_parameters)
+    test_descriptors = fesl.SNAP(test_parameters)
     snap_data = test_descriptors.calculate_from_qe_out("QE_Al.scf.pw.out", data_path+"Al256/")
     snap_data_backup = np.load(data_path+"Al256_reduced/"+"Al_snap_from_qe.npy")
     diff = np.abs(np.sum(snap_data_backup) - np.sum(snap_data))

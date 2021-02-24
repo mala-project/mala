@@ -1,31 +1,52 @@
+"""Hyperparameter optimizer using optuna."""
 import optuna
 from .hyper_opt_base import HyperOptBase
 from .objective_base import ObjectiveBase
 
 
 class HyperOptOptuna(HyperOptBase):
-    """Perform hyperparameter optimization using optuna."""
+    """Hyperparameter optimizer using Optuna."""
 
-    def __init__(self, p):
-        super(HyperOptOptuna,self).__init__(p)
-        self.params = p
-        self.study = optuna.create_study(direction=self.params.hyperparameters.direction)
+    def __init__(self, params):
+        """
+        Create a HyperOptOptuna object.
+
+        Parameters
+        ----------
+        params : fesl.common.parametes.Parameters
+            Parameters used to create this hyperparameter optimizer.
+        """
+        super(HyperOptOptuna, self).__init__(params)
+        self.params = params
+        self.study = optuna.\
+            create_study(direction=self.params.hyperparameters.direction)
         self.objective = None
 
     def perform_study(self, data_handler):
-        """Runs the optuna "study" """
+        """
+        Perform the study, i.e. the optimization.
 
-        # Perform the study.
+        This is done by sampling a certain subset of network architectures.
+        In this case, optuna is used.
+
+        Parameters
+        ----------
+        data_handler : fesl.datahandling.data_handler.DataHandler
+            datahandler to be used during the hyperparameter optimization.
+        """
         self.objective = ObjectiveBase(self.params, data_handler)
-        self.study.optimize(self.objective, n_trials=self.params.hyperparameters.n_trials)
+        self.study.optimize(self.objective,
+                            n_trials=self.params.hyperparameters.n_trials)
 
         # Return the best lost value we could achieve.
         return self.study.best_value
 
     def set_optimal_parameters(self):
-        """Writes the best set of parameters found by an optuna study back into
-        the parameters object."""
+        """
+        Set the optimal parameters found in the present study.
 
+        The parameters will be written to the parameter object with which the
+        hyperparameter optimizer was created.
+        """
         # Parse the parameters from the best trial.
         self.objective.parse_trial_optuna(self.study.best_trial)
-
