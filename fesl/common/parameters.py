@@ -29,6 +29,7 @@ class ParametersBase:
         indent : string
             The indent used in the list with which the parameter
             shows itself.
+
         """
         for v in vars(self):
             printout(indent + '%-15s: %s' % (v, getattr(self, v)))
@@ -55,6 +56,7 @@ class ParametersNetwork(ParametersBase):
         smaller than the dimension of layer_sizes-1, than the first entry
         is used for all layers.
         Currently supported activation functions are:
+
             - Sigmoid (default)
             - ReLU
             - LeakyReLU
@@ -62,6 +64,7 @@ class ParametersNetwork(ParametersBase):
     loss_function_type: string
         Loss function for the neural network
         Currently supported loss functions include:
+
             - mse (Mean squared error; default)
 
     manual_seed: int
@@ -103,6 +106,7 @@ class ParametersDescriptors(ParametersBase):
         SNAP calculation: LAMMPS input file that is used to calculate the
         SNAP descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
+
     """
 
     def __init__(self):
@@ -169,6 +173,7 @@ class ParametersData(ParametersBase):
           - te: This snapshot will be a testing snapshot.
           - tr: This snapshot will be a training snapshot.
           - va: This snapshot will be a validation snapshot.
+
         Please note that the length of this list and the number of snapshots
         must be identical. The first element of this list will be used
         to characterize the first snapshot, the second element for the second
@@ -179,13 +184,12 @@ class ParametersData(ParametersBase):
         Options:
 
             - "None": No normalization is applied.
-            - "standard": Standardization (Scale to mean 0,
-            standard deviation 1)
+            - "standard": Standardization (Scale to mean 0, standard deviation 1)
             - "normal": Min-Max scaling (Scale to be in range 0...1)
             - "feature-wise-standard": Row Standardization (Scale to mean 0,
-            standard deviation 1)
+              standard deviation 1)
             - "feature-wise-normal": Row Min-Max scaling (Scale to be in range
-             0...1)
+              0...1)
 
     output_rescaling_type : string
         Specifies how output quantities are normalized.
@@ -204,6 +208,7 @@ class ParametersData(ParametersBase):
         If True, data is lazily loaded, i.e. only the snapshots that are
         currently needed will be kept in memory. This greatly reduces memory
         demands, but adds additional computational time.
+
     """
 
     def __init__(self):
@@ -235,7 +240,7 @@ class ParametersRunning(ParametersBase):
             - Adam: Adam Optimization Algorithm
 
     learning_rate : float
-            Learning rate for chosen optimization algorithm. Default: 0.5.
+        Learning rate for chosen optimization algorithm. Default: 0.5.
 
     max_number_epochs : int
         Maximum number of epochs to train for. Default: 100.
@@ -258,8 +263,8 @@ class ParametersRunning(ParametersBase):
     early_stopping_threshold : float
         If the validation accuracy does not improve by at least threshold for
         early_stopping_epochs epochs, training is terminated:
-            validation_loss < validation_loss_old *
-            (1+early_stopping_threshold), or patience counter will go up.
+        validation_loss < validation_loss_old * (1+early_stopping_threshold),
+        or patience counter will go up.
         Default: 0. Numbers bigger than 0 can make early stopping very
         aggresive.
 
@@ -268,13 +273,15 @@ class ParametersRunning(ParametersBase):
         corresponding pytorch class will be used to manage the learning rate
         schedule.
         Options:
+
             - None: No learning rate schedule will be used.
             - "ReduceLROnPlateau": The learning rate will be reduced when the
-            validation loss is plateauing.
+              validation loss is plateauing.
 
     learning_rate_decay : float
         Decay rate to be used in the learning rate (if the chosen scheduler
-        supports that). Default: 0.1
+        supports that).
+        Default: 0.1
 
     learning_rate_patience : int
         Patience parameter used in the learning rate schedule (how long the
@@ -295,6 +302,7 @@ class ParametersRunning(ParametersBase):
         If True, the training data will be shuffled in between epochs.
         If lazy loading is selected, then this shuffling will be done on
         a "by snapshot" basis.
+
     """
 
     def __init__(self):
@@ -353,6 +361,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
               variables. No reordering is performed by FESL; the order
               depends on the order in the list. _xxx can be essentially
               anything.
+
         Users normally don't have to fill this list by hand, the hyperparamer
         optimizer provide interfaces for this task.
 
@@ -385,6 +394,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         indent : string
             The indent used in the list with which the parameter
             shows itself.
+
         """
         for v in vars(self):
             if v != "hlist":
@@ -406,6 +416,7 @@ class ParametersDebug(ParametersBase):
     grid_dimensions : list
         A list containing three elements. It enforces a smaller grid size
         globally when it is not empty.. Default : []
+
     """
 
     def __init__(self):
@@ -444,6 +455,7 @@ class Parameters:
 
     debug : ParametersDebug
         Container for all debugging parameters.
+
     """
 
     def __init__(self):
