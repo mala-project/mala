@@ -105,11 +105,7 @@ class DOS(TargetBase):
         # Create the desired/specified energy grid. We will use this to
         # check whether we have a correct file.
 
-        energy_grid = np.arange(self.parameters.ldos_gridoffset_ev,
-                                self.parameters.ldos_gridoffset_ev +
-                                self.parameters.ldos_gridsize *
-                                self.parameters.ldos_gridspacing_ev,
-                                self.parameters.ldos_gridspacing_ev)
+        energy_grid = self.get_energy_grid()
         return_dos_values = []
 
         # Open the file, then iterate through its contents.
@@ -129,20 +125,32 @@ class DOS(TargetBase):
 
         return np.array(return_dos_values)
 
-    def get_energy_grid(self):
+    def get_energy_grid(self, shift_energy_grid=False):
         """
         Get energy grid.
+
+        Parameters
+        ----------
+        shift_energy_grid : bool
+            If True, the entire energy grid will be shifted by
+            ldos_gridoffset_ev from the parameters.
 
         Returns
         -------
         e_grid : numpy.array
             Energy grid on which the DOS is defined.
         """
-        return np.arange(self.parameters.ldos_gridoffset_ev,
-                         self.parameters.ldos_gridoffset_ev +
-                         self.parameters.ldos_gridsize *
-                         self.parameters.ldos_gridspacing_ev,
-                         self.parameters.ldos_gridspacing_ev)
+        emin = self.parameters.ldos_gridoffset_ev
+
+        emax = self.parameters.ldos_gridoffset_ev + \
+            self.parameters.ldos_gridsize * \
+            self.parameters.ldos_gridspacing_ev
+        grid_size = self.parameters.ldos_gridsize
+        if shift_energy_grid is True:
+            emin += self.parameters.ldos_gridspacing_ev
+            emax += self.parameters.ldos_gridspacing_ev
+        linspace_array = (np.linspace(emin, emax, grid_size, endpoint=False))
+        return linspace_array
 
 
     def get_band_energy(self, dos_data, fermi_energy_eV=None,
@@ -184,14 +192,13 @@ class DOS(TargetBase):
         if temperature_K is None:
             temperature_K = self.temperature_K
 
-        emin = self.parameters.ldos_gridoffset_ev
-        emax = self.parameters.ldos_gridsize*self.parameters.\
-            ldos_gridspacing_ev+self.parameters.ldos_gridoffset_ev
-        return self.__band_energy_from_dos(dos_data, emin, emax,
-                                           self.parameters.ldos_gridspacing_ev,
+        if shift_energy_grid and integration_method == "analytical":
+            energy_grid =self.get_energy_grid(shift_energy_grid=True)
+        else:
+            energy_grid = self.get_energy_grid()
+        return self.__band_energy_from_dos(dos_data, energy_grid,
                                            fermi_energy_eV, temperature_K,
-                                           integration_method,
-                                           shift_energy_grid)
+                                           integration_method)
 
     def get_number_of_electrons(self, dos_data, fermi_energy_eV=None,
                                 temperature_K=None,
@@ -232,16 +239,14 @@ class DOS(TargetBase):
             fermi_energy_eV = self.fermi_energy_eV
         if temperature_K is None:
             temperature_K = self.temperature_K
-        emin = self.parameters.ldos_gridoffset_ev
-        emax = self.parameters.ldos_gridsize*self.parameters.\
-            ldos_gridspacing_ev+self.parameters.ldos_gridoffset_ev
-        return self.__number_of_electrons_from_dos(dos_data, emin, emax,
-                                                   self.parameters.
-                                                   ldos_gridspacing_ev,
+        if shift_energy_grid and integration_method == "analytical":
+            energy_grid =self.get_energy_grid(shift_energy_grid=True)
+        else:
+            energy_grid = self.get_energy_grid()
+        return self.__number_of_electrons_from_dos(dos_data, energy_grid,
                                                    fermi_energy_eV,
                                                    temperature_K,
-                                                   integration_method,
-                                                   shift_energy_grid)
+                                                   integration_method)
 
     def get_entropy_contribution(self, dos_data, fermi_energy_eV=None,
                                  temperature_K=None,
@@ -281,16 +286,15 @@ class DOS(TargetBase):
             fermi_energy_eV = self.fermi_energy_eV
         if temperature_K is None:
             temperature_K = self.temperature_K
-        emin = self.parameters.ldos_gridoffset_ev
-        emax = self.parameters.ldos_gridsize*self.parameters.\
-            ldos_gridspacing_ev+self.parameters.ldos_gridoffset_ev
+
+        if shift_energy_grid and integration_method == "analytical":
+            energy_grid =self.get_energy_grid(shift_energy_grid=True)
+        else:
+            energy_grid = self.get_energy_grid()
         return self.\
-            __entropy_contribution_from_dos(dos_data, emin, emax,
-                                            self.parameters.
-                                            ldos_gridspacing_ev,
+            __entropy_contribution_from_dos(dos_data, energy_grid,
                                             fermi_energy_eV, temperature_K,
-                                            integration_method,
-                                            shift_energy_grid)
+                                            integration_method)
 
 
 
@@ -333,19 +337,19 @@ class DOS(TargetBase):
         # Parse the parameters.
         if temperature_K is None:
             temperature_K = self.temperature_K
-        emin = self.parameters.ldos_gridoffset_ev
-        emax = self.parameters.ldos_gridsize * self.parameters.\
-            ldos_gridspacing_ev + self.parameters.ldos_gridoffset_ev
-
+        if shift_energy_grid and integration_method == "analytical":
+            energy_grid =self.get_energy_grid(shift_energy_grid=True)
+        else:
+            energy_grid = self.get_energy_grid()
         fermi_energy_sc = toms748(lambda fermi_sc:
                                   (self.
                                    __number_of_electrons_from_dos
-                                   (dos_data, emin, emax,
-                                    self.parameters.ldos_gridspacing_ev,
+                                   (dos_data, energy_grid,
                                     fermi_sc, temperature_K,
-                                    integration_method, shift_energy_grid)
-                                    - self.number_of_electrons), a=emin,
-                                  b=emax)
+                                    integration_method)
+                                    - self.number_of_electrons),
+                                  a=energy_grid[0],
+                                  b=energy_grid[-1])
         return fermi_energy_sc
 
     def get_density_of_states(self, dos_data):
@@ -388,43 +392,30 @@ class DOS(TargetBase):
 
 
     @staticmethod
-    def __number_of_electrons_from_dos(dos_data, emin, emax,
-                                       energy_grid_spacing, fermi_energy_eV,
-                                       temperature_K, integration_method,
-                                       shift_energy_grid):
-        """
-        Calculate the number of electrons from DOS data.
-
-        I don't fully understand why shift_energy_grid is needed yet.
-        But it definitely is.
-        """
+    def __number_of_electrons_from_dos(dos_data, energy_grid, fermi_energy_eV,
+                                       temperature_K, integration_method):
+        """Calculate the number of electrons from DOS data."""
         # Calculate the energy levels and the Fermi function.
 
-        # energy_vals = np.linspace(emin, emax, nr_energy_levels)
-        if shift_energy_grid and integration_method == "analytical":
-            emin += energy_grid_spacing
-            emax += energy_grid_spacing
-        energy_vals = np.arange(emin, emax, energy_grid_spacing)
-        fermi_vals = fermi_function(energy_vals, fermi_energy_eV, temperature_K)
-
+        fermi_vals = fermi_function(energy_grid, fermi_energy_eV, temperature_K)
         # Calculate the number of electrons.
         if integration_method == "trapz":
             number_of_electrons = integrate.trapz(dos_data * fermi_vals,
-                                                  energy_vals, axis=-1)
+                                                  energy_grid, axis=-1)
         elif integration_method == "simps":
             number_of_electrons = integrate.simps(dos_data * fermi_vals,
-                                                  energy_vals, axis=-1)
+                                                  energy_grid, axis=-1)
         elif integration_method == "quad":
-            dos_pointer = interpolate.interp1d(energy_vals, dos_data)
+            dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             number_of_electrons, abserr = integrate.quad(
                 lambda e: dos_pointer(e) * fermi_function(e, fermi_energy_eV,
                                                           temperature_K),
-                energy_vals[0], energy_vals[-1], limit=500,
+                energy_grid[0], energy_grid[-1], limit=500,
                 points=fermi_energy_eV)
         elif integration_method == "analytical":
             number_of_electrons = analytical_integration(dos_data, "F0", "F1",
                                                          fermi_energy_eV,
-                                                         energy_vals,
+                                                         energy_grid,
                                                          temperature_K)
         else:
             raise Exception("Unknown integration method.")
@@ -432,43 +423,38 @@ class DOS(TargetBase):
         return number_of_electrons
 
     @staticmethod
-    def __band_energy_from_dos(dos_data, emin, emax, energy_grid_spacing,
+    def __band_energy_from_dos(dos_data, energy_grid,
                                fermi_energy_eV,
-                               temperature_K, integration_method,
-                               shift_energy_grid):
+                               temperature_K, integration_method):
         """Calculate the band energy from DOS data."""
         # Calculate the energy levels and the Fermi function.
-        if shift_energy_grid and integration_method == "analytical":
-            emin += energy_grid_spacing
-            emax += energy_grid_spacing
-        energy_vals = np.arange(emin, emax, energy_grid_spacing)
-        fermi_vals = fermi_function(energy_vals, fermi_energy_eV, temperature_K)
+        fermi_vals = fermi_function(energy_grid, fermi_energy_eV, temperature_K)
 
         # Calculate the band energy.
         if integration_method == "trapz":
-            band_energy = integrate.trapz(dos_data * (energy_vals *
+            band_energy = integrate.trapz(dos_data * (energy_grid *
                                                       fermi_vals),
-                                          energy_vals, axis=-1)
+                                          energy_grid, axis=-1)
         elif integration_method == "simps":
-            band_energy = integrate.simps(dos_data * (energy_vals *
+            band_energy = integrate.simps(dos_data * (energy_grid *
                                                       fermi_vals),
-                                          energy_vals, axis=-1)
+                                          energy_grid, axis=-1)
         elif integration_method == "quad":
-            dos_pointer = interpolate.interp1d(energy_vals, dos_data)
+            dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             band_energy, abserr = integrate.quad(
                 lambda e: dos_pointer(e) * e * fermi_function(e,
                                                               fermi_energy_eV,
                                                               temperature_K),
-                energy_vals[0], energy_vals[-1], limit=500,
+                energy_grid[0], energy_grid[-1], limit=500,
                 points=fermi_energy_eV)
         elif integration_method == "analytical":
             number_of_electrons = analytical_integration(dos_data, "F0", "F1",
                                                          fermi_energy_eV,
-                                                         energy_vals,
+                                                         energy_grid,
                                                          temperature_K)
             band_energy_minus_uN = analytical_integration(dos_data, "F1", "F2",
                                                           fermi_energy_eV,
-                                                          energy_vals,
+                                                          energy_grid,
                                                           temperature_K)
             band_energy = band_energy_minus_uN+fermi_energy_eV *\
                 number_of_electrons
@@ -478,50 +464,44 @@ class DOS(TargetBase):
         return band_energy
 
     @staticmethod
-    def __entropy_contribution_from_dos(dos_data, emin, emax,
-                                        energy_grid_spacing, fermi_energy_eV,
-                                        temperature_K, integration_method,
-                                        shift_energy_grid):
+    def __entropy_contribution_from_dos(dos_data, energy_grid, fermi_energy_eV,
+                                        temperature_K, integration_method):
         r"""
         Calculate the entropy contribution to the total energy from DOS data.
 
         More specifically, this gives -\beta^-1*S_S
         """
         # Calculate the energy levels and the Fermi function.
-        if shift_energy_grid and integration_method == "analytical":
-            emin += energy_grid_spacing
-            emax += energy_grid_spacing
-        energy_vals = np.arange(emin, emax, energy_grid_spacing)
-        fermi_vals = fermi_function(energy_vals, fermi_energy_eV,
+        fermi_vals = fermi_function(energy_grid, fermi_energy_eV,
                                     temperature_K)
 
         # Calculate the entropy contribution to the energy.
         if integration_method == "trapz":
-            multiplicator = entropy_multiplicator(energy_vals,
+            multiplicator = entropy_multiplicator(energy_grid,
                                                   fermi_energy_eV,
                                                   temperature_K)
             entropy_contribution = integrate.trapz(dos_data * multiplicator,
-                                                   energy_vals, axis=-1)
+                                                   energy_grid, axis=-1)
             entropy_contribution /= get_beta(temperature_K)
         elif integration_method == "simps":
-            multiplicator = entropy_multiplicator(energy_vals, fermi_energy_eV,
+            multiplicator = entropy_multiplicator(energy_grid, fermi_energy_eV,
                                                   temperature_K)
             entropy_contribution = integrate.simps(dos_data * multiplicator,
-                                                   energy_vals, axis=-1)
+                                                   energy_grid, axis=-1)
             entropy_contribution /= get_beta(temperature_K)
         elif integration_method == "quad":
-            dos_pointer = interpolate.interp1d(energy_vals, dos_data)
+            dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             entropy_contribution, abserr = integrate.quad(
                 lambda e: dos_pointer(e) *
                           entropy_multiplicator(e, fermi_energy_eV,
                                                 temperature_K),
-                energy_vals[0], energy_vals[-1], limit=500,
+                energy_grid[0], energy_grid[-1], limit=500,
                 points=fermi_energy_eV)
             entropy_contribution /= get_beta(temperature_K)
         elif integration_method == "analytical":
             entropy_contribution = analytical_integration(dos_data, "S0", "S1",
                                                           fermi_energy_eV,
-                                                          energy_vals,
+                                                          energy_grid,
                                                           temperature_K)
         else:
             raise Exception("Unknown integration method.")

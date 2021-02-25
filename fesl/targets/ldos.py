@@ -144,20 +144,32 @@ class LDOS(TargetBase):
             ldos_data[:, :, :, i-1] = data[:, :, :]
         return ldos_data
 
-    def get_energy_grid(self):
+    def get_energy_grid(self, shift_energy_grid=False):
         """
         Get energy grid.
+
+        Parameters
+        ----------
+        shift_energy_grid : bool
+            If True, the entire energy grid will be shifted by
+            ldos_gridoffset_ev from the parameters.
 
         Returns
         -------
         e_grid : numpy.array
-            Energy grid on which the DOS is defined.
+            Energy grid on which the LDOS is defined.
         """
-        return np.arange(self.parameters.ldos_gridoffset_ev,
-                         self.parameters.ldos_gridoffset_ev +
-                         self.parameters.ldos_gridsize *
-                         self.parameters.ldos_gridspacing_ev,
-                         self.parameters.ldos_gridspacing_ev)
+        emin = self.parameters.ldos_gridoffset_ev
+
+        emax = self.parameters.ldos_gridoffset_ev + \
+            self.parameters.ldos_gridsize * \
+            self.parameters.ldos_gridspacing_ev
+        grid_size = self.parameters.ldos_gridsize
+        if shift_energy_grid is True:
+            emin += self.parameters.ldos_gridspacing_ev
+            emax += self.parameters.ldos_gridspacing_ev
+        linspace_array = (np.linspace(emin, emax, grid_size, endpoint=False))
+        return linspace_array
 
     def get_total_energy(self, ldos_data=None, dos_data=None,
                          density_data=None, fermi_energy_eV=None,
