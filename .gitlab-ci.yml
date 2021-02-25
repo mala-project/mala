@@ -48,9 +48,12 @@ setup-fesl:
     - master
     - conda-CI
     - pipelinetest
+    - pipeline_fix_test-basic-functions
 
 test-basic-functions:
   stage: test
+  tags:
+    - 2-core
   before_script:
     - *env_setup
     - *data_setup
@@ -62,7 +65,7 @@ test-basic-functions:
     - master
     - conda-CI
     - pipelinetest
-
+    - pipeline_fix_test-basic-functions
 
 test-workflow:
   stage: test
@@ -77,6 +80,7 @@ test-workflow:
   only:
     - master
     - conda-CI
+    - pipeline_fix_test-basic-functions
 
 #### documentation
 
@@ -116,6 +120,7 @@ test-docstrings:
     - fix_docstrings
     - 210222_LF_FixDocstrings
     - /^fix_docstrings_in_.*$/
+    - pipeline_fix_test-basic-functions
 
 pages:
   stage: deploy
@@ -149,3 +154,4 @@ pages:
   - fix_docstrings
   - 210222_LF_FixDocstrings
   - /^fix_docstrings_in_.*$/
+  - pipeline_fix_test-basic-functions
