@@ -99,6 +99,8 @@ class SNAP(DescriptorBase):
 
         """
         self.in_format_ase = "espresso-out"
+        print("Calculating SNAP descriptors from", qe_out_file, "at",
+              qe_out_directory)
         return self.__calculate_snap(qe_out_directory + qe_out_file,
                                      qe_out_directory)
 
@@ -106,7 +108,6 @@ class SNAP(DescriptorBase):
         """Perform actual SNAP calculation."""
         from lammps import lammps
         lammps_format = "lammps-data"
-
         # We get the atomic information by using ASE.
         atoms = ase.io.read(infile, format=self.in_format_ase)
         ase_out_path = outdir+"lammps_input.tmp"
