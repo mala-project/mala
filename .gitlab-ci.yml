@@ -44,11 +44,6 @@ setup-fesl:
     - *data_setup
   script:
     - python examples/ex00_verify_installation.py
-  only:
-    - master
-    - conda-CI
-    - pipelinetest
-    - pipeline_fix_test-basic-functions
 
 test-basic-functions:
   stage: test
@@ -61,11 +56,6 @@ test-basic-functions:
     - cd test
     - python fesl_tests.py
   needs: [setup-fesl]
-  only:
-    - master
-    - conda-CI
-    - pipelinetest
-    - pipeline_fix_test-basic-functions
 
 test-workflow:
   stage: test
@@ -77,10 +67,6 @@ test-workflow:
     - python ex99_verify_all_examples.py
     - cd ..
   needs: [setup-fesl]
-  only:
-    - master
-    - conda-CI
-    - pipeline_fix_test-basic-functions
 
 #### documentation
 
@@ -113,14 +99,6 @@ test-docstrings:
   script:
     - pydocstyle --convention=numpy fesl
   needs: [setup-docs]
-  only:
-    - master
-    - conda-CI
-    - documentation
-    - fix_docstrings
-    - 210222_LF_FixDocstrings
-    - /^fix_docstrings_in_.*$/
-    - pipeline_fix_test-basic-functions
 
 pages:
   stage: deploy
@@ -147,11 +125,3 @@ pages:
     - public
   when:
     always
-  only:
-  - master
-  - conda-CI
-  - documentation
-  - fix_docstrings
-  - 210222_LF_FixDocstrings
-  - /^fix_docstrings_in_.*$/
-  - pipeline_fix_test-basic-functions
