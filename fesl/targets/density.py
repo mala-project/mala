@@ -37,7 +37,7 @@ class Density(TargetBase):
         # there is one value for the density (spin-unpolarized calculations).
         self.target_length = 1
 
-    def read_from_cube(self, file_name, directory):
+    def read_from_cube(self, file_name, directory, units=None):
         """
         Read the density data from a cube file.
 
@@ -48,6 +48,9 @@ class Density(TargetBase):
 
         directory :
             Directory containing the cube file.
+
+        units : string
+            Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file in ", directory)
         data, meta = read_cube(directory + file_name)
