@@ -70,7 +70,7 @@ class ObjectiveNoTraining(ObjectiveBase):
         try:
             surrogate_loss = - ObjectiveNoTraining.__calc_score(jac)
             surrogate_loss = surrogate_loss.detach().numpy().astype(np.float64)
-        except:
+        except RuntimeError:
             printout("Got a NaN, ignoring sample.")
         return surrogate_loss
 

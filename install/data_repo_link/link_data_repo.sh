@@ -36,6 +36,8 @@ fi
 rm -f ${script_path}/${pythonfile}
 touch ${script_path}/${pythonfile}
 echo "data_repo_path = \"${data_repo_path}\""   >> ${script_path}/${pythonfile}
+echo "" >> ${script_path}/${pythonfile}
+echo "" >> ${script_path}/${pythonfile}
 echo "def get_data_repo_path():"   >> ${script_path}/${pythonfile}
 echo "    return data_repo_path"   >> ${script_path}/${pythonfile}
 

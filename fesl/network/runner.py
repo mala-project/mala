@@ -26,9 +26,9 @@ class Runner:
         """
         self.parameters = params.running
         self.network = None
-        self.batch_size=params.running.mini_batch_size
+        self.batch_size = params.running.mini_batch_size
         self.use_gpu = params.use_gpu
-        self.use_horovod=params.use_horovod
+        self.use_horovod = params.use_horovod
         self.use_compression = self.parameters.use_compression
 
     def prepare_to_run(self):

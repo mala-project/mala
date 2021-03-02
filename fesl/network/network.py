@@ -86,7 +86,7 @@ class Network(nn.Module):
                 else:
                     self.layers.append(self.activation_mappings[self.params.
                                        layer_activations[i]]())
-            except:
+            except KeyError:
                 raise Exception("Invalid activation type seleceted.")
 
     def forward(self, inputs):

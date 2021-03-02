@@ -14,7 +14,7 @@ Python module installed.
 """
 
 
-def run_example03(do_total_energy=True, accuracy_electrons = 1e-11,
+def run_example03(do_total_energy=True, accuracy_electrons=1e-11,
                   accuracy_total_energy=50):
 
     ####################
@@ -82,6 +82,7 @@ def run_example03(do_total_energy=True, accuracy_electrons = 1e-11,
 
     print("Number of electrons:", number_of_electrons)
     print("Band energy:", band_energy)
+    total_energy = None
     if do_total_energy:
         print("Total energy:", total_energy)
 

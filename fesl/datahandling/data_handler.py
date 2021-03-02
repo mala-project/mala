@@ -478,15 +478,9 @@ class DataHandler:
         """Load a numpy array from a file."""
         loaded_array = np.load(file, mmap_mode=mmapmode)
         if len(self.dbg_grid_dimensions) == 3:
-            try:
-                return loaded_array[0:self.dbg_grid_dimensions[0],
-                                    0:self.dbg_grid_dimensions[1],
-                                    0:self.dbg_grid_dimensions[2], :]
-            except:
-                printout(
-                    "Could not use grid reduction, falling back to regular "
-                    "grid. Please check that the debug grid is "
-                    "not bigger than the actual grid.")
+            return loaded_array[0:self.dbg_grid_dimensions[0],
+                                0:self.dbg_grid_dimensions[1],
+                                0:self.dbg_grid_dimensions[2], :]
 
         else:
             return loaded_array
@@ -809,7 +803,8 @@ class DataHandler:
             if data_type == "in" and self.parameters.descriptors_contain_xyz:
                 numpy_array = numpy_array[:, :, :, 3:]
             if units is not None:
-                numpy_array *= self.descriptor_calculator.convert_units(1, units)
+                numpy_array *= self.descriptor_calculator.convert_units(1,
+                                                                        units)
             return numpy_array
         elif data_type == "out":
             if units is not None:

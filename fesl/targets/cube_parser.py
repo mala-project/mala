@@ -40,8 +40,8 @@ Cube parser, taken from cubetools (see below).
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 # 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 # 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -93,20 +93,24 @@ class CubeFile(object):
         self.cursor = 0 
         self.const = const
         self.src = src = open(srcname)
-        src.readline(); src.readline(); # comments
+        # comments
+        src.readline()
+        src.readline()
         _debug(srcname)
         self.lines = [" Cubefile created by cubetools.py\n", 
                       "  source: {0}\n".format(srcname)]
-        self.lines.append(src.readline()) # read natm and origin
+        self.lines.append(src.readline())  # read natm and origin
         self.natm = int(self.lines[-1].strip().split()[0])
         # read cube dim and vectors along 3 axes
         self.lines.extend(src.readline() for i in range(3))
         self.src.close()
-        self.nx, self.ny, self.nz = [int(l.strip().split()[0]) for l in self.lines[3:6]]
+        self.nx, self.ny, self.nz = [int(line.strip().split()[0])
+                                     for line in self.lines[3:6]]
         self.remvals = self.nz
         self.remrows = self.nx*self.ny
         for i in range(self.natm):
-            self.lines.append("{0:^ 8d}".format(1) + "{0:< 12.6f}".format(0)*4 + '\n')
+            self.lines.append("{0:^ 8d}".format(1) + "{0:< 12.6f}".format(0)*4
+                              + '\n')
 
     def __del__(self):
         """Close Cube file."""
@@ -129,7 +133,7 @@ class CubeFile(object):
             if not self.remrows:
                 return ""
             if self.remvals <= 6:
-                nval = min(6,self.remvals)
+                nval = min(6, self.remvals)
                 self.remrows -= 1
                 self.remvals = self.nz 
             else:
@@ -152,8 +156,8 @@ def _getline(cube):
     
     returns: (int, list<float>)
     """
-    l = cube.readline().strip().split()
-    return int(l[0]), map(float, l[1:])
+    line = cube.readline().strip().split()
+    return int(line[0]), map(float, line[1:])
 
 
 def _putline(*args):
@@ -191,7 +195,9 @@ def read_cube(fname):
     """
     meta = {}
     with open(fname, 'r') as cube:
-        cube.readline(); cube.readline()  # ignore comments
+        # ignore comments
+        cube.readline()
+        cube.readline()
         natm, meta['org'] = _getline(cube)
         nx, meta['xvec'] = _getline(cube)
         ny, meta['yvec'] = _getline(cube)
@@ -207,7 +213,7 @@ def read_cube(fname):
     return data, meta
 
 
-def read_imcube(rfname, ifname = ""):
+def read_imcube(rfname, ifname=""):
     """
     Read in two cube files at once.
 
@@ -278,9 +284,9 @@ def write_cube(data, meta, fname):
         for i in range(nx):
             for j in range(ny):
                 for k in range(nz):
-                    if (i or j or k) and k%6==0:
+                    if (i or j or k) and k % 6 == 0:
                         cube.write("\n")
-                    cube.write(" {0: .5E}".format(data[i,j,k]))
+                    cube.write(" {0: .5E}".format(data[i, j, k]))
 
 
 def write_imcube(data, meta, rfname, ifname=""):

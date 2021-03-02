@@ -58,6 +58,8 @@ def test_tensor_memory(file, accuracy):
 
 
 if __name__ == "__main__":
-    test1 = test_tensor_memory(data_path+"Al_debug_2k_nr0.in.npy", 0.000001)
-    printout("Check if numpy->tensor works without copying - success?:", test1)
+    test_result = test_tensor_memory(data_path+"Al_debug_2k_nr0.in.npy",
+                                     0.000001)
+    printout("Check if numpy->tensor works without copying - success?:",
+             test_result)
 

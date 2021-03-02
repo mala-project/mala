@@ -17,7 +17,7 @@ class DataScaler:
     implementing the class by ourselves we have more freedom.
     """
 
-    def __init__(self, typestring, use_horovod = False):
+    def __init__(self, typestring, use_horovod=False):
         """
         Create a DataScaler object.
 

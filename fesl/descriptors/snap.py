@@ -116,6 +116,9 @@ class SNAP(DescriptorBase):
         # We also need to know how big the grid is.
         # Iterating directly through the file is slow, but the
         # grid information is at the top (around line 200).
+        nx = None
+        ny = None
+        nz = None
         if len(self.dbg_grid_dimensions) == 3:
             nx = self.dbg_grid_dimensions[0]
             ny = self.dbg_grid_dimensions[1]

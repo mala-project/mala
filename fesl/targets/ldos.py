@@ -125,6 +125,7 @@ class LDOS(TargetBase):
         # QE is a Fortran code, so everything is 1 based.
         printout("Reading "+str(self.parameters.ldos_gridsize) +
                  " LDOS files from"+directory+".")
+        ldos_data = None
         for i in range(1, self.parameters.ldos_gridsize + 1):
             tmp_file_name = file_name_scheme
             tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
@@ -302,7 +303,7 @@ class LDOS(TargetBase):
 
         # Smearing / Entropy contribution
         e_entropy_contribution = dos_calculator.\
-            get_entropy_contribution(dos_data,fermi_energy_eV=fermi_energy_eV,
+            get_entropy_contribution(dos_data, fermi_energy_eV=fermi_energy_eV,
                                      temperature_K=temperature_K,
                                      integration_method=
                                      energy_integration_method,
@@ -318,9 +319,6 @@ class LDOS(TargetBase):
             e_entropy_contribution
 
         return e_total
-
-
-
 
     def get_band_energy(self, ldos_data, fermi_energy_eV=None,
                         temperature_K=None, grid_spacing_bohr=None,
@@ -360,6 +358,9 @@ class LDOS(TargetBase):
         shift_energy_grid : bool
             When using the analytical integration, one has to shift the energy
             grid by setting this parameter to True. Elsewise keep on False.
+
+        grid_spacing_bohr : float
+            Grid spacing (distance between grid points) in Bohr.
 
         Returns
         -------

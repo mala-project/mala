@@ -32,6 +32,7 @@ def set_cmdlinevars(cmdargs, argdict):
 # def extract_commands(string):
 #     return [x for x in string.splitlines() if x.strip() != '']
 
+
 def extract_compute_np(lmp, name, compute_type, result_type, array_shape):
     """
     Convert a lammps compute to a numpy array.

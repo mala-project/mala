@@ -56,7 +56,6 @@ class Density(TargetBase):
         data, meta = read_cube(directory + file_name)
         return data
 
-
     def get_number_of_electrons(self, density_data, grid_spacing_bohr=None,
                                 integration_method="summation"):
         """
@@ -98,6 +97,7 @@ class Density(TargetBase):
         # integrate, but rather reduce in this direction.
         # Integration over one point leads to zero.
 
+        number_of_electrons = None
         if integration_method != "summation":
             number_of_electrons = density_data
 
@@ -222,6 +222,7 @@ class Density(TargetBase):
                 - E_xc
                 - e_Ewald
         """
+        # noinspection PyShadowingNames
         import total_energy as te
         if create_file:
             # If not otherwise specified, use values as read in.
@@ -281,6 +282,7 @@ class Density(TargetBase):
                             " Quantum Espresso")
 
         # Now we need to reshape the density.
+        density_for_qe = None
         if len(density_data.shape) == 3:
             density_for_qe = np.reshape(density_data, [number_of_gridpoints,
                                                        1], order='F')
