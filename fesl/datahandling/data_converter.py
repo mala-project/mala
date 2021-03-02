@@ -86,6 +86,26 @@ class DataConverter:
         self.__snapshot_units.append([input_units, output_units])
 
     def convert_single_snapshot(self, snapshot_number):
+        """
+        Convert single snapshot from the conversion lists.
+
+        Returns the preprocessed data as numpy array, which might be
+        beneficial during testing.
+
+        Parameters
+        ----------
+        snapshot_number : integer
+            Position of the desired snapshot in the snapshot list.
+
+        Returns
+        -------
+        inputs : numpy.array
+            Numpy array containing the preprocessed inputs.
+
+        outputs : numpy.array
+            Numpy array containing the preprocessed outputs.
+
+        """
         snapshot = self.__snapshots_to_convert[snapshot_number]
         description = self.__snapshot_description[snapshot_number]
         original_units = self.__snapshot_units[snapshot_number]
