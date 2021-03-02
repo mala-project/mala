@@ -116,6 +116,9 @@ class SNAP(DescriptorBase):
         # We also need to know how big the grid is.
         # Iterating directly through the file is slow, but the
         # grid information is at the top (around line 200).
+        nx = None
+        ny = None
+        nz = None
         if len(self.dbg_grid_dimensions) == 3:
             nx = self.dbg_grid_dimensions[0]
             ny = self.dbg_grid_dimensions[1]
@@ -151,11 +154,7 @@ class SNAP(DescriptorBase):
             self.parameters.lammps_compute_file = filepath+"in.bgrid.python"
 
         # Do the LAMMPS calculation.
-        try:
-            lmp.file(self.parameters.lammps_compute_file)
-        except lammps.LAMMPSException:
-            raise Exception("There was a problem during the SNAP calculation. "
-                            "Exiting.")
+        lmp.file(self.parameters.lammps_compute_file)
 
         # Set things not accessible from LAMMPS
         # First 3 cols are x, y, z, coords

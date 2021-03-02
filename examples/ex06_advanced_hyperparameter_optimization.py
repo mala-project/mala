@@ -81,6 +81,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
     # Add hyperparameters we want to have optimized to the list.
     # If we do a notraining run currently we need to create an input array
     # using one of the other two possible hyperparameter optimizers.
+    tmp_hp_optimizer = None
     if hyper_optimizer == "oat" or hyper_optimizer == "optuna":
         test_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
                                              choices=["Adam", "SGD"])
@@ -117,7 +118,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
     if hyper_optimizer == "oat" or hyper_optimizer == "optuna":
         test_hp_optimizer.perform_study(data_handler)
         if hyper_optimizer == "optuna":
-            last_optuna_study = test_hp_optimizer.study.get_trials()
+            last_optuna_study = test_hp_optimizer.get_trials_from_study()
     elif hyper_optimizer == "notraining":
         if input_creator_notraining == "optuna":
             test_hp_optimizer.perform_study(data_handler,
@@ -143,7 +144,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
         return test_trainer.final_test_loss
 
 
-def run_example06(desired_std = 0.1):
+def run_example06(desired_std=0.1):
     results = []
     result, last_study = optimize_hyperparameters("optuna")
     results.append(result)
@@ -159,6 +160,7 @@ def run_example06(desired_std = 0.1):
         printout(results)
         printout(np.std(results))
         return False
+
 
 if __name__ == "__main__":
     if run_example06():

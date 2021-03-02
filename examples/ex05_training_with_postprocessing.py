@@ -20,7 +20,7 @@ DFT simulation cell for this example.
 
 # Uses a trained network to make a prediction.
 def use_trained_network(network_path, params_path, input_scaler_path,
-                        output_scaler_path, accuracy = 0.05):
+                        output_scaler_path, accuracy=0.05):
 
     # First load Parameters and network.
     # Parameters may have to

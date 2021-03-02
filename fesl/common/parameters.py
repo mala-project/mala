@@ -8,8 +8,7 @@ except ModuleNotFoundError:
     warnings.warn("You either don't have Horovod installed or it is not "
                   "configured correctly. You can still train networks, but "
                   "attempting to set parameters.training.use_horovod = "
-                  "True WILL cause a crash."
-                  , stacklevel=3)
+                  "True WILL cause a crash.", stacklevel=3)
 import torch
 
 
@@ -184,7 +183,8 @@ class ParametersData(ParametersBase):
         Options:
 
             - "None": No normalization is applied.
-            - "standard": Standardization (Scale to mean 0, standard deviation 1)
+            - "standard": Standardization (Scale to mean 0, standard
+              deviation 1)
             - "normal": Min-Max scaling (Scale to be in range 0...1)
             - "feature-wise-standard": Row Standardization (Scale to mean 0,
               standard deviation 1)

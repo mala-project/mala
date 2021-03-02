@@ -193,7 +193,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
             if file_index != self.currently_loaded_file:
                 self.get_new_data(file_index)
             return self.input_data[index_in_file], \
-                   self.output_data[index_in_file]
+                self.output_data[index_in_file]
 
         elif isinstance(idx, slice):
             # If a slice is requested, we have to find out if t spans files.

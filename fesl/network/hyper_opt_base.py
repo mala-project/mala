@@ -18,7 +18,7 @@ class HyperOptBase(ABC):
         self.params = params
 
     def add_hyperparameter(self, opttype="float", name="", low=0, high=0,
-                           choices=[]):
+                           choices=None):
         """
         Add a hyperparameter to the current investigation.
 

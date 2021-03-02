@@ -118,7 +118,6 @@ class TargetBase:
             self.fermi_energy_eV = self.atoms.get_calculator().\
                 get_fermi_level()
 
-            internal_energy = None
             total_energy = None
             past_calculation_part = False
             with open(path_to_file) as out:
@@ -168,9 +167,9 @@ class TargetBase:
                     if "PseudoPot." in line:
                         pseudolinefound = True
                         lastpseudo = (line.split("for")[1]).split("read")[0]
-                    if "internal energy" in line:
-                        internal_energy \
-                            = float((line.split('=')[2]).split('Ry')[0])
+                    # if "internal energy" in line:
+                    #     internal_energy \
+                    #         = float((line.split('=')[2]).split('Ry')[0])
                     if "total energy" in line and past_calculation_part:
                         if total_energy is None:
                             total_energy \

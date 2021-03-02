@@ -55,7 +55,7 @@ def run_example02():
                                            data_path, output_units="1/Ry")
 
     # Convert all the snapshots and save them in the current directory.
-    # data_converter.convert_snapshots("./", naming_scheme="Al_snapshot*")
+    data_converter.convert_snapshots("./", naming_scheme="Al_snapshot*")
 
     ####################
     # RESULTS.

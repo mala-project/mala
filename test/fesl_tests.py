@@ -1,4 +1,5 @@
-from fesl_integration import check_analytical_integration, qe_dens_to_nr_of_electrons, qe_ldos_to_density, qe_ldos_to_dos
+from fesl_integration import check_analytical_integration, \
+    qe_dens_to_nr_of_electrons, qe_ldos_to_density, qe_ldos_to_dos
 from tensor_memory import test_tensor_memory
 from lazy_loading_basic import test_lazy_loading_basic
 from lazy_loading_horovod_benchmark import lazy_loading_horovod_benchmark
@@ -74,8 +75,12 @@ else:
 try:
     if lazy_loading_horovod_benchmark(data_path=data_path):
         printout("test_lazy_loading suceeded.")
-except:
-    printout("Could not perform lazy loading horovod test, most likely because horovod was not installed.")
+except NameError:
+    printout("Could not perform lazy loading horovod test, most likely because"
+             " horovod was not installed.")
+except ModuleNotFoundError:
+    printout("Could not perform lazy loading horovod test, most likely because"
+             " horovod was not installed.")
 
 ######################
 # Inference tests.

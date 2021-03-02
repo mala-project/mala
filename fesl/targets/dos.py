@@ -152,7 +152,6 @@ class DOS(TargetBase):
         linspace_array = (np.linspace(emin, emax, grid_size, endpoint=False))
         return linspace_array
 
-
     def get_band_energy(self, dos_data, fermi_energy_eV=None,
                         temperature_K=None, integration_method="analytical",
                         shift_energy_grid=True):
@@ -193,7 +192,7 @@ class DOS(TargetBase):
             temperature_K = self.temperature_K
 
         if shift_energy_grid and integration_method == "analytical":
-            energy_grid =self.get_energy_grid(shift_energy_grid=True)
+            energy_grid = self.get_energy_grid(shift_energy_grid=True)
         else:
             energy_grid = self.get_energy_grid()
         return self.__band_energy_from_dos(dos_data, energy_grid,
@@ -240,7 +239,7 @@ class DOS(TargetBase):
         if temperature_K is None:
             temperature_K = self.temperature_K
         if shift_energy_grid and integration_method == "analytical":
-            energy_grid =self.get_energy_grid(shift_energy_grid=True)
+            energy_grid = self.get_energy_grid(shift_energy_grid=True)
         else:
             energy_grid = self.get_energy_grid()
         return self.__number_of_electrons_from_dos(dos_data, energy_grid,
@@ -288,15 +287,13 @@ class DOS(TargetBase):
             temperature_K = self.temperature_K
 
         if shift_energy_grid and integration_method == "analytical":
-            energy_grid =self.get_energy_grid(shift_energy_grid=True)
+            energy_grid = self.get_energy_grid(shift_energy_grid=True)
         else:
             energy_grid = self.get_energy_grid()
         return self.\
             __entropy_contribution_from_dos(dos_data, energy_grid,
                                             fermi_energy_eV, temperature_K,
                                             integration_method)
-
-
 
     def get_self_consistent_fermi_energy_ev(self, dos_data,
                                             temperature_K=None,
@@ -338,7 +335,7 @@ class DOS(TargetBase):
         if temperature_K is None:
             temperature_K = self.temperature_K
         if shift_energy_grid and integration_method == "analytical":
-            energy_grid =self.get_energy_grid(shift_energy_grid=True)
+            energy_grid = self.get_energy_grid(shift_energy_grid=True)
         else:
             energy_grid = self.get_energy_grid()
         fermi_energy_sc = toms748(lambda fermi_sc:
@@ -347,7 +344,7 @@ class DOS(TargetBase):
                                    (dos_data, energy_grid,
                                     fermi_sc, temperature_K,
                                     integration_method)
-                                    - self.number_of_electrons),
+                                   - self.number_of_electrons),
                                   a=energy_grid[0],
                                   b=energy_grid[-1])
         return fermi_energy_sc
@@ -355,7 +352,6 @@ class DOS(TargetBase):
     def get_density_of_states(self, dos_data):
         """Get the density of states."""
         return dos_data
-
 
     @classmethod
     def from_ldos(cls, ldos_object):
@@ -389,15 +385,14 @@ class DOS(TargetBase):
 
         return return_dos_object
 
-
-
     @staticmethod
     def __number_of_electrons_from_dos(dos_data, energy_grid, fermi_energy_eV,
                                        temperature_K, integration_method):
         """Calculate the number of electrons from DOS data."""
         # Calculate the energy levels and the Fermi function.
 
-        fermi_vals = fermi_function(energy_grid, fermi_energy_eV, temperature_K)
+        fermi_vals = fermi_function(energy_grid, fermi_energy_eV,
+                                    temperature_K)
         # Calculate the number of electrons.
         if integration_method == "trapz":
             number_of_electrons = integrate.trapz(dos_data * fermi_vals,
@@ -428,7 +423,8 @@ class DOS(TargetBase):
                                temperature_K, integration_method):
         """Calculate the band energy from DOS data."""
         # Calculate the energy levels and the Fermi function.
-        fermi_vals = fermi_function(energy_grid, fermi_energy_eV, temperature_K)
+        fermi_vals = fermi_function(energy_grid, fermi_energy_eV,
+                                    temperature_K)
 
         # Calculate the band energy.
         if integration_method == "trapz":
@@ -471,10 +467,6 @@ class DOS(TargetBase):
 
         More specifically, this gives -\beta^-1*S_S
         """
-        # Calculate the energy levels and the Fermi function.
-        fermi_vals = fermi_function(energy_grid, fermi_energy_eV,
-                                    temperature_K)
-
         # Calculate the entropy contribution to the energy.
         if integration_method == "trapz":
             multiplicator = entropy_multiplicator(energy_grid,
@@ -493,8 +485,7 @@ class DOS(TargetBase):
             dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             entropy_contribution, abserr = integrate.quad(
                 lambda e: dos_pointer(e) *
-                          entropy_multiplicator(e, fermi_energy_eV,
-                                                temperature_K),
+                entropy_multiplicator(e, fermi_energy_eV, temperature_K),
                 energy_grid[0], energy_grid[-1], limit=500,
                 points=fermi_energy_eV)
             entropy_contribution /= get_beta(temperature_K)

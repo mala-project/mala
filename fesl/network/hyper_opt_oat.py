@@ -82,7 +82,7 @@ class HyperOptOAT(HyperOptBase):
         return np.unique(np.array(arraylist[0]), axis=0)
 
     def add_hyperparameter(self, opttype="float", name="", low=0, high=0,
-                           choices=[]):
+                           choices=None):
         """
         Add a hyperparameter to the current investigation.
 

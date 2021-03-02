@@ -50,3 +50,14 @@ class HyperOptOptuna(HyperOptBase):
         """
         # Parse the parameters from the best trial.
         self.objective.parse_trial_optuna(self.study.best_trial)
+
+    def get_trials_from_study(self):
+        """
+        Return the trials from the last study.
+
+        Returns
+        -------
+        last_trials: list
+            A list of optuna.FrozenTrial objects.
+        """
+        return self.study.get_trials()

@@ -12,6 +12,7 @@ except ModuleNotFoundError:
     pass
 import time
 
+
 class Trainer(Runner):
     """A class for training a neural network."""
 
@@ -143,6 +144,7 @@ class Trainer(Runner):
         # epoch.
         # This shuffling is done in the dataset themselves.
         do_shuffle = self.parameters.use_shuffling_for_samplers
+        test_data_loader = None
         if data.parameters.use_lazy_loading or self.use_horovod:
             do_shuffle = False
 
@@ -175,9 +177,9 @@ class Trainer(Runner):
 
         # Collect and average all the losses from all the devices
         if self.use_horovod:
-            vloss=self.__average_validation(vloss, 'average_loss')
+            vloss = self.__average_validation(vloss, 'average_loss')
             if data.test_data_set is not None:
-                tloss=self.__average_validation(tloss, 'average_loss')
+                tloss = self.__average_validation(tloss, 'average_loss')
         if self.parameters.verbosity:
             printout("Initial Guess - validation data loss: ", vloss)
             if data.test_data_set is not None:
@@ -223,7 +225,7 @@ class Trainer(Runner):
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(network, validation_data_loader)
             if self.use_horovod:
-                vloss=self.__average_validation(vloss, 'average_loss')
+                vloss = self.__average_validation(vloss, 'average_loss')
             if self.parameters.verbosity:
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
 
@@ -261,7 +263,7 @@ class Trainer(Runner):
         if data.test_data_set is not None:
             tloss = self.__validate_network(network, test_data_loader)
             if self.use_horovod:
-                tloss=self.__average_validation(tloss, 'average_loss')
+                tloss = self.__average_validation(tloss, 'average_loss')
         self.final_test_loss = tloss
         printout("Final test data loss: ", tloss)
 
@@ -289,8 +291,9 @@ class Trainer(Runner):
 
         return np.mean(validation_loss)
 
-    def __average_validation(self, val, name):
+    @staticmethod
+    def __average_validation(val, name):
         """Average validation over multiple parallel processes."""
         tensor = torch.tensor(val)
-        avg_loss = hvd.allreduce(tensor,name=name, op=hvd.Average)
+        avg_loss = hvd.allreduce(tensor, name=name, op=hvd.Average)
         return avg_loss.item()

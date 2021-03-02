@@ -8,7 +8,8 @@ from fesl.common.parameters import Parameters
 from fesl.common.parameters import printout
 from data_repo_path import get_data_repo_path
 
-# In order to test the integration capabilities of FESL we need a QuantumEspresso
+# In order to test the integration capabilities of FESL we need a
+# QuantumEspresso
 # calculation containing the following:
 #   1. Outfile from the run
 #   2. LDOS cube files.
@@ -38,6 +39,7 @@ test_parameters = Parameters()
 test_parameters.targets.ldos_gridsize = 250
 test_parameters.targets.ldos_gridspacing_ev = 0.1
 test_parameters.targets.ldos_gridoffset_ev = -10
+
 
 #  Test our implementation of the analytical integration of [1]
 def check_analytical_integration(accuracy):
@@ -85,17 +87,20 @@ def check_analytical_integration(accuracy):
         return False
     return True
 
-# Integrate the QE density (Al.dens) over spatial grid. Does this yield the correct number of electrons?
+
+# Integrate the QE density (Al.dens) over spatial grid. Does this yield the
+# correct number of electrons?
 def qe_dens_to_nr_of_electrons(accuracy):
     # Create a calculator.
     dens_calculator = Density(test_parameters)
-    dens_calculator.read_additional_calculation_data("qe.out",path_to_out)
+    dens_calculator.read_additional_calculation_data("qe.out", path_to_out)
 
     # Read the input data.
     if numpy_arrays:
         density_dft = np.load(path_to_dens_npy)
     else:
-        density_dft = dens_calculator.read_from_cube(path_to_dens_qe[1], path_to_dens_qe[0])
+        density_dft = dens_calculator.read_from_cube(path_to_dens_qe[1],
+                                                     path_to_dens_qe[0])
         np.save(path_to_dens_npy, density_dft)
 
     # Calculate the quantities we want to compare.
@@ -112,18 +117,21 @@ def qe_dens_to_nr_of_electrons(accuracy):
     else:
         return False
 
-# Integrate QE LDOS over energy grid. Does this yield the correct density (when compared to Al.dens)?
+
+# Integrate QE LDOS over energy grid. Does this yield the correct density
+# (when compared to Al.dens)?
 def qe_ldos_to_density(accuracy):
     # Create a calculator.abs()
     ldos_calculator = LDOS(test_parameters)
-    ldos_calculator.read_additional_calculation_data("qe.out",path_to_out)
+    ldos_calculator.read_additional_calculation_data("qe.out", path_to_out)
 
     # Read the input data.
     density_dft = np.load(path_to_dens_npy)
     if numpy_arrays:
         ldos_dft = np.load(path_to_ldos_npy)
     else:
-        ldos_dft = ldos_calculator.read_from_cube(path_to_ldos_qe[1], path_to_ldos_qe[0])
+        ldos_dft = ldos_calculator.read_from_cube(path_to_ldos_qe[1],
+                                                  path_to_ldos_qe[0])
 
         # LDOS is in 1/Ry. DOS is in 1/eV.
         ldos_dft = ldos_calculator.convert_units(ldos_dft, "1/Ry")
@@ -145,13 +153,14 @@ def qe_ldos_to_density(accuracy):
         return False
 
 
-# Integrate the QE LDOS over spatial grid. Does this yield the corrected LDOS (when compared to Al.dos)?
+# Integrate the QE LDOS over spatial grid. Does this yield the corrected LDOS
+# (when compared to Al.dos)?
 def qe_ldos_to_dos(accuracy):
     # Create the necessary calculators.
     ldos_calculator = LDOS(test_parameters)
-    ldos_calculator.read_additional_calculation_data("qe.out",path_to_out)
+    ldos_calculator.read_additional_calculation_data("qe.out", path_to_out)
     dos_calculator = DOS(test_parameters)
-    dos_calculator.read_additional_calculation_data("qe.out",path_to_out)
+    dos_calculator.read_additional_calculation_data("qe.out", path_to_out)
 
     # Read the input data.
     ldos_dft = np.load(path_to_ldos_npy)
@@ -159,7 +168,8 @@ def qe_ldos_to_dos(accuracy):
         dos_dft = np.load(path_to_dos_npy)
     else:
         # DOS is in 1/eV so no conversion necessary.
-        dos_dft = dos_calculator.read_from_qe_dos_txt(path_to_dos_qe[1], path_to_dos_qe[0])
+        dos_dft = dos_calculator.read_from_qe_dos_txt(path_to_dos_qe[1],
+                                                      path_to_dos_qe[0])
         np.save(path_to_dos_npy, dos_dft)
 
     # Calculate the quantities we want to compare.
@@ -180,13 +190,17 @@ if __name__ == "__main__":
 
     # Run the tests.
     test1 = check_analytical_integration(0.0000001)
-    printout("Check if analytical integration works in theory - success?:", test1)
+    printout("Check if analytical integration works in theory - success?:",
+             test1)
 
     test1 = qe_dens_to_nr_of_electrons(0.0000001)
-    printout("Integrate QE density over spatial grid and get correct number of electrons compared to QE - success?:", test1)
+    printout("Integrate QE density over spatial grid and get correct number "
+             "of electrons compared to QE - success?:", test1)
 
     test1 = qe_ldos_to_density(0.0000001)
-    printout("Integrate QE LDOS over energy grid and get correct density compared to QE - succes?:", test1)
+    printout("Integrate QE LDOS over energy grid and get correct density "
+             "compared to QE - succes?:", test1)
 
     test1 = qe_ldos_to_dos(0.0000001)
-    printout("Integrate QE LDOS over spatial grid and get correct DOS compared to QE - success:", test1)
+    printout("Integrate QE LDOS over spatial grid and get correct DOS "
+             "compared to QE - success:", test1)

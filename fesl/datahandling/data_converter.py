@@ -41,7 +41,7 @@ class DataConverter:
             the target calculator will be created by this object using the
             parameters provided.
         """
-        self.parameters : ParametersData = parameters.data
+        self.parameters: ParametersData = parameters.data
         self.target_calculator = target_calculator
         if self.target_calculator is None:
             self.target_calculator = TargetInterface(parameters)
@@ -56,7 +56,7 @@ class DataConverter:
 
     def add_snapshot_qeout_cube(self, qe_out_file, qe_out_directory,
                                 cube_naming_scheme, cube_directory,
-                                input_units = None, output_units = None):
+                                input_units=None, output_units=None):
         """
         Add a Quantum Espresso snapshot to the list of conversion list.
 
@@ -78,6 +78,12 @@ class DataConverter:
 
         cube_directory : string
             Directory containing the LDOS .cube files.
+
+        input_units : string
+            Unit of the input data.
+
+        output_units : string
+            Unit of the output data.
         """
         self.__snapshots_to_convert.append([qe_out_file, qe_out_directory,
                                             cube_naming_scheme,

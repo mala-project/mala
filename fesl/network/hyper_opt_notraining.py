@@ -60,7 +60,8 @@ class HyperOptNoTraining(HyperOptBase):
             trial_type = "optuna"
         else:
             trial_type = "oat"
-        self.objective = ObjectiveNoTraining(self.params, data_handler, trial_type)
+        self.objective = ObjectiveNoTraining(self.params, data_handler,
+                                             trial_type)
         self.trial_losses = [self.objective(row) for row in self.trial_list]
 
         # Return the best lost value we could achieve.

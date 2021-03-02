@@ -1,8 +1,10 @@
 """Hyperparameter to use with OAT."""
+
+
 class HyperparameterOAT:
     """Represents a hyperparameter for OAT."""
 
-    def __init__(self, opttype="categorical", name="", choices=[]):
+    def __init__(self, opttype="categorical", name="", choices=None):
         """
         Create an OAT compatible hyperparameter.
 

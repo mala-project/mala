@@ -14,7 +14,7 @@ Python module installed.
 """
 
 
-def run_example03(do_total_energy=True, accuracy_electrons = 1e-11,
+def run_example03(do_total_energy=True, accuracy_electrons=1e-11,
                   accuracy_total_energy=50):
 
     ####################
@@ -63,6 +63,7 @@ def run_example03(do_total_energy=True, accuracy_electrons = 1e-11,
     band_energy = ldos.get_band_energy(ldos_data,
                                        fermi_energy_eV=
                                        self_consistent_fermi_energy)
+    total_energy = 0.0
     if do_total_energy:
         # To perform a total energy calculation one also needs to provide
         # a pseudopotential(path).
