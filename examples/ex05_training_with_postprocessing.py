@@ -65,7 +65,7 @@ def use_trained_network(network_path, params_path, input_scaler_path,
     # We will use the LDOS calculator to do some preprocessing.
     ldos_calculator = inference_data_handler.target_calculator
     ldos_calculator.read_additional_calculation_data("qe.out",
-                                                     data_path+
+                                                     data_path +
                                                      "QE_Al.scf.pw.out")
 
     # Calculate the Band energy.
@@ -113,7 +113,7 @@ def initial_training(network_path, params_path, input_scaler_path,
     test_parameters.network.layer_activations = ["ReLU"]
 
     # Specify the training parameters.
-    test_parameters.running.max_number_epochs = 20
+    test_parameters.running.max_number_epochs = 400
     test_parameters.running.mini_batch_size = 40
     test_parameters.running.learning_rate = 0.00001
     test_parameters.running.trainingtype = "Adam"
@@ -218,7 +218,7 @@ def run_example05(dotraining, doinference):
 
 
 if __name__ == "__main__":
-    if run_example05(False, True):
+    if run_example05(True, True):
         printout("Successfully ran ex05_training_with_postprocessing.py.")
     else:
         raise Exception("Ran ex05_training_with_postprocessing but something "

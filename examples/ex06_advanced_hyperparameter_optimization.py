@@ -143,7 +143,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
         return test_trainer.final_test_loss
 
 
-def run_example10(desired_std = 0.1):
+def run_example06(desired_std = 0.1):
     results = []
     result, last_study = optimize_hyperparameters("optuna")
     results.append(result)
@@ -161,7 +161,7 @@ def run_example10(desired_std = 0.1):
         return False
 
 if __name__ == "__main__":
-    if run_example10():
+    if run_example06():
         printout("Successfully ran ex06_advanced_hyperparameter_optimization."
                  "py.")
     else:
