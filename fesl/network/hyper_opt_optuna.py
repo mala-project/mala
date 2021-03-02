@@ -53,7 +53,7 @@ class HyperOptOptuna(HyperOptBase):
 
     def get_trials_from_study(self):
         """
-        Returns the trials from the last study.
+        Return the trials from the last study.
 
         Returns
         -------
