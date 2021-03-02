@@ -1,14 +1,14 @@
 from fesl.common.parameters import printout
 from ex01_run_singleshot import run_example01
-from ex02_hyperparameter_optimization import run_example02
+from ex04_hyperparameter_optimization import run_example02
 from ex03_resize_snapshots import run_example03
 from ex04_snapshot_splitting import run_example04
 from ex05_create_snap_descriptors import run_example05
 from ex06_postprocessing import run_example06
 from ex07_dos_analysis import run_example07
-from ex08_training_with_postprocessing import run_example08
+from ex05_training_with_postprocessing import run_example08
 from ex09_get_total_energy import run_example09
-from ex10_advanced_hyperparameter_optimization import run_example10
+from ex06_advanced_hyperparameter_optimization import run_example10
 
 """
 ex99_verify_all_examples.py: This example confirms whether or not the examples run CORRECTLY. That is, even though they
@@ -71,7 +71,7 @@ else:
 
 # Example 8: Train a network, do a prediction and process this prediction.
 if run_example08(True, True,doplots=False):
-    printout("Successfully ran ex08_training_with_postprocessing.py.")
+    printout("Successfully ran ex05_training_with_postprocessing.py.")
 else:
     raise Exception("Ran ex08_training_with_postprocessing but something was off. If you haven't changed any parameters in "
                     "the example, there might be a problem with your installation.")
@@ -84,7 +84,7 @@ except ModuleNotFoundError:
 
 # Example 10: Novel hyperparameter optimization techniques.
 if run_example10():
-    printout("Successfully ran ex10_advanced_hyperparameter_optimization.py.")
+    printout("Successfully ran ex06_advanced_hyperparameter_optimization.py.")
 else:
     raise Exception(
         "Ran ex10_advanced_hyperparameter_optimization but something was off. If you haven't changed any parameters in "
