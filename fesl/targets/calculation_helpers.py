@@ -1,7 +1,7 @@
 """Helper functions for several calculation tasks (such as integration)."""
 import numpy as np
 from ase.units import kB
-from scipy import integrate, interpolate
+from scipy import integrate
 import mpmath as mp
 
 
@@ -74,7 +74,7 @@ def entropy_multiplicator(energy, fermi_energy, temperature_K,
 
     Parameters
     ----------
-    energy : float
+    energy : float or numpy.array
         Energy for which the Fermi function is supposed to be calculated in
         energy_units.
     fermi_energy : float
@@ -384,4 +384,3 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
             for j in range(0, real_space_grid):
                 integral_value[j] += weights_vector[i] * D[j, i]
     return integral_value
-

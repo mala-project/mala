@@ -63,6 +63,7 @@ def run_example03(do_total_energy=True, accuracy_electrons=1e-11,
     band_energy = ldos.get_band_energy(ldos_data,
                                        fermi_energy_eV=
                                        self_consistent_fermi_energy)
+    total_energy = 0.0
     if do_total_energy:
         # To perform a total energy calculation one also needs to provide
         # a pseudopotential(path).
@@ -82,7 +83,6 @@ def run_example03(do_total_energy=True, accuracy_electrons=1e-11,
 
     print("Number of electrons:", number_of_electrons)
     print("Band energy:", band_energy)
-    total_energy = None
     if do_total_energy:
         print("Total energy:", total_energy)
 

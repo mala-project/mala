@@ -118,7 +118,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
     if hyper_optimizer == "oat" or hyper_optimizer == "optuna":
         test_hp_optimizer.perform_study(data_handler)
         if hyper_optimizer == "optuna":
-            last_optuna_study = test_hp_optimizer.study.get_trials()
+            last_optuna_study = test_hp_optimizer.get_trials_from_study()
     elif hyper_optimizer == "notraining":
         if input_creator_notraining == "optuna":
             test_hp_optimizer.perform_study(data_handler,

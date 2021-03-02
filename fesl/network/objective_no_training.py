@@ -8,7 +8,6 @@ from fesl.datahandling.data_handler import DataHandler
 from fesl.network.network import Network
 from fesl.network.objective_base import ObjectiveBase
 from fesl.common.parameters import printout
-import matplotlib.pyplot as plt
 
 
 class ObjectiveNoTraining(ObjectiveBase):

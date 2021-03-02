@@ -835,4 +835,3 @@ class DataHandler:
             raise Exception("Please choose either \"in\" or \"out\" for "
                             "this function.")
         return numpy_array
-

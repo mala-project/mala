@@ -1,7 +1,7 @@
 """Neural network for FESL."""
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as functional
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -52,7 +52,7 @@ class Network(nn.Module):
 
         # initialize the loss function
         if self.params.loss_function_type == "mse":
-            self.loss_func = F.mse_loss
+            self.loss_func = functional.mse_loss
         else:
             raise Exception("Unsupported loss function.")
 

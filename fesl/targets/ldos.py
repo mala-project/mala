@@ -422,6 +422,9 @@ class LDOS(TargetBase):
             When using the analytical integration, one has to shift the energy
             grid by setting this parameter to True. Elsewise keep on False.
 
+        grid_spacing_bohr : float
+            Grid spacing (distance between grid points) in Bohr.
+
         Returns
         -------
         number_of_electrons : float
@@ -487,6 +490,9 @@ class LDOS(TargetBase):
         shift_energy_grid : bool
             When using the analytical integration, one has to shift the energy
             grid by setting this parameter to True. Elsewise keep on False.
+
+        grid_spacing_bohr : float
+            Grid spacing (distance between grid points) in Bohr.
 
         Returns
         -------

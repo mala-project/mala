@@ -344,7 +344,7 @@ class DOS(TargetBase):
                                    (dos_data, energy_grid,
                                     fermi_sc, temperature_K,
                                     integration_method)
-                                    - self.number_of_electrons),
+                                   - self.number_of_electrons),
                                   a=energy_grid[0],
                                   b=energy_grid[-1])
         return fermi_energy_sc
@@ -485,8 +485,7 @@ class DOS(TargetBase):
             dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             entropy_contribution, abserr = integrate.quad(
                 lambda e: dos_pointer(e) *
-                          entropy_multiplicator(e, fermi_energy_eV,
-                                                temperature_K),
+                entropy_multiplicator(e, fermi_energy_eV, temperature_K),
                 energy_grid[0], energy_grid[-1], limit=500,
                 points=fermi_energy_eV)
             entropy_contribution /= get_beta(temperature_K)

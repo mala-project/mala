@@ -45,7 +45,7 @@ def test_inference(accuracy_prediction=1e-16, accuracy_actual=1e-16,
 
     inference_data_handler.prepare_data()
 
-    for n in [46,99,500,1977]:
+    for n in [46, 99, 500, 1977]:
         new_parameters.running.mini_batch_size = n
         tester = Tester(new_parameters)
         tester.set_data(new_network, inference_data_handler)
@@ -85,7 +85,7 @@ def test_inference(accuracy_prediction=1e-16, accuracy_actual=1e-16,
                                             ".in.npy")
             raw_predicted_outputs = inference_data_handler.\
                 raw_numpy_to_converted_scaled_tensor(raw_predicted_outputs,
-                                                     "in", None)
+                                                     "in", "None")
             raw_predicted_outputs = new_network.\
                 do_prediction(raw_predicted_outputs)
             raw_predicted_outputs = inference_data_handler.output_data_scaler.\

@@ -8,8 +8,6 @@ import time
 from data_repo_path import get_data_repo_path
 data_path_Al = get_data_repo_path()+"Al256_reduced/"
 
-
-
 # This is a benchmark comparing the usage of horovod, lazy loading and RAM
 # based storage,.
 
@@ -116,7 +114,6 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/",
         printout(np.std(diff))
         return False
     return True
-
 
 
 if __name__ == "__main__":
