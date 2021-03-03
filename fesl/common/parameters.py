@@ -65,11 +65,6 @@ class ParametersNetwork(ParametersBase):
         Currently supported loss functions include:
 
             - mse (Mean squared error; default)
-
-    manual_seed: int
-        If not none, this value is used as manual seed for the neural networks.
-        Can be used to make experiments comparable. Default: None.
-
     """
 
     def __init__(self):
@@ -79,7 +74,6 @@ class ParametersNetwork(ParametersBase):
         self.layer_sizes = [10, 10, 10]
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
-        self.manual_seed = None
 
 
 class ParametersDescriptors(ParametersBase):
@@ -475,6 +469,9 @@ class Parameters:
     debug : ParametersDebug
         Container for all debugging parameters.
 
+    manual_seed: int
+        If not none, this value is used as manual seed for the neural networks.
+        Can be used to make experiments comparable. Default: None.
     """
 
     def __init__(self):
@@ -487,6 +484,7 @@ class Parameters:
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
         self.debug = ParametersDebug()
+        self.manual_seed = None
 
         # Properties
         self.use_horovod = False

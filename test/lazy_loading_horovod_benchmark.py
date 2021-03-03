@@ -30,7 +30,7 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/",
     test_parameters.running.trainingtype = "Adam"
     test_parameters.comment = "Horovod / lazy loading benchmark."
     test_parameters.network.nn_type = "feed-forward"
-    test_parameters.network.manual_seed = 2021
+    test_parameters.manual_seed = 2021
 
     ####################
     # DATA

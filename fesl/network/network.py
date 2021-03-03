@@ -27,7 +27,7 @@ class Network(nn.Module):
 
         # if the user has planted a seed (for comparibility purposes) we
         # should use it.
-        if self.params.manual_seed is not None:
+        if params.manual_seed is not None:
             torch.manual_seed(self.params.manual_seed)
             torch.cuda.manual_seed(self.params.manual_seed)
 

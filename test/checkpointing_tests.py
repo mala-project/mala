@@ -41,7 +41,7 @@ def original_setup(checkpoint_name, maxepochs, learning_rate_scheduler=None,
     test_parameters.running.early_stopping_threshold = -0.1
     test_parameters.running.checkpoints_each_epoch = 5
     test_parameters.running.checkpoint_name = checkpoint_name
-    test_parameters.network.manual_seed = 1002
+    test_parameters.manual_seed = 1002
     test_parameters.running.use_shuffling_for_samplers = False
 
     ####################
@@ -83,7 +83,7 @@ def original_setup(checkpoint_name, maxepochs, learning_rate_scheduler=None,
 
 
 def resume_checkpoint(checkpoint_name, actual_max_epochs):
-    loaded_params, loaded_iscaler, loaded_oscaler, loaded_network, \
+    loaded_params, loaded_network, \
         new_datahandler, new_trainer = \
         fesl.Trainer.resume_checkpoint(checkpoint_name)
     loaded_params.running.max_number_epochs = actual_max_epochs

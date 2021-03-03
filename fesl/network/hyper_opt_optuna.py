@@ -26,8 +26,17 @@ class HyperOptOptuna(HyperOptBase):
         """
         super(HyperOptOptuna, self).__init__(params, data)
         self.params = params
+
+        # Make the sample behave in a reproducible way, if so specified by
+        # the user.
+        sampler = None
+        if params.manual_seed is not None:
+            sampler = optuna.samplers.TPESampler(seed=params.manual_seed)
+
+        # Create the study.
         self.study = optuna.\
-            create_study(direction=self.params.hyperparameters.direction)
+            create_study(direction=self.params.hyperparameters.direction,
+                         sampler=sampler)
         self.objective = None
         self.checkpoint_counter = 0
 
@@ -97,13 +106,12 @@ class HyperOptOptuna(HyperOptBase):
         new_hyperopt : HyperOptOptuna
             The hyperparameter optimizer reconstructed from the checkpoint.
         """
-        printout("Loading training run from checkpoint.")
+        printout("Loading hyperparameter optimization from checkpoint.")
         # The names are based upon the checkpoint name.
-        network_name = checkpoint_name + "_network.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
         param_name = checkpoint_name + "_params.pkl"
-        optimizer_name = checkpoint_name + "_optimizer.pth"
+        optimizer_name = checkpoint_name + "_hyperopt.pth"
 
         # First load the all the regular objects.
         loaded_params = Parameters.load_from_file(param_name)
@@ -117,9 +125,10 @@ class HyperOptOptuna(HyperOptBase):
                                       output_data_scaler=loaded_oscaler)
         new_datahandler.prepare_data(reparametrize_scaler=False)
         new_hyperopt = HyperOptOptuna.load_from_file(loaded_params,
-                                                     optimizer_name)
+                                                     optimizer_name,
+                                                     new_datahandler)
 
-        return loaded_params,  new_datahandler, new_hyperopt
+        return loaded_params, new_datahandler, new_hyperopt
 
     @classmethod
     def load_from_file(cls, params, file_path, data):
@@ -159,6 +168,7 @@ class HyperOptOptuna(HyperOptBase):
         if self.checkpoint_counter >= self.params.hyperparameters.\
                 checkpoints_each_trial:
             # We need to create a checkpoint!
+            printout("Create checkpoint for hyperparameter optimization.")
             self.checkpoint_counter = 0
 
             # Get the filenames.
@@ -169,7 +179,7 @@ class HyperOptOptuna(HyperOptBase):
             param_name = self.params.hyperparameters.checkpoint_name \
                            + "_params.pkl"
             hyperopt_name = self.params.hyperparameters.checkpoint_name \
-                           + "hyperopt.pth"
+                           + "_hyperopt.pth"
 
             # First we save the objects we would also save for inference.
             self.data_handler.input_data_scaler.save(iscaler_name)
@@ -185,6 +195,3 @@ class HyperOptOptuna(HyperOptBase):
 
             with open(hyperopt_name, 'wb') as handle:
                 pickle.dump(self.study, handle, protocol=4)
-
-
-
