@@ -293,6 +293,10 @@ class Trainer(Runner):
             pass
         else:
             raise Exception("Unsupported learning rate schedule.")
+        if self.scheduler is not None and optimizer_dict is not None:
+            self.scheduler.\
+                load_state_dict(optimizer_dict['lr_scheduler_state_dict'])
+
 
         # If lazy loading is used we do not shuffle the data points on their
         # own, but rather shuffle them
@@ -381,11 +385,18 @@ class Trainer(Runner):
         if self.parameters_full.use_horovod:
             if hvd.rank() != 0:
                 return
+        if self.scheduler is None:
+            save_dict = {
+                'epoch': self.last_epoch,
+                'optimizer_state_dict': self.optimizer.state_dict(),
+            }
+        else:
+            save_dict = {
+                'epoch': self.last_epoch,
+                'optimizer_state_dict': self.optimizer.state_dict(),
+                'lr_scheduler_state_dict': self.scheduler.state_dict()
+            }
 
-        save_dict = {
-            'epoch': self.last_epoch,
-            'optimizer_state_dict': self.optimizer.state_dict(),
-        }
 
         torch.save(save_dict, optimizer_name,
                    _use_new_zipfile_serialization=False)
