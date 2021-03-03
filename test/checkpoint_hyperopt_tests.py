@@ -1,17 +1,12 @@
 import fesl
 from fesl import printout
 from data_repo_path import get_data_repo_path
+import numpy as np
 data_path = get_data_repo_path()+"Al256_reduced/"
-
-"""
-ex04_hyperparameter_optimization.py: Shows how a hyperparameter 
-optimization can be done using this framework. There are multiple 
-hyperparameter optimizers available in this framework. This example focusses
-on the most universal one - optuna.  
-"""
+checkpoint_name = "test_ho"
 
 
-def run_example04(desired_loss_improvement_factor=1):
+def original_setup(n_trials):
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
@@ -30,15 +25,18 @@ def run_example04(desired_loss_improvement_factor=1):
     test_parameters.data.output_rescaling_type = "normal"
 
     # Specify the training parameters.
-    test_parameters.running.max_number_epochs = 20
+    test_parameters.running.max_number_epochs = 10
     test_parameters.running.mini_batch_size = 40
     test_parameters.running.learning_rate = 0.00001
     test_parameters.running.trainingtype = "Adam"
 
     # Specify the number of trials, the hyperparameter optimizer should run
     # and the type of hyperparameter.
-    test_parameters.hyperparameters.n_trials = 20
+    test_parameters.hyperparameters.n_trials = n_trials
     test_parameters.hyperparameters.hyper_opt_method = "optuna"
+    test_parameters.hyperparameters.checkpoints_each_trial = 5
+    test_parameters.hyperparameters.checkpoint_name = checkpoint_name
+    test_parameters.manual_seed = 1002
 
     ####################
     # DATA
@@ -88,42 +86,50 @@ def run_example04(desired_loss_improvement_factor=1):
 
     # Perform hyperparameter optimization.
     printout("Starting Hyperparameter optimization.")
-    test_hp_optimizer.perform_study()
-    test_hp_optimizer.set_optimal_parameters()
-    printout("Hyperparameter optimization: DONE.")
+    # test_hp_optimizer.perform_study()
+    # test_hp_optimizer.set_optimal_parameters()
+    # printout("Hyperparameter optimization: DONE.")
 
-    ####################
-    # TRAINING
-    # Train with these new parameters.
-    ####################
+    # ####################
+    # # TRAINING
+    # # Train with these new parameters.
+    # ####################
+    #
+    # test_network = fesl.Network(test_parameters)
+    # test_trainer = fesl.Trainer(test_parameters, test_network, data_handler)
+    # printout("Network setup: DONE.")
+    # test_trainer.train_network()
+    # printout("Training: DONE.")
+    return test_hp_optimizer
 
-    test_network = fesl.Network(test_parameters)
-    test_trainer = fesl.Trainer(test_parameters, test_network, data_handler)
-    printout("Network setup: DONE.")
-    test_trainer.train_network()
-    printout("Training: DONE.")
 
-    ####################
-    # RESULTS.
-    # Print the used parameters and check whether the loss decreased enough.
-    ####################
+def resume_checkpoint():
+    loaded_params, new_datahandler, new_hyperopt = \
+        fesl.HyperOptOptuna.resume_checkpoint(checkpoint_name)
+    return new_hyperopt
 
-    printout("Parameters used for this experiment:")
-    test_parameters.show()
 
-    if desired_loss_improvement_factor*test_trainer.initial_test_loss < \
-            test_trainer.final_test_loss:
+def run_hyperopt_checkpoint_test(accuracy=1e-14):
+    # First run the entire test.
+    hyperopt = original_setup(9)
+    hyperopt.perform_study()
+    original_final_test_value = hyperopt.study.best_trial.value
+
+    # Now do the same, but cut at epoch 22 and see if it recovers the
+    # correct result.
+    hyperopt = original_setup(9)
+    hyperopt.perform_study()
+    hyperopt = resume_checkpoint()
+    hyperopt.perform_study()
+    new_final_test_value = hyperopt.study.best_trial.value
+
+    if np.abs(original_final_test_value-new_final_test_value) > accuracy:
+        print("test_general did not suceed.", original_final_test_value,
+              new_final_test_value)
         return False
-    else:
-        return True
+    return True
 
 
 if __name__ == "__main__":
-    if run_example04():
-        printout("Successfully ran ex04_hyperparameter_optimization.py.")
-    else:
-        raise Exception("Ran ex04_hyperparameter_optimization but something "
-                        "was off. If you haven't changed any parameters in "
-                        "the example, there might be a problem with "
-                        "your installation.")
-
+    test1 = run_hyperopt_checkpoint_test()
+    printout("Checkpoint test - success?:", test1)

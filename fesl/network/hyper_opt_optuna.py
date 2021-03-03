@@ -1,13 +1,18 @@
 """Hyperparameter optimizer using optuna."""
+import pickle
 import optuna
 from .hyper_opt_base import HyperOptBase
 from .objective_base import ObjectiveBase
+from fesl.common.parameters import printout
+from fesl.datahandling.data_handler import DataHandler
+from fesl.datahandling.data_scaler import DataScaler
+from fesl.common.parameters import Parameters
 
 
 class HyperOptOptuna(HyperOptBase):
     """Hyperparameter optimizer using Optuna."""
 
-    def __init__(self, params):
+    def __init__(self, params, data, trials_from_last_checkpoint=0):
         """
         Create a HyperOptOptuna object.
 
@@ -15,28 +20,48 @@ class HyperOptOptuna(HyperOptBase):
         ----------
         params : fesl.common.parametes.Parameters
             Parameters used to create this hyperparameter optimizer.
-        """
-        super(HyperOptOptuna, self).__init__(params)
-        self.params = params
-        self.study = optuna.\
-            create_study(direction=self.params.hyperparameters.direction)
-        self.objective = None
 
-    def perform_study(self, data_handler):
+        data : fesl.datahandling.data_handler.DataHandler
+            DataHandler holding the data for the hyperparameter optimization.
+
+        trials_from_last_checkpoint : int
+            Trials that were performed during the last checkpoint.
+        """
+        super(HyperOptOptuna, self).__init__(params, data)
+        self.params = params
+
+        # Make the sample behave in a reproducible way, if so specified by
+        # the user.
+        sampler = None
+        if params.manual_seed is not None:
+            sampler = optuna.samplers.TPESampler(seed=params.manual_seed)
+
+        # Create the study.
+        self.study = optuna.\
+            create_study(direction=self.params.hyperparameters.direction,
+                         sampler=sampler)
+        self.objective = None
+        self.checkpoint_counter = 0
+        self.trials_from_last_checkpoint = trials_from_last_checkpoint
+
+    def perform_study(self):
         """
         Perform the study, i.e. the optimization.
 
         This is done by sampling a certain subset of network architectures.
         In this case, optuna is used.
-
-        Parameters
-        ----------
-        data_handler : fesl.datahandling.data_handler.DataHandler
-            datahandler to be used during the hyperparameter optimization.
         """
-        self.objective = ObjectiveBase(self.params, data_handler)
+        self.objective = ObjectiveBase(self.params, self.data_handler)
+
+        # Fill callback list based on user checkpoint wishes.
+        callback_list = []
+        if self.params.hyperparameters.checkpoints_each_trial != 0:
+            callback_list.append(self.__create_checkpointing)
+
         self.study.optimize(self.objective,
-                            n_trials=self.params.hyperparameters.n_trials)
+                            n_trials=self.params.hyperparameters.n_trials -
+                            self.trials_from_last_checkpoint,
+                            callbacks=callback_list)
 
         # Return the best lost value we could achieve.
         return self.study.best_value
@@ -61,3 +86,119 @@ class HyperOptOptuna(HyperOptBase):
             A list of optuna.FrozenTrial objects.
         """
         return self.study.get_trials()
+
+    @classmethod
+    def resume_checkpoint(cls, checkpoint_name):
+        """
+        Prepare resumption of hyperparameter optimization from a checkpoint.
+
+        Please note that to actually resume the optimization,
+        HyperOptOptuna.perform_study() still has to be called.
+
+        Parameters
+        ----------
+        checkpoint_name : string
+            Name of the checkpoint from which
+
+        Returns
+        -------
+        loaded_params : fesl.common.parameters.Parameters
+            The Parameters saved in the checkpoint.
+
+        new_datahandler : fesl.datahandling.data_handler.DataHandler
+            The data handler reconstructed from the checkpoint.
+
+        new_hyperopt : HyperOptOptuna
+            The hyperparameter optimizer reconstructed from the checkpoint.
+        """
+        printout("Loading hyperparameter optimization from checkpoint.")
+        # The names are based upon the checkpoint name.
+        iscaler_name = checkpoint_name + "_iscaler.pkl"
+        oscaler_name = checkpoint_name + "_oscaler.pkl"
+        param_name = checkpoint_name + "_params.pkl"
+        optimizer_name = checkpoint_name + "_hyperopt.pth"
+
+        # First load the all the regular objects.
+        loaded_params = Parameters.load_from_file(param_name)
+        loaded_iscaler = DataScaler.load_from_file(iscaler_name)
+        loaded_oscaler = DataScaler.load_from_file(oscaler_name)
+
+        printout("Preparing data used for last checkpoint.")
+        # Create a new data handler and prepare the data.
+        new_datahandler = DataHandler(loaded_params,
+                                      input_data_scaler=loaded_iscaler,
+                                      output_data_scaler=loaded_oscaler)
+        new_datahandler.prepare_data(reparametrize_scaler=False)
+        new_hyperopt = HyperOptOptuna.load_from_file(loaded_params,
+                                                     optimizer_name,
+                                                     new_datahandler)
+
+        return loaded_params, new_datahandler, new_hyperopt
+
+    @classmethod
+    def load_from_file(cls, params, file_path, data):
+        """
+        Load a hyperparameter optimizer from a file.
+
+        Parameters
+        ----------
+        params : fesl.common.parameters.Parameters
+            Parameters object with which the hyperparameter optimizer
+            should be created Has to be compatible with data.
+
+        file_path : string
+            Path to the file from which the hyperparameter optimizer should
+            be loaded.
+
+        data : fesl.datahandling.data_handler.DataHandler
+            DataHandler holding the training data.
+
+        Returns
+        -------
+        loaded_trainer : Network
+            The hyperparameter optimizer that was loaded from the file.
+        """
+        # First, load the checkpoint.
+        with open(file_path, 'rb') as handle:
+            loaded_study = pickle.load(handle)
+
+        # Now, create the Trainer class with it.
+        loaded_hyperopt = HyperOptOptuna(params, data,
+                                         trials_from_last_checkpoint=
+                                         len(loaded_study.get_trials()))
+        loaded_hyperopt.study = loaded_study
+        return loaded_hyperopt
+
+    def __create_checkpointing(self, study, trial):
+        """Create a checkpoint of optuna study, if necessary."""
+        self.checkpoint_counter += 1
+        if self.checkpoint_counter >= self.params.hyperparameters.\
+                checkpoints_each_trial:
+            # We need to create a checkpoint!
+            printout("Create checkpoint for hyperparameter optimization.")
+            self.checkpoint_counter = 0
+
+            # Get the filenames.
+            iscaler_name = self.params.hyperparameters.checkpoint_name \
+                           + "_iscaler.pkl"
+            oscaler_name = self.params.hyperparameters.checkpoint_name \
+                           + "_oscaler.pkl"
+            param_name = self.params.hyperparameters.checkpoint_name \
+                           + "_params.pkl"
+            hyperopt_name = self.params.hyperparameters.checkpoint_name \
+                           + "_hyperopt.pth"
+
+            # First we save the objects we would also save for inference.
+            self.data_handler.input_data_scaler.save(iscaler_name)
+            self.data_handler.output_data_scaler.save(oscaler_name)
+            self.params.save(param_name)
+
+            # Next, we save all the other objects.
+            # Here some horovod stuff would have to go.
+            # But so far, the optuna implementation is not horovod-ready...
+            # if self.params.use_horovod:
+            #     if hvd.rank() != 0:
+            #         return
+
+            with open(hyperopt_name, 'wb') as handle:
+                pickle.dump(self.study, handle, protocol=4)

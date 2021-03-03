@@ -30,7 +30,7 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/",
     test_parameters.running.trainingtype = "Adam"
     test_parameters.comment = "Horovod / lazy loading benchmark."
     test_parameters.network.nn_type = "feed-forward"
-    test_parameters.network.manual_seed = 2021
+    test_parameters.manual_seed = 2021
 
     ####################
     # DATA
@@ -67,8 +67,7 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/",
 
             # Setup network and trainer.
             test_network = Network(test_parameters)
-            test_trainer = Trainer(test_parameters)
-            test_trainer.train_network(test_network, data_handler)
+            test_trainer = Trainer(test_parameters, test_network, data_handler)
 
             hvdstring = "no horovod"
             if hvduse:
@@ -119,18 +118,3 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/",
 if __name__ == "__main__":
     test1 = lazy_loading_horovod_benchmark(data_path=data_path_Al)
     printout("Benchmark of lazy loading, horovod and ? - success?:", test1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

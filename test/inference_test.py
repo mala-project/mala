@@ -47,8 +47,7 @@ def test_inference(accuracy_prediction=1e-16, accuracy_actual=1e-16,
 
     for n in [46, 99, 500, 1977]:
         new_parameters.running.mini_batch_size = n
-        tester = Tester(new_parameters)
-        tester.set_data(new_network, inference_data_handler)
+        tester = Tester(new_parameters, new_network, inference_data_handler)
         for i in range(0, inference_data_handler.nr_snapshots):
             # Get values with current framework.
             actual_ldos, predicted_ldos = tester.test_snapshot(i)

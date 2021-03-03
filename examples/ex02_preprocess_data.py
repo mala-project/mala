@@ -15,7 +15,6 @@ Further preprocessing steps (scaling, unit conversion) is done later.
 
 
 def run_example02():
-
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that

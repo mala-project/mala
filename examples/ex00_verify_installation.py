@@ -17,7 +17,7 @@ test_handler = fesl.DataHandler(test_parameters,
                                 descriptor_calculator=test_descriptors,
                                 target_calculator=test_targets)
 test_network = fesl.Network(test_parameters)
-test_hpoptimizer = fesl.HyperOptInterface(test_parameters)
+test_hpoptimizer = fesl.HyperOptInterface(test_parameters, test_handler)
 data_path = None
 try:
     from data_repo_path import get_data_repo_path

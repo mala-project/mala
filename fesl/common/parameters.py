@@ -65,11 +65,6 @@ class ParametersNetwork(ParametersBase):
         Currently supported loss functions include:
 
             - mse (Mean squared error; default)
-
-    manual_seed: int
-        If not none, this value is used as manual seed for the neural networks.
-        Can be used to make experiments comparable. Default: None.
-
     """
 
     def __init__(self):
@@ -79,7 +74,6 @@ class ParametersNetwork(ParametersBase):
         self.layer_sizes = [10, 10, 10]
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
-        self.manual_seed = None
 
 
 class ParametersDescriptors(ParametersBase):
@@ -208,7 +202,6 @@ class ParametersData(ParametersBase):
         If True, data is lazily loaded, i.e. only the snapshots that are
         currently needed will be kept in memory. This greatly reduces memory
         demands, but adds additional computational time.
-
     """
 
     def __init__(self):
@@ -303,6 +296,13 @@ class ParametersRunning(ParametersBase):
         If lazy loading is selected, then this shuffling will be done on
         a "by snapshot" basis.
 
+    checkpoints_each_epoch : int
+        If not 0, checkpoint files will be saved after eac
+        checkpoints_each_epoch epoch.
+
+    checkpoint_name : string
+        Name used for the checkpoints. Using this, multiple runs
+        can be performed in the same directory.
     """
 
     def __init__(self):
@@ -327,6 +327,8 @@ class ParametersRunning(ParametersBase):
         self.sampler = {"train_sampler": None, "validate_sampler": None,
                         "test_sampler": None}
         self.use_shuffling_for_samplers = True
+        self.checkpoints_each_epoch = 0
+        self.checkpoint_name = "checkpoint_fesl"
 
 
 class ParametersHyperparameterOptimization(ParametersBase):
@@ -375,6 +377,15 @@ class ParametersHyperparameterOptimization(ParametersBase):
               currently done by simply choosing the lowesr loss.
             - "notraining" : Using a NAS without training, based on jacobians.
 
+    checkpoints_each_trial : int
+        If not 0, checkpoint files will be saved after each
+        checkpoints_each_trial trials. Currently, this only works with
+        optuna.
+
+    checkpoint_name : string
+        Name used for the checkpoints. Using this, multiple runs
+        can be performed in the same directory. Currently. this
+        only works with optuna.
     """
 
     def __init__(self):
@@ -384,6 +395,8 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.n_trials = 100
         self.hlist = []
         self.hyper_opt_method = "optuna"
+        self.checkpoints_each_trial = 0
+        self.checkpoint_name = "checkpoint_fesl_ho"
 
     def show(self, indent=""):
         """
@@ -456,6 +469,9 @@ class Parameters:
     debug : ParametersDebug
         Container for all debugging parameters.
 
+    manual_seed: int
+        If not none, this value is used as manual seed for the neural networks.
+        Can be used to make experiments comparable. Default: None.
     """
 
     def __init__(self):
@@ -468,6 +484,7 @@ class Parameters:
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
         self.debug = ParametersDebug()
+        self.manual_seed = None
 
         # Properties
         self.use_horovod = False

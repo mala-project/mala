@@ -16,7 +16,6 @@ Python module installed.
 
 def run_example03(do_total_energy=True, accuracy_electrons=1e-11,
                   accuracy_total_energy=50):
-
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that

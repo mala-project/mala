@@ -56,8 +56,8 @@ class ObjectiveBase:
 
         # Perform training and report best test loss.
         test_network = Network(self.params)
-        test_trainer = Trainer(self.params)
-        test_trainer.train_network(test_network, self.data_handler)
+        test_trainer = Trainer(self.params, test_network, self.data_handler)
+        test_trainer.train_network()
         return test_trainer.final_test_loss
 
     def parse_trial(self, trial):

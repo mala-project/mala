@@ -223,6 +223,9 @@ class DataHandler:
         printout("Initializing the data scalers.")
         if reparametrize_scaler:
             self.__parametrize_scalers()
+        else:
+            if self.parameters.use_lazy_loading is False:
+                self.__load_training_data_into_ram()
         printout("Data scalers initialized.")
 
         # Build Datasets.
@@ -529,42 +532,8 @@ class DataHandler:
             self.input_data_scaler.finish_incremental_fitting()
 
         else:
-            self.training_data_inputs = []
-            i = 0
-            # We need to perform the data scaling over the entirety of
-            # the training data.
-            for snapshot in self.parameters.snapshot_directories_list:
-
-                # Data scaling is only performed on the training data sets.
-                if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.__load_from_npy_file(snapshot.
-                                                    input_npy_directory +
-                                                    snapshot.input_npy_file,
-                                                    mmapmode='r')
-                    if self.parameters.descriptors_contain_xyz:
-                        tmp = tmp[:, :, :, 3:]
-                    tmp = np.array(tmp)
-                    tmp *= self.descriptor_calculator.\
-                        convert_units(1, snapshot.input_units)
-                    self.training_data_inputs.append(tmp)
-                i += 1
-
-            # The scalers will later operate on torch Tensors so we have to
-            # make sure they are fitted on
-            # torch Tensors as well. Preprocessing the numpy data as follows
-            # does NOT load it into memory, see
-            # test/tensor_memory.py
-            self.training_data_inputs = np.array(self.training_data_inputs)
-            self.training_data_inputs = \
-                self.training_data_inputs.astype(np.float32)
-            self.training_data_inputs = \
-                self.training_data_inputs.reshape(
-                    [self.nr_training_data, self.get_input_dimension()])
-            self.training_data_inputs = \
-                torch.from_numpy(self.training_data_inputs).float()
+            self.__load_training_data_into_ram()
             self.input_data_scaler.fit(self.training_data_inputs)
-            self.training_data_inputs = \
-                self.input_data_scaler.transform(self.training_data_inputs)
 
         printout("Input scaler parametrized.")
 
@@ -608,41 +577,80 @@ class DataHandler:
             self.output_data_scaler.finish_incremental_fitting()
 
         else:
-            self.training_data_outputs = []
-            i = 0
-            # We need to perform the data scaling over the entirety of
-            # the training data.
-            for snapshot in self.parameters.snapshot_directories_list:
-
-                # Data scaling is only performed on the training data sets.
-                if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.\
-                        __load_from_npy_file(snapshot.output_npy_directory +
-                                             snapshot.output_npy_file,
-                                             mmapmode='r')
-                    tmp = np.array(tmp)
-                    tmp *= self.target_calculator.\
-                        convert_units(1, snapshot.output_units)
-                    self.training_data_outputs.append(tmp)
-                i += 1
-
-            # The scalers will later operate on torch Tensors so we have to
-            # make sure they are fitted on
-            # torch Tensors as well. Preprocessing the numpy data as follows
-            # does NOT load it into memory, see
-            # test/tensor_memory.py
-            self.training_data_outputs = np.array(self.training_data_outputs)
-            self.training_data_outputs = \
-                self.training_data_outputs.astype(np.float32)
-            self.training_data_outputs = self.training_data_outputs.reshape(
-                [self.nr_training_data, self.get_output_dimension()])
-            self.training_data_outputs = \
-                torch.from_numpy(self.training_data_outputs).float()
+            # Already loaded into RAM above.
             self.output_data_scaler.fit(self.training_data_outputs)
-            self.training_data_outputs = self.output_data_scaler.\
-                transform(self.training_data_outputs)
 
         printout("Output scaler parametrized.")
+
+    def __load_training_data_into_ram(self):
+        """Load the training data into RAM."""
+        # INPUTS.
+
+        self.training_data_inputs = []
+        i = 0
+        # We need to perform the data scaling over the entirety of
+        # the training data.
+        for snapshot in self.parameters.snapshot_directories_list:
+
+            # Data scaling is only performed on the training data sets.
+            if self.parameters.data_splitting_snapshots[i] == "tr":
+                tmp = self.__load_from_npy_file(snapshot.
+                                                input_npy_directory +
+                                                snapshot.input_npy_file,
+                                                mmapmode='r')
+                if self.parameters.descriptors_contain_xyz:
+                    tmp = tmp[:, :, :, 3:]
+                tmp = np.array(tmp)
+                tmp *= self.descriptor_calculator. \
+                    convert_units(1, snapshot.input_units)
+                self.training_data_inputs.append(tmp)
+            i += 1
+
+        # The scalers will later operate on torch Tensors so we have to
+        # make sure they are fitted on
+        # torch Tensors as well. Preprocessing the numpy data as follows
+        # does NOT load it into memory, see
+        # test/tensor_memory.py
+        self.training_data_inputs = np.array(self.training_data_inputs)
+        self.training_data_inputs = \
+            self.training_data_inputs.astype(np.float32)
+        self.training_data_inputs = \
+            self.training_data_inputs.reshape(
+                [self.nr_training_data, self.get_input_dimension()])
+        self.training_data_inputs = \
+            torch.from_numpy(self.training_data_inputs).float()
+
+        # Outputs.
+        self.training_data_outputs = []
+        i = 0
+        # We need to perform the data scaling over the entirety of
+        # the training data.
+        for snapshot in self.parameters.snapshot_directories_list:
+
+            # Data scaling is only performed on the training data sets.
+            if self.parameters.data_splitting_snapshots[i] == "tr":
+                tmp = self. \
+                    __load_from_npy_file(snapshot.output_npy_directory +
+                                         snapshot.output_npy_file,
+                                         mmapmode='r')
+                tmp = np.array(tmp)
+                tmp *= self.target_calculator. \
+                    convert_units(1, snapshot.output_units)
+                self.training_data_outputs.append(tmp)
+            i += 1
+
+        # The scalers will later operate on torch Tensors so we have to
+        # make sure they are fitted on
+        # torch Tensors as well. Preprocessing the numpy data as follows
+        # does NOT load it into memory, see
+        # test/tensor_memory.py
+        self.training_data_outputs = np.array(self.training_data_outputs)
+        self.training_data_outputs = \
+            self.training_data_outputs.astype(np.float32)
+        self.training_data_outputs = self.training_data_outputs.reshape(
+            [self.nr_training_data, self.get_output_dimension()])
+        self.training_data_outputs = \
+            torch.from_numpy(self.training_data_outputs).float()
 
     def __build_datasets(self):
         """Build the DataSets that are used during training."""
@@ -758,6 +766,8 @@ class DataHandler:
                 torch.from_numpy(self.validation_data_inputs).float()
             self.validation_data_inputs = \
                 self.input_data_scaler.transform(self.validation_data_inputs)
+            self.training_data_inputs = \
+                self.input_data_scaler.transform(self.training_data_inputs)
 
             if self.nr_test_data != 0:
                 self.test_data_outputs = np.array(self.test_data_outputs)
@@ -782,6 +792,8 @@ class DataHandler:
                 torch.from_numpy(self.validation_data_outputs).float()
             self.validation_data_outputs = \
                 self.output_data_scaler.transform(self.validation_data_outputs)
+            self.training_data_outputs = \
+                self.output_data_scaler.transform(self.training_data_outputs)
 
             if self.nr_training_data != 0:
                 self.training_data_set = \
