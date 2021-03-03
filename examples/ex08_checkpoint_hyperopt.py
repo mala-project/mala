@@ -4,14 +4,12 @@ from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al256_reduced/"
 
 """
-ex04_hyperparameter_optimization.py: Shows how a hyperparameter 
-optimization can be done using this framework. There are multiple 
-hyperparameter optimizers available in this framework. This example focusses
-on the most universal one - optuna.  
+ex08_checkpoint_hyperopt.py: Shows how a hyperparameter optimization run can 
+be paused and resumed.
 """
 
 
-def run_example04(desired_loss_improvement_factor=1):
+def run_example08():
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
@@ -30,15 +28,20 @@ def run_example04(desired_loss_improvement_factor=1):
     test_parameters.data.output_rescaling_type = "normal"
 
     # Specify the training parameters.
-    test_parameters.running.max_number_epochs = 20
+    test_parameters.running.max_number_epochs = 10
     test_parameters.running.mini_batch_size = 40
     test_parameters.running.learning_rate = 0.00001
     test_parameters.running.trainingtype = "Adam"
 
     # Specify the number of trials, the hyperparameter optimizer should run
     # and the type of hyperparameter.
-    test_parameters.hyperparameters.n_trials = 20
+    # The study will be 9 trials long, with checkpoints after the 5th
+    # trial. This will result in the first checkpoint still having 4
+    # trials left.
+    test_parameters.hyperparameters.n_trials = 9
     test_parameters.hyperparameters.hyper_opt_method = "optuna"
+    test_parameters.hyperparameters.checkpoints_each_trial = 5
+    test_parameters.hyperparameters.checkpoint_name = "ex08"
 
     ####################
     # DATA
@@ -66,6 +69,8 @@ def run_example04(desired_loss_improvement_factor=1):
     # and let it perform a "study".
     # Before such a study can be done, one has to add all the parameters
     # of interest.
+    # After first performing the study, we load it from the last checkpoint
+    # and run the remaining trials.
     ####################
 
     test_hp_optimizer = fesl.HyperOptInterface(test_parameters, data_handler)
@@ -89,41 +94,26 @@ def run_example04(desired_loss_improvement_factor=1):
     # Perform hyperparameter optimization.
     printout("Starting Hyperparameter optimization.")
     test_hp_optimizer.perform_study()
-    test_hp_optimizer.set_optimal_parameters()
-    printout("Hyperparameter optimization: DONE.")
 
-    ####################
-    # TRAINING
-    # Train with these new parameters.
-    ####################
-
-    test_network = fesl.Network(test_parameters)
-    test_trainer = fesl.Trainer(test_parameters, test_network, data_handler)
-    printout("Network setup: DONE.")
-    test_trainer.train_network()
-    printout("Training: DONE.")
+    loaded_params, new_datahandler, new_hyperopt = \
+        fesl.HyperOptOptuna.resume_checkpoint("ex08")
+    new_hyperopt.perform_study()
 
     ####################
     # RESULTS.
-    # Print the used parameters and check whether the loss decreased enough.
+    # Print the used parameters.
     ####################
 
     printout("Parameters used for this experiment:")
     test_parameters.show()
-
-    if desired_loss_improvement_factor*test_trainer.initial_test_loss < \
-            test_trainer.final_test_loss:
-        return False
-    else:
-        return True
+    return True
 
 
 if __name__ == "__main__":
-    if run_example04():
-        printout("Successfully ran ex04_hyperparameter_optimization.py.")
+    if run_example08():
+        printout("Successfully ran ex08_checkpoint_hyperopt.")
     else:
-        raise Exception("Ran ex04_hyperparameter_optimization but something "
-                        "was off. If you haven't changed any parameters in "
-                        "the example, there might be a problem with "
-                        "your installation.")
-
+        raise Exception("Ran ex08_checkpoint_hyperopt but something was off."
+                        " If you haven't changed any parameters in "
+                        "the example, there might be a problem with your"
+                        " installation.")

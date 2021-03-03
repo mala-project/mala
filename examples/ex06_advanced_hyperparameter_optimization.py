@@ -73,7 +73,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
     # of interest.
     ####################
 
-    test_hp_optimizer = fesl.HyperOptInterface(test_parameters)
+    test_hp_optimizer = fesl.HyperOptInterface(test_parameters, data_handler)
     test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),
                                            100, 100,
                                            data_handler.get_output_dimension()]
@@ -100,7 +100,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
             input_creator_notraining = "oat"
         tmp_parameters.hyperparameters.hyper_opt_method = \
             input_creator_notraining
-        tmp_hp_optimizer = fesl.HyperOptInterface(tmp_parameters)
+        tmp_hp_optimizer = fesl.HyperOptInterface(tmp_parameters, data_handler)
         tmp_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
                                             choices=["Adam", "SGD"])
         tmp_hp_optimizer.add_hyperparameter("categorical",
@@ -116,16 +116,14 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
     # Perform hyperparameter optimization.
     printout("Starting Hyperparameter optimization.")
     if hyper_optimizer == "oat" or hyper_optimizer == "optuna":
-        test_hp_optimizer.perform_study(data_handler)
+        test_hp_optimizer.perform_study()
         if hyper_optimizer == "optuna":
             last_optuna_study = test_hp_optimizer.get_trials_from_study()
     elif hyper_optimizer == "notraining":
         if input_creator_notraining == "optuna":
-            test_hp_optimizer.perform_study(data_handler,
-                                            trial_list=last_optuna_study)
+            test_hp_optimizer.perform_study(trial_list=last_optuna_study)
         else:
-            test_hp_optimizer.perform_study(data_handler,
-                                            trial_list=
+            test_hp_optimizer.perform_study(trial_list=
                                             tmp_hp_optimizer.orthogonal_arr)
     test_hp_optimizer.set_optimal_parameters()
     printout("Hyperparameter optimization: DONE.")

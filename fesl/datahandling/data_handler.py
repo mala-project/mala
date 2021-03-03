@@ -583,8 +583,7 @@ class DataHandler:
         printout("Output scaler parametrized.")
 
     def __load_training_data_into_ram(self):
-        """Loads the training data into RAM."""
-
+        """Load the training data into RAM."""
         # INPUTS.
 
         self.training_data_inputs = []
@@ -768,7 +767,7 @@ class DataHandler:
             self.validation_data_inputs = \
                 self.input_data_scaler.transform(self.validation_data_inputs)
             self.training_data_inputs = \
-                self.output_data_scaler.transform(self.training_data_inputs)
+                self.input_data_scaler.transform(self.training_data_inputs)
 
             if self.nr_test_data != 0:
                 self.test_data_outputs = np.array(self.test_data_outputs)

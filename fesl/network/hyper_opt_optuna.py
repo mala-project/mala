@@ -12,7 +12,7 @@ from fesl.common.parameters import Parameters
 class HyperOptOptuna(HyperOptBase):
     """Hyperparameter optimizer using Optuna."""
 
-    def __init__(self, params, data):
+    def __init__(self, params, data, trials_from_last_checkpoint=0):
         """
         Create a HyperOptOptuna object.
 
@@ -23,6 +23,9 @@ class HyperOptOptuna(HyperOptBase):
 
         data : fesl.datahandling.data_handler.DataHandler
             DataHandler holding the data for the hyperparameter optimization.
+
+        trials_from_last_checkpoint : int
+            Trials that were performed during the last checkpoint.
         """
         super(HyperOptOptuna, self).__init__(params, data)
         self.params = params
@@ -39,6 +42,7 @@ class HyperOptOptuna(HyperOptBase):
                          sampler=sampler)
         self.objective = None
         self.checkpoint_counter = 0
+        self.trials_from_last_checkpoint = trials_from_last_checkpoint
 
     def perform_study(self):
         """
@@ -55,7 +59,8 @@ class HyperOptOptuna(HyperOptBase):
             callback_list.append(self.__create_checkpointing)
 
         self.study.optimize(self.objective,
-                            n_trials=self.params.hyperparameters.n_trials,
+                            n_trials=self.params.hyperparameters.n_trials -
+                            self.trials_from_last_checkpoint,
                             callbacks=callback_list)
 
         # Return the best lost value we could achieve.
@@ -158,7 +163,9 @@ class HyperOptOptuna(HyperOptBase):
             loaded_study = pickle.load(handle)
 
         # Now, create the Trainer class with it.
-        loaded_hyperopt = HyperOptOptuna(params, data)
+        loaded_hyperopt = HyperOptOptuna(params, data,
+                                         trials_from_last_checkpoint=
+                                         len(loaded_study.get_trials()))
         loaded_hyperopt.study = loaded_study
         return loaded_hyperopt
 
