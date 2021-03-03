@@ -43,7 +43,7 @@ class Trainer(Runner):
         self.scheduler = None
         self.patience_counter = 0
         self.last_epoch = 0
-        self.last_loss = 0
+        self.last_loss = None
         self.training_data_loader = None
         self.validation_data_loader = None
         self.test_data_loader = None
@@ -51,7 +51,37 @@ class Trainer(Runner):
 
     @classmethod
     def resume_checkpoint(cls, checkpoint_name):
+        """
+        Prepares resumption of training from a checkpoint.
 
+        Please note that to actually resume the training,
+        Trainer.train_network() still has to be called.
+
+        Parameters
+        ----------
+        checkpoint_name : string
+            Name of the checkpoint from which
+
+        Returns
+        -------
+        loaded_params : fesl.common.parameters.Parameters
+            ThepParameters saved in the checkpoint.
+
+        loaded_iscaler : fesl.datahandling.data_scaler.DataScaler
+            The input data scaler saved in the checkpoint.
+
+        loaded_oscaler : fesl.datahandling.data_scaler.DataScaler
+            The output data scaler saved in the checkpoint.
+
+        loaded_network : fesl.network.network.Network
+            The network saved in the checkpoint.
+
+        new_datahandler : fesl.datahandling.data_handler.DataHandler
+            The data handler reconstructed from the checkpoint.
+
+        new_trainer : Trainer
+            The trainer reconstructed from the checkpoint.
+        """
         printout("Loading training run from checkpoint.")
         # The names are based upon the checkpoint name.
         network_name = checkpoint_name + "_network.pth"
@@ -70,17 +100,40 @@ class Trainer(Runner):
         printout("Preparing data used for last checkpoint.")
         # Create a new data handler and prepare the data.
         new_datahandler = DataHandler(loaded_params,
-                                         input_data_scaler=loaded_iscaler,
-                                         output_data_scaler=loaded_oscaler)
+                                      input_data_scaler=loaded_iscaler,
+                                      output_data_scaler=loaded_oscaler)
         new_datahandler.prepare_data()
         new_trainer = Trainer.load_from_file(loaded_params, optimizer_name,
                                              loaded_network, new_datahandler)
 
         return loaded_params, loaded_iscaler, loaded_oscaler, loaded_network, \
-            new_trainer
+            new_datahandler, new_trainer
 
     @classmethod
     def load_from_file(cls, params, file_path, network, data):
+        """
+        Load a trainer from a file.
+
+        Parameters
+        ----------
+        params : fesl.common.parameters.Parameters
+            Parameters object with which the trainer should be created.
+            Has to be compatible with network and data.
+
+        file_path : string
+            Path to the file from which the trainer should be loaded.
+
+        network : fesl.network.network.Network
+            Network which is being trained.
+
+        data : fesl.datahandling.data_handler.DataHandler
+            DataHandler holding the training data.
+
+        Returns
+        -------
+        loaded_trainer : Network
+            The trainer that was loaded from the file.
+        """
 
         # First, load the checkpoint.
         checkpoint = torch.load(file_path)
@@ -112,10 +165,16 @@ class Trainer(Runner):
                 printout("Initial Guess - test data loss: ", tloss)
         self.initial_test_loss = tloss
 
-        # Perform and log training.
-        self.patience_counter = 0
-        vloss_old = vloss
+        # Initialize all the counters.
         checkpoint_counter = 0
+
+        # If we restarted from a checkpoint, we
+        if self.last_loss is None:
+            vloss_old = vloss
+        else:
+            vloss_old = self.last_loss
+
+        # Perform and log training.
         for epoch in range(self.last_epoch, self.parameters.max_number_epochs):
             start_time = time.time()
 
@@ -158,6 +217,7 @@ class Trainer(Runner):
                     self.scheduler.step(vloss)
 
             # If early stopping is used, check if we need to do something.
+            print(self.patience_counter)
             if self.parameters.early_stopping_epochs > 0:
                 if vloss < vloss_old * (1.0 + self.parameters.
                                         early_stopping_threshold):
@@ -173,6 +233,7 @@ class Trainer(Runner):
                                      "accuracy has not improved for",
                                      self.patience_counter,
                                      "epochs.")
+                        self.last_epoch = epoch
                         break
 
             # If checkpointing is enabled, we need to checkpoint.
@@ -182,7 +243,7 @@ class Trainer(Runner):
                         self.parameters.checkpoints_each_epoch:
                     printout("Checkpointing training.")
                     self.last_epoch = epoch
-                    self.last_loss = vloss
+                    self.last_loss = vloss_old
                     self.__create_training_checkpoint()
                     checkpoint_counter = 0
 
@@ -225,10 +286,14 @@ class Trainer(Runner):
                                         weight_decay)
         else:
             raise Exception("Unsupported training method.")
+
+        # Load data from pytorch file.
         if optimizer_dict is not None:
             self.optimizer.\
                 load_state_dict(optimizer_dict['optimizer_state_dict'])
             self.last_epoch = optimizer_dict['epoch']+1
+            self.patience_counter = optimizer_dict['early_stopping_counter']
+            self.last_loss = optimizer_dict['early_stopping_last_loss']
 
         if self.parameters_full.use_horovod:
             # scaling the batch size for multiGPU per node
@@ -296,7 +361,6 @@ class Trainer(Runner):
         if self.scheduler is not None and optimizer_dict is not None:
             self.scheduler.\
                 load_state_dict(optimizer_dict['lr_scheduler_state_dict'])
-
 
         # If lazy loading is used we do not shuffle the data points on their
         # own, but rather shuffle them
@@ -389,12 +453,16 @@ class Trainer(Runner):
             save_dict = {
                 'epoch': self.last_epoch,
                 'optimizer_state_dict': self.optimizer.state_dict(),
+                'early_stopping_counter': self.patience_counter,
+                'early_stopping_last_loss': self.last_loss
             }
         else:
             save_dict = {
                 'epoch': self.last_epoch,
                 'optimizer_state_dict': self.optimizer.state_dict(),
-                'lr_scheduler_state_dict': self.scheduler.state_dict()
+                'lr_scheduler_state_dict': self.scheduler.state_dict(),
+                'early_stopping_counter': self.patience_counter,
+                'early_stopping_last_loss': self.last_loss
             }
 
 
