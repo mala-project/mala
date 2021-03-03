@@ -208,7 +208,6 @@ class ParametersData(ParametersBase):
         If True, data is lazily loaded, i.e. only the snapshots that are
         currently needed will be kept in memory. This greatly reduces memory
         demands, but adds additional computational time.
-
     """
 
     def __init__(self):
@@ -303,6 +302,13 @@ class ParametersRunning(ParametersBase):
         If lazy loading is selected, then this shuffling will be done on
         a "by snapshot" basis.
 
+    checkpoints_each_epoch : int
+        If not 0, checkpoint files will be saved after eac
+        checkpoints_each_epoch epoch.
+
+    checkpoint_name : string
+        Name used for the checkpoints. Using this, multiple runs
+        can be performed in the same directory.
     """
 
     def __init__(self):
@@ -327,6 +333,8 @@ class ParametersRunning(ParametersBase):
         self.sampler = {"train_sampler": None, "validate_sampler": None,
                         "test_sampler": None}
         self.use_shuffling_for_samplers = True
+        self.checkpoints_each_epoch = 0
+        self.checkpoint_name = "checkpoint_fesl"
 
 
 class ParametersHyperparameterOptimization(ParametersBase):

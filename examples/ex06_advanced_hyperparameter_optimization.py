@@ -131,9 +131,9 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
     printout("Hyperparameter optimization: DONE.")
 
     test_network = fesl.Network(test_parameters)
-    test_trainer = fesl.Trainer(test_parameters)
+    test_trainer = fesl.Trainer(test_parameters, test_network, data_handler)
     printout("Network setup: DONE.")
-    test_trainer.train_network(test_network, data_handler)
+    test_trainer.train_network()
     printout("Training: DONE.")
 
     printout("Parameters used for this experiment:")

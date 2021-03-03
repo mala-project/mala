@@ -101,9 +101,9 @@ def run_example04(desired_loss_improvement_factor=1):
     ####################
 
     test_network = fesl.Network(test_parameters)
-    test_trainer = fesl.Trainer(test_parameters)
+    test_trainer = fesl.Trainer(test_parameters, test_network, data_handler)
     printout("Network setup: DONE.")
-    test_trainer.train_network(test_network, data_handler)
+    test_trainer.train_network()
     printout("Training: DONE.")
 
     ####################

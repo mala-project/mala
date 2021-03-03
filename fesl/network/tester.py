@@ -18,7 +18,7 @@ class Tester(Runner):
     It enables easy inference throughout a test set.
     """
 
-    def __init__(self, params):
+    def __init__(self, params, network, data):
         """
         Create a Tester object to run a Network.
 
@@ -26,46 +26,18 @@ class Tester(Runner):
         ----------
         params : fesl.common.parametes.Parameters
             Parameters used to create this Tester object.
-        """
-        # copy the parameters into the class.
-        super(Tester, self).__init__(params)
-        self.test_data_loader = None
-        self.number_of_batches_per_snapshot = 0
 
-    def set_data(self, network, data):
-        """
-        Set data to be used in this test run.
-
-        Parameters
-        ----------
         network : fesl.network.network.Network
             Network which is being tested.
 
         data : fesl.datahandling.data_handler.DataHandler
             DataHandler holding the test data.
         """
-        self.prepare_to_run()
-        self.data = data
-        self.network = network
-        if self.parameters_full.use_horovod:
-            self.parameters.sampler["test_sampler"] = torch.utils.data.\
-                distributed.DistributedSampler(data.test_data_set,
-                                               num_replicas=hvd.size(),
-                                               rank=hvd.rank())
-        # We will use the DataLoader iterator to iterate over the test data.
-        # But since we only want the data per snapshot,
-        # we need to make sure the batch size is compatible with that.
-        self.__check_and_adjust_batch_size(data.grid_size)
-        self.test_data_loader = DataLoader(data.test_data_set,
-                                           batch_size=self.parameters.
-                                           mini_batch_size * 1,
-                                           sampler=self.parameters.
-                                           sampler["test_sampler"],
-                                           **self.parameters.kwargs,
-                                           shuffle=False)
-        self.number_of_batches_per_snapshot = int(data.grid_size /
-                                                  self.parameters.
-                                                  mini_batch_size)
+        # copy the parameters into the class.
+        super(Tester, self).__init__(params, network, data)
+        self.test_data_loader = None
+        self.number_of_batches_per_snapshot = 0
+        self.__prepare_to_test()
 
     def test_snapshot(self, snapshot_number):
         """
@@ -120,6 +92,28 @@ class Tester(Runner):
                                   to('cpu'), as_numpy=True)
 
         return actual_outputs, predicted_outputs
+
+    def __prepare_to_test(self):
+        """Prepare the tester class to for test run."""
+        if self.parameters_full.use_horovod:
+            self.parameters.sampler["test_sampler"] = torch.utils.data.\
+                distributed.DistributedSampler(self.data.test_data_set,
+                                               num_replicas=hvd.size(),
+                                               rank=hvd.rank())
+        # We will use the DataLoader iterator to iterate over the test data.
+        # But since we only want the data per snapshot,
+        # we need to make sure the batch size is compatible with that.
+        self.__check_and_adjust_batch_size(self.data.grid_size)
+        self.test_data_loader = DataLoader(self.data.test_data_set,
+                                           batch_size=self.parameters.
+                                           mini_batch_size * 1,
+                                           sampler=self.parameters.
+                                           sampler["test_sampler"],
+                                           **self.parameters.kwargs,
+                                           shuffle=False)
+        self.number_of_batches_per_snapshot = int(self.data.grid_size /
+                                                  self.parameters.
+                                                  mini_batch_size)
 
     def __check_and_adjust_batch_size(self, datasize):
         """

@@ -56,8 +56,7 @@ def use_trained_network(network_path, params_path, input_scaler_path,
     inference_data_handler.prepare_data()
 
     # The Tester class is the testing analogon to the training class.
-    tester = fesl.Tester(new_parameters)
-    tester.set_data(new_network, inference_data_handler)
+    tester = fesl.Tester(new_parameters, new_network, inference_data_handler)
 
     # Get the results for the first (and only= snapshot.
     actual_ldos, predicted_ldos = tester.test_snapshot(0)
@@ -151,7 +150,7 @@ def initial_training(network_path, params_path, input_scaler_path,
 
     # Setup network and trainer.
     test_network = fesl.Network(test_parameters)
-    test_trainer = fesl.Trainer(test_parameters)
+    test_trainer = fesl.Trainer(test_parameters, test_network, data_handler)
     printout("Network setup: DONE.")
 
     ####################
@@ -160,7 +159,7 @@ def initial_training(network_path, params_path, input_scaler_path,
     ####################
 
     printout("Starting training.")
-    test_trainer.train_network(test_network, data_handler)
+    test_trainer.train_network()
     printout("Training: DONE.")
 
     ####################
@@ -169,10 +168,10 @@ def initial_training(network_path, params_path, input_scaler_path,
     # Parameters, input/output scaler, network.
     ####################
 
-    test_trainer.save_network_objects(network_name=network_path,
-                                      params_name=params_path,
-                                      iscaler_name=input_scaler_path,
-                                      oscaler_name=output_scaler_path)
+    test_parameters.save(params_path)
+    test_network.save_network(network_path)
+    data_handler.input_data_scaler.save(input_scaler_path)
+    data_handler.output_data_scaler.save(output_scaler_path)
 
     ####################
     # RESULTS.
