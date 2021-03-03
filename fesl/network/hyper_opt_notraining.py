@@ -12,7 +12,7 @@ class HyperOptNoTraining(HyperOptBase):
     Networks are analysed using the Jacobian.
     """
 
-    def __init__(self, params):
+    def __init__(self, params, data):
         """
         Create a HyperOptNoTraining object.
 
@@ -20,14 +20,17 @@ class HyperOptNoTraining(HyperOptBase):
         ----------
         params : fesl.common.parametes.Parameters
             Parameters used to create this hyperparameter optimizer.
+
+        data : fesl.datahandling.data_handler.DataHandler
+            DataHandler holding the data for the hyperparameter optimization.
         """
-        super(HyperOptNoTraining, self).__init__(params)
+        super(HyperOptNoTraining, self).__init__(params, data)
         self.objective = None
         self.trial_losses = None
         self.best_trial = None
         self.trial_list = None
 
-    def perform_study(self, data_handler, trial_list=None):
+    def perform_study(self, trial_list=None):
         """
         Perform the study, i.e. the optimization.
 
@@ -37,9 +40,6 @@ class HyperOptNoTraining(HyperOptBase):
 
         Parameters
         ----------
-        data_handler : fesl.datahandling.data_handler.DataHandler
-            datahandler to be used during the hyperparameter optimization.
-
         trial_list : list
             A list containing trials from either HyperOptOptuna or HyperOptOAT.
             HyperOptNoTraining does currently not have an algorithm to
@@ -60,7 +60,7 @@ class HyperOptNoTraining(HyperOptBase):
             trial_type = "optuna"
         else:
             trial_type = "oat"
-        self.objective = ObjectiveNoTraining(self.params, data_handler,
+        self.objective = ObjectiveNoTraining(self.params, self.data_handler,
                                              trial_type)
         self.trial_losses = [self.objective(row) for row in self.trial_list]
 

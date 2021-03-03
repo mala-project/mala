@@ -67,12 +67,6 @@ class Trainer(Runner):
         loaded_params : fesl.common.parameters.Parameters
             The Parameters saved in the checkpoint.
 
-        loaded_iscaler : fesl.datahandling.data_scaler.DataScaler
-            The input data scaler saved in the checkpoint.
-
-        loaded_oscaler : fesl.datahandling.data_scaler.DataScaler
-            The output data scaler saved in the checkpoint.
-
         loaded_network : fesl.network.network.Network
             The network saved in the checkpoint.
 
@@ -102,12 +96,11 @@ class Trainer(Runner):
         new_datahandler = DataHandler(loaded_params,
                                       input_data_scaler=loaded_iscaler,
                                       output_data_scaler=loaded_oscaler)
-        new_datahandler.prepare_data()
+        new_datahandler.prepare_data(reparametrize_scaler=False)
         new_trainer = Trainer.load_from_file(loaded_params, optimizer_name,
                                              loaded_network, new_datahandler)
 
-        return loaded_params, loaded_iscaler, loaded_oscaler, loaded_network, \
-            new_datahandler, new_trainer
+        return loaded_params, loaded_network, new_datahandler, new_trainer
 
     @classmethod
     def load_from_file(cls, params, file_path, network, data):
@@ -463,11 +456,8 @@ class Trainer(Runner):
                 'early_stopping_last_loss': self.last_loss
             }
 
-
         torch.save(save_dict, optimizer_name,
                    _use_new_zipfile_serialization=False)
-
-
 
     @staticmethod
     def __average_validation(val, name):

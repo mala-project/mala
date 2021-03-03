@@ -91,8 +91,7 @@ def run_example07(desired_loss_improvement_factor=1):
     test_trainer.train_network()
     printout("Training: DONE.")
 
-    loaded_params, loaded_iscaler, loaded_oscaler, loaded_network, \
-        new_datahandler, new_trainer = \
+    loaded_params, loaded_network, new_datahandler, new_trainer = \
         fesl.Trainer.resume_checkpoint("ex07")
 
     # Note that this means the actual total number of epochs,

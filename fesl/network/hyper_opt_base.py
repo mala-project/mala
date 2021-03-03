@@ -6,7 +6,7 @@ from .hyperparameter_interface import HyperparameterInterface
 class HyperOptBase(ABC):
     """Base class for hyperparameter optimizater."""
 
-    def __init__(self, params):
+    def __init__(self, params, data):
         """
         Create a hyperparameter optimizer object.
 
@@ -14,8 +14,12 @@ class HyperOptBase(ABC):
         ----------
         params : fesl.common.parametes.Parameters
             Parameters used to create this hyperparameter optimizer.
+
+        data : fesl.datahandling.data_handler.DataHandler
+            DataHandler holding the data for the hyperparameter optimization.
         """
         self.params = params
+        self.data_handler = data
 
     def add_hyperparameter(self, opttype="float", name="", low=0, high=0,
                            choices=None):
@@ -65,16 +69,11 @@ class HyperOptBase(ABC):
         self.params.hyperparameters.hlist = []
 
     @abstractmethod
-    def perform_study(self, data_handler):
+    def perform_study(self):
         """
         Perform the study, i.e. the optimization.
 
         This is done by sampling a certain subset of network architectures.
-
-        Parameters
-        ----------
-        data_handler : fesl.datahandling.data_handler.DataHandler
-            datahandler to be used during the hyperparameter optimization.
         """
         pass
 

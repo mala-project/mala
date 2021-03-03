@@ -383,6 +383,15 @@ class ParametersHyperparameterOptimization(ParametersBase):
               currently done by simply choosing the lowesr loss.
             - "notraining" : Using a NAS without training, based on jacobians.
 
+    checkpoints_each_trial : int
+        If not 0, checkpoint files will be saved after each
+        checkpoints_each_trial trials. Currently, this only works with
+        optuna.
+
+    checkpoint_name : string
+        Name used for the checkpoints. Using this, multiple runs
+        can be performed in the same directory. Currently. this
+        only works with optuna.
     """
 
     def __init__(self):
@@ -392,6 +401,8 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.n_trials = 100
         self.hlist = []
         self.hyper_opt_method = "optuna"
+        self.checkpoints_each_trial = 0
+        self.checkpoint_name = "checkpoint_fesl_ho"
 
     def show(self, indent=""):
         """

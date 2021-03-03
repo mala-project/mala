@@ -94,7 +94,7 @@ def run_example04(desired_loss_improvement_factor=1):
 
     ####################
     # TRAINING
-    # Train wit these new parameters.
+    # Train with these new parameters.
     ####################
 
     test_network = fesl.Network(test_parameters)

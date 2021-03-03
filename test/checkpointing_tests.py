@@ -1,8 +1,8 @@
 import fesl
 from fesl import printout
 import numpy as np
-data_repo_path = "/home/fiedlerl/data/fesl_data_repo/"
-data_path = data_repo_path+"Al256_reduced/"
+from data_repo_path import get_data_repo_path
+data_path = get_data_repo_path()+"Al256_reduced/"
 test_checkpoint_name = "test"
 
 
