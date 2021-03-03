@@ -1,4 +1,8 @@
 """Trainer class for training a network."""
+from fesl.network.network import Network
+from fesl.datahandling.data_handler import DataHandler
+from fesl.datahandling.data_scaler import DataScaler
+from fesl.common.parameters import Parameters
 import numpy as np
 import torch
 from torch import optim
@@ -16,7 +20,7 @@ import time
 class Trainer(Runner):
     """A class for training a neural network."""
 
-    def __init__(self, params, network, data):
+    def __init__(self, params, network, data, optimizer_dict=None):
         """
         Create a Trainer object to run a Network.
 
@@ -39,10 +43,52 @@ class Trainer(Runner):
         self.scheduler = None
         self.patience_counter = 0
         self.last_epoch = 0
+        self.last_loss = 0
         self.training_data_loader = None
         self.validation_data_loader = None
         self.test_data_loader = None
-        self.__prepare_to_train()
+        self.__prepare_to_train(optimizer_dict)
+
+    @classmethod
+    def resume_checkpoint(cls, checkpoint_name):
+
+        printout("Loading training run from checkpoint.")
+        # The names are based upon the checkpoint name.
+        network_name = checkpoint_name + "_network.pth"
+        iscaler_name = checkpoint_name + "_iscaler.pkl"
+        oscaler_name = checkpoint_name + "_oscaler.pkl"
+        param_name = checkpoint_name + "_params.pkl"
+        optimizer_name = checkpoint_name + "_optimizer.pth"
+
+        # First load the all the regular objects.
+        loaded_params = Parameters.load_from_file(param_name)
+        loaded_iscaler = DataScaler.load_from_file(iscaler_name)
+        loaded_oscaler = DataScaler.load_from_file(oscaler_name)
+        loaded_network = Network.load_from_file(loaded_params,
+                                                network_name)
+
+        printout("Preparing data used for last checkpoint.")
+        # Create a new data handler and prepare the data.
+        new_datahandler = DataHandler(loaded_params,
+                                         input_data_scaler=loaded_iscaler,
+                                         output_data_scaler=loaded_oscaler)
+        new_datahandler.prepare_data()
+        new_trainer = Trainer.load_from_file(loaded_params, optimizer_name,
+                                             loaded_network, new_datahandler)
+
+        return loaded_params, loaded_iscaler, loaded_oscaler, loaded_network, \
+            new_trainer
+
+    @classmethod
+    def load_from_file(cls, params, file_path, network, data):
+
+        # First, load the checkpoint.
+        checkpoint = torch.load(file_path)
+
+        # Now, create the Trainer class with it.
+        loaded_trainer = Trainer(params, network, data,
+                                 optimizer_dict=checkpoint)
+        return loaded_trainer
 
     def train_network(self):
         """Train a network using data given by a DataHandler."""
@@ -71,7 +117,6 @@ class Trainer(Runner):
         vloss_old = vloss
         checkpoint_counter = 0
         for epoch in range(self.last_epoch, self.parameters.max_number_epochs):
-            self.last_epoch = epoch
             start_time = time.time()
 
             # Prepare model for training.
@@ -136,6 +181,8 @@ class Trainer(Runner):
                 if checkpoint_counter >= \
                         self.parameters.checkpoints_each_epoch:
                     printout("Checkpointing training.")
+                    self.last_epoch = epoch
+                    self.last_loss = vloss
                     self.__create_training_checkpoint()
                     checkpoint_counter = 0
 
@@ -151,7 +198,7 @@ class Trainer(Runner):
         self.final_test_loss = tloss
         printout("Final test data loss: ", tloss)
 
-    def __prepare_to_train(self):
+    def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""
         # Configure keyword arguments for DataSampler.
         if self.parameters_full.use_gpu:
@@ -171,7 +218,6 @@ class Trainer(Runner):
                                        lr=self.parameters.learning_rate,
                                        weight_decay=self.parameters.
                                        weight_decay)
-
         elif self.parameters.trainingtype == "Adam":
             self.optimizer = optim.Adam(self.network.parameters(),
                                         lr=self.parameters.learning_rate,
@@ -179,6 +225,10 @@ class Trainer(Runner):
                                         weight_decay)
         else:
             raise Exception("Unsupported training method.")
+        if optimizer_dict is not None:
+            self.optimizer.\
+                load_state_dict(optimizer_dict['optimizer_state_dict'])
+            self.last_epoch = optimizer_dict['epoch']+1
 
         if self.parameters_full.use_horovod:
             # scaling the batch size for multiGPU per node
@@ -303,7 +353,12 @@ class Trainer(Runner):
         return np.mean(validation_loss)
 
     def __create_training_checkpoint(self):
-        """Create a checkpoint during training."""
+        """
+        Create a checkpoint during training.
+
+        Follows https://pytorch.org/tutorials/recipes/recipes/saving_and_
+        loading_a_general_checkpoint.html to some degree.
+        """
         network_name = self.parameters.checkpoint_name \
             + "_network.pth"
         iscaler_name = self.parameters.checkpoint_name \
@@ -312,25 +367,28 @@ class Trainer(Runner):
             + "_oscaler.pkl"
         param_name = self.parameters.checkpoint_name \
             + "_params.pkl"
+        optimizer_name = self.parameters.checkpoint_name \
+            + "_optimizer.pth"
 
         # First we save the objects we would also save for inference.
         self.data.input_data_scaler.save(iscaler_name)
         self.data.output_data_scaler.save(oscaler_name)
         self.parameters_full.save(param_name)
-        self.parameters_full.save(network_name)
+        self.network.save_network(network_name)
 
-        # # Next, we save all the other objects.
-        #
-        # if self.parameters_full.use_horovod:
-        #     if hvd.rank() != 0:
-        #         return
-        #
-        # save_dict = {'epoch': self.last_epoch}
-        #
-        # torch.save(self.state_dict(), path_to_file,
-        #            _use_new_zipfile_serialization=False)
+        # Next, we save all the other objects.
 
+        if self.parameters_full.use_horovod:
+            if hvd.rank() != 0:
+                return
 
+        save_dict = {
+            'epoch': self.last_epoch,
+            'optimizer_state_dict': self.optimizer.state_dict(),
+        }
+
+        torch.save(save_dict, optimizer_name,
+                   _use_new_zipfile_serialization=False)
 
 
 
