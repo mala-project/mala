@@ -12,9 +12,6 @@ on the most universal one - optuna.
 
 
 def run_example04(desired_loss_improvement_factor=1):
-    printout("Welcome to FESL.")
-    printout("Running ex04_hyperparameter_optimization.py")
-
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that

@@ -6,6 +6,7 @@ from lazy_loading_horovod_benchmark import lazy_loading_horovod_benchmark
 from fesl.common.parameters import printout
 from data_repo_path import get_data_repo_path
 from inference_test import run_inference_test
+from checkpointing_tests import run_checkpoint_tests
 data_path = get_data_repo_path()+"Al256_reduced/"
 
 
@@ -90,3 +91,12 @@ if run_inference_test():
     printout("run_inference_test test suceeded.")
 else:
     raise Exception("run_inference_test failed.")
+
+######################
+# Checkpoint tests.
+######################
+
+if run_checkpoint_tests():
+    printout("run_checkpoint_tests test suceeded.")
+else:
+    raise Exception("run_checkpoint_tests failed.")

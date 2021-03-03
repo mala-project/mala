@@ -104,8 +104,8 @@ def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
 
                 # Setup network and trainer.
                 test_network = Network(test_parameters)
-                test_trainer = Trainer(test_parameters)
-                test_trainer.train_network(test_network, data_handler)
+                test_trainer = Trainer(test_parameters, test_network,
+                                       data_handler)
                 training_tester.append(test_trainer.final_test_loss -
                                        test_trainer.initial_test_loss)
 
@@ -159,19 +159,3 @@ if __name__ == "__main__":
     test1 = test_lazy_loading_basic(data_path=data_path_Al)
     printout("Check if lazy loading and RAM implementation get the same "
              "results? - success?:", test1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

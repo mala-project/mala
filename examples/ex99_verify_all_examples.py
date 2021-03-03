@@ -5,6 +5,7 @@ from ex03_postprocess_data import run_example03
 from ex04_hyperparameter_optimization import run_example04
 from ex05_training_with_postprocessing import run_example05
 from ex06_advanced_hyperparameter_optimization import run_example06
+from ex07_checkpoint_training import run_example07
 
 """
 ex99_verify_all_examples.py: This example confirms whether or not the examples
@@ -75,5 +76,10 @@ else:
         "the example, there might be a problem with your installation.")
 
 
-
-
+if run_example07():
+    printout("Successfully ran ex07_checkpoint_training.")
+else:
+    raise Exception("Ran ex07_checkpoint_training but something was off."
+                    " If you haven't changed any parameters in "
+                    "the example, there might be a problem with your"
+                    " installation.")

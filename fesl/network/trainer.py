@@ -52,7 +52,7 @@ class Trainer(Runner):
     @classmethod
     def resume_checkpoint(cls, checkpoint_name):
         """
-        Prepares resumption of training from a checkpoint.
+        Prepare resumption of training from a checkpoint.
 
         Please note that to actually resume the training,
         Trainer.train_network() still has to be called.
@@ -65,7 +65,7 @@ class Trainer(Runner):
         Returns
         -------
         loaded_params : fesl.common.parameters.Parameters
-            ThepParameters saved in the checkpoint.
+            The Parameters saved in the checkpoint.
 
         loaded_iscaler : fesl.datahandling.data_scaler.DataScaler
             The input data scaler saved in the checkpoint.
@@ -134,7 +134,6 @@ class Trainer(Runner):
         loaded_trainer : Network
             The trainer that was loaded from the file.
         """
-
         # First, load the checkpoint.
         checkpoint = torch.load(file_path)
 
@@ -217,7 +216,6 @@ class Trainer(Runner):
                     self.scheduler.step(vloss)
 
             # If early stopping is used, check if we need to do something.
-            print(self.patience_counter)
             if self.parameters.early_stopping_epochs > 0:
                 if vloss < vloss_old * (1.0 + self.parameters.
                                         early_stopping_threshold):
