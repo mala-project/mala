@@ -169,10 +169,10 @@ def initial_training(network_path, params_path, input_scaler_path,
     # Parameters, input/output scaler, network.
     ####################
 
-    test_parameters.save(params_path)
-    test_network.save_network(network_path)
-    data_handler.input_data_scaler.save(input_scaler_path)
-    data_handler.output_data_scaler.save(output_scaler_path)
+    test_trainer.save_network_objects(network_name=network_path,
+                                      params_name=params_path,
+                                      iscaler_name=input_scaler_path,
+                                      oscaler_name=output_scaler_path)
 
     ####################
     # RESULTS.

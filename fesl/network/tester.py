@@ -29,7 +29,6 @@ class Tester(Runner):
         """
         # copy the parameters into the class.
         super(Tester, self).__init__(params)
-        self.data = None
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
 
@@ -48,7 +47,7 @@ class Tester(Runner):
         self.prepare_to_run()
         self.data = data
         self.network = network
-        if self.use_horovod:
+        if self.parameters_full.use_horovod:
             self.parameters.sampler["test_sampler"] = torch.utils.data.\
                 distributed.DistributedSampler(data.test_data_set,
                                                num_replicas=hvd.size(),
@@ -58,13 +57,15 @@ class Tester(Runner):
         # we need to make sure the batch size is compatible with that.
         self.__check_and_adjust_batch_size(data.grid_size)
         self.test_data_loader = DataLoader(data.test_data_set,
-                                           batch_size=self.batch_size * 1,
+                                           batch_size=self.parameters.
+                                           mini_batch_size * 1,
                                            sampler=self.parameters.
                                            sampler["test_sampler"],
                                            **self.parameters.kwargs,
                                            shuffle=False)
         self.number_of_batches_per_snapshot = int(data.grid_size /
-                                                  self.batch_size)
+                                                  self.parameters.
+                                                  mini_batch_size)
 
     def test_snapshot(self, snapshot_number):
         """
@@ -105,12 +106,15 @@ class Tester(Runner):
         offset = snapshot_number * self.data.grid_size
         for i in range(0, self.number_of_batches_per_snapshot):
             inputs, outputs = \
-                self.data.test_data_set[offset+(i * self.batch_size):
-                                        offset+((i + 1) * self.batch_size)]
-            if self.use_gpu:
+                self.data.test_data_set[offset+(i * self.parameters.
+                                        mini_batch_size):
+                                        offset+((i + 1) * self.parameters.
+                                        mini_batch_size)]
+            if self.parameters_full.use_gpu:
                 inputs = inputs.to('cuda')
-            predicted_outputs[i * self.batch_size:(i + 1) * self.batch_size,
-                                                 :] = \
+            predicted_outputs[i * self.parameters.
+                              mini_batch_size:(i + 1) * self.parameters.
+                              mini_batch_size, :] = \
                 self.data.output_data_scaler.\
                 inverse_transform(self.network(inputs).
                                   to('cpu'), as_numpy=True)
@@ -125,9 +129,9 @@ class Tester(Runner):
         batch_size will result in an integer division without any residual
         value.
         """
-        if datasize % self.batch_size != 0:
-            old_batch_size = self.batch_size
-            while datasize % self.batch_size != 0:
-                self.batch_size += 1
+        if datasize % self.parameters.mini_batch_size != 0:
+            old_batch_size = self.parameters.mini_batch_size
+            while datasize % self.parameters.mini_batch_size != 0:
+                self.parameters.mini_batch_size += 1
             printout("Had to readjust batch size from", old_batch_size, "to",
-                     self.batch_size)
+                     self.parameters.mini_batch_size)

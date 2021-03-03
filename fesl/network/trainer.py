@@ -46,13 +46,15 @@ class Trainer(Runner):
         """
         # Prepare horovod to run.
         super(Trainer, self).prepare_to_run()
+        self.data = data
+        self.network = network
 
         # Configure keyword arguments for DataSampler.
-        if self.use_gpu:
+        if self.parameters_full.use_gpu:
             self.parameters.kwargs['pin_memory'] = True
 
         # Scale the learning rate according to horovod. 
-        if self.use_horovod:
+        if self.parameters_full.use_horovod:
             if hvd.size() > 1:
                 printout("Rescaling learning rate because multiple workers are"
                          " used for training.")
@@ -61,25 +63,25 @@ class Trainer(Runner):
 
         # Choose an optimizer to use.
         if self.parameters.trainingtype == "SGD":
-            self.optimizer = optim.SGD(network.parameters(),
+            self.optimizer = optim.SGD(self.network.parameters(),
                                        lr=self.parameters.learning_rate,
                                        weight_decay=self.parameters.
                                        weight_decay)
 
         elif self.parameters.trainingtype == "Adam":
-            self.optimizer = optim.Adam(network.parameters(),
+            self.optimizer = optim.Adam(self.network.parameters(),
                                         lr=self.parameters.learning_rate,
                                         weight_decay=self.parameters.
                                         weight_decay)
         else:
             raise Exception("Unsupported training method.")
 
-        if self.use_horovod:
+        if self.parameters_full.use_horovod:
             # scaling the batch size for multiGPU per node
             # self.batch_size= self.batch_size*hvd.local_size()
 
-            compression = hvd.Compression.fp16 if self.use_compression \
-                else hvd.Compression.none
+            compression = hvd.Compression.fp16 if self.parameters_full.\
+                use_compression else hvd.Compression.none
 
             # If lazy loading is used we do not shuffle the data points on
             # their own, but rather shuffle them
@@ -87,38 +89,38 @@ class Trainer(Runner):
             # per epoch.
             # This shuffling is done in the dataset themselves.
             do_shuffle = self.parameters.use_shuffling_for_samplers
-            if data.parameters.use_lazy_loading:
+            if self.data.parameters.use_lazy_loading:
                 do_shuffle = False
 
             # Set the data sampler for multiGPU
             self.parameters.sampler["train_sampler"] = torch.utils.data.\
-                distributed.DistributedSampler(data.training_data_set,
+                distributed.DistributedSampler(self.data.training_data_set,
                                                num_replicas=hvd.size(),
                                                rank=hvd.rank(),
                                                shuffle=do_shuffle)
 
             self.parameters.sampler["validate_sampler"] = torch.utils.data.\
-                distributed.DistributedSampler(data.validation_data_set,
+                distributed.DistributedSampler(self.data.validation_data_set,
                                                num_replicas=hvd.size(),
                                                rank=hvd.rank(),
                                                shuffle=False)
 
-            if data.test_data_set is not None:
+            if self.data.test_data_set is not None:
                 self.parameters.sampler["test_sampler"] = torch.utils.data.\
-                    distributed.DistributedSampler(data.test_data_set,
+                    distributed.DistributedSampler(self.data.test_data_set,
                                                    num_replicas=hvd.size(),
                                                    rank=hvd.rank(),
                                                    shuffle=False)
 
             # broadcaste parameters and optimizer state from root device to
             # other devices
-            hvd.broadcast_parameters(network.state_dict(), root_rank=0)
+            hvd.broadcast_parameters(self.network.state_dict(), root_rank=0)
             hvd.broadcast_optimizer_state(self.optimizer, root_rank=0)
 
             # Wraps the opimizer for multiGPU operation
             self.optimizer = hvd.DistributedOptimizer(self.optimizer,  
                                                       named_parameters=
-                                                      network.
+                                                      self.network.
                                                       named_parameters(),
                                                       compression=compression,
                                                       op=hvd.Average)
@@ -145,44 +147,48 @@ class Trainer(Runner):
         # This shuffling is done in the dataset themselves.
         do_shuffle = self.parameters.use_shuffling_for_samplers
         test_data_loader = None
-        if data.parameters.use_lazy_loading or self.use_horovod:
+        if self.data.parameters.use_lazy_loading or self.parameters_full.\
+                use_horovod:
             do_shuffle = False
 
         # Prepare data loaders.(look into mini-batch size)
-        training_data_loader = DataLoader(data.training_data_set,
-                                          batch_size=self.batch_size,
+        training_data_loader = DataLoader(self.data.training_data_set,
+                                          batch_size=self.parameters.
+                                          mini_batch_size,
                                           sampler=self.parameters.
                                           sampler["train_sampler"],
                                           **self.parameters.kwargs,
                                           shuffle=do_shuffle)
 
-        validation_data_loader = DataLoader(data.validation_data_set,
-                                            batch_size=self.batch_size * 1,
+        validation_data_loader = DataLoader(self.data.validation_data_set,
+                                            batch_size=self.parameters.
+                                            mini_batch_size * 1,
                                             sampler=self.parameters.
                                             sampler["validate_sampler"],
                                             **self.parameters.kwargs)
 
-        if data.test_data_set is not None:
-            test_data_loader = DataLoader(data.test_data_set,
-                                          batch_size=self.batch_size * 1,
+        if self.data.test_data_set is not None:
+            test_data_loader = DataLoader(self.data.test_data_set,
+                                          batch_size=self.parameters.
+                                          mini_batch_size * 1,
                                           sampler=self.parameters.
                                           sampler["test_sampler"],
                                           **self.parameters.kwargs)
 
         # Calculate initial loss.
         tloss = None
-        vloss = self.__validate_network(network, validation_data_loader)
-        if data.test_data_set is not None:
-            tloss = self.__validate_network(network, test_data_loader)
+        vloss = self.__validate_network(self.network, validation_data_loader)
+        if self.data.test_data_set is not None:
+            tloss = self.__validate_network(self.network, test_data_loader)
 
         # Collect and average all the losses from all the devices
-        if self.use_horovod:
+        if self.parameters_full.use_horovod:
             vloss = self.__average_validation(vloss, 'average_loss')
-            if data.test_data_set is not None:
+            if self.data.test_data_set is not None:
                 tloss = self.__average_validation(tloss, 'average_loss')
         if self.parameters.verbosity:
             printout("Initial Guess - validation data loss: ", vloss)
-            if data.test_data_set is not None:
+            if self.data.test_data_set is not None:
                 printout("Initial Guess - test data loss: ", tloss)
         self.initial_test_loss = tloss
 
@@ -193,24 +199,24 @@ class Trainer(Runner):
             start_time = time.time()
 
             # Prepare model for training.
-            network.train()
+            self.network.train()
 
             # Process each mini batch and save the training loss.
             training_loss = 0
             # train sampler 
-            if self.use_horovod:
+            if self.parameters_full.use_horovod:
                 self.parameters.sampler["train_sampler"].set_epoch(epoch)
 
             # nr_of_batches = (data.nr_training_data // self.batch_size)+1
             # oldprogress = 0
 
             for batchid, (inputs, outputs) in enumerate(training_data_loader):
-                if self.use_gpu:
+                if self.parameters_full.use_gpu:
 
                     inputs = inputs.to('cuda')
                     outputs = outputs.to('cuda')
-                training_loss += self.__process_mini_batch(network, inputs,
-                                                           outputs)
+                training_loss += self.__process_mini_batch(self.network,
+                                                           inputs, outputs)
 
                 # Output of the progress, this can be useful for tests if
                 # an epoch takes forever and one is not
@@ -223,8 +229,9 @@ class Trainer(Runner):
                 #     oldprogress = progress
 
             # Calculate the validation loss. and output it.
-            vloss = self.__validate_network(network, validation_data_loader)
-            if self.use_horovod:
+            vloss = self.__validate_network(self.network,
+                                            validation_data_loader)
+            if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
             if self.parameters.verbosity:
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
@@ -232,7 +239,7 @@ class Trainer(Runner):
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
             if self.parameters.use_shuffling_for_samplers:
-                data.mix_datasets()
+                self.data.mix_datasets()
 
             # If a scheduler is used, update it.
             if self.scheduler is not None:
@@ -260,9 +267,9 @@ class Trainer(Runner):
 
         # Calculate final loss.
         tloss = None
-        if data.test_data_set is not None:
-            tloss = self.__validate_network(network, test_data_loader)
-            if self.use_horovod:
+        if self.data.test_data_set is not None:
+            tloss = self.__validate_network(self.network, test_data_loader)
+            if self.parameters_full.use_horovod:
                 tloss = self.__average_validation(tloss, 'average_loss')
         self.final_test_loss = tloss
         printout("Final test data loss: ", tloss)
@@ -282,7 +289,7 @@ class Trainer(Runner):
         validation_loss = []
         with torch.no_grad():
             for x, y in vdl:
-                if self.use_gpu:
+                if self.parameters_full.use_gpu:
                     x = x.to('cuda')
                     y = y.to('cuda')
                 prediction = network(x)
