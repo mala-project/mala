@@ -15,7 +15,7 @@ Python module installed.
 
 
 def run_example03(do_total_energy=True, accuracy_electrons=1e-11,
-                  accuracy_total_energy=50):
+                  accuracy_total_energy=50, accuracy_band_energy=2):
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
@@ -89,9 +89,9 @@ def run_example03(do_total_energy=True, accuracy_electrons=1e-11,
             accuracy_electrons:
         return False
 
-    # FIXME: Add  as soon as band_energy_dft_calculation is fixed.
-    # if np.abs(number_of_electrons - ldos.number_of_electrons) > accuracy:
-    #     return True
+    if np.abs(band_energy - ldos.band_energy_dft_calculation) > \
+            accuracy_band_energy:
+        return True
 
     if do_total_energy:
         if np.abs(total_energy - ldos.total_energy_dft_calculation) > \
