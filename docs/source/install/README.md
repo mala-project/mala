@@ -141,7 +141,7 @@ $ pip install -U recommonmark
 $ pip intsall -U sphinx-markdown-tables
 ```
 
-1. Change into `docs/source` folder.
+1. Change into `docs/` folder.
 2. Run `make apidocs`.
 3. Run `make html`. This creates a `_build` folder inside `docs`. You may also want to use `make html SPHINXOPTS="-W"` sometimes. This treats warnings as errors and stops the output at first occurence of an error (useful for debugging rST syntax).
 4. Open `docs/_build/html/index.html`.

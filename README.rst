@@ -18,7 +18,7 @@ as a python package. This repository is structured as follows:
 Installation
 ------------
 
-Please refer to :doc:`Installation of FESL <install/README>`.
+Please refer to `Installation of FESL <https://multiscale-wdm.pages.hzdr.de/surrogate-models/fesl/fesl/install/README.html>`_.
 
 Running
 -------
