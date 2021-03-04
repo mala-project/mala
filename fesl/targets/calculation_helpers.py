@@ -44,7 +44,7 @@ def fermi_function(energy, fermi_energy, temperature_K, energy_units="eV"):
 
     Parameters
     ----------
-    energy : float
+    energy : float or numpy.array
         Energy for which the Fermi function is supposed to be calculated in
         energy_units.
     fermi_energy : float
