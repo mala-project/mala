@@ -39,6 +39,8 @@ class Trainer(Runner):
         super(Trainer, self).__init__(params, network, data)
         self.final_test_loss = float("inf")
         self.initial_test_loss = float("inf")
+        self.final_validation_loss = float("inf")
+        self.initial_validation_loss = float("inf")
         self.optimizer = None
         self.scheduler = None
         self.patience_counter = 0
@@ -139,7 +141,7 @@ class Trainer(Runner):
         """Train a network using data given by a DataHandler."""
         # Create reference to data and network and setup training.
         # Calculate initial loss.
-        tloss = None
+        tloss = float("inf")
         vloss = self.__validate_network(self.network,
                                         self.validation_data_loader)
         if self.data.test_data_set is not None:
@@ -149,13 +151,15 @@ class Trainer(Runner):
         # Collect and average all the losses from all the devices
         if self.parameters_full.use_horovod:
             vloss = self.__average_validation(vloss, 'average_loss')
+            self.initial_validation_loss = vloss
             if self.data.test_data_set is not None:
                 tloss = self.__average_validation(tloss, 'average_loss')
+                self.initial_test_loss = tloss
+
         if self.parameters.verbosity:
             printout("Initial Guess - validation data loss: ", vloss)
             if self.data.test_data_set is not None:
                 printout("Initial Guess - test data loss: ", tloss)
-        self.initial_test_loss = tloss
 
         # Initialize all the counters.
         checkpoint_counter = 0
@@ -241,7 +245,8 @@ class Trainer(Runner):
             printout("Time for epoch[s]:", time.time() - start_time)
 
         # Calculate final loss.
-        tloss = None
+        self.final_validation_loss = vloss
+        tloss = float("inf")
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
                                             self.test_data_loader)
