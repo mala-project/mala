@@ -7,6 +7,14 @@ data_path = get_data_repo_path()+"Al256_reduced/"
 test_checkpoint_name = "test"
 
 
+def check_for_gpu():
+    test_parameters = fesl.Parameters()
+    test_parameters.use_gpu = True
+    if test_parameters.use_gpu is False:
+        return False
+    return True
+
+
 def test_run(use_gpu):
     ####################
     # PARAMETERS
@@ -99,6 +107,10 @@ def perform_gpu_test(accuracy=1e-7, performance_improvement=1.2):
 
 
 if __name__ == "__main__":
+    if check_for_gpu():
+        printout("GPU found.")
+    else:
+        raise Exception("No GPU on this system.")
     if perform_gpu_test():
         printout("GPU test sucessful.")
     else:
