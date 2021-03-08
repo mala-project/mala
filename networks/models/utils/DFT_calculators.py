@@ -18,8 +18,8 @@ from functools import partial
 
 
 # Default temp (K)
-#temp = 298
-temp = 933
+temp = 298
+#temp = 933
 
 # Default gcc
 gcc = 2.699
@@ -553,6 +553,7 @@ def dos_2_eband(dos, e_fermi = None, temperature = temp, integration = 'analytic
         raise ValueError('argument "integration" does not match an implemented method')
 
     return eband
+
 
 
 
