@@ -426,6 +426,9 @@ for idx, current_dir in enumerate(args.output_dirs):
 
         inference_fp_dataset = torch.utils.data.TensorDataset(torch.tensor(inference_fp, dtype=torch.float32),
                                                               torch.ones([args.nxyz ** 3, 1], dtype=torch.float32))
+
+        del inference_fp
+
 #        inference_fp_dataset = torch.utils.data.TensorDataset(torch.tensor(inference_fp, dtype=torch.float32), 
 #                                                              torch.ones([model_args.grid_pts, 1], dtype=torch.float32))
 
