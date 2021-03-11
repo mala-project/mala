@@ -14,6 +14,8 @@ from ase import Atoms
 from ase.io import read
 from functools import partial
 
+import total_energy as te
+
 # Constants
 
 
@@ -69,6 +71,7 @@ class DFT_results:
         self.fermi_energy = atoms.get_calculator().get_fermi_level()
         self.volume = atoms.get_volume()
         self.num_atoms = len(atoms)
+        self.positions = np.transpose(atoms.get_scaled_positions())
 
         # I'd rather not do the following "grep" type search, but I can't find a 
         # ASE command to get n_electrons
@@ -76,9 +79,33 @@ class DFT_results:
             for line in out:
                 if "number of electrons       =" in line:
                     self.n_electrons = np.float64(line.split('=')[1])
-                    break
+                if "!    total energy              =" in line:
+                    self.total_energy = np.float64(line.split('=')[1].split('Ry')[0])*Ry2eV
+                if "     one-electron contribution =" in line:
+                    self.e_one_electron = np.float64(line.split('=')[1].split('Ry')[0])*Ry2eV
+                if "     hartree contribution      =" in line:
+                    self.e_hartree = np.float64(line.split('=')[1].split('Ry')[0])*Ry2eV
+                if "     xc contribution           =" in line:
+                    self.e_xc = np.float64(line.split('=')[1].split('Ry')[0])*Ry2eV
+                if "     ewald contribution        =" in line:
+                    self.e_ewald = np.float64(line.split('=')[1].split('Ry')[0])*Ry2eV
+                if "     smearing contrib. (-TS)   =" in line:
+                    self.e_smearing = np.float64(line.split('=')[1].split('Ry')[0])*Ry2eV
 
+    def print_energies(self):
+        # Print components of the total energy
 
+        print("\n\n Energies from DFT Calculation:\n")
+        print("    total energy              = %17.8f eV" % self.total_energy)
+
+        print("\n    The total energy is the sum of the following terms:\n")
+
+        print("    one-electron contribution = %17.8f eV" % self.e_one_electron)
+        print("    Hartree contribution      = %17.8f eV" % self.e_hartree)
+        print("    xc contribution           = %17.8f eV" % self.e_xc)
+        print("    Ewald contribution        = %17.8f eV" % self.e_ewald)
+        print("    smearing contribution     = %17.8f eV" % self.e_smearing)
+        print("\n\n")
 
 
 #----------------------------------------------------------------------------------------#
@@ -144,8 +171,6 @@ class DOS:
 
 
 
-
-
 #----------------------------------------------------------------------------------------#
 # Class that encapsulates the results of a Local-Density-of-States calculation
 class LDOS:
@@ -202,10 +227,69 @@ class LDOS:
                                temperature=self.temperature, \
                                integration=self.integration)
 
+        self.e_smearing = dos_2_e_entropy(self.dos, \
+                               e_fermi=self.e_fermi, \
+                               temperature=self.temperature, \
+                               integration=self.integration)
+
         dw = get_density_weights(self.e_grid, self.e_fermi, temperature=self.temperature)
         self.density = np.sum(self.ldos * dw[np.newaxis, np.newaxis, np.newaxis, :], axis=(3))
 
+        nnr = te.get_nnr()
+        if (nnr != self.ldos.shape[0]*self.ldos.shape[1]*self.ldos.shape[2]):
+           raise ValueError('Grid dimensions are inconsistent between LDOS and Quantum Espresso.')
+        nspin = te.get_nspin()
+        if (nspin != 1):
+           raise ValueError('Spin polarization is not implemented.')
+        nat = te.get_nat()
+        if (nat != self.dft.num_atoms):
+           raise ValueError('Number of atoms is inconsistent between LDOS and Quantum Espresso.')
+        te.set_positions(self.dft.positions,nat)
+        te.set_rho_of_r(np.reshape(self.density,[nnr, 1],order='F'),nnr,nspin)
+        self.e_rho_times_v_hxc, self.e_hartree, self.e_xc, self.e_ewald = np.array(te.get_energies())*Ry2eV
 
+        ##  The following hack is no longer used.
+        # Here we obtain the smearing energy from the DFT calculation
+        # This is a hack to allow evaluation of the total energy until we can implement LDOS -> entropy calculations
+        # Clearly, it will not work for systems where we have not previously done the DFT calculation
+        # self.e_smearing = self.dft.e_smearing
+
+        self.total_energy = self.eband + self.e_rho_times_v_hxc + self.e_hartree + self.e_xc + self.e_ewald + self.e_smearing
+
+    def print_energies(self):
+        # Print components of the total energy
+
+        print("\n\n Energies from LDOS:\n")
+        print("    total energy              = %17.8f eV" % self.total_energy)
+
+        print("\n    The total energy is the sum of the following terms:\n")
+
+        print("    band energy               = %17.8f eV" % self.eband)
+        print("    rho * v_hxc contribution  = %17.8f eV" % self.e_rho_times_v_hxc)
+        print("    Hartree contribution      = %17.8f eV" % self.e_hartree)
+        print("    xc contribution           = %17.8f eV" % self.e_xc)
+        print("    Ewald contribution        = %17.8f eV" % self.e_ewald)
+        print("    smearing contribution     = %17.8f eV" % self.e_smearing)
+        print("\n\n")
+
+    def print_energy_errors(self):
+        # Print the difference between the energies evaluated from the LDOS and the DFT energies
+
+        print("\n\n Energy Errors (LDOS vs. DFT):\n")
+        print("    total energy              = %17.8f meV/atom" %
+               np.float64((self.total_energy - self.dft.total_energy)*1000.0/self.dft.num_atoms))
+
+        print("    one-electron contribution = %17.8f meV/atom" %
+               np.float64((self.eband + self.e_rho_times_v_hxc - self.dft.e_one_electron)*1000.0/self.dft.num_atoms))
+        print("    Hartree contribution      = %17.8f meV/atom" %
+               np.float64((self.e_hartree - self.dft.e_hartree)*1000.0/self.dft.num_atoms))
+        print("    xc contribution           = %17.8f meV/atom" %
+               np.float64((self.e_xc - self.dft.e_xc)*1000.0/self.dft.num_atoms))
+        print("    Ewald contribution        = %17.8f meV/atom" %
+               np.float64((self.e_ewald - self.dft.e_ewald)*1000.0/self.dft.num_atoms))
+        print("    smearing contribution     = %17.8f meV/atom" %
+               np.float64((self.e_smearing - self.dft.e_smearing)*1000.0/self.dft.num_atoms))
+        print("\n\n")
 
 #----------------------------------------------------------------------------------------#
 # General functions
@@ -381,6 +465,69 @@ def analytic_eband2(energies, dos, e_fermi, temperature):
 
 
 #----------------------------------------------------------------------------------------#
+# Entropy weight function
+## I have used the mpmath library because numpy gives overflows, but it seems to be slow
+def entropy_function(energies, e_fermi, temperature):
+    
+    xa = (energies - e_fermi) / (kB * temperature)
+    results = np.array([])
+    for x in xa.flatten():
+        results = np.append(results, np.float64(x*mp.polylog(0,-mp.exp(x)) - mp.polylog(1,-mp.exp(x))))
+    results = results.reshape(energies.shape)
+        
+    return results
+
+
+#----------------------------------------------------------------------------------------#
+# Define the integral of the entropy weight
+#
+def entropy_integral_0(energies, e_fermi, temperature):
+    xa = (energies - e_fermi) / (kB * temperature)
+    results = np.array([])
+    for x in xa:
+        results = np.append(results, np.float64((kB * temperature)**2 \
+                  * (-x*mp.polylog(1,-mp.exp(x)) + 2.0*mp.polylog(2,-mp.exp(x)))))
+                            
+    return results
+
+
+#----------------------------------------------------------------------------------------#
+# Define the integral of the entropy weight times the energy (relative to the Fermi energy)
+#
+def entropy_integral_1(energies, e_fermi, temperature):
+    xa = (energies - e_fermi) / (kB * temperature)
+    results = np.array([])
+    for x in xa:
+        results = np.append(results, np.float64((kB * temperature)**3 \
+           * (-x**2*mp.polylog(1,-mp.exp(x)) + 3.0*x*mp.polylog(2,-mp.exp(x)) - 3.0*mp.polylog(3,-mp.exp(x))) ))
+    return results
+
+
+#----------------------------------------------------------------------------------------#
+# Calculate weights that will compute the analytic integral of the entropy weight
+#   times an arbitrary linearly interpolated function
+def get_entropy_weights(energies, e_fermi, temperature):
+    fi_0 = entropy_integral_0(energies, e_fermi, temperature)
+    fi_0 = fi_0[1:] - fi_0[:-1]
+    fi_1 = entropy_integral_1(energies, e_fermi, temperature)
+    fi_1 = fi_1[1:] - fi_1[:-1]
+    weights = np.zeros(energies.size)
+    delta_e = energies[1:] - energies[:-1]
+    weights[1:] = weights[1:] + fi_1/delta_e
+    weights[1:] = weights[1:] + fi_0 * (1.0 + (e_fermi - energies[1:])/delta_e)
+    weights[:-1] = weights[:-1] - fi_1/delta_e
+    weights[:-1] = weights[:-1] + fi_0 * (1.0 - (e_fermi - energies[:-1])/delta_e)
+    return weights
+
+
+#----------------------------------------------------------------------------------------#
+# Calculate the analytic integral of the entropy weight times the linearly interpolated dos
+#
+def analytic_e_entropy(energies, dos, e_fermi, temperature):
+    return np.sum(dos*get_entropy_weights(energies, e_fermi, temperature))
+
+
+#----------------------------------------------------------------------------------------#
 # Define Gaussian
 ## Note: Gaussian without factor of 1/sqrt(2)
 def gaussian(e_grid, centers, sigma):
@@ -453,6 +600,29 @@ def dft_2_eband(dft, e_fermi = None, temperature = temp):
     eband = np.sum(eband_per_band)
     
     return eband
+
+#----------------------------------------------------------------------------------------#
+# Function generating entropy contribution to energy from DFT results
+#
+def dft_2_e_entropy(dft, e_fermi = None, temperature = None):
+    # input:
+    ## dft: a DFT_results instance
+    ## e_fermi: Fermi energy used in generating the occupations, defaults to Fermi energy from dft
+    ## temperature: temperature used in generating the occupations
+    # output:
+    ## eband: entropy contribution to the energy
+
+    if temperature is None:
+        temperature = dft.electronic_temperature
+    if e_fermi is None:
+        e_fermi = dft.fermi_energy
+    elif e_fermi == "self-consistent" or e_fermi == "sc":
+        e_fermi = toms748(lambda e_fermi: dft_2_enum(dft, e_fermi, temperature) - dft.n_electrons, a = np.min(dft.eigs), b = np.max(dft.eigs))
+    e_per_band = entropy_function(dft.eigs, e_fermi=e_fermi, temperature=temperature)
+    e_per_band = dft.kweights[np.newaxis,:]*e_per_band
+    e_entropy = - kB * temperature * np.sum(e_per_band)
+    print(e_entropy)
+    return e_entropy
 
 
 #----------------------------------------------------------------------------------------#
@@ -555,14 +725,28 @@ def dos_2_eband(dos, e_fermi = None, temperature = temp, integration = 'analytic
     return eband
 
 
-
-
-
-
-
-
-
-
-
-
+#----------------------------------------------------------------------------------------#
+# Function generating entropy contribution to energy from DOS
+#
+def dos_2_e_entropy(dos, e_fermi = None, temperature = None, integration = 'analytic'):
+    # input:
+    ## dos: a DOS instance
+    ## e_fermi: Fermi energy used in generating the occupations, defaults to Fermi energy from dft
+    ## temperature: temperature used in generating the occupations
+    ## integration: method of integration, which can be one of the following strings:
+    ### 'analytic': analytic integration of the Fermi function times the energy times the linearly interpolated dos
+    # output:
+    ## e_entropy: calculated entropy contribution to the energy in eV
+    
+    if temperature is None:
+        temperature = dos.dft.electronic_temperature
+    if e_fermi is None:
+        e_fermi = dos.dft.fermi_energy
+    elif e_fermi == "self-consistent" or e_fermi == "sc":
+        e_fermi = dos_2_efermi(dos, temperature, integration)
+    if integration == 'analytic':
+        e_entropy = analytic_e_entropy(dos.e_grid, dos.dos, e_fermi, temperature)
+    else:
+        raise ValueError('argument "integration" does not match an implemented method')
+    return e_entropy
 

@@ -314,8 +314,9 @@ SUBROUTINE print_energies()
   !
   !
   USE ener, ONLY : eband, deband, ehart, etxc, etxcc, ewld
+  USE io_global, ONLY: stdout, ionode
 
-  WRITE( stdout, 9060 ) &
+  IF ( ionode ) WRITE( unit = stdout, FMT = 9060 ) &
          deband, ehart, etxc, ewld
   !
   RETURN
@@ -551,7 +552,7 @@ SUBROUTINE set_rho_of_r(rho_of_r,nnr_in,nspin_in)
   USE scf,           ONLY : rho, rho_core, rhog_core, vltot, v, vrs, kedtau
   USE ener,          ONLY : ehart, etxc, vtxc, epaw, deband
   USE ldaU,          ONLY : eth
-  USE fft_rho,       ONLY : rho_r2g
+  USE fft_rho,       ONLY : rho_r2g, rho_g2r
   USE paw_variables, ONLY : okpaw, ddd_PAW
   USE lsda_mod,      ONLY : nspin
   USE gvecs,         ONLY : doublegrid
@@ -572,24 +573,34 @@ SUBROUTINE set_rho_of_r(rho_of_r,nnr_in,nspin_in)
   IF (nnr_in /= dfftp%nnr) STOP "*** nnr provided to set_rho_of_r() does not match dfftp%nnr"
   IF (nspin_in /= nspin) STOP "*** nspin provided to set_rho_of_r() does not mach lsda_mod%nspin"
 
-  rho%of_r = rho_of_r
+  !
+  !  This calculates the G-space density from the input density.
+  !
+  CALL rho_r2g(dfftp, rho_of_r, rho%of_g)
 
-  CALL rho_r2g(dfftp, rho%of_r, rho%of_g)
+  !
+  !  The following results in a real-space density filtered at the plane-wave
+  !  density cutoff.  This is needed to make it consistent with G-space density.
+  !
+  CALL rho_g2r(dfftp, rho%of_g, rho%of_r)
 
   !
   ! ... plugin contribution to local potential
   !
   CALL plugin_scf_potential(rho,.FALSE.,-1.d0,vltot)
+
   !
   ! ... compute the potential and store it in v
   !
   CALL v_of_rho( rho, rho_core, rhog_core, &
                  ehart, etxc, vtxc, eth, etotefield, charge, v )
   IF (okpaw) CALL PAW_potential(rho%bec, ddd_PAW, epaw)
+
   !
   ! ... define the total local potential (external+scf)
   !
   CALL set_vrs( vrs, vltot, v%of_r, kedtau, v%kin_r, dfftp%nnr, nspin, doublegrid )
+
   !
   ! Compute:
   ! ... deband = - \sum_v <\psi_v | V_h + V_xc |\psi_v>
