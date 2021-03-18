@@ -7,7 +7,10 @@ Welcome to FESL's documentation!
    :maxdepth: 2
    :caption: Features
 
-   features/template
+   features/background
+   features/preprocessing
+   features/neuralnetworks
+   features/postprocessing
 
 .. toctree::
    :maxdepth: 2

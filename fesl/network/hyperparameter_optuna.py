@@ -5,7 +5,7 @@ from optuna.trial import Trial
 class HyperparameterOptuna:
     """Represents an optuna parameter."""
 
-    def __init__(self, opttype="float", name="", low=0, high=0, choices=[]):
+    def __init__(self, opttype="float", name="", low=0, high=0, choices=None):
         """
         Create an optuna compatible hyperparameter.
 
@@ -45,7 +45,8 @@ class HyperparameterOptuna:
 
         # For now, only three types of hyperparameters are allowed:
         # Lists, floats and ints.
-        if self.opttype != "float" and self.opttype != "int" and self.opttype != "categorical":
+        if self.opttype != "float" and self.opttype != "int" and self.opttype \
+                != "categorical":
             raise Exception("Unsupported Hyperparameter type.")
 
     def get_parameter(self, trial: Trial):

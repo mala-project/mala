@@ -7,6 +7,6 @@ predict LDOS and postprocess LDOS into energies (and forces, soon).
 from .common import Parameters, printout
 from .descriptors import DescriptorInterface, SNAP
 from .datahandling import DataHandler, DataScaler, DataConverter
-from .network import Network, Tester, Trainer, HyperOptInterface
-from .targets import TargetInterface, LDOS, DOS, Density
-
+from .network import Network, Tester, Trainer, HyperOptInterface, \
+    HyperOptOptuna
+from .targets import TargetInterface, LDOS, DOS, Density, fermi_function

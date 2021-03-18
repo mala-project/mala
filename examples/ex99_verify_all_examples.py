@@ -1,18 +1,17 @@
 from fesl.common.parameters import printout
 from ex01_run_singleshot import run_example01
-from ex02_hyperparameter_optimization import run_example02
-from ex03_resize_snapshots import run_example03
-from ex04_snapshot_splitting import run_example04
-from ex05_create_snap_descriptors import run_example05
-from ex06_postprocessing import run_example06
-from ex07_dos_analysis import run_example07
-from ex08_training_with_postprocessing import run_example08
-from ex09_get_total_energy import run_example09
-from ex10_advanced_hyperparameter_optimization import run_example10
+from ex02_preprocess_data import run_example02
+from ex03_postprocess_data import run_example03
+from ex04_hyperparameter_optimization import run_example04
+from ex05_training_with_postprocessing import run_example05
+from ex06_advanced_hyperparameter_optimization import run_example06
+from ex07_checkpoint_training import run_example07
+from ex08_checkpoint_hyperopt import run_example08
 
 """
-ex99_verify_all_examples.py: This example confirms whether or not the examples run CORRECTLY. That is, even though they
-might run, they may not run correctly, e.g. a network will train but with abysmal performance.  
+ex99_verify_all_examples.py: This example confirms whether or not the examples
+run CORRECTLY. That is, even though they might run, they may not run correctly,
+e.g. a network will train but with abysmal performance.  
 """
 printout("Welcome to FESL.")
 printout("Running ex99_verify_all_examples.py")
@@ -21,75 +20,75 @@ printout("Running ex99_verify_all_examples.py")
 if run_example01():
     printout("Successfully ran ex01_run_singleshot.")
 else:
-    raise Exception("Ran ex01_run_singleshot but something was off. If you haven't changed any parameters in "
-                    "the example, there might be a problem with your installation.")
+    raise Exception("Ran ex01_run_singleshot but something was off. If you "
+                    "haven't changed any parameters in "
+                    "the example, there might be a problem with your "
+                    "installation.")
 
-# Example 2: Perform a hyperparameter optimization.
-if run_example02():
-    printout("Successfully ran ex02_hyperparameter_optimization.")
-else:
-    raise Exception("Ran ex02_hyperparameter_optimization but something was off. If you haven't changed any parameters in "
-                    "the example, there might be a problem with your installation.")
-
-
-# Example 3: Resizing of snapshots. Omitted for now, because it depends on data.
+# Example 2: Preprocess data.
 try:
-    if run_example03():
-        printout("Successfully ran ex03_resize_snapshots.")
-except FileNotFoundError:
-    printout("Could not run ex03_resize_snapshots, most likely because data was missing.")
+    if run_example02():
+        printout("Successfully ran ex02_preprocess_data.")
+except ModuleNotFoundError:
+    printout("Could not run ex02_preprocess_data, most likely because of"
+             "missing LAMMPS installation.")
 
-# Example 4: Like example 1, but with snapshot splitting.
+# Example 3: Postprocess data. Run it twice, once with Quantum Espresso.
+if run_example03(do_total_energy=False):
+    printout("Successfully ran ex03_postprocess_data.")
+else:
+    raise Exception("Ran ex03_postprocess_data but something was off."
+                    " If you haven't changed any parameters in "
+                    "the example, there might be a problem with your"
+                    " installation.")
+try:
+    if run_example03(do_total_energy=True):
+        printout("Successfully ran ex03_postprocess_data.")
+except ModuleNotFoundError:
+    printout("Could not run ex03_postprocess_data, most likely because of "
+             "missing QE installation.")
+
+
+# Example 4: Perform Hyperparameter optimization.
 if run_example04():
-    printout("Successfully ran ex04_snapshot_splitting.")
+    printout("Successfully ran ex04_hyperparameter_optimization.py.")
 else:
-    raise Exception("Ran ex04_snapshot_splitting but something was off. If you haven't changed any parameters in "
-                    "the example, there might be a problem with your installation.")
+    raise Exception("Ran ex04_hyperparameter_optimization but something "
+                    "was off. If you haven't changed any parameters in "
+                    "the example, there might be a problem with "
+                    "your installation.")
 
-# Example 5: SNAP calculation. Ommitted for now, because it depends on LAMMPS installation.
-try:
-    run_example05()
-except ModuleNotFoundError:
-    printout("Could not run example05, most likely because of missing LAMMPS installation.")
-
-
-
-# Example 6: Basic postprocessing capabilities.
-if run_example06(doplots=False):
-    printout("Successfully ran ex06_postprocessing.py.")
+# Example 5: Train a network, do a prediction and process this prediction.
+if run_example05(True, True):
+    printout("Successfully ran ex05_training_with_postprocessing.py.")
 else:
-    raise Exception("Ran ex06_postprocessing but something was off. If you haven't changed any parameters in "
-                    "the example, there might be a problem with your installation.")
-
-
-# Example 7: Density of states analysis.
-if run_example07():
-    printout("Successfully ran ex06_postprocessing.py.")
-else:
-    raise Exception("Ran ex06_postprocessing but something was off. If you haven't changed any parameters in "
-                    "the example, there might be a problem with your installation.")
-
-# Example 8: Train a network, do a prediction and process this prediction.
-if run_example08(True, True,doplots=False):
-    printout("Successfully ran ex08_training_with_postprocessing.py.")
-else:
-    raise Exception("Ran ex08_training_with_postprocessing but something was off. If you haven't changed any parameters in "
-                    "the example, there might be a problem with your installation.")
-
-# Example 9: Calculation of the total energy. Ommitted for now, because it depends on a custom QE installation.
-try:
-    run_example09()
-except ModuleNotFoundError:
-    printout("Could not run example09, most likely because of missing QE installation.")
+    raise Exception("Ran ex05_training_with_postprocessing but something "
+                    "was off. If you haven't changed any parameters in "
+                    "the example, there might be a problem with your "
+                    "installation.")
 
 # Example 10: Novel hyperparameter optimization techniques.
-if run_example10():
-    printout("Successfully ran ex10_advanced_hyperparameter_optimization.py.")
+if run_example06():
+    printout("Successfully ran ex06_advanced_hyperparameter_optimization.py.")
 else:
     raise Exception(
-        "Ran ex10_advanced_hyperparameter_optimization but something was off. If you haven't changed any parameters in "
+        "Ran ex10_advanced_hyperparameter_optimization but something was off."
+        " If you haven't changed any parameters in "
         "the example, there might be a problem with your installation.")
 
 
+if run_example07():
+    printout("Successfully ran ex07_checkpoint_training.")
+else:
+    raise Exception("Ran ex07_checkpoint_training but something was off."
+                    " If you haven't changed any parameters in "
+                    "the example, there might be a problem with your"
+                    " installation.")
 
-
+if run_example08():
+    printout("Successfully ran ex08_checkpoint_hyperopt.")
+else:
+    raise Exception("Ran ex08_checkpoint_hyperopt but something was off."
+                    " If you haven't changed any parameters in "
+                    "the example, there might be a problem with your"
+                    " installation.")

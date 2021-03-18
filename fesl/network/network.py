@@ -1,7 +1,7 @@
 """Neural network for FESL."""
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as functional
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -27,9 +27,9 @@ class Network(nn.Module):
 
         # if the user has planted a seed (for comparibility purposes) we
         # should use it.
-        if self.params.manual_seed is not None:
-            torch.manual_seed(self.params.manual_seed)
-            torch.cuda.manual_seed(self.params.manual_seed)
+        if params.manual_seed is not None:
+            torch.manual_seed(params.manual_seed)
+            torch.cuda.manual_seed(params.manual_seed)
 
         # initialize the parent class
         super(Network, self).__init__()
@@ -52,7 +52,7 @@ class Network(nn.Module):
 
         # initialize the loss function
         if self.params.loss_function_type == "mse":
-            self.loss_func = F.mse_loss
+            self.loss_func = functional.mse_loss
         else:
             raise Exception("Unsupported loss function.")
 
@@ -86,7 +86,7 @@ class Network(nn.Module):
                 else:
                     self.layers.append(self.activation_mappings[self.params.
                                        layer_activations[i]]())
-            except:
+            except KeyError:
                 raise Exception("Invalid activation type seleceted.")
 
     def forward(self, inputs):

@@ -3,6 +3,7 @@ from ase.units import Rydberg, Bohr, kB
 import ase.io
 import numpy as np
 from fesl.common.parameters import Parameters, ParametersTargets
+from .calculation_helpers import fermi_function
 
 
 class TargetBase:
@@ -113,14 +114,26 @@ class TargetBase:
             Path to the file that is used.
         """
         if data_type == "qe.out":
+            # Reset everything.
+            self.fermi_energy_eV = None
+            self.temperature_K = None
+            self.grid_spacing_Bohr = None
+            self.number_of_electrons = None
+            self.band_energy_dft_calculation = None
+            self.total_energy_dft_calculation = None
+            self.grid_dimensions = [0, 0, 0]
+            self.atoms = None
+
+            # Read the file.
             self.atoms = ase.io.read(path_to_file, format="espresso-out")
             vol = self.atoms.get_volume()
             self.fermi_energy_eV = self.atoms.get_calculator().\
                 get_fermi_level()
 
-            internal_energy = None
+            # Parse the file for energy values.
             total_energy = None
             past_calculation_part = False
+            bands_included = True
             with open(path_to_file) as out:
                 pseudolinefound = False
                 lastpseudo = None
@@ -168,25 +181,34 @@ class TargetBase:
                     if "PseudoPot." in line:
                         pseudolinefound = True
                         lastpseudo = (line.split("for")[1]).split("read")[0]
-                    if "internal energy" in line:
-                        internal_energy \
-                            = float((line.split('=')[2]).split('Ry')[0])
                     if "total energy" in line and past_calculation_part:
                         if total_energy is None:
                             total_energy \
                                 = float((line.split('=')[1]).split('Ry')[0])
+                    if "set verbosity='high' to print them." in line:
+                        bands_included = False
 
+            # Post process the text values.
             cell_volume = vol / (self.grid_dimensions[0] *
                                  self.grid_dimensions[1] *
                                  self.grid_dimensions[2] * Bohr ** 3)
             self.grid_spacing_Bohr = cell_volume ** (1 / 3)
-            band_energy_Ry = one_electron_contribution + \
-                xc_contribution + hartree_contribution
-            # if internal_energy is not None:
-            #     self.total_energy_dft_calculation = internal_energy*Rydberg
-            # else:
+
+            # Unit conversion
             self.total_energy_dft_calculation = total_energy*Rydberg
-            self.band_energy_dft_calculation = band_energy_Ry*Rydberg
+
+            # Calculate band energy, if the necessary data is included in
+            # the output file.
+            if bands_included:
+                eigs = np.transpose(
+                    self.atoms.get_calculator().band_structure().
+                    energies[0, :, :])
+                kweights = self.atoms.get_calculator().get_k_point_weights()
+                eband_per_band = eigs * fermi_function(eigs,
+                                                       self.fermi_energy_eV,
+                                                       self.temperature_K)
+                eband_per_band = kweights[np.newaxis, :] * eband_per_band
+                self.band_energy_dft_calculation = np.sum(eband_per_band)
         else:
             raise Exception("Unsupported auxiliary file type.")
 

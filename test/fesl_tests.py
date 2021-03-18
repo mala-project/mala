@@ -1,10 +1,13 @@
-from fesl_integration import check_analytical_integration, qe_dens_to_nr_of_electrons, qe_ldos_to_density, qe_ldos_to_dos
+from fesl_integration import check_analytical_integration, \
+    qe_dens_to_nr_of_electrons, qe_ldos_to_density, qe_ldos_to_dos
 from tensor_memory import test_tensor_memory
 from lazy_loading_basic import test_lazy_loading_basic
 from lazy_loading_horovod_benchmark import lazy_loading_horovod_benchmark
 from fesl.common.parameters import printout
 from data_repo_path import get_data_repo_path
 from inference_test import run_inference_test
+from checkpoint_training_tests import run_checkpoint_tests
+from checkpoint_hyperopt_tests import run_hyperopt_checkpoint_test
 data_path = get_data_repo_path()+"Al256_reduced/"
 
 
@@ -74,8 +77,12 @@ else:
 try:
     if lazy_loading_horovod_benchmark(data_path=data_path):
         printout("test_lazy_loading suceeded.")
-except:
-    printout("Could not perform lazy loading horovod test, most likely because horovod was not installed.")
+except NameError:
+    printout("Could not perform lazy loading horovod test, most likely because"
+             " horovod was not installed.")
+except ModuleNotFoundError:
+    printout("Could not perform lazy loading horovod test, most likely because"
+             " horovod was not installed.")
 
 ######################
 # Inference tests.
@@ -85,3 +92,17 @@ if run_inference_test():
     printout("run_inference_test test suceeded.")
 else:
     raise Exception("run_inference_test failed.")
+
+######################
+# Checkpoint tests.
+######################
+
+if run_checkpoint_tests():
+    printout("run_checkpoint_tests test suceeded.")
+else:
+    raise Exception("run_checkpoint_tests failed.")
+
+if run_checkpoint_tests():
+    printout("run_hyperopt_checkpoint_test test suceeded.")
+else:
+    raise Exception("run_hyperopt_checkpoint_test failed.")

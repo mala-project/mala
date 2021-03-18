@@ -15,7 +15,7 @@ class Runner:
     That can be training, benchmarking, inference, etc.
     """
 
-    def __init__(self, params):
+    def __init__(self, params, network, data):
         """
         Create a Runner object to run a Network.
 
@@ -23,23 +23,28 @@ class Runner:
         ----------
         params : fesl.common.parametes.Parameters
             Parameters used to create this Runner object.
-        """
-        self.parameters = params.running
-        self.network = None
-        self.batch_size=params.running.mini_batch_size
-        self.use_gpu = params.use_gpu
-        self.use_horovod=params.use_horovod
-        self.use_compression = self.parameters.use_compression
 
-    def prepare_to_run(self):
+        network : fesl.network.network.Network
+            Network which is being run.
+
+        data : fesl.datahandling.data_handler.DataHandler
+            DataHandler holding the data for the run.
+        """
+        self.parameters_full = params
+        self.parameters = params.running
+        self.network = network
+        self.data = data
+        self.__prepare_to_run()
+
+    def __prepare_to_run(self):
         """
         Prepare the Runner to run the Network.
 
         This includes e.g. horovod setup.
         """
         # See if we want to use horovod.
-        if self.use_horovod:
-            if self.use_gpu:
+        if self.parameters_full.use_horovod:
+            if self.parameters_full.use_gpu:
                 printout("size=", hvd.size(), "global_rank=", hvd.rank(),
                          "local_rank=", hvd.local_rank(), "device=",
                          torch.cuda.get_device_name(hvd.local_rank()))

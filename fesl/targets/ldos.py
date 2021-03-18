@@ -84,7 +84,7 @@ class LDOS(TargetBase):
             printout(out_units)
             raise Exception("Unsupported unit for LDOS.")
 
-    def read_from_cube(self, file_name_scheme, directory, ldos_units="1/eV"):
+    def read_from_cube(self, file_name_scheme, directory, units="1/eV"):
         """
         Read the LDOS data from multiple cube files.
 
@@ -98,7 +98,7 @@ class LDOS(TargetBase):
         directory : string
             Directory containing the LDOS .cube files.
 
-        ldos_units : string
+        units : string
             Units the LDOS is saved in.
 
         Returns
@@ -123,13 +123,14 @@ class LDOS(TargetBase):
 
         # Iterate over the amount of specified LDOS input files.
         # QE is a Fortran code, so everything is 1 based.
-        printout("Reading "+str(self.parameters.ldos_gridsize)+
+        printout("Reading "+str(self.parameters.ldos_gridsize) +
                  " LDOS files from"+directory+".")
+        ldos_data = None
         for i in range(1, self.parameters.ldos_gridsize + 1):
             tmp_file_name = file_name_scheme
             tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
 
-            # Open the cube file#
+            # Open the cube file
             data, meta = read_cube(directory + tmp_file_name)
 
             # Once we have read the first cube file, we know the dimensions
@@ -137,10 +138,12 @@ class LDOS(TargetBase):
             # in which we want to store the LDOS.
             if i == 1:
                 data_shape = np.shape(data)
-                ldos_data = np.zeros((data_shape[0], data_shape[1], data_shape[2], self.parameters.ldos_gridsize), dtype=np.float64)
+                ldos_data = np.zeros((data_shape[0], data_shape[1],
+                                      data_shape[2], self.parameters.
+                                      ldos_gridsize), dtype=np.float64)
 
             # Convert and then append the LDOS data.
-            data = self.convert_units(data, in_units=ldos_units)
+            data = data*self.convert_units(1, in_units=units)
             ldos_data[:, :, :, i-1] = data[:, :, :]
         return ldos_data
 
@@ -300,7 +303,7 @@ class LDOS(TargetBase):
 
         # Smearing / Entropy contribution
         e_entropy_contribution = dos_calculator.\
-            get_entropy_contribution(dos_data,fermi_energy_eV=fermi_energy_eV,
+            get_entropy_contribution(dos_data, fermi_energy_eV=fermi_energy_eV,
                                      temperature_K=temperature_K,
                                      integration_method=
                                      energy_integration_method,
@@ -316,9 +319,6 @@ class LDOS(TargetBase):
             e_entropy_contribution
 
         return e_total
-
-
-
 
     def get_band_energy(self, ldos_data, fermi_energy_eV=None,
                         temperature_K=None, grid_spacing_bohr=None,
@@ -358,6 +358,9 @@ class LDOS(TargetBase):
         shift_energy_grid : bool
             When using the analytical integration, one has to shift the energy
             grid by setting this parameter to True. Elsewise keep on False.
+
+        grid_spacing_bohr : float
+            Grid spacing (distance between grid points) in Bohr.
 
         Returns
         -------
@@ -418,6 +421,9 @@ class LDOS(TargetBase):
         shift_energy_grid : bool
             When using the analytical integration, one has to shift the energy
             grid by setting this parameter to True. Elsewise keep on False.
+
+        grid_spacing_bohr : float
+            Grid spacing (distance between grid points) in Bohr.
 
         Returns
         -------
@@ -484,6 +490,9 @@ class LDOS(TargetBase):
         shift_energy_grid : bool
             When using the analytical integration, one has to shift the energy
             grid by setting this parameter to True. Elsewise keep on False.
+
+        grid_spacing_bohr : float
+            Grid spacing (distance between grid points) in Bohr.
 
         Returns
         -------

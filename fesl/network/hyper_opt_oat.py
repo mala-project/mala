@@ -9,7 +9,7 @@ from fesl.common.parameters import printout
 class HyperOptOAT(HyperOptBase):
     """Hyperparameter optimizer using Orthogonal Array Tuning."""
 
-    def __init__(self, params):
+    def __init__(self, params, data):
         """
         Create a HyperOptOAT object.
 
@@ -17,8 +17,11 @@ class HyperOptOAT(HyperOptBase):
         ----------
         params : fesl.common.parametes.Parameters
             Parameters used to create this hyperparameter optimizer.
+
+        data : fesl.datahandling.data_handler.DataHandler
+            DataHandler holding the data for the hyperparameter optimization.
         """
-        super(HyperOptOAT, self).__init__(params)
+        super(HyperOptOAT, self).__init__(params, data)
         self.objective = None
         self.trial_losses = []
         self.best_trial = None
@@ -27,20 +30,15 @@ class HyperOptOAT(HyperOptBase):
         self.strength = None
         self.N_runs = None
 
-    def perform_study(self, data_handler):
+    def perform_study(self):
         """
         Perform the study, i.e. the optimization.
 
         This is done by sampling a certain subset of network architectures.
         In this case, these are choosen based on an orthogonal array.
-
-        Parameters
-        ----------
-        data_handler : fesl.datahandling.data_handler.DataHandler
-            datahandler to be used during the hyperparameter optimization.
         """
         number_of_trial = 0
-        self.objective = ObjectiveBase(self.params, data_handler)
+        self.objective = ObjectiveBase(self.params, self.data_handler)
         for row in self.orthogonal_arr:
             printout("Trial number", number_of_trial)
             self.trial_losses.append(self.objective(row))
@@ -82,7 +80,7 @@ class HyperOptOAT(HyperOptBase):
         return np.unique(np.array(arraylist[0]), axis=0)
 
     def add_hyperparameter(self, opttype="float", name="", low=0, high=0,
-                           choices=[]):
+                           choices=None):
         """
         Add a hyperparameter to the current investigation.
 

@@ -99,6 +99,8 @@ class SNAP(DescriptorBase):
 
         """
         self.in_format_ase = "espresso-out"
+        print("Calculating SNAP descriptors from", qe_out_file, "at",
+              qe_out_directory)
         return self.__calculate_snap(qe_out_directory + qe_out_file,
                                      qe_out_directory)
 
@@ -106,7 +108,6 @@ class SNAP(DescriptorBase):
         """Perform actual SNAP calculation."""
         from lammps import lammps
         lammps_format = "lammps-data"
-
         # We get the atomic information by using ASE.
         atoms = ase.io.read(infile, format=self.in_format_ase)
         ase_out_path = outdir+"lammps_input.tmp"
@@ -115,6 +116,9 @@ class SNAP(DescriptorBase):
         # We also need to know how big the grid is.
         # Iterating directly through the file is slow, but the
         # grid information is at the top (around line 200).
+        nx = None
+        ny = None
+        nz = None
         if len(self.dbg_grid_dimensions) == 3:
             nx = self.dbg_grid_dimensions[0]
             ny = self.dbg_grid_dimensions[1]
@@ -150,11 +154,7 @@ class SNAP(DescriptorBase):
             self.parameters.lammps_compute_file = filepath+"in.bgrid.python"
 
         # Do the LAMMPS calculation.
-        try:
-            lmp.file(self.parameters.lammps_compute_file)
-        except lammps.LAMMPSException:
-            raise Exception("There was a problem during the SNAP calculation. "
-                            "Exiting.")
+        lmp.file(self.parameters.lammps_compute_file)
 
         # Set things not accessible from LAMMPS
         # First 3 cols are x, y, z, coords
