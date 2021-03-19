@@ -8,12 +8,6 @@ variables:
   PIP_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/pip"
   CONTAINER_LATEST_IMAGE: registry.hzdr.de/kotik79/fesl:latest
 
-cache:
-  paths:
-    - conda/pkgs
-    - .cache/pip
-  policy: pull
-
 stages:
   - build
   - setup
@@ -60,6 +54,11 @@ setup-fesl:
 
 test-basic-functions:
   stage: test
+  cache:
+    paths:
+      - conda/pkgs
+      - .cache/pip
+    policy: pull
   tags:
     - 2-core
   before_script:
@@ -72,6 +71,11 @@ test-basic-functions:
 
 test-workflow:
   stage: test
+  cache:
+    paths:
+      - conda/pkgs
+      - .cache/pip
+    policy: pull
   before_script:
     - *env_setup
     - *data_setup
@@ -82,7 +86,6 @@ test-workflow:
   needs: [setup-fesl]
 
 #### documentation
-
 setup-docs:
   stage: setup
   image: python:3.7
