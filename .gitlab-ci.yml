@@ -1,11 +1,12 @@
 default:
-  image: registry.hzdr.de/multiscale-wdm/surrogate-models/fesl/fesl
+  image: registry.hzdr.de/kotik79/fesl:latest
 
 # Change pip's cache and conda's package directories to be inside the project
 # directory since we can only cache local items.
 variables:
   CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/conda/pkgs"
   PIP_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/pip"
+  CONTAINER_LATEST_IMAGE: registry.hzdr.de/kotik79/fesl:latest
 
 cache:
   paths:
@@ -14,6 +15,7 @@ cache:
   policy: pull
 
 stages:
+  - build
   - setup
   - test
   - deploy
@@ -31,6 +33,17 @@ stages:
   - git lfs install
   - bash ../fesl/install/data_repo_link/link_data_repo.sh `pwd`
   - cd ../fesl
+
+build-image:
+  stage: build
+  image: docker:20.10
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.hzdr.de
+  script:
+    - docker build -t $CONTAINER_LATEST_IMAGE .
+    - docker push $CONTAINER_LATEST_IMAGE
 
 setup-fesl:
   stage: setup
