@@ -6,7 +6,7 @@ default:
 variables:
   CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/conda/pkgs"
   PIP_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/pip"
-  CONTAINER_LATEST_IMAGE: registry.hzdr.de/kotik79/fesl:latest
+  CI_REGISTRY_IMAGE: registry.hzdr.de/kotik79/fesl
 
 stages:
   - build
@@ -36,8 +36,13 @@ build-image:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.hzdr.de
   script:
-    - docker build -t $CONTAINER_LATEST_IMAGE .
-    - docker push $CONTAINER_LATEST_IMAGE
+  #  - docker build -t $CONTAINER_LATEST_IMAGE .
+  #  - docker push $CONTAINER_LATEST_IMAGE
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+
   tags:
     - dind
 
