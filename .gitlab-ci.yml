@@ -38,6 +38,8 @@ build-image:
   script:
     - docker build -t $CONTAINER_LATEST_IMAGE .
     - docker push $CONTAINER_LATEST_IMAGE
+  tags:
+    - dind
 
 setup-fesl:
   stage: setup
