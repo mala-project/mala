@@ -7,8 +7,8 @@ RUN apt-get install --no-install-recommends -y build-essential \
                                                libz-dev swig git-lfs && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY install/fesl_cpu_environment.yml .
-RUN conda env create -q -f fesl_cpu_environment.yml && rm -rf /opt/conda/pkgs/*
+COPY install/mala_cpu_environment.yml .
+RUN conda env create -q -f mala_cpu_environment.yml && rm -rf /opt/conda/pkgs/*
 
-RUN echo "source activate fesl-cpu" > ~/.bashrc
-ENV PATH /opt/conda/envs/fesl-cpu/bin:$PATH
+RUN echo "source activate mala-cpu" > ~/.bashrc
+ENV PATH /opt/conda/envs/mala-cpu/bin:$PATH

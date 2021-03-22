@@ -1,5 +1,5 @@
-import fesl
-from fesl import printout
+import mala
+from mala import printout
 from data_repo_path import get_data_repo_path
 import numpy as np
 data_path = get_data_repo_path()+"Al256_reduced/"
@@ -12,7 +12,7 @@ def original_setup(n_trials):
     # All parameters are handled from a central parameters class that
     # contains subclasses.
     ####################
-    test_parameters = fesl.Parameters()
+    test_parameters = mala.Parameters()
     # Currently, the splitting in training, validation and test set are
     # done on a "by snapshot" basis. Specify how this is
     # done by providing a list containing entries of the form
@@ -42,7 +42,7 @@ def original_setup(n_trials):
     # DATA
     # Add and prepare snapshots for training.
     ####################
-    data_handler = fesl.DataHandler(test_parameters)
+    data_handler = mala.DataHandler(test_parameters)
 
     # Add all the snapshots we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
@@ -66,7 +66,7 @@ def original_setup(n_trials):
     # of interest.
     ####################
 
-    test_hp_optimizer = fesl.HyperOptInterface(test_parameters, data_handler)
+    test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
 
     # Learning rate will be optimized.
     test_hp_optimizer.add_hyperparameter("float", "learning_rate",
@@ -95,8 +95,8 @@ def original_setup(n_trials):
     # # Train with these new parameters.
     # ####################
     #
-    # test_network = fesl.Network(test_parameters)
-    # test_trainer = fesl.Trainer(test_parameters, test_network, data_handler)
+    # test_network = mala.Network(test_parameters)
+    # test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
     # printout("Network setup: DONE.")
     # test_trainer.train_network()
     # printout("Training: DONE.")
@@ -105,7 +105,7 @@ def original_setup(n_trials):
 
 def resume_checkpoint():
     loaded_params, new_datahandler, new_hyperopt = \
-        fesl.HyperOptOptuna.resume_checkpoint(checkpoint_name)
+        mala.HyperOptOptuna.resume_checkpoint(checkpoint_name)
     return new_hyperopt
 
 

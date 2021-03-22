@@ -1,8 +1,8 @@
-from fesl.common.parameters import Parameters
-from fesl.common.printout import printout
-from fesl.datahandling.data_handler import DataHandler
-from fesl.network.network import Network
-from fesl.network.trainer import Trainer
+from mala.common.parameters import Parameters
+from mala.common.printout import printout
+from mala.datahandling.data_handler import DataHandler
+from mala.network.network import Network
+from mala.network.trainer import Trainer
 import numpy as np
 import time
 from data_repo_path import get_data_repo_path

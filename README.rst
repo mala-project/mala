@@ -1,7 +1,7 @@
-FESL
+MALA
 ====
 
-FESL (Framework for Electronic Structure Learning) is a machine-learning
+MALA tools (Materials Analysis and Learning) is a machine-learning
 based framework to enable multiscale modeling by bypassing
 computationally expensive density functional simulations. It is designed
 as a python package. This repository is structured as follows:
@@ -10,7 +10,7 @@ as a python package. This repository is structured as follows:
 
    ├── examples : contains useful examples to get you started with the package
    ├── install : contains scripts for setting up this package on your machine
-   ├── fesl : the source code itself
+   ├── mala : the source code itself
    ├── test : test scripts used during development, will hold tests for CI in the future
    └── docs : Sphinx documentation folder
 
@@ -18,7 +18,7 @@ as a python package. This repository is structured as follows:
 Installation
 ------------
 
-Please refer to `Installation of FESL <https://multiscale-wdm.pages.hzdr.de/surrogate-models/fesl/fesl/install/README.html>`_.
+Please refer to `Installation of MALA <https://multiscale-wdm.pages.hzdr.de/surrogate-models/fesl/fesl/install/README.html>`_.
 
 Running
 -------

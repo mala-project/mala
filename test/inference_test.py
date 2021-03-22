@@ -1,9 +1,9 @@
-from fesl.common.parameters import Parameters
-from fesl.datahandling.data_handler import DataHandler
-from fesl.datahandling.data_scaler import DataScaler
-from fesl.network.network import Network
-from fesl.network.tester import Tester
-from fesl.common.parameters import printout
+from mala.common.parameters import Parameters
+from mala.datahandling.data_handler import DataHandler
+from mala.datahandling.data_scaler import DataScaler
+from mala.network.network import Network
+from mala.network.tester import Tester
+from mala.common.parameters import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al256_reduced/"

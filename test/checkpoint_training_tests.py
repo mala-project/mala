@@ -1,5 +1,5 @@
-import fesl
-from fesl import printout
+import mala
+from mala import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al256_reduced/"
@@ -14,7 +14,7 @@ def original_setup(checkpoint_name, maxepochs, learning_rate_scheduler=None,
     # contains subclasses.
     ####################
 
-    test_parameters = fesl.Parameters()
+    test_parameters = mala.Parameters()
     # Currently, the splitting in training, validation and test set are
     # done on a "by snapshot" basis. Specify how this is
     # done by providing a list containing entries of the form
@@ -49,7 +49,7 @@ def original_setup(checkpoint_name, maxepochs, learning_rate_scheduler=None,
     # Add and prepare snapshots for training.
     ####################
 
-    data_handler = fesl.DataHandler(test_parameters)
+    data_handler = mala.DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
@@ -76,8 +76,8 @@ def original_setup(checkpoint_name, maxepochs, learning_rate_scheduler=None,
                                            data_handler.get_output_dimension()]
 
     # Setup network and trainer.
-    test_network = fesl.Network(test_parameters)
-    test_trainer = fesl.Trainer(test_parameters, test_network, data_handler)
+    test_network = mala.Network(test_parameters)
+    test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
 
     return test_trainer
 
@@ -85,7 +85,7 @@ def original_setup(checkpoint_name, maxepochs, learning_rate_scheduler=None,
 def resume_checkpoint(checkpoint_name, actual_max_epochs):
     loaded_params, loaded_network, \
         new_datahandler, new_trainer = \
-        fesl.Trainer.resume_checkpoint(checkpoint_name)
+        mala.Trainer.resume_checkpoint(checkpoint_name)
     loaded_params.running.max_number_epochs = actual_max_epochs
     return new_trainer
 

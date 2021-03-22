@@ -1,13 +1,13 @@
-## Contributing to FESL
+## Contributing to MALA
 
-FESL is open source software and as such always welcomes additions and 
+MALA is open source software and as such always welcomes additions and 
 improvements. However, we kindly ask any contributor to adhere to the following
 suggestions in order to keep the overall quality and maintainability of the 
 code high. 
 
 ## Versioning and releases
 
-FESL has a versioning system. The version number is only updated when merging
+MALA has a versioning system. The version number is only updated when merging
 on `master`. This constitues a release. Please note that not all changes
 to code constitute such a release and generally, merges will be directed
 to the `develop` branch

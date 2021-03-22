@@ -1,4 +1,4 @@
-Welcome to FESL's documentation!
+Welcome to MALA's documentation!
 ================================
 
 .. include:: ../../README.rst

@@ -20,7 +20,7 @@ from recommonmark.transform import AutoStructify
 
 # -- Project information -----------------------------------------------------
 
-project = 'FESL'
+project = 'MALA'
 copyright = '2021, HZDR'
 author = 'HZDR'
 
