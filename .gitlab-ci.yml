@@ -14,9 +14,6 @@ stages:
   - deploy
 
 .env_setup: &env_setup
-  - conda env create -q -f install/fesl_cpu_environment.yml
-  - conda clean --tarballs --yes
-  - source activate fesl-cpu
   - pip install -q -e .
 
 .data_setup: &data_setup
@@ -43,11 +40,6 @@ build-image:
 
 setup-fesl:
   stage: setup
-  cache:
-    paths:
-      - conda/pkgs
-      - .cache/pip
-    policy: pull-push
   before_script:
     - *env_setup
     - *data_setup
@@ -56,11 +48,6 @@ setup-fesl:
 
 test-basic-functions:
   stage: test
-  cache:
-    paths:
-      - conda/pkgs
-      - .cache/pip
-    policy: pull
   tags:
     - 2-core
   before_script:
@@ -73,11 +60,6 @@ test-basic-functions:
 
 test-workflow:
   stage: test
-  cache:
-    paths:
-      - conda/pkgs
-      - .cache/pip
-    policy: pull
   before_script:
     - *env_setup
     - *data_setup
