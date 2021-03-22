@@ -1,5 +1,5 @@
 default:
-  image: registry.hzdr.de/multiscale-wdm/surrogate-models/fesl/fesl
+  image: $CI_REGISTRY_IMAGE:latest
 
 # Change pip's cache and conda's package directories to be inside the project
 # directory since we can only cache local items.
@@ -7,21 +7,13 @@ variables:
   CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/conda/pkgs"
   PIP_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/pip"
 
-cache:
-  paths:
-    - conda/pkgs
-    - .cache/pip
-  policy: pull
-
 stages:
+  - build
   - setup
   - test
   - deploy
 
 .env_setup: &env_setup
-  - conda env create -q -f install/fesl_cpu_environment.yml
-  - conda clean --tarballs --yes
-  - source activate fesl-cpu
   - pip install -q -e .
 
 .data_setup: &data_setup
@@ -32,13 +24,22 @@ stages:
   - bash ../fesl/install/data_repo_link/link_data_repo.sh `pwd`
   - cd ../fesl
 
+build-image:
+  stage: build
+  image: docker:20.10
+  services:
+    - docker:20.10-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:latest
+  tags:
+    - dind
+
 setup-fesl:
   stage: setup
-  cache:
-    paths:
-      - conda/pkgs
-      - .cache/pip
-    policy: pull-push
   before_script:
     - *env_setup
     - *data_setup
@@ -59,6 +60,8 @@ test-basic-functions:
 
 test-workflow:
   stage: test
+  tags:
+    - performance
   before_script:
     - *env_setup
     - *data_setup
@@ -69,7 +72,6 @@ test-workflow:
   needs: [setup-fesl]
 
 #### documentation
-
 setup-docs:
   stage: setup
   image: python:3.7
