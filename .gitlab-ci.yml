@@ -18,8 +18,8 @@ stages:
 
 .data_setup: &data_setup
   - cd ..
-  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data  fesl_data_repo
-  - cd fesl_data_repo
+  - git clone -b v0.1.2  https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data  mala_data_repo
+  - cd mala_data_repo
   - git lfs install
   - bash ../fesl/install/data_repo_link/link_data_repo.sh `pwd`
   - cd ../fesl
@@ -38,7 +38,7 @@ build-image:
   tags:
     - dind
 
-setup-fesl:
+setup-mala:
   stage: setup
   before_script:
     - *env_setup
@@ -55,8 +55,8 @@ test-basic-functions:
     - *data_setup
   script:
     - cd test
-    - python fesl_tests.py
-  needs: [setup-fesl]
+    - python mala_tests.py
+  needs: [setup-mala]
 
 test-workflow:
   stage: test
@@ -69,7 +69,7 @@ test-workflow:
     - cd examples
     - python ex99_verify_all_examples.py
     - cd ..
-  needs: [setup-fesl]
+  needs: [setup-mala]
 
 #### documentation
 setup-docs:
@@ -99,7 +99,7 @@ test-docstrings:
     - pip install -qU pip
     - pip install -qU pydocstyle
   script:
-    - pydocstyle --convention=numpy fesl
+    - pydocstyle --convention=numpy mala
   needs: [setup-docs]
 
 pages:
@@ -117,7 +117,7 @@ pages:
   - pip install -qU recommonmark
   - pip install -qU sphinx-markdown-tables
   script:
-  - sphinx-apidoc -o docs/source/api fesl
+  - sphinx-apidoc -o docs/source/api mala
   - sphinx-build -b html -d docs/_build/doctrees docs/source docs/_build/html
   after_script:
   - mv docs/_build/html public

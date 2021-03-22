@@ -1,5 +1,5 @@
-import fesl
-from fesl import printout
+import mala
+from mala import printout
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al256_reduced/"
 
@@ -15,7 +15,7 @@ def run_example08():
     # All parameters are handled from a central parameters class that
     # contains subclasses.
     ####################
-    test_parameters = fesl.Parameters()
+    test_parameters = mala.Parameters()
     # Currently, the splitting in training, validation and test set are
     # done on a "by snapshot" basis. Specify how this is
     # done by providing a list containing entries of the form
@@ -47,7 +47,7 @@ def run_example08():
     # DATA
     # Add and prepare snapshots for training.
     ####################
-    data_handler = fesl.DataHandler(test_parameters)
+    data_handler = mala.DataHandler(test_parameters)
 
     # Add all the snapshots we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
@@ -73,7 +73,7 @@ def run_example08():
     # and run the remaining trials.
     ####################
 
-    test_hp_optimizer = fesl.HyperOptInterface(test_parameters, data_handler)
+    test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
 
     # Learning rate will be optimized.
     test_hp_optimizer.add_hyperparameter("float", "learning_rate",
@@ -96,7 +96,7 @@ def run_example08():
     test_hp_optimizer.perform_study()
 
     loaded_params, new_datahandler, new_hyperopt = \
-        fesl.HyperOptOptuna.resume_checkpoint("ex08")
+        mala.HyperOptOptuna.resume_checkpoint("ex08")
     new_hyperopt.perform_study()
 
     ####################

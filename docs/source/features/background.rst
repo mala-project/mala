@@ -4,17 +4,17 @@ Background
 Workflow
 *********
 
-The goal of FESL is to build surrogate models for electronic structure theory.
+The goal of MALA is to build surrogate models for electronic structure theory.
 These surrogate models are based on neural networks. After training such
 a model, it allows the fast evaluation of the total energy and atomic forces.
-FESL is build around Density Functional Theory, but can in
+MALA is build around Density Functional Theory, but can in
 principle be used with all electronic structure methods that calculate the
 total energy and atomic forces given atomic positions as input.
 Building these surrogate models requires preprocessing
 :doc:`preprocessing <preprocessing>` of the data, training of a
 :doc:`neural network <neuralnetworks>` and
 :doc:`postprocessing <postprocessing>` of the results.
-FESL is designed for the investigation of systems at non-zero temperatures and
+MALA is designed for the investigation of systems at non-zero temperatures and
 operates in a "per-grid-point" manner, meaning that every grid point of a
 simulation cell is passed through the network individually.
 

@@ -48,7 +48,7 @@ SUBROUTINE initialize()
   !
   CALL environment_start ( 'PWSCF' )
   !
-  CALL read_input_file ('PW', 'fesl.pw.scf.in' )
+  CALL read_input_file ('PW', 'mala.pw.scf.in' )
   CALL run_pwscf_setup ( exit_status )
 
   print *, "Setup completed"

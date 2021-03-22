@@ -2,26 +2,21 @@
 
 # I rarely do bash scripting, so feel free to refine this script.
 
-echo "Linking FESL and FESL data repo."
+echo "Linking MALA and MALA data repo."
 # Get the paths we need for setup.
 script_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-fesl_base_path=$( echo ${script_path%/*} )
-fesl_base_path=$( echo ${fesl_base_path%/*} )
-examples_path=$fesl_base_path/examples
-test_path=$fesl_base_path/test
+mala_base_path=$( echo ${script_path%/*} )
+mala_base_path=$( echo ${mala_base_path%/*} )
+examples_path=$mala_base_path/examples
+test_path=$mala_base_path/test
 pythonfile=data_repo_path.py
-
-#echo $script_path
-#echo $fesl_base_path
-#echo $examples_path
-#echo $test_path
 
 # Ask the user for the path to the repo if none was given in the command line.
 if [ "$1" != "" ]
 then
   data_repo_path=$1
 else
-  echo "Please input the full path to the FESL data repo."
+  echo "Please input the full path to the MALA data repo."
   read data_repo_path
 fi
 

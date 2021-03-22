@@ -6,7 +6,7 @@ Al.scf.pw
   tprnfor=.true.
   prefix='Al'
   pseudo_dir='/home/fiedle09/tools/PPs/pbe'
-  outdir='/home/fiedle09/jobs/qe/Al36/for_fesl'
+  outdir='temp',
 /
 &SYSTEM
  ibrav=0

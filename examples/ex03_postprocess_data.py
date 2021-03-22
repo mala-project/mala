@@ -1,5 +1,5 @@
-import fesl
-from fesl import printout
+import mala
+from mala import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
@@ -21,7 +21,7 @@ def run_example03(do_total_energy=True, accuracy_electrons=1e-11,
     # All parameters are handled from a central parameters class that
     # contains subclasses.
     ####################
-    test_parameters = fesl.Parameters()
+    test_parameters = mala.Parameters()
 
     # Specify the correct LDOS parameters.
     test_parameters.targets.target_type = "LDOS"
@@ -35,7 +35,7 @@ def run_example03(do_total_energy=True, accuracy_electrons=1e-11,
     # Use this calculator to perform various operations.
     ####################
 
-    ldos = fesl.TargetInterface(test_parameters)
+    ldos = mala.TargetInterface(test_parameters)
 
     # Read additional information about the calculation.
     # By doing this, the calculator is able to know e.g. the temperature

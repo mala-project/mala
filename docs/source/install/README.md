@@ -1,22 +1,22 @@
-# Installation of FESL
+# Installation of MALA
 
-This document details the manual installation of the FESL package.
+This document details the manual installation of the MALA package.
 
 ## Prerequisites
 
 ### Python version
 
-FESL itself is not bound to a certain python version, as long as the package requirements for FESL can be met by the
-version of your choice. FESL has been successfully tested for python 3.8.5.
+MALA itself is not bound to a certain python version, as long as the package requirements for MALA can be met by the
+version of your choice. MALA has been successfully tested for python 3.8.5.
 If you intend to use the optional Quantum Espresso total energy module or LAMMPS and install these software packages
 yourself the necessary python bindings will be created for your python version. If you operate on a machine that
 provides pre-installed versions of these packages (e.g. on an HPC cluster), you need to adhere to the python version
-for which these python bindings have been created. A list of machines on which FESL was tested can be found in
+for which these python bindings have been created. A list of machines on which MALA was tested can be found in
 [Successfully tested on](tested_systems).
 
 ### Python packages
 
-In order to run FESL you have to have the following packages installed:
+In order to run MALA you have to have the following packages installed:
 
 * torch (PyTorch)
 * numpy
@@ -73,8 +73,8 @@ files will likely install newer versions of (sub-)dependencies and we cannot gua
 
 | dependency granularity: | basic                           | explicit                   |
 |-------------------------|---------------------------------|----------------------------|
-| CPU                     | `fesl_cpu_base_environment.yml` | `fesl_cpu_environment.yml` |
-| GPU                     | `fesl_gpu_base_environment.yml` | `fesl_gpu_environment.yml` |
+| CPU                     | `mala_cpu_base_environment.yml` | `mala_cpu_environment.yml` |
+| GPU                     | `mala_gpu_base_environment.yml` | `mala_gpu_environment.yml` |
 
 Follow the steps below to set up the necessary environment.
 
@@ -84,13 +84,13 @@ environment by replacing `3.6` with your desired version in `environment.yml`:
    dependencies:
      - python>=yourversionhere
    ```
-2. Create an environment `fesl`:
+2. Create an environment `mala`:
    ```sh
    $ conda env create -f environment.yml
    ```
 3. Activate the new environment:
    ```sh
-   $ conda activate fesl
+   $ conda activate mala
    ```
 4. You can deactivate the environment with:
     ```sh
@@ -98,7 +98,7 @@ environment by replacing `3.6` with your desired version in `environment.yml`:
     ```
 5. You can update your conda environment by making changes to environment.yml:
     ```sh
-    $ conda env update --name fesl  --file environment.yml
+    $ conda env update --name mala  --file environment.yml
     ```
 ###  LAMMPS (optional)
 
@@ -115,7 +115,7 @@ This provides an additional post-processing capability, but is not necessarily n
 If you want to use this module, please refer to [Python bindings to Quantum Espresso](INSTALL_TE_QE.md).
 
 
-## Installing the FESL package
+## Installing the MALA package
 
 1. Make sure that all prerequisites are fulfilled (see above)
 2. Install the package using
@@ -150,9 +150,9 @@ $ pip intsall -U sphinx-markdown-tables
 
 ## Downloading and adding example data
 
-The examples and tests need additional data to run. The FESL team provides a data repository, that can be downloaded
+The examples and tests need additional data to run. The MALA team provides a data repository, that can be downloaded
 from <https://gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data>. After downloading it, the data repository
-needs to be linked to the FESL repository by using
+needs to be linked to the MALA repository by using
 ```sh
 $ cd ~/path/to/this/git/root/directory
 $ bash install/data_repo_link/link_data_repo.sh ~/path/to/data/repo

@@ -1,14 +1,22 @@
 from setuptools import setup
 
+# Doing it as suggested here:
+# https://packaging.python.org/guides/single-sourcing-package-version/
+# (number 3)
+
+version = {}
+with open("mala/version.py") as fp:
+    exec(fp.read(), version)
+
 setup(
-    name="fesl",
-    version="0.0.1",
+    name="mala",
+    version=version["__version__"],
     description="Framework for Electronic Structure Learning",
     url="https://gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/fesl/",
     author="Lenz Fiedler",
     author_email="l.fiedler@hzdr.de",
     license="MIT",
-    packages=["fesl"],
+    packages=["mala"],
     zip_safe=False,
     install_requires=open('requirements.txt').read().splitlines(),
     python_requires='<3.9',

@@ -1,4 +1,4 @@
-from fesl.common.parameters import printout
+from mala.common.parameters import printout
 from ex01_run_singleshot import run_example01
 from ex02_preprocess_data import run_example02
 from ex03_postprocess_data import run_example03
@@ -13,7 +13,7 @@ ex99_verify_all_examples.py: This example confirms whether or not the examples
 run CORRECTLY. That is, even though they might run, they may not run correctly,
 e.g. a network will train but with abysmal performance.  
 """
-printout("Welcome to FESL.")
+printout("Welcome to MALA.")
 printout("Running ex99_verify_all_examples.py")
 
 # Example 1: Perform a training.
