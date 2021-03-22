@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+"""GPU test
+
+write some text here...
+"""
 import fesl
 from fesl import printout
 from data_repo_path import get_data_repo_path
