@@ -60,6 +60,8 @@ test-basic-functions:
 
 test-workflow:
   stage: test
+  tags:
+    - performance
   before_script:
     - *env_setup
     - *data_setup
