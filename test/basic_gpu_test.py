@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """GPU test
 
-write some text here...
+This is a very basic test of the GPU functionalities of MALA (i.e. pytorch,
+which MALA relies on). Two things are tested:
+
+1. Whether or not your system has GPU support.
+2. Whether or not the GPU does what it is supposed to. For this, 
+a training is performed. It is measured whether or not the utilization
+of the GPU results in a speed up. 
 """
-import fesl
-from fesl import printout
+import mala
+from mala import printout
 from data_repo_path import get_data_repo_path
 import time
 import numpy as np
@@ -13,7 +19,7 @@ test_checkpoint_name = "test"
 
 
 def check_for_gpu():
-    test_parameters = fesl.Parameters()
+    test_parameters = mala.Parameters()
     test_parameters.use_gpu = True
     if test_parameters.use_gpu is False:
         return False
@@ -27,7 +33,7 @@ def test_run(use_gpu):
     # contains subclasses.
     ####################
 
-    test_parameters = fesl.Parameters()
+    test_parameters = mala.Parameters()
     # Currently, the splitting in training, validation and test set are
     # done on a "by snapshot" basis. Specify how this is
     # done by providing a list containing entries of the form
@@ -57,7 +63,7 @@ def test_run(use_gpu):
     # Add and prepare snapshots for training.
     ####################
 
-    data_handler = fesl.DataHandler(test_parameters)
+    data_handler = mala.DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
     for i in range(0, 6):
@@ -85,8 +91,8 @@ def test_run(use_gpu):
                                            data_handler.get_output_dimension()]
 
     # Setup network and trainer.
-    test_network = fesl.Network(test_parameters)
-    test_trainer = fesl.Trainer(test_parameters, test_network, data_handler)
+    test_network = mala.Network(test_parameters)
+    test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
     starttime = time.time()
     test_trainer.train_network()
 
