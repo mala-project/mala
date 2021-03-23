@@ -1,6 +1,10 @@
 MALA
 ====
 
+.. image:: https://gitlab.com/hzdr/mala/mala/badges/develop/pipeline.svg
+    :target: https://gitlab.com/hzdr/mala/mala/-/commits/develop
+    :alt: pipeline status
+
 MALA tools (Materials Analysis and Learning) is a machine-learning
 based framework to enable multiscale modeling by bypassing
 computationally expensive density functional simulations. It is designed
