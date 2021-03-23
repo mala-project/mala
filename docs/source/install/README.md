@@ -151,7 +151,7 @@ $ pip intsall -U sphinx-markdown-tables
 ## Downloading and adding example data
 
 The examples and tests need additional data to run. The MALA team provides a data repository, that can be downloaded
-from <https://gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/data>. After downloading it, the data repository
+from <https://gitlab.com/hzdr/mala/data>. After downloading it, the data repository
 needs to be linked to the MALA repository by using
 ```sh
 $ cd ~/path/to/this/git/root/directory

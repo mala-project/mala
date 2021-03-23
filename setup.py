@@ -12,7 +12,7 @@ setup(
     name="mala",
     version=version["__version__"],
     description="Framework for Electronic Structure Learning",
-    url="https://gitlab.hzdr.de/multiscale-wdm/surrogate-models/fesl/fesl/",
+    url="https://gitlab.com/hzdr/mala/mala",
     author="Lenz Fiedler",
     author_email="l.fiedler@hzdr.de",
     license="MIT",
