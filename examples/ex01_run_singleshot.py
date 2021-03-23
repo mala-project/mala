@@ -1,5 +1,5 @@
-import fesl
-from fesl import printout
+import mala
+from mala import printout
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al256_reduced/"
 
@@ -9,21 +9,15 @@ data using this framework. It uses preprocessed data, that is read in
 from *.npy files.
 """
 
-printout("Welcome to FESL.")
-printout("Running ex01_run_singleshot.py")
-
 
 def run_example01(desired_loss_improvement_factor=1):
-    printout("Welcome to FESL.")
-    printout("Running ex01_run_singleshot.py")
-
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
     # contains subclasses.
     ####################
 
-    test_parameters = fesl.Parameters()
+    test_parameters = mala.Parameters()
     # Currently, the splitting in training, validation and test set are
     # done on a "by snapshot" basis. Specify how this is
     # done by providing a list containing entries of the form
@@ -49,7 +43,7 @@ def run_example01(desired_loss_improvement_factor=1):
     # Add and prepare snapshots for training.
     ####################
 
-    data_handler = fesl.DataHandler(test_parameters)
+    data_handler = mala.DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
@@ -76,8 +70,8 @@ def run_example01(desired_loss_improvement_factor=1):
                                            data_handler.get_output_dimension()]
 
     # Setup network and trainer.
-    test_network = fesl.Network(test_parameters)
-    test_trainer = fesl.Trainer(test_parameters)
+    test_network = mala.Network(test_parameters)
+    test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
     printout("Network setup: DONE.")
 
     ####################
@@ -86,7 +80,7 @@ def run_example01(desired_loss_improvement_factor=1):
     ####################
 
     printout("Starting training.")
-    test_trainer.train_network(test_network, data_handler)
+    test_trainer.train_network()
     printout("Training: DONE.")
 
     ####################

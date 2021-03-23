@@ -1,5 +1,5 @@
-import fesl
-from fesl import printout
+import mala
+from mala import printout
 from data_repo_path import get_data_repo_path
 import numpy as np
 data_path = get_data_repo_path()+"Al36/"
@@ -15,14 +15,13 @@ Further preprocessing steps (scaling, unit conversion) is done later.
 
 
 def run_example02():
-
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
     # contains subclasses.
     ####################
 
-    test_parameters = fesl.Parameters()
+    test_parameters = mala.Parameters()
 
     # Specify input data options, i.e. which descriptors are calculated
     # with which parameters. These are the standard parameters for
@@ -46,7 +45,7 @@ def run_example02():
     # Create a DataConverter, and add snapshots to it.
     ####################
 
-    data_converter = fesl.DataConverter(test_parameters)
+    data_converter = mala.DataConverter(test_parameters)
 
     # Take care to choose the "add_snapshot" function correct for
     # the type of data you want to preprocess.
@@ -55,7 +54,7 @@ def run_example02():
                                            data_path, output_units="1/Ry")
 
     # Convert all the snapshots and save them in the current directory.
-    # data_converter.convert_snapshots("./", naming_scheme="Al_snapshot*")
+    data_converter.convert_snapshots("./", naming_scheme="Al_snapshot*")
 
     ####################
     # RESULTS.

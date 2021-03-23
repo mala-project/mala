@@ -1,4 +1,4 @@
-Welcome to FESL's documentation!
+Welcome to MALA's documentation!
 ================================
 
 .. include:: ../../README.rst
@@ -7,7 +7,10 @@ Welcome to FESL's documentation!
    :maxdepth: 2
    :caption: Features
 
-   features/template
+   features/background
+   features/preprocessing
+   features/neuralnetworks
+   features/postprocessing
 
 .. toctree::
    :maxdepth: 2

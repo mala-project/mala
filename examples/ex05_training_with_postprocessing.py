@@ -1,5 +1,5 @@
-import fesl
-from fesl import printout
+import mala
+from mala import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al256_reduced/"
@@ -20,11 +20,11 @@ DFT simulation cell for this example.
 
 # Uses a trained network to make a prediction.
 def use_trained_network(network_path, params_path, input_scaler_path,
-                        output_scaler_path, accuracy = 0.05):
+                        output_scaler_path, accuracy=0.05):
 
     # First load Parameters and network.
     # Parameters may have to
-    new_parameters = fesl.Parameters.load_from_file(params_path,
+    new_parameters = mala.Parameters.load_from_file(params_path,
                                                     no_snapshots=True)
 
     # Specify the correct LDOS parameters.
@@ -38,12 +38,12 @@ def use_trained_network(network_path, params_path, input_scaler_path,
     new_parameters.data.use_lazy_loading = True
 
     # Load a network from a file.
-    new_network = fesl.Network.load_from_file(new_parameters, network_path)
+    new_network = mala.Network.load_from_file(new_parameters, network_path)
 
     # Make sure the same scaling is used for data handling.
-    iscaler = fesl.DataScaler.load_from_file(input_scaler_path)
-    oscaler = fesl.DataScaler.load_from_file(output_scaler_path)
-    inference_data_handler = fesl.DataHandler(new_parameters,
+    iscaler = mala.DataScaler.load_from_file(input_scaler_path)
+    oscaler = mala.DataScaler.load_from_file(output_scaler_path)
+    inference_data_handler = mala.DataHandler(new_parameters,
                                               input_data_scaler=iscaler,
                                               output_data_scaler=oscaler)
 
@@ -53,11 +53,10 @@ def use_trained_network(network_path, params_path, input_scaler_path,
     inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                         "Al_debug_2k_nr2.out.npy", data_path,
                                         output_units="1/Ry")
-    inference_data_handler.prepare_data()
+    inference_data_handler.prepare_data(reparametrize_scaler=False)
 
     # The Tester class is the testing analogon to the training class.
-    tester = fesl.Tester(new_parameters)
-    tester.set_data(new_network, inference_data_handler)
+    tester = mala.Tester(new_parameters, new_network, inference_data_handler)
 
     # Get the results for the first (and only= snapshot.
     actual_ldos, predicted_ldos = tester.test_snapshot(0)
@@ -97,7 +96,7 @@ def initial_training(network_path, params_path, input_scaler_path,
     # contains subclasses.
     ####################
 
-    test_parameters = fesl.Parameters()
+    test_parameters = mala.Parameters()
     # Currently, the splitting in training, validation and test set are
     # done on a "by snapshot" basis. Specify how this is
     # done by providing a list containing entries of the form
@@ -123,7 +122,7 @@ def initial_training(network_path, params_path, input_scaler_path,
     # Add and prepare snapshots for training.
     ####################
 
-    data_handler = fesl.DataHandler(test_parameters)
+    data_handler = mala.DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
@@ -150,8 +149,8 @@ def initial_training(network_path, params_path, input_scaler_path,
                                            data_handler.get_output_dimension()]
 
     # Setup network and trainer.
-    test_network = fesl.Network(test_parameters)
-    test_trainer = fesl.Trainer(test_parameters)
+    test_network = mala.Network(test_parameters)
+    test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
     printout("Network setup: DONE.")
 
     ####################
@@ -160,7 +159,7 @@ def initial_training(network_path, params_path, input_scaler_path,
     ####################
 
     printout("Starting training.")
-    test_trainer.train_network(test_network, data_handler)
+    test_trainer.train_network()
     printout("Training: DONE.")
 
     ####################
@@ -187,7 +186,7 @@ def initial_training(network_path, params_path, input_scaler_path,
 
 
 def run_example05(dotraining, doinference):
-    printout("Welcome to FESL.")
+    printout("Welcome to MALA.")
     printout("Running ex05_training_with_postprocessing.py")
 
     # Choose the paths where the network and the parameters for it should

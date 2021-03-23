@@ -1,25 +1,26 @@
-from fesl.common.parameters import Parameters
-from fesl.common.printout import printout
-from fesl.datahandling.data_handler import DataHandler
-from fesl.network.network import Network
-from fesl.network.trainer import Trainer
+from mala.common.parameters import Parameters
+from mala.common.printout import printout
+from mala.datahandling.data_handler import DataHandler
+from mala.network.network import Network
+from mala.network.trainer import Trainer
 import numpy as np
 import time
 from data_repo_path import get_data_repo_path
 data_path_Al = get_data_repo_path()+"Al256_reduced/"
 
+# This is a benchmark comparing the usage of horovod, lazy loading and RAM
+# based storage,.
 
 
-# This is a benchmark comparing the usage of horovod, lazy loading and RAM based storage,.
-
-
-def lazy_loading_horovod_benchmark(data_path="../examples/data/", accuracy=0.0005):
+def lazy_loading_horovod_benchmark(data_path="../examples/data/",
+                                   accuracy=0.0005):
 
     ####################
     # PARAMETERS
     ####################
     test_parameters = Parameters()
-    test_parameters.data.data_splitting_snapshots = ["tr", "tr", "tr", "va", "te"]
+    test_parameters.data.data_splitting_snapshots = ["tr", "tr", "tr", "va",
+                                                     "te"]
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
     test_parameters.data.output_rescaling_type = "normal"
     test_parameters.data.data_splitting_type = "by_snapshot"
@@ -29,7 +30,7 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/", accuracy=0.000
     test_parameters.running.trainingtype = "Adam"
     test_parameters.comment = "Horovod / lazy loading benchmark."
     test_parameters.network.nn_type = "feed-forward"
-    test_parameters.network.manual_seed = 2021
+    test_parameters.manual_seed = 2021
 
     ####################
     # DATA
@@ -43,25 +44,30 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/", accuracy=0.000
             test_parameters.use_horovod = hvduse
             data_handler = DataHandler(test_parameters)
             data_handler.clear_data()
-            data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path, "Al_debug_2k_nr0.out.npy", data_path,
+            data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
+                                      "Al_debug_2k_nr0.out.npy", data_path,
                                       output_units="1/Ry")
-            data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path, "Al_debug_2k_nr1.out.npy", data_path,
+            data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
+                                      "Al_debug_2k_nr1.out.npy", data_path,
                                       output_units="1/Ry")
-            data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path, "Al_debug_2k_nr2.out.npy", data_path,
+            data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
+                                      "Al_debug_2k_nr2.out.npy", data_path,
                                       output_units="1/Ry")
-            data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path, "Al_debug_2k_nr1.out.npy", data_path,
+            data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
+                                      "Al_debug_2k_nr1.out.npy", data_path,
                                       output_units="1/Ry")
-            data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path, "Al_debug_2k_nr2.out.npy", data_path,
+            data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
+                                      "Al_debug_2k_nr2.out.npy", data_path,
                                       output_units="1/Ry")
 
             data_handler.prepare_data()
-            test_parameters.network.layer_sizes = [data_handler.get_input_dimension(), 100,
-                                                   data_handler.get_output_dimension()]
+            test_parameters.network.layer_sizes = \
+                [data_handler.get_input_dimension(), 100,
+                 data_handler.get_output_dimension()]
 
             # Setup network and trainer.
             test_network = Network(test_parameters)
-            test_trainer = Trainer(test_parameters)
-            test_trainer.train_network(test_network, data_handler)
+            test_trainer = Trainer(test_parameters, test_network, data_handler)
 
             hvdstring = "no horovod"
             if hvduse:
@@ -71,7 +77,8 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/", accuracy=0.000
             if ll:
                 llstring = "using lazy loading"
 
-            results.append([hvdstring, llstring, test_trainer.initial_test_loss, test_trainer.final_test_loss,
+            results.append([hvdstring, llstring, test_trainer.
+                           initial_test_loss, test_trainer.final_test_loss,
                             time.time() - start_time])
 
     diff = []
@@ -107,21 +114,7 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/", accuracy=0.000
         return False
     return True
 
+
 if __name__ == "__main__":
     test1 = lazy_loading_horovod_benchmark(data_path=data_path_Al)
     printout("Benchmark of lazy loading, horovod and ? - success?:", test1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
-from fesl.common.parameters import printout
+from mala.common.parameters import printout
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al256_reduced/"
 
@@ -58,6 +58,8 @@ def test_tensor_memory(file, accuracy):
 
 
 if __name__ == "__main__":
-    test1 = test_tensor_memory(data_path+"Al_debug_2k_nr0.in.npy", 0.000001)
-    printout("Check if numpy->tensor works without copying - success?:", test1)
+    test_result = test_tensor_memory(data_path+"Al_debug_2k_nr0.in.npy",
+                                     0.000001)
+    printout("Check if numpy->tensor works without copying - success?:",
+             test_result)
 

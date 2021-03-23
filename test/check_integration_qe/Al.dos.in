@@ -1,5 +1,5 @@
 &dos
- outdir='/home/fiedle09/jobs/qe/Al36/for_fesl',
+ outdir='temp',
  prefix='Al',
  Emin=-10.0,
  Emax=15.0,

@@ -1,5 +1,5 @@
-import fesl
-from fesl import printout
+import mala
+from mala import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
@@ -14,15 +14,14 @@ Python module installed.
 """
 
 
-def run_example03(do_total_energy=True, accuracy_electrons = 1e-11,
-                  accuracy_total_energy=50):
-
+def run_example03(do_total_energy=True, accuracy_electrons=1e-11,
+                  accuracy_total_energy=50, accuracy_band_energy=2):
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
     # contains subclasses.
     ####################
-    test_parameters = fesl.Parameters()
+    test_parameters = mala.Parameters()
 
     # Specify the correct LDOS parameters.
     test_parameters.targets.target_type = "LDOS"
@@ -36,7 +35,7 @@ def run_example03(do_total_energy=True, accuracy_electrons = 1e-11,
     # Use this calculator to perform various operations.
     ####################
 
-    ldos = fesl.TargetInterface(test_parameters)
+    ldos = mala.TargetInterface(test_parameters)
 
     # Read additional information about the calculation.
     # By doing this, the calculator is able to know e.g. the temperature
@@ -63,6 +62,7 @@ def run_example03(do_total_energy=True, accuracy_electrons = 1e-11,
     band_energy = ldos.get_band_energy(ldos_data,
                                        fermi_energy_eV=
                                        self_consistent_fermi_energy)
+    total_energy = 0.0
     if do_total_energy:
         # To perform a total energy calculation one also needs to provide
         # a pseudopotential(path).
@@ -89,9 +89,9 @@ def run_example03(do_total_energy=True, accuracy_electrons = 1e-11,
             accuracy_electrons:
         return False
 
-    # FIXME: Add  as soon as band_energy_dft_calculation is fixed.
-    # if np.abs(number_of_electrons - ldos.number_of_electrons) > accuracy:
-    #     return True
+    if np.abs(band_energy - ldos.band_energy_dft_calculation) > \
+            accuracy_band_energy:
+        return True
 
     if do_total_energy:
         if np.abs(total_energy - ldos.total_energy_dft_calculation) > \

@@ -1,17 +1,19 @@
-from fesl.common.parameters import printout
+from mala.common.parameters import printout
 from ex01_run_singleshot import run_example01
 from ex02_preprocess_data import run_example02
 from ex03_postprocess_data import run_example03
 from ex04_hyperparameter_optimization import run_example04
 from ex05_training_with_postprocessing import run_example05
 from ex06_advanced_hyperparameter_optimization import run_example06
+from ex07_checkpoint_training import run_example07
+from ex08_checkpoint_hyperopt import run_example08
 
 """
 ex99_verify_all_examples.py: This example confirms whether or not the examples
 run CORRECTLY. That is, even though they might run, they may not run correctly,
 e.g. a network will train but with abysmal performance.  
 """
-printout("Welcome to FESL.")
+printout("Welcome to MALA.")
 printout("Running ex99_verify_all_examples.py")
 
 # Example 1: Perform a training.
@@ -75,5 +77,18 @@ else:
         "the example, there might be a problem with your installation.")
 
 
+if run_example07():
+    printout("Successfully ran ex07_checkpoint_training.")
+else:
+    raise Exception("Ran ex07_checkpoint_training but something was off."
+                    " If you haven't changed any parameters in "
+                    "the example, there might be a problem with your"
+                    " installation.")
 
-
+if run_example08():
+    printout("Successfully ran ex08_checkpoint_hyperopt.")
+else:
+    raise Exception("Ran ex08_checkpoint_hyperopt but something was off."
+                    " If you haven't changed any parameters in "
+                    "the example, there might be a problem with your"
+                    " installation.")
