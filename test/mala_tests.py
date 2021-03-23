@@ -40,14 +40,19 @@ if qe_dens_to_nr_of_electrons(standard_accuracy*(10**3)):
     printout("qe_dens_to_nr_of_electrons suceeded.")
 else:
     raise Exception("qe_dens_to_nr_of_electrons failed.")
-if qe_ldos_to_density(standard_accuracy*(10**7)):
-    printout("qe_ldos_to_density suceeded.")
-else:
-    raise Exception("qe_ldos_to_density failed.")
-if qe_ldos_to_dos(standard_accuracy*(10**4)):
-    printout("qe_ldos_to_dos suceeded.")
-else:
-    raise Exception("qe_ldos_to_dos failed.")
+try:
+    if qe_ldos_to_density(standard_accuracy*(10**7)):
+        printout("qe_ldos_to_density suceeded.")
+    else:
+        raise Exception("qe_ldos_to_density failed.")
+    if qe_ldos_to_dos(standard_accuracy*(10**4)):
+        printout("qe_ldos_to_dos suceeded.")
+    else:
+        raise Exception("qe_ldos_to_dos failed.")
+except FileNotFoundError:
+    printout("Could not test LDOS integration because of "
+             "missing LDOS data.")
+
 
 ######################
 # Total energy test.

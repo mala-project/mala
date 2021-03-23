@@ -47,6 +47,9 @@ try:
 except ModuleNotFoundError:
     printout("Could not run ex03_postprocess_data, most likely because of "
              "missing QE installation.")
+except FileNotFoundError:
+    printout("Could not run ex03_postprocess_data, most likely because of "
+             "missing LDOS data.")
 
 
 # Example 4: Perform Hyperparameter optimization.
