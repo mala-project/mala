@@ -34,13 +34,13 @@ except ModuleNotFoundError:
              "missing LAMMPS installation.")
 
 # Example 3: Postprocess data. Run it twice, once with Quantum Espresso.
-if run_example03(do_total_energy=False):
-    printout("Successfully ran ex03_postprocess_data.")
-else:
-    raise Exception("Ran ex03_postprocess_data but something was off."
-                    " If you haven't changed any parameters in "
-                    "the example, there might be a problem with your"
-                    " installation.")
+# if run_example03(do_total_energy=False):
+#     printout("Successfully ran ex03_postprocess_data.")
+# else:
+#     raise Exception("Ran ex03_postprocess_data but something was off."
+#                     " If you haven't changed any parameters in "
+#                     "the example, there might be a problem with your"
+#                     " installation.")
 try:
     if run_example03(do_total_energy=True):
         printout("Successfully ran ex03_postprocess_data.")
