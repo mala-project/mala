@@ -36,7 +36,7 @@ build-image:
     - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:latest .
     - docker push $CI_REGISTRY_IMAGE:latest
   tags:
-    - dind
+    - docker
 
 setup-mala:
   stage: setup
@@ -48,8 +48,6 @@ setup-mala:
 
 test-basic-functions:
   stage: test
-  tags:
-    - 2-core
   before_script:
     - *env_setup
     - *data_setup
@@ -60,8 +58,6 @@ test-basic-functions:
 
 test-workflow:
   stage: test
-  tags:
-    - performance
   before_script:
     - *env_setup
     - *data_setup
