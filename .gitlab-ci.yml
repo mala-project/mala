@@ -18,7 +18,7 @@ stages:
 
 .data_setup: &data_setup
   - cd ..
-  - git clone -b v0.1.2  https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/hzdr/mala/data  mala_data_repo
+  - git clone -b v0.1.0  https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/hzdr/mala/data  mala_data_repo
   - cd mala_data_repo
   - git lfs install
   - bash ../mala/install/data_repo_link/link_data_repo.sh `pwd`
@@ -36,7 +36,7 @@ build-image:
     - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:latest .
     - docker push $CI_REGISTRY_IMAGE:latest
   tags:
-    - dind
+    - docker
 
 setup-mala:
   stage: setup
@@ -48,8 +48,6 @@ setup-mala:
 
 test-basic-functions:
   stage: test
-  tags:
-    - 2-core
   before_script:
     - *env_setup
     - *data_setup
@@ -60,8 +58,6 @@ test-basic-functions:
 
 test-workflow:
   stage: test
-  tags:
-    - performance
   before_script:
     - *env_setup
     - *data_setup
