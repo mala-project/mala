@@ -54,6 +54,7 @@ class TargetBase:
                 "ecutrho": None,
                 "ecutwfc": None,
                 "nosym": True,
+                "noinv": True,
         }
         self.qe_pseudopotentials = {}
 

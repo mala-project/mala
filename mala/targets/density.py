@@ -232,6 +232,18 @@ class Density(TargetBase):
                 qe_pseudopotentials = self.qe_pseudopotentials
             if atoms_Angstrom is None:
                 atoms_Angstrom = self.atoms
+
+            # Specify grid dimensions, if any are given.
+            if self.grid_dimensions[0] != 0 and \
+               self.grid_dimensions[1] != 0 and \
+               self.grid_dimensions[2] != 0:
+                qe_input_data["nr1"] = self.grid_dimensions[0]
+                qe_input_data["nr2"] = self.grid_dimensions[1]
+                qe_input_data["nr3"] = self.grid_dimensions[2]
+                qe_input_data["nr1s"] = self.grid_dimensions[0]
+                qe_input_data["nr2s"] = self.grid_dimensions[1]
+                qe_input_data["nr3s"] = self.grid_dimensions[2]
+
             ase.io.write("mala.pw.scf.in", atoms_Angstrom, "espresso-in",
                          input_data=qe_input_data,
                          pseudopotentials=qe_pseudopotentials)
@@ -262,9 +274,10 @@ class Density(TargetBase):
 
         # If we got values through the ASE parser - is everything consistent?
         number_of_atoms = te.get_nat()
-        if number_of_atoms != atoms_Angstrom.get_global_number_of_atoms():
-            raise Exception("Number of atoms is inconsistent between MALA "
-                            "and Quantum Espresso.")
+        if create_file is True:
+            if number_of_atoms != atoms_Angstrom.get_global_number_of_atoms():
+                raise Exception("Number of atoms is inconsistent between MALA "
+                                "and Quantum Espresso.")
 
         # We need to find out if the grid dimensions are consistent.
         # That depends on the form of the density data we received.
