@@ -1,3 +1,3 @@
 # ML-DFT-SANDIA
 
-The Sandia code goes here. 
+This is the original code used in [1].
