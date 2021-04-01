@@ -18,7 +18,7 @@ SUBROUTINE initialize()
   !
   IMPLICIT NONE
   !
-  include 'laxlib.fh'
+  include '../../LAXLIB/laxlib.fh'
   !
   CHARACTER(len=256) :: srvaddress
   !! Get the address of the server
