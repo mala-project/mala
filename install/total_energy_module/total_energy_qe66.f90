@@ -18,7 +18,8 @@ SUBROUTINE initialize()
   !
   IMPLICIT NONE
   !
-  include '../../LAXLIB/laxlib.fh'
+  include 'laxlib.fh'
+!  include '../../LAXLIB/laxlib.fh'
   !
   CHARACTER(len=256) :: srvaddress
   !! Get the address of the server
@@ -70,7 +71,7 @@ SUBROUTINE run_pwscf_setup ( exit_status )
   !
   !
   USE io_global,        ONLY : stdout, ionode, ionode_id
-  USE parameters,       ONLY : typx, npk
+  USE parameters,       ONLY : ntypx, npk
   USE upf_params,       ONLY : lmaxx
   USE cell_base,        ONLY : fix_volume, fix_area
   USE control_flags,    ONLY : conv_elec, gamma_only, ethr, lscf
