@@ -56,6 +56,7 @@ class TargetBase:
                 "nosym": True,
                 "noinv": True,
         }
+        self.kpoints = None
         self.qe_pseudopotentials = {}
 
     def read_from_cube(self):

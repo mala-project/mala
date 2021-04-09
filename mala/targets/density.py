@@ -246,7 +246,8 @@ class Density(TargetBase):
 
             ase.io.write("mala.pw.scf.in", atoms_Angstrom, "espresso-in",
                          input_data=qe_input_data,
-                         pseudopotentials=qe_pseudopotentials)
+                         pseudopotentials=qe_pseudopotentials,
+                         kpts=self.kpoints)
 
         # initialize the total energy module.
         # FIXME: So far, the total energy module can only be initialized once.
@@ -354,5 +355,6 @@ class Density(TargetBase):
             qe_pseudopotentials
         return_density_object.total_energy_dft_calculation = \
             ldos_object.total_energy_dft_calculation
+        return_density_object.kpoints = ldos_object.kpoints
 
         return return_density_object
