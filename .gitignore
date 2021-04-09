@@ -156,3 +156,8 @@ cython_debug/
 *.pth
 /install/data_repo_link/data_repo_path.py
 /test/data_repo_path.py
+
+
+# JupyterNotebooks
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
