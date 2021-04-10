@@ -84,11 +84,12 @@ Build Quantum Espresso
 Build the Python Module
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Change to ``q-e/PW/src`` and run the
-   ``build_total_energy_energy_module_gnu.sh`` script in the
-   ``total/energy`` folder. If the build is successful, a file named
-   ``total_energy.cpython-37m-x86_64-linux-gnu.so`` will be generated.
-   It contains the Python module.
+1. Inside ``install/total_energy_module``, Run the
+   ``build_tem.sh``. Use the ``-v`` option to specify your QE version and the
+   ``-p`` option to specify the path to your QE installation, e.g.
+   ``bash build_tem.sh -v 6.6 -p /path/to/QE/``. If the build is successful,
+   a file named ``total_energy.cpython-37m-x86_64-linux-gnu.so`` will be
+   generated. It contains the Python module.
 
 Use the Python Module
 ~~~~~~~~~~~~~~~~~~~~~
