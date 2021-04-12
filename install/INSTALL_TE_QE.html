@@ -1,0 +1,356 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Python bindings to Quantum Espresso &mdash; MALA  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Successfully tested on" href="tested_systems.html" />
+    <link rel="prev" title="Setting up LAMMPS" href="INSTALL_LAMMPS.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MALA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/neuralnetworks.html">Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/postprocessing.html">Postprocessing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Installation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">Installation of MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Python bindings to Quantum Espresso</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-gnu-and-the-mlmm-env-environment-on-blake">Using GNU and the mlmm_env environment on Blake</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#initial-setup">Initial Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-quantum-espresso">Build Quantum Espresso</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-the-python-module">Build the Python Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#use-the-python-module">Use the Python Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-intel-mkl">Using Intel/MKL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tested_systems.html">Successfully tested on</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">mala</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#developing-code">Developing code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#issues">Issues</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MALA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Python bindings to Quantum Espresso</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/install/INSTALL_TE_QE.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="python-bindings-to-quantum-espresso">
+<h1>Python bindings to Quantum Espresso<a class="headerlink" href="#python-bindings-to-quantum-espresso" title="Permalink to this headline">¶</a></h1>
+<p>All the files described here can be found in the subfolder
+<code class="docutils literal notranslate"><span class="pre">install/total_energy_module/</span></code>.</p>
+<div class="section" id="using-gnu-and-the-mlmm-env-environment-on-blake">
+<h2>Using GNU and the mlmm_env environment on Blake<a class="headerlink" href="#using-gnu-and-the-mlmm-env-environment-on-blake" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="initial-setup">
+<h3>Initial Setup<a class="headerlink" href="#initial-setup" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Clone QE source: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/QEF/q-e.git</span></code> On
+blake, it may be necessary to ‘module load git’ first.</p></li>
+<li><p>Change into the <code class="docutils literal notranslate"><span class="pre">q-e</span></code> directory and check out out the qe-6.4.1 tag:
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">qe-6.4.1</span></code></p></li>
+<li><p>Make sure you have the necessary modules loaded (<code class="docutils literal notranslate"><span class="pre">gcc</span></code>, <code class="docutils literal notranslate"><span class="pre">python</span></code>,
+<code class="docutils literal notranslate"><span class="pre">openmpi</span></code>).</p></li>
+<li><p>Patch the QE source so that the FoX project is built with <code class="docutils literal notranslate"><span class="pre">-fPIC</span></code>:</p>
+<ol class="arabic simple">
+<li><p>change to the <code class="docutils literal notranslate"><span class="pre">q-e/install/m4</span></code> folder</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">patch</span> <span class="pre">&lt;</span> <span class="pre">x_ac_qe_f90.m4.patch</span></code></p></li>
+</ol>
+</li>
+<li><p>Copy <code class="docutils literal notranslate"><span class="pre">total_energy.f90</span></code> to <code class="docutils literal notranslate"><span class="pre">q-e/PW/src</span></code>. This file contains the
+Fortran 90 code that <code class="docutils literal notranslate"><span class="pre">f2py</span></code> will create a Python binding to.</p></li>
+</ol>
+</div>
+<div class="section" id="build-quantum-espresso">
+<h3>Build Quantum Espresso<a class="headerlink" href="#build-quantum-espresso" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>If you already have a build of QE, go into the <code class="docutils literal notranslate"><span class="pre">q-e</span></code> folder and
+run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">veryclean</span></code>.</p></li>
+<li><p>Make sure you have the necessary modules loaded (<code class="docutils literal notranslate"><span class="pre">gcc</span></code>,
+<code class="docutils literal notranslate"><span class="pre">openmpi</span></code>).</p></li>
+<li><p>Set up the environment using
+<code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">total_energy_module_env_gnu.sh.</span></code>.</p></li>
+<li><p>In order for this module to work, your QE installation has to be
+linked against custom compiled LAPACK and BLAS libraries. If you
+have LAPACK/BLAS already installed somewhere on your system, QE will
+use these installations; they will have to be recompiled correctly
+(see below)</p>
+<ol class="arabic simple">
+<li><p>A simple workaround is to force QE to build its own LAPACK and
+BLAS.</p></li>
+<li><p>In order to do that open <code class="docutils literal notranslate"><span class="pre">q-e/install/make.inc.in</span></code> uncomment
+the line <code class="docutils literal notranslate"><span class="pre">BLAS_LIBS_SWITCH</span> <span class="pre">=</span> <span class="pre">internal</span></code> and the line above;
+comment the line <code class="docutils literal notranslate"><span class="pre">BLAS_LIBS_SWITCH</span> <span class="pre">=</span> <span class="pre">external</span></code> and the line
+above.</p></li>
+<li><p>Do the same for the LAPACK lines.</p></li>
+<li><p>Both for LAPACK and BLAs, make sure to add a <code class="docutils literal notranslate"><span class="pre">lib</span></code> to the
+<code class="docutils literal notranslate"><span class="pre">*.a</span></code> files (e.g. <code class="docutils literal notranslate"><span class="pre">lapack.a</span></code> to <code class="docutils literal notranslate"><span class="pre">liblapack.a</span></code></p></li>
+</ol>
+</li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">-fallow-argument-mismatch</span></code> at the end of line 105
+(<code class="docutils literal notranslate"><span class="pre">F90FLAGS</span></code>) in <code class="docutils literal notranslate"><span class="pre">q-e/install/make.inc.in</span></code>.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">./configure</span></code> in the q-e directory.</p></li>
+<li><p>Afterwards, configure the make input for LAPACK:</p>
+<ol class="arabic simple">
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">-fallow-argument-mismatch</span></code> to line 20 (<code class="docutils literal notranslate"><span class="pre">OPTS</span></code>) in
+<code class="docutils literal notranslate"><span class="pre">q-e/install/make_lapack.inc</span></code>.</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">-fPIC</span></code> to line 22 (<code class="docutils literal notranslate"><span class="pre">NOOPT</span></code>) in
+<code class="docutils literal notranslate"><span class="pre">q-e/install/make_lapack.inc</span></code>.</p></li>
+</ol>
+</li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">all</span></code> (use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">-j8</span> <span class="pre">all</span></code> for a faster compilation
+process).</p>
+<ol class="arabic simple">
+<li><p>I (L. Fiedler) had to clean and recompile in the middle of the
+compilation process; that might be due to a problem with the
+parallel build I was doing. Maybe serial build is not the worst
+idea here.</p></li>
+</ol>
+</li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">q-e/LAPACK</span></code>, run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code> and <code class="docutils literal notranslate"><span class="pre">make</span></code></p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">q-e/LAPACK/CBLAS</span></code>, run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code> and <code class="docutils literal notranslate"><span class="pre">make</span></code>.</p></li>
+<li><p>The FoX library included in QE is delivered precompiled; this omits
+the compilation with the <code class="docutils literal notranslate"><span class="pre">-fPIC</span></code> option necessary for usage of the
+total energy module.</p>
+<ol class="arabic simple">
+<li><p>Download the FoX library from <a class="reference external" href="https://github.com/andreww/fox">https://github.com/andreww/fox</a></p></li>
+<li><p>Compile the library, make sure that the <code class="docutils literal notranslate"><span class="pre">-fPIC</span></code> compiler option
+is used (this should already be the case after step 3)</p></li>
+<li><p>Replace the <code class="docutils literal notranslate"><span class="pre">q-e/FoX/lib/</span></code> folder with the <code class="docutils literal notranslate"><span class="pre">fox/objs/lib</span></code>
+folder</p></li>
+<li><p>Replace the <code class="docutils literal notranslate"><span class="pre">q-e/FoX/finclude/</span></code> folder with the
+<code class="docutils literal notranslate"><span class="pre">fox/objs/finclude</span></code> folder</p></li>
+</ol>
+</li>
+</ol>
+</div>
+<div class="section" id="build-the-python-module">
+<h3>Build the Python Module<a class="headerlink" href="#build-the-python-module" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Change to <code class="docutils literal notranslate"><span class="pre">q-e/PW/src</span></code> and run the
+<code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module_gnu.sh</span></code> script in the
+<code class="docutils literal notranslate"><span class="pre">total/energy</span></code> folder. If the build is successful, a file named
+<code class="docutils literal notranslate"><span class="pre">total_energy.cpython-37m-x86_64-linux-gnu.so</span></code> will be generated.
+It contains the Python module.</p></li>
+</ol>
+</div>
+<div class="section" id="use-the-python-module">
+<h3>Use the Python Module<a class="headerlink" href="#use-the-python-module" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Add the folder that contains
+<code class="docutils literal notranslate"><span class="pre">total_energy.cpython-37m-x86_64-linux-gnu.so</span></code> to your
+<code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code>.</p></li>
+<li><p>Now you can use: <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">total_energy</span></code></p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="using-intel-mkl">
+<h2>Using Intel/MKL<a class="headerlink" href="#using-intel-mkl" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Not tested/supported yet! Please contact the authors to receive the original files from the Sandia
+National Laboratories group.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="tested_systems.html" class="btn btn-neutral float-right" title="Successfully tested on" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="INSTALL_LAMMPS.html" class="btn btn-neutral float-left" title="Setting up LAMMPS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, HZDR.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

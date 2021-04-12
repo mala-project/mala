@@ -1,0 +1,29 @@
+mala.common package
+===================
+
+Submodules
+----------
+
+mala.common.parameters module
+-----------------------------
+
+.. automodule:: mala.common.parameters
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.common.printout module
+---------------------------
+
+.. automodule:: mala.common.printout
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: mala.common
+   :members:
+   :undoc-members:
+   :show-inheritance:

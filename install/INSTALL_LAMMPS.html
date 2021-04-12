@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Setting up LAMMPS &mdash; MALA  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Python bindings to Quantum Espresso" href="INSTALL_TE_QE.html" />
+    <link rel="prev" title="Installation of MALA" href="README.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MALA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/neuralnetworks.html">Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/postprocessing.html">Postprocessing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Installation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">Installation of MALA</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Setting up LAMMPS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installing-lammps">Installing LAMMPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#make-the-lammps-libray-visible">Make the LAMMPS libray visible</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#method-1-links-not-recommended">Method 1 (links, not recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-2-package-recommended">Method 2 (package, recommended)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tested_systems.html">Successfully tested on</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">mala</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#developing-code">Developing code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#issues">Issues</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MALA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Setting up LAMMPS</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/install/INSTALL_LAMMPS.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="setting-up-lammps">
+<h1>Setting up LAMMPS<a class="headerlink" href="#setting-up-lammps" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installing-lammps">
+<h2>Installing LAMMPS<a class="headerlink" href="#installing-lammps" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>checkout <a class="reference external" href="https://github.com/athomps/lammps/tree/compute-grid">https://github.com/athomps/lammps/tree/compute-grid</a></p></li>
+<li><p>Make sure the compute-grid tree is checked out!</p></li>
+<li><p>Compile the LAMMPS shared library with the SNAP package installed</p>
+<ul>
+<li><p>cd into <code class="docutils literal notranslate"><span class="pre">/path/to/lammps/src</span></code> folder of LAMMPS</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yes-snap</span></code></p></li>
+<li><p>(optional: check with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">ps</span></code> that snap was correctly added)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">mode=shlib</span> <span class="pre">mpi</span></code></p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="make-the-lammps-libray-visible">
+<h2>Make the LAMMPS libray visible<a class="headerlink" href="#make-the-lammps-libray-visible" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="method-1-links-not-recommended">
+<h3>Method 1 (links, not recommended)<a class="headerlink" href="#method-1-links-not-recommended" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Make the shared library visible e.g. <code class="docutils literal notranslate"><span class="pre">ln</span> <span class="pre">-s</span> <span class="pre">$LAMMPS/src/liblammps.so</span> <span class="pre">/path/to/repo/src/datahandling</span></code></p></li>
+<li><p>Make the LAMMPS <code class="docutils literal notranslate"><span class="pre">lammps.py</span></code> visible e.g. <code class="docutils literal notranslate"><span class="pre">ln</span> <span class="pre">-s</span> <span class="pre">$LAMMPS/python/lammps.py</span> <span class="pre">/path/to/repo/src/datahandling</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="method-2-package-recommended">
+<h3>Method 2 (package, recommended)<a class="headerlink" href="#method-2-package-recommended" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">install.py</span> <span class="pre">-m</span> <span class="pre">lammps.py</span> <span class="pre">-l</span> <span class="pre">../src/liblammps.so</span> <span class="pre">-v</span> <span class="pre">../src/version.h</span></code></p></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="INSTALL_TE_QE.html" class="btn btn-neutral float-right" title="Python bindings to Quantum Espresso" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="README.html" class="btn btn-neutral float-left" title="Installation of MALA" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, HZDR.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

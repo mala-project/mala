@@ -1,0 +1,33 @@
+mala package
+============
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   mala.common
+   mala.datahandling
+   mala.descriptors
+   mala.network
+   mala.targets
+
+Submodules
+----------
+
+mala.version module
+-------------------
+
+.. automodule:: mala.version
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: mala
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,425 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.network.network &mdash; MALA  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> MALA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/neuralnetworks.html">Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/postprocessing.html">Postprocessing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/README.html">Installation of MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/tested_systems.html">Successfully tested on</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#developing-code">Developing code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#issues">Issues</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MALA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.network.network</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.network.network</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Neural network for MALA.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">functional</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="c1"># Warning is thrown by parameters class</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="Network"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network">[docs]</a><span class="k">class</span> <span class="nc">Network</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Central network class for this framework, based on pytorch.nn.Module.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a Network object, representing a neural network.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : mala.common.parametes.Parameters</span>
+<span class="sd">            Parameters used to create this neural network.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># copy the network params from the input parameter object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">use_horovod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">network</span>
+
+        <span class="c1"># if the user has planted a seed (for comparibility purposes) we</span>
+        <span class="c1"># should use it.</span>
+        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">manual_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">)</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">)</span>
+
+        <span class="c1"># initialize the parent class</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># Mappings for parsing of the activation layers.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation_mappings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;Sigmoid&quot;</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">,</span>
+            <span class="s2">&quot;ReLU&quot;</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
+            <span class="s2">&quot;LeakyReLU&quot;</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">LeakyReLU</span>
+        <span class="p">}</span>
+
+        <span class="c1"># initialize the layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_sizes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;feed-forward&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__initialize_as_feedforward</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported network architecture.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># initialize the loss function</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">loss_function_type</span> <span class="o">==</span> <span class="s2">&quot;mse&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loss_func</span> <span class="o">=</span> <span class="n">functional</span><span class="o">.</span><span class="n">mse_loss</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported loss function.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Once everything is done, we can move the Network on the target</span>
+        <span class="c1"># device.</span>
+        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">use_gpu</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cuda&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__initialize_as_feedforward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize this network as a feed-forward network.&quot;&quot;&quot;</span>
+        <span class="c1"># Check if multiple types of activations were selected or only one</span>
+        <span class="c1"># was passed to be used in the entire network.#</span>
+        <span class="c1"># If multiple layers have been passed, their size needs to be correct.</span>
+
+        <span class="n">use_only_one_activation_type</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">use_only_one_activation_type</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Not enough activation layers provided.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Add the layers.</span>
+        <span class="c1"># As this is a feedforward layer we always add linear layers, and then</span>
+        <span class="c1"># an activation function</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_sizes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_sizes</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">use_only_one_activation_type</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activation_mappings</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span>
+                                       <span class="n">layer_activations</span><span class="p">[</span><span class="mi">0</span><span class="p">]]())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activation_mappings</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span>
+                                       <span class="n">layer_activations</span><span class="p">[</span><span class="n">i</span><span class="p">]]())</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid activation type seleceted.&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Network.forward"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform a forward pass through the network.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        inputs : torch.Tensor</span>
+<span class="sd">            Input array for which the forward pass is to be performed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        predicted_array : torch.Tensor</span>
+<span class="sd">            Predicted outputs of array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Forward propagate data.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;feed-forward&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">inputs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported network architecture.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Network.do_prediction"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network.do_prediction">[docs]</a>    <span class="k">def</span> <span class="nf">do_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict the output values for an input array..</span>
+
+<span class="sd">        Interface to do predictions. The data put in here is assumed to be a</span>
+<span class="sd">        scaled torch.Tensor and in the right units. Be aware that this will</span>
+<span class="sd">        pass the entire array through the network, which might be very</span>
+<span class="sd">        demanding in terms of RAM.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : torch.Tensor</span>
+<span class="sd">            Input array for which the prediction is to be performed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        predicted_array : torch.Tensor</span>
+<span class="sd">            Predicted outputs of array.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">array</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Network.calculate_loss"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network.calculate_loss">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the loss for a predicted output and target.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output : torch.Tensor</span>
+<span class="sd">            Predicted output.</span>
+
+<span class="sd">        target : torch.Tensor.</span>
+<span class="sd">            Actual output.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        loss_val : float</span>
+<span class="sd">            Loss value for output and target.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_func</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span></div>
+
+    <span class="c1"># FIXME: This guarentees downwards compatibility, but it is ugly.</span>
+    <span class="c1">#  Rather enforce the right package versions in the repo.</span>
+<div class="viewcode-block" id="Network.save_network"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network.save_network">[docs]</a>    <span class="k">def</span> <span class="nf">save_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the network.</span>
+
+<span class="sd">        This function serves as an interfaces to pytorchs own saving</span>
+<span class="sd">        functionalities AND possibly own saving needs.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path_to_file : string</span>
+<span class="sd">            Path to the file in which the network should be saved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If we use horovod, only save the network on root.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">path_to_file</span><span class="p">,</span>
+                   <span class="n">_use_new_zipfile_serialization</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Network.load_from_file"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a network from a file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : mala.common.parameters.Parameters</span>
+<span class="sd">            Parameters object with which the network should be created.</span>
+<span class="sd">            Has to be compatible to the network architecture. This is usually</span>
+<span class="sd">            enforced by using the same Parameters object (and saving/loading</span>
+<span class="sd">            it to)</span>
+
+<span class="sd">        path_to_file : string</span>
+<span class="sd">            Path to the file from which the network should be loaded.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        loaded_network : Network</span>
+<span class="sd">            The network that was loaded from the file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">loaded_network</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">loaded_network</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path_to_file</span><span class="p">))</span>
+        <span class="n">loaded_network</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">loaded_network</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, HZDR.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,446 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.descriptors package &mdash; MALA  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mala.network package" href="mala.network.html" />
+    <link rel="prev" title="mala.datahandling package" href="mala.datahandling.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MALA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/neuralnetworks.html">Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/postprocessing.html">Postprocessing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install/README.html">Installation of MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/tested_systems.html">Successfully tested on</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">mala</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="mala.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mala.common.html">mala.common package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.html">mala.datahandling package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">mala.descriptors package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.html">mala.network package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.html">mala.targets package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.html#module-mala.version">mala.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.html#module-mala">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#developing-code">Developing code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#issues">Issues</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MALA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">mala</a> &raquo;</li>
+        
+          <li><a href="mala.html">mala package</a> &raquo;</li>
+        
+      <li>mala.descriptors package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/mala.descriptors.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mala-descriptors-package">
+<h1>mala.descriptors package<a class="headerlink" href="#mala-descriptors-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mala.descriptors.descriptor_base">
+<span id="mala-descriptors-descriptor-base-module"></span><h2>mala.descriptors.descriptor_base module<a class="headerlink" href="#module-mala.descriptors.descriptor_base" title="Permalink to this headline">¶</a></h2>
+<p>Base class for all descriptor calculators.</p>
+<dl class="py class">
+<dt id="mala.descriptors.descriptor_base.DescriptorBase">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.descriptors.descriptor_base.</span></code><code class="sig-name descname"><span class="pre">DescriptorBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_base.html#DescriptorBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for all descriptors available in MALA.</p>
+<p>Descriptors encode the atomic fingerprint of a DFT calculation.</p>
+<dl class="py method">
+<dt id="mala.descriptors.descriptor_base.DescriptorBase.backconvert_units">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">backconvert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_base.html#DescriptorBase.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.backconvert_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert descriptors from MALA units into a specified unit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>numpy.array</em>) – Data in MALA units.</p></li>
+<li><p><strong>out_units</strong> (<em>string</em>) – Desired units of output array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>converted_array</strong> – Data in out_units.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.descriptors.descriptor_base.DescriptorBase.convert_units">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">convert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_base.html#DescriptorBase.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.convert_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert descriptors from a specified unit into the ones used in MALA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>numpy.array</em>) – Data for which the units should be converted.</p></li>
+<li><p><strong>in_units</strong> (<em>string</em>) – Units of array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>converted_array</strong> – Data in MALA units.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.descriptors.descriptor_interface">
+<span id="mala-descriptors-descriptor-interface-module"></span><h2>mala.descriptors.descriptor_interface module<a class="headerlink" href="#module-mala.descriptors.descriptor_interface" title="Permalink to this headline">¶</a></h2>
+<p>Interface functions to automatically get descriptors.</p>
+<dl class="py function">
+<dt id="mala.descriptors.descriptor_interface.DescriptorInterface">
+<code class="sig-prename descclassname"><span class="pre">mala.descriptors.descriptor_interface.</span></code><code class="sig-name descname"><span class="pre">DescriptorInterface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_interface.html#DescriptorInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_interface.DescriptorInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a DescriptorBase object that adheres to the parameters provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters for which a DescriptorBase object is desired.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.descriptors.lammps_utils">
+<span id="mala-descriptors-lammps-utils-module"></span><h2>mala.descriptors.lammps_utils module<a class="headerlink" href="#module-mala.descriptors.lammps_utils" title="Permalink to this headline">¶</a></h2>
+<p>Collection of useful functions for working with LAMMPS.</p>
+<p>Courtesy of the Sandia code. We have to talk about licensing.</p>
+<dl class="py function">
+<dt id="mala.descriptors.lammps_utils.extract_compute_np">
+<code class="sig-prename descclassname"><span class="pre">mala.descriptors.lammps_utils.</span></code><code class="sig-name descname"><span class="pre">extract_compute_np</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/lammps_utils.html#extract_compute_np"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.lammps_utils.extract_compute_np" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a lammps compute to a numpy array.</p>
+<p>Assumes the compute returns a floating point numbers.
+Note that the result is a view into the original memory.
+If the result type is 0 (scalar) then conversion to numpy is
+skipped and a python float is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lmp</strong> (<em>lammps.lammps</em>) – The LAMMPS object from which data is supposed to be extracted.</p></li>
+<li><p><strong>name</strong> (<em>string</em>) – Name of the LAMMPS calculation.</p></li>
+<li><p><strong>compute_type</strong> – Compute type of the LAMMPS calculation.</p></li>
+<li><p><strong>result_type</strong> – Result type of the LAMMPS calculation.</p></li>
+<li><p><strong>array_shape</strong> – Array shape of the LAMMPS calculation.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.descriptors.lammps_utils.set_cmdlinevars">
+<code class="sig-prename descclassname"><span class="pre">mala.descriptors.lammps_utils.</span></code><code class="sig-name descname"><span class="pre">set_cmdlinevars</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmdargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argdict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/lammps_utils.html#set_cmdlinevars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.lammps_utils.set_cmdlinevars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a dicitionary of LAMMPS arguments in a command line argument string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmdargs</strong> (<em>list</em>) – Command line argument string. Will be mutated by this function.</p></li>
+<li><p><strong>argdict</strong> (<em>dict</em>) – Dictionary to be added to LAMMPS command line argument string.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>cmdargs</strong> – New command line argument string.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.descriptors.snap">
+<span id="mala-descriptors-snap-module"></span><h2>mala.descriptors.snap module<a class="headerlink" href="#module-mala.descriptors.snap" title="Permalink to this headline">¶</a></h2>
+<p>SNAP descriptor class.</p>
+<dl class="py class">
+<dt id="mala.descriptors.snap.SNAP">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.descriptors.snap.</span></code><code class="sig-name descname"><span class="pre">SNAP</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/snap.html#SNAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.snap.SNAP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.descriptors.descriptor_base.DescriptorBase</span></code></a></p>
+<p>Class for calculation and parsing of SNAP descriptors.</p>
+<dl class="py method">
+<dt id="mala.descriptors.snap.SNAP.backconvert_units">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">backconvert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/snap.html#SNAP.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.snap.SNAP.backconvert_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the units of a SNAP descriptor.</p>
+<p>Since these do not really have units this function does nothing yet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>numpy.array</em>) – Data in MALA units.</p></li>
+<li><p><strong>out_units</strong> (<em>string</em>) – Desired units of output array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>converted_array</strong> – Data in out_units.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.descriptors.snap.SNAP.calculate_from_qe_out">
+<code class="sig-name descname"><span class="pre">calculate_from_qe_out</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/snap.html#SNAP.calculate_from_qe_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.snap.SNAP.calculate_from_qe_out" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the SNAP descriptors based on a Quantum Espresso outfile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qe_out_file</strong> (<em>string</em>) – Name of Quantum Espresso output file for snapshot.</p></li>
+<li><p><strong>qe_out_directory</strong> (<em>string</em>) – Path to Quantum Espresso output file for snapshot.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>snap_descriptors</strong> – Numpy array containing the SNAP descriptors with the dimension
+(x,y,z,snap_dimension)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.descriptors.snap.SNAP.convert_units">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">convert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/snap.html#SNAP.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.snap.SNAP.convert_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the units of a SNAP descriptor.</p>
+<p>Since these do not really have units this function does nothing yet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>numpy.array</em>) – Data for which the units should be converted.</p></li>
+<li><p><strong>in_units</strong> (<em>string</em>) – Units of array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>converted_array</strong> – Data in MALA units.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.descriptors">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mala.descriptors" title="Permalink to this headline">¶</a></h2>
+<p>Contains classes for calculating/parsing descriptors.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mala.network.html" class="btn btn-neutral float-right" title="mala.network package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.datahandling.html" class="btn btn-neutral float-left" title="mala.datahandling package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, HZDR.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

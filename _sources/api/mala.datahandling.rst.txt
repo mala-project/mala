@@ -1,0 +1,53 @@
+mala.datahandling package
+=========================
+
+Submodules
+----------
+
+mala.datahandling.data\_converter module
+----------------------------------------
+
+.. automodule:: mala.datahandling.data_converter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.datahandling.data\_handler module
+--------------------------------------
+
+.. automodule:: mala.datahandling.data_handler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.datahandling.data\_scaler module
+-------------------------------------
+
+.. automodule:: mala.datahandling.data_scaler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.datahandling.lazy\_load\_dataset module
+--------------------------------------------
+
+.. automodule:: mala.datahandling.lazy_load_dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.datahandling.snapshot module
+---------------------------------
+
+.. automodule:: mala.datahandling.snapshot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: mala.datahandling
+   :members:
+   :undoc-members:
+   :show-inheritance:

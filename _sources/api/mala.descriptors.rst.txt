@@ -1,0 +1,45 @@
+mala.descriptors package
+========================
+
+Submodules
+----------
+
+mala.descriptors.descriptor\_base module
+----------------------------------------
+
+.. automodule:: mala.descriptors.descriptor_base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.descriptors.descriptor\_interface module
+---------------------------------------------
+
+.. automodule:: mala.descriptors.descriptor_interface
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.descriptors.lammps\_utils module
+-------------------------------------
+
+.. automodule:: mala.descriptors.lammps_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.descriptors.snap module
+----------------------------
+
+.. automodule:: mala.descriptors.snap
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: mala.descriptors
+   :members:
+   :undoc-members:
+   :show-inheritance:

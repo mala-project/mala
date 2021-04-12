@@ -1,0 +1,745 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.datahandling package &mdash; MALA  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mala.descriptors package" href="mala.descriptors.html" />
+    <link rel="prev" title="mala.common package" href="mala.common.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MALA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/neuralnetworks.html">Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/postprocessing.html">Postprocessing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install/README.html">Installation of MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/tested_systems.html">Successfully tested on</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">mala</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="mala.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mala.common.html">mala.common package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">mala.datahandling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.html">mala.descriptors package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.html">mala.network package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.html">mala.targets package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.html#module-mala.version">mala.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.html#module-mala">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#developing-code">Developing code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#issues">Issues</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MALA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">mala</a> &raquo;</li>
+        
+          <li><a href="mala.html">mala package</a> &raquo;</li>
+        
+      <li>mala.datahandling package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/mala.datahandling.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mala-datahandling-package">
+<h1>mala.datahandling package<a class="headerlink" href="#mala-datahandling-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mala.datahandling.data_converter">
+<span id="mala-datahandling-data-converter-module"></span><h2>mala.datahandling.data_converter module<a class="headerlink" href="#module-mala.datahandling.data_converter" title="Permalink to this headline">¶</a></h2>
+<p>DataConverter class for converting snapshots into numpy arrays.</p>
+<dl class="py class">
+<dt id="mala.datahandling.data_converter.DataConverter">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.datahandling.data_converter.</span></code><code class="sig-name descname"><span class="pre">DataConverter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Converts raw snapshots (direct DFT outputs) into numpy arrays for MALA.</p>
+<p>These snapshots can be e.g. Quantum Espresso results.</p>
+<dl class="py attribute">
+<dt id="mala.datahandling.data_converter.DataConverter.descriptor_calculator">
+<code class="sig-name descname"><span class="pre">descriptor_calculator</span></code><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.descriptor_calculator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Descriptor calculator used for parsing/converting fingerprint data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase">mala.descriptors.descriptor_base.DescriptorBase</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.datahandling.data_converter.DataConverter.target_calculator">
+<code class="sig-name descname"><span class="pre">target_calculator</span></code><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.target_calculator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Target calculator used for parsing/converting target data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.targets.html#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase">mala.targets.target_base.TargetBase</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube">
+<code class="sig-name descname"><span class="pre">add_snapshot_qeout_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_naming_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_qeout_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a Quantum Espresso snapshot to the list of conversion list.</p>
+<p>Please not that a Quantum Espresso snapshot consists of:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a Quantum Espresso output file for a self-consistent calculation.</p></li>
+<li><p>multiple .cube files containing the LDOS</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qe_out_file</strong> (<em>string</em>) – Name of Quantum Espresso output file for snapshot.</p></li>
+<li><p><strong>qe_out_directory</strong> (<em>string</em>) – Path to Quantum Espresso output file for snapshot.</p></li>
+<li><p><strong>cube_naming_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files.</p></li>
+<li><p><strong>cube_directory</strong> (<em>string</em>) – Directory containing the LDOS .cube files.</p></li>
+<li><p><strong>input_units</strong> (<em>string</em>) – Unit of the input data.</p></li>
+<li><p><strong>output_units</strong> (<em>string</em>) – Unit of the output data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_converter.DataConverter.convert_single_snapshot">
+<code class="sig-name descname"><span class="pre">convert_single_snapshot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_single_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_single_snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert single snapshot from the conversion lists.</p>
+<p>Returns the preprocessed data as numpy array, which might be
+beneficial during testing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>snapshot_number</strong> (<em>integer</em>) – Position of the desired snapshot in the snapshot list.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>inputs</strong> (<em>numpy.array</em>) – Numpy array containing the preprocessed inputs.</p></li>
+<li><p><strong>outputs</strong> (<em>numpy.array</em>) – Numpy array containing the preprocessed outputs.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_converter.DataConverter.convert_snapshots">
+<code class="sig-name descname"><span class="pre">convert_snapshots</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ELEM_snapshot*'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_snapshots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the snapshots in the list to numpy arrays.</p>
+<p>These can then be used by MALA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>save_path</strong> (<em>string</em>) – Directory in which the snapshots will be saved.</p></li>
+<li><p><strong>naming_scheme</strong> (<em>string</em>) – String detailing the naming scheme for the snapshots. * symbols
+will be replaced with the snapshot number.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.datahandling.data_handler">
+<span id="mala-datahandling-data-handler-module"></span><h2>mala.datahandling.data_handler module<a class="headerlink" href="#module-mala.datahandling.data_handler" title="Permalink to this headline">¶</a></h2>
+<p>DataHandler class that loads and scales data.</p>
+<dl class="py class">
+<dt id="mala.datahandling.data_handler.DataHandler">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.datahandling.data_handler.</span></code><code class="sig-name descname"><span class="pre">DataHandler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_data_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_data_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Loads and scales dara. Can only process numpy arrays at the moment.</p>
+<p>Data that is not in a numpy array can be converted using the DataConverter
+class.</p>
+<dl class="py method">
+<dt id="mala.datahandling.data_handler.DataHandler.add_snapshot">
+<code class="sig-name descname"><span class="pre">add_snapshot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_npy_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_npy_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculation_output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.add_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.add_snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a snapshot to the data pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_npy_file</strong> (<em>string</em>) – File with saved numpy input array.</p></li>
+<li><p><strong>input_npy_directory</strong> (<em>string</em>) – Directory containing input_npy_directory.</p></li>
+<li><p><strong>output_npy_file</strong> (<em>string</em>) – File with saved numpy output array.</p></li>
+<li><p><strong>output_npy_directory</strong> (<em>string</em>) – Directory containing output_npy_file.</p></li>
+<li><p><strong>input_units</strong> (<em>string</em>) – Units of input data. See descriptor classes to see which units are
+supported.</p></li>
+<li><p><strong>output_units</strong> (<em>string</em>) – Units of output data. See target classes to see which units are
+supported.</p></li>
+<li><p><strong>calculation_output_file</strong> (<em>string</em>) – File with the output of the original snapshot calculation. This is
+only needed when testing multiple snapshots.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_handler.DataHandler.clear_data">
+<code class="sig-name descname"><span class="pre">clear_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.clear_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.clear_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the entire data pipeline.</p>
+<p>Useful when doing multiple investigations in the same python file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_handler.DataHandler.get_input_dimension">
+<code class="sig-name descname"><span class="pre">get_input_dimension</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_input_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_input_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the dimension of the input vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>input_dimension</strong> – Dimension of the input vector.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_handler.DataHandler.get_output_dimension">
+<code class="sig-name descname"><span class="pre">get_output_dimension</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_output_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_output_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the dimension of the output vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>output_dimension</strong> – Dimension of the output vector.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output">
+<code class="sig-name descname"><span class="pre">get_snapshot_calculation_output</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_snapshot_calculation_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the path to the output file for a specific snapshot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>snapshot_number</strong> (<em>int</em>) – Snapshot for which the calculation output should be returned.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>calculation_output</strong> – Path to the calculation output for this snapshot.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_handler.DataHandler.mix_datasets">
+<code class="sig-name descname"><span class="pre">mix_datasets</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.mix_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.mix_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>For lazily-loaded data sets, the snapshot ordering is (re-)mixed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_handler.DataHandler.prepare_data">
+<code class="sig-name descname"><span class="pre">prepare_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reparametrize_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.prepare_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.prepare_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare the data to be used in a training process.</p>
+<p>This includes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Checking snapshots for consistency</p></li>
+<li><p>Parametrizing the DataScalers (if desired)</p></li>
+<li><p>Building DataSet objects.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>reparametrize_scaler</strong> (<em>bool</em>) – If True (default), the DataScalers are parametrized based on the
+training data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_handler.DataHandler.prepare_for_testing">
+<code class="sig-name descname"><span class="pre">prepare_for_testing</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.prepare_for_testing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.prepare_for_testing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare DataHandler for usage within Tester class.</p>
+<p>Ensures that lazily-loaded data sets do not perform unnecessary I/O
+operations. Only needed in Tester class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor">
+<code class="sig-name descname"><span class="pre">raw_numpy_to_converted_scaled_tensor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numpy_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert3Dto1D</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.raw_numpy_to_converted_scaled_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a raw numpy array into a scaled torch tensor.</p>
+<p>This tensor will also be in the right units, i.e. a tensor that can
+simply be put into a MALA network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numpy_array</strong> (<em>np.array</em>) – Array that is to be converted.</p></li>
+<li><p><strong>data_type</strong> (<em>string</em>) – Either “in” or “out”, depending if input or output data is
+processed.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units of the data that is processed.</p></li>
+<li><p><strong>convert3Dto1D</strong> (<em>bool</em>) – If True (default: False), then a (x,y,z,dim) array is transformed
+into a (x*y*z,dim) array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>converted_tensor</strong> – The fully converted and scaled tensor.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging">
+<code class="sig-name descname"><span class="pre">resize_snapshots_for_debugging</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'test_Al_debug_2k_nr*.in'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'test_Al_debug_2k_nr*.out'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.resize_snapshots_for_debugging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resize all snapsshot in the list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>string</em>) – Directory to which the resized snapshots should be saved.</p></li>
+<li><p><strong>naming_scheme_input</strong> (<em>string</em>) – Naming scheme for the resulting input numpy files.</p></li>
+<li><p><strong>naming_scheme_output</strong> (<em>string</em>) – Naming scheme for the resulting output numpy files.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.datahandling.data_handler.DataHandler.test_data_inputs">
+<code class="sig-name descname"><span class="pre">test_data_inputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.test_data_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Torch tensor holding all scaled testing data inputs.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.datahandling.data_handler.DataHandler.test_data_outputs">
+<code class="sig-name descname"><span class="pre">test_data_outputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.test_data_outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Torch tensor holding all scaled testing data output.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.datahandling.data_handler.DataHandler.training_data_inputs">
+<code class="sig-name descname"><span class="pre">training_data_inputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.training_data_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Torch tensor holding all scaled training data inputs.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.datahandling.data_handler.DataHandler.training_data_outputs">
+<code class="sig-name descname"><span class="pre">training_data_outputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.training_data_outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Torch tensor holding all scaled training data output.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.datahandling.data_handler.DataHandler.validation_data_inputs">
+<code class="sig-name descname"><span class="pre">validation_data_inputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.validation_data_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Torch tensor holding all scaled validation data inputs.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.datahandling.data_handler.DataHandler.validation_data_outputs">
+<code class="sig-name descname"><span class="pre">validation_data_outputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.validation_data_outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Torch tensor holding all scaled validation data output.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.datahandling.data_scaler">
+<span id="mala-datahandling-data-scaler-module"></span><h2>mala.datahandling.data_scaler module<a class="headerlink" href="#module-mala.datahandling.data_scaler" title="Permalink to this headline">¶</a></h2>
+<p>DataScaler class for scaling DFT data.</p>
+<dl class="py class">
+<dt id="mala.datahandling.data_scaler.DataScaler">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.datahandling.data_scaler.</span></code><code class="sig-name descname"><span class="pre">DataScaler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typestring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_horovod</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Scales input and output data.</p>
+<p>Sort of emulates the functionality of the scikit-learn library, but by
+implementing the class by ourselves we have more freedom.</p>
+<dl class="py method">
+<dt id="mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting">
+<code class="sig-name descname"><span class="pre">finish_incremental_fitting</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.finish_incremental_fitting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicate that all data has been added to the incremental calculation.</p>
+<p>This is necessary for lazy loading.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_scaler.DataScaler.fit">
+<code class="sig-name descname"><span class="pre">fit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the quantities necessary for scaling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unscaled</strong> (<em>torch.Tensor</em>) – Data that on which the scaling will be calculated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_scaler.DataScaler.incremental_fit">
+<code class="sig-name descname"><span class="pre">incremental_fit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.incremental_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.incremental_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add data to the incremental calculation of scaling parameters.</p>
+<p>This is necessary for lazy loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unscaled</strong> (<em>torch.Tensor</em>) – Data that is to be added to the fit.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_scaler.DataScaler.inverse_transform">
+<code class="sig-name descname"><span class="pre">inverse_transform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaled</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.inverse_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.inverse_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform data from scaled to unscaled.</p>
+<p>Unscaled means real world data, scaled means data as is used in
+the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scaled</strong> (<em>torch.Tensor</em>) – Scaled data.</p></li>
+<li><p><strong>as_numpy</strong> (<em>bool</em>) – If True, a numpy array is returned, otherwsie</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>unscaled</strong> – Real world data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_scaler.DataScaler.load_from_file">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.load_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a saved Scaler object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>string</em>) – File from which the parameters will be read.</p></li>
+<li><p><strong>save_format</strong> – File format which was used for saving.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>data_scaler</strong> – DataScaler which was read from the file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler">DataScaler</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_scaler.DataScaler.save">
+<code class="sig-name descname"><span class="pre">save</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the Scaler object so that it can be accessed again later.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>string</em>) – File in which the parameters will be saved.</p></li>
+<li><p><strong>save_format</strong> – File format which will be used for saving.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_scaler.DataScaler.start_incremental_fitting">
+<code class="sig-name descname"><span class="pre">start_incremental_fitting</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.start_incremental_fitting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.start_incremental_fitting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the incremental calculation of scaling parameters.</p>
+<p>This is necessary for lazy loading.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.data_scaler.DataScaler.transform">
+<code class="sig-name descname"><span class="pre">transform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform data from unscaled to scaled.</p>
+<p>Unscaled means real world data, scaled means data as is used in
+the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unscaled</strong> (<em>torch.Tensor</em>) – Real world data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>scaled</strong> – Scaled data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.datahandling.lazy_load_dataset">
+<span id="mala-datahandling-lazy-load-dataset-module"></span><h2>mala.datahandling.lazy_load_dataset module<a class="headerlink" href="#module-mala.datahandling.lazy_load_dataset" title="Permalink to this headline">¶</a></h2>
+<p>DataSet for lazy-loading.</p>
+<dl class="py class">
+<dt id="mala.datahandling.lazy_load_dataset.LazyLoadDataset">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.datahandling.lazy_load_dataset.</span></code><code class="sig-name descname"><span class="pre">LazyLoadDataset</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.</span></code></p>
+<p>DataSet class for lazy loading.</p>
+<p>Only loads snapshots in the memory that are currently being processed.
+Uses a “caching” approach of keeping the last used snapshot in memory,
+until values from a new ones are used. Therefore, shuffling at DataSampler
+/ DataLoader level is discouraged to the point that it was disabled.
+Instead, we mix the snapshot load order here ot have some sort of mixing
+at all.</p>
+<dl class="py method">
+<dt id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">
+<code class="sig-name descname"><span class="pre">add_snapshot_to_dataset</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#mala.datahandling.snapshot.Snapshot" title="mala.datahandling.snapshot.Snapshot"><span class="pre">mala.datahandling.snapshot.Snapshot</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.add_snapshot_to_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Addsa snapshot to a DataSet.</p>
+<p>Afterwards, the DataSet can and will load this snapshot as needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>snapshot</strong> (<a class="reference internal" href="#mala.datahandling.snapshot.Snapshot" title="mala.datahandling.snapshot.Snapshot"><em>mala.datahandling.snapshot.Snapshot</em></a>) – Snapshot that is to be added to this DataSet.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data">
+<code class="sig-name descname"><span class="pre">get_new_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.get_new_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a new snapshot into RAM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_index</strong> (<em>i</em>) – File to be read.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets">
+<code class="sig-name descname"><span class="pre">mix_datasets</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset.html#LazyLoadDataset.mix_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mix the order of the snapshots.</p>
+<p>With this, there can be some variance between runs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.return_outputs_directly">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">return_outputs_directly</span></code><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.return_outputs_directly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether outputs are actually transformed.</p>
+<p>Has to be False for training. In the testing case,
+Numerical errors are smaller if set to True.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.datahandling.snapshot">
+<span id="mala-datahandling-snapshot-module"></span><h2>mala.datahandling.snapshot module<a class="headerlink" href="#module-mala.datahandling.snapshot" title="Permalink to this headline">¶</a></h2>
+<p>Snapshot class.</p>
+<dl class="py class">
+<dt id="mala.datahandling.snapshot.Snapshot">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.datahandling.snapshot.</span></code><code class="sig-name descname"><span class="pre">Snapshot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_npy_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_npy_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculation_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/snapshot.html#Snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents a snapshot on a hard drive.</p>
+<p>A snapshot consists of numpy arrays for input/output data and an
+optional DFT calculation output, needed for post-processing.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.datahandling">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mala.datahandling" title="Permalink to this headline">¶</a></h2>
+<p>All functions for handling data.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mala.descriptors.html" class="btn btn-neutral float-right" title="mala.descriptors package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.common.html" class="btn btn-neutral float-left" title="mala.common package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, HZDR.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

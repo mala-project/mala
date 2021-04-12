@@ -1,0 +1,543 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.targets.cube_parser &mdash; MALA  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> MALA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/neuralnetworks.html">Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/postprocessing.html">Postprocessing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/README.html">Installation of MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/tested_systems.html">Successfully tested on</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#developing-code">Developing code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#issues">Issues</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MALA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.targets.cube_parser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.targets.cube_parser</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Cube parser, taken from cubetools (see below).</span>
+
+<span class="sd">#------------------------------------------------------------------------------</span>
+<span class="sd"># Module: cubetools</span>
+<span class="sd">#------------------------------------------------------------------------------</span>
+<span class="sd">#</span>
+<span class="sd"># Description:</span>
+<span class="sd"># Module to work with Gaussian cube format files</span>
+<span class="sd"># (see http://paulbourke.net/dataformats/cube/)</span>
+<span class="sd">#</span>
+<span class="sd">#------------------------------------------------------------------------------</span>
+<span class="sd">#</span>
+<span class="sd"># What does it do:</span>
+<span class="sd"># * Read/write cube files to/from numpy arrays (dtype=float*)</span>
+<span class="sd"># * Read/write pairse of cube files to/from numpy arrays (dtype=complex*)</span>
+<span class="sd"># * Provides a CubeFile object, to be used when cubefiles with </span>
+<span class="sd">#   constant and static data is required. It simulates the readline method</span>
+<span class="sd">#   of a file object with a cube file opened, without creating a file</span>
+<span class="sd">#</span>
+<span class="sd">#------------------------------------------------------------------------------</span>
+<span class="sd">#</span>
+<span class="sd"># Dependency: numpy</span>
+<span class="sd">#</span>
+<span class="sd">#------------------------------------------------------------------------------</span>
+<span class="sd">#</span>
+<span class="sd"># Author: P. R. Vaidyanathan (aditya95sriram &lt;at&gt; gmail &lt;dot&gt; com)</span>
+<span class="sd"># Date: 25th June 2017</span>
+<span class="sd">#</span>
+<span class="sd">#------------------------------------------------------------------------------</span>
+<span class="sd">#</span>
+<span class="sd"># MIT License</span>
+<span class="sd"># </span>
+<span class="sd"># Copyright (c) 2019 P. R. Vaidyanathan</span>
+<span class="sd"># </span>
+<span class="sd"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="sd"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="sd"># in the Software without restriction, including without limitation the rights</span>
+<span class="sd"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="sd"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="sd"># furnished to do so, subject to the following conditions:</span>
+<span class="sd"># </span>
+<span class="sd"># The above copyright notice and this permission notice shall be included in</span>
+<span class="sd"># all copies or substantial portions of the Software.</span>
+<span class="sd"># </span>
+<span class="sd"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="sd"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="sd"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="sd"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="sd"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="sd"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="sd"># SOFTWARE.</span>
+<span class="sd">#</span>
+<span class="sd">#------------------------------------------------------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">DEBUGMODE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">DEBUGMODE</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">_debug</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">DEBUGMODE</span>
+<span class="c1">#    if DEBUGMODE:</span>
+<span class="c1">#        print &quot; &quot;.join(map(str, args))</span>
+
+
+<div class="viewcode-block" id="CubeFile"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.CubeFile">[docs]</a><span class="k">class</span> <span class="nc">CubeFile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Object which mimics a cube file opened as a file object.</span>
+
+<span class="sd">    Done by returning output in the correct format, matching the</span>
+<span class="sd">    metadata of the source cube file and replacing volumetric</span>
+<span class="sd">    data with static data provided as arg to the constructor. </span>
+<span class="sd">    Doesn&#39;t copy atoms metadata, retains number of atoms, but</span>
+<span class="sd">    returns dummy atoms</span>
+<span class="sd">    Mimics file object&#39;s readline method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcname</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create cube file object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        srcname: string</span>
+<span class="sd">            source file to copy metadata from</span>
+
+<span class="sd">        const: int</span>
+<span class="sd">            numeric value to return instead of volumetric data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span> <span class="o">=</span> <span class="mi">0</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">const</span> <span class="o">=</span> <span class="n">const</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">src</span> <span class="o">=</span> <span class="n">src</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">srcname</span><span class="p">)</span>
+        <span class="c1"># comments</span>
+        <span class="n">src</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">src</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">_debug</span><span class="p">(</span><span class="n">srcname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot; Cubefile created by cubetools.py</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> 
+                      <span class="s2">&quot;  source: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">srcname</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>  <span class="c1"># read natm and origin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">natm</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># read cube dim and vectors along 3 axes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nz</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                                     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remvals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remrows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ny</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natm</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:^ 8d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{0:&lt; 12.6f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="mi">4</span>
+                              <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Close Cube file.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CubeFile.readline"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.CubeFile.readline">[docs]</a>    <span class="k">def</span> <span class="nf">readline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read next line.</span>
+
+<span class="sd">        Mimic readline method of file object with cube file opened.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        retval : string</span>
+<span class="sd">            Current line.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">retval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">remrows</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remvals</span> <span class="o">&lt;=</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="n">nval</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remvals</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remrows</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remvals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nz</span> 
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nval</span> <span class="o">=</span> <span class="mi">6</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remvals</span> <span class="o">-=</span> <span class="n">nval</span>
+            <span class="k">return</span> <span class="s2">&quot; </span><span class="si">{0: .5E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">const</span><span class="p">)</span><span class="o">*</span><span class="n">nval</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">retval</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read a line from cube file.</span>
+
+<span class="sd">    First field is an int and the remaining fields are floats.</span>
+<span class="sd">    </span>
+<span class="sd">    params:</span>
+<span class="sd">        cube:</span>
+<span class="sd">    </span>
+<span class="sd">    returns: (int, list&lt;float&gt;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">cube</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+
+<span class="k">def</span> <span class="nf">_putline</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a line to be written to a cube file.</span>
+
+<span class="sd">    The first field is an int and the remaining fields are floats.</span>
+<span class="sd">    </span>
+<span class="sd">    params:</span>
+<span class="sd">        *args: first arg is formatted as int and remaining as floats</span>
+<span class="sd">    </span>
+<span class="sd">    returns: formatted string to be written to file with trailing newline</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0:^ 8d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:&lt; 12.6f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">return</span> <span class="n">s</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+
+<div class="viewcode-block" id="read_cube"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.read_cube">[docs]</a><span class="k">def</span> <span class="nf">read_cube</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read cube file into numpy array.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fname : string</span>
+<span class="sd">        filename of cube file.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : numpy.array</span>
+<span class="sd">        Data from cube file.</span>
+
+<span class="sd">    meta : dict</span>
+<span class="sd">        Meta data from cube file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cube</span><span class="p">:</span>
+        <span class="c1"># ignore comments</span>
+        <span class="n">cube</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">cube</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">natm</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;org&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
+        <span class="n">nx</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;xvec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
+        <span class="n">ny</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;yvec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
+        <span class="n">nz</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;zvec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">_getline</span><span class="p">(</span><span class="n">cube</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">natm</span><span class="p">)]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span><span class="p">))</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cube</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">meta</span></div>
+
+
+<div class="viewcode-block" id="read_imcube"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.read_imcube">[docs]</a><span class="k">def</span> <span class="nf">read_imcube</span><span class="p">(</span><span class="n">rfname</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read in two cube files at once.</span>
+
+<span class="sd">    One contains the real part and the other contains the</span>
+<span class="sd">    imag part. If only one filename given, other filename is inferred.</span>
+<span class="sd">    </span>
+<span class="sd">    params:</span>
+
+<span class="sd">    returns: np.array (real part + j*imag part)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rfname: string</span>
+<span class="sd">        filename of cube file of real part</span>
+
+<span class="sd">    ifname: string</span>
+<span class="sd">        optional, filename of cube file of imag part</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : numpy.array</span>
+<span class="sd">        Data from cube file.</span>
+
+<span class="sd">    meta : dict</span>
+<span class="sd">        Meta data from cube file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ifname</span> <span class="o">=</span> <span class="n">ifname</span> <span class="ow">or</span> <span class="n">rfname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;real&#39;</span><span class="p">,</span> <span class="s1">&#39;imag&#39;</span><span class="p">)</span>
+    <span class="n">_debug</span><span class="p">(</span><span class="s2">&quot;reading from files&quot;</span><span class="p">,</span> <span class="n">rfname</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="n">ifname</span><span class="p">)</span>
+    <span class="n">re</span><span class="p">,</span> <span class="n">im</span> <span class="o">=</span> <span class="n">read_cube</span><span class="p">(</span><span class="n">rfname</span><span class="p">),</span> <span class="n">read_cube</span><span class="p">(</span><span class="n">ifname</span><span class="p">)</span>
+    <span class="n">fin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">re</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;complex128&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">re</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">im</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">_debug</span><span class="p">(</span><span class="s2">&quot;warning: meta data mismatch, real part metadata retained&quot;</span><span class="p">)</span>
+    <span class="n">fin</span> <span class="o">+=</span> <span class="n">re</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+    <span class="n">fin</span> <span class="o">+=</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">im</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">fin</span><span class="p">,</span> <span class="n">re</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="write_cube"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.write_cube">[docs]</a><span class="k">def</span> <span class="nf">write_cube</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write volumetric data to cube file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: numpy.array</span>
+<span class="sd">        volumetric data consisting real values</span>
+
+<span class="sd">    meta: dict</span>
+<span class="sd">        dict containing metadata with following keys:</span>
+
+<span class="sd">            - atoms: list of atoms in the form (mass, [position])</span>
+<span class="sd">            - org: origin</span>
+<span class="sd">            - xvec,yvec,zvec: lattice vector basis</span>
+
+<span class="sd">    fname: string</span>
+<span class="sd">        filename of cubefile (existing files overwritten)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cube</span><span class="p">:</span>
+        <span class="c1"># first two lines are comments</span>
+        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; Cubefile created by cubetools.py</span><span class="se">\n</span><span class="s2">  source: none</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">natm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">])</span>
+        <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">natm</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;org&#39;</span><span class="p">]))</span>  <span class="c1"># 3rd line #atoms and origin</span>
+        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;xvec&#39;</span><span class="p">]))</span>
+        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;yvec&#39;</span><span class="p">]))</span>
+        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">nz</span><span class="p">,</span> <span class="o">*</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;zvec&#39;</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">atom_mass</span><span class="p">,</span> <span class="n">atom_pos</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">]:</span>
+            <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_putline</span><span class="p">(</span><span class="n">atom_mass</span><span class="p">,</span> <span class="o">*</span><span class="n">atom_pos</span><span class="p">))</span>    <span class="c1"># skip the newline</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nz</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="ow">or</span> <span class="n">j</span> <span class="ow">or</span> <span class="n">k</span><span class="p">)</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">%</span> <span class="mi">6</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">{0: .5E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="write_imcube"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.write_imcube">[docs]</a><span class="k">def</span> <span class="nf">write_imcube</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">rfname</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write two cube files from compley valued volumetric data.</span>
+
+<span class="sd">    One for the real part and one for the imaginary part.</span>
+<span class="sd">    Data about atoms, origin and lattice vectors are kept same for both.</span>
+<span class="sd">    If only one filename given, other filename is inferred.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: numpy.array</span>
+<span class="sd">        volumetric data consisting complex values</span>
+
+<span class="sd">    meta: dict</span>
+<span class="sd">        dict containing metadata with following keys:</span>
+
+<span class="sd">            - atoms: list of atoms in the form (mass, [position])</span>
+<span class="sd">            - org: origin</span>
+<span class="sd">            - xvec,yvec,zvec: lattice vector basis</span>
+
+<span class="sd">    rfname: string</span>
+<span class="sd">        filename of cube file containing real part</span>
+
+<span class="sd">    ifname: string</span>
+<span class="sd">        optional, filename of cube file containing imag part</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ifname</span> <span class="o">=</span> <span class="n">ifname</span> <span class="ow">or</span> <span class="n">rfname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;real&#39;</span><span class="p">,</span> <span class="s1">&#39;imag&#39;</span><span class="p">)</span>
+    <span class="n">_debug</span><span class="p">(</span><span class="s2">&quot;writing data to files&quot;</span><span class="p">,</span> <span class="n">rfname</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="n">ifname</span><span class="p">)</span>
+    <span class="n">write_cube</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">rfname</span><span class="p">)</span>
+    <span class="n">write_cube</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">ifname</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, HZDR.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

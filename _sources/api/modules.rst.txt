@@ -1,0 +1,7 @@
+mala
+====
+
+.. toctree::
+   :maxdepth: 4
+
+   mala

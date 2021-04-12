@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Installation of MALA &mdash; MALA  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Setting up LAMMPS" href="INSTALL_LAMMPS.html" />
+    <link rel="prev" title="Postprocessing" href="../features/postprocessing.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MALA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features/background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/neuralnetworks.html">Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features/postprocessing.html">Postprocessing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Installation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation of MALA</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#python-version">Python version</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-packages">Python packages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#conda-environment-optional">Conda environment (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#lammps-optional">LAMMPS (optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#total-energy-module-optional">Total energy module (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-the-mala-package">Installing the MALA package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-documentation-locally-optional">Build documentation locally (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#downloading-and-adding-example-data">Downloading and adding example data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tested_systems.html">Successfully tested on</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">mala</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#developing-code">Developing code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#issues">Issues</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MALA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Installation of MALA</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/install/README.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installation-of-mala">
+<h1>Installation of MALA<a class="headerlink" href="#installation-of-mala" title="Permalink to this headline">¶</a></h1>
+<p>This document details the manual installation of the MALA package.</p>
+<div class="section" id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="python-version">
+<h3>Python version<a class="headerlink" href="#python-version" title="Permalink to this headline">¶</a></h3>
+<p>MALA itself is not bound to a certain python version, as long as the package requirements for MALA can be met by the
+version of your choice. MALA has been successfully tested for python 3.8.5.
+If you intend to use the optional Quantum Espresso total energy module or LAMMPS and install these software packages
+yourself the necessary python bindings will be created for your python version. If you operate on a machine that
+provides pre-installed versions of these packages (e.g. on an HPC cluster), you need to adhere to the python version
+for which these python bindings have been created. A list of machines on which MALA was tested can be found in
+<a class="reference internal" href="tested_systems.html"><span class="doc">Successfully tested on</span></a>.</p>
+</div>
+<div class="section" id="python-packages">
+<h3>Python packages<a class="headerlink" href="#python-packages" title="Permalink to this headline">¶</a></h3>
+<p>In order to run MALA you have to have the following packages installed:</p>
+<ul class="simple">
+<li><p>torch (PyTorch)</p></li>
+<li><p>numpy</p></li>
+<li><p>scipy</p></li>
+<li><p>oapackage</p></li>
+<li><p>optuna</p></li>
+<li><p>ase</p></li>
+<li><p>mpmath</p></li>
+</ul>
+<p>See also the <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file.
+You can install each Python package with</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install packagename
+</pre></div>
+</div>
+<p>or all with</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -r requirements.txt
+</pre></div>
+</div>
+<p>or just install the package along with dependencies</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -e .
+</pre></div>
+</div>
+<p>See below for what the <code class="docutils literal notranslate"><span class="pre">-e</span></code> option does.</p>
+<p>Note that we exclude <code class="docutils literal notranslate"><span class="pre">torch</span></code> in <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> We don’t want torch to be
+installed automatically, just note that we need it. For local testing, people
+might want to install the CPU-only version using something like</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install <span class="nv">torch</span><span class="o">==</span><span class="m">1</span>.7.1+cpu <span class="nv">torchvision</span><span class="o">==</span><span class="m">0</span>.8.2+cpu <span class="se">\</span>
+    <span class="nv">torchaudio</span><span class="o">==</span><span class="m">0</span>.7.2 -f <span class="se">\</span>
+    https://download.pytorch.org/whl/torch_stable.html
+</pre></div>
+</div>
+<p>while a plain <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">torch</span></code> will pull the much larger GPU version by
+default.</p>
+<p>For other ways to install PyTorch you might also refer to <a class="reference external" href="https://pytorch.org/">https://pytorch.org/</a>.</p>
+<div class="section" id="conda-environment-optional">
+<h4>Conda environment (optional)<a class="headerlink" href="#conda-environment-optional" title="Permalink to this headline">¶</a></h4>
+<p>Alternatively to pip, you can install the required packages within a
+<a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">conda</a> environment.
+We provide four different environment files, depending on the architecture and
+ganularity of dependencies specified (find them in the <code class="docutils literal notranslate"><span class="pre">install</span></code> folder).
+We use the explicit environment files for our reproducible and tested builds. Feel free to
+start off with a basic environment file specifing only the direct dependencies (these
+files will likely install newer versions of (sub-)dependencies and we cannot guarantee everything to work).</p>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>dependency granularity:</th>
+<th>basic</th>
+<th>explicit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU</td>
+<td><code>mala_cpu_base_environment.yml</code></td>
+<td><code>mala_cpu_environment.yml</code></td>
+</tr>
+<tr>
+<td>GPU</td>
+<td><code>mala_gpu_base_environment.yml</code></td>
+<td><code>mala_gpu_environment.yml</code></td>
+</tr>
+</tbody>
+</table><p>Follow the steps below to set up the necessary environment.</p>
+<ol>
+<li><p>(optional) If needed, specify the python version you want to use in this
+environment by replacing <code class="docutils literal notranslate"><span class="pre">3.6</span></code> with your desired version in <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code>:</p>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>dependencies:
+  - python&gt;=yourversionhere
+</pre></div>
+</div>
+</li>
+<li><p>Create an environment <code class="docutils literal notranslate"><span class="pre">mala</span></code>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ conda env create -f environment.yml
+</pre></div>
+</div>
+</li>
+<li><p>Activate the new environment:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ conda activate mala
+</pre></div>
+</div>
+</li>
+<li><p>You can deactivate the environment with:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ conda deactivate
+</pre></div>
+</div>
+</li>
+<li><p>You can update your conda environment by making changes to environment.yml:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ conda env update --name mala  --file environment.yml
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="lammps-optional">
+<h3>LAMMPS (optional)<a class="headerlink" href="#lammps-optional" title="Permalink to this headline">¶</a></h3>
+<p>This workflow uses the Large-scale Atomic/Molecular Massively Parallel
+Simulator <a class="reference external" href="https://lammps.sandia.gov/">LAMMPS</a> for input data preprocessing. It
+is not necessary to install LAMMPS if you are you using this workflow with
+preprocessed data. If you need/want to install LAMMPS, please refer to
+<a class="reference internal" href="INSTALL_LAMMPS.html"><span class="doc">Setting up LAMMPS</span></a>.</p>
+</div>
+<div class="section" id="total-energy-module-optional">
+<h3>Total energy module (optional)<a class="headerlink" href="#total-energy-module-optional" title="Permalink to this headline">¶</a></h3>
+<p>It is possible to utilize Quantum Espresso to calculate the total energy of a given system using python bindings.
+This provides an additional post-processing capability, but is not necessarily needed for using this workflow.
+If you want to use this module, please refer to <a class="reference internal" href="INSTALL_TE_QE.html"><span class="doc">Python bindings to Quantum Espresso</span></a>.</p>
+</div>
+</div>
+<div class="section" id="installing-the-mala-package">
+<h2>Installing the MALA package<a class="headerlink" href="#installing-the-mala-package" title="Permalink to this headline">¶</a></h2>
+<ol>
+<li><p>Make sure that all prerequisites are fulfilled (see above)</p></li>
+<li><p>Install the package using</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> ~/path/to/this/git/root/directory
+$ pip install -e .
+</pre></div>
+</div>
+<p>(note: the <code class="docutils literal notranslate"><span class="pre">-e</span></code> is absolutely crucial, so that changes in the code will be
+reflected system wide)</p>
+</li>
+<li><p>Go to the <code class="docutils literal notranslate"><span class="pre">examples</span></code> folder and run <code class="docutils literal notranslate"><span class="pre">ex0_verify_installation.py</span></code> to make
+sure the setup was successful.</p></li>
+<li><p>Enjoy!</p></li>
+</ol>
+<div class="section" id="build-documentation-locally-optional">
+<h3>Build documentation locally (optional)<a class="headerlink" href="#build-documentation-locally-optional" title="Permalink to this headline">¶</a></h3>
+<p>Install the prerequisites:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -U sphinx
+$ pip install -U sphinx_rtd_theme
+$ pip install -U recommonmark
+$ pip intsall -U sphinx-markdown-tables
+</pre></div>
+</div>
+<ol class="simple">
+<li><p>Change into <code class="docutils literal notranslate"><span class="pre">docs/</span></code> folder.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">apidocs</span></code>.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span></code>. This creates a <code class="docutils literal notranslate"><span class="pre">_build</span></code> folder inside <code class="docutils literal notranslate"><span class="pre">docs</span></code>. You may also want to use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span> <span class="pre">SPHINXOPTS=&quot;-W&quot;</span></code> sometimes. This treats warnings as errors and stops the output at first occurence of an error (useful for debugging rST syntax).</p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">docs/_build/html/index.html</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code> if required (e.g. after fixing erros) and building again</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="downloading-and-adding-example-data">
+<h2>Downloading and adding example data<a class="headerlink" href="#downloading-and-adding-example-data" title="Permalink to this headline">¶</a></h2>
+<p>The examples and tests need additional data to run. The MALA team provides a data repository, that can be downloaded
+from <a class="reference external" href="https://gitlab.com/hzdr/mala/data">https://gitlab.com/hzdr/mala/data</a>. After downloading it, the data repository
+needs to be linked to the MALA repository by using</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> ~/path/to/this/git/root/directory
+$ bash install/data_repo_link/link_data_repo.sh ~/path/to/data/repo
+</pre></div>
+</div>
+<p>Afterwards, all the examples and tests will run out-of-the.box.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="INSTALL_LAMMPS.html" class="btn btn-neutral float-right" title="Setting up LAMMPS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../features/postprocessing.html" class="btn btn-neutral float-left" title="Postprocessing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, HZDR.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

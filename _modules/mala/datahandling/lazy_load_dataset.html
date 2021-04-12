@@ -1,0 +1,455 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.datahandling.lazy_load_dataset &mdash; MALA  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> MALA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/neuralnetworks.html">Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/postprocessing.html">Postprocessing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/README.html">Installation of MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/tested_systems.html">Successfully tested on</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#developing-code">Developing code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#issues">Issues</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MALA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.datahandling.lazy_load_dataset</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.datahandling.lazy_load_dataset</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;DataSet for lazy-loading.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">mala.datahandling.snapshot</span> <span class="kn">import</span> <span class="n">Snapshot</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="c1"># Warning is thrown by Parameters class.</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="LazyLoadDataset"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset">[docs]</a><span class="k">class</span> <span class="nc">LazyLoadDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    DataSet class for lazy loading.</span>
+
+<span class="sd">    Only loads snapshots in the memory that are currently being processed.</span>
+<span class="sd">    Uses a &quot;caching&quot; approach of keeping the last used snapshot in memory,</span>
+<span class="sd">    until values from a new ones are used. Therefore, shuffling at DataSampler</span>
+<span class="sd">    / DataLoader level is discouraged to the point that it was disabled.</span>
+<span class="sd">    Instead, we mix the snapshot load order here ot have some sort of mixing</span>
+<span class="sd">    at all.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dimension</span><span class="p">,</span> <span class="n">output_dimension</span><span class="p">,</span> <span class="n">input_data_scaler</span><span class="p">,</span>
+                 <span class="n">output_data_scaler</span><span class="p">,</span> <span class="n">descriptor_calculator</span><span class="p">,</span>
+                 <span class="n">target_calculator</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span>
+                 <span class="n">descriptors_contain_xyz</span><span class="p">,</span> <span class="n">use_horovod</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a lazily loaded DataSet.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_dimension : int</span>
+<span class="sd">            Dimension of an input vector.</span>
+
+<span class="sd">        output_dimension : int</span>
+<span class="sd">            Dimension of an output vector.</span>
+
+<span class="sd">        input_data_scaler : mala.datahandling.data_scaler.DataScaler</span>
+<span class="sd">            Used to scale the input data.</span>
+
+<span class="sd">        output_data_scaler : mala.datahandling.data_scaler.DataScaler</span>
+<span class="sd">            Used to scale the output data.</span>
+
+<span class="sd">        descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase</span>
+<span class="sd">            Used to do unit conversion on input data.</span>
+
+<span class="sd">        target_calculator : mala.targets.target_base.TargetBase or derivative</span>
+<span class="sd">            Used to do unit conversion on output data.</span>
+
+<span class="sd">        grid_dimensions : list</span>
+<span class="sd">            Dimensions of the grid (x,y,z).</span>
+
+<span class="sd">        grid_size : int</span>
+<span class="sd">            Size of the grid (x*y*z), i.e. the number of datapoints per</span>
+<span class="sd">            snapshot.</span>
+
+<span class="sd">        descriptors_contain_xyz : bool</span>
+<span class="sd">            If true, then it is assumed that the first three entries of any</span>
+<span class="sd">            input data file are xyz-information and can be discarded.</span>
+<span class="sd">            Generally true, if your descriptors were calculated using MALA.</span>
+
+<span class="sd">        use_horovod : bool</span>
+<span class="sd">            If true, it is assumed that horovod is used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">=</span> <span class="n">input_dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">=</span> <span class="n">output_dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span> <span class="o">=</span> <span class="n">input_data_scaler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span> <span class="o">=</span> <span class="n">output_data_scaler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">descriptor_calculator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">grid_dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="n">grid_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="n">descriptors_contain_xyz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span> <span class="o">=</span> <span class="n">use_horovod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_outputs_directly</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">return_outputs_directly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Control whether outputs are actually transformed.</span>
+
+<span class="sd">        Has to be False for training. In the testing case,</span>
+<span class="sd">        Numerical errors are smaller if set to True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_outputs_directly</span>
+
+    <span class="nd">@return_outputs_directly</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">return_outputs_directly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_return_outputs_directly</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="LazyLoadDataset.add_snapshot_to_dataset"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">:</span> <span class="n">Snapshot</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Addsa snapshot to a DataSet.</span>
+
+<span class="sd">        Afterwards, the DataSet can and will load this snapshot as needed.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snapshot : mala.datahandling.snapshot.Snapshot</span>
+<span class="sd">            Snapshot that is to be added to this DataSet.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span></div>
+
+<div class="viewcode-block" id="LazyLoadDataset.mix_datasets"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets">[docs]</a>    <span class="k">def</span> <span class="nf">mix_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mix the order of the snapshots.</span>
+
+<span class="sd">        With this, there can be some variance between runs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">used_perm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
+            <span class="n">hvd</span><span class="o">.</span><span class="n">allreduce</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;barrier&#39;</span><span class="p">)</span>
+            <span class="n">used_perm</span> <span class="o">=</span> <span class="n">hvd</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span><span class="n">used_perm</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">used_perm</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_new_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LazyLoadDataset.get_new_data"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_new_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read a new snapshot into RAM.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        file_index : i</span>
+<span class="sd">            File to be read.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Load the data into RAM.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_directory</span> <span class="o">+</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_directory</span> <span class="o">+</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">)</span>
+
+        <span class="c1"># Transform the data.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">*=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
+            <span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_units</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">*=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+            <span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_units</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_outputs_directly</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">)</span>
+
+        <span class="c1"># Save which data we have currently loaded.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">=</span> <span class="n">file_index</span></div>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get an item of the DataSet.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Requested index. NOTE: Slices over multiple files</span>
+<span class="sd">            are currently NOT supported.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        inputs, outputs : torch.Tensor</span>
+<span class="sd">            The requested inputs and outputs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get item can be called with an int or a slice.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">file_index</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
+            <span class="n">index_in_file</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
+
+            <span class="c1"># Find out if new data is needed.</span>
+            <span class="k">if</span> <span class="n">file_index</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_new_data</span><span class="p">(</span><span class="n">file_index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="n">index_in_file</span><span class="p">],</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">[</span><span class="n">index_in_file</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+            <span class="c1"># If a slice is requested, we have to find out if t spans files.</span>
+            <span class="n">file_index_start</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">start</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
+            <span class="n">index_in_file_start</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">start</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
+            <span class="n">file_index_stop</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">stop</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
+            <span class="n">index_in_file_stop</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">stop</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
+
+            <span class="c1"># If it does, we cannot deliver.</span>
+            <span class="c1"># Take care though, if a full snapshot is requested,</span>
+            <span class="c1"># the stop index will point to the wrong file.</span>
+            <span class="k">if</span> <span class="n">file_index_start</span> <span class="o">!=</span> <span class="n">file_index_stop</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">index_in_file_stop</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">index_in_file_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Lazy loading currently only supports &quot;</span>
+                                    <span class="s2">&quot;slices in one file. &quot;</span>
+                                    <span class="s2">&quot;You have requested a slice over two &quot;</span>
+                                    <span class="s2">&quot;files.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Find out if new data is needed.</span>
+            <span class="n">file_index</span> <span class="o">=</span> <span class="n">file_index_start</span>
+            <span class="k">if</span> <span class="n">file_index</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_new_data</span><span class="p">(</span><span class="n">file_index</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="n">index_in_file_start</span><span class="p">:</span><span class="n">index_in_file_stop</span><span class="p">],</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">[</span><span class="n">index_in_file_start</span><span class="p">:</span><span class="n">index_in_file_stop</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the length of the DataSet.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        length : int</span>
+<span class="sd">            Number of data points in DataSet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, HZDR.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

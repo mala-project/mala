@@ -1,0 +1,608 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.targets.calculation_helpers &mdash; MALA  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> MALA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/neuralnetworks.html">Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/postprocessing.html">Postprocessing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/README.html">Installation of MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/tested_systems.html">Successfully tested on</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#developing-code">Developing code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#issues">Issues</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MALA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.targets.calculation_helpers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.targets.calculation_helpers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Helper functions for several calculation tasks (such as integration).&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">kB</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
+<span class="kn">import</span> <span class="nn">mpmath</span> <span class="k">as</span> <span class="nn">mp</span>
+
+
+<div class="viewcode-block" id="integrate_values_on_spacing"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.calculation_helpers.integrate_values_on_spacing">[docs]</a><span class="k">def</span> <span class="nf">integrate_values_on_spacing</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">spacing</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Integrate values assuming a uniform grid with a provided spacing.</span>
+
+<span class="sd">    Different integration methods are available.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    values : numpy.array</span>
+<span class="sd">        Values to be integrated.</span>
+<span class="sd">    spacing : int</span>
+<span class="sd">        Spacing of the grid on which the integration is performed.</span>
+<span class="sd">    method : string</span>
+<span class="sd">        Integration method to be used. Currently supported:</span>
+
+<span class="sd">            - &quot;trapz&quot; for trapezoid method</span>
+<span class="sd">            - &quot;simps&quot; for Simpson method.</span>
+<span class="sd">    axis : int</span>
+<span class="sd">        Axis along which the integration is performed.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    integral_values : float</span>
+<span class="sd">        The value of the integral.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">spacing</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">spacing</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="fermi_function"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.calculation_helpers.fermi_function">[docs]</a><span class="k">def</span> <span class="nf">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature_K</span><span class="p">,</span> <span class="n">energy_units</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the Fermi function f(E) = 1 / (1 + e^((E-E_F)/(k_B*T))).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    energy : float or numpy.array</span>
+<span class="sd">        Energy for which the Fermi function is supposed to be calculated in</span>
+<span class="sd">        energy_units.</span>
+<span class="sd">    fermi_energy : float</span>
+<span class="sd">        Fermi energy level in energy_units.</span>
+<span class="sd">    temperature_K : float</span>
+<span class="sd">        Temperature in K.</span>
+<span class="sd">    energy_units : string</span>
+<span class="sd">        Currently supported:</span>
+
+<span class="sd">            - eV</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fermi_val : float</span>
+<span class="sd">        Value of the Fermi function.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">energy_units</span> <span class="o">==</span> <span class="s2">&quot;eV&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fermi_function_eV</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature_K</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="entropy_multiplicator"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.calculation_helpers.entropy_multiplicator">[docs]</a><span class="k">def</span> <span class="nf">entropy_multiplicator</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature_K</span><span class="p">,</span>
+                          <span class="n">energy_units</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the multiplicator function for the entropy integral.</span>
+
+<span class="sd">    Entropy integral is f(E)*log(f(E))+(1-f(E)*log(1-f(E))</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    energy : float or numpy.array</span>
+<span class="sd">        Energy for which the Fermi function is supposed to be calculated in</span>
+<span class="sd">        energy_units.</span>
+<span class="sd">    fermi_energy : float</span>
+<span class="sd">        Fermi energy level in energy_units.</span>
+<span class="sd">    temperature_K : float</span>
+<span class="sd">        Temperature in K.</span>
+<span class="sd">    energy_units : string</span>
+<span class="sd">        Currently supported:</span>
+
+<span class="sd">            - eV</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    multiplicator_val : float</span>
+<span class="sd">        Value of the multiplicator function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">energy</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">energy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">energy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">fermi_val</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature_K</span><span class="p">,</span>
+                                       <span class="n">energy_units</span><span class="o">=</span><span class="n">energy_units</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fermi_val</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+                <span class="n">secondterm</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">secondterm</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fermi_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fermi_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fermi_val</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">firsterm</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">firsterm</span> <span class="o">=</span> <span class="n">fermi_val</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">fermi_val</span><span class="p">)</span>
+            <span class="n">multiplicator</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">firsterm</span> <span class="o">+</span> <span class="n">secondterm</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fermi_val</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature_K</span><span class="p">,</span>
+                                   <span class="n">energy_units</span><span class="o">=</span><span class="n">energy_units</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fermi_val</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">secondterm</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">secondterm</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fermi_val</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fermi_val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fermi_val</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">firsterm</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">firsterm</span> <span class="o">=</span> <span class="n">fermi_val</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">fermi_val</span><span class="p">)</span>
+        <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">firsterm</span> <span class="o">+</span> <span class="n">secondterm</span>
+
+    <span class="k">return</span> <span class="n">multiplicator</span></div>
+
+
+<div class="viewcode-block" id="fermi_function_eV"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.calculation_helpers.fermi_function_eV">[docs]</a><span class="k">def</span> <span class="nf">fermi_function_eV</span><span class="p">(</span><span class="n">energy_ev</span><span class="p">,</span> <span class="n">fermi_energy_ev</span><span class="p">,</span> <span class="n">temperature_K</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the Fermi function f(E) = 1 / (1 + e^((E-E_F)/(k_B*T))).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    energy_ev : float</span>
+<span class="sd">        Energy in eV.</span>
+<span class="sd">    fermi_energy_ev : float</span>
+<span class="sd">        Fermi energy level in eV.</span>
+<span class="sd">    temperature_K : float</span>
+<span class="sd">        Temperature in K.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fermi_val : float</span>
+<span class="sd">        Value of the Fermi function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">energy_ev</span> <span class="o">-</span> <span class="n">fermi_energy_ev</span><span class="p">)</span> <span class="o">/</span>
+                               <span class="p">(</span><span class="n">kB</span> <span class="o">*</span> <span class="n">temperature_K</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="get_beta"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.calculation_helpers.get_beta">[docs]</a><span class="k">def</span> <span class="nf">get_beta</span><span class="p">(</span><span class="n">temperature_K</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate beta = 1 / (k_B * T).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temperature_K : float</span>
+<span class="sd">        Temperature in K</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    beta : float</span>
+<span class="sd">        Thermodynamic beta.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">kB</span> <span class="o">*</span> <span class="n">temperature_K</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_f0_value"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.calculation_helpers.get_f0_value">[docs]</a><span class="k">def</span> <span class="nf">get_f0_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the F0 value for the analytic integration formula.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float</span>
+<span class="sd">        x value for function.</span>
+
+<span class="sd">    beta : float</span>
+<span class="sd">        Thermodynamic beta.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    function_value : float</span>
+<span class="sd">        F0 value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span><span class="o">/</span><span class="n">beta</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="get_f1_value"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.calculation_helpers.get_f1_value">[docs]</a><span class="k">def</span> <span class="nf">get_f1_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the F1 value for the analytic integration formula.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float</span>
+<span class="sd">        x value for function.</span>
+
+<span class="sd">    beta : float</span>
+<span class="sd">        Thermodynamic beta.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    function_value : float</span>
+<span class="sd">        F1 value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+               <span class="o">-</span> <span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="get_f2_value"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.calculation_helpers.get_f2_value">[docs]</a><span class="k">def</span> <span class="nf">get_f2_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the F2 value for the analytic integration formula.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float</span>
+<span class="sd">        x value for function.</span>
+
+<span class="sd">    beta : float</span>
+<span class="sd">        Thermodynamic beta.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    function_value : float</span>
+<span class="sd">        F2 value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">((</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="o">+</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">-</span>
+               <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span>
+               <span class="mi">2</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="get_s0_value"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.calculation_helpers.get_s0_value">[docs]</a><span class="k">def</span> <span class="nf">get_s0_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the S0 value for the analytic integration formula.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float</span>
+<span class="sd">        x value for function.</span>
+
+<span class="sd">    beta : float</span>
+<span class="sd">        Thermodynamic beta.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    function_value : float</span>
+<span class="sd">        S0 value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span>
+               <span class="mf">2.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="get_s1_value"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.calculation_helpers.get_s1_value">[docs]</a><span class="k">def</span> <span class="nf">get_s1_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the S1 value for the analytic integration formula.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float</span>
+<span class="sd">        x value for function.</span>
+
+<span class="sd">    beta : float</span>
+<span class="sd">        Thermodynamic beta.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    function_value : float</span>
+<span class="sd">        S1 value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span>
+               <span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">-</span>
+               <span class="mi">3</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">polylog</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">mp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="analytical_integration"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.calculation_helpers.analytical_integration">[docs]</a><span class="k">def</span> <span class="nf">analytical_integration</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">I0</span><span class="p">,</span> <span class="n">I1</span><span class="p">,</span> <span class="n">fermi_energy_ev</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
+                           <span class="n">temperature_k</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform analytical integration following the outline given by [1].</span>
+
+<span class="sd">    More specifically, this function solves Eq. 32, by constructing the</span>
+<span class="sd">    weights itself.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    D : numpy.array or float</span>
+<span class="sd">        Either LDOS or DOS data.</span>
+
+<span class="sd">    I0 : string</span>
+<span class="sd">        I_0 from Eq. 33. The user only needs to provide which function should</span>
+<span class="sd">        be used. Arguments are:</span>
+
+<span class="sd">            - F0</span>
+<span class="sd">            - F1</span>
+<span class="sd">            - F2</span>
+<span class="sd">            - S0</span>
+<span class="sd">            - S1</span>
+
+<span class="sd">    I1 : string</span>
+<span class="sd">        I_1 from Eq. 33. The user only needs to provide which function should</span>
+<span class="sd">        be used. Arguments are:</span>
+
+<span class="sd">            - F0</span>
+<span class="sd">            - F1</span>
+<span class="sd">            - F2</span>
+<span class="sd">            - S0</span>
+<span class="sd">            - S1</span>
+
+<span class="sd">    fermi_energy_ev : float</span>
+<span class="sd">        The fermi energy in eV.</span>
+
+<span class="sd">    energy_grid : numpy.array</span>
+<span class="sd">        Energy grid on which the integration should be performed.</span>
+
+<span class="sd">    temperature_k : float</span>
+<span class="sd">        Temperature in K.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    integration_value : numpy.array or float</span>
+<span class="sd">        Value of the integral.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Mappings for the functions further down.</span>
+    <span class="n">function_mappings</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;F0&quot;</span><span class="p">:</span> <span class="n">get_f0_value</span><span class="p">,</span>
+        <span class="s2">&quot;F1&quot;</span><span class="p">:</span> <span class="n">get_f1_value</span><span class="p">,</span>
+        <span class="s2">&quot;F2&quot;</span><span class="p">:</span> <span class="n">get_f2_value</span><span class="p">,</span>
+        <span class="s2">&quot;S0&quot;</span><span class="p">:</span> <span class="n">get_s0_value</span><span class="p">,</span>
+        <span class="s2">&quot;S1&quot;</span><span class="p">:</span> <span class="n">get_s1_value</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Check if everything makes sense.</span>
+    <span class="k">if</span> <span class="n">I0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">function_mappings</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="ow">or</span> <span class="n">I1</span> <span class="ow">not</span> <span class="ow">in</span>\
+            <span class="nb">list</span><span class="p">(</span><span class="n">function_mappings</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not calculate analytical intergal, &quot;</span>
+                        <span class="s2">&quot;wrong choice of auxiliary functions.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Construct the weight vector.</span>
+    <span class="n">weights_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">energy_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">gridsize</span> <span class="o">=</span> <span class="n">energy_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">energy_grid_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">energy_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">energy_grid_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_grid</span>
+    <span class="n">spacing</span> <span class="o">=</span> <span class="p">(</span><span class="n">energy_grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">energy_grid_edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">spacing</span>
+    <span class="n">energy_grid_edges</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">spacing</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">real_space_grid</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">integral_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">real_space_grid</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">real_space_grid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">integral_value</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Calculate the weights.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gridsize</span><span class="p">):</span>
+        <span class="c1"># Calculate beta and x</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">kB</span> <span class="o">*</span> <span class="n">temperature_k</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">beta</span><span class="o">*</span><span class="p">(</span><span class="n">energy_grid_edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">fermi_energy_ev</span><span class="p">)</span>
+        <span class="n">x_plus</span> <span class="o">=</span> <span class="n">beta</span><span class="o">*</span><span class="p">(</span><span class="n">energy_grid_edges</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">fermi_energy_ev</span><span class="p">)</span>
+        <span class="n">x_minus</span> <span class="o">=</span> <span class="n">beta</span><span class="o">*</span><span class="p">(</span><span class="n">energy_grid_edges</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">fermi_energy_ev</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the I0 value</span>
+        <span class="n">i0</span> <span class="o">=</span> <span class="n">function_mappings</span><span class="p">[</span><span class="n">I0</span><span class="p">](</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="n">i0_plus</span> <span class="o">=</span> <span class="n">function_mappings</span><span class="p">[</span><span class="n">I0</span><span class="p">](</span><span class="n">x_plus</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="n">i0_minus</span> <span class="o">=</span> <span class="n">function_mappings</span><span class="p">[</span><span class="n">I0</span><span class="p">](</span><span class="n">x_minus</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the I1 value</span>
+        <span class="n">i1</span> <span class="o">=</span> <span class="n">function_mappings</span><span class="p">[</span><span class="n">I1</span><span class="p">](</span><span class="n">x</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="n">i1_plus</span> <span class="o">=</span> <span class="n">function_mappings</span><span class="p">[</span><span class="n">I1</span><span class="p">](</span><span class="n">x_plus</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="n">i1_minus</span> <span class="o">=</span> <span class="n">function_mappings</span><span class="p">[</span><span class="n">I1</span><span class="p">](</span><span class="n">x_minus</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+
+        <span class="c1"># Some aliases for readibility</span>
+        <span class="n">ei</span> <span class="o">=</span> <span class="n">energy_grid_edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">ei_plus</span> <span class="o">=</span> <span class="n">energy_grid_edges</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ei_minus</span> <span class="o">=</span> <span class="n">energy_grid_edges</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">weights_vector</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">i0_plus</span><span class="o">-</span><span class="n">i0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span>
+                                          <span class="p">((</span><span class="n">ei</span><span class="o">-</span><span class="n">fermi_energy_ev</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">ei_plus</span><span class="o">-</span><span class="n">ei</span><span class="p">)))</span>\
+            <span class="o">+</span> <span class="p">(</span><span class="n">i0</span><span class="o">-</span><span class="n">i0_minus</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="p">((</span><span class="n">ei</span><span class="o">-</span><span class="n">fermi_energy_ev</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">ei</span><span class="o">-</span><span class="n">ei_minus</span><span class="p">)))</span> <span class="o">-</span> \
+                            <span class="p">((</span><span class="n">i1_plus</span><span class="o">-</span><span class="n">i1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ei_plus</span><span class="o">-</span><span class="n">ei</span><span class="p">))</span> <span class="o">+</span> <span class="p">((</span><span class="n">i1</span> <span class="o">-</span> <span class="n">i1_minus</span><span class="p">)</span>
+                                                             <span class="o">/</span> <span class="p">(</span><span class="n">ei</span> <span class="o">-</span> <span class="n">ei_minus</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">real_space_grid</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">integral_value</span> <span class="o">+=</span> <span class="n">weights_vector</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">D</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">real_space_grid</span><span class="p">):</span>
+                <span class="n">integral_value</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">weights_vector</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">D</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">integral_value</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, HZDR.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

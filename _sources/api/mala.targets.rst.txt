@@ -1,0 +1,69 @@
+mala.targets package
+====================
+
+Submodules
+----------
+
+mala.targets.calculation\_helpers module
+----------------------------------------
+
+.. automodule:: mala.targets.calculation_helpers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.targets.cube\_parser module
+--------------------------------
+
+.. automodule:: mala.targets.cube_parser
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.targets.density module
+---------------------------
+
+.. automodule:: mala.targets.density
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.targets.dos module
+-----------------------
+
+.. automodule:: mala.targets.dos
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.targets.ldos module
+------------------------
+
+.. automodule:: mala.targets.ldos
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.targets.target\_base module
+--------------------------------
+
+.. automodule:: mala.targets.target_base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mala.targets.target\_interface module
+-------------------------------------
+
+.. automodule:: mala.targets.target_interface
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: mala.targets
+   :members:
+   :undoc-members:
+   :show-inheritance:

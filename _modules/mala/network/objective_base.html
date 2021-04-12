@@ -1,0 +1,360 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.network.objective_base &mdash; MALA  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> MALA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/preprocessing.html">Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/neuralnetworks.html">Neural Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features/postprocessing.html">Postprocessing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/README.html">Installation of MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/tested_systems.html">Successfully tested on</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#developing-code">Developing code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#issues">Issues</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MALA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.network.objective_base</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.network.objective_base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Objective function for all training based hyperparameter optimizations.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">optuna</span> <span class="kn">import</span> <span class="n">Trial</span>
+<span class="kn">from</span> <span class="nn">.hyperparameter_optuna</span> <span class="kn">import</span> <span class="n">HyperparameterOptuna</span>
+<span class="kn">from</span> <span class="nn">.hyperparameter_oat</span> <span class="kn">import</span> <span class="n">HyperparameterOAT</span>
+<span class="kn">from</span> <span class="nn">.network</span> <span class="kn">import</span> <span class="n">Network</span>
+<span class="kn">from</span> <span class="nn">.trainer</span> <span class="kn">import</span> <span class="n">Trainer</span>
+
+
+<div class="viewcode-block" id="ObjectiveBase"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.objective_base.ObjectiveBase">[docs]</a><span class="k">class</span> <span class="nc">ObjectiveBase</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents the objective function of a training process.</span>
+
+<span class="sd">    This is usually the result of a training of a network.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">data_handler</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an ObjectiveBase object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : mala.common.parametes.Parameters</span>
+<span class="sd">            Parameters used to create this objective.</span>
+
+<span class="sd">        data_handler : mala.datahandling.data_handler.DataHandler</span>
+<span class="sd">            datahandler to be used during the hyperparameter optimization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">data_handler</span>
+
+        <span class="c1"># We need to find out if we have to reparametrize the lists with the</span>
+        <span class="c1"># layers and the activations.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;ff_neurons_layer&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span>
+        <span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimize_activation_list</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;layer_activation&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span>
+        <span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get objective value for a trial (=set of hyperparameters).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        trial</span>
+<span class="sd">            A trial is a set of hyperparameters; can be an optuna based</span>
+<span class="sd">            trial or simply a OAT compatible list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Parse the parameters included in the trial.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse_trial</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
+
+        <span class="c1"># Perform training and report best test loss.</span>
+        <span class="n">test_network</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">test_trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">test_network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">)</span>
+        <span class="n">test_trainer</span><span class="o">.</span><span class="n">train_network</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">test_trainer</span><span class="o">.</span><span class="n">final_validation_loss</span>
+
+<div class="viewcode-block" id="ObjectiveBase.parse_trial"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.objective_base.ObjectiveBase.parse_trial">[docs]</a>    <span class="k">def</span> <span class="nf">parse_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse a trial into a network architecture.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        trial</span>
+<span class="sd">            A trial is a set of hyperparameters; can be an optuna based</span>
+<span class="sd">            trial or simply a OAT compatible list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parse_trial_optuna</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">==</span> <span class="s2">&quot;oat&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parse_trial_oat</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot parse trial, unknown hyperparameter&quot;</span>
+                            <span class="s2">&quot; optimization method.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectiveBase.parse_trial_optuna"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.objective_base.ObjectiveBase.parse_trial_optuna">[docs]</a>    <span class="k">def</span> <span class="nf">parse_trial_optuna</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse an optuna style trial into the params attribute.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        trial : optuna.trial.Trial.</span>
+<span class="sd">            A set of hyperparameters encoded by optuna.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span> <span class="o">=</span> \
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_input_dimension</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_activation_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">par</span><span class="p">:</span> <span class="n">HyperparameterOptuna</span>
+        <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">&quot;layer_activation&quot;</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span><span class="o">.</span>\
+                    <span class="n">append</span><span class="p">(</span><span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="s2">&quot;ff_neurons_layer&quot;</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;feed-forward&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span><span class="o">.</span>\
+                        <span class="n">append</span><span class="p">(</span><span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="s2">&quot;trainingtype&quot;</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">trainingtype</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Optimization of hyperparameter &quot;</span><span class="p">,</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                <span class="s2">&quot;not supported at the moment.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span><span class="o">.</span>\
+                <span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_output_dimension</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="ObjectiveBase.parse_trial_oat"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.objective_base.ObjectiveBase.parse_trial_oat">[docs]</a>    <span class="k">def</span> <span class="nf">parse_trial_oat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse an OA based trial into the params attribute.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        trial : numpy.array</span>
+<span class="sd">            Row in an orthogonal array which respresents current trial.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_activation_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">par</span><span class="p">:</span> <span class="n">HyperparameterOAT</span>
+        <span class="k">for</span> <span class="n">factor_idx</span><span class="p">,</span> <span class="n">par</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;layer_activation&quot;</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span><span class="o">.</span>\
+                    <span class="n">append</span><span class="p">(</span><span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">,</span> <span class="n">factor_idx</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="s2">&quot;trainingtype&quot;</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">trainingtype</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span>\
+                    <span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">,</span> <span class="n">factor_idx</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Optimization of hyperparameter &quot;</span><span class="p">,</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                <span class="s2">&quot;not supported at the moment.&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, HZDR.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
