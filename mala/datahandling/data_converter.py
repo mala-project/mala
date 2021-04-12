@@ -151,7 +151,7 @@ class DataConverter:
         return tmp_input, tmp_output
 
     def convert_snapshots(self, save_path="./",
-                          naming_scheme="ELEM_snapshot*"):
+                          naming_scheme="ELEM_snapshot*", starts_at=0):
         """
         Convert the snapshots in the list to numpy arrays.
 
@@ -165,11 +165,19 @@ class DataConverter:
         naming_scheme : string
             String detailing the naming scheme for the snapshots. * symbols
             will be replaced with the snapshot number.
+
+        starts_at : int
+            Number of the first snapshot generated using this approach.
+            Default is 0, but may be set to any integer. This is to ensure
+            consistency in naming when converting e.g. only a certain portion
+            of all available snapshots. If set to e.g. 4,
+            the first snapshot generated will be called snapshot4.
         """
         for i in range(0, len(self.__snapshots_to_convert)):
+            snapshot_number = i + starts_at
             input_data, output_data = self.convert_single_snapshot(i)
             snapshot_name = naming_scheme
-            snapshot_name = snapshot_name.replace("*", str(i))
-            printout("Saving snapshot", i, "at ", save_path)
+            snapshot_name = snapshot_name.replace("*", str(snapshot_number))
+            printout("Saving snapshot", snapshot_number, "at ", save_path)
             np.save(save_path+snapshot_name+".in.npy", input_data)
             np.save(save_path+snapshot_name+".out.npy", output_data)
