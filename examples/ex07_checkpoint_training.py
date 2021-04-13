@@ -1,7 +1,7 @@
 import mala
 from mala import printout
 from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al256_reduced/"
+data_path = get_data_repo_path()+"Al36/"
 
 """
 ex07_checkpoint_training.py: Shows how a training run can be paused and 

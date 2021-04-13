@@ -1,7 +1,7 @@
 import mala
 from mala import printout
 from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al256_reduced/"
+data_path = get_data_repo_path()+"Al36/"
 
 """
 ex01_run_singleshot.py: Shows how a neural network can be trained on material 
