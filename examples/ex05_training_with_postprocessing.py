@@ -2,7 +2,7 @@ import mala
 from mala import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al256_reduced/"
+data_path = get_data_repo_path()+"Al36/"
 param_path = get_data_repo_path()+"example05_data/"
 """
 ex05_training_with_postprocessing.py: Train a network, then use this network 
@@ -65,7 +65,7 @@ def use_trained_network(network_path, params_path, input_scaler_path,
     ldos_calculator = inference_data_handler.target_calculator
     ldos_calculator.read_additional_calculation_data("qe.out",
                                                      data_path +
-                                                     "QE_Al.scf.pw.out")
+                                                     "Al.pw.scf.out")
 
     # Calculate the Band energy.
     band_energy_predicted = ldos_calculator.get_band_energy(predicted_ldos)

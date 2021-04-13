@@ -6,7 +6,7 @@ from mala.network.tester import Tester
 from mala.common.parameters import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al256_reduced/"
+data_path = get_data_repo_path()+"Al36/"
 param_path = get_data_repo_path()+"example05_data/"
 params_path = param_path+"ex05_params.pkl"
 network_path = param_path+"ex05_network.pth"

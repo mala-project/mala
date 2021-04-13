@@ -4,7 +4,7 @@ from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 from mala.common.parameters import printout
 from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al256_reduced/"
+data_path = get_data_repo_path()+"Al36/"
 
 
 def test_tensor_memory(file, accuracy):

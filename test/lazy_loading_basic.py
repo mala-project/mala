@@ -9,7 +9,7 @@ import numpy as np
 from mala.network.network import Network
 from mala.network.trainer import Trainer
 from data_repo_path import get_data_repo_path
-data_path_Al = get_data_repo_path()+"Al256_reduced/"
+data_path_Al = get_data_repo_path()+"Al36/"
 
 
 def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):

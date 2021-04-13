@@ -6,7 +6,7 @@ from mala.network.trainer import Trainer
 import numpy as np
 import time
 from data_repo_path import get_data_repo_path
-data_path_Al = get_data_repo_path()+"Al256_reduced/"
+data_path_Al = get_data_repo_path()+"Al36/"
 
 # This is a benchmark comparing the usage of horovod, lazy loading and RAM
 # based storage,.
