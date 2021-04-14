@@ -422,7 +422,8 @@
 
             <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;mala.pw.scf.in&quot;</span><span class="p">,</span> <span class="n">atoms_Angstrom</span><span class="p">,</span> <span class="s2">&quot;espresso-in&quot;</span><span class="p">,</span>
                          <span class="n">input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
-                         <span class="n">pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">)</span>
+                         <span class="n">pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
+                         <span class="n">kpts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span>
 
         <span class="c1"># initialize the total energy module.</span>
         <span class="c1"># FIXME: So far, the total energy module can only be initialized once.</span>
@@ -530,6 +531,7 @@
             <span class="n">qe_pseudopotentials</span>
         <span class="n">return_density_object</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> \
             <span class="n">ldos_object</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span>
+        <span class="n">return_density_object</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">kpoints</span>
 
         <span class="k">return</span> <span class="n">return_density_object</span></div></div>
 </pre></div>
