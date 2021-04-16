@@ -1,0 +1,19 @@
+name: mala-cpu
+channels:
+  - file:///sw/sources/open-ce/conda-channel-v1.1.3
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python>=3.6, <3.9
+  - pip
+  - numpy
+  - scipy
+  - optuna
+  - ase
+  - pytorch
+  - cpuonly
+  - mpmath
+  - gxx_linux-ppc64le
+  - pip:
+    - oapackage
