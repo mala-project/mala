@@ -21,7 +21,7 @@ as a python package. This repository is structured as follows:
 Installation
 ------------
 
-Please refer to `Installation of MALA <https://multiscale-wdm.pages.hzdr.de/surrogate-models/fesl/fesl/install/README.html>`_.
+Please refer to :doc:`Installation of FESL <install/README>`.
 
 Running
 -------

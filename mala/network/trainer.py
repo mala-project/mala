@@ -296,7 +296,7 @@ class Trainer(Runner):
             # self.batch_size= self.batch_size*hvd.local_size()
 
             compression = hvd.Compression.fp16 if self.parameters_full.\
-                use_compression else hvd.Compression.none
+                running.use_compression else hvd.Compression.none
 
             # If lazy loading is used we do not shuffle the data points on
             # their own, but rather shuffle them
