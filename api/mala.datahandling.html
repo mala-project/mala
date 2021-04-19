@@ -280,7 +280,7 @@ beneficial during testing.</p>
 
 <dl class="py method">
 <dt id="mala.datahandling.data_converter.DataConverter.convert_snapshots">
-<code class="sig-name descname"><span class="pre">convert_snapshots</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ELEM_snapshot*'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_snapshots" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">convert_snapshots</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ELEM_snapshot*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starts_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_snapshots" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert the snapshots in the list to numpy arrays.</p>
 <p>These can then be used by MALA.</p>
 <dl class="field-list simple">
@@ -289,6 +289,11 @@ beneficial during testing.</p>
 <li><p><strong>save_path</strong> (<em>string</em>) – Directory in which the snapshots will be saved.</p></li>
 <li><p><strong>naming_scheme</strong> (<em>string</em>) – String detailing the naming scheme for the snapshots. * symbols
 will be replaced with the snapshot number.</p></li>
+<li><p><strong>starts_at</strong> (<em>int</em>) – Number of the first snapshot generated using this approach.
+Default is 0, but may be set to any integer. This is to ensure
+consistency in naming when converting e.g. only a certain portion
+of all available snapshots. If set to e.g. 4,
+the first snapshot generated will be called snapshot4.</p></li>
 </ul>
 </dd>
 </dl>
