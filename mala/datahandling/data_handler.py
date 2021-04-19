@@ -136,7 +136,7 @@ class DataHandler:
     def add_snapshot(self, input_npy_file, input_npy_directory,
                      output_npy_file=None, output_npy_directory=None,
                      input_units="None", output_units="1/eV",
-                     calculation_output_file=""):
+                     calculation_output_file="", add_snapshot_as=None):
         """
         Add a snapshot to the data pipeline.
 
@@ -165,10 +165,17 @@ class DataHandler:
         calculation_output_file : string
             File with the output of the original snapshot calculation. This is
             only needed when testing multiple snapshots.
+
+        add_snapshot_as : string
+            If "tr", "va" or "te", the snapshot will be added to the snapshot
+            list as training, validation or testing snapshot, respectively.
         """
         snapshot = Snapshot(input_npy_file, input_npy_directory, input_units,
                             output_npy_file, output_npy_directory,
                             output_units, calculation_output_file)
+        if add_snapshot_as is "tr" or add_snapshot_as is "te" \
+           or add_snapshot_as is "va":
+            self.parameters.data_splitting_snapshots.append(add_snapshot_as)
         self.parameters.snapshot_directories_list.append(snapshot)
 
     def clear_data(self):

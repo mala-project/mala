@@ -211,7 +211,7 @@ class ParametersData(ParametersBase):
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
         # self.data_splitting_percent = [0,0,0]
-        self.data_splitting_snapshots = ["tr", "va", "te"]
+        self.data_splitting_snapshots = []
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False

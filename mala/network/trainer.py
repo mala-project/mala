@@ -242,7 +242,8 @@ class Trainer(Runner):
                     self.__create_training_checkpoint()
                     checkpoint_counter = 0
 
-            printout("Time for epoch[s]:", time.time() - start_time)
+            if self.parameters.verbosity:
+                printout("Time for epoch[s]:", time.time() - start_time)
 
         # Calculate final loss.
         self.final_validation_loss = vloss
@@ -252,8 +253,8 @@ class Trainer(Runner):
                                             self.test_data_loader)
             if self.parameters_full.use_horovod:
                 tloss = self.__average_validation(tloss, 'average_loss')
+            printout("Final test data loss: ", tloss)
         self.final_test_loss = tloss
-        printout("Final test data loss: ", tloss)
 
     def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""
