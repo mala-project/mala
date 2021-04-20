@@ -37,17 +37,17 @@ Summit
         - ``./configure --prefix=/.../swig`` (replace ``...`` with absolute path to ``swig`` directory)
         - ``make``
         - ``make install``
-        - ``PATH = /.../swig/bin`` (replace ``...`` with actual absolute path to ``swig`` directory)
+        - ``PATH = /.../swig/bin:$PATH`` (replace ``...`` with actual absolute path to ``swig`` directory)
 
     2. Clone conda environment with pytorch and horovod, and add oapackage to it:
-        - ``module load open-ce``
+        - ``module load open-ce/1.1.3-py38-0``
         - ``conda create --name mala-opence --clone open-ce-1.1.3-py38-0``
         - ``conda activate mala-opence``
         - ``conda install gxx_linux-ppc64le``
         - ``pip install oapackage``
 
-    3. Install MALA (form the directory with cloned MALA repository):
-        - ``pip install -e .``
+    3. Install MALA (from the directory with cloned MALA repository):
+        - ``pip install -e .`` (note that it will install required packages for MALA listed in ``requirements.txt``)
 
 
 
