@@ -37,7 +37,7 @@ Summit
         - ``./configure --prefix=/.../swig`` (replace ``...`` with absolute path to ``swig`` directory)
         - ``make``
         - ``make install``
-        - ``PATH = /.../swig/bin:$PATH`` (replace ``...`` with actual absolute path to ``swig`` directory)
+        - ``PATH=/.../swig/bin:$PATH`` (replace ``...`` with actual absolute path to ``swig`` directory)
 
     2. Clone conda environment with pytorch and horovod, and add oapackage to it:
         - ``module load open-ce/1.1.3-py38-0``
