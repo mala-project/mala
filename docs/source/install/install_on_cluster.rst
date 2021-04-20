@@ -24,30 +24,6 @@ hemera5
     5. Then I install horovod as
         ``pip install horovod[pytorch]``
 
-Summit
-*******************
-
-- Tested by: Vladyslav Oles, 16.04.2021
-- Scope of test: mala, torch, horovod; I ommited LAMMPS and QE for this test
-- Test log:
-    1. Install a current version of SWIG (instead of Summit's 2.0.10) as per http://www.swig.org/svn.html:
-        - ``git clone https://github.com/swig/swig.git``
-        - ``cd swig``
-        - ``./autogen.sh``
-        - ``./configure --prefix=/.../swig`` (replace ``...`` with absolute path to ``swig`` directory)
-        - ``make``
-        - ``make install``
-        - ``PATH = /.../swig/bin`` (replace ``...`` with actual absolute path to ``swig`` directory)
-
-    2. Clone conda environment with pytorch and horovod, and add oapackage to it:
-        - ``module load open-ce``
-        - ``conda create --name mala-opence --clone open-ce-1.1.3-py38-0``
-        - ``conda activate mala-opence``
-        - ``conda install gxx_linux-ppc64le``
-        - ``pip install oapackage``
-
-    3. Install MALA (form the directory with cloned MALA repository):
-        - ``pip install -e .``
 
 
 
