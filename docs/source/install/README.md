@@ -80,7 +80,7 @@ Follow the steps below to set up the necessary environment.
 
 1. (optional) If needed, specify the python version you want to use in this
 environment by replacing `3.6` with your desired version in `environment.yml`:
-   ```yml
+   ```yaml
    dependencies:
      - python>=yourversionhere
    ```
