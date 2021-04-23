@@ -187,7 +187,7 @@ class DataHandler:
         self.training_data_set = None
         self.validation_data_set = None
         self.test_data_set = None
-
+        self.parameters.data_splitting_snapshots = []
         self.parameters.snapshot_directories_list = []
 
     def prepare_data(self, reparametrize_scaler=True):
