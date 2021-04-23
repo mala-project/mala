@@ -122,11 +122,6 @@
 <p class="caption"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#developing-code">Developing code</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html#issues">Issues</a></li>
 </ul>
 
             
@@ -207,7 +202,7 @@ If you intend to use the optional Quantum Espresso total energy module or LAMMPS
 yourself the necessary python bindings will be created for your python version. If you operate on a machine that
 provides pre-installed versions of these packages (e.g. on an HPC cluster), you need to adhere to the python version
 for which these python bindings have been created. A list of machines on which MALA was tested can be found in
-<a class="reference internal" href="tested_systems.html"><span class="doc">Successfully tested on</span></a>.</p>
+<a class="reference internal" href="tested_systems.html"><span class="doc std std-doc">Successfully tested on</span></a>.</p>
 </div>
 <div class="section" id="python-packages">
 <h3>Python packages<a class="headerlink" href="#python-packages" title="Permalink to this headline">¶</a></h3>
@@ -275,12 +270,13 @@ files will likely install newer versions of (sub-)dependencies and we cannot gua
 <td><code>mala_gpu_environment.yml</code></td>
 </tr>
 </tbody>
-</table><p>Follow the steps below to set up the necessary environment.</p>
+</table>
+<p>Follow the steps below to set up the necessary environment.</p>
 <ol>
 <li><p>(optional) If needed, specify the python version you want to use in this
 environment by replacing <code class="docutils literal notranslate"><span class="pre">3.6</span></code> with your desired version in <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code>:</p>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>dependencies:
-  - python&gt;=yourversionhere
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dependencies</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">python&gt;=yourversionhere</span>
 </pre></div>
 </div>
 </li>
@@ -313,13 +309,13 @@ environment by replacing <code class="docutils literal notranslate"><span class=
 Simulator <a class="reference external" href="https://lammps.sandia.gov/">LAMMPS</a> for input data preprocessing. It
 is not necessary to install LAMMPS if you are you using this workflow with
 preprocessed data. If you need/want to install LAMMPS, please refer to
-<a class="reference internal" href="INSTALL_LAMMPS.html"><span class="doc">Setting up LAMMPS</span></a>.</p>
+<a class="reference internal" href="INSTALL_LAMMPS.html"><span class="doc std std-doc">Setting up LAMMPS</span></a>.</p>
 </div>
 <div class="section" id="total-energy-module-optional">
 <h3>Total energy module (optional)<a class="headerlink" href="#total-energy-module-optional" title="Permalink to this headline">¶</a></h3>
 <p>It is possible to utilize Quantum Espresso to calculate the total energy of a given system using python bindings.
 This provides an additional post-processing capability, but is not necessarily needed for using this workflow.
-If you want to use this module, please refer to <a class="reference internal" href="INSTALL_TE_QE.html"><span class="doc">Python bindings to Quantum Espresso</span></a>.</p>
+If you want to use this module, please refer to <a class="reference internal" href="INSTALL_TE_QE.html"><span class="doc std std-doc">Python bindings to Quantum Espresso</span></a>.</p>
 </div>
 </div>
 <div class="section" id="installing-the-mala-package">
@@ -343,7 +339,7 @@ sure the setup was successful.</p></li>
 <p>Install the prerequisites:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -U sphinx
 $ pip install -U sphinx_rtd_theme
-$ pip install -U recommonmark
+$ pip install -U myst-parser
 $ pip intsall -U sphinx-markdown-tables
 </pre></div>
 </div>

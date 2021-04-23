@@ -103,11 +103,6 @@
 <p class="caption"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#developing-code">Developing code</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#submitting-a-merge-request">Submitting a merge request</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html#issues">Issues</a></li>
 </ul>
 
             
@@ -472,7 +467,7 @@
             <span class="c1"># self.batch_size= self.batch_size*hvd.local_size()</span>
 
             <span class="n">compression</span> <span class="o">=</span> <span class="n">hvd</span><span class="o">.</span><span class="n">Compression</span><span class="o">.</span><span class="n">fp16</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span>\
-                <span class="n">use_compression</span> <span class="k">else</span> <span class="n">hvd</span><span class="o">.</span><span class="n">Compression</span><span class="o">.</span><span class="n">none</span>
+                <span class="n">running</span><span class="o">.</span><span class="n">use_compression</span> <span class="k">else</span> <span class="n">hvd</span><span class="o">.</span><span class="n">Compression</span><span class="o">.</span><span class="n">none</span>
 
             <span class="c1"># If lazy loading is used we do not shuffle the data points on</span>
             <span class="c1"># their own, but rather shuffle them</span>
