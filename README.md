@@ -26,6 +26,25 @@ Please refer to [Installation of MALA](docs/source/install/README.md).
 You can familiarize yourself with the usage of this package by running
 the examples in the `example/` folder.
 
+## Developers
+### Scientific Supervision
+
+- Attila Cangi
+- Siva Rajamanickam
+
+### Core Developers
+
+- Lenz Fiedler
+- Steve Schmerler
+- Daniel Kotik
+
+### Contributors
+
+
+### Former Members
+
+
+
 ## Citing MALA
 
 If you publish work which uses or mentions MALA, please cite the following paper:
