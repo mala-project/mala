@@ -382,6 +382,7 @@ class DOS(TargetBase):
         return_dos_object.qe_pseudopotentials = ldos_object.qe_pseudopotentials
         return_dos_object.total_energy_dft_calculation = \
             ldos_object.total_energy_dft_calculation
+        return_dos_object.kpoints = ldos_object.kpoints
 
         return return_dos_object
 

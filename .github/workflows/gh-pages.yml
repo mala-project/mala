@@ -1,0 +1,63 @@
+name: docs
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  test-docstrings:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Upgrade pip
+        run: python3 -m pip install --upgrade pip
+
+      - name: Install dependencies
+        run: pip install -qU pydocstyle
+
+      - name: Check docstrings
+        run: pydocstyle --convention=numpy mala
+
+  deploy-pages:
+    needs: test-docstrings
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Upgrade pip
+        run: python3 -m pip install --upgrade pip
+
+      - name: Install dependencies
+        run: |
+          pip install -qU pydocstyle
+          pip install -qU sphinx
+          pip install -qU sphinx_rtd_theme
+          pip install -qU myst-parser
+          pip install -qU sphinx-markdown-tables
+
+      - name: Build API and docs
+        run: |
+          sphinx-apidoc -o docs/source/api mala
+          sphinx-build -b html -d docs/_build/doctrees docs/source docs/_build/html
+          mv -v docs/_build/html public
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public

@@ -32,6 +32,9 @@ try:
 except ModuleNotFoundError:
     printout("Could not run ex02_preprocess_data, most likely because of"
              "missing LAMMPS installation.")
+except FileNotFoundError:
+    printout("Could not run ex02_preprocess_data, most likely because of"
+             "missing cube files.")
 
 # Example 3: Postprocess data. Run it twice, once with Quantum Espresso.
 # if run_example03(do_total_energy=False):

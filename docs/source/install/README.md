@@ -80,7 +80,7 @@ Follow the steps below to set up the necessary environment.
 
 1. (optional) If needed, specify the python version you want to use in this
 environment by replacing `3.6` with your desired version in `environment.yml`:
-   ```yml
+   ```yaml
    dependencies:
      - python>=yourversionhere
    ```
@@ -137,7 +137,7 @@ Install the prerequisites:
 ```sh
 $ pip install -U sphinx
 $ pip install -U sphinx_rtd_theme
-$ pip install -U recommonmark
+$ pip install -U myst-parser
 $ pip intsall -U sphinx-markdown-tables
 ```
 

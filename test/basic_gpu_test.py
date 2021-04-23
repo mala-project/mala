@@ -14,7 +14,7 @@ from mala import printout
 from data_repo_path import get_data_repo_path
 import time
 import numpy as np
-data_path = get_data_repo_path()+"Al256_reduced/"
+data_path = get_data_repo_path()+"Al36/"
 test_checkpoint_name = "test"
 
 

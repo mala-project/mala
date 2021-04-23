@@ -15,8 +15,6 @@ import sys
 # sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../../'))
 
-import sphinx
-from recommonmark.transform import AutoStructify
 
 # -- Project information -----------------------------------------------------
 
@@ -31,7 +29,7 @@ author = 'HZDR'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'recommonmark',
+    'myst_parser',
     'sphinx_markdown_tables',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -40,6 +38,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
+    'sphinx.ext.githubpages',
 ]
 
 napoleon_google_docstring = False
@@ -80,9 +79,7 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
 
-source_parsers = {
-    '.md': 'recommonmark.parser.CommonMarkParser',
-}
+
 
 # The suffix of source file names.
 source_suffix = {
@@ -90,13 +87,3 @@ source_suffix = {
     '.txt': 'markdown',
     '.md': 'markdown',
 }
-
-
-# app setup hook
-def setup(app):
-    app.add_config_value('recommonmark_config', {
-        'enable_math': False,
-        'enable_inline_math': True,
-        'enable_eval_rst': True,
-    }, True)
-    app.add_transform(AutoStructify)
