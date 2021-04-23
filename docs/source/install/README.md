@@ -137,7 +137,7 @@ Install the prerequisites:
 ```sh
 $ pip install -U sphinx
 $ pip install -U sphinx_rtd_theme
-$ pip install -U recommonmark
+$ pip install -U myst-parser
 $ pip intsall -U sphinx-markdown-tables
 ```
 
