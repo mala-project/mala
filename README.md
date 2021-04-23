@@ -4,6 +4,8 @@
 
 [![image](https://github.com/mala-project/mala/actions/workflows/gh-pages.yml/badge.svg)](https://mala-project.github.io/mala/)
 
+[![image](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+
 MALA tools (Materials Analysis and Learning) is a machine-learning based
 framework to enable multiscale modeling by bypassing computationally
 expensive density functional simulations. It is designed as a python
