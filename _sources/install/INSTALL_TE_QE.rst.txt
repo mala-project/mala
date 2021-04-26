@@ -29,6 +29,9 @@ Build Quantum Espresso
 
 1.  If you already have a build of QE, go into the ``q-e`` folder and
     run ``make veryclean``.
+
+    1. Optional: If you want to use this QE installation to calculate LDOS data,#
+    copy ``ldos.f90`` into ``q-e/PP/src/`` prior to (re-)compilation.
 2.  Make sure you have the necessary modules loaded (``gcc``,
     ``openmpi``).
 3.  Set up the environment using

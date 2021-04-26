@@ -234,7 +234,10 @@
         <span class="c1"># with QE. However, there were some (very small) inaccuracies when</span>
         <span class="c1"># operating only at the gamma point. Consequently, MALA defaults</span>
         <span class="c1"># to a small k-grid to ensure best accuracy and performance.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># UPDATE 23.04.2021: As per discussion bewteen Normand Modine and Lenz</span>
+        <span class="c1"># Fiedler, the number of k-points is moved to 1.</span>
+        <span class="c1"># The small inaccuracies are neglected for now.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># (2, 2, 2)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span> <span class="o">=</span> <span class="p">{}</span>
 
 <div class="viewcode-block" id="TargetBase.read_from_cube"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target_base.TargetBase.read_from_cube">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
