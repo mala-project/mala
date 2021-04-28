@@ -60,8 +60,7 @@ class Network(nn.Module):
         # device.
         if params.use_gpu:
             local_rank = hvd.local_rank() if self.use_horovod else 0
-#             self.to(f'cuda:{local_rank}')
-            self.to(f'cuda')
+            self.to(f'cuda:{local_rank}')
 
     def __initialize_as_feedforward(self):
         """Initialize this network as a feed-forward network."""
