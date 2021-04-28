@@ -82,8 +82,8 @@ class Tester(Runner):
                                         mini_batch_size):
                                         offset+((i + 1) * self.parameters.
                                         mini_batch_size)]
-            if self.parameters_full.use_gpu:
-                inputs = inputs.to('cuda')
+            inputs = inputs.to(self.parameters_full.device_type + \
+                    self.parameters_full.device_id)
             predicted_outputs[i * self.parameters.
                               mini_batch_size:(i + 1) * self.parameters.
                               mini_batch_size, :] = \

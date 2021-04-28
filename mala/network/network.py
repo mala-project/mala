@@ -23,9 +23,10 @@ class Network(nn.Module):
         """
         # copy the network params from the input parameter object
         self.use_horovod = params.use_horovod
+        self.params_full = params
         self.params = params.network
 
-        # if the user has planted a seed (for comparibility purposes) we
+       # if the user has planted a seed (for comparibility purposes) we
         # should use it.
         if params.manual_seed is not None:
             torch.manual_seed(params.manual_seed)
@@ -58,9 +59,8 @@ class Network(nn.Module):
 
         # Once everything is done, we can move the Network on the target
         # device.
-        if params.use_gpu:
-            local_rank = hvd.local_rank() if self.use_horovod else 0
-            self.to(f'cuda:{local_rank}')
+        self.to(self.params_full.device_type + \
+                self.params_full.device_id)
 
     def __initialize_as_feedforward(self):
         """Initialize this network as a feed-forward network."""

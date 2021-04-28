@@ -186,10 +186,12 @@ class Trainer(Runner):
 
             for batchid, (inputs, outputs) in \
                     enumerate(self.training_data_loader):
-                if self.parameters_full.use_gpu:
 
-                    inputs = inputs.to('cuda')
-                    outputs = outputs.to('cuda')
+                inputs = inputs.to(self.parameters_full.device_type + \
+                        self.parameters_full.device_id)
+                outputs = outputs.to(self.parameters_full.device_type + \
+                        self.parameters_full.device_id)
+
                 training_loss += self.__process_mini_batch(self.network,
                                                            inputs, outputs)
 
@@ -296,7 +298,7 @@ class Trainer(Runner):
             # self.batch_size= self.batch_size*hvd.local_size()
 
             compression = hvd.Compression.fp16 if self.parameters_full.\
-                running.use_compression else hvd.Compression.none
+                use_compression else hvd.Compression.none
 
             # If lazy loading is used we do not shuffle the data points on
             # their own, but rather shuffle them
@@ -407,9 +409,10 @@ class Trainer(Runner):
         validation_loss = []
         with torch.no_grad():
             for x, y in vdl:
-                if self.parameters_full.use_gpu:
-                    x = x.to('cuda')
-                    y = y.to('cuda')
+                x = x.to(self.parameters_full.device_type + \
+                        self.parameters_full.device_id)
+                y = y.to(self.parameters_full.device_type + \
+                        self.parameters_full.device_id)
                 prediction = network(x)
                 validation_loss.append(network.calculate_loss(prediction, y)
                                        .item())
