@@ -397,6 +397,9 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.hyper_opt_method = "optuna"
         self.checkpoints_each_trial = 0
         self.checkpoint_name = "checkpoint_mala_ho"
+        self.study_name = None
+        self.storage_database_username = None
+        self.storage_database = None
 
     def show(self, indent=""):
         """

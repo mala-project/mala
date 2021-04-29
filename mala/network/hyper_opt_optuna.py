@@ -37,12 +37,56 @@ class HyperOptOptuna(HyperOptBase):
             sampler = optuna.samplers.TPESampler(seed=params.manual_seed)
 
         # Create the study.
-        self.study = optuna.\
-            create_study(direction=self.params.hyperparameters.direction,
-                         sampler=sampler)
+        if self.params.hyperparameters.storage_database is None:
+            self.study = optuna.\
+                create_study(direction=self.params.hyperparameters.direction,
+                             sampler=sampler,
+                             study_name=self.params.hyperparameters.
+                             study_name)
+        else:
+            storage_string, does_already_exist = self.setup_remote_storage()
+            if does_already_exist is True:
+                self.study = optuna.load_study(
+                    study_name=self.params.hyperparameters.
+                        study_name,
+                    storage=storage_string)
+            else:
+                self.study = optuna.\
+                    create_study(direction=self.params.hyperparameters.direction,
+                             sampler=sampler,
+                             study_name=self.params.hyperparameters.
+                             study_name,
+                             storage=storage_string)
+
         self.objective = None
         self.checkpoint_counter = 0
         self.trials_from_last_checkpoint = trials_from_last_checkpoint
+
+    def setup_remote_storage(self):
+        from sqlalchemy import create_engine
+        from sqlalchemy_utils import database_exists, create_database
+        # If a RDB storage database is to be used, it has to be provided
+        # to the user.
+        if self.params.hyperparameters.storage_database_username is None:
+            raise Exception("If RDB storage is used, a RDB username has"
+                            " to be provided.")
+        if self.params.hyperparameters.study_name is None:
+            raise Exception("If RDB storage is used, a name for the study "
+                            "has to be provided.")
+
+        # Parse the user input.
+        storage_string = "mysql://"+self.params.hyperparameters.\
+                         storage_database_username + \
+                         "@/"+self.params.hyperparameters.storage_database
+
+        # Create the database, if it does not exist already.
+        engine = create_engine(storage_string)
+        does_already_exist = True
+        if not database_exists(engine.url):
+            create_database(engine.url)
+            does_already_exist = False
+
+        return storage_string, does_already_exist
 
     def perform_study(self):
         """
