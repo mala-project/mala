@@ -79,7 +79,15 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
 
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+#html_logo = "./img/logos/mala_vertical.png"
 
+# The name of an image file (relative to this directory) to use as a favicon of
+# the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
+# pixels large.
+#html_favicon = "../resources/theme/favicon.ico"
+html_favicon = "./img/logos/mala_favicon.png"
 
 # The suffix of source file names.
 source_suffix = {
