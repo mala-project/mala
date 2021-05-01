@@ -173,8 +173,8 @@ class DataHandler:
         snapshot = Snapshot(input_npy_file, input_npy_directory, input_units,
                             output_npy_file, output_npy_directory,
                             output_units, calculation_output_file)
-        if add_snapshot_as is "tr" or add_snapshot_as is "te" \
-           or add_snapshot_as is "va":
+        if add_snapshot_as == "tr" or add_snapshot_as == "te" \
+           or add_snapshot_as == "va":
             self.parameters.data_splitting_snapshots.append(add_snapshot_as)
         self.parameters.snapshot_directories_list.append(snapshot)
 
