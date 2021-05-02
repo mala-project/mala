@@ -30,21 +30,22 @@ the examples in the `example/` folder.
 
 ## Developers
 ### Scientific Supervision
-
 - Attila Cangi
 - Siva Rajamanickam
 
 ### Core Developers
-
 - Lenz Fiedler
 - Steve Schmerler
 - Daniel Kotik
 
 ### Contributors
-
+- Omar Faruk
+- Parvez Mohammed
+- Sneha Verma
+- Somashekhar Kulkarni
 
 ### Former Members
-
+- Nils Hoffmann
 
 
 ## Citing MALA
