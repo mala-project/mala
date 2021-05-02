@@ -398,7 +398,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.checkpoints_each_trial = 0
         self.checkpoint_name = "checkpoint_mala_ho"
         self.study_name = None
-        self.storage_database_absolute_path = None
+        self.rdb_storage = None
 
     def show(self, indent=""):
         """

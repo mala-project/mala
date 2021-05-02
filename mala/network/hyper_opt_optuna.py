@@ -37,7 +37,7 @@ class HyperOptOptuna(HyperOptBase):
             sampler = optuna.samplers.TPESampler(seed=params.manual_seed)
 
         # Create the study.
-        if self.params.hyperparameters.storage_database_absolute_path is None:
+        if self.params.hyperparameters.rdb_storage is None:
             self.study = optuna.\
                 create_study(direction=self.params.hyperparameters.direction,
                              sampler=sampler,
@@ -47,15 +47,12 @@ class HyperOptOptuna(HyperOptBase):
             if self.params.hyperparameters.study_name is None:
                 raise Exception("If RDB storage is used, a name for the study "
                                 "has to be provided.")
-            storage_string = "sqlite:///"\
-                             + self.params.hyperparameters.\
-                             storage_database_absolute_path
             self.study = optuna.\
                 create_study(direction=self.params.hyperparameters.direction,
                              sampler=sampler,
                              study_name=self.params.hyperparameters.
                              study_name,
-                             storage=storage_string,
+                             storage=self.params.hyperparameters.rdb_storage,
                              load_if_exists=True)
 
         self.objective = None
