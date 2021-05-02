@@ -220,7 +220,9 @@ class Trainer(Runner):
                     vloss_old = vloss
                 else:
                     self.patience_counter += 1
-                    printout("Validation accuracy has not improved enough.")
+                    if self.parameters.verbosity:
+                        printout("Validation accuracy has not improved "
+                                 "enough.")
                     if self.patience_counter >= self.parameters.\
                             early_stopping_epochs:
                         if self.parameters.verbosity:
