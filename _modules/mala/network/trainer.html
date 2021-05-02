@@ -415,7 +415,8 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">__create_training_checkpoint</span><span class="p">()</span>
                     <span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Time for epoch[s]:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">verbosity</span><span class="p">:</span>
+                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Time for epoch[s]:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
 
         <span class="c1"># Calculate final loss.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">final_validation_loss</span> <span class="o">=</span> <span class="n">vloss</span>
@@ -425,8 +426,8 @@
                                             <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
                 <span class="n">tloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span><span class="n">tloss</span><span class="p">,</span> <span class="s1">&#39;average_loss&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">final_test_loss</span> <span class="o">=</span> <span class="n">tloss</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Final test data loss: &quot;</span><span class="p">,</span> <span class="n">tloss</span><span class="p">)</span></div>
+            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Final test data loss: &quot;</span><span class="p">,</span> <span class="n">tloss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_test_loss</span> <span class="o">=</span> <span class="n">tloss</span></div>
 
     <span class="k">def</span> <span class="nf">__prepare_to_train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_dict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Prepare everything for training.&quot;&quot;&quot;</span>
