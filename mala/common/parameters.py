@@ -472,6 +472,18 @@ class Parameters:
     manual_seed: int
         If not none, this value is used as manual seed for the neural networks.
         Can be used to make experiments comparable. Default: None.
+
+    use_horovod: bool
+        Determines if the data-parallel Horovod package is being used. Default: False.
+
+    use_gpu: bool
+        Determines if Nvidia GPUs are being used. Default: False.
+
+    device_type: String
+        Which device type to train on. Default: "cpu".
+
+    device_id: Int
+        Which node-local device id to train on. Default: 0.
     """
 
     def __init__(self):
@@ -489,6 +501,8 @@ class Parameters:
         # Properties
         self.use_horovod = False
         self.use_gpu = False
+        self.device_type = "cpu"
+        self.device_id = 0
 
     @property
     def use_gpu(self):
@@ -499,9 +513,11 @@ class Parameters:
     def use_gpu(self, value):
         if value is False:
             self._use_gpu = False
-        if value is True:
+            self.device_type = "cpu"
+        else:
             if torch.cuda.is_available():
                 self._use_gpu = True
+                self.device_type = "cuda"
             else:
                 warnings.warn("GPU requested, but no GPU found. MALA will "
                               "operate with CPU only.", stacklevel=3)
@@ -515,6 +531,10 @@ class Parameters:
     def use_horovod(self, value):
         if value:
             hvd.init()
+            self.device_id = hvd.local_rank()
+        else:
+            self.device_id = 0
+
         set_horovod_status(value)
         self._use_horovod = value
 
