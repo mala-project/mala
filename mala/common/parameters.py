@@ -322,7 +322,7 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_patience = 0
         self.use_compression = False
         # TODO: Give this parameter a more descriptive name.
-        self.kwargs = {'num_workers': 1, 'pin_memory': False}
+        self.kwargs = {'num_workers': 0, 'pin_memory': False}
         # TODO: Objects should not be parameters!
         self.sampler = {"train_sampler": None, "validate_sampler": None,
                         "test_sampler": None}
@@ -474,16 +474,16 @@ class Parameters:
         Can be used to make experiments comparable. Default: None.
 
     use_horovod: bool
-        Determines if the data-parallel Horovod package is being used
+        Determines if the data-parallel Horovod package is being used. Default: False.
 
     use_gpu: bool
-        Determines if Nvidia GPUs are being used
+        Determines if Nvidia GPUs are being used. Default: False.
 
     device_type: String
-        Which device type to train on
+        Which device type to train on. Default: "cpu".
 
-    device_id: String
-        Which node-local device id (0 being the default) to train on
+    device_id: Int
+        Which node-local device id to train on. Default: 0.
     """
 
     def __init__(self):
@@ -502,7 +502,7 @@ class Parameters:
         self.use_horovod = False
         self.use_gpu = False
         self.device_type = "cpu"
-        self.device_id = ":0"
+        self.device_id = 0
 
     @property
     def use_gpu(self):
@@ -531,13 +531,12 @@ class Parameters:
     def use_horovod(self, value):
         if value:
             hvd.init()
-            self.device_id = f":{hvd.local_rank()}"
+            self.device_id = hvd.local_rank()
         else:
-            self.device_id = ":0"
+            self.device_id = 0
 
         set_horovod_status(value)
         self._use_horovod = value
-
 
     def show(self):
         """Print name and values of all attributes of this object."""

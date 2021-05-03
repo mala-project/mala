@@ -26,7 +26,7 @@ class Network(nn.Module):
         self.params_full = params
         self.params = params.network
 
-       # if the user has planted a seed (for comparibility purposes) we
+        # if the user has planted a seed (for comparibility purposes) we
         # should use it.
         if params.manual_seed is not None:
             torch.manual_seed(params.manual_seed)
@@ -59,8 +59,8 @@ class Network(nn.Module):
 
         # Once everything is done, we can move the Network on the target
         # device.
-        self.to(self.params_full.device_type + \
-                self.params_full.device_id)
+        self.to(f"{self.params_full.device_type}:"
+                f"{self.params_full.device_id}")
 
     def __initialize_as_feedforward(self):
         """Initialize this network as a feed-forward network."""
