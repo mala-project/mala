@@ -34,6 +34,8 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -270,26 +272,15 @@
         <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
-
             <span class="k">elif</span> <span class="s2">&quot;layer_activation&quot;</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span><span class="o">.</span>\
                     <span class="n">append</span><span class="p">(</span><span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">))</span>
-
             <span class="k">elif</span> <span class="s2">&quot;ff_neurons_layer&quot;</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;feed-forward&quot;</span><span class="p">:</span>
-                    <span class="c1"># Check for zero neuron layers; These indicate layers</span>
-                    <span class="c1"># that can be left out.</span>
-                    <span class="n">layer_size</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">layer_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span><span class="o">.</span>\
-                            <span class="n">append</span><span class="p">(</span><span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">))</span>
-
+                    <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span><span class="o">.</span>\
+                        <span class="n">append</span><span class="p">(</span><span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">))</span>
             <span class="k">elif</span> <span class="s2">&quot;trainingtype&quot;</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">trainingtype</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
-
-            <span class="k">elif</span> <span class="s2">&quot;mini_batch_size&quot;</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
-
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Optimization of hyperparameter &quot;</span><span class="p">,</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                                 <span class="s2">&quot;not supported at the moment.&quot;</span><span class="p">)</span>

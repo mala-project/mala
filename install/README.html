@@ -34,6 +34,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -339,10 +341,7 @@ sure the setup was successful.</p></li>
 <div class="section" id="build-documentation-locally-optional">
 <h3>Build documentation locally (optional)<a class="headerlink" href="#build-documentation-locally-optional" title="Permalink to this headline">¶</a></h3>
 <p>Install the prerequisites:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -U sphinx
-$ pip install -U sphinx_rtd_theme
-$ pip install -U myst-parser
-$ pip intsall -U sphinx-markdown-tables
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -r docs/requirements.txt
 </pre></div>
 </div>
 <ol class="simple">

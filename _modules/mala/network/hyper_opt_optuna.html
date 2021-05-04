@@ -34,6 +34,8 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -210,24 +212,9 @@
             <span class="n">sampler</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">TPESampler</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">)</span>
 
         <span class="c1"># Create the study.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span>\
-                <span class="n">create_study</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">direction</span><span class="p">,</span>
-                             <span class="n">sampler</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span>
-                             <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>
-                             <span class="n">study_name</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">study_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;If RDB storage is used, a name for the study &quot;</span>
-                                <span class="s2">&quot;has to be provided.&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span>\
-                <span class="n">create_study</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">direction</span><span class="p">,</span>
-                             <span class="n">sampler</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span>
-                             <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>
-                             <span class="n">study_name</span><span class="p">,</span>
-                             <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span><span class="p">,</span>
-                             <span class="n">load_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span>\
+            <span class="n">create_study</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">direction</span><span class="p">,</span>
+                         <span class="n">sampler</span><span class="o">=</span><span class="n">sampler</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trials_from_last_checkpoint</span> <span class="o">=</span> <span class="n">trials_from_last_checkpoint</span>

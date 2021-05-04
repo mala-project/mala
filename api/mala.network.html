@@ -34,6 +34,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -204,12 +206,12 @@
 <p>Base class for all hyperparameter optimizers.</p>
 <dl class="py class">
 <dt id="mala.network.hyper_opt_base.HyperOptBase">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_base.</span></code><code class="sig-name descname"><span class="pre">HyperOptBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_base.html#HyperOptBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.hyper_opt_base.</code><code class="sig-name descname">HyperOptBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_base.html#HyperOptBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Base class for hyperparameter optimizater.</p>
 <dl class="py method">
 <dt id="mala.network.hyper_opt_base.HyperOptBase.add_hyperparameter">
-<code class="sig-name descname"><span class="pre">add_hyperparameter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_base.html#HyperOptBase.add_hyperparameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase.add_hyperparameter" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_hyperparameter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">opttype</span><span class="o">=</span><span class="default_value">'float'</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">low</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">high</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">choices</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_base.html#HyperOptBase.add_hyperparameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase.add_hyperparameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a hyperparameter to the current investigation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -240,20 +242,20 @@ ff_neurons_layer_002, etc. as names.</p></li>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_base.HyperOptBase.clear_hyperparameters">
-<code class="sig-name descname"><span class="pre">clear_hyperparameters</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_base.html#HyperOptBase.clear_hyperparameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase.clear_hyperparameters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">clear_hyperparameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_base.html#HyperOptBase.clear_hyperparameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase.clear_hyperparameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clear the list of hyperparameters that are to be investigated.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_base.HyperOptBase.perform_study">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">perform_study</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_base.html#HyperOptBase.perform_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase.perform_study" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">perform_study</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_base.html#HyperOptBase.perform_study"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase.perform_study" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the study, i.e. the optimization.</p>
 <p>This is done by sampling a certain subset of network architectures.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_base.HyperOptBase.set_optimal_parameters">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">set_optimal_parameters</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_base.html#HyperOptBase.set_optimal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">set_optimal_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_base.html#HyperOptBase.set_optimal_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the optimal parameters found in the present study.</p>
 <p>The parameters will be written to the parameter object with which the
 hyperparameter optimizer was created.</p>
@@ -267,7 +269,7 @@ hyperparameter optimizer was created.</p>
 <p>Interface to get correct hyperparameter optimizer.</p>
 <dl class="py function">
 <dt id="mala.network.hyper_opt_interface.HyperOptInterface">
-<code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_interface.</span></code><code class="sig-name descname"><span class="pre">HyperOptInterface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_interface.html#HyperOptInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_interface.HyperOptInterface" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mala.network.hyper_opt_interface.</code><code class="sig-name descname">HyperOptInterface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_interface.html#HyperOptInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_interface.HyperOptInterface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the correct hyperparameter optimizer based on the parameters provided.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -291,13 +293,13 @@ hyperparameter optimizer was created.</p>
 <p>Hyperparameter optimizer working without training.</p>
 <dl class="py class">
 <dt id="mala.network.hyper_opt_notraining.HyperOptNoTraining">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_notraining.</span></code><code class="sig-name descname"><span class="pre">HyperOptNoTraining</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_notraining.html#HyperOptNoTraining"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.hyper_opt_notraining.</code><code class="sig-name descname">HyperOptNoTraining</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_notraining.html#HyperOptNoTraining"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.hyper_opt_base.HyperOptBase" title="mala.network.hyper_opt_base.HyperOptBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.hyper_opt_base.HyperOptBase</span></code></a></p>
 <p>Hyperparameter optimizer that does not require training networks.</p>
 <p>Networks are analysed using the Jacobian.</p>
 <dl class="py method">
 <dt id="mala.network.hyper_opt_notraining.HyperOptNoTraining.perform_study">
-<code class="sig-name descname"><span class="pre">perform_study</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_notraining.html#HyperOptNoTraining.perform_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining.perform_study" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">perform_study</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trial_list</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_notraining.html#HyperOptNoTraining.perform_study"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining.perform_study" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the study, i.e. the optimization.</p>
 <p>This is done by sampling a certain subset of network architectures.
 Currently it is mandatory to provide a trial_list, although it
@@ -315,7 +317,7 @@ optimizer.</p>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_notraining.HyperOptNoTraining.set_optimal_parameters">
-<code class="sig-name descname"><span class="pre">set_optimal_parameters</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_notraining.html#HyperOptNoTraining.set_optimal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_optimal_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_notraining.html#HyperOptNoTraining.set_optimal_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the optimal parameters found in the present study.</p>
 <p>The parameters will be written to the parameter object with which the
 hyperparameter optimizer was created.</p>
@@ -329,12 +331,12 @@ hyperparameter optimizer was created.</p>
 <p>Hyperparameter optimizer using orthogonal array tuning.</p>
 <dl class="py class">
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_oat.</span></code><code class="sig-name descname"><span class="pre">HyperOptOAT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.hyper_opt_oat.</code><code class="sig-name descname">HyperOptOAT</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.hyper_opt_base.HyperOptBase" title="mala.network.hyper_opt_base.HyperOptBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.hyper_opt_base.HyperOptBase</span></code></a></p>
 <p>Hyperparameter optimizer using Orthogonal Array Tuning.</p>
 <dl class="py method">
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter">
-<code class="sig-name descname"><span class="pre">add_hyperparameter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.add_hyperparameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add_hyperparameter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">opttype</span><span class="o">=</span><span class="default_value">'float'</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">low</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">high</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">choices</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.add_hyperparameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a hyperparameter to the current investigation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -361,13 +363,13 @@ etc. as names.</p></li>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT.orthogonal_arr">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">orthogonal_arr</span></code><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.orthogonal_arr" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">orthogonal_arr</code><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.orthogonal_arr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Orthogonal array used for optimal hyperparameter sampling.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT.perform_study">
-<code class="sig-name descname"><span class="pre">perform_study</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.perform_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.perform_study" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">perform_study</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.perform_study"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.perform_study" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the study, i.e. the optimization.</p>
 <p>This is done by sampling a certain subset of network architectures.
 In this case, these are choosen based on an orthogonal array.</p>
@@ -375,7 +377,7 @@ In this case, these are choosen based on an orthogonal array.</p>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT.set_optimal_parameters">
-<code class="sig-name descname"><span class="pre">set_optimal_parameters</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.set_optimal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_optimal_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_oat.html#HyperOptOAT.set_optimal_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the optimal parameters found in the present study.</p>
 <p>The parameters will be written to the parameter object with which the
 hyperparameter optimizer was created.</p>
@@ -389,12 +391,12 @@ hyperparameter optimizer was created.</p>
 <p>Hyperparameter optimizer using optuna.</p>
 <dl class="py class">
 <dt id="mala.network.hyper_opt_optuna.HyperOptOptuna">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_optuna.</span></code><code class="sig-name descname"><span class="pre">HyperOptOptuna</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials_from_last_checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.hyper_opt_optuna.</code><code class="sig-name descname">HyperOptOptuna</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">trials_from_last_checkpoint</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.hyper_opt_base.HyperOptBase" title="mala.network.hyper_opt_base.HyperOptBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.hyper_opt_base.HyperOptBase</span></code></a></p>
 <p>Hyperparameter optimizer using Optuna.</p>
 <dl class="py method">
 <dt id="mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study">
-<code class="sig-name descname"><span class="pre">get_trials_from_study</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna.get_trials_from_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_trials_from_study</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna.get_trials_from_study"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the trials from the last study.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -408,7 +410,7 @@ hyperparameter optimizer was created.</p>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_optuna.HyperOptOptuna.load_from_file">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.load_from_file" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">load_from_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">file_path</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna.load_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.load_from_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a hyperparameter optimizer from a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -431,7 +433,7 @@ be loaded.</p></li>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_optuna.HyperOptOptuna.perform_study">
-<code class="sig-name descname"><span class="pre">perform_study</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna.perform_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.perform_study" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">perform_study</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna.perform_study"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.perform_study" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the study, i.e. the optimization.</p>
 <p>This is done by sampling a certain subset of network architectures.
 In this case, optuna is used.</p>
@@ -439,7 +441,7 @@ In this case, optuna is used.</p>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna.resume_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">resume_checkpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">checkpoint_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna.resume_checkpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare resumption of hyperparameter optimization from a checkpoint.</p>
 <p>Please note that to actually resume the optimization,
 HyperOptOptuna.perform_study() still has to be called.</p>
@@ -460,7 +462,7 @@ HyperOptOptuna.perform_study() still has to be called.</p>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_optuna.HyperOptOptuna.set_optimal_parameters">
-<code class="sig-name descname"><span class="pre">set_optimal_parameters</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna.set_optimal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_optimal_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna.set_optimal_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the optimal parameters found in the present study.</p>
 <p>The parameters will be written to the parameter object with which the
 hyperparameter optimizer was created.</p>
@@ -474,7 +476,7 @@ hyperparameter optimizer was created.</p>
 <p>Interface function to get the correct type of hyperparameter.</p>
 <dl class="py function">
 <dt id="mala.network.hyperparameter_interface.HyperparameterInterface">
-<code class="sig-prename descclassname"><span class="pre">mala.network.hyperparameter_interface.</span></code><code class="sig-name descname"><span class="pre">HyperparameterInterface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hotype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_interface.html#HyperparameterInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyperparameter_interface.HyperparameterInterface" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mala.network.hyperparameter_interface.</code><code class="sig-name descname">HyperparameterInterface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hotype</span></em>, <em class="sig-param"><span class="n">opttype</span><span class="o">=</span><span class="default_value">'float'</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">low</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">high</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">choices</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_interface.html#HyperparameterInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyperparameter_interface.HyperparameterInterface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the correct type of hyperparameter based on your hotype.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -523,12 +525,12 @@ etc. as names.</p></li>
 <p>Hyperparameter to use with OAT.</p>
 <dl class="py class">
 <dt id="mala.network.hyperparameter_oat.HyperparameterOAT">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyperparameter_oat.</span></code><code class="sig-name descname"><span class="pre">HyperparameterOAT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'categorical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_oat.html#HyperparameterOAT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyperparameter_oat.HyperparameterOAT" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.hyperparameter_oat.</code><code class="sig-name descname">HyperparameterOAT</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">opttype</span><span class="o">=</span><span class="default_value">'categorical'</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">choices</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_oat.html#HyperparameterOAT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyperparameter_oat.HyperparameterOAT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represents a hyperparameter for OAT.</p>
 <dl class="py method">
 <dt id="mala.network.hyperparameter_oat.HyperparameterOAT.get_categorical">
-<code class="sig-name descname"><span class="pre">get_categorical</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_oat.html#HyperparameterOAT.get_categorical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyperparameter_oat.HyperparameterOAT.get_categorical" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_categorical</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trial</span></em>, <em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_oat.html#HyperparameterOAT.get_categorical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyperparameter_oat.HyperparameterOAT.get_categorical" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract categorical (string) hyperparameter from on a optuna Trial.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -548,7 +550,7 @@ etc. as names.</p></li>
 
 <dl class="py method">
 <dt id="mala.network.hyperparameter_oat.HyperparameterOAT.get_parameter">
-<code class="sig-name descname"><span class="pre">get_parameter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_oat.html#HyperparameterOAT.get_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyperparameter_oat.HyperparameterOAT.get_parameter" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_parameter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trial</span></em>, <em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_oat.html#HyperparameterOAT.get_parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyperparameter_oat.HyperparameterOAT.get_parameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract current value of hyperparameter from an orthogonal array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -574,12 +576,12 @@ etc. as names.</p></li>
 <p>Hyperparameter to use with optuna.</p>
 <dl class="py class">
 <dt id="mala.network.hyperparameter_optuna.HyperparameterOptuna">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyperparameter_optuna.</span></code><code class="sig-name descname"><span class="pre">HyperparameterOptuna</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_optuna.html#HyperparameterOptuna"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.hyperparameter_optuna.</code><code class="sig-name descname">HyperparameterOptuna</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">opttype</span><span class="o">=</span><span class="default_value">'float'</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">low</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">high</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">choices</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_optuna.html#HyperparameterOptuna"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represents an optuna parameter.</p>
 <dl class="py method">
 <dt id="mala.network.hyperparameter_optuna.HyperparameterOptuna.get_categorical">
-<code class="sig-name descname"><span class="pre">get_categorical</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">optuna.trial.Trial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_optuna.html#HyperparameterOptuna.get_categorical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_categorical" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_categorical</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trial</span><span class="p">:</span> <span class="n">optuna.trial.Trial</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_optuna.html#HyperparameterOptuna.get_categorical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_categorical" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract categorical (string) hyperparameter from on a optuna Trial.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -597,7 +599,7 @@ extracted.</p>
 
 <dl class="py method">
 <dt id="mala.network.hyperparameter_optuna.HyperparameterOptuna.get_float">
-<code class="sig-name descname"><span class="pre">get_float</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">optuna.trial.Trial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_optuna.html#HyperparameterOptuna.get_float"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_float" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_float</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trial</span><span class="p">:</span> <span class="n">optuna.trial.Trial</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_optuna.html#HyperparameterOptuna.get_float"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_float" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract float hyperparameter from on a optuna Trial.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -615,7 +617,7 @@ extracted.</p>
 
 <dl class="py method">
 <dt id="mala.network.hyperparameter_optuna.HyperparameterOptuna.get_int">
-<code class="sig-name descname"><span class="pre">get_int</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">optuna.trial.Trial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_optuna.html#HyperparameterOptuna.get_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_int" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trial</span><span class="p">:</span> <span class="n">optuna.trial.Trial</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_optuna.html#HyperparameterOptuna.get_int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_int" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract integer hyperparameter from on a optuna Trial.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -633,7 +635,7 @@ extracted.</p>
 
 <dl class="py method">
 <dt id="mala.network.hyperparameter_optuna.HyperparameterOptuna.get_parameter">
-<code class="sig-name descname"><span class="pre">get_parameter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">optuna.trial.Trial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_optuna.html#HyperparameterOptuna.get_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_parameter" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_parameter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trial</span><span class="p">:</span> <span class="n">optuna.trial.Trial</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter_optuna.html#HyperparameterOptuna.get_parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_parameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract current value of hyperparameter from on a optuna Trial.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -657,12 +659,12 @@ extracted.</p>
 <p>Neural network for MALA.</p>
 <dl class="py class">
 <dt id="mala.network.network.Network">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.network.</span></code><code class="sig-name descname"><span class="pre">Network</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.Network" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.network.</code><code class="sig-name descname">Network</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.network.Network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.</span></code></p>
 <p>Central network class for this framework, based on pytorch.nn.Module.</p>
 <dl class="py method">
 <dt id="mala.network.network.Network.calculate_loss">
-<code class="sig-name descname"><span class="pre">calculate_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.calculate_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.Network.calculate_loss" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">calculate_loss</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">output</span></em>, <em class="sig-param"><span class="n">target</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.calculate_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.network.Network.calculate_loss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the loss for a predicted output and target.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -682,7 +684,7 @@ extracted.</p>
 
 <dl class="py method">
 <dt id="mala.network.network.Network.do_prediction">
-<code class="sig-name descname"><span class="pre">do_prediction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.do_prediction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.Network.do_prediction" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">do_prediction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.do_prediction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.network.Network.do_prediction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict the output values for an input array..</p>
 <p>Interface to do predictions. The data put in here is assumed to be a
 scaled torch.Tensor and in the right units. Be aware that this will
@@ -703,7 +705,7 @@ demanding in terms of RAM.</p>
 
 <dl class="py method">
 <dt id="mala.network.network.Network.forward">
-<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.Network.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.network.Network.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a forward pass through the network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -720,7 +722,7 @@ demanding in terms of RAM.</p>
 
 <dl class="py method">
 <dt id="mala.network.network.Network.load_from_file">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.Network.load_from_file" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">load_from_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">path_to_file</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.load_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.network.Network.load_from_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a network from a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -743,7 +745,7 @@ it to)</p></li>
 
 <dl class="py method">
 <dt id="mala.network.network.Network.save_network">
-<code class="sig-name descname"><span class="pre">save_network</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_to_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.save_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.Network.save_network" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">save_network</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_file</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#Network.save_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.network.Network.save_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the network.</p>
 <p>This function serves as an interfaces to pytorchs own saving
 functionalities AND possibly own saving needs.</p>
@@ -762,13 +764,13 @@ functionalities AND possibly own saving needs.</p>
 <p>Objective function for all training based hyperparameter optimizations.</p>
 <dl class="py class">
 <dt id="mala.network.objective_base.ObjectiveBase">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.objective_base.</span></code><code class="sig-name descname"><span class="pre">ObjectiveBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_handler</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/objective_base.html#ObjectiveBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.objective_base.ObjectiveBase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.objective_base.</code><code class="sig-name descname">ObjectiveBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">data_handler</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/objective_base.html#ObjectiveBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.objective_base.ObjectiveBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represents the objective function of a training process.</p>
 <p>This is usually the result of a training of a network.</p>
 <dl class="py method">
 <dt id="mala.network.objective_base.ObjectiveBase.parse_trial">
-<code class="sig-name descname"><span class="pre">parse_trial</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/objective_base.html#ObjectiveBase.parse_trial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.objective_base.ObjectiveBase.parse_trial" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">parse_trial</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trial</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/objective_base.html#ObjectiveBase.parse_trial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.objective_base.ObjectiveBase.parse_trial" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a trial into a network architecture.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -780,7 +782,7 @@ trial or simply a OAT compatible list.</p>
 
 <dl class="py method">
 <dt id="mala.network.objective_base.ObjectiveBase.parse_trial_oat">
-<code class="sig-name descname"><span class="pre">parse_trial_oat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/objective_base.html#ObjectiveBase.parse_trial_oat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.objective_base.ObjectiveBase.parse_trial_oat" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">parse_trial_oat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trial</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/objective_base.html#ObjectiveBase.parse_trial_oat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.objective_base.ObjectiveBase.parse_trial_oat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse an OA based trial into the params attribute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -791,7 +793,7 @@ trial or simply a OAT compatible list.</p>
 
 <dl class="py method">
 <dt id="mala.network.objective_base.ObjectiveBase.parse_trial_optuna">
-<code class="sig-name descname"><span class="pre">parse_trial_optuna</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">optuna.Trial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/objective_base.html#ObjectiveBase.parse_trial_optuna"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.objective_base.ObjectiveBase.parse_trial_optuna" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">parse_trial_optuna</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trial</span><span class="p">:</span> <span class="n">optuna.Trial</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/objective_base.html#ObjectiveBase.parse_trial_optuna"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.objective_base.ObjectiveBase.parse_trial_optuna" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse an optuna style trial into the params attribute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -808,7 +810,7 @@ trial or simply a OAT compatible list.</p>
 <p>Objective functions for hyperparameter optimizations without training.</p>
 <dl class="py class">
 <dt id="mala.network.objective_no_training.ObjectiveNoTraining">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.objective_no_training.</span></code><code class="sig-name descname"><span class="pre">ObjectiveNoTraining</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_parameters</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_handler</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><span class="pre">mala.datahandling.data_handler.DataHandler</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/objective_no_training.html#ObjectiveNoTraining"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.objective_no_training.ObjectiveNoTraining" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.objective_no_training.</code><code class="sig-name descname">ObjectiveNoTraining</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">search_parameters</span><span class="p">:</span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters">mala.common.parameters.Parameters</a></span></em>, <em class="sig-param"><span class="n">data_handler</span><span class="p">:</span> <span class="n"><a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler">mala.datahandling.data_handler.DataHandler</a></span></em>, <em class="sig-param"><span class="n">trial_type</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/objective_no_training.html#ObjectiveNoTraining"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.objective_no_training.ObjectiveNoTraining" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.objective_base.ObjectiveBase" title="mala.network.objective_base.ObjectiveBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.objective_base.ObjectiveBase</span></code></a></p>
 <p>Represents the objective function using no NN training.</p>
 <p>The objective value is calculated using the Jacobian.</p>
@@ -820,7 +822,7 @@ trial or simply a OAT compatible list.</p>
 <p>Runner class for running networks.</p>
 <dl class="py class">
 <dt id="mala.network.runner.Runner">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.runner.</span></code><code class="sig-name descname"><span class="pre">Runner</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/runner.html#Runner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.runner.Runner" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.runner.</code><code class="sig-name descname">Runner</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">network</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/runner.html#Runner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.runner.Runner" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Parent class for all classes that in some sense “run” the network.</p>
 <p>That can be training, benchmarking, inference, etc.</p>
@@ -832,13 +834,13 @@ trial or simply a OAT compatible list.</p>
 <p>Tester class for testing a network.</p>
 <dl class="py class">
 <dt id="mala.network.tester.Tester">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.tester.</span></code><code class="sig-name descname"><span class="pre">Tester</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/tester.html#Tester"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.tester.Tester" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.tester.</code><code class="sig-name descname">Tester</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">network</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/tester.html#Tester"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.tester.Tester" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.runner.Runner" title="mala.network.runner.Runner"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.runner.Runner</span></code></a></p>
 <p>A class for testing a neural network.</p>
 <p>It enables easy inference throughout a test set.</p>
 <dl class="py method">
 <dt id="mala.network.tester.Tester.test_snapshot">
-<code class="sig-name descname"><span class="pre">test_snapshot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/tester.html#Tester.test_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.tester.Tester.test_snapshot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">test_snapshot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">snapshot_number</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/tester.html#Tester.test_snapshot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.tester.Tester.test_snapshot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get actual and predicted output for a snapshot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -862,12 +864,12 @@ trial or simply a OAT compatible list.</p>
 <p>Trainer class for training a network.</p>
 <dl class="py class">
 <dt id="mala.network.trainer.Trainer">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.trainer.</span></code><code class="sig-name descname"><span class="pre">Trainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mala.network.trainer.</code><code class="sig-name descname">Trainer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">network</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">optimizer_dict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.trainer.Trainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.runner.Runner" title="mala.network.runner.Runner"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.runner.Runner</span></code></a></p>
 <p>A class for training a neural network.</p>
 <dl class="py method">
 <dt id="mala.network.trainer.Trainer.load_from_file">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer.load_from_file" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">load_from_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">file_path</span></em>, <em class="sig-param"><span class="n">network</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.load_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.trainer.Trainer.load_from_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a trainer from a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -890,7 +892,7 @@ Has to be compatible with network and data.</p></li>
 
 <dl class="py method">
 <dt id="mala.network.trainer.Trainer.resume_checkpoint">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.resume_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">resume_checkpoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">checkpoint_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.resume_checkpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.trainer.Trainer.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare resumption of training from a checkpoint.</p>
 <p>Please note that to actually resume the training,
 Trainer.train_network() still has to be called.</p>
@@ -912,7 +914,7 @@ Trainer.train_network() still has to be called.</p>
 
 <dl class="py method">
 <dt id="mala.network.trainer.Trainer.train_network">
-<code class="sig-name descname"><span class="pre">train_network</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.train_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer.train_network" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">train_network</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.train_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.network.trainer.Trainer.train_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Train a network using data given by a DataHandler.</p>
 </dd></dl>
 
