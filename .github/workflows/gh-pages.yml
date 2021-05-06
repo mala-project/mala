@@ -44,11 +44,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -qU pydocstyle
-          pip install -qU sphinx
-          pip install -qU sphinx_rtd_theme
-          pip install -qU myst-parser
-          pip install -qU sphinx-markdown-tables
+          pip install -q -r docs/requirements.txt
 
       - name: Build API and docs
         run: |
