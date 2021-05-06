@@ -34,8 +34,6 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -206,12 +204,12 @@
 <p>Collection of all parameter related classes and functions.</p>
 <dl class="py class">
 <dt id="mala.common.parameters.Parameters">
-<em class="property">class </em><code class="sig-prename descclassname">mala.common.parameters.</code><code class="sig-name descname">Parameters</code><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.Parameters" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">Parameters</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>All parameter MALA needs to perform its various tasks.</p>
 <dl class="py attribute">
 <dt id="mala.common.parameters.Parameters.comment">
-<code class="sig-name descname">comment</code><a class="headerlink" href="#mala.common.parameters.Parameters.comment" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">comment</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.comment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Characterizes a set of parameters (e.g. “experiment_ddmmyy”).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -222,7 +220,7 @@
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.Parameters.network">
-<code class="sig-name descname">network</code><a class="headerlink" href="#mala.common.parameters.Parameters.network" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">network</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contains all parameters necessary for constructing a neural network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -233,7 +231,7 @@
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.Parameters.descriptors">
-<code class="sig-name descname">descriptors</code><a class="headerlink" href="#mala.common.parameters.Parameters.descriptors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">descriptors</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.descriptors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contains all parameters necessary for calculating/parsing descriptors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -244,7 +242,7 @@
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.Parameters.targets">
-<code class="sig-name descname">targets</code><a class="headerlink" href="#mala.common.parameters.Parameters.targets" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">targets</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.targets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contains all parameters necessary for calculating/parsing output
 quantites.</p>
 <dl class="field-list simple">
@@ -256,7 +254,7 @@ quantites.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.Parameters.data">
-<code class="sig-name descname">data</code><a class="headerlink" href="#mala.common.parameters.Parameters.data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">data</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contains all parameters necessary for loading and preprocessing data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -267,7 +265,7 @@ quantites.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.Parameters.running">
-<code class="sig-name descname">running</code><a class="headerlink" href="#mala.common.parameters.Parameters.running" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">running</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.running" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contains parameters needed for network runs (train, test or inference).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -278,7 +276,7 @@ quantites.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.Parameters.hyperparameters">
-<code class="sig-name descname">hyperparameters</code><a class="headerlink" href="#mala.common.parameters.Parameters.hyperparameters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">hyperparameters</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.hyperparameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parameters used for hyperparameter optimization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -289,7 +287,7 @@ quantites.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.Parameters.debug">
-<code class="sig-name descname">debug</code><a class="headerlink" href="#mala.common.parameters.Parameters.debug" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">debug</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.debug" title="Permalink to this definition">¶</a></dt>
 <dd><p>Container for all debugging parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -300,7 +298,7 @@ quantites.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.Parameters.manual_seed">
-<code class="sig-name descname">manual_seed</code><a class="headerlink" href="#mala.common.parameters.Parameters.manual_seed" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">manual_seed</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.manual_seed" title="Permalink to this definition">¶</a></dt>
 <dd><p>If not none, this value is used as manual seed for the neural networks.
 Can be used to make experiments comparable. Default: None.</p>
 <dl class="field-list simple">
@@ -312,7 +310,7 @@ Can be used to make experiments comparable. Default: None.</p>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.load_from_file">
-<em class="property">classmethod </em><code class="sig-name descname">load_from_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">save_format</span><span class="o">=</span><span class="default_value">'pickle'</span></em>, <em class="sig-param"><span class="n">no_snapshots</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_file" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a Parameters object from a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -335,7 +333,7 @@ performing inference/testing after training a network.</p></li>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.save">
-<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">save_format</span><span class="o">=</span><span class="default_value">'pickle'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.Parameters.save" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">save</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the Parameters object to a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -350,19 +348,19 @@ Currently only supported file format is “pickle”.</p></li>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.show">
-<code class="sig-name descname">show</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.Parameters.show" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.show" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print name and values of all attributes of this object.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.use_gpu">
-<em class="property">property </em><code class="sig-name descname">use_gpu</code><a class="headerlink" href="#mala.common.parameters.Parameters.use_gpu" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">use_gpu</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.use_gpu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Control whether or not a GPU is used (provided there is one).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.use_horovod">
-<em class="property">property </em><code class="sig-name descname">use_horovod</code><a class="headerlink" href="#mala.common.parameters.Parameters.use_horovod" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">use_horovod</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.use_horovod" title="Permalink to this definition">¶</a></dt>
 <dd><p>Control whether or not horovod is used for parallel training.</p>
 </dd></dl>
 
@@ -370,12 +368,12 @@ Currently only supported file format is “pickle”.</p></li>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersBase">
-<em class="property">class </em><code class="sig-prename descclassname">mala.common.parameters.</code><code class="sig-name descname">ParametersBase</code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersBase</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Base parameter class for MALA.</p>
 <dl class="py method">
 <dt id="mala.common.parameters.ParametersBase.show">
-<code class="sig-name descname">show</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">indent</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase.show" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase.show" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print name and values of all attributes of this object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -389,12 +387,12 @@ shows itself.</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersData">
-<em class="property">class </em><code class="sig-prename descclassname">mala.common.parameters.</code><code class="sig-name descname">ParametersData</code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.ParametersData" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersData</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for loading and preprocessing data.</p>
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersData.descriptors_contain_xyz">
-<code class="sig-name descname">descriptors_contain_xyz</code><a class="headerlink" href="#mala.common.parameters.ParametersData.descriptors_contain_xyz" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">descriptors_contain_xyz</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.descriptors_contain_xyz" title="Permalink to this definition">¶</a></dt>
 <dd><p>Legacy option. If True, it is assumed that the first three entries of
 the descriptor vector are the xyz coordinates and they are cut from the
 descriptor vector. If False, no such cutting is peformed.</p>
@@ -407,7 +405,7 @@ descriptor vector. If False, no such cutting is peformed.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersData.snapshot_directories_list">
-<code class="sig-name descname">snapshot_directories_list</code><a class="headerlink" href="#mala.common.parameters.ParametersData.snapshot_directories_list" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">snapshot_directories_list</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.snapshot_directories_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of all added snapshots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -418,7 +416,7 @@ descriptor vector. If False, no such cutting is peformed.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersData.data_splitting_type">
-<code class="sig-name descname">data_splitting_type</code><a class="headerlink" href="#mala.common.parameters.ParametersData.data_splitting_type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">data_splitting_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.data_splitting_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Specify how the data for validation, test and training is splitted.
 Currently the only supported option is by_snapshot,
 which splits the data by snapshot boundaries. It is also the default.</p>
@@ -431,7 +429,7 @@ which splits the data by snapshot boundaries. It is also the default.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersData.data_splitting_snapshots">
-<code class="sig-name descname">data_splitting_snapshots</code><a class="headerlink" href="#mala.common.parameters.ParametersData.data_splitting_snapshots" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">data_splitting_snapshots</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.data_splitting_snapshots" title="Permalink to this definition">¶</a></dt>
 <dd><p>Details how (and which!) snapshots are used for what:</p>
 <blockquote>
 <div><ul class="simple">
@@ -453,7 +451,7 @@ snapshot etc.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersData.input_rescaling_type">
-<code class="sig-name descname">input_rescaling_type</code><a class="headerlink" href="#mala.common.parameters.ParametersData.input_rescaling_type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">input_rescaling_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.input_rescaling_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Specifies how input quantities are normalized.
 Options:</p>
 <blockquote>
@@ -477,7 +475,7 @@ standard deviation 1)</p></li>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersData.output_rescaling_type">
-<code class="sig-name descname">output_rescaling_type</code><a class="headerlink" href="#mala.common.parameters.ParametersData.output_rescaling_type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">output_rescaling_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.output_rescaling_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Specifies how output quantities are normalized.
 Options:</p>
 <blockquote>
@@ -510,7 +508,7 @@ Options:</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersData.use_lazy_loading">
-<code class="sig-name descname">use_lazy_loading</code><a class="headerlink" href="#mala.common.parameters.ParametersData.use_lazy_loading" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">use_lazy_loading</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.use_lazy_loading" title="Permalink to this definition">¶</a></dt>
 <dd><p>If True, data is lazily loaded, i.e. only the snapshots that are
 currently needed will be kept in memory. This greatly reduces memory
 demands, but adds additional computational time.</p>
@@ -525,12 +523,12 @@ demands, but adds additional computational time.</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersDebug">
-<em class="property">class </em><code class="sig-prename descclassname">mala.common.parameters.</code><code class="sig-name descname">ParametersDebug</code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersDebug"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.ParametersDebug" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersDebug</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersDebug"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersDebug" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>All debugging parameters.</p>
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersDebug.grid_dimensions">
-<code class="sig-name descname">grid_dimensions</code><a class="headerlink" href="#mala.common.parameters.ParametersDebug.grid_dimensions" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">grid_dimensions</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDebug.grid_dimensions" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list containing three elements. It enforces a smaller grid size
 globally when it is not empty.. Default : []</p>
 <dl class="field-list simple">
@@ -544,12 +542,12 @@ globally when it is not empty.. Default : []</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersDescriptors">
-<em class="property">class </em><code class="sig-prename descclassname">mala.common.parameters.</code><code class="sig-name descname">ParametersDescriptors</code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersDescriptors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersDescriptors</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for calculating/parsing input descriptors.</p>
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersDescriptors.descriptor_type">
-<code class="sig-name descname">descriptor_type</code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.descriptor_type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">descriptor_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.descriptor_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type of descriptors that is used to represent the atomic fingerprint.
 Currently only “SNAP” is supported.</p>
 <dl class="field-list simple">
@@ -561,7 +559,7 @@ Currently only “SNAP” is supported.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersDescriptors.twojmax">
-<code class="sig-name descname">twojmax</code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.twojmax" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">twojmax</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.twojmax" title="Permalink to this definition">¶</a></dt>
 <dd><p>SNAP calculation: 2*jmax-parameter used for calculation of SNAP
 descriptors. Default value for jmax is 5, so default value for
 twojmax is 10.</p>
@@ -574,7 +572,7 @@ twojmax is 10.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersDescriptors.rcutfac">
-<code class="sig-name descname">rcutfac</code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.rcutfac" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">rcutfac</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.rcutfac" title="Permalink to this definition">¶</a></dt>
 <dd><p>SNAP calculation: radius cutoff factor for the fingerprint sphere in
 Angstroms. Default value is 4.67637.</p>
 <dl class="field-list simple">
@@ -586,7 +584,7 @@ Angstroms. Default value is 4.67637.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersDescriptors.lammps_compute_file">
-<code class="sig-name descname">lammps_compute_file</code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.lammps_compute_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">lammps_compute_file</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.lammps_compute_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>SNAP calculation: LAMMPS input file that is used to calculate the
 SNAP descriptors. If this string is empty, the standard LAMMPS input
 file found in this repository will be used (recommended).</p>
@@ -601,12 +599,12 @@ file found in this repository will be used (recommended).</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersHyperparameterOptimization">
-<em class="property">class </em><code class="sig-prename descclassname">mala.common.parameters.</code><code class="sig-name descname">ParametersHyperparameterOptimization</code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersHyperparameterOptimization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersHyperparameterOptimization</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersHyperparameterOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Hyperparameter optimization parameters.</p>
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersHyperparameterOptimization.direction">
-<code class="sig-name descname">direction</code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.direction" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">direction</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.direction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Controls whether to minimize or maximize the loss function.
 Arguments are “minimize” and “maximize” respectively.</p>
 <dl class="field-list simple">
@@ -618,7 +616,7 @@ Arguments are “minimize” and “maximize” respectively.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersHyperparameterOptimization.n_trials">
-<code class="sig-name descname">n_trials</code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.n_trials" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">n_trials</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.n_trials" title="Permalink to this definition">¶</a></dt>
 <dd><p>Controls how many trials are performed (when using optuna).
 Default: 100.</p>
 <dl class="field-list simple">
@@ -630,7 +628,7 @@ Default: 100.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersHyperparameterOptimization.hlist">
-<code class="sig-name descname">hlist</code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.hlist" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">hlist</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.hlist" title="Permalink to this definition">¶</a></dt>
 <dd><p>List containing hyperparameters, that are then passed to optuna.
 Supported options so far include:</p>
 <blockquote>
@@ -683,7 +681,7 @@ only works with optuna.</p>
 </dl>
 <dl class="py method">
 <dt id="mala.common.parameters.ParametersHyperparameterOptimization.show">
-<code class="sig-name descname">show</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">indent</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersHyperparameterOptimization.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.show" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersHyperparameterOptimization.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.show" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print name and values of all attributes of this object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -697,12 +695,12 @@ shows itself.</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersNetwork">
-<em class="property">class </em><code class="sig-prename descclassname">mala.common.parameters.</code><code class="sig-name descname">ParametersNetwork</code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersNetwork"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.ParametersNetwork" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersNetwork</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersNetwork" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for constructing a neural network.</p>
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersNetwork.nn_type">
-<code class="sig-name descname">nn_type</code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.nn_type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">nn_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.nn_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type of the neural network that will be used. Currently supported is
 only feed-forward, which is also the default</p>
 <dl class="field-list simple">
@@ -714,7 +712,7 @@ only feed-forward, which is also the default</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersNetwork.layer_sizes">
-<code class="sig-name descname">layer_sizes</code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.layer_sizes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">layer_sizes</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.layer_sizes" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of integers detailing the sizes of the layer of the neural
 network. Please note that the input layer is included therein.
 Default: [10,10,0]</p>
@@ -727,7 +725,7 @@ Default: [10,10,0]</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersNetwork.layer_activations">
-<code class="sig-name descname">layer_activations</code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.layer_activations" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">layer_activations</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.layer_activations" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of strings detailing the activation functions to be used
 by the neural network. If the dimension of layer_activations is
 smaller than the dimension of layer_sizes-1, than the first entry
@@ -749,7 +747,7 @@ Currently supported activation functions are:</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersNetwork.loss_function_type">
-<code class="sig-name descname">loss_function_type</code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.loss_function_type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">loss_function_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.loss_function_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loss function for the neural network
 Currently supported loss functions include:</p>
 <blockquote>
@@ -768,14 +766,14 @@ Currently supported loss functions include:</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersRunning">
-<em class="property">class </em><code class="sig-prename descclassname">mala.common.parameters.</code><code class="sig-name descname">ParametersRunning</code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersRunning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.ParametersRunning" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersRunning</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersRunning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersRunning" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters needed for network runs (train, test or inference).</p>
 <p>Some of these parameters only apply to either the train or test or
 inference case.</p>
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.trainingtype">
-<code class="sig-name descname">trainingtype</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.trainingtype" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">trainingtype</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.trainingtype" title="Permalink to this definition">¶</a></dt>
 <dd><p>Training type to be used. Supported options at the moment:</p>
 <blockquote>
 <div><ul class="simple">
@@ -792,7 +790,7 @@ inference case.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.learning_rate">
-<code class="sig-name descname">learning_rate</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">learning_rate</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learning rate for chosen optimization algorithm. Default: 0.5.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -803,7 +801,7 @@ inference case.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.max_number_epochs">
-<code class="sig-name descname">max_number_epochs</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.max_number_epochs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">max_number_epochs</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.max_number_epochs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maximum number of epochs to train for. Default: 100.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -814,7 +812,7 @@ inference case.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.verbosity">
-<code class="sig-name descname">verbosity</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.verbosity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">verbosity</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.verbosity" title="Permalink to this definition">¶</a></dt>
 <dd><p>If True, training output is shown during training. Default: True.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -825,7 +823,7 @@ inference case.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.mini_batch_size">
-<code class="sig-name descname">mini_batch_size</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.mini_batch_size" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">mini_batch_size</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.mini_batch_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Size of the mini batch for the optimization algorihm. Default: 10.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -836,7 +834,7 @@ inference case.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.weight_decay">
-<code class="sig-name descname">weight_decay</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.weight_decay" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">weight_decay</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.weight_decay" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weight decay for regularization. Always refers to L2 regularization.
 Default: 0.</p>
 <dl class="field-list simple">
@@ -848,7 +846,7 @@ Default: 0.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.early_stopping_epochs">
-<code class="sig-name descname">early_stopping_epochs</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.early_stopping_epochs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">early_stopping_epochs</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.early_stopping_epochs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of epochs the validation accuracy is allowed to not improve by
 at leastearly_stopping_threshold, before we terminate. If 0, no
 early stopping is performed. Default: 0.</p>
@@ -861,7 +859,7 @@ early stopping is performed. Default: 0.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.early_stopping_threshold">
-<code class="sig-name descname">early_stopping_threshold</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.early_stopping_threshold" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">early_stopping_threshold</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.early_stopping_threshold" title="Permalink to this definition">¶</a></dt>
 <dd><p>If the validation accuracy does not improve by at least threshold for
 early_stopping_epochs epochs, training is terminated:
 validation_loss &lt; validation_loss_old * (1+early_stopping_threshold),
@@ -877,7 +875,7 @@ aggresive.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.learning_rate_scheduler">
-<code class="sig-name descname">learning_rate_scheduler</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate_scheduler" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">learning_rate_scheduler</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate_scheduler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Learning rate scheduler to be used. If not None, an instance of the
 corresponding pytorch class will be used to manage the learning rate
 schedule.
@@ -898,7 +896,7 @@ validation loss is plateauing.</p></li>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.learning_rate_decay">
-<code class="sig-name descname">learning_rate_decay</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate_decay" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">learning_rate_decay</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate_decay" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decay rate to be used in the learning rate (if the chosen scheduler
 supports that).
 Default: 0.1</p>
@@ -911,7 +909,7 @@ Default: 0.1</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.learning_rate_patience">
-<code class="sig-name descname">learning_rate_patience</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate_patience" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">learning_rate_patience</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate_patience" title="Permalink to this definition">¶</a></dt>
 <dd><p>Patience parameter used in the learning rate schedule (how long the
 validation loss has to plateau before the schedule takes effect).
 Default: 0.</p>
@@ -924,7 +922,7 @@ Default: 0.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.use_compression">
-<code class="sig-name descname">use_compression</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.use_compression" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">use_compression</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.use_compression" title="Permalink to this definition">¶</a></dt>
 <dd><p>If True and horovod is used, horovod compression will be used for
 allreduce communication. This can improve performance.</p>
 <dl class="field-list simple">
@@ -936,7 +934,7 @@ allreduce communication. This can improve performance.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.kwargs">
-<code class="sig-name descname">kwargs</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.kwargs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">kwargs</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.kwargs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dictionary for keyword arguments for horovod.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -947,7 +945,7 @@ allreduce communication. This can improve performance.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.sampler">
-<code class="sig-name descname">sampler</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.sampler" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">sampler</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.sampler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dictionary with samplers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -958,7 +956,7 @@ allreduce communication. This can improve performance.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.use_shuffling_for_samplers">
-<code class="sig-name descname">use_shuffling_for_samplers</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.use_shuffling_for_samplers" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">use_shuffling_for_samplers</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.use_shuffling_for_samplers" title="Permalink to this definition">¶</a></dt>
 <dd><p>If True, the training data will be shuffled in between epochs.
 If lazy loading is selected, then this shuffling will be done on
 a “by snapshot” basis.</p>
@@ -966,7 +964,7 @@ a “by snapshot” basis.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.checkpoints_each_epoch">
-<code class="sig-name descname">checkpoints_each_epoch</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.checkpoints_each_epoch" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">checkpoints_each_epoch</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.checkpoints_each_epoch" title="Permalink to this definition">¶</a></dt>
 <dd><p>If not 0, checkpoint files will be saved after eac
 checkpoints_each_epoch epoch.</p>
 <dl class="field-list simple">
@@ -978,7 +976,7 @@ checkpoints_each_epoch epoch.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersRunning.checkpoint_name">
-<code class="sig-name descname">checkpoint_name</code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.checkpoint_name" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">checkpoint_name</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.checkpoint_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name used for the checkpoints. Using this, multiple runs
 can be performed in the same directory.</p>
 <dl class="field-list simple">
@@ -992,12 +990,12 @@ can be performed in the same directory.</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersTargets">
-<em class="property">class </em><code class="sig-prename descclassname">mala.common.parameters.</code><code class="sig-name descname">ParametersTargets</code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersTargets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.parameters.ParametersTargets" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersTargets</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersTargets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersTargets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for calculating/parsing output quantites.</p>
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersTargets.target_type">
-<code class="sig-name descname">target_type</code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.target_type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">target_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.target_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of points in the energy grid that is used to calculate the
 (L)DOS.</p>
 <dl class="field-list simple">
@@ -1009,7 +1007,7 @@ can be performed in the same directory.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersTargets.ldos_gridsize">
-<code class="sig-name descname">ldos_gridsize</code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridsize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">ldos_gridsize</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridsize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gridspacing of the energy grid the (L)DOS is evaluated on [eV].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1020,7 +1018,7 @@ can be performed in the same directory.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersTargets.ldos_gridspacing_ev">
-<code class="sig-name descname">ldos_gridspacing_ev</code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridspacing_ev" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">ldos_gridspacing_ev</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridspacing_ev" title="Permalink to this definition">¶</a></dt>
 <dd><p>SNAP calculation: radius cutoff factor for the fingerprint sphere in
 Angstroms. Default value is 4.67637.</p>
 <dl class="field-list simple">
@@ -1032,7 +1030,7 @@ Angstroms. Default value is 4.67637.</p>
 
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersTargets.ldos_gridoffset_ev">
-<code class="sig-name descname">ldos_gridoffset_ev</code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridoffset_ev" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">ldos_gridoffset_ev</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridoffset_ev" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lowest energy value on the (L)DOS energy grid [eV].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -1049,7 +1047,7 @@ Angstroms. Default value is 4.67637.</p>
 <p>Functions for safely printing in parallel.</p>
 <dl class="py function">
 <dt id="mala.common.printout.printout">
-<code class="sig-prename descclassname">mala.common.printout.</code><code class="sig-name descname">printout</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">values</span></em>, <em class="sig-param"><span class="n">sep</span><span class="o">=</span><span class="default_value">' '</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/printout.html#printout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.printout.printout" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">mala.common.printout.</span></code><code class="sig-name descname"><span class="pre">printout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/printout.html#printout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.printout.printout" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interface to built-in “print” for parallel runs. Can be used like print.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1063,7 +1061,7 @@ Angstroms. Default value is 4.67637.</p>
 
 <dl class="py function">
 <dt id="mala.common.printout.set_horovod_status">
-<code class="sig-prename descclassname">mala.common.printout.</code><code class="sig-name descname">set_horovod_status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/printout.html#set_horovod_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mala.common.printout.set_horovod_status" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">mala.common.printout.</span></code><code class="sig-name descname"><span class="pre">set_horovod_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/printout.html#set_horovod_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.printout.set_horovod_status" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the horovod status for printing.</p>
 <p>By setting the horovod status via this function it can be ensured that
 printing works in parallel. The Parameters class does that for the user.</p>
