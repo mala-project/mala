@@ -187,10 +187,24 @@ class HyperOptOptuna(HyperOptBase):
     def __create_checkpointing(self, study, trial):
         """Create a checkpoint of optuna study, if necessary."""
         self.checkpoint_counter += 1
+        need_to_checkpoint = False
+
         if self.checkpoint_counter >= self.params.hyperparameters.\
-                checkpoints_each_trial:
+                checkpoints_each_trial and self.params.hyperparameters.\
+                checkpoints_each_trial > 0:
+            need_to_checkpoint = True
+            printout(str(self.params.hyperparameters.
+                     checkpoints_each_trial)+" trials have passed, creating a "
+                                             "checkpoint for hyperparameter "
+                                             "optimization.")
+        if self.params.hyperparameters.checkpoints_each_trial < 0 and \
+                trial.number == study.best_trial.number:
+            need_to_checkpoint = True
+            printout("Best trial is "+str(trial.number)+", creating a "
+                     "checkpoint for it.")
+
+        if need_to_checkpoint is True:
             # We need to create a checkpoint!
-            printout("Create checkpoint for hyperparameter optimization.")
             self.checkpoint_counter = 0
 
             # Get the filenames.
