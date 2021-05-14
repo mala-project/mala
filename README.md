@@ -20,11 +20,9 @@ This repository is structured as follows:
 ```
 
 ## Installation
-
 Please refer to [Installation of MALA](docs/source/install/README.md).
 
 ## Running
-
 You can familiarize yourself with the usage of this package by running
 the examples in the `example/` folder.
 
@@ -35,10 +33,18 @@ the examples in the `example/` folder.
 
 ### Core Developers
 - Lenz Fiedler
+- J. Austin Ellis
 - Steve Schmerler
 - Daniel Kotik
+- Normand A. Modine
+- Aidan P. Thompson
+- Siva Rajamanickam
+- Attila Cangi
 
 ### Contributors
+- Gabriel Popoola
+- J. Adam Stephens
+- Vlad Oles
 - Omar Faruk
 - Parvez Mohammed
 - Sneha Verma
@@ -49,7 +55,6 @@ the examples in the `example/` folder.
 
 
 ## Citing MALA
-
 If you publish work which uses or mentions MALA, please cite the following paper:
 
 J. A. Ellis, A. Cangi,  N. A. Modine, J. A. Stephens, A. P. Thompson,
