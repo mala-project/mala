@@ -1,0 +1,5 @@
+docutils==0.16         # dependency of myst-parser; problems with 0.17.*
+sphinx==3.5.*
+sphinx_rtd_theme==0.5.*
+myst-parser==0.14.*
+sphinx-markdown-tables==0.0.15
