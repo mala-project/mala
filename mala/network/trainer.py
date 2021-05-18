@@ -3,6 +3,7 @@ from mala.network.network import Network
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
 from mala.common.parameters import Parameters
+import os
 import numpy as np
 import torch
 from torch import optim
@@ -50,6 +51,39 @@ class Trainer(Runner):
         self.validation_data_loader = None
         self.test_data_loader = None
         self.__prepare_to_train(optimizer_dict)
+
+    @classmethod
+    def checkpoint_exists(cls, checkpoint_name):
+        """
+        Check if a hyperparameter optimization checkpoint exists.
+
+        Returns True if it does.
+
+        Parameters
+        ----------
+        checkpoint_name : string
+            Name of the checkpoint.
+
+        Returns
+        -------
+        checkpoint_exists : bool
+            True if the checkpoint exists, False otherwise.
+
+        """
+        network_name = checkpoint_name + "_network.pth"
+        iscaler_name = checkpoint_name + "_iscaler.pkl"
+        oscaler_name = checkpoint_name + "_oscaler.pkl"
+        param_name = checkpoint_name + "_params.pkl"
+        optimizer_name = checkpoint_name + "_optimizer.pth"
+
+        if os.path.isfile(iscaler_name) is True \
+                and os.path.isfile(oscaler_name) is True \
+                and os.path.isfile(param_name) is True \
+                and os.path.isfile(network_name) is True \
+                and os.path.isfile(optimizer_name):
+            return True
+        else:
+            return False
 
     @classmethod
     def resume_checkpoint(cls, checkpoint_name):
