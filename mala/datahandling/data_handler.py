@@ -187,6 +187,9 @@ class DataHandler:
         self.training_data_set = None
         self.validation_data_set = None
         self.test_data_set = None
+        self.nr_training_data = 0
+        self.nr_test_data = 0
+        self.nr_validation_data = 0
         self.parameters.data_splitting_snapshots = []
         self.parameters.snapshot_directories_list = []
 
