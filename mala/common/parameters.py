@@ -399,6 +399,19 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.checkpoint_name = "checkpoint_mala_ho"
         self.study_name = None
         self.rdb_storage = None
+        self.rdb_storage_heartbeat = None
+
+    @property
+    def rdb_storage_heartbeat(self):
+        """Control whether or not a GPU is used (provided there is one)."""
+        return self._rdb_storage_heartbeat
+
+    @rdb_storage_heartbeat.setter
+    def rdb_storage_heartbeat(self, value):
+        if value == 0:
+            self._rdb_storage_heartbeat = None
+        else:
+            self._rdb_storage_heartbeat = value
 
     def show(self, indent=""):
         """
