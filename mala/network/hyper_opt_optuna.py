@@ -45,12 +45,17 @@ class HyperOptOptuna(HyperOptBase):
             if self.params.hyperparameters.study_name is None:
                 raise Exception("If RDB storage is used, a name for the study "
                                 "has to be provided.")
+            rdb_storage = optuna.storages.RDBStorage(
+                    url=self.params.hyperparameters.rdb_storage,
+                    heartbeat_interval=self.params.hyperparameters.
+                    rdb_storage_heartbeat)
+
             self.study = optuna.\
                 create_study(direction=self.params.hyperparameters.direction,
                              sampler=sampler,
                              study_name=self.params.hyperparameters.
                              study_name,
-                             storage=self.params.hyperparameters.rdb_storage,
+                             storage=rdb_storage,
                              load_if_exists=True)
 
         self.objective = None
