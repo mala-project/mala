@@ -3,7 +3,6 @@ import numpy as np
 from ase.units import kB
 from scipy import integrate
 import mpmath as mp
-import time
 
 def integrate_values_on_spacing(values, spacing, method, axis=0):
     """
