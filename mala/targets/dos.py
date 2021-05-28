@@ -125,15 +125,9 @@ class DOS(TargetBase):
 
         return np.array(return_dos_values)
 
-    def get_energy_grid(self, shift_energy_grid=False):
+    def get_energy_grid(self):
         """
         Get energy grid.
-
-        Parameters
-        ----------
-        shift_energy_grid : bool
-            If True, the entire energy grid will be shifted by
-            ldos_gridoffset_ev from the parameters.
 
         Returns
         -------
@@ -146,9 +140,6 @@ class DOS(TargetBase):
             self.parameters.ldos_gridsize * \
             self.parameters.ldos_gridspacing_ev
         grid_size = self.parameters.ldos_gridsize
-        if shift_energy_grid is True:
-            emin += self.parameters.ldos_gridspacing_ev
-            emax += self.parameters.ldos_gridspacing_ev
         linspace_array = (np.linspace(emin, emax, grid_size, endpoint=False))
         return linspace_array
 
@@ -191,10 +182,7 @@ class DOS(TargetBase):
         if temperature_K is None:
             temperature_K = self.temperature_K
 
-        if shift_energy_grid and integration_method == "analytical":
-            energy_grid = self.get_energy_grid(shift_energy_grid=True)
-        else:
-            energy_grid = self.get_energy_grid()
+        energy_grid = self.get_energy_grid()
         return self.__band_energy_from_dos(dos_data, energy_grid,
                                            fermi_energy_eV, temperature_K,
                                            integration_method)
@@ -238,10 +226,7 @@ class DOS(TargetBase):
             fermi_energy_eV = self.fermi_energy_eV
         if temperature_K is None:
             temperature_K = self.temperature_K
-        if shift_energy_grid and integration_method == "analytical":
-            energy_grid = self.get_energy_grid(shift_energy_grid=True)
-        else:
-            energy_grid = self.get_energy_grid()
+        energy_grid = self.get_energy_grid()
         return self.__number_of_electrons_from_dos(dos_data, energy_grid,
                                                    fermi_energy_eV,
                                                    temperature_K,
@@ -286,10 +271,7 @@ class DOS(TargetBase):
         if temperature_K is None:
             temperature_K = self.temperature_K
 
-        if shift_energy_grid and integration_method == "analytical":
-            energy_grid = self.get_energy_grid(shift_energy_grid=True)
-        else:
-            energy_grid = self.get_energy_grid()
+        energy_grid = self.get_energy_grid()
         return self.\
             __entropy_contribution_from_dos(dos_data, energy_grid,
                                             fermi_energy_eV, temperature_K,
@@ -334,10 +316,7 @@ class DOS(TargetBase):
         # Parse the parameters.
         if temperature_K is None:
             temperature_K = self.temperature_K
-        if shift_energy_grid and integration_method == "analytical":
-            energy_grid = self.get_energy_grid(shift_energy_grid=True)
-        else:
-            energy_grid = self.get_energy_grid()
+        energy_grid = self.get_energy_grid()
         fermi_energy_sc = toms748(lambda fermi_sc:
                                   (self.
                                    __number_of_electrons_from_dos

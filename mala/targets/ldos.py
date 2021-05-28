@@ -147,15 +147,9 @@ class LDOS(TargetBase):
             ldos_data[:, :, :, i-1] = data[:, :, :]
         return ldos_data
 
-    def get_energy_grid(self, shift_energy_grid=False):
+    def get_energy_grid(self):
         """
         Get energy grid.
-
-        Parameters
-        ----------
-        shift_energy_grid : bool
-            If True, the entire energy grid will be shifted by
-            ldos_gridoffset_ev from the parameters.
 
         Returns
         -------
@@ -168,9 +162,6 @@ class LDOS(TargetBase):
             self.parameters.ldos_gridsize * \
             self.parameters.ldos_gridspacing_ev
         grid_size = self.parameters.ldos_gridsize
-        if shift_energy_grid is True:
-            emin += self.parameters.ldos_gridspacing_ev
-            emax += self.parameters.ldos_gridspacing_ev
         linspace_array = (np.linspace(emin, emax, grid_size, endpoint=False))
         return linspace_array
 
@@ -595,24 +586,21 @@ class LDOS(TargetBase):
         energy_grid_spacing = self.parameters.ldos_gridspacing_ev
 
         # Build the energy grid and calculate the fermi function.
-        if shift_energy_grid and integration_method == "analytical":
-            emin += energy_grid_spacing
-            emax += energy_grid_spacing
-        energy_vals = np.arange(emin, emax, energy_grid_spacing)
-        fermi_values = fermi_function(energy_vals, fermi_energy_ev,
+        energy_grid = self.get_energy_grid()
+        fermi_values = fermi_function(energy_grid, fermi_energy_ev,
                                       temperature_K, energy_units="eV")
 
         # Calculate the number of electrons.
         if integration_method == "trapz":
             density_values = integrate.trapz(ldos_data_used * fermi_values,
-                                             energy_vals, axis=-1)
+                                             energy_grid, axis=-1)
         elif integration_method == "simps":
             density_values = integrate.simps(ldos_data_used * fermi_values,
-                                             energy_vals, axis=-1)
+                                             energy_grid, axis=-1)
         elif integration_method == "analytical":
             density_values = analytical_integration(ldos_data_used, "F0", "F1",
                                                     fermi_energy_ev,
-                                                    energy_vals,
+                                                    energy_grid,
                                                     temperature_K)
         else:
             raise Exception("Unknown integration method.")

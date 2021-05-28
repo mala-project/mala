@@ -3,7 +3,7 @@ import numpy as np
 from ase.units import kB
 from scipy import integrate
 import mpmath as mp
-
+import time
 
 def integrate_values_on_spacing(values, spacing, method, axis=0):
     """
@@ -343,20 +343,21 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
     energy_grid_edges[0] = energy_grid[0] - spacing
     energy_grid_edges[-1] = energy_grid[-1] + spacing
 
-    if len(D.shape) > 1:
-        real_space_grid = D.shape[0]
-        integral_value = np.zeros(real_space_grid, dtype=np.float64)
-    else:
-        real_space_grid = 1
-        integral_value = 0
-
     # Calculate the weights.
+    # It is not really possible to express this as a vector operation,
+    # since mp.polylog (which is called in function_mappings) does not support
+    # that.
+    beta = 1 / (kB * temperature_k)
     for i in range(0, gridsize):
-        # Calculate beta and x
-        beta = 1 / (kB * temperature_k)
-        x = beta*(energy_grid_edges[i]-fermi_energy_ev)
-        x_plus = beta*(energy_grid_edges[i+1]-fermi_energy_ev)
-        x_minus = beta*(energy_grid_edges[i-1]-fermi_energy_ev)
+        # Some aliases for readibility
+        ei = energy_grid_edges[i+1]
+        ei_plus = energy_grid_edges[i+2]
+        ei_minus = energy_grid_edges[i]
+
+        # Calculate x
+        x = beta*(ei-fermi_energy_ev)
+        x_plus = beta*(ei_plus-fermi_energy_ev)
+        x_minus = beta*(ei_minus-fermi_energy_ev)
 
         # Calculate the I0 value
         i0 = function_mappings[I0](x, beta)
@@ -368,19 +369,11 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
         i1_plus = function_mappings[I1](x_plus, beta)
         i1_minus = function_mappings[I1](x_minus, beta)
 
-        # Some aliases for readibility
-        ei = energy_grid_edges[i]
-        ei_plus = energy_grid_edges[i+1]
-        ei_minus = energy_grid_edges[i-1]
-
         weights_vector[i] = (i0_plus-i0)*(1 +
                                           ((ei-fermi_energy_ev)/(ei_plus-ei)))\
             + (i0-i0_minus)*(1-((ei-fermi_energy_ev)/(ei-ei_minus))) - \
                             ((i1_plus-i1) / (ei_plus-ei)) + ((i1 - i1_minus)
                                                              / (ei - ei_minus))
-        if real_space_grid == 1:
-            integral_value += weights_vector[i] * D[i]
-        else:
-            for j in range(0, real_space_grid):
-                integral_value[j] += weights_vector[i] * D[j, i]
+
+    integral_value = np.dot(D, weights_vector)
     return integral_value
