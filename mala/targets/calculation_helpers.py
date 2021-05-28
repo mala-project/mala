@@ -4,6 +4,7 @@ from ase.units import kB
 from scipy import integrate
 import mpmath as mp
 
+
 def integrate_values_on_spacing(values, spacing, method, axis=0):
     """
     Integrate values assuming a uniform grid with a provided spacing.
