@@ -754,9 +754,7 @@ class LDOS(TargetBase):
         return self.cached_dos
 
     def uncache_density_of_states(self):
-        """
-        Uncache a DOS. In subsequent calculations, a new DOS is calculated.
-        """
+        """Uncache a DOS, to calculate a new one in following steps."""
         self.cached_dos_exists = False
 
     def get_and_cache_density_cached(self, ldos_data,
@@ -827,8 +825,6 @@ class LDOS(TargetBase):
         return self.cached_density
 
     def uncache_density(self):
-        """
-        Uncache a density. In subsequent calculations, a new one is calculated.
-        """
+        """Uncache a density, to calculate a new one in following steps."""
         self.cached_density_exists = False
 
