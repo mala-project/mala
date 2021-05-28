@@ -138,7 +138,10 @@ def qe_ldos_to_density(accuracy):
         np.save(path_to_ldos_npy, ldos_dft)
 
     # Calculate the quantities we want to compare.
-    density_mala = ldos_calculator.get_density(ldos_dft)
+    self_consistent_fermi_energy = ldos_calculator.\
+        get_self_consistent_fermi_energy_ev(ldos_dft)
+    density_mala = ldos_calculator.\
+        get_density(ldos_dft, fermi_energy_ev=self_consistent_fermi_energy)
     density_mala_sum = density_mala.sum()
     density_dft_sum = density_dft.sum()
 
