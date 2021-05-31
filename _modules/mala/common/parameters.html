@@ -311,7 +311,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">target_type</span> <span class="o">=</span> <span class="s2">&quot;LDOS&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span> <span class="o">=</span> <span class="mi">0</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restrict_targets</span> <span class="o">=</span> <span class="s2">&quot;zero_out_negative&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">restrict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Control if and how targets are restricted to physical values..&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_restrict_targets</span>
+
+    <span class="nd">@restrict_targets</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">restrict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;zero_out_negative&quot;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;absolute_values&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_restrict_targets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_restrict_targets</span> <span class="o">=</span> <span class="n">value</span></div>
 
 
 <div class="viewcode-block" id="ParametersData"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersData">[docs]</a><span class="k">class</span> <span class="nc">ParametersData</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>

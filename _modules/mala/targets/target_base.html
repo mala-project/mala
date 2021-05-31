@@ -452,7 +452,37 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No unit back conversion method implemented &quot;</span>
-                        <span class="s2">&quot;for this target type.&quot;</span><span class="p">)</span></div></div>
+                        <span class="s2">&quot;for this target type.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TargetBase.restrict_data"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target_base.TargetBase.restrict_data">[docs]</a>    <span class="k">def</span> <span class="nf">restrict_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Restrict target data to only contain physically meaningful values.</span>
+
+<span class="sd">        For the LDOS this e.g. implies non-negative values. The type</span>
+<span class="sd">        of data restriction is specified by the parameters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            Numpy array, for which the restrictions are to be applied.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            The same array, with restrictions enforced.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">restrict_targets</span> <span class="o">==</span> <span class="s2">&quot;zero_out_negative&quot;</span><span class="p">:</span>
+            <span class="n">array</span><span class="p">[</span><span class="n">array</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="n">array</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">restrict_targets</span> <span class="o">==</span> <span class="s2">&quot;absolute_values&quot;</span><span class="p">:</span>
+            <span class="n">array</span><span class="p">[</span><span class="n">array</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">return</span> <span class="n">array</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">restrict_targets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Wrong data restriction.&quot;</span><span class="p">)</span></div></div>
+
+
 </pre></div>
 
            </div>

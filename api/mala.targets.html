@@ -1613,6 +1613,25 @@ qe.out for Quantum Espresso outfiles.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.targets.target_base.TargetBase.restrict_data">
+<code class="sig-name descname"><span class="pre">restrict_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target_base.html#TargetBase.restrict_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target_base.TargetBase.restrict_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restrict target data to only contain physically meaningful values.</p>
+<p>For the LDOS this e.g. implies non-negative values. The type
+of data restriction is specified by the parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>array</strong> (<em>numpy.array</em>) – Numpy array, for which the restrictions are to be applied.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>array</strong> – The same array, with restrictions enforced.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.targets.target_base.TargetBase.set_pseudopotential_path">
 <code class="sig-name descname"><span class="pre">set_pseudopotential_path</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newpath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target_base.html#TargetBase.set_pseudopotential_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target_base.TargetBase.set_pseudopotential_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set a path where your pseudopotentials are stored.</p>
