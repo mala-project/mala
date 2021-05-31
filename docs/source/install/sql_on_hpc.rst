@@ -52,3 +52,5 @@ Hemera5 (HZDR)
     .. code-block:: python
 
         parameters.hyperparameters.rdb_storage = "postgresql://YOUR_USER_NAME@YOUR_COMPUTE_NODE/YOUR_DATABASE_NAME"
+        
+9. [optional] To increase the maximum number of connections to PostgreSQL (default is 100), go to ``a/suitable/location/postgres_local/postgresql.conf`` and change the value of ``max_connections``. In addition, the value of ``shared_buffers`` is recommended to be set to about 10% of RAM available on a compute node. Note that the actual number of connections exceeds the number of workers, likely because the workers establish new connections every time they communicate with DB and idle connections not dying out by default.
