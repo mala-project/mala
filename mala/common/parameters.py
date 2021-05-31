@@ -143,7 +143,7 @@ class ParametersTargets(ParametersBase):
 
     @property
     def restrict_targets(self):
-        """Controls if and how targets are restricted to physical values.."""
+        """Control if and how targets are restricted to physical values.."""
         return self._restrict_targets
 
     @restrict_targets.setter
