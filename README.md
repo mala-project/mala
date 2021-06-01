@@ -57,7 +57,7 @@ the examples in the `example/` folder.
 ## Citing MALA
 If you publish work which uses or mentions MALA, please cite the following paper:
 
-J. A. Ellis, A. Cangi,  N. A. Modine, J. A. Stephens, A. P. Thompson,
-S. Rajamanickam (2020). Accelerating Finite-temperature
+J. A. Ellis, G. A. Popoola, L. Fiedler, N. A. Modine, J. A. Stephens, A. P. Thompson, 
+A. Cangi, S. Rajamanickam (2020). Accelerating Finite-temperature
 Kohn-Sham Density Functional Theory with Deep Neural Networks.
 [arXiv:2010.04905](https://arxiv.org/abs/2010.04905).
