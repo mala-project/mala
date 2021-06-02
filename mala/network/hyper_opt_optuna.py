@@ -127,7 +127,7 @@ class HyperOptOptuna(HyperOptBase):
 
         if os.path.isfile(iscaler_name) is True \
                 and os.path.isfile(oscaler_name) is True \
-                and os.path.isfile(param_name):
+                and os.path.isfile(param_name) is True:
             return True
         else:
             return False

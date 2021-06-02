@@ -7,7 +7,7 @@ data_path = get_data_repo_path()+"Al36/"
 ex08_checkpoint_hyperopt.py: Shows how a hyperparameter optimization run can 
 be paused and resumed. Delete all ex08_*.pkl and ex08_*.pth prior to execution.
 Afterwards, execute this script twice to see how MALA progresses from a 
-checkpoint. As the number of trials is cannot divided by the number
+checkpoint. As the number of trials cannot be divided by the number
 of epochs after which a checkpoint is created without residual, this will 
 lead to MALA performing the missing trials again.
 """
