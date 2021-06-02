@@ -7,7 +7,7 @@ data_path = get_data_repo_path()+"Al36/"
 ex07_checkpoint_training.py: Shows how a training run can be paused and 
 resumed. Delete all ex07_*.pkl and ex07_*pth prior to execution.
 Afterwards, execute this script twice to see how MALA progresses from a 
-checkpoint. As the number of total epochs is cannot divided by the number
+checkpoint. As the number of total epochs cannot be divided by the number
 of epochs after which a checkpoint is created without residual, this will 
 lead to MALA performing the missing epochs again. 
 """

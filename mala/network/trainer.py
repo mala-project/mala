@@ -80,7 +80,7 @@ class Trainer(Runner):
                 and os.path.isfile(oscaler_name) is True \
                 and os.path.isfile(param_name) is True \
                 and os.path.isfile(network_name) is True \
-                and os.path.isfile(optimizer_name):
+                and os.path.isfile(optimizer_name) is True:
             return True
         else:
             return False
