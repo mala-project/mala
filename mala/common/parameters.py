@@ -416,7 +416,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
 
     @property
     def rdb_storage_heartbeat(self):
-        """Control whether or not a GPU is used (provided there is one)."""
+        """Control whether a heartbeat is used for distributed optuna runs."""
         return self._rdb_storage_heartbeat
 
     @rdb_storage_heartbeat.setter
