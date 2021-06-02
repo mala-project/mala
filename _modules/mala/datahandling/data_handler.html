@@ -309,7 +309,7 @@
 <div class="viewcode-block" id="DataHandler.add_snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.add_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_npy_file</span><span class="p">,</span> <span class="n">input_npy_directory</span><span class="p">,</span>
                      <span class="n">output_npy_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_npy_directory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">input_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="n">output_units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">,</span>
-                     <span class="n">calculation_output_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+                     <span class="n">calculation_output_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">add_snapshot_as</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a snapshot to the data pipeline.</span>
 
@@ -338,10 +338,17 @@
 <span class="sd">        calculation_output_file : string</span>
 <span class="sd">            File with the output of the original snapshot calculation. This is</span>
 <span class="sd">            only needed when testing multiple snapshots.</span>
+
+<span class="sd">        add_snapshot_as : string</span>
+<span class="sd">            If &quot;tr&quot;, &quot;va&quot; or &quot;te&quot;, the snapshot will be added to the snapshot</span>
+<span class="sd">            list as training, validation or testing snapshot, respectively.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">snapshot</span> <span class="o">=</span> <span class="n">Snapshot</span><span class="p">(</span><span class="n">input_npy_file</span><span class="p">,</span> <span class="n">input_npy_directory</span><span class="p">,</span> <span class="n">input_units</span><span class="p">,</span>
                             <span class="n">output_npy_file</span><span class="p">,</span> <span class="n">output_npy_directory</span><span class="p">,</span>
                             <span class="n">output_units</span><span class="p">,</span> <span class="n">calculation_output_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">add_snapshot_as</span> <span class="o">==</span> <span class="s2">&quot;tr&quot;</span> <span class="ow">or</span> <span class="n">add_snapshot_as</span> <span class="o">==</span> <span class="s2">&quot;te&quot;</span> \
+           <span class="ow">or</span> <span class="n">add_snapshot_as</span> <span class="o">==</span> <span class="s2">&quot;va&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">data_splitting_snapshots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">add_snapshot_as</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DataHandler.clear_data"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.clear_data">[docs]</a>    <span class="k">def</span> <span class="nf">clear_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -353,7 +360,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">training_data_set</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_set</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_data_set</span> <span class="o">=</span> <span class="kc">None</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">data_splitting_snapshots</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span> <span class="o">=</span> <span class="p">[]</span></div>
 
 <div class="viewcode-block" id="DataHandler.prepare_data"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.prepare_data">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reparametrize_scaler</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>

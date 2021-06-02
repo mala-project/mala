@@ -311,20 +311,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">target_type</span> <span class="o">=</span> <span class="s2">&quot;LDOS&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">restrict_targets</span> <span class="o">=</span> <span class="s2">&quot;zero_out_negative&quot;</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">restrict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Control if and how targets are restricted to physical values..&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_restrict_targets</span>
-
-    <span class="nd">@restrict_targets</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">restrict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;zero_out_negative&quot;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s2">&quot;absolute_values&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_restrict_targets</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_restrict_targets</span> <span class="o">=</span> <span class="n">value</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 
 <div class="viewcode-block" id="ParametersData"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersData">[docs]</a><span class="k">class</span> <span class="nc">ParametersData</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
@@ -397,7 +384,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_directories_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_splitting_type</span> <span class="o">=</span> <span class="s2">&quot;by_snapshot&quot;</span>
         <span class="c1"># self.data_splitting_percent = [0,0,0]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_splitting_snapshots</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tr&quot;</span><span class="p">,</span> <span class="s2">&quot;va&quot;</span><span class="p">,</span> <span class="s2">&quot;te&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_splitting_snapshots</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_rescaling_type</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_rescaling_type</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_lazy_loading</span> <span class="o">=</span> <span class="kc">False</span></div>
@@ -583,6 +570,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">=</span> <span class="s2">&quot;optuna&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoints_each_trial</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">=</span> <span class="s2">&quot;checkpoint_mala_ho&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">study_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rdb_storage</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rdb_storage_heartbeat</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rdb_storage_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Control whether a heartbeat is used for distributed optuna runs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rdb_storage_heartbeat</span>
+
+    <span class="nd">@rdb_storage_heartbeat</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rdb_storage_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rdb_storage_heartbeat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rdb_storage_heartbeat</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="ParametersHyperparameterOptimization.show"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

@@ -197,11 +197,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">LDOS</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos_exists</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density_exists</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density</span> <span class="o">=</span> <span class="p">[]</span>
-
 
 <div class="viewcode-block" id="LDOS.convert_units"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.ldos.LDOS.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
@@ -325,9 +320,15 @@
             <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span>
         <span class="k">return</span> <span class="n">ldos_data</span></div>
 
-<div class="viewcode-block" id="LDOS.get_energy_grid"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.ldos.LDOS.get_energy_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.get_energy_grid"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.ldos.LDOS.get_energy_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift_energy_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get energy grid.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shift_energy_grid : bool</span>
+<span class="sd">            If True, the entire energy grid will be shifted by</span>
+<span class="sd">            ldos_gridoffset_ev from the parameters.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -340,6 +341,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">*</span> \
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
         <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+        <span class="k">if</span> <span class="n">shift_energy_grid</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">emin</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
+            <span class="n">emax</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
         <span class="n">linspace_array</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">linspace_array</span></div>
 
@@ -735,9 +739,6 @@
 <span class="sd">            dimensions.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_density_exists</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_density</span>
-
         <span class="k">if</span> <span class="n">fermi_energy_ev</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fermi_energy_ev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_eV</span>
         <span class="k">if</span> <span class="n">temperature_K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -760,22 +761,31 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid LDOS array shape.&quot;</span><span class="p">)</span>
 
+        <span class="c1"># Parse the information about the energy grid.</span>
+        <span class="n">emin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
+        <span class="n">emax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
+            <span class="n">ldos_gridspacing_ev</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
+        <span class="n">energy_grid_spacing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
+
         <span class="c1"># Build the energy grid and calculate the fermi function.</span>
-        <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
-        <span class="n">fermi_values</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy_ev</span><span class="p">,</span>
+        <span class="k">if</span> <span class="n">shift_energy_grid</span> <span class="ow">and</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
+            <span class="n">emin</span> <span class="o">+=</span> <span class="n">energy_grid_spacing</span>
+            <span class="n">emax</span> <span class="o">+=</span> <span class="n">energy_grid_spacing</span>
+        <span class="n">energy_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">energy_grid_spacing</span><span class="p">)</span>
+        <span class="n">fermi_values</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_vals</span><span class="p">,</span> <span class="n">fermi_energy_ev</span><span class="p">,</span>
                                       <span class="n">temperature_K</span><span class="p">,</span> <span class="n">energy_units</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">)</span>
 
         <span class="c1"># Calculate the number of electrons.</span>
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
             <span class="n">density_values</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">ldos_data_used</span> <span class="o">*</span> <span class="n">fermi_values</span><span class="p">,</span>
-                                             <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                                             <span class="n">energy_vals</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
             <span class="n">density_values</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="n">ldos_data_used</span> <span class="o">*</span> <span class="n">fermi_values</span><span class="p">,</span>
-                                             <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                                             <span class="n">energy_vals</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
             <span class="n">density_values</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">ldos_data_used</span><span class="p">,</span> <span class="s2">&quot;F0&quot;</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span>
                                                     <span class="n">fermi_energy_ev</span><span class="p">,</span>
-                                                    <span class="n">energy_grid</span><span class="p">,</span>
+                                                    <span class="n">energy_vals</span><span class="p">,</span>
                                                     <span class="n">temperature_K</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span>
@@ -809,15 +819,7 @@
 <span class="sd">            - &quot;trapz&quot; for trapezoid method</span>
 <span class="sd">            - &quot;simps&quot; for Simpson method.</span>
 <span class="sd">            - &quot;summation&quot; for summation and scaling of the values (recommended)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dos_values : np.array</span>
-<span class="sd">            The DOS.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos_exists</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos</span>
-
         <span class="k">if</span> <span class="n">grid_spacing_bohr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">grid_spacing_bohr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_spacing_Bohr</span>
 
@@ -882,125 +884,7 @@
                 <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> \
                              <span class="p">(</span><span class="n">grid_spacing_bohr</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">dos_values</span></div>
-
-<div class="viewcode-block" id="LDOS.get_and_cache_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.ldos.LDOS.get_and_cache_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_and_cache_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span>
-                                        <span class="n">grid_spacing_bohr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate a DOS from LDOS data and keep it in memory.</span>
-
-<span class="sd">        For all subsequent calculations involving the DOS, this cached</span>
-<span class="sd">        DOS will be used. Usage of this function is advised for time-critical</span>
-<span class="sd">        calculations.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        ldos_data : numpy.array</span>
-<span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
-<span class="sd">            [gridx,gridy,gridz,energygrid].</span>
-
-<span class="sd">        grid_spacing_bohr : float</span>
-<span class="sd">            Grid spacing (in Bohr) used to construct this grid. As of now,</span>
-<span class="sd">            only equidistant grids are supported.</span>
-
-<span class="sd">        integration_method : str</span>
-<span class="sd">            Integration method used to integrate LDOS on the grid.</span>
-<span class="sd">            Currently supported:</span>
-
-<span class="sd">            - &quot;trapz&quot; for trapezoid method</span>
-<span class="sd">            - &quot;simps&quot; for Simpson method.</span>
-<span class="sd">            - &quot;summation&quot; for summation and scaling of the values (recommended)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dos_values : np.array</span>
-<span class="sd">            The DOS.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">uncache_density_of_states</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-            <span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span>
-                                  <span class="n">grid_spacing_bohr</span><span class="o">=</span><span class="n">grid_spacing_bohr</span><span class="p">,</span>
-                                  <span class="n">integration_method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos_exists</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos</span></div>
-
-<div class="viewcode-block" id="LDOS.uncache_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.ldos.LDOS.uncache_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">uncache_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Uncache a DOS, to calculate a new one in following steps.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos_exists</span> <span class="o">=</span> <span class="kc">False</span></div>
-
-<div class="viewcode-block" id="LDOS.get_and_cache_density_cached"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.ldos.LDOS.get_and_cache_density_cached">[docs]</a>    <span class="k">def</span> <span class="nf">get_and_cache_density_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span>
-                                     <span class="n">fermi_energy_ev</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                     <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                     <span class="n">conserve_dimensions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                     <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
-                                     <span class="n">shift_energy_grid</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate an electronic density from LDOS data and keep it in memory.</span>
-
-<span class="sd">        For all subsequent calculations involving the electronic density, this</span>
-<span class="sd">        cached density will be used. Usage of this function is advised for</span>
-<span class="sd">        time-critical calculations.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        conserve_dimensions : bool</span>
-<span class="sd">            If True, the density is returned in the same dimensions as</span>
-<span class="sd">            the LDOS was entered. If False, the density is always given</span>
-<span class="sd">            as [gridsize].</span>
-
-<span class="sd">        fermi_energy_ev : float</span>
-<span class="sd">            Fermi energy level in eV.</span>
-
-<span class="sd">        temperature_K : float</span>
-<span class="sd">            Temperature in K.</span>
-
-<span class="sd">        integration_method : string</span>
-<span class="sd">            Integration method to be used. Currently supported:</span>
-
-<span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
-<span class="sd">                - &quot;simps&quot; for Simpson method.</span>
-<span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
-
-<span class="sd">        shift_energy_grid : bool</span>
-<span class="sd">            When using the analytical integration, one has to shift the energy</span>
-<span class="sd">            grid by setting this parameter to True. Elsewise keep on False.</span>
-
-<span class="sd">        ldos_data : numpy.array</span>
-<span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
-<span class="sd">            [gridx,gridy,gridz,energygrid].</span>
-
-<span class="sd">        integration_method : string</span>
-<span class="sd">            Integration method to integrate LDOS on energygrid.</span>
-<span class="sd">            Currently supported:</span>
-
-<span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
-<span class="sd">                - &quot;simps&quot; for Simpson method.</span>
-<span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        density_data : numpy.array</span>
-<span class="sd">            Density data, dimensions depend on conserve_dimensions and LDOS</span>
-<span class="sd">            dimensions.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">uncache_density</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-            <span class="n">get_density</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span>
-                        <span class="n">fermi_energy_ev</span><span class="o">=</span><span class="n">fermi_energy_ev</span><span class="p">,</span>
-                        <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
-                        <span class="n">conserve_dimensions</span><span class="o">=</span><span class="n">conserve_dimensions</span><span class="p">,</span>
-                        <span class="n">integration_method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
-                        <span class="n">shift_energy_grid</span><span class="o">=</span><span class="n">shift_energy_grid</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density_exists</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_density</span></div>
-
-<div class="viewcode-block" id="LDOS.uncache_density"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.ldos.LDOS.uncache_density">[docs]</a>    <span class="k">def</span> <span class="nf">uncache_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Uncache a density, to calculate a new one in following steps.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density_exists</span> <span class="o">=</span> <span class="kc">False</span></div></div>
-
+        <span class="k">return</span> <span class="n">dos_values</span></div></div>
 </pre></div>
 
            </div>

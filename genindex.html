@@ -244,6 +244,12 @@
 </li>
       <li><a href="api/mala.network.html#mala.network.network.Network.calculate_loss">calculate_loss() (mala.network.network.Network method)</a>
 </li>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.checkpoint_exists">checkpoint_exists() (mala.network.hyper_opt_optuna.HyperOptOptuna class method)</a>
+
+      <ul>
+        <li><a href="api/mala.network.html#mala.network.trainer.Trainer.checkpoint_exists">(mala.network.trainer.Trainer class method)</a>
+</li>
+      </ul></li>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.checkpoint_name">checkpoint_name (mala.common.parameters.ParametersRunning attribute)</a>
 </li>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.checkpoints_each_epoch">checkpoints_each_epoch (mala.common.parameters.ParametersRunning attribute)</a>
@@ -252,10 +258,10 @@
 </li>
       <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.clear_hyperparameters">clear_hyperparameters() (mala.network.hyper_opt_base.HyperOptBase method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.comment">comment (mala.common.parameters.Parameters attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.comment">comment (mala.common.parameters.Parameters attribute)</a>
+</li>
       <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.convert_single_snapshot">convert_single_snapshot() (mala.datahandling.data_converter.DataConverter method)</a>
 </li>
       <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">convert_snapshots() (mala.datahandling.data_converter.DataConverter method)</a>
@@ -362,10 +368,6 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_and_cache_density_cached">get_and_cache_density_cached() (mala.targets.ldos.LDOS method)</a>
-</li>
-      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_and_cache_density_of_states">get_and_cache_density_of_states() (mala.targets.ldos.LDOS method)</a>
-</li>
       <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_band_energy">get_band_energy() (mala.targets.dos.DOS method)</a>
 
       <ul>
@@ -414,10 +416,10 @@
 </li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.get_f1_value">get_f1_value() (in module mala.targets.calculation_helpers)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.get_f2_value">get_f2_value() (in module mala.targets.calculation_helpers)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_float">get_float() (mala.network.hyperparameter_optuna.HyperparameterOptuna method)</a>
 </li>
       <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.get_input_dimension">get_input_dimension() (mala.datahandling.data_handler.DataHandler method)</a>
@@ -1030,6 +1032,8 @@
 </li>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.rcutfac">rcutfac (mala.common.parameters.ParametersDescriptors attribute)</a>
 </li>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.rdb_storage_heartbeat">rdb_storage_heartbeat() (mala.common.parameters.ParametersHyperparameterOptimization property)</a>
+</li>
       <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.read_additional_calculation_data">read_additional_calculation_data() (mala.targets.target_base.TargetBase method)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.cube_parser.read_cube">read_cube() (in module mala.targets.cube_parser)</a>
@@ -1055,10 +1059,6 @@
       <li><a href="api/mala.targets.html#mala.targets.cube_parser.CubeFile.readline">readline() (mala.targets.cube_parser.CubeFile method)</a>
 </li>
       <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging">resize_snapshots_for_debugging() (mala.datahandling.data_handler.DataHandler method)</a>
-</li>
-      <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.restrict_data">restrict_data() (mala.targets.target_base.TargetBase method)</a>
-</li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets.restrict_targets">restrict_targets() (mala.common.parameters.ParametersTargets property)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint">resume_checkpoint() (mala.network.hyper_opt_optuna.HyperOptOptuna class method)</a>
 
@@ -1170,16 +1170,12 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.uncache_density">uncache_density() (mala.targets.ldos.LDOS method)</a>
-</li>
-      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.uncache_density_of_states">uncache_density_of_states() (mala.targets.ldos.LDOS method)</a>
-</li>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.use_compression">use_compression (mala.common.parameters.ParametersRunning attribute)</a>
+</li>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.use_gpu">use_gpu() (mala.common.parameters.Parameters property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.use_gpu">use_gpu() (mala.common.parameters.Parameters property)</a>
-</li>
       <li><a href="api/mala.common.html#mala.common.parameters.Parameters.use_horovod">use_horovod() (mala.common.parameters.Parameters property)</a>
 </li>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.use_lazy_loading">use_lazy_loading (mala.common.parameters.ParametersData attribute)</a>

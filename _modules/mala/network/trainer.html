@@ -176,6 +176,7 @@
 <span class="kn">from</span> <span class="nn">mala.datahandling.data_handler</span> <span class="kn">import</span> <span class="n">DataHandler</span>
 <span class="kn">from</span> <span class="nn">mala.datahandling.data_scaler</span> <span class="kn">import</span> <span class="n">DataScaler</span>
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">optim</span>
@@ -223,6 +224,39 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__prepare_to_train</span><span class="p">(</span><span class="n">optimizer_dict</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Trainer.checkpoint_exists"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.trainer.Trainer.checkpoint_exists">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">checkpoint_exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if a hyperparameter optimization checkpoint exists.</span>
+
+<span class="sd">        Returns True if it does.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        checkpoint_name : string</span>
+<span class="sd">            Name of the checkpoint.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        checkpoint_exists : bool</span>
+<span class="sd">            True if the checkpoint exists, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">network_name</span> <span class="o">=</span> <span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_network.pth&quot;</span>
+        <span class="n">iscaler_name</span> <span class="o">=</span> <span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_iscaler.pkl&quot;</span>
+        <span class="n">oscaler_name</span> <span class="o">=</span> <span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_oscaler.pkl&quot;</span>
+        <span class="n">param_name</span> <span class="o">=</span> <span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_params.pkl&quot;</span>
+        <span class="n">optimizer_name</span> <span class="o">=</span> <span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s2">&quot;_optimizer.pth&quot;</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">iscaler_name</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> \
+                <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">oscaler_name</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> \
+                <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> \
+                <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">network_name</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span> \
+                <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">optimizer_name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="Trainer.resume_checkpoint"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.trainer.Trainer.resume_checkpoint">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">resume_checkpoint</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">):</span>
@@ -393,7 +427,9 @@
                     <span class="n">vloss_old</span> <span class="o">=</span> <span class="n">vloss</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Validation accuracy has not improved enough.&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">verbosity</span><span class="p">:</span>
+                        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Validation accuracy has not improved &quot;</span>
+                                 <span class="s2">&quot;enough.&quot;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
                             <span class="n">early_stopping_epochs</span><span class="p">:</span>
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">verbosity</span><span class="p">:</span>
@@ -415,7 +451,8 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">__create_training_checkpoint</span><span class="p">()</span>
                     <span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Time for epoch[s]:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">verbosity</span><span class="p">:</span>
+                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Time for epoch[s]:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
 
         <span class="c1"># Calculate final loss.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">final_validation_loss</span> <span class="o">=</span> <span class="n">vloss</span>
@@ -425,8 +462,8 @@
                                             <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
                 <span class="n">tloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span><span class="n">tloss</span><span class="p">,</span> <span class="s1">&#39;average_loss&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">final_test_loss</span> <span class="o">=</span> <span class="n">tloss</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Final test data loss: &quot;</span><span class="p">,</span> <span class="n">tloss</span><span class="p">)</span></div>
+            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Final test data loss: &quot;</span><span class="p">,</span> <span class="n">tloss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_test_loss</span> <span class="o">=</span> <span class="n">tloss</span></div>
 
     <span class="k">def</span> <span class="nf">__prepare_to_train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_dict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Prepare everything for training.&quot;&quot;&quot;</span>
