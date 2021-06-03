@@ -1,0 +1,41 @@
+name: Run tests on CPU
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - docker_ci
+
+jobs:
+  super-job:
+    runs-on: ubuntu-18.04
+    container:
+      image: ghcr.io/mala-project/custom_conda:latest
+      credentials:
+         username: ${{ github.actor }}
+         password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Install mala package
+        run: pip install -q -e .
+
+      #- name: Switch to parent directory
+      #  run: cd ..
+
+      - name: Data repository checkout
+        uses: actions/checkout@v2
+        with:
+          repository: mala-project/data
+          token: ${{ secrets.GITHUB_TOKEN }}
+          #path: mala_data_repo
+          ref: v0.1.0
+          lfs: true
+
+      - name: Data setup
+        shell: bash
+        run: |
+          ../mala/install/data_repo_link/link_data_repo.sh `pwd`
+          cd ../mala
