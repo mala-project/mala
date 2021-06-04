@@ -76,11 +76,8 @@ class Trainer(Runner):
         param_name = checkpoint_name + "_params.pkl"
         optimizer_name = checkpoint_name + "_optimizer.pth"
 
-        if all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
-                                    network_name, optimizer_name])):
-            return True
-        else:
-            return False
+        return all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
+                                        network_name, optimizer_name]))
 
     @classmethod
     def resume_checkpoint(cls, checkpoint_name):

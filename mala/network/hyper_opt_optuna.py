@@ -125,10 +125,8 @@ class HyperOptOptuna(HyperOptBase):
         oscaler_name = checkpoint_name + "_oscaler.pkl"
         param_name = checkpoint_name + "_params.pkl"
 
-        if all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name])):
-            return True
-        else:
-            return False
+        return all(map(os.path.isfile, [iscaler_name, oscaler_name,
+                                        param_name]))
 
     @classmethod
     def resume_checkpoint(cls, checkpoint_name):
