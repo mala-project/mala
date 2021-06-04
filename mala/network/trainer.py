@@ -76,11 +76,8 @@ class Trainer(Runner):
         param_name = checkpoint_name + "_params.pkl"
         optimizer_name = checkpoint_name + "_optimizer.pth"
 
-        if os.path.isfile(iscaler_name) is True \
-                and os.path.isfile(oscaler_name) is True \
-                and os.path.isfile(param_name) is True \
-                and os.path.isfile(network_name) is True \
-                and os.path.isfile(optimizer_name) is True:
+        if all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
+                                    network_name, optimizer_name])):
             return True
         else:
             return False

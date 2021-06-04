@@ -125,9 +125,7 @@ class HyperOptOptuna(HyperOptBase):
         oscaler_name = checkpoint_name + "_oscaler.pkl"
         param_name = checkpoint_name + "_params.pkl"
 
-        if os.path.isfile(iscaler_name) is True \
-                and os.path.isfile(oscaler_name) is True \
-                and os.path.isfile(param_name) is True:
+        if all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name])):
             return True
         else:
             return False
