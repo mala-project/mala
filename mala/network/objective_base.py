@@ -125,6 +125,10 @@ class ObjectiveBase:
                 self.params.running.learning_rate_patience = par.\
                     get_parameter(trial)
 
+            elif "learning_rate_decay" in par.name:
+                self.params.running.learning_rate_decay = par.\
+                    get_parameter(trial)
+
             else:
                 raise Exception("Optimization of hyperparameter ", par.name,
                                 "not supported at the moment.")
