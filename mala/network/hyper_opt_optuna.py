@@ -212,8 +212,26 @@ class HyperOptOptuna(HyperOptBase):
         return loaded_hyperopt
 
     def __check_max_number_trials(self, study, trial):
-        number_of_completed_trials = len([t for t in study.trials if t.state ==
-                                          optuna.trial.TrialState.COMPLETE])
+        """Check if this trial was already the maximum number of trials."""
+        # How to check for this depends on whether or not a heartbeat was
+        # used. If one was used, then both COMPLETE and RUNNING trials
+        # Can be taken into account, as it can be expected that RUNNING
+        # trials will actually finish. If no heartbeat is used,
+        # then RUNNING trials might be Zombie trials.
+        # See
+        # https://github.com/optuna/optuna/issues/1883#issuecomment-841844834
+        # https://github.com/optuna/optuna/issues/1883#issuecomment-842106950
+
+        if self.params.hyperparameters.rdb_storage_heartbeat is None:
+            number_of_completed_trials = len([t for t in study.trials if
+                                              t.state == optuna.trial.
+                                              TrialState.COMPLETE])
+        else:
+            number_of_completed_trials = len([t for t in study.trials if
+                                              t.state == optuna.trial.
+                                              TrialState.COMPLETE or
+                                              t.state == optuna.trial.
+                                              TrialState.RUNNING])
         if number_of_completed_trials >= self.params.hyperparameters.n_trials:
             self.study.stop()
 

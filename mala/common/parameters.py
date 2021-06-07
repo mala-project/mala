@@ -393,6 +393,32 @@ class ParametersHyperparameterOptimization(ParametersBase):
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory. Currently. this
         only works with optuna.
+
+    study_name : string
+        Name used for this study (in optuna#s storage). Necessary
+        when operating with a RDB storage.
+
+    rdb_storage : string
+        Adress of the RDB storage to be used by optuna.
+
+    rdb_storage_heartbeat : int
+        Heartbeat interval for optuna (in seconds). Default is None.
+        If not None and above 0, optuna will record the heartbeat of intervals.
+        If no action on a RUNNING trial is recognized for longer then this
+        interval, then this trial will be moved to FAILED. In distributed
+        training, setting a heartbeat is currently the only way to achieve
+        a precise number of trials:
+
+        https://github.com/optuna/optuna/issues/1883
+
+        For optuna versions below 2.8.0, larger heartbeat intervals are
+        detrimental to performance and should be avoided:
+
+        https://github.com/optuna/optuna/issues/2685
+
+        For MALA, no evidence for decreased performance using smaller
+        heartbeat values could be found. So if this is used, 1s is a reasonable
+        value.
     """
 
     def __init__(self):
