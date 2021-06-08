@@ -1,6 +1,4 @@
-"""
-Collection of useful functions for working with LAMMPS.
-"""
+"""Collection of useful functions for working with LAMMPS."""
 
 import numpy as np
 import ctypes
