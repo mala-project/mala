@@ -110,8 +110,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#versioning-and-releases">Versioning and releases</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#branching-strategy">Branching strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#developing-code">Developing code</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#submitting-a-merge-request">Submitting a merge request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pull-requests">Pull Requests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#issues">Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
 </ul>
 </li>
 </ul>
@@ -205,10 +206,9 @@ functions or wrap up a longer development.</p></li>
 <div class="section" id="branching-strategy">
 <h2>Branching strategy<a class="headerlink" href="#branching-strategy" title="Permalink to this headline">¶</a></h2>
 <p>In general, contributors should develop on branches based off of <code class="docutils literal notranslate"><span class="pre">develop</span></code> and
-merge requests should be to <code class="docutils literal notranslate"><span class="pre">develop</span></code>. Please choose a descriptive branch name,
-ideally incorporating some identifying information (such as your initials)
-or the starting date of your developments. Branches from <code class="docutils literal notranslate"><span class="pre">develop</span></code> to <code class="docutils literal notranslate"><span class="pre">master</span></code>
-will be done after prior consultation of the core development team.</p>
+merge requests should be to <code class="docutils literal notranslate"><span class="pre">develop</span></code>. Please choose a descriptive branch name.
+Branches from <code class="docutils literal notranslate"><span class="pre">develop</span></code> to <code class="docutils literal notranslate"><span class="pre">master</span></code> will be done after prior consultation of
+the core development team.</p>
 </div>
 <div class="section" id="developing-code">
 <h2>Developing code<a class="headerlink" href="#developing-code" title="Permalink to this headline">¶</a></h2>
@@ -219,24 +219,30 @@ follow the
 <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard">NumPy style</a>
 for docstrings</p></li>
 <li><p>Keep your code object-oriented, modular, and easily reusable</p></li>
-<li><p>Add tests and examples for sizable new features</p></li>
+<li><p>If you’re adding code that should be tested, add tests</p></li>
 </ul>
 </div>
-<div class="section" id="submitting-a-merge-request">
-<h2>Submitting a merge request<a class="headerlink" href="#submitting-a-merge-request" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>Ensure that you followed the guidelines for <a class="reference external" href="#developing-code">developing code</a></p></li>
+<div class="section" id="pull-requests">
+<h2>Pull Requests<a class="headerlink" href="#pull-requests" title="Permalink to this headline">¶</a></h2>
+<p>We actively welcome pull requests.</p>
+<ol class="simple">
+<li><p>Fork the repo and create your branch from <code class="docutils literal notranslate"><span class="pre">develop</span></code></p></li>
+<li><p>During development, make sure that you follow the guidelines for <a class="reference external" href="#developing-code">developing code</a></p></li>
 <li><p>Rebase your branch onto <code class="docutils literal notranslate"><span class="pre">develop</span></code> before submitting a merge request</p></li>
-<li><p>Only assign yourself to a merge request when time does not permit an
-external check</p></li>
-</ul>
+<li><p>Ensure the test suite passes before submitting a pull request</p></li>
+</ol>
 </div>
 <div class="section" id="issues">
 <h2>Issues<a class="headerlink" href="#issues" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Use issues to document potential enhancements, bugs and such</p></li>
 <li><p>Please tag your issues, and consider setting up a deadline</p></li>
+<li><p>Please ensure your description is clear and has sufficient instructions to be able to reproduce the issue</p></li>
 </ul>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>By contributing to MALA, you agree that your contributions will be licensed under the LICENSE file in the root directory of this source tree.</p>
 </div>
 </div>
 
