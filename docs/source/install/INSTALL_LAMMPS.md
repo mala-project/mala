@@ -1,22 +1,38 @@
-# Setting up LAMMPS
+This example shows how to generate the SNAP bispectrum on a grid.
 
-## Installing LAMMPS
+Usage:
 
-* checkout <https://github.com/athomps/lammps/tree/compute-grid>
-* Make sure the compute-grid tree is checked out!
-* Compile the LAMMPS shared library with the SNAP package installed
-    - cd into `/path/to/lammps/src` folder of LAMMPS
-    - `make yes-snap`
-    - (optional: check with `make ps` that snap was correctly added)
-    - `make mode=shlib mpi`
+python3.7 ./bgrid.py > bgrid.out
 
-## Make the LAMMPS libray visible
+Requirements:
 
-### Method 1 (links, not recommended)
+Python 3.6 or 3.7
+LAMMPS, with compute sna/grid, from here:
+https://github.com/athomps/lammps/tree/compute-grid
 
-* Make the shared library visible e.g. `ln -s $LAMMPS/src/liblammps.so /path/to/repo/src/datahandling`
-* Make the LAMMPS `lammps.py` visible e.g. `ln -s $LAMMPS/python/lammps.py /path/to/repo/src/datahandling`
+Before running, you will need to do the following:
 
-### Method 2 (package, recommended)
+1. Compile the LAMMPS shared library with the SNAP package installed
+2. Make the shared library visible e.g.
 
-* `python3 install.py -m lammps.py -l ../src/liblammps.so -v ../src/version.h`
+ln -s $LAMMPS/src/liblammps.so .
+(for other ways see https://lammps.sandia.gov/doc/Python_shlib.html)
+
+3. Make the LAMMPS lammps.py visible e.g. 
+
+ln -s $LAMMPS/python/lammps.py .
+(for better ways see https://lammps.sandia.gov/doc/Python_install.html)
+
+The files that are produced are as follows:
+
+bgrid.out: Screen output from LAMMPS and bgrid.py
+log.lammps: LAMMPS log file
+b.dump: per-atom bispectrum components
+bgrid.dat: grid bispectrum components as LAMMPS array
+bgrid_np.dat: grid bispectrum components as Numpy array
+pgrid_np.dat: grid power spectrum components as Numpy array
+bgridnorm_np.dat: normalized bispectrum 
+pgridnorm_np.dat: normalized power spectrum
+
+You can compare these to the corresponding files
+with names containing a timestamp e.g. b.25Oct2019.dump
