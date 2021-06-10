@@ -11,7 +11,7 @@ on the most universal one - optuna.
 """
 
 
-def run_example04(desired_loss_improvement_factor=1):
+def run_example04(desired_loss_improvement_factor=2):
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
@@ -111,8 +111,13 @@ def run_example04(desired_loss_improvement_factor=1):
     printout("Parameters used for this experiment:")
     test_parameters.show()
 
-    if desired_loss_improvement_factor*test_trainer.initial_test_loss < \
-            test_trainer.final_test_loss:
+    # To see if the hyperparameter optimization actually worked,
+    # check if the best trial is better then the worst trial
+    # by a certain factor.
+    performed_trials_values = test_hp_optimizer.study.\
+        trials_dataframe()["value"]
+    if desired_loss_improvement_factor*min(performed_trials_values) > \
+            max(performed_trials_values):
         return False
     else:
         return True
