@@ -1,4 +1,4 @@
-name: Run tests on CPU
+name: CPU
 
 on:
   push:
