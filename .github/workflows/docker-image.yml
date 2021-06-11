@@ -1,4 +1,4 @@
-name: Building Docker Image
+name: Docker
 
 on:
   push:
