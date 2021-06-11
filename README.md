@@ -2,8 +2,8 @@
 
 # MALA
 
+[![CPU](https://github.com/DanielKotik/mala/actions/workflows/cpu-tests.yml/badge.svg)](https://github.com/DanielKotik/mala/actions/workflows/cpu-tests.yml)
 [![image](https://github.com/mala-project/mala/actions/workflows/gh-pages.yml/badge.svg)](https://mala-project.github.io/mala/)
-
 [![image](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 
@@ -57,7 +57,7 @@ the examples in the `example/` folder.
 
 If you publish work which uses or mentions MALA, please cite the following paper:
 
-J. A. Ellis, G. A. Popoola, L. Fiedler, N. A. Modine, J. A. Stephens, A. P. Thompson, 
+J. A. Ellis, G. A. Popoola, L. Fiedler, N. A. Modine, J. A. Stephens, A. P. Thompson,
 A. Cangi, S. Rajamanickam (2020). Accelerating Finite-temperature
 Kohn-Sham Density Functional Theory with Deep Neural Networks.
 [arXiv:2010.04905](https://arxiv.org/abs/2010.04905).
