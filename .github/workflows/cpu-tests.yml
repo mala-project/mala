@@ -11,7 +11,7 @@ jobs:
   super-job:
     runs-on: ubuntu-18.04
     container:
-      image: ghcr.io/mala-project/custom_conda:latest
+      image: ghcr.io/mala-project/mala_conda_cpu:latest
       credentials:
          username: ${{ github.actor }}
          password: ${{ secrets.GITHUB_TOKEN }}
