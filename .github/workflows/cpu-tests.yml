@@ -8,7 +8,7 @@ on:
       - docker_ci
 
 jobs:
-  super-job:
+  cpu-tests:
     runs-on: ubuntu-18.04
     container:
       image: ghcr.io/mala-project/mala_conda_cpu:latest
@@ -16,26 +16,32 @@ jobs:
          username: ${{ github.actor }}
          password: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Check out repository
+      - name: Check out repository (mala)
         uses: actions/checkout@v2
 
       - name: Install mala package
-        run: pip install -q -e .
+        run: |
+          pip --no-cache-dir install -e .
 
-      #- name: Switch to parent directory
-      #  run: cd ..
-
-      - name: Data repository checkout
+      - name: Check out repository (data)
         uses: actions/checkout@v2
         with:
           repository: mala-project/data
-          token: ${{ secrets.GITHUB_TOKEN }}
-          #path: mala_data_repo
+          token: ${{ secrets.ACCESS_TOKEN }}
+          #token: ${{ secrets.GITHUB_TOKEN }}
+          path: mala_data
           ref: v0.1.0
           lfs: true
 
       - name: Data setup
         shell: bash
         run: |
-          ../mala/install/data_repo_link/link_data_repo.sh `pwd`
-          cd ../mala
+          cd mala_data
+          chmod +x ../install/data_repo_link/link_data_repo.sh
+          ../install/data_repo_link/link_data_repo.sh `pwd`
+
+      - name: Test basic functions
+        run: python test/mala_tests.py
+
+      - name: Test workflow
+        run: python examples/ex99_verify_all_examples.py
