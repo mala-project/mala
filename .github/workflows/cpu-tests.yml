@@ -11,18 +11,15 @@ on:
     tags:
       - v*
 
-env:
-  IMAGE_NAME: mala_conda_cpu
-
 jobs:
   # Build and push Docker image to GitHub Packages.
   build-docker-image-cpu:
     runs-on: ubuntu-18.04
-
+    env:
+      IMAGE_NAME: mala_conda_cpu
     permissions:
       packages: write
       contents: read
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
