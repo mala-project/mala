@@ -122,6 +122,10 @@ class ObjectiveBase:
         trial : numpy.array
             Row in an orthogonal array which respresents current trial.
         """
+        if self.optimize_layer_list:
+            self.params.network.layer_sizes = \
+                [self.data_handler.get_input_dimension()]
+
         if self.optimize_activation_list:
             self.params.network.layer_activations = []
 
@@ -130,6 +134,10 @@ class ObjectiveBase:
             if "layer_activation" in par.name:
                 self.params.network.layer_activations.\
                     append(par.get_parameter(trial, factor_idx))
+            elif "ff_neurons_layer" in par.name:
+                if self.params.network.nn_type == "feed-forward":
+                    self.params.network.layer_sizes.\
+                        append(par.get_parameter(trial, factor_idx))
             elif "trainingtype" in par.name:
                 self.params.running.trainingtype = par.\
                     get_parameter(trial, factor_idx)

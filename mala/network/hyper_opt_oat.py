@@ -3,6 +3,7 @@ import oapackage as oa
 from .hyper_opt_base import HyperOptBase
 from .objective_base import ObjectiveBase
 import numpy as np
+import itertools
 from mala.common.parameters import printout
 
 
@@ -24,11 +25,12 @@ class HyperOptOAT(HyperOptBase):
         super(HyperOptOAT, self).__init__(params, data)
         self.objective = None
         self.trial_losses = []
-        self.best_trial = None
+        self.optimal_params = None
         self.n_factors = None
-        self.n_levels = None
+        self.factor_levels = None
         self.strength = None
         self.N_runs = None
+        self.OA = None
 
     def perform_study(self):
         """
@@ -37,9 +39,16 @@ class HyperOptOAT(HyperOptBase):
         This is done by sampling a certain subset of network architectures.
         In this case, these are choosen based on an orthogonal array.
         """
+        self.n_factors = len(self.params.hyperparameters.hlist)
+
+        self.factor_levels = [par.num_choices for par in self.params.
+                              hyperparameters.hlist]
+        self.strength = 3
+        self.N_runs = self.number_of_runs()
+        self.OA = self.get_orthogonal_array()
         number_of_trial = 0
         self.objective = ObjectiveBase(self.params, self.data_handler)
-        for row in self.orthogonal_arr:
+        for row in self.OA:
             printout("Trial number", number_of_trial)
             self.trial_losses.append(self.objective(row))
             number_of_trial += 1
@@ -49,20 +58,36 @@ class HyperOptOAT(HyperOptBase):
 
     def set_optimal_parameters(self):
         """
+        Find the optimal set of hyperparameters by doing range analysis.
+        This is done using loss instead of accuracy as done in the paper.
+
         Set the optimal parameters found in the present study.
 
         The parameters will be written to the parameter object with which the
         hyperparameter optimizer was created.
         """
-        # Getting the best trial based on the test errors
-        idx = self.trial_losses.index(min(self.trial_losses))
-        self.best_trial = self.orthogonal_arr[idx]
-        self.objective.parse_trial_oat(self.best_trial)
 
-    @property
-    def orthogonal_arr(self):
-        """Orthogonal array used for optimal hyperparameter sampling."""
-        arrayclass = oa.arraydata_t(self.n_levels, self.N_runs, self.strength,
+        def indices(idx, val): return np.where(self.OA[:, idx] == val)[0]
+
+        R = [[self.trial_losses[indices(i, l)] for l in range(levels)]
+             for (i, levels) in enumerate(self.factor_levels)]
+
+        A = [[i/len(j) for i in j] for j in R]
+
+        self.optimal_params = np.array([i.index(max(i)) for i in A])
+        importance = np.argsort([max(i)-min(i) for i in A])
+
+        print("Order of Importance: ")
+        printout(
+            [self.params.hyperparameters.hlist[idx].name for idx in self.optimal_params], " > ")
+
+        print("Optimal Hyperparameters:")
+        self.objective.parse_trial_oat(self.optimal_params)
+
+    def get_orthogonal_array(self):
+        """Generate the best Orthogonal array used for optimal hyperparameter sampling."""
+
+        arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs, self.strength,
                                     self.n_factors)
         arraylist = [arrayclass.create_root()]
 
@@ -110,12 +135,28 @@ class HyperOptOAT(HyperOptBase):
         super(HyperOptOAT, self).add_hyperparameter(opttype=opttype, name=name,
                                                     low=low, high=high,
                                                     choices=choices)
-        self.n_factors = len(self.params.hyperparameters.hlist)
 
-        # if self.n_factors>4:
-        #     raise Exception("Sorry only upto 3 factors are supported")
+    def number_of_runs(self):
+        """
+        Calculate the minimum number of runs required for an Orthogonal array
 
-        self.n_levels = min([par.num_choices for par in self.params.
-                            hyperparameters.hlist])
-        self.strength = 3
-        self.N_runs = pow(self.n_levels, self.n_factors)
+        Based on the factor levels and the strength of the array requested
+
+        Parameters
+        ----------
+        factor_levels : list
+            A list of number of choices of each hyperparameter
+
+        strength : int
+            A design parameter for Orthogonal arrays
+                strength 2 models all 2 factor interactions
+                strength 3 models all 3 factor interactions
+
+        This is function is taken from the example notebook of OApackage
+        """
+
+        runs = [np.prod(tt) for tt in itertools.combinations(
+            self.factor_levels, self.strength)]
+
+        N = np.lcm.reduce(runs)
+        return N
