@@ -57,6 +57,9 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+
   cpu-tests:
     needs: build-docker-image-cpu
     runs-on: ubuntu-18.04
