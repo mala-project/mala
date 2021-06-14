@@ -32,6 +32,38 @@ class HyperOptOAT(HyperOptBase):
         self.N_runs = None
         self.OA = None
 
+    def add_hyperparameter(self, opttype="categorical", name="", low=0, high=0,
+                           choices=None):
+        """
+        Add a hyperparameter to the current investigation.
+
+        Parameters
+        ----------
+        opttype : string
+            Datatype of the hyperparameter. Follows optunas naming convetions.
+            Currently supported are:
+
+                - categorical (list)
+
+        name : string
+            Name of the hyperparameter. Please note that these names always
+            have to be distinct; if you e.g. want to investigate multiple
+            layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
+            etc. as names.
+
+        low : float or int
+            Currently unsupported: Lower bound for numerical parameter.
+
+        high : float or int
+            Currently unsupported: Higher bound for numerical parameter.
+
+        choices :
+            List of possible choices (for categorical parameter).
+        """
+        super(HyperOptOAT, self).add_hyperparameter(opttype=opttype, name=name,
+                                                    low=low, high=high,
+                                                    choices=choices)
+
     def perform_study(self):
         """
         Perform the study, i.e. the optimization.
@@ -69,72 +101,24 @@ class HyperOptOAT(HyperOptBase):
 
         def indices(idx, val): return np.where(self.OA[:, idx] == val)[0]
 
-        R = [[self.trial_losses[indices(i, l)] for l in range(levels)]
-             for (i, levels) in enumerate(self.factor_levels)]
+        R = [[self.trial_losses[indices(idx, l)].sum() for l in range(levels)]
+             for (idx, levels) in enumerate(self.factor_levels)]
 
         A = [[i/len(j) for i in j] for j in R]
 
-        self.optimal_params = np.array([i.index(max(i)) for i in A])
+        # Taking loss as objective to minimise
+        self.optimal_params = np.array([i.index(min(i)) for i in A])
         importance = np.argsort([max(i)-min(i) for i in A])
 
         print("Order of Importance: ")
         printout(
-            [self.params.hyperparameters.hlist[idx].name for idx in self.optimal_params], " > ")
+            [self.params.hyperparameters.hlist[idx].name for idx in importance], " > ")
 
         print("Optimal Hyperparameters:")
+        for (idx, par) in enumerate(self.params.hyperparameters.hlist):
+            printout([par.name, par.choice[self.optimal_params[idx]]], ' : ')
+
         self.objective.parse_trial_oat(self.optimal_params)
-
-    def get_orthogonal_array(self):
-        """Generate the best Orthogonal array used for optimal hyperparameter sampling."""
-
-        arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs, self.strength,
-                                    self.n_factors)
-        arraylist = [arrayclass.create_root()]
-
-        # extending the orthogonal array
-        options = oa.OAextend()
-        options.setAlgorithmAuto(arrayclass)
-
-        for _ in range(self.strength + 1, self.n_factors + 1):
-            arraylist_extensions = oa.extend_arraylist(arraylist, arrayclass,
-                                                       options)
-            dd = np.array([a.Defficiency() for a in arraylist_extensions])
-            idxs = np.argsort(dd)
-            arraylist = [arraylist_extensions[ii] for ii in idxs]
-
-        return np.unique(np.array(arraylist[0]), axis=0)
-
-    def add_hyperparameter(self, opttype="float", name="", low=0, high=0,
-                           choices=None):
-        """
-        Add a hyperparameter to the current investigation.
-
-        Parameters
-        ----------
-        opttype : string
-            Datatype of the hyperparameter. Follows optunas naming convetions.
-            Currently supported are:
-
-                - categorical (list)
-
-        name : string
-            Name of the hyperparameter. Please note that these names always
-            have to be distinct; if you e.g. want to investigate multiple
-            layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
-            etc. as names.
-
-        low : float or int
-            Currently unsupported: Lower bound for numerical parameter.
-
-        high : float or int
-            Currently unsupported: Higher bound for numerical parameter.
-
-        choices :
-            List of possible choices (for categorical parameter).
-        """
-        super(HyperOptOAT, self).add_hyperparameter(opttype=opttype, name=name,
-                                                    low=low, high=high,
-                                                    choices=choices)
 
     def number_of_runs(self):
         """
@@ -160,3 +144,23 @@ class HyperOptOAT(HyperOptBase):
 
         N = np.lcm.reduce(runs)
         return N
+
+    def get_orthogonal_array(self):
+        """Generate the best Orthogonal array used for optimal hyperparameter sampling."""
+
+        arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs, self.strength,
+                                    self.n_factors)
+        arraylist = [arrayclass.create_root()]
+
+        # extending the orthogonal array
+        options = oa.OAextend()
+        options.setAlgorithmAuto(arrayclass)
+
+        for _ in range(self.strength + 1, self.n_factors + 1):
+            arraylist_extensions = oa.extend_arraylist(arraylist, arrayclass,
+                                                       options)
+            dd = np.array([a.Defficiency() for a in arraylist_extensions])
+            idxs = np.argsort(dd)
+            arraylist = [arraylist_extensions[ii] for ii in idxs]
+
+        return np.unique(np.array(arraylist[0]), axis=0)
