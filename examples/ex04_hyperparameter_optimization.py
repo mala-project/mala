@@ -131,4 +131,3 @@ if __name__ == "__main__":
                         "was off. If you haven't changed any parameters in "
                         "the example, there might be a problem with "
                         "your installation.")
-
