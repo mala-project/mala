@@ -128,7 +128,7 @@ class HyperOptOptuna(HyperOptBase):
                                         param_name]))
 
     @classmethod
-    def resume_checkpoint(cls, checkpoint_name):
+    def resume_checkpoint(cls, checkpoint_name, alternative_storage_path=None):
         """
         Prepare resumption of hyperparameter optimization from a checkpoint.
 
@@ -138,7 +138,13 @@ class HyperOptOptuna(HyperOptBase):
         Parameters
         ----------
         checkpoint_name : string
-            Name of the checkpoint from which
+            Name of the checkpoint from which the checkpoint is loaded.
+
+        alternative_storage_path: string
+            Alternative storage string to load the study from.
+            For applications on an HPC cluster it might be necessary to
+            slightly modify the storage path between runs, since the SQL
+            server might be running on different nodes each time.
 
         Returns
         -------
@@ -162,6 +168,9 @@ class HyperOptOptuna(HyperOptBase):
         loaded_params = Parameters.load_from_file(param_name)
         loaded_iscaler = DataScaler.load_from_file(iscaler_name)
         loaded_oscaler = DataScaler.load_from_file(oscaler_name)
+        if alternative_storage_path is not None:
+            loaded_params.hyperparameters.rdb_storage = \
+                alternative_storage_path
 
         printout("Preparing data used for last checkpoint.")
         # Create a new data handler and prepare the data.
