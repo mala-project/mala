@@ -21,7 +21,10 @@ sys.path.insert(0, os.path.abspath('../../'))
 project = 'Materials Learning Algorithms (MALA)'
 copyright = '2021 National Technology & Engineering Solutions of Sandia, ' \
             'LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, ' \
-            'the U.S. Government retains certain rights in this software'
+            'the U.S. Government retains certain rights in this software.' \
+            'Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, ' \
+            'Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson'
+
 author = 'Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, ' \
          'Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson'
 
