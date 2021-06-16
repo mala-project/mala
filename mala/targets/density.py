@@ -1,10 +1,11 @@
 """Electronic density calculation class."""
 from .target_base import TargetBase
+from .atomic_force import AtomicForce
 from .calculation_helpers import *
 from .cube_parser import read_cube
 import warnings
 import ase.io
-from ase.units import Rydberg
+from ase.units import Rydberg, Bohr
 from mala.common.parameters import printout
 try:
     import total_energy as te
@@ -322,6 +323,70 @@ class Density(TargetBase):
         # Get and return the energies.
         energies = np.array(te.get_energies())*Rydberg
         return energies
+
+    def get_atomic_forces(self, density_data, atoms_Angstrom=None,
+                          integration_method="trapz", valence_electrons=None):
+        if atoms_Angstrom is None:
+            atoms_Angstrom = self.atoms
+        atomic_positions = atoms_Angstrom.get_positions()
+
+        # Currently, MALA works in Bohr units for length. This is not good
+        # and will be fixed soon, but as it is not fixed right now, these
+        # positions have to be converted.
+        atomic_positions /= Bohr
+        print(atomic_positions)
+        number_of_atoms = np.shape(atomic_positions)[0]
+        forces = np.zeros_like(atomic_positions)
+
+        # I am not completely sure if this is right when working with
+        # PSPs. The charge of the ions should technically be reduced by
+        # the number of core ions.
+        atomic_numbers = atoms_Angstrom.get_atomic_numbers()
+        if valence_electrons is not None:
+            atomic_numbers -= valence_electrons
+
+        # First, we need the grid.
+        grid3D = get_3D_grid(self.grid_dimensions[2],
+                             self.grid_dimensions[1],
+                             self.grid_dimensions[0],
+                             self.grid_spacing_Bohr,
+                             self.grid_spacing_Bohr,
+                             self.grid_spacing_Bohr)
+        print("Got the grid")
+        # Calculate Hellmann-Feynmann forces.
+        # This is very badly optimized.
+        for l in range(0, number_of_atoms):
+            # Calculate the ion-ion contribution.
+            ion_ion = np.zeros_like(atomic_positions[0])
+            for j in range(0, number_of_atoms):
+                if j != l:
+                    dist_vector = atomic_positions[j]-atomic_positions[l]
+                    norm = np.linalg.norm(dist_vector)
+                    prefactor = -1*AtomicForce.get_hellman_feynman_factor() * \
+                        atomic_numbers[l]*atomic_numbers[j]
+                    ion_ion += prefactor*dist_vector/(norm**3)
+
+            # Calculate the ion-electron contribution.
+
+            # integrand = np.zeros_like(grid3D)
+            # for x in range(0, self.grid_dimensions[2]):
+            #     for y in range(0, self.grid_dimensions[1]):
+            #         for z in range(0, self.grid_dimensions[0]):
+            #
+            #             dist_vector = grid3D[x, y, z] - atomic_positions[l]
+            #             norm = np.linalg.norm(dist_vector)
+            #
+            #             integrand[x, y, z] = (dist_vector / (norm ** 3))*\
+            #                                  density_data[x, y, z]
+            # # Perform the integration.
+            # ion_electron = np.sum(integrand, axis=(0, 1, 2)) \
+            #                          * (self.grid_spacing_Bohr ** 3)
+            # prefactor = -1 * AtomicForce.get_hellman_feynman_factor() * \
+            #     atomic_numbers[l]
+            # ion_electron *= prefactor
+            # print(ion_electron, ion_ion)
+            forces[l] += ion_ion#+ion_electron
+        return forces
 
     @classmethod
     def from_ldos(cls, ldos_object):

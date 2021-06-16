@@ -271,6 +271,31 @@ def get_s1_value(x, beta):
                3*mp.polylog(3, -1.0*mp.exp(x))) / (beta*beta*beta)
     return results
 
+def get_3D_grid(dimx, dimy, dimz, spacing_x, spacing_y, spacing_z, fastest="x"):
+    """
+    Creates a 3D grid from specified spacing and dimension parameters.
+
+    Parameters
+    ----------
+    spacing_x
+    spacing_y
+    spacing_z
+    fastest
+
+    Returns
+    -------
+
+    """
+
+    grid3D = np.zeros((dimx, dimy, dimz, 3), dtype=np.float64)
+    for i in range(0, dimx):
+        for j in range(0, dimy):
+            for k in range(0, dimz):
+                grid3D[i, j, k, 0] = i*spacing_x
+                grid3D[i, j, k, 1] = j*spacing_y
+                grid3D[i, j, k, 2] = k*spacing_z
+    return grid3D
+
 
 def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
                            temperature_k):
