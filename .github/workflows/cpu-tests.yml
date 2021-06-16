@@ -41,7 +41,7 @@ jobs:
         run: docker pull $IMAGE_ID || true
 
       - name: Build image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME --cache-from=$IMAGE_ID --label "runnumber=${GITHUB_RUN_ID}"
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME --cache-from=$IMAGE_ID --build-arg DEVICE=cpu --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Push image
         run: |
