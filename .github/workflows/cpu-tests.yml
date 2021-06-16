@@ -1,11 +1,10 @@
 name: CPU
 
 on:
-  push:
+  pull_request:
     branches:
       - master
       - develop
-      - docker_ci
 
     # Publish `v1.2.3` tags as releases.
     tags:
