@@ -711,6 +711,14 @@ class LDOS(TargetBase):
 
         return dos_values
 
+    def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler):
+        # For now this only works with ML generated LDOS.
+        # Gradient of the LDOS respect to the SNAP descriptors.
+        ldos_data.backward(dE_dd)
+        dd_dB = used_data_handler.test_data_inputs.grad
+        print(dd_dB)
+        print(dd_dB.size())
+
     def get_and_cache_density_of_states(self, ldos_data,
                                         grid_spacing_bohr=None,
                                         integration_method="summation"):

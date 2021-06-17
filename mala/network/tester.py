@@ -39,7 +39,7 @@ class Tester(Runner):
         self.number_of_batches_per_snapshot = 0
         self.__prepare_to_test()
 
-    def test_snapshot(self, snapshot_number):
+    def test_snapshot(self, snapshot_number, as_unscaled_numpy=True):
         """
         Get actual and predicted output for a snapshot.
 
@@ -47,6 +47,11 @@ class Tester(Runner):
         ----------
         snapshot_number : int
             Snapshot for which the prediction is done.
+
+        as_unscaled_numpy: bool
+            If True, the prediced and actual LDOS will be returned as numpy
+            arrays in 1/eV. If False they will be returned as torch Tensors
+            with correct scaling i.e. as outputted from the network directly.
 
         Returns
         -------
@@ -63,17 +68,23 @@ class Tester(Runner):
                  [snapshot_number * self.data.
                      grid_size:(snapshot_number + 1) * self.data.grid_size])[1]
         else:
-            actual_outputs = \
-                self.data.output_data_scaler.\
-                inverse_transform(
-                    (self.data.test_data_set[snapshot_number *
-                                             self.data.grid_size:
-                                             (snapshot_number + 1) *
-                                             self.data.grid_size])[1],
-                    as_numpy=True)
+            if as_unscaled_numpy is True:
+                actual_outputs = \
+                    self.data.output_data_scaler.\
+                    inverse_transform(
+                        (self.data.test_data_set[snapshot_number *
+                                                 self.data.grid_size:
+                                                 (snapshot_number + 1) *
+                                                 self.data.grid_size])[1],
+                                                 as_numpy=True)
+            else:
+                actual_outputs = (self.data.test_data_set[snapshot_number *
+                                                 self.data.grid_size:
+                                                 (snapshot_number + 1) *
+                                                 self.data.grid_size])[1]
 
-        predicted_outputs = np.zeros((self.data.grid_size,
-                                      self.data.get_output_dimension()))
+        predicted_outputs = torch.zeros((self.data.grid_size,
+                                         self.data.get_output_dimension()))
 
         offset = snapshot_number * self.data.grid_size
         for i in range(0, self.number_of_batches_per_snapshot):
@@ -87,14 +98,20 @@ class Tester(Runner):
             predicted_outputs[i * self.parameters.
                               mini_batch_size:(i + 1) * self.parameters.
                               mini_batch_size, :] = \
+                              self.network(inputs).to('cpu')
+
+        if as_unscaled_numpy is True:
+            predicted_outputs = \
                 self.data.output_data_scaler.\
-                inverse_transform(self.network(inputs).
+                inverse_transform(self.network(predicted_outputs).
                                   to('cpu'), as_numpy=True)
 
         # Restricting the actual quantities to physical meaningful values,
         # i.e. restricting the (L)DOS to positive values.
-        predicted_outputs = self.data.target_calculator.\
-            restrict_data(predicted_outputs)
+        # Can only be done if a numpy array in 1/eV is requested.
+        if as_unscaled_numpy is True:
+            predicted_outputs = self.data.target_calculator.\
+                restrict_data(predicted_outputs)
         return actual_outputs, predicted_outputs
 
     def __prepare_to_test(self):

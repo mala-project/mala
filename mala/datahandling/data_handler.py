@@ -755,6 +755,8 @@ class DataHandler:
                     torch.from_numpy(self.test_data_inputs).float()
                 self.test_data_inputs = \
                     self.input_data_scaler.transform(self.test_data_inputs)
+                if self.parameters.include_grad_for_test_inputs:
+                    self.test_data_inputs.requires_grad = True
 
             self.validation_data_inputs = np.array(self.validation_data_inputs)
             self.validation_data_inputs = \
