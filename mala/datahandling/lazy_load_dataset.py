@@ -164,6 +164,8 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.input_data = self.input_data.astype(np.float32)
         self.input_data = torch.from_numpy(self.input_data).float()
         self.input_data = self.input_data_scaler.transform(self.input_data)
+        if self.inlcude_grads_for_inputs:
+            self.input_data.requires_grad = True
 
         self.output_data = \
             self.output_data.reshape([self.grid_size, self.output_dimension])
