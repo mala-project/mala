@@ -17,8 +17,6 @@ def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
     # PARAMETERS
     ####################
     test_parameters = Parameters()
-    test_parameters.data.data_splitting_snapshots = ["tr", "tr", "tr", "va",
-                                                     "te"]
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
     test_parameters.data.output_rescaling_type = "normal"
     test_parameters.data.data_splitting_type = "by_snapshot"
@@ -57,19 +55,24 @@ def test_lazy_loading_basic(data_path="../examples/data/", accuracy=0.001):
             data_handler.clear_data()
             data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                       "Al_debug_2k_nr0.out.npy", data_path,
-                                      output_units="1/Ry")
+                                      output_units="1/Ry",
+                                      add_snapshot_as="tr")
             data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                       "Al_debug_2k_nr1.out.npy", data_path,
-                                      output_units="1/Ry")
+                                      output_units="1/Ry",
+                                      add_snapshot_as="tr")
             data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                       "Al_debug_2k_nr2.out.npy", data_path,
-                                      output_units="1/Ry")
+                                      output_units="1/Ry",
+                                      add_snapshot_as="tr")
             data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                       "Al_debug_2k_nr1.out.npy", data_path,
-                                      output_units="1/Ry")
+                                      output_units="1/Ry",
+                                      add_snapshot_as="va")
             data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                       "Al_debug_2k_nr2.out.npy", data_path,
-                                      output_units="1/Ry")
+                                      output_units="1/Ry",
+                                      add_snapshot_as="te")
             data_handler.prepare_data()
             if scalingtype == "standard":
                 # The lazy-loading STD equation (and to a smaller amount the
