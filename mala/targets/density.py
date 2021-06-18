@@ -325,7 +325,8 @@ class Density(TargetBase):
         return energies
 
     def get_atomic_forces(self, density_data, atoms_Angstrom=None,
-                          integration_method="trapz", valence_electrons=None):
+                          integration_method="trapz", valence_electrons=None,
+                          grid_cutoff=4):
         if atoms_Angstrom is None:
             atoms_Angstrom = self.atoms
         atomic_positions = atoms_Angstrom.get_positions()
@@ -368,24 +369,26 @@ class Density(TargetBase):
 
             # Calculate the ion-electron contribution.
 
-            # integrand = np.zeros_like(grid3D)
-            # for x in range(0, self.grid_dimensions[2]):
-            #     for y in range(0, self.grid_dimensions[1]):
-            #         for z in range(0, self.grid_dimensions[0]):
-            #
-            #             dist_vector = grid3D[x, y, z] - atomic_positions[l]
-            #             norm = np.linalg.norm(dist_vector)
-            #
-            #             integrand[x, y, z] = (dist_vector / (norm ** 3))*\
-            #                                  density_data[x, y, z]
-            # # Perform the integration.
-            # ion_electron = np.sum(integrand, axis=(0, 1, 2)) \
-            #                          * (self.grid_spacing_Bohr ** 3)
-            # prefactor = -1 * AtomicForce.get_hellman_feynman_factor() * \
-            #     atomic_numbers[l]
-            # ion_electron *= prefactor
-            # print(ion_electron, ion_ion)
-            forces[l] += ion_ion#+ion_electron
+            integrand = np.zeros_like(grid3D)
+            print(grid3D[-1, -1, -1])
+            quit()
+            for x in range(0, self.grid_dimensions[2]):
+                for y in range(0, self.grid_dimensions[1]):
+                    for z in range(0, self.grid_dimensions[0]):
+
+                        dist_vector = grid3D[x, y, z] - atomic_positions[l]
+                        norm = np.linalg.norm(dist_vector)
+                        if norm > grid_cutoff:
+                            integrand[x, y, z] = (dist_vector / (norm ** 3))*\
+                                                 density_data[x, y, z]
+            # Perform the integration.
+            ion_electron = np.sum(integrand, axis=(0, 1, 2)) \
+                                     * (self.grid_spacing_Bohr ** 3)
+            prefactor = -1 * AtomicForce.get_hellman_feynman_factor() * \
+                atomic_numbers[l]
+            ion_electron *= prefactor
+            print(ion_electron, ion_ion)
+            forces[l] += ion_ion+ion_electron
         return forces
 
     @classmethod

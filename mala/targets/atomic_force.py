@@ -41,4 +41,7 @@ class AtomicForce(TargetBase):
         Ry_in_Joule = Rydberg*h*c
         # This should be the correct formula but it doesn't work yet.
         prefactor_Ry_Bohr = prefactor_J_m*(physical_constants["Bohr radius"][0]/Ry_in_Joule)
-        return prefactor_Ry_Bohr
+        final_prefactor = prefactor_Ry_Bohr / (
+                    physical_constants["Bohr radius"][0] *
+                    physical_constants["Bohr radius"][0])
+        return final_prefactor
