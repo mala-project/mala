@@ -432,6 +432,28 @@ class Density(TargetBase):
                             if norm > grid_cutoff:
                                 integrand[x, y, z] = (dist_vector / (norm ** 3))*\
                                                      density_data[x_actual, y_actual, z_actual]
+                        else:
+                            x_ec = x
+                            y_ec = y
+                            z_ec = z
+                            if x_ec == 24:
+                                x_ec = 0
+                            if y_ec == 24:
+                                y_ec = 0
+                            if z_ec == 24:
+                                z_ec = 0
+                            # This is unphysical I think, but keeps the
+                            # discretization error down.
+                            current_grid_point = np.array([
+                                x_actual * self.grid_spacing_Bohr,
+                                y_actual * self.grid_spacing_Bohr,
+                                z_actual * self.grid_spacing_Bohr])
+                            dist_vector = current_grid_point - atomic_positions[l]
+                            norm = np.linalg.norm(dist_vector)
+                            if norm > grid_cutoff:
+                                integrand[x_ec, y_ec, z_ec] += (dist_vector / (norm ** 3))*\
+                                                     density_data[x_ec, y_ec, z_ec]
+
             # # Perform the integration.
             ion_electron = np.sum(integrand, axis=(0, 1, 2)) \
                                      * (self.grid_spacing_Bohr ** 3)
