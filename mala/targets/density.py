@@ -334,7 +334,6 @@ class Density(TargetBase):
         # Currently, MALA works in Bohr units for length. This is not good
         # and will be fixed soon, but as it is not fixed right now, these
         # positions have to be converted.
-        print(atomic_positions)
         number_of_atoms = np.shape(atomic_positions)[0]
         forces = np.zeros_like(atomic_positions)
 
@@ -361,15 +360,17 @@ class Density(TargetBase):
         # Place the atoms in the simulation cell.
         atomic_positions_indices = np.zeros_like(atomic_positions)
         atoms_on_the_grid = np.zeros_like(grid3D)
+        min_norm_atoms = np.zeros(number_of_atoms)+1000
         for x in range(0, self.grid_dimensions[0]):
             for y in range(0, self.grid_dimensions[1]):
                 for z in range(0, self.grid_dimensions[2]):
                     for l in range(0, number_of_atoms):
                         dist_vector = grid3D[x, y, z] - atomic_positions[l]
                         norm = np.linalg.norm(dist_vector)
-                        if norm < 1e-14:
+                        if norm < min_norm_atoms[l] and x==y and y==z:
                             atomic_positions_indices[l] = np.array([x, y, z])
                             atoms_on_the_grid[x, y, z] = atomic_numbers[l]
+                            min_norm_atoms[l] = norm
                     dist_vector = grid3D[x, y, z] - center
                     norm = np.linalg.norm(dist_vector)
                     if norm < 1e-14:
@@ -378,10 +379,12 @@ class Density(TargetBase):
         print(atomic_positions)
         print(atomic_positions_indices)
         print(center_position_indices)
+        print(self.grid_spacing_Bohr)
+        print(self.grid_dimensions)
         print("Got the grid")
+
         # Calculate Hellmann-Feynmann forces.
         # This is very badly optimized.
-        last_uniquex = -1000
         for l in range(0, number_of_atoms):
             # Calculate the ion-ion contribution.
             ion_ion = np.zeros_like(atomic_positions[0])
@@ -392,17 +395,17 @@ class Density(TargetBase):
                         x_actual = int(x - (center_position_indices[0] - atomic_positions_indices[l, 0]))
                         y_actual = int(y - (center_position_indices[1] - atomic_positions_indices[l, 1]))
                         z_actual = int(z - (center_position_indices[2] - atomic_positions_indices[l, 2]))
-                        # See whether we found an atom.
+                        # See z_actual we found an atom.
                         for j in range(0, number_of_atoms):
                             if l != j:
                                 x_possibleborder = x_actual
-                                if x_possibleborder == 24:
+                                if x_possibleborder == self.grid_dimensions[0]:
                                     x_possibleborder = 0
                                 y_possibleborder = y_actual
-                                if y_possibleborder == 24:
+                                if y_possibleborder == self.grid_dimensions[1]:
                                     y_possibleborder = 0
                                 z_possibleborder = z_actual
-                                if z_possibleborder == 24:
+                                if z_possibleborder == self.grid_dimensions[2]:
                                     z_possibleborder = 0
 
                                 if atomic_positions_indices[j, 0] == np.abs(x_possibleborder) \
@@ -418,11 +421,19 @@ class Density(TargetBase):
                                             atomic_numbers[l]*atomic_numbers[j]
                                         ion_ion += prefactor*dist_vector/(norm**3)
 
-            # Calculate the ion-electron contribution.
+                        # Calculate the ion-electron contribution.
                         if x < self.grid_dimensions[0] and \
-                            y < self.grid_dimensions[0] and \
-                            z < self.grid_dimensions[0]:
-
+                            y < self.grid_dimensions[1] and \
+                            z < self.grid_dimensions[2]:
+                            x_possibleborder = x_actual
+                            if x_possibleborder == self.grid_dimensions[0]:
+                                x_possibleborder = 0
+                            y_possibleborder = y_actual
+                            if y_possibleborder == self.grid_dimensions[1]:
+                                y_possibleborder = 0
+                            z_possibleborder = z_actual
+                            if z_possibleborder == self.grid_dimensions[2]:
+                                z_possibleborder = 0
                             current_grid_point = np.array([
                                 x_actual * self.grid_spacing_Bohr,
                                 y_actual * self.grid_spacing_Bohr,
@@ -431,16 +442,16 @@ class Density(TargetBase):
                             norm = np.linalg.norm(dist_vector)
                             if norm > grid_cutoff:
                                 integrand[x, y, z] = (dist_vector / (norm ** 3))*\
-                                                     density_data[x_actual, y_actual, z_actual]
+                                                     density_data[x_possibleborder, y_possibleborder, z_possibleborder]
                         else:
                             x_ec = x
                             y_ec = y
                             z_ec = z
-                            if x_ec == 24:
+                            if x_ec == self.grid_dimensions[0]:
                                 x_ec = 0
-                            if y_ec == 24:
+                            if y_ec == self.grid_dimensions[1]:
                                 y_ec = 0
-                            if z_ec == 24:
+                            if z_ec == self.grid_dimensions[2]:
                                 z_ec = 0
                             # This is unphysical I think, but keeps the
                             # discretization error down.
