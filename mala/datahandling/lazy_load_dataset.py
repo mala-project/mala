@@ -25,8 +25,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
     def __init__(self, input_dimension, output_dimension, input_data_scaler,
                  output_data_scaler, descriptor_calculator,
                  target_calculator, grid_dimensions, grid_size,
-                 descriptors_contain_xyz, use_horovod,
-                 inlcude_grads_for_inputs=False):
+                 descriptors_contain_xyz, use_horovod):
         """
         Create a lazily loaded DataSet.
 
@@ -64,15 +63,6 @@ class LazyLoadDataset(torch.utils.data.Dataset):
 
         use_horovod : bool
             If true, it is assumed that horovod is used.
-
-        inlcude_grads_for_inputs :
-            If True (default is False) test data inputs will be created so as
-            to include a gradient function. This comes at a cost of RAM.
-            The reason for this is that we load data from numpy arrays and to
-            minimize RAM, try to reference this numpy data rather then copying
-            it when going from numpy->torch. Unfortunately, to assign a grad
-            function to a tensor, a copy operation is necessary, thus
-            including the grad for the inputs comes at a cost of RAM.
         """
         self.snapshot_list = []
         self.input_dimension = input_dimension
@@ -91,7 +81,6 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.output_data = np.empty(0)
         self.use_horovod = use_horovod
         self.return_outputs_directly = False
-        self.inlcude_grads_for_inputs = inlcude_grads_for_inputs
 
     @property
     def return_outputs_directly(self):
@@ -164,8 +153,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.input_data = self.input_data.astype(np.float32)
         self.input_data = torch.from_numpy(self.input_data).float()
         self.input_data = self.input_data_scaler.transform(self.input_data)
-        if self.inlcude_grads_for_inputs:
-            self.input_data.requires_grad = True
+        self.input_data.requires_grad = True
 
         self.output_data = \
             self.output_data.reshape([self.grid_size, self.output_dimension])

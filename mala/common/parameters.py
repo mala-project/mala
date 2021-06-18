@@ -215,15 +215,6 @@ class ParametersData(ParametersBase):
         If True, data is lazily loaded, i.e. only the snapshots that are
         currently needed will be kept in memory. This greatly reduces memory
         demands, but adds additional computational time.
-
-    include_grad_for_test_inputs : bool
-        If True (default) test data inputs will be created so as to include
-        a gradient function. This comes at a cost of RAM. The reason for this
-        is that we load data from numpy arrays and to minimize RAM,
-        try to reference this numpy data rather then copying it when going
-        from numpy->torch. Unfortunately, to assign a grad function to a
-        tensor, a copy operation is necessary, thus including the grad for
-        the inputs comes at a cost of RAM.
     """
 
     def __init__(self):
@@ -237,7 +228,6 @@ class ParametersData(ParametersBase):
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
-        self.include_grad_for_test_inputs = True
 
 
 class ParametersRunning(ParametersBase):

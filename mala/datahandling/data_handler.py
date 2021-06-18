@@ -707,9 +707,7 @@ class DataHandler:
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
                     self.grid_dimension, self.grid_size,
-                    self.parameters.descriptors_contain_xyz, self.use_horovod,
-                    inlcude_grads_for_inputs=self.parameters.
-                    include_grad_for_test_inputs)
+                    self.parameters.descriptors_contain_xyz, self.use_horovod)
 
             # Add snapshots to the lazy loading data sets.
             i = 0
@@ -788,8 +786,7 @@ class DataHandler:
                     torch.from_numpy(self.test_data_inputs).float()
                 self.test_data_inputs = \
                     self.input_data_scaler.transform(self.test_data_inputs)
-                if self.parameters.include_grad_for_test_inputs:
-                    self.test_data_inputs.requires_grad = True
+                self.test_data_inputs.requires_grad = True
 
             self.validation_data_inputs = np.array(self.validation_data_inputs)
             self.validation_data_inputs = \
