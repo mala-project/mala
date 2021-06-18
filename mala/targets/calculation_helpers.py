@@ -286,14 +286,26 @@ def get_3D_grid(dimx, dimy, dimz, spacing_x, spacing_y, spacing_z, fastest="x"):
     -------
 
     """
+    offset_x = 1*(dimx*spacing_x)/2
+    offset_y = 1*(dimy*spacing_y)/2
+    offset_z = 1*(dimz*spacing_z)/2
 
+    offset_x = 0
+    offset_y = 0
+    offset_z = 0
+
+    # offset_x = spacing_x
+    # offset_y = spacing_y
+    # offset_z = spacing_z
+
+    print(dimx, spacing_x, dimx*spacing_x)
     grid3D = np.zeros((dimx, dimy, dimz, 3), dtype=np.float64)
     for i in range(0, dimx):
         for j in range(0, dimy):
             for k in range(0, dimz):
-                grid3D[i, j, k, 0] = i*spacing_x
-                grid3D[i, j, k, 1] = j*spacing_y
-                grid3D[i, j, k, 2] = k*spacing_z
+                grid3D[i, j, k, 0] = i*spacing_x+offset_x
+                grid3D[i, j, k, 1] = j*spacing_y+offset_y
+                grid3D[i, j, k, 2] = k*spacing_z+offset_z
     return grid3D
 
 
