@@ -237,6 +237,19 @@ class TargetBase:
         """Get energy grid."""
         raise Exception("No method implement to calculate an energy grid.")
 
+    def get_real_space_grid(self):
+        """Get the real space grid."""
+
+        grid3D = np.zeros((self.grid_dimensions[0], self.grid_dimensions[1],
+                           self.grid_dimensions[2], 3), dtype=np.float64)
+        for i in range(0, self.grid_dimensions[0]):
+            for j in range(0, self.grid_dimensions[1]):
+                for k in range(0, self.grid_dimensions[2]):
+                    grid3D[i, j, k, 0] = i * self.grid_spacing_Bohr
+                    grid3D[i, j, k, 1] = j * self.grid_spacing_Bohr
+                    grid3D[i, j, k, 2] = k * self.grid_spacing_Bohr
+        return grid3D
+
     @staticmethod
     def convert_units(array, in_units="eV"):
         """

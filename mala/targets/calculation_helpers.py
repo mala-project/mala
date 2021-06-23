@@ -3,7 +3,7 @@ import numpy as np
 from ase.units import kB
 from scipy import integrate
 import mpmath as mp
-
+import itertools
 
 def integrate_values_on_spacing(values, spacing, method, axis=0):
     """
@@ -271,42 +271,20 @@ def get_s1_value(x, beta):
                3*mp.polylog(3, -1.0*mp.exp(x))) / (beta*beta*beta)
     return results
 
-def get_3D_grid(dimx, dimy, dimz, spacing_x, spacing_y, spacing_z, fastest="x"):
-    """
-    Creates a 3D grid from specified spacing and dimension parameters.
 
-    Parameters
-    ----------
-    spacing_x
-    spacing_y
-    spacing_z
-    fastest
-
-    Returns
-    -------
-
-    """
-    offset_x = 1*(dimx*spacing_x)/2
-    offset_y = 1*(dimy*spacing_y)/2
-    offset_z = 1*(dimz*spacing_z)/2
-
-    offset_x = 0
-    offset_y = 0
-    offset_z = 0
-
-    # offset_x = spacing_x
-    # offset_y = spacing_y
-    # offset_z = spacing_z
-
-    print(dimx, spacing_x, dimx*spacing_x)
-    grid3D = np.zeros((dimx, dimy, dimz, 3), dtype=np.float64)
-    for i in range(0, dimx):
-        for j in range(0, dimy):
-            for k in range(0, dimz):
-                grid3D[i, j, k, 0] = i*spacing_x+offset_x
-                grid3D[i, j, k, 1] = j*spacing_y+offset_y
-                grid3D[i, j, k, 2] = k*spacing_z+offset_z
-    return grid3D
+def neighboring_cells(order):
+    max_min = list(range(-order, order+1))
+    if order > 0:
+        combinations = list(itertools.product(max_min, repeat=3))
+    else:
+        combinations = [(0, 0, 0)]
+    points = np.array(combinations)
+    filtered_points = []
+    # for i in range(0, np.shape(points)[0]):
+    #     if np.linalg.norm(points[i]) <= np.sqrt(order)+0.01:
+    #         filtered_points.append(points[i])
+    # filtered_points = np.array(filtered_points)
+    return points
 
 
 def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,

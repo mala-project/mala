@@ -326,6 +326,111 @@ class Density(TargetBase):
 
     def get_atomic_forces(self, density_data, atoms_Angstrom=None,
                           integration_method="trapz", valence_electrons=None,
+                          grid_cutoff=1e-15, maximum_order=1):
+        if atoms_Angstrom is None:
+            atoms_Angstrom = self.atoms
+        atomic_positions = atoms_Angstrom.get_positions()
+        atomic_positions /= Bohr
+        cell_dimensions = atoms_Angstrom.get_cell()[:]
+        cell_dimensions /= Bohr
+        # Currently, MALA works in Bohr units for length. This is not good
+        # and will be fixed soon, but as it is not fixed right now, these
+        # positions have to be converted.
+        number_of_atoms = np.shape(atomic_positions)[0]
+        forces = np.zeros_like(atomic_positions)
+        print(atomic_positions)
+        # I am not completely sure if this is right when working with
+        # PSPs. The charge of the ions should technically be reduced by
+        # the number of core ions.
+        atomic_numbers = atoms_Angstrom.get_atomic_numbers()
+        if valence_electrons is not None:
+            atomic_numbers -= valence_electrons
+
+        # Now, we need the grid.
+        grid3D = self.get_real_space_grid()
+        for order in range(0, maximum_order+1):
+            cells_to_integrate = neighboring_cells(order)
+            number_of_cells = np.shape(cells_to_integrate)[0]
+            ion_ion = np.zeros_like(atomic_positions)
+            # Calculate Hellmann-Feynmann forces.
+            # This is very badly optimized.
+            for cell_number in range(0, number_of_cells):
+                displacement = cell_dimensions.dot(cells_to_integrate[cell_number])
+                atoms_in_current_cell = displacement+atomic_positions
+                is_original_cell = cells_to_integrate[cell_number][0] == 0 and\
+                                   cells_to_integrate[cell_number][1] == 0 and\
+                                   cells_to_integrate[cell_number][2] == 0
+                for l in range(1, number_of_atoms):
+                    for j in range(0, number_of_atoms):
+                        if not is_original_cell or l != j:
+                            dist_vector = atoms_in_current_cell[j] - atomic_positions[l]
+                            norm = np.linalg.norm(dist_vector)
+                            # print(cells_to_integrate[cell_number], dist_vector / (norm ** 3))
+                            prefactor = -1 * AtomicForce.get_hellman_feynman_factor() * \
+                                        atomic_numbers[l] * atomic_numbers[j]
+                            ion_ion[l] += prefactor * dist_vector / (norm ** 3)
+
+                    # Calculate the ion-ion contribution.
+                    integrand = np.zeros_like(grid3D)
+                    #             # Calculate the ion-electron contribution.
+                    #             if x < self.grid_dimensions[0] and \
+                    #                 y < self.grid_dimensions[1] and \
+                    #                 z < self.grid_dimensions[2]:
+                    #                 x_possibleborder = x_actual
+                    #                 if x_possibleborder == self.grid_dimensions[0]:
+                    #                     x_possibleborder = 0
+                    #                 y_possibleborder = y_actual
+                    #                 if y_possibleborder == self.grid_dimensions[1]:
+                    #                     y_possibleborder = 0
+                    #                 z_possibleborder = z_actual
+                    #                 if z_possibleborder == self.grid_dimensions[2]:
+                    #                     z_possibleborder = 0
+                    #                 current_grid_point = np.array([
+                    #                     x_actual * self.grid_spacing_Bohr,
+                    #                     y_actual * self.grid_spacing_Bohr,
+                    #                     z_actual * self.grid_spacing_Bohr])
+                    #                 dist_vector = current_grid_point - atomic_positions[l]
+                    #                 norm = np.linalg.norm(dist_vector)
+                    #                 if norm > grid_cutoff:
+                    #                     integrand[x, y, z] = (dist_vector / (norm ** 3))*\
+                    #                                          density_data[x_possibleborder, y_possibleborder, z_possibleborder]
+                    #             else:
+                    #                 x_ec = x
+                    #                 y_ec = y
+                    #                 z_ec = z
+                    #                 if x_ec == self.grid_dimensions[0]:
+                    #                     x_ec = 0
+                    #                 if y_ec == self.grid_dimensions[1]:
+                    #                     y_ec = 0
+                    #                 if z_ec == self.grid_dimensions[2]:
+                    #                     z_ec = 0
+                    #                 # This is unphysical I think, but keeps the
+                    #                 # discretization error down.
+                    #                 current_grid_point = np.array([
+                    #                     x_actual * self.grid_spacing_Bohr,
+                    #                     y_actual * self.grid_spacing_Bohr,
+                    #                     z_actual * self.grid_spacing_Bohr])
+                    #                 dist_vector = current_grid_point - atomic_positions[l]
+                    #                 norm = np.linalg.norm(dist_vector)
+                    #                 if norm > grid_cutoff:
+                    #                     integrand[x_ec, y_ec, z_ec] += (dist_vector / (norm ** 3))*\
+                    #                                          density_data[x_ec, y_ec, z_ec]
+                    #
+                    # # # Perform the integration.
+                    # ion_electron = np.sum(integrand, axis=(0, 1, 2)) \
+                    #                          * (self.grid_spacing_Bohr ** 3)
+                    # prefactor = -1 * AtomicForce.get_hellman_feynman_factor() * \
+                    #     atomic_numbers[l]
+                    # ion_electron *= prefactor
+                    # print(ion_electron, ion_ion)
+            forces = ion_ion#+ion_electron
+            print(order, forces)
+        return forces
+
+
+
+    def get_atomic_forces_hacky(self, density_data, atoms_Angstrom=None,
+                          integration_method="trapz", valence_electrons=None,
                           grid_cutoff=1e-15):
         if atoms_Angstrom is None:
             atoms_Angstrom = self.atoms
