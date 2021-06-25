@@ -391,7 +391,6 @@ def gaussians(grid, centers, sigma):
     """
     Calculate multiple gaussians on the same grid, but with different centers.
 
-
     Gaussian functions are used as approximations to the delta in the
     Brillouin zone integration. Note that this defines Gaussians without the
     factor of 1/sqrt(2). All the Gaussians will have the same sigmas
