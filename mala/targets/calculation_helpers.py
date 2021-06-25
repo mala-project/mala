@@ -414,6 +414,6 @@ def gaussians(grid, centers, sigma):
 
     """
     multiple_gaussians = 1.0/np.sqrt(np.pi*sigma**2) * \
-             np.exp(-1.0*((grid[np.newaxis] -
-                           centers[..., np.newaxis])/sigma)**2)
+        np.exp(-1.0*((grid[np.newaxis] - centers[..., np.newaxis])/sigma)**2)
+
     return multiple_gaussians

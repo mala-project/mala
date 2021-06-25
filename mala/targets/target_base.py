@@ -37,6 +37,7 @@ class TargetBase:
         self.temperature_K = None
         self.grid_spacing_Bohr = None
         self.number_of_electrons = None
+        self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
         self.grid_dimensions = [0, 0, 0]
@@ -222,6 +223,11 @@ class TargetBase:
                                                        self.temperature_K)
                 eband_per_band = kweights[np.newaxis, :] * eband_per_band
                 self.band_energy_dft_calculation = np.sum(eband_per_band)
+                enum_per_band = fermi_function(eigs,
+                                               self.fermi_energy_eV,
+                                               self.temperature_K)
+                enum_per_band = kweights[np.newaxis, :] * enum_per_band
+                self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
         else:
             raise Exception("Unsupported auxiliary file type.")
 

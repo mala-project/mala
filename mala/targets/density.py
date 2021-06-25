@@ -356,5 +356,6 @@ class Density(TargetBase):
         return_density_object.total_energy_dft_calculation = \
             ldos_object.total_energy_dft_calculation
         return_density_object.kpoints = ldos_object.kpoints
-
+        return_density_object.number_of_electrons_from_eigenvals = \
+            ldos_object.number_of_electrons_from_eigenvals
         return return_density_object
