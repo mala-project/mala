@@ -11,7 +11,7 @@ from data_repo_path import get_data_repo_path
 # In order to test the integration capabilities of MALA we need a
 # QuantumEspresso
 # calculation containing the following:
-#   1. Outfile from the run
+#   1. Outfile from the run (containing the full band output!)
 #   2. LDOS cube files.
 #   3. Density cube file.
 #   4. A DOS file.
@@ -185,6 +185,34 @@ def qe_ldos_to_dos(accuracy):
     else:
         return False
 
+# Check whether we get the same result when calculating the DOS via the
+# DFT eigenvalues and via the DOS calculated by pp.x.
+def pwevaldos_vs_ppdos(accuracy):
+    dos_calculator = DOS(test_parameters)
+    dos_calculator.read_additional_calculation_data("qe.out", path_to_out)
+
+    # Read the DOS data.
+    if numpy_arrays:
+        dos_from_pp = np.load(path_to_dos_npy)
+    else:
+        # DOS is in 1/eV so no conversion necessary.
+        dos_from_pp = dos_calculator.read_from_qe_dos_txt(path_to_dos_qe[1],
+                                                          path_to_dos_qe[0])
+
+    # Calculate the quantities we want to compare.
+    dos_from_dft = dos_calculator.read_from_qe_out()
+    dos_pp_sum = dos_from_pp.sum()
+    dos_dft_sum = dos_from_dft.sum()
+    rel_error = np.abs(dos_dft_sum-dos_pp_sum) / dos_pp_sum
+
+    printout("Relative error for sum of DOS: ", rel_error)
+
+    # Check against the constraints we put upon ourselves.
+    if rel_error < accuracy:
+        return True
+    else:
+        return False
+
 
 if __name__ == "__main__":
 
@@ -204,3 +232,7 @@ if __name__ == "__main__":
     test1 = qe_ldos_to_dos(0.0000001)
     printout("Integrate QE LDOS over spatial grid and get correct DOS "
              "compared to QE - success:", test1)
+
+    test1 = pwevaldos_vs_ppdos(0.0001)
+    printout("Reading DOS from pp.x compared to calculating DOS from DFT "
+             "eigenvalues - success:", test1)
