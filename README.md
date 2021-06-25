@@ -2,7 +2,7 @@
 
 # MALA
 
-[![CPU](https://github.com/DanielKotik/mala/actions/workflows/cpu-tests.yml/badge.svg)](https://github.com/DanielKotik/mala/actions/workflows/cpu-tests.yml)
+[![CPU](https://github.com/mala-project/mala/actions/workflows/cpu-tests.yml/badge.svg)](https://github.com/mala-project/mala/actions/workflows/cpu-tests.yml)
 [![image](https://github.com/mala-project/mala/actions/workflows/gh-pages.yml/badge.svg)](https://mala-project.github.io/mala/)
 [![image](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
