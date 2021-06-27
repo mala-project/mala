@@ -51,7 +51,7 @@ jobs:
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "docker_ci" ] && VERSION=latest
+          [ "$VERSION" == "develop" ] && VERSION=latest
 
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
@@ -77,11 +77,11 @@ jobs:
       - name: Check out repository (data)
         uses: actions/checkout@v2
         with:
-          repository: mala-project/data
+          repository: mala-project/test-data
           token: ${{ secrets.ACCESS_TOKEN }}
           path: mala_data
           ref: v0.1.0
-          lfs: true
+          lfs: false
 
       - name: Data setup
         shell: bash
