@@ -329,7 +329,7 @@ class ParametersRunning(ParametersBase):
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
-
+        self.visualisation = False
 
 class ParametersHyperparameterOptimization(ParametersBase):
     """

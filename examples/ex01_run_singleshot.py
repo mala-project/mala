@@ -37,7 +37,7 @@ def run_example01(desired_loss_improvement_factor=1):
     test_parameters.running.mini_batch_size = 40
     test_parameters.running.learning_rate = 0.00001
     test_parameters.running.trainingtype = "Adam"
-
+    test_parameters.running.visualisation = True
     ####################
     # DATA
     # Add and prepare snapshots for training.
