@@ -30,7 +30,7 @@ def run_example04(desired_loss_improvement_factor=1):
     test_parameters.data.output_rescaling_type = "normal"
 
     # Specify the training parameters.
-    test_parameters.running.max_number_epochs = 20
+    test_parameters.running.max_number_epochs = 5
     test_parameters.running.mini_batch_size = 40
     test_parameters.running.learning_rate = 0.00001
     test_parameters.running.trainingtype = "Adam"
@@ -38,7 +38,7 @@ def run_example04(desired_loss_improvement_factor=1):
     # Specify the number of trials, the hyperparameter optimizer should run
     # and the type of hyperparameter.
     test_parameters.hyperparameters.n_trials = 20
-    test_parameters.hyperparameters.hyper_opt_method = "optuna"
+    test_parameters.hyperparameters.hyper_opt_method = "oat"
 
     ####################
     # DATA
@@ -71,20 +71,18 @@ def run_example04(desired_loss_improvement_factor=1):
     test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
 
     # Learning rate will be optimized.
-    test_hp_optimizer.add_hyperparameter("float", "learning_rate",
-                                         0.0000001, 0.01)
+    test_hp_optimizer.add_hyperparameter("categorical", "learning_rate",
+                                         choices=[0.005, 0.01, 0.015])
 
     # Number of neurons per layer will be optimized.
-    test_hp_optimizer.add_hyperparameter("int", "ff_neurons_layer_00", 10, 100)
-    test_hp_optimizer.add_hyperparameter("int", "ff_neurons_layer_01", 10, 100)
+    test_hp_optimizer.add_hyperparameter(
+        "categorical", "ff_neurons_layer_00", choices=[32, 64, 96])
+    test_hp_optimizer.add_hyperparameter(
+        "categorical", "ff_neurons_layer_01", choices=[32, 64, 96])
 
     # Choices for activation function at each layer will be optimized.
     test_hp_optimizer.add_hyperparameter("categorical", "layer_activation_00",
-                                         choices=["ReLU", "Sigmoid"])
-    test_hp_optimizer.add_hyperparameter("categorical", "layer_activation_01",
-                                         choices=["ReLU", "Sigmoid"])
-    test_hp_optimizer.add_hyperparameter("categorical", "layer_activation_02",
-                                         choices=["ReLU", "Sigmoid"])
+                                         choices=["ReLU", "Sigmoid", "LeakyReLU"])
 
     # Perform hyperparameter optimization.
     printout("Starting Hyperparameter optimization.")

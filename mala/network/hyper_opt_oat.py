@@ -26,6 +26,7 @@ class HyperOptOAT(HyperOptBase):
         self.objective = None
         self.trial_losses = []
         self.optimal_params = None
+        self.importance = None
         self.n_factors = None
         self.factor_levels = None
         self.strength = None
@@ -75,7 +76,12 @@ class HyperOptOAT(HyperOptBase):
 
         self.factor_levels = [par.num_choices for par in self.params.
                               hyperparameters.hlist]
-        self.strength = 3
+
+        if not self.monotonic:
+            raise Exception(
+                "Please use hyperparameters in increasing or decreasing order of number of choices")
+
+        self.strength = 2
         self.N_runs = self.number_of_runs()
         self.OA = self.get_orthogonal_array()
         number_of_trial = 0
@@ -83,40 +89,53 @@ class HyperOptOAT(HyperOptBase):
         for row in self.OA:
             printout("Trial number", number_of_trial)
             self.trial_losses.append(self.objective(row))
+
             number_of_trial += 1
 
-        # Return the best lost value we could achieve.
-        return min(self.trial_losses)
+        # Return the best loss value we could achieve.
+        self.get_optimal_parameters()
+        return self.objective(self.optimal_params)
 
-    def set_optimal_parameters(self):
+    def get_optimal_parameters(self):
         """
         Find the optimal set of hyperparameters by doing range analysis.
         This is done using loss instead of accuracy as done in the paper.
 
+        """
+        print("Performing Range Analysis")
+        print("factor levels", self.factor_levels)
+
+        def indices(idx, val): return np.where(self.OA[:, idx] == val)[0]
+        # R = [[self.trial_losses[indices(idx, l)].sum() for l in range(levels)]
+        #      for (idx, levels) in enumerate(self.factor_levels)]
+
+        R = []
+        for (idx, levels) in enumerate(self.factor_levels):
+            R.append([])
+            for l in range(levels):
+                R[idx].extend(self.trial_losses[indices(idx, l)].sum())
+        print(R)
+        A = [[i/len(j) for i in j] for j in R]
+
+        # Taking loss as objective to minimise
+        self.optimal_params = np.array([i.index(min(i)) for i in A])
+        self.importance = np.argsort([max(i)-min(i) for i in A])
+
+        print("Order of Importance: ")
+        printout(
+            [self.params.hyperparameters.hlist[idx].name for idx in self.importance], " > ")
+
+        print("Optimal Hyperparameters:")
+        for (idx, par) in enumerate(self.params.hyperparameters.hlist):
+            printout([par.name, par.choice[self.optimal_params[idx]]], ' : ')
+
+    def set_optimal_parameters(self):
+        """
         Set the optimal parameters found in the present study.
 
         The parameters will be written to the parameter object with which the
         hyperparameter optimizer was created.
         """
-
-        def indices(idx, val): return np.where(self.OA[:, idx] == val)[0]
-
-        R = [[self.trial_losses[indices(idx, l)].sum() for l in range(levels)]
-             for (idx, levels) in enumerate(self.factor_levels)]
-
-        A = [[i/len(j) for i in j] for j in R]
-
-        # Taking loss as objective to minimise
-        self.optimal_params = np.array([i.index(min(i)) for i in A])
-        importance = np.argsort([max(i)-min(i) for i in A])
-
-        print("Order of Importance: ")
-        printout(
-            [self.params.hyperparameters.hlist[idx].name for idx in importance], " > ")
-
-        print("Optimal Hyperparameters:")
-        for (idx, par) in enumerate(self.params.hyperparameters.hlist):
-            printout([par.name, par.choice[self.optimal_params[idx]]], ' : ')
 
         self.objective.parse_trial_oat(self.optimal_params)
 
@@ -143,11 +162,12 @@ class HyperOptOAT(HyperOptBase):
             self.factor_levels, self.strength)]
 
         N = np.lcm.reduce(runs)
-        return N
+        return int(N)
 
     def get_orthogonal_array(self):
         """Generate the best Orthogonal array used for optimal hyperparameter sampling."""
 
+        print("Generating Suitable Orthogonal Array")
         arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs, self.strength,
                                     self.n_factors)
         arraylist = [arrayclass.create_root()]
@@ -163,4 +183,12 @@ class HyperOptOAT(HyperOptBase):
             idxs = np.argsort(dd)
             arraylist = [arraylist_extensions[ii] for ii in idxs]
 
+        if not arraylist:  # checking if the list is empty
+            raise Exception(
+                "No orthogonal array exists with such a parameter combination")
         return np.unique(np.array(arraylist[0]), axis=0)
+
+    @property
+    def monotonic(self):
+        dx = np.diff(self.factor_levels)
+        return np.all(dx <= 0) or np.all(dx >= 0)
