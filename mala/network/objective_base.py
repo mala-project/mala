@@ -153,7 +153,10 @@ class ObjectiveBase:
 
         par: HyperparameterOAT
         for factor_idx, par in enumerate(self.params.hyperparameters.hlist):
-            if "layer_activation" in par.name:
+            if "learning_rate" in par.name:
+                self.params.running.learning_rate = \
+                    par.get_parameter(trial, factor_idx)
+            elif "layer_activation" in par.name:
                 self.params.network.layer_activations.\
                     append(par.get_parameter(trial, factor_idx))
             elif "ff_neurons_layer" in par.name:
@@ -166,3 +169,7 @@ class ObjectiveBase:
             else:
                 raise Exception("Optimization of hyperparameter ", par.name,
                                 "not supported at the moment.")
+
+        if self.optimize_layer_list:
+            self.params.network.layer_sizes.\
+                append(self.data_handler.get_output_dimension())
