@@ -32,8 +32,8 @@ the examples in the `example/` folder.
 ## Institutions
 ### Founding Institutions
 
-- Sandia National Laboratories (SNL), USA.
-- Center for Advanced Systems Understanding (CASUS), Germany.
+- [Sandia National Laboratories](https://www.sandia.gov/) (SNL), USA.
+- [Center for Advanced Systems Understanding](https://www.casus.science/) (CASUS), Germany.
 
 ## Developers
 ### Scientific Supervision
