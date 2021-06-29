@@ -36,6 +36,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # 0 fetches complete history and tags
 
       - name: Setup Python
         uses: actions/setup-python@v2
@@ -52,7 +54,7 @@ jobs:
       - name: Build API and docs
         run: |
           sphinx-apidoc -o docs/source/api mala
-          sphinx-build -b html -d docs/_build/doctrees docs/source docs/_build/html
+          sphinx-build -W --keep-going -b html -d docs/_build/doctrees docs/source docs/_build/html
           mv -v docs/_build/html public
 
       - name: Deploy

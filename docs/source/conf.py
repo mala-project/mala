@@ -11,6 +11,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import subprocess
 import sys
 # sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../../'))
@@ -27,6 +28,12 @@ copyright = '2021 National Technology & Engineering Solutions of Sandia, ' \
 
 author = 'Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, ' \
          'Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson'
+
+# The version info for the project
+tag = subprocess.run(['git', 'describe', '--tags'], capture_output=True,
+                        text=True)
+version = tag.stdout.strip()
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -62,6 +69,8 @@ autodoc_mock_imports = [
     'lammps',
     'total_energy',
 ]
+
+autodoc_member_order = 'groupwise'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
