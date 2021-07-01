@@ -53,7 +53,7 @@ class Trainer(Runner):
         self.__prepare_to_train(optimizer_dict)
         self.tensor_board = None
         if self.parameters.visualisation:
-            self.tb = SummaryWriter()
+            self.tensor_board = SummaryWriter()
 
     @classmethod
     def checkpoint_exists(cls, checkpoint_name):
@@ -248,8 +248,8 @@ class Trainer(Runner):
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
 
             #summary_writer tensor board
-            if self.tb is not None:
-                self.tb.add_scalar("Loss", vloss, epoch)
+            if self.tensor_board is not None:
+                self.tensor_board.add_scalar("Loss", vloss, epoch)
 
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
@@ -313,7 +313,7 @@ class Trainer(Runner):
 <<<<<<< HEAD
 =======
         # closing tensorboard window   
-        self.tb.close()
+        self.tensor_board.close()
 
         # Calculate final loss.
 >>>>>>> 39e8119 (summary writer added for check)
