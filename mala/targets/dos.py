@@ -144,8 +144,7 @@ class DOS(TargetBase):
         return linspace_array
 
     def get_band_energy(self, dos_data, fermi_energy_eV=None,
-                        temperature_K=None, integration_method="analytical",
-                        shift_energy_grid=True):
+                        temperature_K=None, integration_method="analytical"):
         """
         Calculate the band energy from given DOS data.
 
@@ -167,10 +166,6 @@ class DOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
-
         Returns
         -------
         band_energy : float
@@ -189,8 +184,7 @@ class DOS(TargetBase):
 
     def get_number_of_electrons(self, dos_data, fermi_energy_eV=None,
                                 temperature_K=None,
-                                integration_method="analytical",
-                                shift_energy_grid=True):
+                                integration_method="analytical"):
         """
         Calculate the number of electrons from given DOS data.
 
@@ -212,10 +206,6 @@ class DOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
-
         Returns
         -------
         number_of_electrons : float
@@ -234,8 +224,7 @@ class DOS(TargetBase):
 
     def get_entropy_contribution(self, dos_data, fermi_energy_eV=None,
                                  temperature_K=None,
-                                 integration_method="analytical",
-                                 shift_energy_grid=True):
+                                 integration_method="analytical"):
         """
         Calculate the entropy contribution to the total energy.
 
@@ -257,10 +246,6 @@ class DOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
-
         Returns
         -------
         entropy_contribution : float
@@ -279,8 +264,7 @@ class DOS(TargetBase):
 
     def get_self_consistent_fermi_energy_ev(self, dos_data,
                                             temperature_K=None,
-                                            integration_method="analytical",
-                                            shift_energy_grid=True):
+                                            integration_method="analytical"):
         """
         Calculate the self-consistent Fermi energy.
 
@@ -303,10 +287,6 @@ class DOS(TargetBase):
                 - "trapz" for trapezoid method
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
-
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
 
         Returns
         -------
