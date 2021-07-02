@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.0.3-alpha-66-gaa7f7c8
+                v0.0.3-alpha-70-gdd5c20b
               </div>
             
           
@@ -548,6 +548,15 @@ data with static data provided as arg to the constructor.
 Doesn’t copy atoms metadata, retains number of atoms, but
 returns dummy atoms
 Mimics file object’s readline method.</p>
+<p>Create cube file object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>srcname</strong> (<em>string</em>) – source file to copy metadata from</p></li>
+<li><p><strong>const</strong> (<em>int</em>) – numeric value to return instead of volumetric data</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt id="mala.targets.cube_parser.CubeFile.readline">
 <code class="sig-name descname"><span class="pre">readline</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.cube_parser.CubeFile.readline" title="Permalink to this definition">¶</a></dt>
@@ -667,6 +676,12 @@ If only one filename given, other filename is inferred.</p>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.targets.density.</span></code><code class="sig-name descname"><span class="pre">Density</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.density.Density" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.targets.target_base.TargetBase</span></code></a></p>
 <p>Postprocessing / parsing functions for the electronic density.</p>
+<p>Create a Density object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this TargetBase object.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt id="mala.targets.density.Density.from_ldos">
 <em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_ldos</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.density.Density.from_ldos" title="Permalink to this definition">¶</a></dt>
@@ -806,6 +821,12 @@ Currently supported:</p>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.targets.dos.</span></code><code class="sig-name descname"><span class="pre">DOS</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.targets.target_base.TargetBase</span></code></a></p>
 <p>Postprocessing / parsing functions for the density of states (DOS).</p>
+<p>Create a DOS object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this TargetBase object.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt id="mala.targets.dos.DOS.backconvert_units">
 <em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">backconvert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.backconvert_units" title="Permalink to this definition">¶</a></dt>
@@ -1060,6 +1081,12 @@ qe.dos.txt here. QE saves the DOS in 1/eV.</p>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.targets.ldos.</span></code><code class="sig-name descname"><span class="pre">LDOS</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.targets.target_base.TargetBase</span></code></a></p>
 <p>Postprocessing / parsing functions for the local density of states.</p>
+<p>Create a LDOS object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this TargetBase object.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt id="mala.targets.ldos.LDOS.backconvert_units">
 <em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">backconvert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.backconvert_units" title="Permalink to this definition">¶</a></dt>
@@ -1417,6 +1444,15 @@ interface. If None (recommended), MALA will create one.</p></li>
 <p>Target parsers read the target quantity
 (i.e. the quantity the NN will learn to predict) from a specified file
 format and performs postprocessing calculations on the quantity.</p>
+<p>Create a TargetBase object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>mala.common.parameters.Parameters or</em>) – </p></li>
+<li><p><strong>mala.common.parameters.ParametersTargets</strong> – Parameters used to create this TargetBase object.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt id="mala.targets.target_base.TargetBase.backconvert_units">
 <em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">backconvert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase.backconvert_units" title="Permalink to this definition">¶</a></dt>
