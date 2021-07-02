@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.0.3-alpha-70-gdd5c20b
+                v0.0.3-alpha-76-gc50a49e
               </div>
             
           
@@ -235,20 +235,6 @@
 </dl>
 </dd></dl>
 
-<p>Create an instances of the DataConverter class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>parameters</strong> (<a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – The parameters object used for creating this instance.</p></li>
-<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase"><em>mala.descriptors.descriptor_base.DescriptorBase</em></a>) – The descriptor calculator used for parsing/converting fingerprint
-data. If None, the descriptor calculator will be created by this
-object using the parameters provided. Default: None</p></li>
-<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.html#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><em>mala.targets.target_base.TargetBase</em></a>) – Target calculator used for parsing/converting target data. If None,
-the target calculator will be created by this object using the
-parameters provided.</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube">
 <code class="sig-name descname"><span class="pre">add_snapshot_qeout_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_naming_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube" title="Permalink to this definition">¶</a></dt>
@@ -328,22 +314,6 @@ the first snapshot generated will be called snapshot4.</p></li>
 <p>Loads and scales dara. Can only process numpy arrays at the moment.</p>
 <p>Data that is not in a numpy array can be converted using the DataConverter
 class.</p>
-<p>Create an instance of DataHandler.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>parameters</strong> (<a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – </p></li>
-<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase"><em>mala.descriptors.descriptor_base.DescriptorBase</em></a>) – Used to do unit conversion on input data. If None, then one will
-be created by this class.</p></li>
-<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.html#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><em>mala.targets.target_base.TargetBase</em></a>) – Used to do unit conversion on output data. If None, then one will
-be created by this class.</p></li>
-<li><p><strong>input_data_scaler</strong> (<a class="reference internal" href="#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler"><em>mala.datahandling.data_scaler.DataScaler</em></a>) – Used to scale the input data. If None, then one will be created by
-this class.</p></li>
-<li><p><strong>output_data_scaler</strong> (<a class="reference internal" href="#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler"><em>mala.datahandling.data_scaler.DataScaler</em></a>) – Used to scale the output data. If None, then one will be created by
-this class.</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="mala.datahandling.data_handler.DataHandler.add_snapshot">
 <code class="sig-name descname"><span class="pre">add_snapshot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_npy_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_npy_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculation_output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_snapshot_as</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.add_snapshot" title="Permalink to this definition">¶</a></dt>
@@ -544,28 +514,6 @@ into a (x*y*z,dim) array.</p></li>
 <p>Scales input and output data.</p>
 <p>Sort of emulates the functionality of the scikit-learn library, but by
 implementing the class by ourselves we have more freedom.</p>
-<p>Create a DataScaler object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>typestring</strong> (<em>string</em>) – <p>Specifies how scaling should be performed.
-Options:</p>
-<ul>
-<li><p>”None”: No normalization is applied.</p></li>
-<li><p>”standard”: Standardization (Scale to mean 0,
-standard deviation 1)</p></li>
-<li><p>”normal”: Min-Max scaling (Scale to be in range 0…1)</p></li>
-<li><p>”feature-wise-standard”: Row Standardization (Scale to mean 0,
-standard deviation 1)</p></li>
-<li><p>”feature-wise-normal”: Row Min-Max scaling (Scale to be in range
-0…1)</p></li>
-</ul>
-</p></li>
-<li><p><strong>use_horovod</strong> (<em>bool</em>) – If True, the DataScaler will use horovod to check that data is
-only saved on the root process in parallel execution.</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting">
 <code class="sig-name descname"><span class="pre">finish_incremental_fitting</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting" title="Permalink to this definition">¶</a></dt>
@@ -695,26 +643,6 @@ until values from a new ones are used. Therefore, shuffling at DataSampler
 / DataLoader level is discouraged to the point that it was disabled.
 Instead, we mix the snapshot load order here ot have some sort of mixing
 at all.</p>
-<p>Create a lazily loaded DataSet.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_dimension</strong> (<em>int</em>) – Dimension of an input vector.</p></li>
-<li><p><strong>output_dimension</strong> (<em>int</em>) – Dimension of an output vector.</p></li>
-<li><p><strong>input_data_scaler</strong> (<a class="reference internal" href="#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler"><em>mala.datahandling.data_scaler.DataScaler</em></a>) – Used to scale the input data.</p></li>
-<li><p><strong>output_data_scaler</strong> (<a class="reference internal" href="#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler"><em>mala.datahandling.data_scaler.DataScaler</em></a>) – Used to scale the output data.</p></li>
-<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase"><em>mala.descriptors.descriptor_base.DescriptorBase</em></a>) – Used to do unit conversion on input data.</p></li>
-<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.html#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><em>mala.targets.target_base.TargetBase</em></a><em> or </em><em>derivative</em>) – Used to do unit conversion on output data.</p></li>
-<li><p><strong>grid_dimensions</strong> (<em>list</em>) – Dimensions of the grid (x,y,z).</p></li>
-<li><p><strong>grid_size</strong> (<em>int</em>) – Size of the grid (x*y*z), i.e. the number of datapoints per
-snapshot.</p></li>
-<li><p><strong>descriptors_contain_xyz</strong> (<em>bool</em>) – If true, then it is assumed that the first three entries of any
-input data file are xyz-information and can be discarded.
-Generally true, if your descriptors were calculated using MALA.</p></li>
-<li><p><strong>use_horovod</strong> (<em>bool</em>) – If true, it is assumed that horovod is used.</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">
 <code class="sig-name descname"><span class="pre">add_snapshot_to_dataset</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#mala.datahandling.snapshot.Snapshot" title="mala.datahandling.snapshot.Snapshot"><span class="pre">mala.datahandling.snapshot.Snapshot</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset" title="Permalink to this definition">¶</a></dt>
@@ -766,23 +694,6 @@ Numerical errors are smaller if set to True.</p>
 <p>Represents a snapshot on a hard drive.</p>
 <p>A snapshot consists of numpy arrays for input/output data and an
 optional DFT calculation output, needed for post-processing.</p>
-<p>Create a Snapshot object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_npy_file</strong> (<em>string</em>) – File with saved numpy input array.</p></li>
-<li><p><strong>input_npy_directory</strong> (<em>string</em>) – Directory containing input_npy_directory.</p></li>
-<li><p><strong>output_npy_file</strong> (<em>string</em>) – File with saved numpy output array.</p></li>
-<li><p><strong>output_npy_directory</strong> (<em>string</em>) – Directory containing output_npy_file.</p></li>
-<li><p><strong>input_units</strong> (<em>string</em>) – Units of input data. See descriptor classes to see which units are
-supported.</p></li>
-<li><p><strong>output_units</strong> (<em>string</em>) – Units of output data. See target classes to see which units are
-supported.</p></li>
-<li><p><strong>calculation_output</strong> (<em>string</em>) – File with the output of the original snapshot calculation. This is
-only needed when testing multiple snapshots.</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 </div>
