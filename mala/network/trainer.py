@@ -3,6 +3,7 @@ from mala.network.network import Network
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
 from mala.common.parameters import Parameters
+import os
 import numpy as np
 import torch
 from torch import optim
@@ -55,6 +56,33 @@ class Trainer(Runner):
         self.tensor_board = None
         if self.parameters.visualisation:
             self.tensor_board = SummaryWriter()
+
+    @classmethod
+    def checkpoint_exists(cls, checkpoint_name):
+        """
+        Check if a hyperparameter optimization checkpoint exists.
+
+        Returns True if it does.
+
+        Parameters
+        ----------
+        checkpoint_name : string
+            Name of the checkpoint.
+
+        Returns
+        -------
+        checkpoint_exists : bool
+            True if the checkpoint exists, False otherwise.
+
+        """
+        network_name = checkpoint_name + "_network.pth"
+        iscaler_name = checkpoint_name + "_iscaler.pkl"
+        oscaler_name = checkpoint_name + "_oscaler.pkl"
+        param_name = checkpoint_name + "_params.pkl"
+        optimizer_name = checkpoint_name + "_optimizer.pth"
+
+        return all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
+                                        network_name, optimizer_name]))
 
     @classmethod
     def resume_checkpoint(cls, checkpoint_name):
@@ -229,7 +257,9 @@ class Trainer(Runner):
                     vloss_old = vloss
                 else:
                     self.patience_counter += 1
-                    printout("Validation accuracy has not improved enough.")
+                    if self.parameters.verbosity:
+                        printout("Validation accuracy has not improved "
+                                 "enough.")
                     if self.patience_counter >= self.parameters.\
                             early_stopping_epochs:
                         if self.parameters.verbosity:
@@ -251,7 +281,8 @@ class Trainer(Runner):
                     self.__create_training_checkpoint()
                     checkpoint_counter = 0
 
-            printout("Time for epoch[s]:", time.time() - start_time)
+            if self.parameters.verbosity:
+                printout("Time for epoch[s]:", time.time() - start_time)
 
         # closing tensorboard window   
         self.tensor_board.close()
@@ -264,8 +295,8 @@ class Trainer(Runner):
                                             self.test_data_loader)
             if self.parameters_full.use_horovod:
                 tloss = self.__average_validation(tloss, 'average_loss')
+            printout("Final test data loss: ", tloss)
         self.final_test_loss = tloss
-        printout("Final test data loss: ", tloss)
 
         
 
