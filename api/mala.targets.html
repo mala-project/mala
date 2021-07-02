@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.0.3-alpha-76-gc50a49e
+                v0.0.3-alpha-78-gfa12c18
               </div>
             
           
@@ -771,6 +771,28 @@ Currently supported:</p>
 </ul>
 </p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.density.Density.get_scaled_positions_for_qe">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">get_scaled_positions_for_qe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.density.Density.get_scaled_positions_for_qe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the positions correctly scaled for QE.</p>
+<p>QE (for ibrav=0) scales a little bit different then ASE would.
+ASE uses all provided cell parameters, while QE simply sets the
+first entry in the cell parameter matrix as reference and divides
+all positions by this value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>atoms</strong> (<em>ase.Atoms</em>) – The atom objects for which the scaled positions should be
+calculated.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>scaled_positions</strong> – The scaled positions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
 </dd></dl>
