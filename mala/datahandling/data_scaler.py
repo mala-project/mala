@@ -29,12 +29,12 @@ class DataScaler:
 
             - "None": No normalization is applied.
             - "standard": Standardization (Scale to mean 0,
-            standard deviation 1)
+              standard deviation 1)
             - "normal": Min-Max scaling (Scale to be in range 0...1)
             - "feature-wise-standard": Row Standardization (Scale to mean 0,
-            standard deviation 1)
+              standard deviation 1)
             - "feature-wise-normal": Row Min-Max scaling (Scale to be in range
-             0...1)
+              0...1)
 
         use_horovod : bool
             If True, the DataScaler will use horovod to check that data is

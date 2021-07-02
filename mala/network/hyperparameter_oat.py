@@ -25,7 +25,7 @@ class HyperparameterOAT:
             Name of the hyperparameter. Please note that these names always
             have to be distinct; if you e.g. want to investigate multiple
             layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
-             etc. as names.
+            etc. as names.
 
         choices :
             List of possible choices (for categorical parameter).
@@ -37,7 +37,7 @@ class HyperparameterOAT:
 
         if self.opttype != "categorical":
             raise Exception("Unsupported Hyperparameter type.")
-    
+
     def get_parameter(self, trial, idx):
         """
         Extract current value of hyperparameter from an orthogonal array.

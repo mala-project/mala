@@ -26,7 +26,7 @@ class HyperparameterOptuna:
             Name of the hyperparameter. Please note that these names always
             have to be distinct; if you e.g. want to investigate multiple
             layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
-             etc. as names.
+            etc. as names.
 
         low : float or int
             Lower bound for numerical parameter.
