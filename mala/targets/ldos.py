@@ -304,8 +304,6 @@ class LDOS(TargetBase):
                                      qe_pseudopotentials=qe_pseudopotentials)
         e_total = e_band + e_rho_times_v_hxc + e_hartree + e_xc + e_ewald +\
             e_entropy_contribution
-        print(e_band, e_rho_times_v_hxc, e_hartree, e_xc, e_ewald,
-              e_entropy_contribution)
 
         return e_total
 
