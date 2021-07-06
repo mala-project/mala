@@ -57,7 +57,6 @@ class HyperOptOptuna(HyperOptBase):
                              storage=rdb_storage,
                              load_if_exists=True)
 
-        self.objective = ObjectiveBase(self.params, self.data_handler)
         self.checkpoint_counter = 0
 
     def perform_study(self):
@@ -91,15 +90,6 @@ class HyperOptOptuna(HyperOptBase):
         """
         # Parse the parameters from the best trial.
         self.objective.parse_trial_optuna(self.study.best_trial)
-
-    def set_parameters(self, trial):
-        """
-        Set the parameters to a specific trial.
-
-        The parameters will be written to the parameter object with which the
-        hyperparameter optimizer was created.
-        """
-        self.objective.parse_trial_optuna(trial)
 
     def get_trials_from_study(self):
         """

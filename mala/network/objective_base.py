@@ -37,6 +37,8 @@ class ObjectiveBase:
         ))
 
         self.trial_type = self.params.hyperparameters.hyper_opt_method
+        if self.trial_type == "notraining":
+            self.trial_type = "optuna"
 
     def __call__(self, trial):
         """

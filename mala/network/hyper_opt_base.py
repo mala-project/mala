@@ -1,6 +1,7 @@
 """Base class for all hyperparameter optimizers."""
 from abc import abstractmethod, ABC
 from .hyperparameter_interface import HyperparameterInterface
+from .objective_base import ObjectiveBase
 
 
 class HyperOptBase(ABC):
@@ -18,6 +19,7 @@ class HyperOptBase(ABC):
     def __init__(self, params, data):
         self.params = params
         self.data_handler = data
+        self.objective = ObjectiveBase(self.params, self.data_handler)
 
     def add_hyperparameter(self, opttype="float", name="", low=0, high=0,
                            choices=None):
@@ -85,7 +87,6 @@ class HyperOptBase(ABC):
         """
         pass
 
-    @abstractmethod
     def set_parameters(self, trial):
         """
         Set the parameters to a specific trial.
@@ -93,4 +94,4 @@ class HyperOptBase(ABC):
         The parameters will be written to the parameter object with which the
         hyperparameter optimizer was created.
         """
-        pass
+        self.objective.parse_trial(trial)
