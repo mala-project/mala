@@ -59,6 +59,15 @@ class HyperOptOAT(HyperOptBase):
         self.best_trial = self.orthogonal_arr[idx]
         self.objective.parse_trial_oat(self.best_trial)
 
+    def set_parameters(self, trial):
+        """
+        Set the parameters to a specific trial.
+
+        The parameters will be written to the parameter object with which the
+        hyperparameter optimizer was created.
+        """
+        self.objective.parse_trial_oat(trial)
+
     @property
     def orthogonal_arr(self):
         """Orthogonal array used for optimal hyperparameter sampling."""
