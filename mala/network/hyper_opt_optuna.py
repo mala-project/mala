@@ -57,7 +57,7 @@ class HyperOptOptuna(HyperOptBase):
                              storage=rdb_storage,
                              load_if_exists=True)
 
-        self.objective = None
+        self.objective = ObjectiveBase(self.params, self.data_handler)
         self.checkpoint_counter = 0
 
     def perform_study(self):
@@ -67,6 +67,7 @@ class HyperOptOptuna(HyperOptBase):
         This is done by sampling a certain subset of network architectures.
         In this case, optuna is used.
         """
+        # The parameters could have changed.
         self.objective = ObjectiveBase(self.params, self.data_handler)
 
         # Fill callback list based on user checkpoint wishes.
