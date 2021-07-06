@@ -19,9 +19,7 @@ class ObjectiveNoTraining(ObjectiveBase):
 
     def __init__(self, search_parameters: Parameters, data_handler:
                  DataHandler, trial_type):
-        """
-        Create an ObjectiveNoTraining object.
-        
+        """        
         Parameters
         ----------
         search_parameters : mala.common.parameters.Parameters

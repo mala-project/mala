@@ -19,8 +19,6 @@ class SNAP(DescriptorBase):
 
     def __init__(self, parameters):
         """
-        Create a SNAP object.
-
         Parameters
         ----------
         parameters : mala.common.parameters.Parameters

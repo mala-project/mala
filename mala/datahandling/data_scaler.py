@@ -19,8 +19,6 @@ class DataScaler:
 
     def __init__(self, typestring, use_horovod=False):
         """
-        Create a DataScaler object.
-
         Parameters
         ----------
         typestring :  string

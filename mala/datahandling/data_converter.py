@@ -24,8 +24,6 @@ class DataConverter:
     def __init__(self, parameters, descriptor_calculator=None,
                  target_calculator=None):
         """
-        Create an instances of the DataConverter class.
-
         Parameters
         ----------
         parameters : mala.common.parameters.Parameters

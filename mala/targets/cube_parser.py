@@ -80,8 +80,7 @@ class CubeFile(object):
     """
 
     def __init__(self, srcname, const=1):
-        """Create cube file object.
-
+        """
         Parameters
         ----------
         srcname: string

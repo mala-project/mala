@@ -27,8 +27,6 @@ class LazyLoadDataset(torch.utils.data.Dataset):
                  target_calculator, grid_dimensions, grid_size,
                  descriptors_contain_xyz, use_horovod):
         """
-        Create a lazily loaded DataSet.
-
         Parameters
         ----------
         input_dimension : int

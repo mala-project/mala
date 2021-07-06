@@ -24,8 +24,6 @@ class DataHandler:
                  descriptor_calculator=None, input_data_scaler=None,
                  output_data_scaler=None):
         """
-        Create an instance of DataHandler.
-
         Parameters
         ----------
         parameters : mala.common.parameters.Parameters

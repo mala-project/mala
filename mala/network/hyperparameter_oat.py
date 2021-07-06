@@ -6,8 +6,6 @@ class HyperparameterOAT:
 
     def __init__(self, opttype="categorical", name="", choices=None):
         """
-        Create an OAT compatible hyperparameter.
-
         Parameters
         ----------
         opttype : string

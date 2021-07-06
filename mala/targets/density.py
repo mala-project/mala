@@ -24,8 +24,6 @@ class Density(TargetBase):
 
     def __init__(self, params):
         """
-        Create a Density object.
-
         Parameters
         ----------
         params : mala.common.parameters.Parameters

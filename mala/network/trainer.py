@@ -23,8 +23,6 @@ class Trainer(Runner):
 
     def __init__(self, params, network, data, optimizer_dict=None):
         """
-        Create a Trainer object to run a Network.
-
         Parameters
         ----------
         params : mala.common.parametes.Parameters

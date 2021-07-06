@@ -14,8 +14,6 @@ class HyperOptNoTraining(HyperOptBase):
 
     def __init__(self, params, data):
         """
-        Create a HyperOptNoTraining object.
-
         Parameters
         ----------
         params : mala.common.parametes.Parameters

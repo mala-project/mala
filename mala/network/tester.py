@@ -20,8 +20,6 @@ class Tester(Runner):
 
     def __init__(self, params, network, data):
         """
-        Create a Tester object to run a Network.
-
         Parameters
         ----------
         params : mala.common.parametes.Parameters
