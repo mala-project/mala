@@ -84,3 +84,13 @@ class HyperOptBase(ABC):
         hyperparameter optimizer was created.
         """
         pass
+
+    @abstractmethod
+    def set_parameters(self, trial):
+        """
+        Set the parameters to a specific trial.
+
+        The parameters will be written to the parameter object with which the
+        hyperparameter optimizer was created.
+        """
+        pass
