@@ -128,7 +128,8 @@ class HyperOptOptuna(HyperOptBase):
                                         param_name]))
 
     @classmethod
-    def resume_checkpoint(cls, checkpoint_name, alternative_storage_path=None):
+    def resume_checkpoint(cls, checkpoint_name, alternative_storage_path=None,
+                          no_data=False):
         """
         Prepare resumption of hyperparameter optimization from a checkpoint.
 
@@ -145,6 +146,11 @@ class HyperOptOptuna(HyperOptBase):
             For applications on an HPC cluster it might be necessary to
             slightly modify the storage path between runs, since the SQL
             server might be running on different nodes each time.
+
+        no_data : bool
+            If True, the data won't actually be loaded into RAM or scaled.
+            This can be useful for cases where a checkpoint is loaded
+            for analysis purposes.
 
         Returns
         -------
@@ -174,6 +180,8 @@ class HyperOptOptuna(HyperOptBase):
 
         printout("Preparing data used for last checkpoint.")
         # Create a new data handler and prepare the data.
+        if no_data is True:
+            loaded_params.data.use_lazy_loading = True
         new_datahandler = DataHandler(loaded_params,
                                       input_data_scaler=loaded_iscaler,
                                       output_data_scaler=loaded_oscaler)
