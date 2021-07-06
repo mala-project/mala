@@ -29,6 +29,7 @@ class HyperOptOAT(HyperOptBase):
         self.n_levels = None
         self.strength = None
         self.N_runs = None
+        self.objective = ObjectiveBase(self.params, self.data_handler)
 
     def perform_study(self):
         """
@@ -38,6 +39,7 @@ class HyperOptOAT(HyperOptBase):
         In this case, these are choosen based on an orthogonal array.
         """
         number_of_trial = 0
+        # The parameters could have changed.
         self.objective = ObjectiveBase(self.params, self.data_handler)
         for row in self.orthogonal_arr:
             printout("Trial number", number_of_trial)
