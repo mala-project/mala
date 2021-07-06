@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.0.3-alpha-79-gf401436
+                v0.0.3-alpha-68-gc64b7e3
               </div>
             
           
@@ -776,28 +776,6 @@ Currently supported:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.targets.density.Density.get_scaled_positions_for_qe">
-<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">get_scaled_positions_for_qe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.density.Density.get_scaled_positions_for_qe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the positions correctly scaled for QE.</p>
-<p>QE (for ibrav=0) scales a little bit different then ASE would.
-ASE uses all provided cell parameters, while QE simply sets the
-first entry in the cell parameter matrix as reference and divides
-all positions by this value.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>atoms</strong> (<em>ase.Atoms</em>) – The atom objects for which the scaled positions should be
-calculated.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>scaled_positions</strong> – The scaled positions.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="mala.targets.density.Density.read_from_cube">
 <code class="sig-name descname"><span class="pre">read_from_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.density.Density.read_from_cube" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the density data from a cube file.</p>
@@ -896,7 +874,7 @@ calculated.</p>
 
 <dl class="py method">
 <dt id="mala.targets.dos.DOS.get_band_energy">
-<code class="sig-name descname"><span class="pre">get_band_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.get_band_energy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_band_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_energy_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.get_band_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the band energy from given DOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -913,6 +891,8 @@ calculated.</p>
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>shift_energy_grid</strong> (<em>bool</em>) – When using the analytical integration, one has to shift the energy
+grid by setting this parameter to True. Elsewise keep on False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -932,21 +912,25 @@ calculated.</p>
 
 <dl class="py method">
 <dt id="mala.targets.dos.DOS.get_energy_grid">
-<code class="sig-name descname"><span class="pre">get_energy_grid</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.get_energy_grid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_energy_grid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift_energy_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.get_energy_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get energy grid.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>e_grid</strong> – Energy grid on which the DOS is defined.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>shift_energy_grid</strong> (<em>bool</em>) – If True, the entire energy grid will be shifted by
+ldos_gridoffset_ev from the parameters.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>numpy.array</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>e_grid</strong> – Energy grid on which the DOS is defined.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mala.targets.dos.DOS.get_entropy_contribution">
-<code class="sig-name descname"><span class="pre">get_entropy_contribution</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.get_entropy_contribution" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_entropy_contribution</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_energy_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.get_entropy_contribution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the entropy contribution to the total energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -963,6 +947,8 @@ calculated.</p>
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>shift_energy_grid</strong> (<em>bool</em>) – When using the analytical integration, one has to shift the energy
+grid by setting this parameter to True. Elsewise keep on False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -976,7 +962,7 @@ calculated.</p>
 
 <dl class="py method">
 <dt id="mala.targets.dos.DOS.get_number_of_electrons">
-<code class="sig-name descname"><span class="pre">get_number_of_electrons</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.get_number_of_electrons" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_number_of_electrons</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_energy_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.get_number_of_electrons" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the number of electrons from given DOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -993,6 +979,8 @@ calculated.</p>
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>shift_energy_grid</strong> (<em>bool</em>) – When using the analytical integration, one has to shift the energy
+grid by setting this parameter to True. Elsewise keep on False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1006,7 +994,7 @@ calculated.</p>
 
 <dl class="py method">
 <dt id="mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev">
-<code class="sig-name descname"><span class="pre">get_self_consistent_fermi_energy_ev</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_self_consistent_fermi_energy_ev</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_energy_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the self-consistent Fermi energy.</p>
 <p>“Self-consistent” does not mean self-consistent in the DFT sense,
 but rather the Fermi energy, for which DOS integration reproduces
@@ -1026,6 +1014,8 @@ from how this quantity is calculated.</p>
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>shift_energy_grid</strong> (<em>bool</em>) – When using the analytical integration, one has to shift the energy
+grid by setting this parameter to True. Elsewise keep on False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1120,89 +1110,8 @@ qe.dos.txt here. QE saves the DOS in 1/eV.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.targets.ldos.LDOS.get_and_cache_density_cached">
-<code class="sig-name descname"><span class="pre">get_and_cache_density_cached</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conserve_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_and_cache_density_cached" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate an electronic density from LDOS data and keep it in memory.</p>
-<p>For all subsequent calculations involving the electronic density, this
-cached density will be used. Usage of this function is advised for
-time-critical calculations.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>conserve_dimensions</strong> (<em>bool</em>) – If True, the density is returned in the same dimensions as
-the LDOS was entered. If False, the density is always given
-as [gridsize].</p></li>
-<li><p><strong>fermi_energy_ev</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
-<li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
-<li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
-<blockquote>
-<div><ul>
-<li><p>”trapz” for trapezoid method</p></li>
-<li><p>”simps” for Simpson method.</p></li>
-<li><p>”analytical” for analytical integration. Recommended.</p></li>
-</ul>
-</div></blockquote>
-</p></li>
-<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
-[gridx,gridy,gridz,energygrid].</p></li>
-<li><p><strong>integration_method</strong> – <p>Integration method to integrate LDOS on energygrid.
-Currently supported:</p>
-<blockquote>
-<div><ul>
-<li><p>”trapz” for trapezoid method</p></li>
-<li><p>”simps” for Simpson method.</p></li>
-<li><p>”analytical” for analytical integration. Recommended.</p></li>
-</ul>
-</div></blockquote>
-</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>density_data</strong> – Density data, dimensions depend on conserve_dimensions and LDOS
-dimensions.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mala.targets.ldos.LDOS.get_and_cache_density_of_states">
-<code class="sig-name descname"><span class="pre">get_and_cache_density_of_states</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_and_cache_density_of_states" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate a DOS from LDOS data and keep it in memory.</p>
-<p>For all subsequent calculations involving the DOS, this cached
-DOS will be used. Usage of this function is advised for time-critical
-calculations.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
-[gridx,gridy,gridz,energygrid].</p></li>
-<li><p><strong>grid_spacing_bohr</strong> (<em>float</em>) – Grid spacing (in Bohr) used to construct this grid. As of now,
-only equidistant grids are supported.</p></li>
-<li><p><strong>integration_method</strong> (<em>str</em>) – <p>Integration method used to integrate LDOS on the grid.
-Currently supported:</p>
-<ul>
-<li><p>”trapz” for trapezoid method</p></li>
-<li><p>”simps” for Simpson method.</p></li>
-<li><p>”summation” for summation and scaling of the values (recommended)</p></li>
-</ul>
-</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>dos_values</strong> – The DOS.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="mala.targets.ldos.LDOS.get_band_energy">
-<code class="sig-name descname"><span class="pre">get_band_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_band_energy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_band_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_energy_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_band_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the band energy from given LDOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1228,6 +1137,8 @@ Currently supported:</p>
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>shift_energy_grid</strong> (<em>bool</em>) – When using the analytical integration, one has to shift the energy
+grid by setting this parameter to True. Elsewise keep on False.</p></li>
 <li><p><strong>grid_spacing_bohr</strong> (<em>float</em>) – Grid spacing (distance between grid points) in Bohr.</p></li>
 </ul>
 </dd>
@@ -1242,7 +1153,7 @@ Currently supported:</p>
 
 <dl class="py method">
 <dt id="mala.targets.ldos.LDOS.get_density">
-<code class="sig-name descname"><span class="pre">get_density</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conserve_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_density" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_density</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conserve_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_energy_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_density" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the density from given LDOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1261,6 +1172,8 @@ as [gridsize].</p></li>
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>shift_energy_grid</strong> (<em>bool</em>) – When using the analytical integration, one has to shift the energy
+grid by setting this parameter to True. Elsewise keep on False.</p></li>
 <li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
 [gridx,gridy,gridz,energygrid].</p></li>
 <li><p><strong>integration_method</strong> – <p>Integration method to integrate LDOS on energygrid.
@@ -1306,32 +1219,30 @@ Currently supported:</p>
 </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>dos_values</strong> – The DOS.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array</p>
-</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mala.targets.ldos.LDOS.get_energy_grid">
-<code class="sig-name descname"><span class="pre">get_energy_grid</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_energy_grid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_energy_grid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift_energy_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_energy_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get energy grid.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>e_grid</strong> – Energy grid on which the LDOS is defined.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>shift_energy_grid</strong> (<em>bool</em>) – If True, the entire energy grid will be shifted by
+ldos_gridoffset_ev from the parameters.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>numpy.array</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>e_grid</strong> – Energy grid on which the LDOS is defined.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mala.targets.ldos.LDOS.get_number_of_electrons">
-<code class="sig-name descname"><span class="pre">get_number_of_electrons</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_number_of_electrons" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_number_of_electrons</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_energy_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_number_of_electrons" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the number of electrons from given LDOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1357,6 +1268,8 @@ Currently supported:</p>
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>shift_energy_grid</strong> (<em>bool</em>) – When using the analytical integration, one has to shift the energy
+grid by setting this parameter to True. Elsewise keep on False.</p></li>
 <li><p><strong>grid_spacing_bohr</strong> (<em>float</em>) – Grid spacing (distance between grid points) in Bohr.</p></li>
 </ul>
 </dd>
@@ -1371,7 +1284,7 @@ Currently supported:</p>
 
 <dl class="py method">
 <dt id="mala.targets.ldos.LDOS.get_self_consistent_fermi_energy_ev">
-<code class="sig-name descname"><span class="pre">get_self_consistent_fermi_energy_ev</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy_ev" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_self_consistent_fermi_energy_ev</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_energy_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy_ev" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the self-consistent Fermi energy.</p>
 <p>“Self-consistent” does not mean self-consistent in the DFT sense,
 but rather the Fermi energy, for which DOS integration reproduces
@@ -1400,6 +1313,8 @@ Currently supported:</p>
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>shift_energy_grid</strong> (<em>bool</em>) – When using the analytical integration, one has to shift the energy
+grid by setting this parameter to True. Elsewise keep on False.</p></li>
 <li><p><strong>grid_spacing_bohr</strong> (<em>float</em>) – Grid spacing (distance between grid points) in Bohr.</p></li>
 </ul>
 </dd>
@@ -1414,7 +1329,7 @@ Currently supported:</p>
 
 <dl class="py method">
 <dt id="mala.targets.ldos.LDOS.get_total_energy">
-<code class="sig-name descname"><span class="pre">get_total_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_total_energy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_total_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_energy_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_total_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the total energy from LDOS or given DOS + density data.</p>
 <p>EITHER LDOS OR Density+DOS data have to be specified. Elsewise
 this function will raise an exception.</p>
@@ -1447,6 +1362,8 @@ Currently supported:</p>
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>shift_energy_grid</strong> (<em>bool</em>) – When using the analytical integration, one has to shift the energy
+grid by setting this parameter to True. Elsewise keep on False.</p></li>
 <li><p><strong>atoms_Angstrom</strong> (<em>ase.Atoms</em>) – ASE atoms object for the current system. If None, MALA will
 create one.</p></li>
 <li><p><strong>qe_input_data</strong> (<em>dict</em>) – Quantum Espresso parameters dictionary for the ASE&lt;-&gt;QE interface.
@@ -1484,18 +1401,6 @@ interface. If None (recommended), MALA will create one.</p></li>
 <dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mala.targets.ldos.LDOS.uncache_density">
-<code class="sig-name descname"><span class="pre">uncache_density</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.uncache_density" title="Permalink to this definition">¶</a></dt>
-<dd><p>Uncache a density, to calculate a new one in following steps.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mala.targets.ldos.LDOS.uncache_density_of_states">
-<code class="sig-name descname"><span class="pre">uncache_density_of_states</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.uncache_density_of_states" title="Permalink to this definition">¶</a></dt>
-<dd><p>Uncache a DOS, to calculate a new one in following steps.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1617,25 +1522,6 @@ qe.out for Quantum Espresso outfiles.</p></li>
 <dt id="mala.targets.target_base.TargetBase.read_from_qe_dos_txt">
 <code class="sig-name descname"><span class="pre">read_from_qe_dos_txt</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase.read_from_qe_dos_txt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the quantity from a Quantum Espresso .dos.txt file.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mala.targets.target_base.TargetBase.restrict_data">
-<code class="sig-name descname"><span class="pre">restrict_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase.restrict_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Restrict target data to only contain physically meaningful values.</p>
-<p>For the LDOS this e.g. implies non-negative values. The type
-of data restriction is specified by the parameters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>array</strong> (<em>numpy.array</em>) – Numpy array, for which the restrictions are to be applied.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>array</strong> – The same array, with restrictions enforced.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.array</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
