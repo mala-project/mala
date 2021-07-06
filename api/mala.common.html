@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.0.3-alpha-68-g3b6bb46
+                v0.0.3-alpha-72-gfb96935
               </div>
             
           
@@ -682,6 +682,25 @@ optuna.</p>
 <dt>checkpoint_name<span class="classifier">string</span></dt><dd><p>Name used for the checkpoints. Using this, multiple runs
 can be performed in the same directory. Currently. this
 only works with optuna.</p>
+</dd>
+<dt>study_name<span class="classifier">string</span></dt><dd><p>Name used for this study (in optuna#s storage). Necessary
+when operating with a RDB storage.</p>
+</dd>
+<dt>rdb_storage<span class="classifier">string</span></dt><dd><p>Adress of the RDB storage to be used by optuna.</p>
+</dd>
+<dt>rdb_storage_heartbeat<span class="classifier">int</span></dt><dd><p>Heartbeat interval for optuna (in seconds). Default is None.
+If not None and above 0, optuna will record the heartbeat of intervals.
+If no action on a RUNNING trial is recognized for longer then this
+interval, then this trial will be moved to FAILED. In distributed
+training, setting a heartbeat is currently the only way to achieve
+a precise number of trials:</p>
+<p><a class="reference external" href="https://github.com/optuna/optuna/issues/1883">https://github.com/optuna/optuna/issues/1883</a></p>
+<p>For optuna versions below 2.8.0, larger heartbeat intervals are
+detrimental to performance and should be avoided:</p>
+<p><a class="reference external" href="https://github.com/optuna/optuna/issues/2685">https://github.com/optuna/optuna/issues/2685</a></p>
+<p>For MALA, no evidence for decreased performance using smaller
+heartbeat values could be found. So if this is used, 1s is a reasonable
+value.</p>
 </dd>
 </dl>
 <dl class="py method">
