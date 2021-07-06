@@ -15,8 +15,6 @@ class HyperOptOptuna(HyperOptBase):
 
     def __init__(self, params, data):
         """
-        Create a HyperOptOptuna object.
-
         Parameters
         ----------
         params : mala.common.parametes.Parameters

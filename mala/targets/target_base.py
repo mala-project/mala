@@ -17,8 +17,6 @@ class TargetBase:
 
     def __init__(self, params):
         """
-        Create a TargetBase object.
-
         Parameters
         ----------
         params : mala.common.parameters.Parameters or

@@ -15,8 +15,6 @@ class ObjectiveBase:
 
     def __init__(self, params, data_handler):
         """
-        Create an ObjectiveBase object.
-
         Parameters
         ----------
         params : mala.common.parametes.Parameters

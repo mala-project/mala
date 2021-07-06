@@ -7,8 +7,6 @@ class HyperparameterOptuna:
 
     def __init__(self, opttype="float", name="", low=0, high=0, choices=None):
         """
-        Create an optuna compatible hyperparameter.
-
         Parameters
         ----------
         opttype : string

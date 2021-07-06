@@ -10,8 +10,6 @@ class DescriptorBase:
 
     def __init__(self, parameters):
         """
-        Create a DescriptorBase object.
-
         Parameters
         ----------
         parameters : mala.common.parameters.Parameters

@@ -12,8 +12,6 @@ class DOS(TargetBase):
 
     def __init__(self, params):
         """
-        Create a DOS object.
-
         Parameters
         ----------
         params : mala.common.parameters.Parameters

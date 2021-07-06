@@ -16,7 +16,6 @@ class ParametersBase:
     """Base parameter class for MALA."""
 
     def __init__(self):
-        """Create an instance of ParameterBase."""
         pass
 
     def show(self, indent=""):
@@ -68,7 +67,6 @@ class ParametersNetwork(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersNetwork."""
         super(ParametersNetwork, self).__init__()
         self.nn_type = "feed-forward"
         self.layer_sizes = [10, 10, 10]
@@ -103,7 +101,6 @@ class ParametersDescriptors(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersDescriptors."""
         super(ParametersDescriptors, self).__init__()
         self.descriptor_type = "SNAP"
         self.twojmax = 10
@@ -133,7 +130,6 @@ class ParametersTargets(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParameterTargets."""
         super(ParametersTargets, self).__init__()
         self.target_type = "LDOS"
         self.ldos_gridsize = 0
@@ -218,7 +214,6 @@ class ParametersData(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersData."""
         super(ParametersData, self).__init__()
         self.descriptors_contain_xyz = True
         self.snapshot_directories_list = []
@@ -319,7 +314,6 @@ class ParametersRunning(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersRunning."""
         super(ParametersRunning, self).__init__()
         self.trainingtype = "SGD"
         self.learning_rate = 0.5
@@ -402,7 +396,6 @@ class ParametersHyperparameterOptimization(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersHyperparameterOptimization."""
         super(ParametersHyperparameterOptimization, self).__init__()
         self.direction = 'minimize'
         self.n_trials = 100
@@ -461,7 +454,6 @@ class ParametersDebug(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersDebug."""
         super(ParametersDebug, self).__init__()
         self.grid_dimensions = []
 
@@ -503,7 +495,6 @@ class Parameters:
     """
 
     def __init__(self):
-        """Create an instance of Parameters."""
         self.comment = ""
         self.network = ParametersNetwork()
         self.descriptors = ParametersDescriptors()

@@ -14,8 +14,6 @@ class Snapshot:
                  output_npy_directory="", output_units="",
                  calculation_output=""):
         """
-        Create a Snapshot object.
-
         Parameters
         ----------
         input_npy_file : string

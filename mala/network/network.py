@@ -14,8 +14,6 @@ class Network(nn.Module):
 
     def __init__(self, params):
         """
-        Create a Network object, representing a neural network.
-
         Parameters
         ----------
         params : mala.common.parametes.Parameters

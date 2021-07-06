@@ -8,8 +8,6 @@ class HyperOptBase(ABC):
 
     def __init__(self, params, data):
         """
-        Create a hyperparameter optimizer object.
-
         Parameters
         ----------
         params : mala.common.parametes.Parameters

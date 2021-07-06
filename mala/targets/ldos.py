@@ -15,8 +15,6 @@ class LDOS(TargetBase):
 
     def __init__(self, params):
         """
-        Create a LDOS object.
-
         Parameters
         ----------
         params : mala.common.parameters.Parameters

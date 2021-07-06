@@ -11,8 +11,6 @@ class HyperOptOAT(HyperOptBase):
 
     def __init__(self, params, data):
         """
-        Create a HyperOptOAT object.
-
         Parameters
         ----------
         params : mala.common.parametes.Parameters
