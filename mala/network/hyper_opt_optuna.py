@@ -11,20 +11,19 @@ from mala.common.parameters import Parameters
 
 
 class HyperOptOptuna(HyperOptBase):
-    """Hyperparameter optimizer using Optuna."""
+    """Hyperparameter optimizer using Optuna.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this hyperparameter optimizer.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the data for the hyperparameter optimization.
+
+    """
 
     def __init__(self, params, data):
-        """
-        Create a HyperOptOptuna object.
-
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this hyperparameter optimizer.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the data for the hyperparameter optimization.
-        """
         super(HyperOptOptuna, self).__init__(params, data)
         self.params = params
 

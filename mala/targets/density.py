@@ -18,20 +18,17 @@ except ModuleNotFoundError:
 
 
 class Density(TargetBase):
-    """Postprocessing / parsing functions for the electronic density."""
+    """Postprocessing / parsing functions for the electronic density.
+
+    Parameters
+    ----------
+    params : mala.common.parameters.Parameters
+        Parameters used to create this TargetBase object.
+    """
 
     te_mutex = False
 
     def __init__(self, params):
-        """
-        Create a Density object.
-
-        Parameters
-        ----------
-        params : mala.common.parameters.Parameters
-            Parameters used to create this TargetBase object.
-
-        """
         super(Density, self).__init__(params)
         # We operate on a per gridpoint basis. Per gridpoint,
         # there is one value for the density (spin-unpolarized calculations).

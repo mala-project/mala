@@ -11,20 +11,17 @@ class ObjectiveBase:
     Represents the objective function of a training process.
 
     This is usually the result of a training of a network.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this objective.
+
+    data_handler : mala.datahandling.data_handler.DataHandler
+        datahandler to be used during the hyperparameter optimization.
     """
 
     def __init__(self, params, data_handler):
-        """
-        Create an ObjectiveBase object.
-
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this objective.
-
-        data_handler : mala.datahandling.data_handler.DataHandler
-            datahandler to be used during the hyperparameter optimization.
-        """
         self.params = params
         self.data_handler = data_handler
 

@@ -4,20 +4,18 @@ from .hyperparameter_interface import HyperparameterInterface
 
 
 class HyperOptBase(ABC):
-    """Base class for hyperparameter optimizater."""
+    """Base class for hyperparameter optimizater.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this hyperparameter optimizer.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the data for the hyperparameter optimization.
+    """
 
     def __init__(self, params, data):
-        """
-        Create a hyperparameter optimizer object.
-
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this hyperparameter optimizer.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the data for the hyperparameter optimization.
-        """
         self.params = params
         self.data_handler = data
 

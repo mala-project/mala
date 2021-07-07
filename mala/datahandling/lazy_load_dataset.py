@@ -20,50 +20,47 @@ class LazyLoadDataset(torch.utils.data.Dataset):
     / DataLoader level is discouraged to the point that it was disabled.
     Instead, we mix the snapshot load order here ot have some sort of mixing
     at all.
+
+    Parameters
+    ----------
+    input_dimension : int
+        Dimension of an input vector.
+
+    output_dimension : int
+        Dimension of an output vector.
+
+    input_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the input data.
+
+    output_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the output data.
+
+    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
+        Used to do unit conversion on input data.
+
+    target_calculator : mala.targets.target_base.TargetBase or derivative
+        Used to do unit conversion on output data.
+
+    grid_dimensions : list
+        Dimensions of the grid (x,y,z).
+
+    grid_size : int
+        Size of the grid (x*y*z), i.e. the number of datapoints per
+        snapshot.
+
+    descriptors_contain_xyz : bool
+        If true, then it is assumed that the first three entries of any
+        input data file are xyz-information and can be discarded.
+        Generally true, if your descriptors were calculated using MALA.
+
+    use_horovod : bool
+        If true, it is assumed that horovod is used.
     """
 
     def __init__(self, input_dimension, output_dimension, input_data_scaler,
                  output_data_scaler, descriptor_calculator,
                  target_calculator, grid_dimensions, grid_size,
                  descriptors_contain_xyz, use_horovod):
-        """
-        Create a lazily loaded DataSet.
-
-        Parameters
-        ----------
-        input_dimension : int
-            Dimension of an input vector.
-
-        output_dimension : int
-            Dimension of an output vector.
-
-        input_data_scaler : mala.datahandling.data_scaler.DataScaler
-            Used to scale the input data.
-
-        output_data_scaler : mala.datahandling.data_scaler.DataScaler
-            Used to scale the output data.
-
-        descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
-            Used to do unit conversion on input data.
-
-        target_calculator : mala.targets.target_base.TargetBase or derivative
-            Used to do unit conversion on output data.
-
-        grid_dimensions : list
-            Dimensions of the grid (x,y,z).
-
-        grid_size : int
-            Size of the grid (x*y*z), i.e. the number of datapoints per
-            snapshot.
-
-        descriptors_contain_xyz : bool
-            If true, then it is assumed that the first three entries of any
-            input data file are xyz-information and can be discarded.
-            Generally true, if your descriptors were calculated using MALA.
-
-        use_horovod : bool
-            If true, it is assumed that horovod is used.
-        """
         self.snapshot_list = []
         self.input_dimension = input_dimension
         self.output_dimension = output_dimension

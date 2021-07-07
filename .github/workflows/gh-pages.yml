@@ -30,7 +30,7 @@ jobs:
       - name: Check docstrings
         run: pydocstyle --convention=numpy mala
 
-  deploy-pages:
+  build-and-deploy-pages:
     needs: test-docstrings
     runs-on: ubuntu-18.04
     steps:

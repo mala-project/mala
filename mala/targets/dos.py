@@ -8,18 +8,15 @@ from mala.common.parameters import printout
 
 
 class DOS(TargetBase):
-    """Postprocessing / parsing functions for the density of states (DOS)."""
+    """Postprocessing / parsing functions for the density of states (DOS).
+
+    Parameters
+    ----------
+    params : mala.common.parameters.Parameters
+        Parameters used to create this TargetBase object.
+    """
 
     def __init__(self, params):
-        """
-        Create a DOS object.
-
-        Parameters
-        ----------
-        params : mala.common.parameters.Parameters
-            Parameters used to create this TargetBase object.
-
-        """
         super(DOS, self).__init__(params)
         self.target_length = self.parameters.ldos_gridsize
 
