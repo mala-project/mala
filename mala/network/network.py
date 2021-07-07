@@ -10,15 +10,15 @@ except ModuleNotFoundError:
 
 
 class Network(nn.Module):
-    """Central network class for this framework, based on pytorch.nn.Module."""
+    """Central network class for this framework, based on pytorch.nn.Module.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this neural network.
+    """
 
     def __init__(self, params):
-        """
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this neural network.
-        """
         # copy the network params from the input parameter object
         self.use_horovod = params.use_horovod
         self.params = params.network

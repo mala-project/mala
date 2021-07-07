@@ -15,15 +15,15 @@ except ModuleNotFoundError:
 
 
 class SNAP(DescriptorBase):
-    """Class for calculation and parsing of SNAP descriptors."""
+    """Class for calculation and parsing of SNAP descriptors.
+
+    Parameters
+    ----------
+    parameters : mala.common.parameters.Parameters
+        Parameters object used to create this object.
+    """
 
     def __init__(self, parameters):
-        """
-        Parameters
-        ----------
-        parameters : mala.common.parameters.Parameters
-            Parameters object used to create this object.
-        """
         super(SNAP, self).__init__(parameters)
         self.in_format_ase = ""
 

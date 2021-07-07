@@ -16,21 +16,20 @@ class Tester(Runner):
     A class for testing a neural network.
 
     It enables easy inference throughout a test set.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this Tester object.
+
+    network : mala.network.network.Network
+        Network which is being tested.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the test data.
     """
 
     def __init__(self, params, network, data):
-        """
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this Tester object.
-
-        network : mala.network.network.Network
-            Network which is being tested.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the test data.
-        """
         # copy the parameters into the class.
         super(Tester, self).__init__(params, network, data)
         self.test_data_loader = None

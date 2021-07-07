@@ -12,6 +12,21 @@ class DataConverter:
 
     These snapshots can be e.g. Quantum Espresso results.
 
+    Parameters
+    ----------
+    parameters : mala.common.parameters.Parameters
+        The parameters object used for creating this instance.
+
+    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
+        The descriptor calculator used for parsing/converting fingerprint
+        data. If None, the descriptor calculator will be created by this
+        object using the parameters provided. Default: None
+
+    target_calculator : mala.targets.target_base.TargetBase
+        Target calculator used for parsing/converting target data. If None,
+        the target calculator will be created by this object using the
+        parameters provided.
+
     Attributes
     ----------
     descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
@@ -23,22 +38,6 @@ class DataConverter:
 
     def __init__(self, parameters, descriptor_calculator=None,
                  target_calculator=None):
-        """
-        Parameters
-        ----------
-        parameters : mala.common.parameters.Parameters
-            The parameters object used for creating this instance.
-
-        descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
-            The descriptor calculator used for parsing/converting fingerprint
-            data. If None, the descriptor calculator will be created by this
-            object using the parameters provided. Default: None
-
-        target_calculator : mala.targets.target_base.TargetBase
-            Target calculator used for parsing/converting target data. If None,
-            the target calculator will be created by this object using the
-            parameters provided.
-        """
         self.parameters: ParametersData = parameters.data
         self.target_calculator = target_calculator
         if self.target_calculator is None:

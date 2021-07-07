@@ -13,17 +13,15 @@ class TargetBase:
     Target parsers read the target quantity
     (i.e. the quantity the NN will learn to predict) from a specified file
     format and performs postprocessing calculations on the quantity.
+
+    Parameters
+    ----------
+    params : mala.common.parameters.Parameters or
+    mala.common.parameters.ParametersTargets
+        Parameters used to create this TargetBase object.
     """
 
     def __init__(self, params):
-        """
-        Parameters
-        ----------
-        params : mala.common.parameters.Parameters or
-        mala.common.parameters.ParametersTargets
-            Parameters used to create this TargetBase object.
-
-        """
         if isinstance(params, Parameters):
             self.parameters = params.targets
         elif isinstance(params, ParametersTargets):

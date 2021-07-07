@@ -19,21 +19,21 @@ import time
 
 
 class Trainer(Runner):
-    """A class for training a neural network."""
+    """A class for training a neural network.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this Trainer object.
+
+    network : mala.network.network.Network
+        Network which is being trained.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the training data.
+    """
 
     def __init__(self, params, network, data, optimizer_dict=None):
-        """
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this Trainer object.
-
-        network : mala.network.network.Network
-            Network which is being trained.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the training data.
-        """
         # copy the parameters into the class.
         super(Trainer, self).__init__(params, network, data)
         self.final_test_loss = float("inf")

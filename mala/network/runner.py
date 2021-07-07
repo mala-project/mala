@@ -13,21 +13,20 @@ class Runner:
     Parent class for all classes that in some sense "run" the network.
 
     That can be training, benchmarking, inference, etc.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this Runner object.
+
+    network : mala.network.network.Network
+        Network which is being run.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the data for the run.
     """
 
     def __init__(self, params, network, data):
-        """
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this Runner object.
-
-        network : mala.network.network.Network
-            Network which is being run.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the data for the run.
-        """
         self.parameters_full = params
         self.parameters = params.running
         self.network = network

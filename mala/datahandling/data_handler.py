@@ -18,31 +18,30 @@ class DataHandler:
 
     Data that is not in a numpy array can be converted using the DataConverter
     class.
+
+    Parameters
+    ----------
+    parameters : mala.common.parameters.Parameters
+    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
+        Used to do unit conversion on input data. If None, then one will
+        be created by this class.
+
+    target_calculator : mala.targets.target_base.TargetBase
+        Used to do unit conversion on output data. If None, then one will
+        be created by this class.
+
+    input_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the input data. If None, then one will be created by
+        this class.
+
+    output_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the output data. If None, then one will be created by
+        this class.
     """
 
     def __init__(self, parameters: Parameters, target_calculator=None,
                  descriptor_calculator=None, input_data_scaler=None,
                  output_data_scaler=None):
-        """
-        Parameters
-        ----------
-        parameters : mala.common.parameters.Parameters
-        descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
-            Used to do unit conversion on input data. If None, then one will
-            be created by this class.
-
-        target_calculator : mala.targets.target_base.TargetBase
-            Used to do unit conversion on output data. If None, then one will
-            be created by this class.
-
-        input_data_scaler : mala.datahandling.data_scaler.DataScaler
-            Used to scale the input data. If None, then one will be created by
-            this class.
-
-        output_data_scaler : mala.datahandling.data_scaler.DataScaler
-            Used to scale the output data. If None, then one will be created by
-            this class.
-        """
         self.parameters = parameters.data
         self.dbg_grid_dimensions = parameters.debug.grid_dimensions
         self.use_horovod = parameters.use_horovod

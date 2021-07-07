@@ -11,15 +11,15 @@ from mala.common.parameters import printout
 
 
 class LDOS(TargetBase):
-    """Postprocessing / parsing functions for the local density of states."""
+    """Postprocessing / parsing functions for the local density of states.
+
+    Parameters
+    ----------
+    params : mala.common.parameters.Parameters
+        Parameters used to create this TargetBase object.
+    """
 
     def __init__(self, params):
-        """
-        Parameters
-        ----------
-        params : mala.common.parameters.Parameters
-            Parameters used to create this TargetBase object.
-        """
         super(LDOS, self).__init__(params)
         self.target_length = self.parameters.ldos_gridsize
 
