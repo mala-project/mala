@@ -77,19 +77,18 @@ class CubeFile(object):
     Doesn't copy atoms metadata, retains number of atoms, but
     returns dummy atoms
     Mimics file object's readline method.
+
+    Parameters
+    ----------
+    srcname: string
+        source file to copy metadata from
+
+    const: int
+        numeric value to return instead of volumetric data
     """
 
     def __init__(self, srcname, const=1):
-        """
-        Parameters
-        ----------
-        srcname: string
-            source file to copy metadata from
-
-        const: int
-            numeric value to return instead of volumetric data
-        """
-        self.cursor = 0 
+        self.cursor = 0
         self.const = const
         self.src = src = open(srcname)
         # comments
@@ -150,10 +149,15 @@ def _getline(cube):
 
     First field is an int and the remaining fields are floats.
     
-    params:
-        cube:
-    
-    returns: (int, list<float>)
+    Parameters
+    ----------
+    cube : TextIO
+        The cubefile from which the line is read.
+
+    Returns
+    -------
+    line : tuple
+        First entry is an int, the followin are floats.
     """
     line = cube.readline().strip().split()
     return int(line[0]), map(float, line[1:])
@@ -164,11 +168,16 @@ def _putline(*args):
     Generate a line to be written to a cube file.
 
     The first field is an int and the remaining fields are floats.
-    
-    params:
-        *args: first arg is formatted as int and remaining as floats
-    
-    returns: formatted string to be written to file with trailing newline
+
+    Parameters
+    ----------
+    args : tuple
+        First arg is formatted as int and remaining as floats.
+
+    Returns
+    -------
+    line : string
+        Formatted string to be written to file with trailing newline.
     """
     s = "{0:^ 8d}".format(args[0])
     s += "".join("{0:< 12.6f}".format(arg) for arg in args[1:])
