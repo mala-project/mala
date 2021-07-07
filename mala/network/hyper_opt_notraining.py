@@ -10,18 +10,17 @@ class HyperOptNoTraining(HyperOptBase):
     Hyperparameter optimizer that does not require training networks.
 
     Networks are analysed using the Jacobian.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this hyperparameter optimizer.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the data for the hyperparameter optimization.
     """
 
     def __init__(self, params, data):
-        """
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this hyperparameter optimizer.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the data for the hyperparameter optimization.
-        """
         super(HyperOptNoTraining, self).__init__(params, data)
         self.objective = None
         self.trial_losses = None
@@ -76,4 +75,3 @@ class HyperOptNoTraining(HyperOptBase):
         idx = self.trial_losses.index(min(self.trial_losses))
         self.best_trial = self.trial_list[idx]
         self.objective.parse_trial(self.best_trial)
-

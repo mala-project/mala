@@ -6,15 +6,15 @@ class DescriptorBase:
     Base class for all descriptors available in MALA.
 
     Descriptors encode the atomic fingerprint of a DFT calculation.
+
+    Parameters
+    ----------
+    parameters : mala.common.parameters.Parameters
+        Parameters object used to create this object.
+
     """
 
     def __init__(self, parameters):
-        """
-        Parameters
-        ----------
-        parameters : mala.common.parameters.Parameters
-            Parameters object used to create this object.
-        """
         self.parameters = parameters.descriptors
         self.fingerprint_length = -1  # so iterations will fail
         self.dbg_grid_dimensions = parameters.debug.grid_dimensions
