@@ -157,7 +157,7 @@ def _getline(cube):
     Returns
     -------
     line : tuple
-        First entry is an int, the followin are floats.
+        First entry is an int, and the rests are floats.
     """
     line = cube.readline().strip().split()
     return int(line[0]), map(float, line[1:])
