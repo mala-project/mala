@@ -1,15 +1,19 @@
 import mala
 from mala import printout
 from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al256_reduced/"
+data_path = get_data_repo_path()+"Al36/"
 
 """
 ex07_checkpoint_training.py: Shows how a training run can be paused and 
-resumed.
+resumed. Delete all ex07_*.pkl and ex07_*pth prior to execution.
+Afterwards, execute this script twice to see how MALA progresses from a 
+checkpoint. As the number of total epochs cannot be divided by the number
+of epochs after which a checkpoint is created without residual, this will 
+lead to MALA performing the missing epochs again. 
 """
 
 
-def run_example07(desired_loss_improvement_factor=1):
+def initial_setup():
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
@@ -34,8 +38,8 @@ def run_example07(desired_loss_improvement_factor=1):
     # Specify the training parameters.
     # We only train for an odd number of epochs here, and train for
     # the rest after the checkpoint has been loaded.
-    test_parameters.running.max_number_epochs = 8
-    test_parameters.running.mini_batch_size = 40
+    test_parameters.running.max_number_epochs = 9
+    test_parameters.running.mini_batch_size = 8
     test_parameters.running.learning_rate = 0.00001
     test_parameters.running.trainingtype = "Adam"
 
@@ -81,26 +85,25 @@ def run_example07(desired_loss_improvement_factor=1):
 
     printout("Network setup: DONE.")
 
+    return test_parameters, test_network, data_handler, test_trainer
+
+
+def run_example07(desired_loss_improvement_factor=1):
+    if mala.Trainer.checkpoint_exists("ex07"):
+        parameters, network, datahandler, trainer = \
+            mala.Trainer.resume_checkpoint("ex07")
+        printout("Starting resumed training.")
+    else:
+        parameters, network, datahandler, trainer = initial_setup()
+        printout("Starting original training.")
+
     ####################
     # TRAINING
     # Train the network. After training, load from the last checkpoint
     # and train for more epochs.
     ####################
-
-    printout("Starting training.")
-    test_trainer.train_network()
+    trainer.train_network()
     printout("Training: DONE.")
-
-    loaded_params, loaded_network, new_datahandler, new_trainer = \
-        mala.Trainer.resume_checkpoint("ex07")
-
-    # Note that this means the actual total number of epochs,
-    # not the ones trained after loading. That is, if we trained
-    # 8 before, but checkpointed every 5 epochs, we will now train
-    # for 15.
-    loaded_params.running.max_number_epochs = 20
-    new_trainer.train_network()
-    printout("Training 2.0: DONE.")
 
     ####################
     # RESULTS.
@@ -108,10 +111,10 @@ def run_example07(desired_loss_improvement_factor=1):
     ####################
 
     printout("Parameters used for this experiment:")
-    test_parameters.show()
+    parameters.show()
 
-    if desired_loss_improvement_factor*test_trainer.initial_test_loss\
-            < new_trainer.final_test_loss:
+    if desired_loss_improvement_factor*trainer.initial_test_loss\
+            < trainer.final_test_loss:
         return False
     else:
         return True

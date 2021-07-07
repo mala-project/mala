@@ -97,15 +97,26 @@ class ObjectiveBase:
         for par in self.params.hyperparameters.hlist:
             if par.name == "learning_rate":
                 self.params.running.learning_rate = par.get_parameter(trial)
+
             elif "layer_activation" in par.name:
                 self.params.network.layer_activations.\
                     append(par.get_parameter(trial))
+
             elif "ff_neurons_layer" in par.name:
                 if self.params.network.nn_type == "feed-forward":
-                    self.params.network.layer_sizes.\
-                        append(par.get_parameter(trial))
+                    # Check for zero neuron layers; These indicate layers
+                    # that can be left out.
+                    layer_size = par.get_parameter(trial)
+                    if layer_size > 0:
+                        self.params.network.layer_sizes.\
+                            append(par.get_parameter(trial))
+
             elif "trainingtype" in par.name:
                 self.params.running.trainingtype = par.get_parameter(trial)
+
+            elif "mini_batch_size" in par.name:
+                self.params.running.mini_batch_size = par.get_parameter(trial)
+
             else:
                 raise Exception("Optimization of hyperparameter ", par.name,
                                 "not supported at the moment.")

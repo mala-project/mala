@@ -54,7 +54,19 @@ class TargetBase:
                 "ecutrho": None,
                 "ecutwfc": None,
                 "nosym": True,
+                "noinv": True,
         }
+
+        # It has been shown that the number of k-points
+        # does not really affect the QE post-processing calculation.
+        # This is because we only evaulate density-dependent contributions
+        # with QE. However, there were some (very small) inaccuracies when
+        # operating only at the gamma point. Consequently, MALA defaults
+        # to a small k-grid to ensure best accuracy and performance.
+        # UPDATE 23.04.2021: As per discussion bewteen Normand Modine and Lenz
+        # Fiedler, the number of k-points is moved to 1.
+        # The small inaccuracies are neglected for now.
+        self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
 
     def read_from_cube(self):

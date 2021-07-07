@@ -6,7 +6,7 @@ from mala.network.trainer import Trainer
 import numpy as np
 import time
 from data_repo_path import get_data_repo_path
-data_path_Al = get_data_repo_path()+"Al256_reduced/"
+data_path_Al = get_data_repo_path()+"Al36/"
 
 # This is a benchmark comparing the usage of horovod, lazy loading and RAM
 # based storage,.
@@ -19,8 +19,6 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/",
     # PARAMETERS
     ####################
     test_parameters = Parameters()
-    test_parameters.data.data_splitting_snapshots = ["tr", "tr", "tr", "va",
-                                                     "te"]
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
     test_parameters.data.output_rescaling_type = "normal"
     test_parameters.data.data_splitting_type = "by_snapshot"
@@ -46,19 +44,24 @@ def lazy_loading_horovod_benchmark(data_path="../examples/data/",
             data_handler.clear_data()
             data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                       "Al_debug_2k_nr0.out.npy", data_path,
-                                      output_units="1/Ry")
+                                      output_units="1/Ry",
+                                      add_snapshot_as="tr")
             data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                       "Al_debug_2k_nr1.out.npy", data_path,
-                                      output_units="1/Ry")
+                                      output_units="1/Ry",
+                                      add_snapshot_as="tr")
             data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                       "Al_debug_2k_nr2.out.npy", data_path,
-                                      output_units="1/Ry")
+                                      output_units="1/Ry",
+                                      add_snapshot_as="tr")
             data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                       "Al_debug_2k_nr1.out.npy", data_path,
-                                      output_units="1/Ry")
+                                      output_units="1/Ry",
+                                      add_snapshot_as="va")
             data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                       "Al_debug_2k_nr2.out.npy", data_path,
-                                      output_units="1/Ry")
+                                      output_units="1/Ry",
+                                      add_snapshot_as="te")
 
             data_handler.prepare_data()
             test_parameters.network.layer_sizes = \

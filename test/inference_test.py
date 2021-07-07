@@ -6,7 +6,7 @@ from mala.network.tester import Tester
 from mala.common.parameters import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al256_reduced/"
+data_path = get_data_repo_path()+"Al36/"
 param_path = get_data_repo_path()+"example05_data/"
 params_path = param_path+"ex05_params.pkl"
 network_path = param_path+"ex05_network.pth"
@@ -105,7 +105,7 @@ def run_inference_test():
     # outputs. This is due to the fact that we scale and rescale data on 32
     # byte float arrays; lazy loading is therefore drastically advised for
     # inference/testing purposes.
-    if test_inference(accuracy_prediction=0, accuracy_actual=5e-7,
+    if test_inference(accuracy_prediction=5e-7, accuracy_actual=5e-7,
                       use_lazy_loading=False) is False:
         return False
     if test_inference(accuracy_prediction=0, accuracy_actual=0,
