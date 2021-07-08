@@ -88,6 +88,10 @@ class Tester(Runner):
                 inverse_transform(self.network(inputs).
                                   to('cpu'), as_numpy=True)
 
+        # Restricting the actual quantities to physical meaningful values,
+        # i.e. restricting the (L)DOS to positive values.
+        predicted_outputs = self.data.target_calculator.\
+            restrict_data(predicted_outputs)
         return actual_outputs, predicted_outputs
 
     def __prepare_to_test(self):

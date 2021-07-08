@@ -276,3 +276,33 @@ class TargetBase:
         """
         raise Exception("No unit back conversion method implemented "
                         "for this target type.")
+
+    def restrict_data(self, array):
+        """
+        Restrict target data to only contain physically meaningful values.
+
+        For the LDOS this e.g. implies non-negative values. The type
+        of data restriction is specified by the parameters.
+
+        Parameters
+        ----------
+        array : numpy.array
+            Numpy array, for which the restrictions are to be applied.
+
+        Returns
+        -------
+        array : numpy.array
+            The same array, with restrictions enforced.
+        """
+        if self.parameters.restrict_targets == "zero_out_negative":
+            array[array < 0] = 0
+            return array
+        elif self.parameters.restrict_targets == "absolute_values":
+            array[array < 0] *= -1
+            return array
+        elif self.parameters.restrict_targets is None:
+            return array
+        else:
+            raise Exception("Wrong data restriction.")
+
+

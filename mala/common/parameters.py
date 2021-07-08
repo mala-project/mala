@@ -135,6 +135,19 @@ class ParametersTargets(ParametersBase):
         self.ldos_gridsize = 0
         self.ldos_gridspacing_ev = 0
         self.ldos_gridoffset_ev = 0
+        self.restrict_targets = "zero_out_negative"
+
+    @property
+    def restrict_targets(self):
+        """Control if and how targets are restricted to physical values.."""
+        return self._restrict_targets
+
+    @restrict_targets.setter
+    def restrict_targets(self, value):
+        if value != "zero_out_negative" and value != "absolute_values":
+            self._restrict_targets = None
+        else:
+            self._restrict_targets = value
 
 
 class ParametersData(ParametersBase):

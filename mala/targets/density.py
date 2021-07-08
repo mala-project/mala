@@ -306,12 +306,11 @@ class Density(TargetBase):
                                               convert_to_threedimensional=True)
             density_for_qe = np.reshape(density_for_qe, [number_of_gridpoints,
                                                          1], order='F')
-
-        # Reset the positions. For some reason creating the positions
-        # directly from ASE (see above) sometimes
-        # causes slight errors. This is more accurate.
-        te.set_positions(np.transpose(atoms_Angstrom.get_scaled_positions()),
-                         number_of_atoms)
+        # Reset the positions. Some calculations (such as the Ewald sum)
+        # is directly performed here, so it is not enough to simply
+        # instantiate the process with the file.
+        positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
+        te.set_positions(np.transpose(positions_for_qe), number_of_atoms)
 
         # Now we can set the new density.
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
@@ -319,6 +318,31 @@ class Density(TargetBase):
         # Get and return the energies.
         energies = np.array(te.get_energies())*Rydberg
         return energies
+
+    @staticmethod
+    def get_scaled_positions_for_qe(atoms):
+        """
+        Get the positions correctly scaled for QE.
+
+        QE (for ibrav=0) scales a little bit different then ASE would.
+        ASE uses all provided cell parameters, while QE simply sets the
+        first entry in the cell parameter matrix as reference and divides
+        all positions by this value.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            The atom objects for which the scaled positions should be
+            calculated.
+
+        Returns
+        -------
+        scaled_positions : numpy.array
+            The scaled positions.
+        """
+        principal_axis = atoms.get_cell()[0][0]
+        scaled_positions = atoms.get_positions()/principal_axis
+        return scaled_positions
 
     @classmethod
     def from_ldos(cls, ldos_object):
