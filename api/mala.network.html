@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.0.3-alpha-79-gea86c67
+                v0.0.3-alpha-89-g1c4a558
               </div>
             
           
@@ -268,6 +268,14 @@ ff_neurons_layer_002, etc. as names.</p></li>
 <dt id="mala.network.hyper_opt_base.HyperOptBase.set_optimal_parameters">
 <em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">set_optimal_parameters</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the optimal parameters found in the present study.</p>
+<p>The parameters will be written to the parameter object with which the
+hyperparameter optimizer was created.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.hyper_opt_base.HyperOptBase.set_parameters">
+<code class="sig-name descname"><span class="pre">set_parameters</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase.set_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the parameters to a specific trial.</p>
 <p>The parameters will be written to the parameter object with which the
 hyperparameter optimizer was created.</p>
 </dd></dl>
@@ -494,13 +502,22 @@ In this case, optuna is used.</p>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative_storage_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare resumption of hyperparameter optimization from a checkpoint.</p>
 <p>Please note that to actually resume the optimization,
 HyperOptOptuna.perform_study() still has to be called.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint from which</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint from which the checkpoint is loaded.</p></li>
+<li><p><strong>alternative_storage_path</strong> (<em>string</em>) – Alternative storage string to load the study from.
+For applications on an HPC cluster it might be necessary to
+slightly modify the storage path between runs, since the SQL
+server might be running on different nodes each time.</p></li>
+<li><p><strong>no_data</strong> (<em>bool</em>) – If True, the data won’t actually be loaded into RAM or scaled.
+This can be useful for cases where a checkpoint is loaded
+for analysis purposes.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
