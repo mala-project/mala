@@ -4,7 +4,7 @@ from .hyper_opt_base import HyperOptBase
 from .objective_base import ObjectiveBase
 import numpy as np
 import itertools
-from mala.common.parameters import printout
+from mala.common.printout import printout
 
 
 class HyperOptOAT(HyperOptBase):
@@ -91,6 +91,7 @@ class HyperOptOAT(HyperOptBase):
             self.trial_losses.append(self.objective(row))
 
             number_of_trial += 1
+        self.trial_losses = np.array(self.trial_losses)
 
         # Return the best loss value we could achieve.
         self.get_optimal_parameters()
@@ -102,32 +103,28 @@ class HyperOptOAT(HyperOptBase):
         This is done using loss instead of accuracy as done in the paper.
 
         """
-        print("Performing Range Analysis")
-        print("factor levels", self.factor_levels)
+        printout("Performing Range Analysis")
+        print("Factor levels:", self.factor_levels)
 
-        def indices(idx, val): return np.where(self.OA[:, idx] == val)[0]
-        # R = [[self.trial_losses[indices(idx, l)].sum() for l in range(levels)]
-        #      for (idx, levels) in enumerate(self.factor_levels)]
+        def indices(idx, val): return np.where(
+            self.OA[:, idx] == val)[0]
+        R = [[self.trial_losses[indices(idx, l)].sum() for l in range(levels)]
+             for (idx, levels) in enumerate(self.factor_levels)]
 
-        R = []
-        for (idx, levels) in enumerate(self.factor_levels):
-            R.append([])
-            for l in range(levels):
-                R[idx].extend(self.trial_losses[indices(idx, l)].sum())
-        print(R)
         A = [[i/len(j) for i in j] for j in R]
 
         # Taking loss as objective to minimise
         self.optimal_params = np.array([i.index(min(i)) for i in A])
         self.importance = np.argsort([max(i)-min(i) for i in A])
 
-        print("Order of Importance: ")
+        printout("Order of Importance: ")
         printout(
-            [self.params.hyperparameters.hlist[idx].name for idx in self.importance], " > ")
+            *[self.params.hyperparameters.hlist[idx].name for idx in self.importance], sep=" > ")
 
-        print("Optimal Hyperparameters:")
+        printout("Optimal Hyperparameters:")
         for (idx, par) in enumerate(self.params.hyperparameters.hlist):
-            printout([par.name, par.choice[self.optimal_params[idx]]], ' : ')
+            printout(
+                par.name, par.choices[self.optimal_params[idx]], sep=' : ')
 
     def set_optimal_parameters(self):
         """
