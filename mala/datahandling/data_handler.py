@@ -10,6 +10,11 @@ from mala.descriptors.descriptor_interface import DescriptorInterface
 from mala.common.printout import printout
 import numpy as np
 import torch
+try:
+    import horovod.torch as hvd
+except ModuleNotFoundError:
+    # Warning is thrown by Parameters class
+    pass
 
 
 class DataHandler:
@@ -239,6 +244,10 @@ class DataHandler:
         printout("Build datasets.")
         self.__build_datasets()
         printout("Build dataset done.")
+
+        # Wait until all ranks are finished with data preparation.
+        if self.use_horovod:
+            hvd.allreduce(torch.tensor(0), name='barrier')
 
     def mix_datasets(self):
         """For lazily-loaded data sets, the snapshot ordering is (re-)mixed."""

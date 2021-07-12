@@ -15,10 +15,8 @@ from data_repo_path import get_data_repo_path
 #   2. LDOS cube files.
 #   3. Density cube file.
 #   4. A DOS file.
-# In the check_integration_qe subfolder, input scripts can be found  for a
-# simple test calculation (the results of this calculation have been used
-# to develop this script). It uses an Al supercell with 36 atoms and a
-# 6x6x6 k-grid.
+# Scripts to reproduce the data files used in this test script can be found
+# in the data repo.
 
 data_path = get_data_repo_path()+"Al36/"
 path_to_out = data_path+"Al.pw.scf.out"
@@ -193,9 +191,3 @@ class TestMALAIntegration:
 
         # Check against the constraints we put upon ourselves.
         assert np.isclose(rel_error, 0, atol=accuracy)
-
-# if __name__ == "__main__":
-#
-#     # Run the tests.
-#     testtester = TestMALAIntegration()
-#     testtester.test_analytical_integration()
