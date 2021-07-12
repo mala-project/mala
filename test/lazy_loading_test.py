@@ -162,7 +162,7 @@ class TestLazyLoading:
         assert np.isclose(training_tester[0], training_tester[1],
                           atol=accuracy_coarse)
 
-    def test_perfromance_horovod(self):
+    def test_performance_horovod(self):
 
         ####################
         # PARAMETERS
@@ -275,7 +275,3 @@ class TestLazyLoading:
 
         # The loss improvements should be comparable.
         assert np.std(diff) < accuracy_strict
-
-
-test_class = TestLazyLoading()
-test_class.test_perfromance_horovod()

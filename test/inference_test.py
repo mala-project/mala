@@ -23,7 +23,7 @@ class TestInference:
         """Test that RAM inexpensive unit conversion works."""
         new_parameters = Parameters.load_from_file(params_path,
                                                    no_snapshots=True)
-        new_parameters.data.data_splitting_snapshots = ["te", "te", "te"]
+        new_parameters.data.data_splitting_snapshots = ["te"]
         new_parameters.data.use_lazy_loading = False
         new_parameters.running.mini_batch_size = 50
 
@@ -97,7 +97,7 @@ class TestInference:
         # First we load Parameters and network.
         new_parameters = Parameters.load_from_file(params_path,
                                                    no_snapshots=True)
-        new_parameters.data.data_splitting_snapshots = ["te", "te", "te"]
+        new_parameters.data.data_splitting_snapshots = ["te"]
         new_parameters.data.use_lazy_loading = use_lazy_loading
         new_parameters.running.mini_batch_size = batchsize
 
@@ -130,7 +130,7 @@ class TestInference:
                                   str(0)+".out.npy"), in_units="1/Ry")
 
         # Test if prediction still works.
-        raw_predicted_outputs = np.load(data_path+"Al_debug_2k_nr"+str(i) +
+        raw_predicted_outputs = np.load(data_path+"Al_debug_2k_nr"+str(0) +
                                         ".in.npy")
         raw_predicted_outputs = inference_data_handler.\
             raw_numpy_to_converted_scaled_tensor(raw_predicted_outputs,
