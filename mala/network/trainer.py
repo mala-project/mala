@@ -173,14 +173,15 @@ class Trainer(Runner):
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
                                             self.test_data_loader)
-
+        print(tloss)
         # Collect and average all the losses from all the devices
         if self.parameters_full.use_horovod:
             vloss = self.__average_validation(vloss, 'average_loss')
-            self.initial_validation_loss = vloss
             if self.data.test_data_set is not None:
                 tloss = self.__average_validation(tloss, 'average_loss')
-                self.initial_test_loss = tloss
+
+        self.initial_test_loss = tloss
+        self.initial_validation_loss = vloss
 
         if self.parameters.verbosity:
             printout("Initial Guess - validation data loss: ", vloss)

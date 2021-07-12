@@ -11,7 +11,7 @@ import time
 # the lazy-loading one (incremental fitting).
 
 data_path = get_data_repo_path()+"Al36/"
-accuracy_strict = 5e-4
+accuracy_strict = 1e-3
 accuracy_coarse = 1e-3
 
 
@@ -121,6 +121,7 @@ class TestLazyLoading:
                     test_network = Network(test_parameters)
                     test_trainer = Trainer(test_parameters, test_network,
                                            data_handler)
+                    test_trainer.train_network()
                     training_tester.append(test_trainer.final_test_loss -
                                            test_trainer.initial_test_loss)
 
@@ -230,6 +231,7 @@ class TestLazyLoading:
                 test_network = Network(test_parameters)
                 test_trainer = Trainer(test_parameters, test_network,
                                        data_handler)
+                test_trainer.train_network()
 
                 hvdstring = "no horovod"
                 if hvduse:
@@ -272,4 +274,8 @@ class TestLazyLoading:
         diff = np.array(diff)
 
         # The loss improvements should be comparable.
-        assert np.std(diff) > accuracy_strict
+        assert np.std(diff) < accuracy_strict
+
+
+test_class = TestLazyLoading()
+test_class.test_perfromance_horovod()
