@@ -2,9 +2,11 @@
 import oapackage as oa
 from .hyper_opt_base import HyperOptBase
 from .objective_base import ObjectiveBase
+from .hyperparameter_oat import HyperparameterOAT
 import numpy as np
 import itertools
 from mala.common.printout import printout
+from bisect import bisect
 
 
 class HyperOptOAT(HyperOptBase):
@@ -23,6 +25,7 @@ class HyperOptOAT(HyperOptBase):
         super(HyperOptOAT, self).__init__(params, data)
         self.objective = None
         self.trial_losses = []
+        self.sorted_num_choices = []
         self.optimal_params = None
         self.importance = None
         self.n_factors = None
@@ -33,35 +36,23 @@ class HyperOptOAT(HyperOptBase):
 
     def add_hyperparameter(self, opttype="categorical", name="", low=0, high=0,
                            choices=None):
-        """
-        Add a hyperparameter to the current investigation.
 
-        Parameters
-        ----------
-        opttype : string
-            Datatype of the hyperparameter. Follows optunas naming convetions.
-            Currently supported are:
+        if opttype != 'categorical':
+            raise Exception(
+                "Only categorical hyperparameters are supported for OAT")
 
-                - categorical (list)
+        else:
+            if not self.sorted_num_choices:
+                super(HyperOptOAT, self).add_hyperparameter(opttype=opttype, name=name,
+                                                            low=low, high=high,
+                                                            choices=choices)
+                self.sorted_num_choices.append(len(choices))
 
-        name : string
-            Name of the hyperparameter. Please note that these names always
-            have to be distinct; if you e.g. want to investigate multiple
-            layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
-            etc. as names.
-
-        low : float or int
-            Currently unsupported: Lower bound for numerical parameter.
-
-        high : float or int
-            Currently unsupported: Higher bound for numerical parameter.
-
-        choices :
-            List of possible choices (for categorical parameter).
-        """
-        super(HyperOptOAT, self).add_hyperparameter(opttype=opttype, name=name,
-                                                    low=low, high=high,
-                                                    choices=choices)
+            else:
+                index = bisect(self.sorted_num_choices, len(choices))
+                self.sorted_num_choices.insert(index, len(choices))
+                self.params.hyperparameters.hlist.insert(
+                    index, HyperparameterOAT(opttype=opttype, name=name, choices=choices))
 
     def perform_study(self):
         """
@@ -75,6 +66,7 @@ class HyperOptOAT(HyperOptBase):
         self.factor_levels = [par.num_choices for par in self.params.
                               hyperparameters.hlist]
 
+        printout(*self.factor_levels, sep=",")
         if not self.monotonic:
             raise Exception(
                 "Please use hyperparameters in increasing or decreasing order of number of choices")
@@ -112,6 +104,17 @@ class HyperOptOAT(HyperOptBase):
 
         A = [[i/len(j) for i in j] for j in R]
 
+        print("OA:")
+        print(self.OA)
+
+        print("Trial Losses:")
+        print(np.array(self.trial_losses).transpose())
+
+        print("R matrix: ")
+        print(np.array(R).transpose())
+
+        print("A Matrix:")
+        print(np.array(A).transpose())
         # Taking loss as objective to minimise
         self.optimal_params = np.array([i.index(min(i)) for i in A])
         self.importance = np.argsort([max(i)-min(i) for i in A])

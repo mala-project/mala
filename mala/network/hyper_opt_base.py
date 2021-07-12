@@ -54,6 +54,7 @@ class HyperOptBase(ABC):
         choices :
             List of possible choices (for categorical parameter).
         """
+
         self.params.\
             hyperparameters.hlist.append(
                 HyperparameterInterface(self.params.hyperparameters.
