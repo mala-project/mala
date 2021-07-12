@@ -1,19 +1,21 @@
+import numpy as np
 import mala
 from mala import printout
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
 
 """
-ex08_checkpoint_hyperopt.py: Shows how a hyperparameter optimization run can 
-be paused and resumed. Delete all ex08_*.pkl and ex08_*.pth prior to execution.
-Afterwards, execute this script twice to see how MALA progresses from a 
-checkpoint. As the number of trials cannot be divided by the number
-of epochs after which a checkpoint is created without residual, this will 
-lead to MALA performing the missing trials again.
+ex09_distributed_hyperopt.py: Shows how a hyperparameter 
+optimization can be sped up using a RDB storage. Ideally this should be done
+using a database server system, such as PostgreSQL or MySQL. 
+For this easy example, sqlite will be used. It is highly advisory not to
+to use this for actual, at-scale calculations!  
+Please delete ex09.db prior to execution. Afterwards execute this script
+in multiple terminals / nodes. 
 """
 
 
-def initial_setup():
+def run_example09(desired_loss_improvement_factor=2):
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
@@ -32,20 +34,17 @@ def initial_setup():
     test_parameters.data.output_rescaling_type = "normal"
 
     # Specify the training parameters.
-    test_parameters.running.max_number_epochs = 10
+    test_parameters.running.max_number_epochs = 5
     test_parameters.running.mini_batch_size = 40
     test_parameters.running.learning_rate = 0.00001
     test_parameters.running.trainingtype = "Adam"
 
     # Specify the number of trials, the hyperparameter optimizer should run
     # and the type of hyperparameter.
-    # The study will be 9 trials long, with checkpoints after the 5th
-    # trial. This will result in the first checkpoint still having 4
-    # trials left.
-    test_parameters.hyperparameters.n_trials = 9
+    test_parameters.hyperparameters.n_trials = 20
     test_parameters.hyperparameters.hyper_opt_method = "optuna"
-    test_parameters.hyperparameters.checkpoints_each_trial = 5
-    test_parameters.hyperparameters.checkpoint_name = "ex08"
+    test_parameters.hyperparameters.study_name = "ex09"
+    test_parameters.hyperparameters.rdb_storage = 'sqlite:///ex09.db'
 
     ####################
     # DATA
@@ -73,8 +72,6 @@ def initial_setup():
     # and let it perform a "study".
     # Before such a study can be done, one has to add all the parameters
     # of interest.
-    # After first performing the study, we load it from the last checkpoint
-    # and run the remaining trials.
     ####################
 
     test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
@@ -95,37 +92,49 @@ def initial_setup():
     test_hp_optimizer.add_hyperparameter("categorical", "layer_activation_02",
                                          choices=["ReLU", "Sigmoid"])
 
-    return test_parameters, data_handler, test_hp_optimizer
-
-
-def run_example08():
-    if mala.HyperOptOptuna.checkpoint_exists("ex08"):
-        parameters, datahandler, hyperoptimizer = \
-            mala.HyperOptOptuna.resume_checkpoint(
-                "ex08")
-        printout("Starting resumed hyperparameter optimization.")
-    else:
-        parameters, datahandler, hyperoptimizer = initial_setup()
-        printout("Starting original hyperparameter optimization.")
-
     # Perform hyperparameter optimization.
-    hyperoptimizer.perform_study()
+    printout("Starting Hyperparameter optimization.")
+    test_hp_optimizer.perform_study()
+    test_hp_optimizer.set_optimal_parameters()
+    printout("Hyperparameter optimization: DONE.")
+
+    ####################
+    # TRAINING
+    # Train with these new parameters.
+    ####################
+
+    test_network = mala.Network(test_parameters)
+    test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
+    printout("Network setup: DONE.")
+    test_trainer.train_network()
+    printout("Training: DONE.")
 
     ####################
     # RESULTS.
-    # Print the used parameters.
+    # Print the used parameters and check whether the loss decreased enough.
     ####################
 
     printout("Parameters used for this experiment:")
-    parameters.show()
-    return True
+    test_parameters.show()
+
+    # To see if the hyperparameter optimization actually worked,
+    # check if the best trial is better then the worst trial
+    # by a certain factor.
+    performed_trials_values = test_hp_optimizer.study.\
+        trials_dataframe()["value"]
+    if desired_loss_improvement_factor*min(performed_trials_values) > \
+            max(performed_trials_values):
+        return False
+    else:
+        return True
 
 
 if __name__ == "__main__":
-    if run_example08():
-        printout("Successfully ran ex08_checkpoint_hyperopt.")
+    if run_example09():
+        printout("Successfully ran ex09_distributed_hyperopt.py.")
     else:
-        raise Exception("Ran ex08_checkpoint_hyperopt but something was off."
-                        " If you haven't changed any parameters in "
-                        "the example, there might be a problem with your"
-                        " installation.")
+        raise Exception("Ran ex09_distributed_hyperopt but something "
+                        "was off. If you haven't changed any parameters in "
+                        "the example, there might be a problem with "
+                        "your installation.")
+

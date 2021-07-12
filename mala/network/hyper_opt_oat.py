@@ -7,20 +7,18 @@ from mala.common.parameters import printout
 
 
 class HyperOptOAT(HyperOptBase):
-    """Hyperparameter optimizer using Orthogonal Array Tuning."""
+    """Hyperparameter optimizer using Orthogonal Array Tuning.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this hyperparameter optimizer.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the data for the hyperparameter optimization.
+    """
 
     def __init__(self, params, data):
-        """
-        Create a HyperOptOAT object.
-
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this hyperparameter optimizer.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the data for the hyperparameter optimization.
-        """
         super(HyperOptOAT, self).__init__(params, data)
         self.objective = None
         self.trial_losses = []
@@ -38,6 +36,7 @@ class HyperOptOAT(HyperOptBase):
         In this case, these are choosen based on an orthogonal array.
         """
         number_of_trial = 0
+        # The parameters could have changed.
         self.objective = ObjectiveBase(self.params, self.data_handler)
         for row in self.orthogonal_arr:
             printout("Trial number", number_of_trial)

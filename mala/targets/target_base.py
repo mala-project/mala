@@ -13,19 +13,15 @@ class TargetBase:
     Target parsers read the target quantity
     (i.e. the quantity the NN will learn to predict) from a specified file
     format and performs postprocessing calculations on the quantity.
+
+    Parameters
+    ----------
+    params : mala.common.parameters.Parameters or
+    mala.common.parameters.ParametersTargets
+        Parameters used to create this TargetBase object.
     """
 
     def __init__(self, params):
-        """
-        Create a TargetBase object.
-
-        Parameters
-        ----------
-        params : mala.common.parameters.Parameters or
-        mala.common.parameters.ParametersTargets
-            Parameters used to create this TargetBase object.
-
-        """
         if isinstance(params, Parameters):
             self.parameters = params.targets
         elif isinstance(params, ParametersTargets):
@@ -63,7 +59,10 @@ class TargetBase:
         # with QE. However, there were some (very small) inaccuracies when
         # operating only at the gamma point. Consequently, MALA defaults
         # to a small k-grid to ensure best accuracy and performance.
-        self.kpoints = (2, 2, 2)
+        # UPDATE 23.04.2021: As per discussion bewteen Normand Modine and Lenz
+        # Fiedler, the number of k-points is moved to 1.
+        # The small inaccuracies are neglected for now.
+        self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
 
     def read_from_cube(self):
@@ -277,3 +276,33 @@ class TargetBase:
         """
         raise Exception("No unit back conversion method implemented "
                         "for this target type.")
+
+    def restrict_data(self, array):
+        """
+        Restrict target data to only contain physically meaningful values.
+
+        For the LDOS this e.g. implies non-negative values. The type
+        of data restriction is specified by the parameters.
+
+        Parameters
+        ----------
+        array : numpy.array
+            Numpy array, for which the restrictions are to be applied.
+
+        Returns
+        -------
+        array : numpy.array
+            The same array, with restrictions enforced.
+        """
+        if self.parameters.restrict_targets == "zero_out_negative":
+            array[array < 0] = 0
+            return array
+        elif self.parameters.restrict_targets == "absolute_values":
+            array[array < 0] *= -1
+            return array
+        elif self.parameters.restrict_targets is None:
+            return array
+        else:
+            raise Exception("Wrong data restriction.")
+
+

@@ -3,6 +3,7 @@ from mala.network.network import Network
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
 from mala.common.parameters import Parameters
+import os
 import numpy as np
 import torch
 from torch import optim
@@ -18,23 +19,21 @@ import time
 
 
 class Trainer(Runner):
-    """A class for training a neural network."""
+    """A class for training a neural network.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this Trainer object.
+
+    network : mala.network.network.Network
+        Network which is being trained.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the training data.
+    """
 
     def __init__(self, params, network, data, optimizer_dict=None):
-        """
-        Create a Trainer object to run a Network.
-
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this Trainer object.
-
-        network : mala.network.network.Network
-            Network which is being trained.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the training data.
-        """
         # copy the parameters into the class.
         super(Trainer, self).__init__(params, network, data)
         self.final_test_loss = float("inf")
@@ -50,6 +49,33 @@ class Trainer(Runner):
         self.validation_data_loader = None
         self.test_data_loader = None
         self.__prepare_to_train(optimizer_dict)
+
+    @classmethod
+    def checkpoint_exists(cls, checkpoint_name):
+        """
+        Check if a hyperparameter optimization checkpoint exists.
+
+        Returns True if it does.
+
+        Parameters
+        ----------
+        checkpoint_name : string
+            Name of the checkpoint.
+
+        Returns
+        -------
+        checkpoint_exists : bool
+            True if the checkpoint exists, False otherwise.
+
+        """
+        network_name = checkpoint_name + "_network.pth"
+        iscaler_name = checkpoint_name + "_iscaler.pkl"
+        oscaler_name = checkpoint_name + "_oscaler.pkl"
+        param_name = checkpoint_name + "_params.pkl"
+        optimizer_name = checkpoint_name + "_optimizer.pth"
+
+        return all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
+                                        network_name, optimizer_name]))
 
     @classmethod
     def resume_checkpoint(cls, checkpoint_name):
@@ -222,7 +248,9 @@ class Trainer(Runner):
                     vloss_old = vloss
                 else:
                     self.patience_counter += 1
-                    printout("Validation accuracy has not improved enough.")
+                    if self.parameters.verbosity:
+                        printout("Validation accuracy has not improved "
+                                 "enough.")
                     if self.patience_counter >= self.parameters.\
                             early_stopping_epochs:
                         if self.parameters.verbosity:
@@ -244,7 +272,8 @@ class Trainer(Runner):
                     self.__create_training_checkpoint()
                     checkpoint_counter = 0
 
-            printout("Time for epoch[s]:", time.time() - start_time)
+            if self.parameters.verbosity:
+                printout("Time for epoch[s]:", time.time() - start_time)
 
         # Calculate final loss.
         self.final_validation_loss = vloss
@@ -254,8 +283,8 @@ class Trainer(Runner):
                                             self.test_data_loader)
             if self.parameters_full.use_horovod:
                 tloss = self.__average_validation(tloss, 'average_loss')
+            printout("Final test data loss: ", tloss)
         self.final_test_loss = tloss
-        printout("Final test data loss: ", tloss)
 
     def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""

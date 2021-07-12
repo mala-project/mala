@@ -1,25 +1,25 @@
 """Base class for all hyperparameter optimizers."""
 from abc import abstractmethod, ABC
 from .hyperparameter_interface import HyperparameterInterface
+from .objective_base import ObjectiveBase
 
 
 class HyperOptBase(ABC):
-    """Base class for hyperparameter optimizater."""
+    """Base class for hyperparameter optimizater.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this hyperparameter optimizer.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the data for the hyperparameter optimization.
+    """
 
     def __init__(self, params, data):
-        """
-        Create a hyperparameter optimizer object.
-
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this hyperparameter optimizer.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the data for the hyperparameter optimization.
-        """
         self.params = params
         self.data_handler = data
+        self.objective = ObjectiveBase(self.params, self.data_handler)
 
     def add_hyperparameter(self, opttype="float", name="", low=0, high=0,
                            choices=None):
@@ -86,3 +86,12 @@ class HyperOptBase(ABC):
         hyperparameter optimizer was created.
         """
         pass
+
+    def set_parameters(self, trial):
+        """
+        Set the parameters to a specific trial.
+
+        The parameters will be written to the parameter object with which the
+        hyperparameter optimizer was created.
+        """
+        self.objective.parse_trial(trial)

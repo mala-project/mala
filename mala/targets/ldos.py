@@ -11,19 +11,22 @@ from mala.common.parameters import printout
 
 
 class LDOS(TargetBase):
-    """Postprocessing / parsing functions for the local density of states."""
+    """Postprocessing / parsing functions for the local density of states.
+
+    Parameters
+    ----------
+    params : mala.common.parameters.Parameters
+        Parameters used to create this TargetBase object.
+    """
 
     def __init__(self, params):
-        """
-        Create a LDOS object.
-
-        Parameters
-        ----------
-        params : mala.common.parameters.Parameters
-            Parameters used to create this TargetBase object.
-        """
         super(LDOS, self).__init__(params)
         self.target_length = self.parameters.ldos_gridsize
+        self.cached_dos_exists = False
+        self.cached_dos = []
+        self.cached_density_exists = False
+        self.cached_density = []
+
 
     @staticmethod
     def convert_units(array, in_units="1/eV"):
@@ -147,15 +150,9 @@ class LDOS(TargetBase):
             ldos_data[:, :, :, i-1] = data[:, :, :]
         return ldos_data
 
-    def get_energy_grid(self, shift_energy_grid=False):
+    def get_energy_grid(self):
         """
         Get energy grid.
-
-        Parameters
-        ----------
-        shift_energy_grid : bool
-            If True, the entire energy grid will be shifted by
-            ldos_gridoffset_ev from the parameters.
 
         Returns
         -------
@@ -168,9 +165,6 @@ class LDOS(TargetBase):
             self.parameters.ldos_gridsize * \
             self.parameters.ldos_gridspacing_ev
         grid_size = self.parameters.ldos_gridsize
-        if shift_energy_grid is True:
-            emin += self.parameters.ldos_gridspacing_ev
-            emax += self.parameters.ldos_gridspacing_ev
         linspace_array = (np.linspace(emin, emax, grid_size, endpoint=False))
         return linspace_array
 
@@ -180,7 +174,7 @@ class LDOS(TargetBase):
                          grid_spacing_bohr=None,
                          grid_integration_method="summation",
                          energy_integration_method="analytical",
-                         shift_energy_grid=True, atoms_Angstrom=None,
+                         atoms_Angstrom=None,
                          qe_input_data=None, qe_pseudopotentials=None):
         """
         Calculate the total energy from LDOS or given DOS + density data.
@@ -227,10 +221,6 @@ class LDOS(TargetBase):
                 - "trapz" for trapezoid method
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
-
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
 
         atoms_Angstrom : ase.Atoms
             ASE atoms object for the current system. If None, MALA will
@@ -279,9 +269,7 @@ class LDOS(TargetBase):
                                             fermi_energy_ev=fermi_energy_eV,
                                             temperature_K=temperature_K,
                                             integration_method=
-                                            energy_integration_method,
-                                            shift_energy_grid=
-                                            shift_energy_grid)
+                                            energy_integration_method)
 
         # Now we can create calculation objects to get the necessary
         # quantities.
@@ -297,17 +285,14 @@ class LDOS(TargetBase):
                                                 fermi_energy_eV,
                                                 temperature_K=temperature_K,
                                                 integration_method=
-                                                energy_integration_method,
-                                                shift_energy_grid=
-                                                shift_energy_grid)
+                                                energy_integration_method)
 
         # Smearing / Entropy contribution
         e_entropy_contribution = dos_calculator.\
             get_entropy_contribution(dos_data, fermi_energy_eV=fermi_energy_eV,
                                      temperature_K=temperature_K,
                                      integration_method=
-                                     energy_integration_method,
-                                     shift_energy_grid=shift_energy_grid)
+                                     energy_integration_method)
 
         # Density based energy contributions (via QE)
         e_rho_times_v_hxc, e_hartree,  e_xc, e_ewald \
@@ -323,8 +308,7 @@ class LDOS(TargetBase):
     def get_band_energy(self, ldos_data, fermi_energy_eV=None,
                         temperature_K=None, grid_spacing_bohr=None,
                         grid_integration_method="summation",
-                        energy_integration_method="analytical",
-                        shift_energy_grid=True):
+                        energy_integration_method="analytical"):
         """
         Calculate the band energy from given LDOS data.
 
@@ -355,10 +339,6 @@ class LDOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
-
         grid_spacing_bohr : float
             Grid spacing (distance between grid points) in Bohr.
 
@@ -380,14 +360,12 @@ class LDOS(TargetBase):
         return dos_calculator.\
             get_band_energy(dos_data, fermi_energy_eV=fermi_energy_eV,
                             temperature_K=temperature_K,
-                            integration_method=energy_integration_method,
-                            shift_energy_grid=shift_energy_grid)
+                            integration_method=energy_integration_method)
 
     def get_number_of_electrons(self, ldos_data, grid_spacing_bohr=None,
                                 fermi_energy_eV=None, temperature_K=None,
                                 grid_integration_method="summation",
-                                energy_integration_method="analytical",
-                                shift_energy_grid=True):
+                                energy_integration_method="analytical"):
         """
         Calculate the number of electrons from given LDOS data.
 
@@ -418,10 +396,6 @@ class LDOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
-
         grid_spacing_bohr : float
             Grid spacing (distance between grid points) in Bohr.
 
@@ -444,8 +418,7 @@ class LDOS(TargetBase):
             get_number_of_electrons(dos_data, fermi_energy_eV=fermi_energy_eV,
                                     temperature_K=temperature_K,
                                     integration_method=
-                                    energy_integration_method,
-                                    shift_energy_grid=shift_energy_grid)
+                                    energy_integration_method)
 
     def get_self_consistent_fermi_energy_ev(self, ldos_data,
                                             grid_spacing_bohr=None,
@@ -453,8 +426,7 @@ class LDOS(TargetBase):
                                             grid_integration_method=
                                             "summation",
                                             energy_integration_method=
-                                            "analytical",
-                                            shift_energy_grid=True):
+                                            "analytical"):
         """
         Calculate the self-consistent Fermi energy.
 
@@ -487,10 +459,6 @@ class LDOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
-
         grid_spacing_bohr : float
             Grid spacing (distance between grid points) in Bohr.
 
@@ -513,13 +481,11 @@ class LDOS(TargetBase):
             get_self_consistent_fermi_energy_ev(dos_data,
                                                 temperature_K=temperature_K,
                                                 integration_method=
-                                                energy_integration_method,
-                                                shift_energy_grid=
-                                                shift_energy_grid)
+                                                energy_integration_method)
 
     def get_density(self, ldos_data, fermi_energy_ev=None, temperature_K=None,
                     conserve_dimensions=False,
-                    integration_method="analytical", shift_energy_grid=True):
+                    integration_method="analytical"):
         """
         Calculate the density from given LDOS data.
 
@@ -543,10 +509,6 @@ class LDOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
-
         ldos_data : numpy.array
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid].
@@ -566,6 +528,9 @@ class LDOS(TargetBase):
             dimensions.
 
         """
+        if self.cached_density_exists:
+            return self.cached_density
+
         if fermi_energy_ev is None:
             fermi_energy_ev = self.fermi_energy_eV
         if temperature_K is None:
@@ -588,31 +553,22 @@ class LDOS(TargetBase):
         else:
             raise Exception("Invalid LDOS array shape.")
 
-        # Parse the information about the energy grid.
-        emin = self.parameters.ldos_gridoffset_ev
-        emax = self.parameters.ldos_gridsize * self.parameters.\
-            ldos_gridspacing_ev + self.parameters.ldos_gridoffset_ev
-        energy_grid_spacing = self.parameters.ldos_gridspacing_ev
-
         # Build the energy grid and calculate the fermi function.
-        if shift_energy_grid and integration_method == "analytical":
-            emin += energy_grid_spacing
-            emax += energy_grid_spacing
-        energy_vals = np.arange(emin, emax, energy_grid_spacing)
-        fermi_values = fermi_function(energy_vals, fermi_energy_ev,
+        energy_grid = self.get_energy_grid()
+        fermi_values = fermi_function(energy_grid, fermi_energy_ev,
                                       temperature_K, energy_units="eV")
 
         # Calculate the number of electrons.
         if integration_method == "trapz":
             density_values = integrate.trapz(ldos_data_used * fermi_values,
-                                             energy_vals, axis=-1)
+                                             energy_grid, axis=-1)
         elif integration_method == "simps":
             density_values = integrate.simps(ldos_data_used * fermi_values,
-                                             energy_vals, axis=-1)
+                                             energy_grid, axis=-1)
         elif integration_method == "analytical":
             density_values = analytical_integration(ldos_data_used, "F0", "F1",
                                                     fermi_energy_ev,
-                                                    energy_vals,
+                                                    energy_grid,
                                                     temperature_K)
         else:
             raise Exception("Unknown integration method.")
@@ -646,7 +602,15 @@ class LDOS(TargetBase):
             - "trapz" for trapezoid method
             - "simps" for Simpson method.
             - "summation" for summation and scaling of the values (recommended)
+
+        Returns
+        -------
+        dos_values : np.array
+            The DOS.
         """
+        if self.cached_dos_exists:
+            return self.cached_dos
+
         if grid_spacing_bohr is None:
             grid_spacing_bohr = self.grid_spacing_Bohr
 
@@ -712,3 +676,115 @@ class LDOS(TargetBase):
                              (grid_spacing_bohr ** 3)
 
         return dos_values
+
+    def get_and_cache_density_of_states(self, ldos_data,
+                                        grid_spacing_bohr=None,
+                                        integration_method="summation"):
+        """
+        Calculate a DOS from LDOS data and keep it in memory.
+
+        For all subsequent calculations involving the DOS, this cached
+        DOS will be used. Usage of this function is advised for time-critical
+        calculations.
+
+        Parameters
+        ----------
+        ldos_data : numpy.array
+            LDOS data, either as [gridsize, energygrid] or
+            [gridx,gridy,gridz,energygrid].
+
+        grid_spacing_bohr : float
+            Grid spacing (in Bohr) used to construct this grid. As of now,
+            only equidistant grids are supported.
+
+        integration_method : str
+            Integration method used to integrate LDOS on the grid.
+            Currently supported:
+
+            - "trapz" for trapezoid method
+            - "simps" for Simpson method.
+            - "summation" for summation and scaling of the values (recommended)
+
+        Returns
+        -------
+        dos_values : np.array
+            The DOS.
+
+        """
+        self.uncache_density_of_states()
+        self.cached_dos = self.\
+            get_density_of_states(ldos_data,
+                                  grid_spacing_bohr=grid_spacing_bohr,
+                                  integration_method=integration_method)
+        self.cached_dos_exists = True
+        return self.cached_dos
+
+    def uncache_density_of_states(self):
+        """Uncache a DOS, to calculate a new one in following steps."""
+        self.cached_dos_exists = False
+
+    def get_and_cache_density_cached(self, ldos_data,
+                                     fermi_energy_ev=None,
+                                     temperature_K=None,
+                                     conserve_dimensions=False,
+                                     integration_method="analytical"):
+        """
+        Calculate an electronic density from LDOS data and keep it in memory.
+
+        For all subsequent calculations involving the electronic density, this
+        cached density will be used. Usage of this function is advised for
+        time-critical calculations.
+
+        Parameters
+        ----------
+        conserve_dimensions : bool
+            If True, the density is returned in the same dimensions as
+            the LDOS was entered. If False, the density is always given
+            as [gridsize].
+
+        fermi_energy_ev : float
+            Fermi energy level in eV.
+
+        temperature_K : float
+            Temperature in K.
+
+        integration_method : string
+            Integration method to be used. Currently supported:
+
+                - "trapz" for trapezoid method
+                - "simps" for Simpson method.
+                - "analytical" for analytical integration. Recommended.
+
+        ldos_data : numpy.array
+            LDOS data, either as [gridsize, energygrid] or
+            [gridx,gridy,gridz,energygrid].
+
+        integration_method : string
+            Integration method to integrate LDOS on energygrid.
+            Currently supported:
+
+                - "trapz" for trapezoid method
+                - "simps" for Simpson method.
+                - "analytical" for analytical integration. Recommended.
+
+        Returns
+        -------
+        density_data : numpy.array
+            Density data, dimensions depend on conserve_dimensions and LDOS
+            dimensions.
+        """
+        self.uncache_density()
+        self.cached_density = self.\
+            get_density(ldos_data,
+                        fermi_energy_ev=fermi_energy_ev,
+                        temperature_K=temperature_K,
+                        conserve_dimensions=conserve_dimensions,
+                        integration_method=integration_method)
+
+        self.cached_density_exists = True
+        return self.cached_density
+
+    def uncache_density(self):
+        """Uncache a density, to calculate a new one in following steps."""
+        self.cached_density_exists = False
+

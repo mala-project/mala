@@ -16,7 +16,6 @@ class ParametersBase:
     """Base parameter class for MALA."""
 
     def __init__(self):
-        """Create an instance of ParameterBase."""
         pass
 
     def show(self, indent=""):
@@ -68,7 +67,6 @@ class ParametersNetwork(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersNetwork."""
         super(ParametersNetwork, self).__init__()
         self.nn_type = "feed-forward"
         self.layer_sizes = [10, 10, 10]
@@ -103,7 +101,6 @@ class ParametersDescriptors(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersDescriptors."""
         super(ParametersDescriptors, self).__init__()
         self.descriptor_type = "SNAP"
         self.twojmax = 10
@@ -133,12 +130,24 @@ class ParametersTargets(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParameterTargets."""
         super(ParametersTargets, self).__init__()
         self.target_type = "LDOS"
         self.ldos_gridsize = 0
         self.ldos_gridspacing_ev = 0
         self.ldos_gridoffset_ev = 0
+        self.restrict_targets = "zero_out_negative"
+
+    @property
+    def restrict_targets(self):
+        """Control if and how targets are restricted to physical values.."""
+        return self._restrict_targets
+
+    @restrict_targets.setter
+    def restrict_targets(self, value):
+        if value != "zero_out_negative" and value != "absolute_values":
+            self._restrict_targets = None
+        else:
+            self._restrict_targets = value
 
 
 class ParametersData(ParametersBase):
@@ -205,13 +214,12 @@ class ParametersData(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersData."""
         super(ParametersData, self).__init__()
         self.descriptors_contain_xyz = True
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
         # self.data_splitting_percent = [0,0,0]
-        self.data_splitting_snapshots = ["tr", "va", "te"]
+        self.data_splitting_snapshots = []
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
@@ -306,7 +314,6 @@ class ParametersRunning(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersRunning."""
         super(ParametersRunning, self).__init__()
         self.trainingtype = "SGD"
         self.learning_rate = 0.5
@@ -386,10 +393,35 @@ class ParametersHyperparameterOptimization(ParametersBase):
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory. Currently. this
         only works with optuna.
+
+    study_name : string
+        Name used for this study (in optuna#s storage). Necessary
+        when operating with a RDB storage.
+
+    rdb_storage : string
+        Adress of the RDB storage to be used by optuna.
+
+    rdb_storage_heartbeat : int
+        Heartbeat interval for optuna (in seconds). Default is None.
+        If not None and above 0, optuna will record the heartbeat of intervals.
+        If no action on a RUNNING trial is recognized for longer then this
+        interval, then this trial will be moved to FAILED. In distributed
+        training, setting a heartbeat is currently the only way to achieve
+        a precise number of trials:
+
+        https://github.com/optuna/optuna/issues/1883
+
+        For optuna versions below 2.8.0, larger heartbeat intervals are
+        detrimental to performance and should be avoided:
+
+        https://github.com/optuna/optuna/issues/2685
+
+        For MALA, no evidence for decreased performance using smaller
+        heartbeat values could be found. So if this is used, 1s is a reasonable
+        value.
     """
 
     def __init__(self):
-        """Create an instance of ParametersHyperparameterOptimization."""
         super(ParametersHyperparameterOptimization, self).__init__()
         self.direction = 'minimize'
         self.n_trials = 100
@@ -397,6 +429,21 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.hyper_opt_method = "optuna"
         self.checkpoints_each_trial = 0
         self.checkpoint_name = "checkpoint_mala_ho"
+        self.study_name = None
+        self.rdb_storage = None
+        self.rdb_storage_heartbeat = None
+
+    @property
+    def rdb_storage_heartbeat(self):
+        """Control whether a heartbeat is used for distributed optuna runs."""
+        return self._rdb_storage_heartbeat
+
+    @rdb_storage_heartbeat.setter
+    def rdb_storage_heartbeat(self, value):
+        if value == 0:
+            self._rdb_storage_heartbeat = None
+        else:
+            self._rdb_storage_heartbeat = value
 
     def show(self, indent=""):
         """
@@ -433,7 +480,6 @@ class ParametersDebug(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersDebug."""
         super(ParametersDebug, self).__init__()
         self.grid_dimensions = []
 
@@ -487,7 +533,6 @@ class Parameters:
     """
 
     def __init__(self):
-        """Create an instance of Parameters."""
         self.comment = ""
         self.network = ParametersNetwork()
         self.descriptors = ParametersDescriptors()

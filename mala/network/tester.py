@@ -16,23 +16,20 @@ class Tester(Runner):
     A class for testing a neural network.
 
     It enables easy inference throughout a test set.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this Tester object.
+
+    network : mala.network.network.Network
+        Network which is being tested.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the test data.
     """
 
     def __init__(self, params, network, data):
-        """
-        Create a Tester object to run a Network.
-
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this Tester object.
-
-        network : mala.network.network.Network
-            Network which is being tested.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the test data.
-        """
         # copy the parameters into the class.
         super(Tester, self).__init__(params, network, data)
         self.test_data_loader = None
@@ -91,6 +88,10 @@ class Tester(Runner):
                 inverse_transform(self.network(inputs).
                                   to('cpu'), as_numpy=True)
 
+        # Restricting the actual quantities to physical meaningful values,
+        # i.e. restricting the (L)DOS to positive values.
+        predicted_outputs = self.data.target_calculator.\
+            restrict_data(predicted_outputs)
         return actual_outputs, predicted_outputs
 
     def __prepare_to_test(self):

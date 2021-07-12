@@ -1,8 +1,4 @@
-"""
-Collection of useful functions for working with LAMMPS.
-
-Courtesy of the Sandia code. We have to talk about licensing.
-"""
+"""Collection of useful functions for working with LAMMPS."""
 
 import numpy as np
 import ctypes

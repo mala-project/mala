@@ -15,28 +15,25 @@ class ObjectiveNoTraining(ObjectiveBase):
     Represents the objective function using no NN training.
 
     The objective value is calculated using the Jacobian.
+
+    Parameters
+    ----------
+    search_parameters : mala.common.parameters.Parameters
+        Parameters used to create this objective.
+
+    data_handler : mala.datahandling.data_handler.DataHandler
+        datahandler to be used during the hyperparameter optimization.
+
+    trial_type : string
+        Format of hyperparameters used in this objective. Supported
+        choices are:
+
+            - optuna
+            - oat
     """
 
     def __init__(self, search_parameters: Parameters, data_handler:
                  DataHandler, trial_type):
-        """
-        Create an ObjectiveNoTraining object.
-        
-        Parameters
-        ----------
-        search_parameters : mala.common.parameters.Parameters
-            Parameters used to create this objective.
-            
-        data_handler : mala.datahandling.data_handler.DataHandler
-            datahandler to be used during the hyperparameter optimization.
-        
-        trial_type : string
-            Format of hyperparameters used in this objective. Supported 
-            choices are:
-            
-                - optuna
-                - oat
-        """
         super(ObjectiveNoTraining, self).__init__(search_parameters,
                                                   data_handler)
         self.trial_type = trial_type
