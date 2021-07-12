@@ -91,7 +91,7 @@ jobs:
           ../install/data_repo_link/link_data_repo.sh `pwd`
 
       - name: Test basic functions
-        run: python test/mala_tests.py
+        run: pytest --disable-warnings
 
       - name: Test workflow
         run: python examples/ex99_verify_all_examples.py
