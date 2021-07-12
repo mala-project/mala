@@ -1,4 +1,4 @@
-from mala_integration import check_analytical_integration, \
+from integration_test import check_analytical_integration, \
     qe_dens_to_nr_of_electrons, qe_ldos_to_density, qe_ldos_to_dos
 from tensor_memory import test_tensor_memory
 from lazy_loading_basic import test_lazy_loading_basic
