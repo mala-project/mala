@@ -45,7 +45,7 @@ class Runner:
         # See if we want to use horovod.
         if self.parameters_full.use_horovod:
             if self.parameters_full.use_gpu:
-                printout("size=", hvd.size(), "global_rank=", hvd.rank(),
+                print("size=", hvd.size(), "global_rank=", hvd.rank(),
                          "local_rank=", hvd.local_rank(), "device=",
                          torch.cuda.get_device_name(hvd.local_rank()))
                 # pin GPU to local rank
