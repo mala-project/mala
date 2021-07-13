@@ -4,12 +4,17 @@ from torch.utils.data import TensorDataset
 from .data_scaler import DataScaler
 from .snapshot import Snapshot
 from .lazy_load_dataset import LazyLoadDataset
-from mala.common.parameters import Parameters
+from mala.common.parameters import Parameters, ParametersData
 from mala.targets.target_interface import TargetInterface
 from mala.descriptors.descriptor_interface import DescriptorInterface
 from mala.common.printout import printout
 import numpy as np
 import torch
+try:
+    import horovod.torch as hvd
+except ModuleNotFoundError:
+    # Warning is thrown by Parameters class
+    pass
 
 
 class DataHandler:
@@ -42,7 +47,7 @@ class DataHandler:
     def __init__(self, parameters: Parameters, target_calculator=None,
                  descriptor_calculator=None, input_data_scaler=None,
                  output_data_scaler=None):
-        self.parameters = parameters.data
+        self.parameters: ParametersData = parameters.data
         self.dbg_grid_dimensions = parameters.debug.grid_dimensions
         self.use_horovod = parameters.use_horovod
         self.training_data_set = None
@@ -239,6 +244,14 @@ class DataHandler:
         printout("Build datasets.")
         self.__build_datasets()
         printout("Build dataset done.")
+
+        # Wait until all ranks are finished with data preparation.
+        # It is not uncommon that ranks might be asynchronous in their
+        # data preparation by a small amount of minutes. If you notice
+        # an elongated wait time at this barrier, check that your file system
+        # allows for parallel I/O.
+        if self.use_horovod:
+            hvd.allreduce(torch.tensor(0), name='barrier')
 
     def mix_datasets(self):
         """For lazily-loaded data sets, the snapshot ordering is (re-)mixed."""
