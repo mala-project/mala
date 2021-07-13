@@ -165,8 +165,10 @@ class Trainer(Runner):
 
     def train_network(self):
         """Train a network using data given by a DataHandler."""
-        # Create reference to data and network and setup training.
-        # Calculate initial loss.
+        ############################
+        # CALCULATE INITIAL METRICS
+        ############################
+
         tloss = float("inf")
         vloss = self.__validate_network(self.network,
                                         self.validation_data_loader)
@@ -191,13 +193,17 @@ class Trainer(Runner):
         # Initialize all the counters.
         checkpoint_counter = 0
 
-        # If we restarted from a checkpoint, we
+        # If we restarted from a checkpoint, we have to differently initialize
+        # the loss.
         if self.last_loss is None:
             vloss_old = vloss
         else:
             vloss_old = self.last_loss
 
-        # Perform and log training.
+        ############################
+        # PERFORM TRAINING
+        ############################
+
         for epoch in range(self.last_epoch, self.parameters.max_number_epochs):
             start_time = time.time()
 
@@ -274,7 +280,10 @@ class Trainer(Runner):
             if self.parameters.verbosity:
                 printout("Time for epoch[s]:", time.time() - start_time)
 
-        # Calculate final loss.
+        ############################
+        # CALCULATE FINAL METRICS
+        ############################
+
         self.final_validation_loss = vloss
         tloss = float("inf")
         if self.data.test_data_set is not None:

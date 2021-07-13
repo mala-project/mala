@@ -311,6 +311,24 @@ class ParametersRunning(ParametersBase):
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
+
+    during_training_metric : string
+        Metric for evaluated on the validation set during training.
+        Default is "LDOS", meaning that the regular loss on the LDOS will be
+        used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
+
+    after_training_metric : string
+        Metric for evaluated on the validation and test set AFTER training.
+        Default is "LDOS", meaning that the regular loss on the LDOS will be
+        used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
     """
 
     def __init__(self):
@@ -336,6 +354,8 @@ class ParametersRunning(ParametersBase):
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
+        self.during_training_metric = "LDOS"
+        self.after_training_metric = "LDOS"
 
 
 class ParametersHyperparameterOptimization(ParametersBase):
