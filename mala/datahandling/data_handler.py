@@ -4,7 +4,7 @@ from torch.utils.data import TensorDataset
 from .data_scaler import DataScaler
 from .snapshot import Snapshot
 from .lazy_load_dataset import LazyLoadDataset
-from mala.common.parameters import Parameters
+from mala.common.parameters import Parameters, ParametersData
 from mala.targets.target_interface import TargetInterface
 from mala.descriptors.descriptor_interface import DescriptorInterface
 from mala.common.printout import printout
@@ -42,7 +42,7 @@ class DataHandler:
     def __init__(self, parameters: Parameters, target_calculator=None,
                  descriptor_calculator=None, input_data_scaler=None,
                  output_data_scaler=None):
-        self.parameters = parameters.data
+        self.parameters: ParametersData = parameters.data
         self.dbg_grid_dimensions = parameters.debug.grid_dimensions
         self.use_horovod = parameters.use_horovod
         self.training_data_set = None
