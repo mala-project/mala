@@ -27,8 +27,18 @@ install/README
 install/INSTALL_LAMMPS
 install/INSTALL_TE_QE
 install/tested_systems
-install/sql_on_hpc
+install/install_on_cluster
 ```
+
+```{toctree}
+---
+caption: Running MALA
+maxdepth: 2
+---
+usage/horovod_slurm
+usage/sql_on_hpc
+```
+
 
 ```{toctree}
 ---
