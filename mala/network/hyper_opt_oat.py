@@ -118,8 +118,7 @@ class HyperOptOAT(HyperOptBase):
         print(np.array(A).transpose())
         # Taking loss as objective to minimise
         self.optimal_params = np.array([i.index(min(i)) for i in A])
-        self.importance = np.argsort([max(i)-min(i) for i in A])
-
+        self.importance = np.argsort([max(i)-min(i) for i in A])[::-1]
         printout("Order of Importance: ")
         printout(
             *[self.params.hyperparameters.hlist[idx].name for idx in self.importance], sep=" > ")
