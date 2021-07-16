@@ -9,7 +9,7 @@ test_checkpoint_name = "test"
 accuracy = 1e-14
 
 
-class TestHyperoptTraining:
+class TestTrainingCheckpoint:
     """Tests the checkpointing capabilities of the NN training."""
 
     def test_general(self):

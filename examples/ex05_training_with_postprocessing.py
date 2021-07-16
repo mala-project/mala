@@ -20,7 +20,7 @@ DFT simulation cell for this example.
 
 # Uses a trained network to make a prediction.
 def use_trained_network(network_path, params_path, input_scaler_path,
-                        output_scaler_path, accuracy=0.05):
+                        output_scaler_path):
 
     # First load Parameters and network.
     # Parameters may have to
@@ -72,8 +72,6 @@ def use_trained_network(network_path, params_path, input_scaler_path,
     band_energy_actual = ldos_calculator.get_band_energy(actual_ldos)
     printout("Band energy (actual, predicted, error)[eV]", band_energy_actual,
              band_energy_predicted, band_energy_predicted-band_energy_actual)
-    if np.abs(band_energy_predicted-band_energy_actual) > accuracy:
-        return False
 
     # Calculate the number of electrons.
     nr_electrons_predicted = ldos_calculator.\
@@ -82,9 +80,6 @@ def use_trained_network(network_path, params_path, input_scaler_path,
     printout("Number of electrons (actual, predicted, error)[eV]",
              nr_electrons_actual, nr_electrons_predicted,
              nr_electrons_predicted-nr_electrons_actual)
-    if np.abs(band_energy_predicted-band_energy_actual) > accuracy:
-        return False
-    return True
 
 
 # Trains a network.
@@ -173,55 +168,13 @@ def initial_training(network_path, params_path, input_scaler_path,
     data_handler.input_data_scaler.save(input_scaler_path)
     data_handler.output_data_scaler.save(output_scaler_path)
 
-    ####################
-    # RESULTS.
-    # Check whether the loss decreased enough.
-    ####################
 
-    if desired_loss_improvement_factor*test_trainer.initial_test_loss \
-            < test_trainer.final_test_loss:
-        return False
-    else:
-        return True
-
-
-def run_example05(dotraining, doinference):
-    printout("Welcome to MALA.")
-    printout("Running ex05_training_with_postprocessing.py")
-
-    # Choose the paths where the network and the parameters for it should
-    # be saved.
-    if dotraining is False:
-        params_path = param_path+"ex05_params.pkl"
-        network_path = param_path+"ex05_network.pth"
-        input_scaler_path = param_path+"ex05_iscaler.pkl"
-        output_scaler_path = param_path+"ex05_oscaler.pkl"
-    else:
-        params_path = "./ex05_params.pkl"
-        network_path = "./ex05_network.pth"
-        input_scaler_path = "./ex05_iscaler.pkl"
-        output_scaler_path = "./ex05_oscaler.pkl"
-
-    training_return = True
-    inference_return = True
-    if dotraining:
-        training_return = initial_training(network_path, params_path,
-                                           input_scaler_path,
-                                           output_scaler_path)
-    if doinference:
-        inference_return = use_trained_network(network_path, params_path,
-                                               input_scaler_path,
-                                               output_scaler_path)
-
-    return training_return and inference_return
-
-
-if __name__ == "__main__":
-    if run_example05(True, True):
-        printout("Successfully ran ex05_training_with_postprocessing.py.")
-    else:
-        raise Exception("Ran ex05_training_with_postprocessing but something "
-                        "was off. If you haven't changed any parameters in "
-                        "the example, there might be a problem with your "
-                        "installation.")
+params_path = "./ex05_params.pkl"
+network_path = "./ex05_network.pth"
+input_scaler_path = "./ex05_iscaler.pkl"
+output_scaler_path = "./ex05_oscaler.pkl"
+initial_training(network_path, params_path, input_scaler_path,
+                 output_scaler_path)
+use_trained_network(network_path, params_path, input_scaler_path,
+                    output_scaler_path)
 
