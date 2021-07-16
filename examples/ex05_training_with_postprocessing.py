@@ -3,7 +3,6 @@ from mala import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
-param_path = get_data_repo_path()+"example05_data/"
 """
 ex05_training_with_postprocessing.py: Train a network, then use this network 
 to predict the LDOS and then analyze the results of this prediction. This 

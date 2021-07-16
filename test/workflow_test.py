@@ -1,6 +1,7 @@
 import mala
 from data_repo_path import get_data_repo_path
 import numpy as np
+import pytest
 data_path = get_data_repo_path()+"Al36/"
 
 # Control how much the loss should be better after training compared to
@@ -25,6 +26,7 @@ class TestFullWorkflow:
         assert desired_loss_improvement_factor * \
                test_trainer.initial_test_loss > test_trainer.final_test_loss
 
+    @pytest.mark.skip(reason="LAMMPS is currently not part of the pipeline.")
     def test_preprocessing(self):
         """
         Test whether MALA can preprocess data.
@@ -99,6 +101,7 @@ class TestFullWorkflow:
         assert np.isclose(band_energy, ldos.band_energy_dft_calculation,
                           atol=accuracy_band_energy)
 
+    @pytest.mark.skip(reason="QE is currently not part of the pipeline.")
     def test_total_energy_from_ldos(self):
         """
         Test whether MALA can calculate the total energy using the LDOS.
@@ -125,7 +128,6 @@ class TestFullWorkflow:
         total_energy = ldos.get_total_energy(ldos_data,
                                              fermi_energy_eV=
                                              self_consistent_fermi_energy)
-
         assert np.isclose(total_energy, ldos.total_energy_dft_calculation,
                           atol=accuracy_total_energy)
 
