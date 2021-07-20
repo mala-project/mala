@@ -465,11 +465,14 @@ class Trainer(Runner):
             data_loader = self.test_data_loader
             data_set = self.data.test_data_set
             number_of_snapshots = self.data.nr_test_snapshots
+            offset_snapshots = self.data.nr_validation_snapshots + \
+                               self.data.nr_training_snapshots
 
         elif data_set_type == "validation":
             data_loader = self.validation_data_loader
             data_set = self.data.validation_data_set
             number_of_snapshots = self.data.nr_validation_snapshots
+            offset_snapshots = self.data.nr_training_snapshots
 
         else:
             raise Exception("Please select test or validation"
@@ -496,23 +499,27 @@ class Trainer(Runner):
             number_of_batches_per_snapshot = int(self.data.grid_size /
                                                  optimal_batch_size)
             errors = []
-            for snapshot_number in range(0, number_of_snapshots):
+            for snapshot_number in range(offset_snapshots,
+                                         number_of_snapshots+offset_snapshots):
                 actual_outputs, \
                 predicted_outputs = self.\
-                    _forward_entire_snapshot(snapshot_number, data_set,
+                    _forward_entire_snapshot(snapshot_number-offset_snapshots,
+                                             data_set,
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)
-
                 calculator = self.data.target_calculator
-                # FIXME: This will eventually break down.
+
+                # This works because the list is always guaranteed to be
+                # ordered.
                 calculator.\
                     read_additional_calculation_data("qe.out",
                                          self.data.
-                                         get_snapshot_calculation_output(0))
+                                         get_snapshot_calculation_output(snapshot_number))
                 fe_actual = calculator.\
                     get_self_consistent_fermi_energy_ev(actual_outputs)
                 be_actual = calculator.\
                     get_band_energy(actual_outputs, fermi_energy_eV=fe_actual)
+
                 try:
                     fe_predicted = calculator.\
                         get_self_consistent_fermi_energy_ev(predicted_outputs)
@@ -526,6 +533,49 @@ class Trainer(Runner):
                     be_predicted = float("inf")
                 errors.append(np.abs(be_predicted-be_actual)*(1000/len(calculator.atoms)))
             return np.mean(errors)
+        elif validation_type == "total_energy":
+            # Get optimal batch size and number of batches per snapshots.
+            optimal_batch_size = self. \
+                _correct_batch_size_for_testing(self.data.grid_size,
+                                                self.parameters.
+                                                mini_batch_size)
+            number_of_batches_per_snapshot = int(self.data.grid_size /
+                                                 optimal_batch_size)
+            errors = []
+            for snapshot_number in range(offset_snapshots,
+                                         number_of_snapshots+offset_snapshots):
+                actual_outputs, \
+                predicted_outputs = self.\
+                    _forward_entire_snapshot(snapshot_number, data_set,
+                                             number_of_batches_per_snapshot,
+                                             optimal_batch_size)
+                calculator = self.data.target_calculator
+
+                # This works because the list is always guaranteed to be
+                # ordered.
+                calculator.\
+                    read_additional_calculation_data("qe.out",
+                                         self.data.
+                                         get_snapshot_calculation_output(snapshot_number))
+                fe_actual = calculator.\
+                    get_self_consistent_fermi_energy_ev(actual_outputs)
+                te_actual = calculator.\
+                    get_total_energy(ldos_data=actual_outputs, fermi_energy_eV=fe_actual)
+
+                try:
+                    fe_predicted = calculator.\
+                        get_self_consistent_fermi_energy_ev(predicted_outputs)
+                    te_predicted = calculator.\
+                        get_total_energy(ldos_data=actual_outputs, fermi_energy_eV=fe_predicted)
+                except ValueError:
+                    # If the training went badly, it might be that the above
+                    # code results in an error, due to the LDOS being so wrong
+                    # that the estimation of the self consistent Fermi energy
+                    # fails.
+                    te_predicted = float("inf")
+                errors.append(np.abs(te_predicted-te_actual)*(1000/len(calculator.atoms)))
+            return np.mean(errors)
+
         else:
             raise Exception("Selected validation method not supported.")
 
