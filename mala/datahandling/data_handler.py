@@ -79,9 +79,17 @@ class DataHandler:
         self.nr_snapshots = 0
         self.grid_dimension = [0, 0, 0]
         self.grid_size = 0
+
+        # Actual data points in the different categories.
         self.nr_training_data = 0
         self.nr_test_data = 0
         self.nr_validation_data = 0
+
+        # Number of snapshots in these categories.
+        self.nr_training_snapshots = 0
+        self.nr_test_snapshots = 0
+        self.nr_validation_snapshots = 0
+
 
         self.training_data_inputs = torch.empty(0)
         """
@@ -192,6 +200,9 @@ class DataHandler:
         self.nr_training_data = 0
         self.nr_test_data = 0
         self.nr_validation_data = 0
+        self.nr_training_snapshots = 0
+        self.nr_test_snapshots = 0
+        self.nr_validation_snapshots = 0
         self.parameters.data_splitting_snapshots = []
         self.parameters.snapshot_directories_list = []
 
@@ -449,37 +460,37 @@ class DataHandler:
         if self.parameters.data_splitting_type == "by_snapshot":
             for snapshot_function in self.parameters.data_splitting_snapshots:
                 if snapshot_function == "tr":
-                    self.nr_training_data += 1
+                    self.nr_training_snapshots += 1
                 elif snapshot_function == "te":
-                    self.nr_test_data += 1
+                    self.nr_test_snapshots += 1
                 elif snapshot_function == "va":
-                    self.nr_validation_data += 1
+                    self.nr_validation_snapshots += 1
                 else:
                     raise Exception("Unknown option for snapshot splitting "
                                     "selected.")
 
             # Now we need to check whether or not this input is believable.
             nr_of_snapshots = len(self.parameters.snapshot_directories_list)
-            if nr_of_snapshots != (self.nr_training_data +
-                                   self.nr_validation_data +
-                                   self.nr_test_data):
+            if nr_of_snapshots != (self.nr_training_snapshots +
+                                   self.nr_test_snapshots +
+                                   self.nr_validation_snapshots):
                 raise Exception("Cannot split snapshots with specified "
                                 "splitting scheme, "
                                 "too few or too many options selected")
-            if self.nr_training_data == 0 and self.nr_test_data == 0:
+            if self.nr_training_snapshots == 0 and self.nr_test_snapshots == 0:
                 raise Exception("No training snapshots provided.")
-            if self.nr_validation_data == 0 and self.nr_test_data == 0:
+            if self.nr_validation_snapshots == 0 and self.nr_test_snapshots == 0:
                 raise Exception("No validation snapshots provided.")
-            if self.nr_training_data == 0 and self.nr_test_data != 0:
+            if self.nr_training_snapshots == 0 and self.nr_test_snapshots != 0:
                 printout("DataHandler prepared for inference. No training "
                          "possible with this setup. "
                          "If this is not what you wanted, please revise the "
                          "input script.")
-                if self.nr_validation_data != 0:
+                if self.nr_validation_snapshots != 0:
                     printout("As this DataHandler can only be used for "
                              "inference, the validation data you have "
                              "provided will be ignored.")
-            if self.nr_test_data == 0:
+            if self.nr_test_snapshots == 0:
                 printout("Running MALA without test data. If this is not "
                          "what you wanted, "
                          "please revise the input script.")
@@ -489,9 +500,9 @@ class DataHandler:
 
         # As we are not actually interested in the number of snapshots, but in
         # the number of datasets,we need to multiply by that.
-        self.nr_training_data *= self.grid_size
-        self.nr_validation_data *= self.grid_size
-        self.nr_test_data *= self.grid_size
+        self.nr_training_data = self.nr_training_snapshots*self.grid_size
+        self.nr_validation_data = self.nr_validation_snapshots*self.grid_size
+        self.nr_test_data = self.nr_test_snapshots*self.grid_size
 
     def __load_from_npy_file(self, file, mmapmode=None):
         """Load a numpy array from a file."""
