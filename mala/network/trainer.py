@@ -171,7 +171,8 @@ class Trainer(Runner):
 
         tloss = float("inf")
         vloss = self.__validate_network(self.network,
-                                        self.validation_data_loader)
+                                        self.validation_data_loader,
+                                        validation_type="band_energy")
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
                                             self.test_data_loader)
@@ -439,20 +440,57 @@ class Trainer(Runner):
         self.optimizer.zero_grad()
         return loss.item()
 
-    def __validate_network(self, network, vdl):
+    def __validate_network(self, network, vdl, validation_type="ldos"):
         """Validate a network, using test or validation data."""
         network.eval()
-        validation_loss = []
-        with torch.no_grad():
-            for x, y in vdl:
-                if self.parameters_full.use_gpu:
-                    x = x.to('cuda')
-                    y = y.to('cuda')
-                prediction = network(x)
-                validation_loss.append(network.calculate_loss(prediction, y)
-                                       .item())
+        if validation_type == "ldos":
+            validation_loss = []
+            with torch.no_grad():
+                for x, y in vdl:
+                    if self.parameters_full.use_gpu:
+                        x = x.to('cuda')
+                        y = y.to('cuda')
+                    prediction = network(x)
+                    validation_loss.append(network.calculate_loss(prediction, y)
+                                           .item())
 
-        return np.mean(validation_loss)
+            return np.mean(validation_loss)
+        elif validation_type == "band_energy":
+
+            data_set = self.data.validation_data_set
+            number_snapshots = 2
+
+            # Get optimal batch size and number of batches per snapshots.
+            optimal_batch_size = self. \
+                _correct_batch_size_for_testing(self.data.grid_size,
+                                                self.parameters.
+                                                mini_batch_size)
+            number_of_batches_per_snapshot = int(self.data.grid_size /
+                                                 optimal_batch_size)
+            errors = []
+            for snapshot_number in range(0, number_snapshots):
+                actual_outputs, \
+                predicted_outputs = self.\
+                    _forward_entire_snapshot(snapshot_number, data_set,
+                                             number_of_batches_per_snapshot,
+                                             optimal_batch_size)
+
+                calculator = self.data.target_calculator
+                # FIXME: This will eventually break down.
+                calculator.\
+                    read_additional_calculation_data("qe.out",
+                                         self.data.
+                                         get_snapshot_calculation_output(0))
+                fe_actual = calculator.\
+                    get_self_consistent_fermi_energy_ev(actual_outputs)
+                be_actual = calculator.\
+                    get_band_energy(actual_outputs, fermi_energy_eV=fe_actual)
+                fe_predicted = calculator.\
+                    get_self_consistent_fermi_energy_ev(predicted_outputs)
+                be_predicted = calculator.\
+                    get_band_energy(predicted_outputs, fermi_energy_eV=fe_predicted)
+                errors.append(np.abs(be_predicted-be_actual)*(1000/len(calculator.atoms)))
+            return np.mean(errors)
 
     def __create_training_checkpoint(self):
         """
