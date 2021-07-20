@@ -261,12 +261,14 @@ class DataHandler:
             hvd.allreduce(torch.tensor(0), name='barrier')
 
     def mix_datasets(self):
-        """For lazily-loaded data sets, the snapshot ordering is (re-)mixed."""
+        """
+        For lazily-loaded data sets, the snapshot ordering is (re-)mixed.
+
+        This applies only to the training data set. For the validation and
+        test set it does not matter.
+        """
         if self.parameters.use_lazy_loading:
-            self.validation_data_set.mix_datasets()
             self.training_data_set.mix_datasets()
-            if self.test_data_set is not None:
-                self.test_data_set.mix_datasets()
 
     def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type,
                                              units, convert3Dto1D=False):
@@ -503,6 +505,16 @@ class DataHandler:
         self.nr_training_data = self.nr_training_snapshots*self.grid_size
         self.nr_validation_data = self.nr_validation_snapshots*self.grid_size
         self.nr_test_data = self.nr_test_snapshots*self.grid_size
+
+        # Reordering the lists.
+        snapshot_order = ['tr', 'va', 'te']
+        combined = zip(self.parameters.data_splitting_snapshots,
+                       self.parameters.snapshot_directories_list)
+        order = {key: i for i, key in enumerate(snapshot_order)}
+        combined_sorted = sorted(combined, key=lambda d: order[d[0]])
+        self.parameters.data_splitting_snapshots, \
+            self.parameters.snapshot_directories_list = \
+            map(list, zip(*combined_sorted))
 
     def __load_from_npy_file(self, file, mmapmode=None):
         """Load a numpy array from a file."""
