@@ -303,6 +303,13 @@ class ParametersRunning(ParametersBase):
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
+    visualisation : int
+        If True then Tensorboard is activated for visualisation
+        case 0: No tensorboard activated
+        case 1: tensorboard activated with Loss and learning rate
+        case 2; additonally weights and biases and gradient  
+        
+        
     """
 
     def __init__(self):
@@ -329,7 +336,7 @@ class ParametersRunning(ParametersBase):
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
-        self.visualisation = False
+        self.visualisation = 0
 
 class ParametersHyperparameterOptimization(ParametersBase):
     """

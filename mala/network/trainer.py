@@ -54,7 +54,8 @@ class Trainer(Runner):
         self.__prepare_to_train(optimizer_dict)
         self.tensor_board = None
         if self.parameters.visualisation:
-            self.tensor_board = SummaryWriter()
+            self.tensor_board = SummaryWriter("log_dir")## here the path to the log file can be set
+
 
     @classmethod
     def resume_checkpoint(cls, checkpoint_name):
@@ -207,8 +208,21 @@ class Trainer(Runner):
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
 
             #summary_writer tensor board
-            if self.tensor_board is not None:
+            if self.parameters.visualisation > 0:
                 self.tensor_board.add_scalar("Loss", vloss, epoch)
+                self.tensor_board.add_scalar("Learning rate", self.parameters.learning_rate, epoch)
+                if self.parameters.visualisation == 2:
+                    print("visualisation = 2")
+                    for name, param in self.network.named_parameters():
+                        self.tensor_board.add_histogram(name,param,epoch)
+                        self.tensor_board.add_histogram(f'{name}.grad',param.grad,epoch)
+
+            self.tensor_board.flush() #method to make sure that all pending events have been written to disk
+
+
+
+                
+                 
 
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).

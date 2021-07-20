@@ -3,12 +3,13 @@ from mala import printout
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
 
-"""
-ex01_run_singleshot.py: Shows how a neural network can be trained on material 
-data using this framework. It uses preprocessed data, that is read in 
-from *.npy files.
-"""
 
+"""
+ex10_tensor_board.py: 
+to include tensor board link through python script to auto start the tensorboard port.
+to run tensorboard from a python script.
+to check if the  
+"""
 
 def run_example01(desired_loss_improvement_factor=1):
     ####################
@@ -98,11 +99,32 @@ def run_example01(desired_loss_improvement_factor=1):
         return True
 
 
+
+
+
+def run_example10():
+    tensor_board_program = program.TensorBoard()
+    tensor_board_program.configure(argv=[None, '--logdir', http://localhost:6006/])
+    url = tensor_board_program.launch()
+
+
+  ####################
+    # RESULTS.
+    # Check whether tensorboard has run.
+    ####################
+
+    printout("Tensor board has ran succesfully:")
+
+    if desired_loss_improvement_factor*test_trainer.initial_test_loss\
+            < test_trainer.final_test_loss:
+        return False
+    else: 
+        return True
 if __name__ == "__main__":
-    if run_example01():
-        printout("Successfully ran ex01_run_singleshot.")
+    if run_example01() && run_example10():
+        printout("Successfully ran ex10_tensor_board.py.")
     else:
-        raise Exception("Ran ex01_run_singleshot but something was off."
-                        " If you haven't changed any parameters in "
-                        "the example, there might be a problem with your"
-                        " installation.")
+        raise Exception("Ran ex10_tensor_board but something "
+                        "was off. If you haven't changed any parameters in "
+                        "the example, there might be a problem with "
+                        "your installation.")
