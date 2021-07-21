@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""GPU test
+"""
+GPU test
 
 This is a very basic test of the GPU functionalities of MALA (i.e. pytorch,
 which MALA relies on). Two things are tested:
@@ -14,7 +15,11 @@ from mala import printout
 from data_repo_path import get_data_repo_path
 import time
 import numpy as np
-data_path = get_data_repo_path()+"Al36/"
+import os
+import torch
+import pytest
+data_path = os.path.join(get_data_repo_path(), "Al36/")
+
 test_checkpoint_name = "test"
 
 # Define the accuracy used in the tests and a parameter to control
@@ -29,13 +34,16 @@ class TestGPUExecution:
 
     Tests whether a GPU is available and then the execution on it.
     """
-
+    @pytest.mark.skipif(torch.cuda.is_available() is False,
+                        reason="No GPU detected.")
     def test_gpu_availability(self):
         """Test whether a GPU is available."""
         test_parameters = mala.Parameters()
         test_parameters.use_gpu = True
         assert test_parameters.use_gpu
 
+    @pytest.mark.skipif(torch.cuda.is_available() is False,
+                        reason="No GPU detected.")
     def test_gpu_performance(self):
         """
         Test whether GPU training brings performance improvements.

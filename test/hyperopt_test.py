@@ -2,7 +2,7 @@ import mala
 from data_repo_path import get_data_repo_path
 import numpy as np
 import os
-data_path = get_data_repo_path()+"Al36/"
+data_path = os.path.join(get_data_repo_path(), "Al36/")
 
 # Control how much the loss should be better after hyperopt compared to
 # before. This value is fairly high, but we're training on absolutely

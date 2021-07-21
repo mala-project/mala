@@ -6,12 +6,13 @@ from mala.network.tester import Tester
 from mala.common.parameters import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al36/"
-param_path = get_data_repo_path()+"example05_data/"
-params_path = param_path+"ex05_params.pkl"
-network_path = param_path+"ex05_network.pth"
-input_scaler_path = param_path+"ex05_iscaler.pkl"
-output_scaler_path = param_path+"ex05_oscaler.pkl"
+import os
+data_path = os.path.join(get_data_repo_path(), "Al36/")
+param_path = os.path.join(get_data_repo_path(), "workflow_test/")
+params_path = param_path+"workflow_test_params.pkl"
+network_path = param_path+"workflow_test_network.pth"
+input_scaler_path = param_path+"workflow_test_iscaler.pkl"
+output_scaler_path = param_path+"workflow_test_oscaler.pkl"
 accuracy_strict = 1e-16
 accuracy_coarse = 5e-7
 

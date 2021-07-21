@@ -7,6 +7,7 @@ from mala.targets.dos import DOS
 from mala.common.parameters import Parameters
 from mala.common.parameters import printout
 from data_repo_path import get_data_repo_path
+import os
 
 # In order to test the integration capabilities of MALA we need a
 # QuantumEspresso
@@ -18,14 +19,11 @@ from data_repo_path import get_data_repo_path
 # Scripts to reproduce the data files used in this test script can be found
 # in the data repo.
 
-data_path = get_data_repo_path()+"Al36/"
-path_to_out = data_path+"Al.pw.scf.out"
-path_to_ldos_qe = [data_path, "tmp.pp*Al_ldos.cube"]
-path_to_dos_qe = [data_path, "Al.dos"]
-path_to_dens_qe = [data_path, "Al_dens.cube"]
-path_to_ldos_npy = data_path+"Al_ldos.npy"
-path_to_dos_npy = data_path+"Al_dos.npy"
-path_to_dens_npy = data_path+"Al_dens.npy"
+data_path = os.path.join(get_data_repo_path(), "Al36")
+path_to_out = os.path.join(data_path, "Al.pw.scf.out")
+path_to_ldos_npy = os.path.join(data_path, "Al_ldos.npy")
+path_to_dos_npy = os.path.join(data_path, "Al_dos.npy")
+path_to_dens_npy = os.path.join(data_path, "Al_dens.npy")
 
 # We can read from numpy arrays or directly from QE data.
 # In the later case, numpy arrays will be saved for the subsqeuent run.
@@ -106,12 +104,7 @@ class TestMALAIntegration:
         dens_calculator.read_additional_calculation_data("qe.out", path_to_out)
 
         # Read the input data.
-        if numpy_arrays:
-            density_dft = np.load(path_to_dens_npy)
-        else:
-            density_dft = dens_calculator.read_from_cube(path_to_dens_qe[1],
-                                                         path_to_dens_qe[0])
-            np.save(path_to_dens_npy, density_dft)
+        density_dft = np.load(path_to_dens_npy)
 
         # Calculate the quantities we want to compare.
         nr_mala = dens_calculator.get_number_of_electrons(density_dft)
@@ -136,15 +129,7 @@ class TestMALAIntegration:
 
         # Read the input data.
         density_dft = np.load(path_to_dens_npy)
-        if numpy_arrays:
-            ldos_dft = np.load(path_to_ldos_npy)
-        else:
-            ldos_dft = ldos_calculator.read_from_cube(path_to_ldos_qe[1],
-                                                      path_to_ldos_qe[0])
-
-            # LDOS is in 1/Ry. DOS is in 1/eV.
-            ldos_dft = ldos_calculator.convert_units(ldos_dft, "1/Ry")
-            np.save(path_to_ldos_npy, ldos_dft)
+        ldos_dft = np.load(path_to_ldos_npy)
 
         # Calculate the quantities we want to compare.
         self_consistent_fermi_energy = ldos_calculator.\
@@ -174,13 +159,7 @@ class TestMALAIntegration:
 
         # Read the input data.
         ldos_dft = np.load(path_to_ldos_npy)
-        if numpy_arrays:
-            dos_dft = np.load(path_to_dos_npy)
-        else:
-            # DOS is in 1/eV so no conversion necessary.
-            dos_dft = dos_calculator.read_from_qe_dos_txt(path_to_dos_qe[1],
-                                                          path_to_dos_qe[0])
-            np.save(path_to_dos_npy, dos_dft)
+        dos_dft = np.load(path_to_dos_npy)
 
         # Calculate the quantities we want to compare.
         dos_mala = ldos_calculator.get_density_of_states(ldos_dft)

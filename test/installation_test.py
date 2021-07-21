@@ -1,6 +1,6 @@
 import mala
 import numpy as np
-
+import os
 
 class TestInstallation:
     """Verifies the installation."""
@@ -24,5 +24,5 @@ class TestInstallation:
         """Test whether the data repo is set up properly"""
         from data_repo_path import get_data_repo_path
         data_path = get_data_repo_path()
-        test_array = np.load(data_path + "linking_tester.npy")
+        test_array = np.load(os.path.join(data_path, "linking_tester.npy"))
         assert (test_array == [1, 2, 3, 4]).all()

@@ -8,10 +8,12 @@ from mala.network.trainer import Trainer
 from data_repo_path import get_data_repo_path
 import time
 import pytest
+import importlib
+import os
 # This test compares the data scaling using the regular scaling procedure and
 # the lazy-loading one (incremental fitting).
 
-data_path = get_data_repo_path()+"Al36/"
+data_path = os.path.join(get_data_repo_path(), "Al36/")
 accuracy_strict = 1e-3
 accuracy_coarse = 1e-3
 
@@ -163,7 +165,8 @@ class TestLazyLoading:
         assert np.isclose(training_tester[0], training_tester[1],
                           atol=accuracy_coarse)
 
-    @pytest.mark.skip(reason="Horovod is currently not part of the pipeline")
+    @pytest.mark.skipif(importlib.util.find_spec("horovod") is None,
+                        reason="Horovod is currently not part of the pipeline")
     def test_performance_horovod(self):
 
         ####################
