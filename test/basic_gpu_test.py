@@ -36,14 +36,6 @@ class TestGPUExecution:
     """
     @pytest.mark.skipif(torch.cuda.is_available() is False,
                         reason="No GPU detected.")
-    def test_gpu_availability(self):
-        """Test whether a GPU is available."""
-        test_parameters = mala.Parameters()
-        test_parameters.use_gpu = True
-        assert test_parameters.use_gpu
-
-    @pytest.mark.skipif(torch.cuda.is_available() is False,
-                        reason="No GPU detected.")
     def test_gpu_performance(self):
         """
         Test whether GPU training brings performance improvements.
