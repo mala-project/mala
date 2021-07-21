@@ -547,7 +547,8 @@ class Trainer(Runner):
                                          number_of_snapshots+offset_snapshots):
                 actual_outputs, \
                 predicted_outputs = self.\
-                    _forward_entire_snapshot(snapshot_number, data_set,
+                    _forward_entire_snapshot(snapshot_number-offset_snapshots,
+                                             data_set,
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)
                 calculator = self.data.target_calculator
@@ -561,13 +562,15 @@ class Trainer(Runner):
                 fe_actual = calculator.\
                     get_self_consistent_fermi_energy_ev(actual_outputs)
                 te_actual = calculator.\
-                    get_total_energy(ldos_data=actual_outputs, fermi_energy_eV=fe_actual)
+                    get_total_energy(ldos_data=actual_outputs,
+                                     fermi_energy_eV=fe_actual)
 
                 try:
                     fe_predicted = calculator.\
                         get_self_consistent_fermi_energy_ev(predicted_outputs)
                     te_predicted = calculator.\
-                        get_total_energy(ldos_data=actual_outputs, fermi_energy_eV=fe_predicted)
+                        get_total_energy(ldos_data=actual_outputs,
+                                         fermi_energy_eV=fe_predicted)
                 except ValueError:
                     # If the training went badly, it might be that the above
                     # code results in an error, due to the LDOS being so wrong

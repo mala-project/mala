@@ -127,6 +127,8 @@ class ParametersTargets(ParametersBase):
 
     ldos_gridoffset_ev: float
         Lowest energy value on the (L)DOS energy grid [eV].
+
+
     """
 
     def __init__(self):
@@ -136,6 +138,7 @@ class ParametersTargets(ParametersBase):
         self.ldos_gridspacing_ev = 0
         self.ldos_gridoffset_ev = 0
         self.restrict_targets = "zero_out_negative"
+        self.pseudopotential_path = None
 
     @property
     def restrict_targets(self):
