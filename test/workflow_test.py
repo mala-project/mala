@@ -332,3 +332,4 @@ class TestFullWorkflow:
                           atol=accuracy_predictions)
         assert np.isclose(nr_electrons_predicted, nr_electrons_actual,
                           atol=accuracy_predictions)
+                          

@@ -25,4 +25,5 @@ class TestInstallation:
         from data_repo_path import get_data_repo_path
         data_path = get_data_repo_path()
         test_array = np.load(os.path.join(data_path, "linking_tester.npy"))
-        assert (test_array == [1, 2, 3, 4]).all()
+        assert np.array_equal(test_array, [1, 2, 3, 4])
+        

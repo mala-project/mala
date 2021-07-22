@@ -175,3 +175,4 @@ class TestMALAIntegration:
 
         # Check against the constraints we put upon ourselves.
         assert np.isclose(rel_error, 0, atol=accuracy)
+        

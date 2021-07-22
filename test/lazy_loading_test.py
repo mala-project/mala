@@ -102,7 +102,7 @@ class TestLazyLoading:
                                        data_handler.nr_training_data)
                     this_result.append(data_handler.output_data_scaler.total_std /
                                        data_handler.nr_training_data)
-                if scalingtype == "normal":
+                elif scalingtype == "normal":
                     torch.manual_seed(2002)
                     this_result.append(data_handler.input_data_scaler.total_max)
                     this_result.append(data_handler.input_data_scaler.total_min)
@@ -128,7 +128,7 @@ class TestLazyLoading:
                     training_tester.append(test_trainer.final_test_loss -
                                            test_trainer.initial_test_loss)
 
-                if scalingtype == "feature-wise-standard":
+                elif scalingtype == "feature-wise-standard":
                     # The lazy-loading STD equation (and to a smaller amount the
                     # mean equation) is having some small accurcay issue that
                     # I presume to be due to numerical constraints. To make a
@@ -160,6 +160,7 @@ class TestLazyLoading:
             assert np.isclose(entry[1][3], entry[2][3], atol=accuracy_coarse)
             assert np.isclose(entry[1][4], entry[2][4], atol=accuracy_coarse)
             assert np.isclose(entry[1][1], entry[2][1], atol=accuracy_coarse)
+            
         assert np.isclose(dataset_tester[0], dataset_tester[1],
                           atol=accuracy_coarse)
         assert np.isclose(training_tester[0], training_tester[1],
@@ -246,8 +247,8 @@ class TestLazyLoading:
                 if ll:
                     llstring = "using lazy loading"
 
-                results.append([hvdstring, llstring, test_trainer.
-                               initial_test_loss,
+                results.append([hvdstring, llstring, 
+                                test_trainer.initial_test_loss,
                                 test_trainer.final_test_loss,
                                 time.time() - start_time])
 
@@ -276,7 +277,9 @@ class TestLazyLoading:
             printout("Final loss: ", r[3])
             printout("Time: ", r[4])
             diff.append(r[3] - r[2])
+            
         diff = np.array(diff)
 
         # The loss improvements should be comparable.
         assert np.std(diff) < accuracy_strict
+        

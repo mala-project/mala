@@ -143,3 +143,4 @@ class TestHyperoptCheckpointing:
         loaded_params, new_datahandler, new_hyperopt = \
             mala.HyperOptOptuna.resume_checkpoint(checkpoint_name)
         return new_hyperopt
+        
