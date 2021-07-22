@@ -28,10 +28,10 @@ class TestFullWorkflow:
         assert desired_loss_improvement_factor * \
                test_trainer.initial_test_loss > test_trainer.final_test_loss
 
-    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None
-                        or os.path.isdir(os.path.join(data_path, "cubes"))
-                        is False,
+    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
                         reason="LAMMPS is currently not part of the pipeline.")
+    @pytest.mark.skipif(os.path.isdir(os.path.join(data_path, "cubes"))
+                        is False, reason="No cube files found in data repo.")
     def test_preprocessing(self):
         """
         Test whether MALA can preprocess data.
@@ -71,9 +71,46 @@ class TestFullWorkflow:
         assert output_data_shape[0] == 108 and output_data_shape[1] == 108 and\
                output_data_shape[2] == 100 and output_data_shape[3] == 10
 
+    def test_postprocessing_from_dos(self):
+        """
+        Test whether MALA can postprocess data (DOS).
+
+        This means calculating band energy and number of electrons from
+        LDOS. Total energy is tested further below.
+        """
+        # Set up parameters.
+        test_parameters = mala.Parameters()
+        test_parameters.targets.target_type = "DOS"
+        test_parameters.targets.ldos_gridsize = 250
+        test_parameters.targets.ldos_gridspacing_ev = 0.1
+        test_parameters.targets.ldos_gridoffset_ev = -10
+
+        # Create a target calculator to perform postprocessing.
+        dos = mala.TargetInterface(test_parameters)
+        dos.read_additional_calculation_data("qe.out",
+                                             data_path + "Al.pw.scf.out")
+        dos_data = np.load(data_path + "Al_dos.npy")
+
+        # Calculate energies
+        self_consistent_fermi_energy = dos. \
+            get_self_consistent_fermi_energy_ev(dos_data)
+        number_of_electrons = dos. \
+            get_number_of_electrons(dos_data, fermi_energy_eV=
+                                    self_consistent_fermi_energy)
+        band_energy = dos.get_band_energy(dos_data,
+                                          fermi_energy_eV=
+                                          self_consistent_fermi_energy)
+
+        assert np.isclose(number_of_electrons, dos.number_of_electrons,
+                          atol=accuracy_electrons)
+        assert np.isclose(band_energy, dos.band_energy_dft_calculation,
+                          atol=accuracy_band_energy)
+
+    @pytest.mark.skipif(os.path.isfile(os.path.join(data_path, "Al_ldos.npy"))
+                        is False, reason="No LDOS file in data repo found.")
     def test_postprocessing(self):
         """
-        Test whether MALA can postprocess data.
+        Test whether MALA can postprocess data (from LDOS)
 
         This means calculating band energy and number of electrons from
         LDOS. Total energy is tested further below.
@@ -108,6 +145,42 @@ class TestFullWorkflow:
 
     @pytest.mark.skipif(importlib.util.find_spec("total_energy") is None,
                         reason="QE is currently not part of the pipeline.")
+    def test_total_energy_from_dos_density(self):
+        """
+        Test whether MALA can calculate the total energy using the DOS+Density.
+
+        This means calculating energies from the DOS and density.
+        """
+        # Set up parameters.
+        test_parameters = mala.Parameters()
+        test_parameters.targets.target_type = "LDOS"
+        test_parameters.targets.ldos_gridsize = 250
+        test_parameters.targets.ldos_gridspacing_ev = 0.1
+        test_parameters.targets.ldos_gridoffset_ev = -10
+
+        # Create a target calculator to perform postprocessing.
+        ldos = mala.TargetInterface(test_parameters)
+        ldos.read_additional_calculation_data("qe.out",
+                                              data_path + "Al.pw.scf.out")
+        dos_data = np.load(data_path + "Al_dos.npy")
+        dens_data = np.load(data_path + "Al_dens.npy")
+        dos = mala.DOS.from_ldos(ldos)
+
+        # Calculate energies
+        self_consistent_fermi_energy = dos. \
+            get_self_consistent_fermi_energy_ev(dos_data)
+        ldos.set_pseudopotential_path(data_path)
+        total_energy = ldos.get_total_energy(dos_data=dos_data,
+                                             density_data=dens_data,
+                                             fermi_energy_eV=
+                                             self_consistent_fermi_energy)
+        assert np.isclose(total_energy, ldos.total_energy_dft_calculation,
+                          atol=accuracy_total_energy)
+
+    @pytest.mark.skipif(importlib.util.find_spec("total_energy") is None,
+                        reason="QE is currently not part of the pipeline.")
+    @pytest.mark.skipif(os.path.isfile(os.path.join(data_path, "Al_ldos.npy"))
+                        is False, reason="No LDOS file in data repo found.")
     def test_total_energy_from_ldos(self):
         """
         Test whether MALA can calculate the total energy using the LDOS.
