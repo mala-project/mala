@@ -141,7 +141,7 @@ class TestLazyLoading:
                                                   means)/data_handler.grid_size)
                     this_result.append(torch.mean(data_handler.output_data_scaler.
                                                   stds)/data_handler.grid_size)
-                if scalingtype == "feature-wise-normal":
+                elif scalingtype == "feature-wise-normal":
                     this_result.append(torch.mean(data_handler.input_data_scaler.
                                                   maxs))
                     this_result.append(torch.mean(data_handler.input_data_scaler.
