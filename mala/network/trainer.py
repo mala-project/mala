@@ -173,13 +173,13 @@ class Trainer(Runner):
         vloss = self.__validate_network(self.network,
                                         "validation",
                                         self.parameters.
-                                        after_training_metric)
+                                        after_before_training_metric)
 
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
                                             "test",
                                             self.parameters.
-                                            after_training_metric)
+                                            after_before_training_metric)
 
         # Collect and average all the losses from all the devices
         if self.parameters_full.use_horovod:
@@ -291,12 +291,12 @@ class Trainer(Runner):
         # CALCULATE FINAL METRICS
         ############################
 
-        if self.parameters.after_training_metric != \
+        if self.parameters.after_before_training_metric != \
                 self.parameters.during_training_metric:
             vloss = self.__validate_network(self.network,
                                             "validation",
                                             self.parameters.
-                                            after_training_metric)
+                                            after_before_training_metric)
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
 
@@ -308,7 +308,7 @@ class Trainer(Runner):
             tloss = self.__validate_network(self.network,
                                             "test",
                                             self.parameters.
-                                            after_training_metric)
+                                            after_before_training_metric)
             if self.parameters_full.use_horovod:
                 tloss = self.__average_validation(tloss, 'average_loss')
             printout("Final test data loss: ", tloss)
