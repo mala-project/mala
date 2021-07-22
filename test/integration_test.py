@@ -8,6 +8,7 @@ from mala.common.parameters import Parameters
 from mala.common.parameters import printout
 from data_repo_path import get_data_repo_path
 import os
+import pytest
 
 # In order to test the integration capabilities of MALA we need a
 # QuantumEspresso
@@ -117,6 +118,8 @@ class TestMALAIntegration:
         # Check against the constraints we put upon ourselves.
         assert np.isclose(rel_error, 0, atol=accuracy)
 
+    @pytest.mark.skipif(os.path.isfile(path_to_ldos_npy) is False,
+                        reason="No LDOS file in data repo found.")
     def test_qe_ldos_to_density(self):
         """
         Test integration of local density of states on energy grid.
@@ -146,6 +149,8 @@ class TestMALAIntegration:
         # Check against the constraints we put upon ourselves.
         assert np.isclose(rel_error, 0, atol=accuracy)
 
+    @pytest.mark.skipif(os.path.isfile(path_to_ldos_npy) is False,
+                        reason="No LDOS file in data repo found.")
     def test_qe_ldos_to_dos(self):
         """
         Test integration of local density of states on real space grid.

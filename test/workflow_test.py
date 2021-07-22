@@ -28,7 +28,9 @@ class TestFullWorkflow:
         assert desired_loss_improvement_factor * \
                test_trainer.initial_test_loss > test_trainer.final_test_loss
 
-    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
+    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None
+                        or os.path.isdir(os.path.join(data_path, "cubes"))
+                        is False,
                         reason="LAMMPS is currently not part of the pipeline.")
     def test_preprocessing(self):
         """
