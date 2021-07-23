@@ -54,8 +54,7 @@ class Runner:
                                  number_of_batches_per_snapshot=0,
                                  batch_size=0):
         """
-        Forward an entire snapshot through the network and get actual
-        and predicted outputs.
+        Forward a snapshot through the network, get actual/predicted output.
 
         Parameters
         ----------

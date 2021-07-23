@@ -68,7 +68,6 @@ class TargetBase:
     @property
     def qe_input_data(self):
         """Input data for QE TEM calls."""
-
         # Update the pseudopotential path from Parameters.
         self._qe_input_data["pseudo_dir"] = \
             self.parameters.pseudopotential_path

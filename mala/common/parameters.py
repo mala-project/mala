@@ -371,7 +371,7 @@ class ParametersRunning(ParametersBase):
 
     @property
     def during_training_metric(self):
-        """The metric used during training."""
+        """Get the metric used during training."""
         return self._during_training_metric
 
     @during_training_metric.setter
@@ -384,7 +384,7 @@ class ParametersRunning(ParametersBase):
 
     @property
     def after_before_training_metric(self):
-        """The metric used during training."""
+        """Get the metric used during training."""
         return self._after_before_training_metric
 
     @after_before_training_metric.setter
