@@ -187,13 +187,14 @@ class Trainer(Runner):
             if self.data.test_data_set is not None:
                 tloss = self.__average_validation(tloss, 'average_loss')
 
-        self.initial_test_loss = tloss
-        self.initial_validation_loss = vloss
-
         if self.parameters.verbosity:
             printout("Initial Guess - validation data loss: ", vloss)
             if self.data.test_data_set is not None:
                 printout("Initial Guess - test data loss: ", tloss)
+
+        # Save losses for later use.
+        self.initial_validation_loss = vloss
+        self.initial_test_loss = tloss
 
         # Initialize all the counters.
         checkpoint_counter = 0
