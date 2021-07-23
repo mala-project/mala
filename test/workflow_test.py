@@ -157,7 +157,7 @@ class TestFullWorkflow:
         test_parameters.targets.ldos_gridsize = 250
         test_parameters.targets.ldos_gridspacing_ev = 0.1
         test_parameters.targets.ldos_gridoffset_ev = -10
-
+        test_parameters.targets.pseudopotential_path = data_path
         # Create a target calculator to perform postprocessing.
         ldos = mala.TargetInterface(test_parameters)
         ldos.read_additional_calculation_data("qe.out",
@@ -169,7 +169,7 @@ class TestFullWorkflow:
         # Calculate energies
         self_consistent_fermi_energy = dos. \
             get_self_consistent_fermi_energy_ev(dos_data)
-        ldos.set_pseudopotential_path(data_path)
+
         total_energy = ldos.get_total_energy(dos_data=dos_data,
                                              density_data=dens_data,
                                              fermi_energy_eV=
@@ -193,6 +193,7 @@ class TestFullWorkflow:
         test_parameters.targets.ldos_gridsize = 250
         test_parameters.targets.ldos_gridspacing_ev = 0.1
         test_parameters.targets.ldos_gridoffset_ev = -10
+        test_parameters.targets.pseudopotential_path = data_path
 
         # Create a target calculator to perform postprocessing.
         ldos = mala.TargetInterface(test_parameters)
@@ -203,7 +204,6 @@ class TestFullWorkflow:
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
             get_self_consistent_fermi_energy_ev(ldos_data)
-        ldos.set_pseudopotential_path(data_path)
         total_energy = ldos.get_total_energy(ldos_data,
                                              fermi_energy_eV=
                                              self_consistent_fermi_energy)

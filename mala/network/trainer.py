@@ -165,39 +165,51 @@ class Trainer(Runner):
 
     def train_network(self):
         """Train a network using data given by a DataHandler."""
-        # Create reference to data and network and setup training.
-        # Calculate initial loss.
+        ############################
+        # CALCULATE INITIAL METRICS
+        ############################
+
         tloss = float("inf")
         vloss = self.__validate_network(self.network,
-                                        self.validation_data_loader)
+                                        "validation",
+                                        self.parameters.
+                                        after_before_training_metric)
+
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
-                                            self.test_data_loader)
-        print(tloss)
+                                            "test",
+                                            self.parameters.
+                                            after_before_training_metric)
+
         # Collect and average all the losses from all the devices
         if self.parameters_full.use_horovod:
             vloss = self.__average_validation(vloss, 'average_loss')
             if self.data.test_data_set is not None:
                 tloss = self.__average_validation(tloss, 'average_loss')
 
-        self.initial_test_loss = tloss
-        self.initial_validation_loss = vloss
-
         if self.parameters.verbosity:
             printout("Initial Guess - validation data loss: ", vloss)
             if self.data.test_data_set is not None:
                 printout("Initial Guess - test data loss: ", tloss)
 
+        # Save losses for later use.
+        self.initial_validation_loss = vloss
+        self.initial_test_loss = tloss
+
         # Initialize all the counters.
         checkpoint_counter = 0
 
-        # If we restarted from a checkpoint, we
+        # If we restarted from a checkpoint, we have to differently initialize
+        # the loss.
         if self.last_loss is None:
             vloss_old = vloss
         else:
             vloss_old = self.last_loss
 
-        # Perform and log training.
+        ############################
+        # PERFORM TRAINING
+        ############################
+
         for epoch in range(self.last_epoch, self.parameters.max_number_epochs):
             start_time = time.time()
 
@@ -222,7 +234,9 @@ class Trainer(Runner):
 
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(self.network,
-                                            self.validation_data_loader)
+                                            "validation",
+                                            self.parameters.
+                                            during_training_metric)
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
             if self.parameters.verbosity:
@@ -274,12 +288,28 @@ class Trainer(Runner):
             if self.parameters.verbosity:
                 printout("Time for epoch[s]:", time.time() - start_time)
 
-        # Calculate final loss.
+        ############################
+        # CALCULATE FINAL METRICS
+        ############################
+
+        if self.parameters.after_before_training_metric != \
+                self.parameters.during_training_metric:
+            vloss = self.__validate_network(self.network,
+                                            "validation",
+                                            self.parameters.
+                                            after_before_training_metric)
+            if self.parameters_full.use_horovod:
+                vloss = self.__average_validation(vloss, 'average_loss')
+
         self.final_validation_loss = vloss
+        printout("Final validation data loss: ", vloss)
+
         tloss = float("inf")
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
-                                            self.test_data_loader)
+                                            "test",
+                                            self.parameters.
+                                            after_before_training_metric)
             if self.parameters_full.use_horovod:
                 tloss = self.__average_validation(tloss, 'average_loss')
             printout("Final test data loss: ", tloss)
@@ -431,20 +461,128 @@ class Trainer(Runner):
         self.optimizer.zero_grad()
         return loss.item()
 
-    def __validate_network(self, network, vdl):
+    def __validate_network(self, network, data_set_type, validation_type):
         """Validate a network, using test or validation data."""
-        network.eval()
-        validation_loss = []
-        with torch.no_grad():
-            for x, y in vdl:
-                if self.parameters_full.use_gpu:
-                    x = x.to('cuda')
-                    y = y.to('cuda')
-                prediction = network(x)
-                validation_loss.append(network.calculate_loss(prediction, y)
-                                       .item())
+        if data_set_type == "test":
+            data_loader = self.test_data_loader
+            data_set = self.data.test_data_set
+            number_of_snapshots = self.data.nr_test_snapshots
+            offset_snapshots = self.data.nr_validation_snapshots + \
+                               self.data.nr_training_snapshots
 
-        return np.mean(validation_loss)
+        elif data_set_type == "validation":
+            data_loader = self.validation_data_loader
+            data_set = self.data.validation_data_set
+            number_of_snapshots = self.data.nr_validation_snapshots
+            offset_snapshots = self.data.nr_training_snapshots
+
+        else:
+            raise Exception("Please select test or validation"
+                            "when using this function.")
+        network.eval()
+        if validation_type == "ldos":
+            validation_loss = []
+            with torch.no_grad():
+                for x, y in data_loader:
+                    if self.parameters_full.use_gpu:
+                        x = x.to('cuda')
+                        y = y.to('cuda')
+                    prediction = network(x)
+                    validation_loss.append(network.calculate_loss(prediction, y)
+                                           .item())
+
+            return np.mean(validation_loss)
+        elif validation_type == "band_energy":
+            # Get optimal batch size and number of batches per snapshots.
+            optimal_batch_size = self. \
+                _correct_batch_size_for_testing(self.data.grid_size,
+                                                self.parameters.
+                                                mini_batch_size)
+            number_of_batches_per_snapshot = int(self.data.grid_size /
+                                                 optimal_batch_size)
+            errors = []
+            for snapshot_number in range(offset_snapshots,
+                                         number_of_snapshots+offset_snapshots):
+                actual_outputs, \
+                predicted_outputs = self.\
+                    _forward_entire_snapshot(snapshot_number-offset_snapshots,
+                                             data_set,
+                                             number_of_batches_per_snapshot,
+                                             optimal_batch_size)
+                calculator = self.data.target_calculator
+
+                # This works because the list is always guaranteed to be
+                # ordered.
+                calculator.\
+                    read_additional_calculation_data("qe.out",
+                                         self.data.
+                                         get_snapshot_calculation_output(snapshot_number))
+                fe_actual = calculator.\
+                    get_self_consistent_fermi_energy_ev(actual_outputs)
+                be_actual = calculator.\
+                    get_band_energy(actual_outputs, fermi_energy_eV=fe_actual)
+
+                try:
+                    fe_predicted = calculator.\
+                        get_self_consistent_fermi_energy_ev(predicted_outputs)
+                    be_predicted = calculator.\
+                        get_band_energy(predicted_outputs, fermi_energy_eV=fe_predicted)
+                except ValueError:
+                    # If the training went badly, it might be that the above
+                    # code results in an error, due to the LDOS being so wrong
+                    # that the estimation of the self consistent Fermi energy
+                    # fails.
+                    be_predicted = float("inf")
+                errors.append(np.abs(be_predicted-be_actual)*(1000/len(calculator.atoms)))
+            return np.mean(errors)
+        elif validation_type == "total_energy":
+            # Get optimal batch size and number of batches per snapshots.
+            optimal_batch_size = self. \
+                _correct_batch_size_for_testing(self.data.grid_size,
+                                                self.parameters.
+                                                mini_batch_size)
+            number_of_batches_per_snapshot = int(self.data.grid_size /
+                                                 optimal_batch_size)
+            errors = []
+            for snapshot_number in range(offset_snapshots,
+                                         number_of_snapshots+offset_snapshots):
+                actual_outputs, \
+                predicted_outputs = self.\
+                    _forward_entire_snapshot(snapshot_number-offset_snapshots,
+                                             data_set,
+                                             number_of_batches_per_snapshot,
+                                             optimal_batch_size)
+                calculator = self.data.target_calculator
+
+                # This works because the list is always guaranteed to be
+                # ordered.
+                calculator.\
+                    read_additional_calculation_data("qe.out",
+                                         self.data.
+                                         get_snapshot_calculation_output(snapshot_number))
+                fe_actual = calculator.\
+                    get_self_consistent_fermi_energy_ev(actual_outputs)
+                te_actual = calculator.\
+                    get_total_energy(ldos_data=actual_outputs,
+                                     fermi_energy_eV=fe_actual)
+
+                try:
+                    fe_predicted = calculator.\
+                        get_self_consistent_fermi_energy_ev(predicted_outputs)
+                    te_predicted = calculator.\
+                        get_total_energy(ldos_data=actual_outputs,
+                                         fermi_energy_eV=fe_predicted)
+                except ValueError:
+                    # If the training went badly, it might be that the above
+                    # code results in an error, due to the LDOS being so wrong
+                    # that the estimation of the self consistent Fermi energy
+                    # fails.
+                    te_predicted = float("inf")
+                errors.append(np.abs(te_predicted-te_actual)*(1000/len(calculator.atoms)))
+            return np.mean(errors)
+
+        else:
+            raise Exception("Selected validation method not supported.")
 
     def __create_training_checkpoint(self):
         """

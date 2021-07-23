@@ -42,7 +42,7 @@ class TargetBase:
                 "calculation": 'scf',
                 "restart_mode": 'from_scratch',
                 "prefix": 'MALA',
-                "pseudo_dir": None,
+                "pseudo_dir": self.parameters.pseudopotential_path,
                 "outdir": './',
                 "ibrav": None,
                 "smearing": 'fermi-dirac',
@@ -64,6 +64,18 @@ class TargetBase:
         # The small inaccuracies are neglected for now.
         self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
+
+    @property
+    def qe_input_data(self):
+        """Input data for QE TEM calls."""
+        # Update the pseudopotential path from Parameters.
+        self._qe_input_data["pseudo_dir"] = \
+            self.parameters.pseudopotential_path
+        return self._qe_input_data
+
+    @qe_input_data.setter
+    def qe_input_data(self, value):
+        self._qe_input_data = value
 
     def read_from_cube(self):
         """Read the quantity from a .cube file."""
@@ -220,14 +232,6 @@ class TargetBase:
                 self.band_energy_dft_calculation = np.sum(eband_per_band)
         else:
             raise Exception("Unsupported auxiliary file type.")
-
-    def set_pseudopotential_path(self, newpath):
-        """
-        Set a path where your pseudopotentials are stored.
-
-        This is needed for doing QE calculations.
-        """
-        self.qe_input_data["pseudo_dir"] = newpath
 
     def get_energy_grid(self):
         """Get energy grid."""

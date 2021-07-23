@@ -15,7 +15,8 @@ import torch
 class ParametersBase:
     """Base parameter class for MALA."""
 
-    def __init__(self):
+    def __init__(self,):
+        self._configuration = {"gpu": False, "horovod": False}
         pass
 
     def show(self, indent=""):
@@ -31,6 +32,12 @@ class ParametersBase:
         """
         for v in vars(self):
             printout(indent + '%-15s: %s' % (v, getattr(self, v)))
+
+    def _update_gpu(self, new_gpu):
+        self._configuration["gpu"] = new_gpu
+
+    def _update_horovod(self, new_horovod):
+        self._configuration["horovod"] = new_horovod
 
 
 class ParametersNetwork(ParametersBase):
@@ -127,6 +134,8 @@ class ParametersTargets(ParametersBase):
 
     ldos_gridoffset_ev: float
         Lowest energy value on the (L)DOS energy grid [eV].
+
+
     """
 
     def __init__(self):
@@ -136,6 +145,7 @@ class ParametersTargets(ParametersBase):
         self.ldos_gridspacing_ev = 0
         self.ldos_gridoffset_ev = 0
         self.restrict_targets = "zero_out_negative"
+        self.pseudopotential_path = None
 
     @property
     def restrict_targets(self):
@@ -336,6 +346,59 @@ class ParametersRunning(ParametersBase):
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
+        self.during_training_metric = "ldos"
+        self.after_before_training_metric = "ldos"
+
+    def _update_horovod(self, new_horovod):
+        super(ParametersRunning, self)._update_horovod(new_horovod)
+        self.during_training_metric = self.during_training_metric
+        self.after_before_training_metric = self.after_before_training_metric
+
+    @property
+    def during_training_metric(self):
+        """
+        Control the metric used during training.
+
+        Metric for evaluated on the validation set during training.
+        Default is "ldos", meaning that the regular loss on the LDOS will be
+        used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
+        """
+        return self._during_training_metric
+
+    @during_training_metric.setter
+    def during_training_metric(self, value):
+        if value != "ldos":
+            if self._configuration["horovod"]:
+                raise Exception("Currently, MALA can only operate with the "
+                                "\"ldos\" metric for horovod runs.")
+        self._during_training_metric = value
+
+    @property
+    def after_before_training_metric(self):
+        """
+        Get the metric used during training.
+
+        Metric for evaluated on the validation and test set before and after
+        training. Default is "LDOS", meaning that the regular loss on the LDOS
+        will be used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
+        """
+        return self._after_before_training_metric
+
+    @after_before_training_metric.setter
+    def after_before_training_metric(self, value):
+        if value != "ldos":
+            if self._configuration["horovod"]:
+                raise Exception("Currently, MALA can only operate with the "
+                                "\"ldos\" metric for horovod runs.")
+        self._after_before_training_metric = value
 
 
 class ParametersHyperparameterOptimization(ParametersBase):
@@ -522,6 +585,8 @@ class Parameters:
 
     def __init__(self):
         self.comment = ""
+
+        # Parameters subobjects.
         self.network = ParametersNetwork()
         self.descriptors = ParametersDescriptors()
         self.targets = ParametersTargets()
@@ -529,11 +594,11 @@ class Parameters:
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
         self.debug = ParametersDebug()
-        self.manual_seed = None
 
         # Properties
         self.use_horovod = False
         self.use_gpu = False
+        self.manual_seed = None
 
     @property
     def use_gpu(self):
@@ -550,6 +615,13 @@ class Parameters:
             else:
                 warnings.warn("GPU requested, but no GPU found. MALA will "
                               "operate with CPU only.", stacklevel=3)
+        self.network._update_gpu(self.use_gpu)
+        self.descriptors._update_gpu(self.use_gpu)
+        self.targets._update_gpu(self.use_gpu)
+        self.data._update_gpu(self.use_gpu)
+        self.running._update_gpu(self.use_gpu)
+        self.hyperparameters._update_gpu(self.use_gpu)
+        self.debug._update_gpu(self.use_gpu)
 
     @property
     def use_horovod(self):
@@ -562,6 +634,13 @@ class Parameters:
             hvd.init()
         set_horovod_status(value)
         self._use_horovod = value
+        self.network._update_horovod(self.use_horovod)
+        self.descriptors._update_horovod(self.use_horovod)
+        self.targets._update_horovod(self.use_horovod)
+        self.data._update_horovod(self.use_horovod)
+        self.running._update_horovod(self.use_horovod)
+        self.hyperparameters._update_horovod(self.use_horovod)
+        self.debug._update_horovod(self.use_horovod)
 
     def show(self):
         """Print name and values of all attributes of this object."""

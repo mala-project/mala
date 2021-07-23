@@ -29,6 +29,9 @@ test_parameters.targets.target_type = "LDOS"
 test_parameters.targets.ldos_gridsize = 250
 test_parameters.targets.ldos_gridspacing_ev = 0.1
 test_parameters.targets.ldos_gridoffset_ev = -10
+# To perform a total energy calculation one also needs to provide
+# a pseudopotential(path).
+test_parameters.targets.pseudopotential_path = data_path
 
 ####################
 # TARGETS
@@ -65,9 +68,6 @@ band_energy = ldos.get_band_energy(ldos_data,
                                    self_consistent_fermi_energy)
 total_energy = 0.0
 if do_total_energy:
-    # To perform a total energy calculation one also needs to provide
-    # a pseudopotential(path).
-    ldos.set_pseudopotential_path(data_path)
     total_energy = ldos.get_total_energy(ldos_data,
                                          fermi_energy_eV=
                                          self_consistent_fermi_energy)
