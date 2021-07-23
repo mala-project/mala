@@ -234,14 +234,6 @@ class TargetBase:
         else:
             raise Exception("Unsupported auxiliary file type.")
 
-    def set_pseudopotential_path(self, newpath):
-        """
-        Set a path where your pseudopotentials are stored.
-
-        This is needed for doing QE calculations.
-        """
-        self.qe_input_data["pseudo_dir"] = newpath
-
     def get_energy_grid(self):
         """Get energy grid."""
         raise Exception("No method implement to calculate an energy grid.")
