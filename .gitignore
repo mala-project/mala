@@ -161,3 +161,6 @@ cython_debug/
 # JupyterNotebooks
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
+
+# SQLite
+*.db

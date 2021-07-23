@@ -142,30 +142,13 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
         return test_trainer.final_test_loss
 
 
-def run_example06(desired_std=0.1):
-    results = []
-    result, last_study = optimize_hyperparameters("optuna")
-    results.append(result)
-    results.append(optimize_hyperparameters("oat"))
-    results.append(optimize_hyperparameters("notraining",
-                                            input_creator_notraining="oat"))
-    results.append(optimize_hyperparameters("notraining",
-                                            input_creator_notraining="optuna",
-                                            last_optuna_study=last_study))
-    if np.std(results) < desired_std:
-        return True
-    else:
-        printout(results)
-        printout(np.std(results))
-        return False
-
-
-if __name__ == "__main__":
-    if run_example06():
-        printout("Successfully ran ex06_advanced_hyperparameter_optimization."
-                 "py.")
-    else:
-        raise Exception("Ran ex06_advanced_hyperparameter_optimization but "
-                        "something was off. If you haven't changed any "
-                        "parameters in the example, there might be a problem "
-                        "with your installation.")
+results = []
+result, last_study = optimize_hyperparameters("optuna")
+results.append(result)
+results.append(optimize_hyperparameters("oat"))
+results.append(optimize_hyperparameters("notraining",
+                                        input_creator_notraining="oat"))
+results.append(optimize_hyperparameters("notraining",
+                                        input_creator_notraining="optuna",
+                                        last_optuna_study=last_study))
+print(results)

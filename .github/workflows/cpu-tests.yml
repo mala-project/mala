@@ -72,15 +72,16 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install mala package
-        run: pip --no-cache-dir install -e .
-
+        run: |
+          pip --no-cache-dir install -e .
+          pip install pytest
       - name: Check out repository (data)
         uses: actions/checkout@v2
         with:
           repository: mala-project/test-data
           token: ${{ secrets.ACCESS_TOKEN }}
           path: mala_data
-          ref: v0.2.0
+          ref: v0.3.0
           lfs: false
 
       - name: Data setup
@@ -90,8 +91,6 @@ jobs:
           chmod +x ../install/data_repo_link/link_data_repo.sh
           ../install/data_repo_link/link_data_repo.sh `pwd`
 
-      - name: Test basic functions
-        run: python test/mala_tests.py
-
-      - name: Test workflow
-        run: python examples/ex99_verify_all_examples.py
+      - name: Test MALA
+        run: pytest --disable-warnings
+        
