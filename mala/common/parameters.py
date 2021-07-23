@@ -318,24 +318,6 @@ class ParametersRunning(ParametersBase):
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
-
-    during_training_metric : string
-        Metric for evaluated on the validation set during training.
-        Default is "ldos", meaning that the regular loss on the LDOS will be
-        used as a metric. Possible options are "band_energy" and
-        "total_energy". For these, the band resp. total energy of the
-        validation snapshots will be calculated and compared to the provided
-        DFT results. Of these, the mean average error in eV/atom will be
-        calculated.
-
-    after_before_training_metric : string
-        Metric for evaluated on the validation and test set AFTER training.
-        Default is "LDOS", meaning that the regular loss on the LDOS will be
-        used as a metric. Possible options are "band_energy" and
-        "total_energy". For these, the band resp. total energy of the
-        validation snapshots will be calculated and compared to the provided
-        DFT results. Of these, the mean average error in eV/atom will be
-        calculated.
     """
 
     def __init__(self):
@@ -371,7 +353,17 @@ class ParametersRunning(ParametersBase):
 
     @property
     def during_training_metric(self):
-        """Get the metric used during training."""
+        """
+        Control the metric used during training.
+
+        Metric for evaluated on the validation set during training.
+        Default is "ldos", meaning that the regular loss on the LDOS will be
+        used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
+        """
         return self._during_training_metric
 
     @during_training_metric.setter
@@ -384,7 +376,17 @@ class ParametersRunning(ParametersBase):
 
     @property
     def after_before_training_metric(self):
-        """Get the metric used during training."""
+        """
+        Get the metric used during training.
+
+        Metric for evaluated on the validation and test set before and after
+        training. Default is "LDOS", meaning that the regular loss on the LDOS
+        will be used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
+        """
         return self._after_before_training_metric
 
     @after_before_training_metric.setter
