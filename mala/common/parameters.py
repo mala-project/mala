@@ -16,7 +16,7 @@ class ParametersBase:
     """Base parameter class for MALA."""
 
     def __init__(self,):
-        self.configuration = None
+        self._configuration = {"gpu": False, "horovod": False}
         pass
 
     def show(self, indent=""):
@@ -33,8 +33,11 @@ class ParametersBase:
         for v in vars(self):
             printout(indent + '%-15s: %s' % (v, getattr(self, v)))
 
-    def _update_configuration(self, config):
-        self.configuration = {"gpu": config[0], "horovod": config[1]}
+    def _update_gpu(self, new_gpu):
+        self._configuration["gpu"] = new_gpu
+
+    def _update_horovod(self, new_horovod):
+        self._configuration["horovod"] = new_horovod
 
 
 class ParametersNetwork(ParametersBase):
@@ -346,8 +349,8 @@ class ParametersRunning(ParametersBase):
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
 
-    def _update_configuration(self, config):
-        super(ParametersRunning, self)._update_configuration(config)
+    def _update_horovod(self, new_horovod):
+        super(ParametersRunning, self)._update_horovod(new_horovod)
         self.during_training_metric = self.during_training_metric
         self.after_before_training_metric = self.after_before_training_metric
 
@@ -369,7 +372,7 @@ class ParametersRunning(ParametersBase):
     @during_training_metric.setter
     def during_training_metric(self, value):
         if value != "ldos":
-            if self.configuration["horovod"]:
+            if self._configuration["horovod"]:
                 raise Exception("Currently, MALA can only operate with the "
                                 "\"ldos\" metric for horovod runs.")
         self._during_training_metric = value
@@ -392,7 +395,7 @@ class ParametersRunning(ParametersBase):
     @after_before_training_metric.setter
     def after_before_training_metric(self, value):
         if value != "ldos":
-            if self.configuration["horovod"]:
+            if self._configuration["horovod"]:
                 raise Exception("Currently, MALA can only operate with the "
                                 "\"ldos\" metric for horovod runs.")
         self._after_before_training_metric = value
@@ -593,8 +596,6 @@ class Parameters:
         self.debug = ParametersDebug()
 
         # Properties
-        self._use_gpu = False
-        self._use_horovod = False
         self.use_horovod = False
         self.use_gpu = False
         self.manual_seed = None
@@ -614,15 +615,13 @@ class Parameters:
             else:
                 warnings.warn("GPU requested, but no GPU found. MALA will "
                               "operate with CPU only.", stacklevel=3)
-        self.network._update_configuration([self.use_gpu, self.use_horovod])
-        self.descriptors._update_configuration([self.use_gpu,
-                                                self.use_horovod])
-        self.targets._update_configuration([self.use_gpu, self.use_horovod])
-        self.data._update_configuration([self.use_gpu, self.use_horovod])
-        self.running._update_configuration([self.use_gpu, self.use_horovod])
-        self.hyperparameters._update_configuration([self.use_gpu,
-                                                    self.use_horovod])
-        self.debug._update_configuration([self.use_gpu, self.use_horovod])
+        self.network._update_gpu(self.use_gpu)
+        self.descriptors._update_gpu(self.use_gpu)
+        self.targets._update_gpu(self.use_gpu)
+        self.data._update_gpu(self.use_gpu)
+        self.running._update_gpu(self.use_gpu)
+        self.hyperparameters._update_gpu(self.use_gpu)
+        self.debug._update_gpu(self.use_gpu)
 
     @property
     def use_horovod(self):
@@ -635,15 +634,13 @@ class Parameters:
             hvd.init()
         set_horovod_status(value)
         self._use_horovod = value
-        self.network._update_configuration([self.use_gpu, self.use_horovod])
-        self.descriptors._update_configuration([self.use_gpu,
-                                                self.use_horovod])
-        self.targets._update_configuration([self.use_gpu, self.use_horovod])
-        self.data._update_configuration([self.use_gpu, self.use_horovod])
-        self.running._update_configuration([self.use_gpu, self.use_horovod])
-        self.hyperparameters._update_configuration([self.use_gpu,
-                                                    self.use_horovod])
-        self.debug._update_configuration([self.use_gpu, self.use_horovod])
+        self.network._update_horovod(self.use_horovod)
+        self.descriptors._update_horovod(self.use_horovod)
+        self.targets._update_horovod(self.use_horovod)
+        self.data._update_horovod(self.use_horovod)
+        self.running._update_horovod(self.use_horovod)
+        self.hyperparameters._update_horovod(self.use_horovod)
+        self.debug._update_horovod(self.use_horovod)
 
     def show(self):
         """Print name and values of all attributes of this object."""
