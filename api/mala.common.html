@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.0.3-alpha-242-gec6e451
+                v0.0.3-alpha-226-ge0ad4ce
               </div>
             
           
@@ -1016,32 +1016,6 @@ can be performed in the same directory.</p>
 <dd class="field-odd"><p>string</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mala.common.parameters.ParametersRunning.after_before_training_metric">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">after_before_training_metric</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.after_before_training_metric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the metric used during training.</p>
-<p>Metric for evaluated on the validation and test set before and after
-training. Default is “LDOS”, meaning that the regular loss on the LDOS
-will be used as a metric. Possible options are “band_energy” and
-“total_energy”. For these, the band resp. total energy of the
-validation snapshots will be calculated and compared to the provided
-DFT results. Of these, the mean average error in eV/atom will be
-calculated.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mala.common.parameters.ParametersRunning.during_training_metric">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">during_training_metric</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.during_training_metric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Control the metric used during training.</p>
-<p>Metric for evaluated on the validation set during training.
-Default is “ldos”, meaning that the regular loss on the LDOS will be
-used as a metric. Possible options are “band_energy” and
-“total_energy”. For these, the band resp. total energy of the
-validation snapshots will be calculated and compared to the provided
-DFT results. Of these, the mean average error in eV/atom will be
-calculated.</p>
 </dd></dl>
 
 </dd></dl>
