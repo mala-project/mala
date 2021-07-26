@@ -98,6 +98,7 @@ def run_example04(desired_loss_improvement_factor=2):
     test_network = mala.Network(test_parameters)
     test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
     printout("Network setup: DONE.")
+    printout("Trial with optimal parameters set.")
     test_trainer.train_network()
     printout("Training: DONE.")
 

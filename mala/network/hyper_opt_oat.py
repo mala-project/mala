@@ -34,18 +34,23 @@ class HyperOptOAT(HyperOptBase):
         self.N_runs = None
         self.OA = None
 
-    def add_hyperparameter(self, opttype="categorical", name="", low=0, high=0,
-                           choices=None):
+    def add_hyperparameter(self, opttype="categorical", name="", choices=None, **kwargs):
+        """
+        Add hyperparameter such that the hyperparameter list is sorted w.r.t the number of choices.
 
+        opttype : string
+            Datatype of the hyperparameter. Follows optunas naming convetions.
+            Default value - categorical (list)
+
+        """
         if opttype != 'categorical':
             raise Exception(
                 "Only categorical hyperparameters are supported for OAT")
 
         else:
-            if not self.sorted_num_choices:
-                super(HyperOptOAT, self).add_hyperparameter(opttype=opttype, name=name,
-                                                            low=low, high=high,
-                                                            choices=choices)
+            if not self.sorted_num_choices:  # if empty
+                super(HyperOptOAT, self).add_hyperparameter(
+                    opttype=opttype, name=name, choices=choices)
                 self.sorted_num_choices.append(len(choices))
 
             else:
@@ -66,7 +71,6 @@ class HyperOptOAT(HyperOptBase):
         self.factor_levels = [par.num_choices for par in self.params.
                               hyperparameters.hlist]
 
-        printout(*self.factor_levels, sep=",")
         if not self.monotonic:
             raise Exception(
                 "Please use hyperparameters in increasing or decreasing order of number of choices")
@@ -86,7 +90,6 @@ class HyperOptOAT(HyperOptBase):
 
         # Return the best loss value we could achieve.
         self.get_optimal_parameters()
-        return self.objective(self.optimal_params)
 
     def get_optimal_parameters(self):
         """
@@ -94,8 +97,7 @@ class HyperOptOAT(HyperOptBase):
         This is done using loss instead of accuracy as done in the paper.
 
         """
-        printout("Performing Range Analysis")
-        print("Factor levels:", self.factor_levels)
+        printout("Performing Range Analysis.")
 
         def indices(idx, val): return np.where(
             self.OA[:, idx] == val)[0]
@@ -104,29 +106,18 @@ class HyperOptOAT(HyperOptBase):
 
         A = [[i/len(j) for i in j] for j in R]
 
-        print("OA:")
-        print(self.OA)
-
-        print("Trial Losses:")
-        print(np.array(self.trial_losses).transpose())
-
-        print("R matrix: ")
-        print(np.array(R).transpose())
-
-        print("A Matrix:")
-        print(np.array(A).transpose())
         # Taking loss as objective to minimise
         self.optimal_params = np.array([i.index(min(i)) for i in A])
         self.importance = np.argsort([max(i)-min(i) for i in A])
 
-        printout("Order of Importance: ")
-        printout(
-            *[self.params.hyperparameters.hlist[idx].name for idx in self.importance], sep=" > ")
+        # printout("Order of Importance: ")
+        # printout(
+        #     *[self.params.hyperparameters.hlist[idx].name for idx in self.importance], sep=" < ")
 
-        printout("Optimal Hyperparameters:")
-        for (idx, par) in enumerate(self.params.hyperparameters.hlist):
-            printout(
-                par.name, par.choices[self.optimal_params[idx]], sep=' : ')
+        # printout("Optimal Hyperparameters:")
+        # for (idx, par) in enumerate(self.params.hyperparameters.hlist):
+        #     printout(
+        #         par.name, par.choices[self.optimal_params[idx]], sep=' : ')
 
     def set_optimal_parameters(self):
         """
@@ -135,7 +126,6 @@ class HyperOptOAT(HyperOptBase):
         The parameters will be written to the parameter object with which the
         hyperparameter optimizer was created.
         """
-
         self.objective.parse_trial_oat(self.optimal_params)
 
     def number_of_runs(self):
@@ -166,7 +156,7 @@ class HyperOptOAT(HyperOptBase):
     def get_orthogonal_array(self):
         """Generate the best Orthogonal array used for optimal hyperparameter sampling."""
 
-        print("Generating Suitable Orthogonal Array")
+        print("Generating Suitable Orthogonal Array.")
         arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs, self.strength,
                                     self.n_factors)
         arraylist = [arrayclass.create_root()]
@@ -175,16 +165,17 @@ class HyperOptOAT(HyperOptBase):
         options = oa.OAextend()
         options.setAlgorithmAuto(arrayclass)
 
-        for _ in range(self.strength + 1, self.n_factors + 1):
-            arraylist_extensions = oa.extend_arraylist(arraylist, arrayclass,
-                                                       options)
-            dd = np.array([a.Defficiency() for a in arraylist_extensions])
-            idxs = np.argsort(dd)
-            arraylist = [arraylist_extensions[ii] for ii in idxs]
+        try:
+            for _ in range(self.strength + 1, self.n_factors + 1):
+                arraylist_extensions = oa.extend_arraylist(arraylist, arrayclass,
+                                                           options)
+                dd = np.array([a.Defficiency() for a in arraylist_extensions])
+                idxs = np.argsort(dd)
+                arraylist = [arraylist_extensions[ii] for ii in idxs]
 
-        if not arraylist:  # checking if the list is empty
-            raise Exception(
-                "No orthogonal array exists with such a parameter combination")
+        except:
+            if not arraylist:
+                print("No orthogonal array exists with such a parameter combination.")
         return np.unique(np.array(arraylist[0]), axis=0)
 
     @property
