@@ -1,5 +1,8 @@
 import mala
 from mala import printout
+from multiprocessing import Process
+import sys
+import os
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
 
@@ -100,14 +103,56 @@ def run_example01(desired_loss_improvement_factor=1):
 
 
 
+    
 
+class TensorboardSupervisor:
+    def __init__(self, log_dp):
+            self.server = TensorboardServer(log_dp)
+            self.server.start()
+            print("Started Tensorboard Server")
+            self.chrome = ChromeProcess()
+            print("Started Chrome Browser")
+            self.chrome.start()
+
+    def finalize(self):
+        if self.server.is_alive():
+            print('Killing Tensorboard Server')
+            self.server.terminate()
+            self.server.join()
+
+
+class TensorboardServer(Process):
+    def __init__(self, log_dp):
+        super().__init__()
+        self.os_name = os.name
+        self.log_dp = str(log_dp)
+
+    def run(self):
+        if self.os_name == 'nt':  # Windows
+            os.system('tensorboard --logdir="{self.log_dp} --bind_all"')
+        elif self.os_name == 'posix':  # Linux
+            os.system(f'tensorboard --logdir="{self.log_dp} --bind_all" ')
+        else:
+            raise NotImplementedError(f'No support for OS : {self.os_name}')
+    
+    
+class ChromeProcess(Process):
+    def __init__(self):
+        super().__init__()
+        self.os_name = os.name
+        self.daemon = True
+
+    def run(self):
+        if self.os_name == 'nt':  # Windows
+            os.system(f'start chrome  http://localhost:6006/')
+        elif self.os_name == 'posix':  # Linux
+            os.system(f'google-chrome http://localhost:6006/')
+        else:
+            raise NotImplementedError(f'No support for OS : {self.os_name}')
 
 def run_example10():
-    tensor_board_program = program.TensorBoard()
-    tensor_board_program.configure(argv=[None, '--logdir', http://localhost:6006/])
-    url = tensor_board_program.launch()
-
-
+    tb_sup = TensorboardSupervisor("/home/snehaverma/Downloads/HZDR_work/mala/examples/log_dir")
+    tb_sup.finalize()
   ####################
     # RESULTS.
     # Check whether tensorboard has run.
@@ -115,13 +160,14 @@ def run_example10():
 
     printout("Tensor board has ran succesfully:")
 
-    if desired_loss_improvement_factor*test_trainer.initial_test_loss\
-            < test_trainer.final_test_loss:
+    if run_example10:
         return False
     else: 
         return True
+
+
 if __name__ == "__main__":
-    if run_example01() && run_example10():
+    if run_example01() & run_example10():
         printout("Successfully ran ex10_tensor_board.py.")
     else:
         raise Exception("Ran ex10_tensor_board but something "
