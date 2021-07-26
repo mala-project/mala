@@ -211,7 +211,7 @@ class ParametersData(ParametersBase):
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
         # self.data_splitting_percent = [0,0,0]
-        self.data_splitting_snapshots = ["tr", "va", "te"]
+        self.data_splitting_snapshots = []
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
@@ -404,6 +404,21 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.hyper_opt_method = "optuna"
         self.checkpoints_each_trial = 0
         self.checkpoint_name = "checkpoint_mala_ho"
+        self.study_name = None
+        self.rdb_storage = None
+        self.rdb_storage_heartbeat = None
+
+    @property
+    def rdb_storage_heartbeat(self):
+        """Control whether a heartbeat is used for distributed optuna runs."""
+        return self._rdb_storage_heartbeat
+
+    @rdb_storage_heartbeat.setter
+    def rdb_storage_heartbeat(self, value):
+        if value == 0:
+            self._rdb_storage_heartbeat = None
+        else:
+            self._rdb_storage_heartbeat = value
 
     def show(self, indent=""):
         """

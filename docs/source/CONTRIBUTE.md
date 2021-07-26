@@ -23,10 +23,9 @@ the form `MAJOR.MINOR.FIX`:
 ## Branching strategy
 
 In general, contributors should develop on branches based off of `develop` and
-merge requests should be to `develop`. Please choose a descriptive branch name,
-ideally incorporating some identifying information (such as your initials)
-or the starting date of your developments. Branches from `develop` to `master`
-will be done after prior consultation of the core development team.
+merge requests should be to `develop`. Please choose a descriptive branch name.
+Branches from `develop` to `master` will be done after prior consultation of 
+the core development team.
 
 ## Developing code
 
@@ -36,16 +35,21 @@ will be done after prior consultation of the core development team.
   [NumPy style](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard)
   for docstrings
 * Keep your code object-oriented, modular, and easily reusable
-* Add tests and examples for sizable new features
+* If you're adding code that should be tested, add tests
 
-## Submitting a merge request
-
-* Ensure that you followed the guidelines for [developing code](#developing-code)
-* Rebase your branch onto `develop` before submitting a merge request
-* Only assign yourself to a merge request when time does not permit an
-  external check
+## Pull Requests
+We actively welcome pull requests.
+1. Fork the repo and create your branch from `develop`
+2. During development, make sure that you follow the guidelines for [developing code](#developing-code)
+3. Rebase your branch onto `develop` before submitting a merge request
+4. Ensure the test suite passes before submitting a pull request
 
 ## Issues
 
 * Use issues to document potential enhancements, bugs and such
 * Please tag your issues, and consider setting up a deadline
+* Please ensure your description is clear and has sufficient instructions to be able to reproduce the issue
+
+## License
+By contributing to MALA, you agree that your contributions will be licensed under the LICENSE file in the root directory of this source tree.
+

@@ -11,5 +11,6 @@ dependencies:
   - ase
   - pytorch-cpu
   - mpmath
+  - pandas
   - pip:
     - oapackage

@@ -105,7 +105,7 @@ def run_inference_test():
     # outputs. This is due to the fact that we scale and rescale data on 32
     # byte float arrays; lazy loading is therefore drastically advised for
     # inference/testing purposes.
-    if test_inference(accuracy_prediction=0, accuracy_actual=5e-7,
+    if test_inference(accuracy_prediction=5e-7, accuracy_actual=5e-7,
                       use_lazy_loading=False) is False:
         return False
     if test_inference(accuracy_prediction=0, accuracy_actual=0,
