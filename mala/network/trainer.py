@@ -9,7 +9,8 @@ from torch import optim
 from torch.utils.data import DataLoader
 from mala.common.parameters import printout
 from .runner import Runner
-from torch.utils.tensorboard import SummaryWriter ##summaty writer
+from torch.utils.tensorboard import SummaryWriter 
+import os
 
 try:
     import horovod.torch as hvd
@@ -54,8 +55,13 @@ class Trainer(Runner):
         self.__prepare_to_train(optimizer_dict)
         self.tensor_board = None
         if self.parameters.visualisation:
-            self.tensor_board = SummaryWriter("log_dir")## here the path to the log file can be set
-
+            trainer_path = os.getcwd()
+            log_dir_path = trainer_path.replace('mala/network','examples/log_dir')
+            if not os.path.exists(log_dir_path):
+                os.mkdir(log_dir_path)
+            
+            self.tensor_board = SummaryWriter(log_dir_path)## here the path to the log file can be set
+                
 
     @classmethod
     def resume_checkpoint(cls, checkpoint_name):
