@@ -4,10 +4,10 @@ from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
 
 """
-ex04_hyperparameter_optimization.py: Shows how a hyperparameter 
-optimization can be done using this framework. There are multiple 
+ex04_hyperparameter_optimization.py: Shows how a hyperparameter
+optimization can be done using this framework. There are multiple
 hyperparameter optimizers available in this framework. This example focusses
-on the most universal one - optuna.  
+on the most universal one - optuna.
 """
 
 
@@ -113,10 +113,8 @@ def run_example04(desired_loss_improvement_factor=2):
     # To see if the hyperparameter optimization actually worked,
     # check if the best trial is better then the worst trial
     # by a certain factor.
-    performed_trials_values = test_hp_optimizer.study.\
-        trials_dataframe()["value"]
-    if desired_loss_improvement_factor*min(performed_trials_values) > \
-            max(performed_trials_values):
+    if desired_loss_improvement_factor*test_trainer.initial_test_loss < \
+            test_trainer.final_test_loss:
         return False
     else:
         return True
