@@ -38,6 +38,7 @@ test_parameters.targets.ldos_gridoffset_ev = -10
 
 # Define the accuracy used in the tests.
 accuracy = 1e-6
+accuracy_dos = 1e-4
 
 
 class TestMALAIntegration:
@@ -175,4 +176,18 @@ class TestMALAIntegration:
 
         # Check against the constraints we put upon ourselves.
         assert np.isclose(rel_error, 0, atol=accuracy)
-        
+
+    def test_pwevaldos_vs_ppdos(self):
+        """Check pp.x DOS vs. pw.x DOS (from eigenvalues in outfile)."""
+        dos_calculator = DOS(test_parameters)
+        dos_calculator.read_additional_calculation_data("qe.out", path_to_out)
+
+        dos_from_pp = np.load(path_to_dos_npy)
+
+        # Calculate the quantities we want to compare.
+        dos_from_dft = dos_calculator.read_from_qe_out()
+        dos_pp_sum = dos_from_pp.sum()
+        dos_dft_sum = dos_from_dft.sum()
+        rel_error = np.abs(dos_dft_sum-dos_pp_sum) / dos_pp_sum
+
+        assert np.isclose(rel_error, 0, atol=accuracy_dos)
