@@ -36,7 +36,8 @@ class Network(nn.Module):
         self.activation_mappings = {
             "Sigmoid": nn.Sigmoid,
             "ReLU": nn.ReLU,
-            "LeakyReLU": nn.LeakyReLU
+            "LeakyReLU": nn.LeakyReLU,
+            "Tanh": nn.Tanh
         }
 
         # initialize the layers
@@ -70,6 +71,8 @@ class Network(nn.Module):
             use_only_one_activation_type = True
         elif len(self.params.layer_activations) < self.number_of_layers:
             raise Exception("Not enough activation layers provided.")
+        elif len(self.params.layer_activations) > self.number_of_layers:
+            raise Exception("Too many activation layers provided.")
 
         # Add the layers.
         # As this is a feedforward layer we always add linear layers, and then
