@@ -155,7 +155,7 @@ the data repository, it needs to be linked with MALA.
 1. Download data repository and check out correct tag 
 
    ```sh
-   $ git clone ~/path/to/data/repo ~/path/to/data/repo
+   $ git clone origin_of_data_repo ~/path/to/data/repo
    $ cd ~/path/to/data/repo
    $ git checkout v0.1.0
    ```
