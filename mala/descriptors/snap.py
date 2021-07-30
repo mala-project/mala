@@ -108,6 +108,9 @@ class SNAP(DescriptorBase):
         lammps_format = "lammps-data"
         # We get the atomic information by using ASE.
         atoms = ase.io.read(infile, format=self.in_format_ase)
+
+        # Enforcing / Checking PBC on the read atoms.
+        atoms = self.enforce_pbc(atoms)
         ase_out_path = outdir+"lammps_input.tmp"
         ase.io.write(ase_out_path, atoms, format=lammps_format)
 
