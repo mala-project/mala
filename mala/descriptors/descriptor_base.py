@@ -86,7 +86,6 @@ class DescriptorBase:
         new_atoms : ase.atoms
             The ASE atoms object for which the PBC have been enforced.
         """
-
         new_atoms = atoms.copy()
         new_atoms.set_scaled_positions(new_atoms.get_scaled_positions())
 
