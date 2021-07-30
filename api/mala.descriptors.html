@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.0.3-alpha-258-g82ce5a2
+                v0.0.3-alpha-261-g42d2ec4
               </div>
             
           
@@ -256,6 +256,29 @@
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.descriptors.descriptor_base.DescriptorBase.enforce_pbc">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">enforce_pbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.enforce_pbc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Explictly enforeces the PBC on an ASE atoms object.</p>
+<p>QE (and potentially other codes?) do that internally. Meaning that the
+raw positions of atoms (in Angstrom) can lie outside of the unit cell.
+When setting up the DFT calculation, these atoms get shifted into
+the unit cell. Since we directly use these raw positions for the
+descriptor calculation, we need to enforce that in the ASE atoms
+objects, the atoms are explicitly in the unit cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>atoms</strong> (<em>ase.atoms</em>) – The ASE atoms object for which the PBC need to be enforced.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>new_atoms</strong> – The ASE atoms object for which the PBC have been enforced.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ase.atoms</p>
 </dd>
 </dl>
 </dd></dl>
