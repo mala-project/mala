@@ -157,7 +157,7 @@ the data repository, it needs to be linked with MALA.
    ```sh
    $ git clone origin_of_data_repo ~/path/to/data/repo
    $ cd ~/path/to/data/repo
-   $ git checkout v0.1.0
+   $ git checkout v0.4.0
    ```
 2. Link MALA and data repository
 
