@@ -583,6 +583,22 @@ class Parameters:
         set_horovod_status(value)
         self._use_horovod = value
 
+    @property
+    def device_id(self):
+        """Control the device ID used for multi GPU settings."""
+        if self.device_type == "cuda":
+            return self._device_id
+        else:
+            # For cpu architectures, this should always be zero
+            # (elsewise we get a torch error).
+            # Not that this will eevr matter in production, but I have
+            # to run test cases on a non-GPU enabled machine occasionally.
+            return 0
+
+    @device_id.setter
+    def device_id(self, value):
+        self._device_id = value
+
     def show(self):
         """Print name and values of all attributes of this object."""
         printout("--- " + self.__doc__.split("\n")[1] + " ---")

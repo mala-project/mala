@@ -210,17 +210,17 @@ class Trainer(Runner):
             if self.parameters_full.use_horovod:
                 self.parameters.sampler["train_sampler"].set_epoch(epoch)
 
+            processed_on_this_process = 0
             for batchid, (inputs, outputs) in \
                     enumerate(self.training_data_loader):
-
+                processed_on_this_process += inputs.size()[0]
                 inputs = inputs.to(f"{self.parameters_full.device_type}:"
                                    f"{self.parameters_full.device_id}")
                 outputs = outputs.to(f"{self.parameters_full.device_type}:"
                                      f"{self.parameters_full.device_id}")
-
                 training_loss += self.__process_mini_batch(self.network,
                                                            inputs, outputs)
-
+            print(hvd.local_rank(), processed_on_this_process)
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(self.network,
                                             self.validation_data_loader)
@@ -323,8 +323,16 @@ class Trainer(Runner):
             self.last_loss = optimizer_dict['early_stopping_last_loss']
 
         if self.parameters_full.use_horovod:
-            # scaling the batch size for multiGPU per node
-            # self.batch_size= self.batch_size*hvd.local_size()
+            # At some point, we had the scaling of the batch size here.
+            # The scaling of learning rate and batch size in horovod can
+            # be confusing, so I'm embedding this link here:
+            # https://github.com/horovod/horovod/issues/1617#issuecomment-569094205
+            # Essentially, horovod runs an epoch on each process independently.
+            # If we assume a batch size of 128 and 4 GPUs, that means each
+            # mini batch effectively consists of 4*128 data points. That's
+            # why we have to scale the learning rate. We could also scale the
+            # batch size, but I think that would cost us performance for
+            # no good reason.
 
             compression = hvd.Compression.fp16 if self.parameters_full.\
                 running.use_compression else hvd.Compression.none
