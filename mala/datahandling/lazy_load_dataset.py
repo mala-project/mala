@@ -1,4 +1,6 @@
 """DataSet for lazy-loading."""
+import time
+
 import torch
 from torch.utils.data import Dataset
 from mala.datahandling.snapshot import Snapshot
@@ -132,6 +134,10 @@ class LazyLoadDataset(torch.utils.data.Dataset):
             File to be read.
         """
         # Load the data into RAM.
+        rank = 0
+        if self.use_horovod is True:
+            rank = hvd.local_rank()
+        start_time = time.time()
         self.input_data = \
             np.load(self.snapshot_list[file_index].input_npy_directory +
                     self.snapshot_list[file_index].input_npy_file)
@@ -165,6 +171,9 @@ class LazyLoadDataset(torch.utils.data.Dataset):
 
         # Save which data we have currently loaded.
         self.currently_loaded_file = file_index
+        print("Getting file", file_index, "on rank", rank, "started at",
+              start_time, "ended at",time.time(), "and took",
+              time.time()-start_time)
 
     def __getitem__(self, idx):
         """
