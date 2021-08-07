@@ -54,12 +54,10 @@ class Trainer(Runner):
         self.__prepare_to_train(optimizer_dict)
         self.tensor_board = None
         if self.parameters.visualisation:
-            trainer_path = os.getcwd()
-            log_dir_path = trainer_path.replace('mala/network','examples/log_dir')
-            if not os.path.exists(log_dir_path):
-                os.mkdir(log_dir_path)
-            
-            self.tensor_board = SummaryWriter(log_dir_path)## here the path to the log file can be set
+            if not os.path.exists(self.parameters.visualisation_dir):
+                os.makedirs(self.parameters.visualisation_dir)
+            # Set the path to log files
+            self.tensor_board = SummaryWriter(self.parameters.visualisation_dir)
                 
 
     @classmethod
@@ -255,7 +253,7 @@ class Trainer(Runner):
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
 
             #summary_writer tensor board
-            if self.parameters.visualisation > 0:
+            if self.parameters.visualisation:
                 self.tensor_board.add_scalar("Loss", vloss, epoch)
                 self.tensor_board.add_scalar("Learning rate", self.parameters.learning_rate, epoch)
                 if self.parameters.visualisation == 2:
@@ -264,7 +262,7 @@ class Trainer(Runner):
                         self.tensor_board.add_histogram(name,param,epoch)
                         self.tensor_board.add_histogram(f'{name}.grad',param.grad,epoch)
 
-            self.tensor_board.flush() #method to make sure that all pending events have been written to disk
+            self.tensor_board.close() #method to make sure that all pending events have been written to disk
 
 
 

@@ -1,4 +1,5 @@
 """Collection of all parameter related classes and functions."""
+import os
 import pickle
 import warnings
 from .printout import printout, set_horovod_status
@@ -354,6 +355,8 @@ class ParametersRunning(ParametersBase):
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
         self.visualisation = 0
+        # default visualisation_dir= "~/log_dir"
+        self.visualisation_dir= os.path.join(os.path.expanduser("~"), "log_dir")
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
 
@@ -410,6 +413,7 @@ class ParametersRunning(ParametersBase):
 
 
         
+
 
 class ParametersHyperparameterOptimization(ParametersBase):
     """
