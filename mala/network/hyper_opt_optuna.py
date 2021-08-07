@@ -15,7 +15,7 @@ class HyperOptOptuna(HyperOptBase):
 
     Parameters
     ----------
-    params : mala.common.parametes.Parameters
+    params : mala.common.parameters.Parameters
         Parameters used to create this hyperparameter optimizer.
 
     data : mala.datahandling.data_handler.DataHandler

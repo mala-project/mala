@@ -33,6 +33,7 @@ class TargetBase:
         self.temperature_K = None
         self.grid_spacing_Bohr = None
         self.number_of_electrons = None
+        self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
         self.grid_dimensions = [0, 0, 0]
@@ -42,7 +43,7 @@ class TargetBase:
                 "calculation": 'scf',
                 "restart_mode": 'from_scratch',
                 "prefix": 'MALA',
-                "pseudo_dir": None,
+                "pseudo_dir": self.parameters.pseudopotential_path,
                 "outdir": './',
                 "ibrav": None,
                 "smearing": 'fermi-dirac',
@@ -64,6 +65,18 @@ class TargetBase:
         # The small inaccuracies are neglected for now.
         self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
+
+    @property
+    def qe_input_data(self):
+        """Input data for QE TEM calls."""
+        # Update the pseudopotential path from Parameters.
+        self._qe_input_data["pseudo_dir"] = \
+            self.parameters.pseudopotential_path
+        return self._qe_input_data
+
+    @qe_input_data.setter
+    def qe_input_data(self, value):
+        self._qe_input_data = value
 
     def read_from_cube(self):
         """Read the quantity from a .cube file."""
@@ -218,16 +231,13 @@ class TargetBase:
                                                        self.temperature_K)
                 eband_per_band = kweights[np.newaxis, :] * eband_per_band
                 self.band_energy_dft_calculation = np.sum(eband_per_band)
+                enum_per_band = fermi_function(eigs,
+                                               self.fermi_energy_eV,
+                                               self.temperature_K)
+                enum_per_band = kweights[np.newaxis, :] * enum_per_band
+                self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
         else:
             raise Exception("Unsupported auxiliary file type.")
-
-    def set_pseudopotential_path(self, newpath):
-        """
-        Set a path where your pseudopotentials are stored.
-
-        This is needed for doing QE calculations.
-        """
-        self.qe_input_data["pseudo_dir"] = newpath
 
     def get_energy_grid(self):
         """Get energy grid."""

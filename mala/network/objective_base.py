@@ -34,10 +34,10 @@ class ObjectiveBase:
             lambda p: "ff_neurons_layer" in p.name,
             self.params.hyperparameters.hlist
         ))
-        self.optimize_activation_list = any(map(
+        self.optimize_activation_list = list(map(
             lambda p: "layer_activation" in p.name,
             self.params.hyperparameters.hlist
-        ))
+        )).count(True)
 
         self.trial_type = self.params.hyperparameters.hyper_opt_method
 
@@ -90,25 +90,68 @@ class ObjectiveBase:
         if self.optimize_layer_list:
             self.params.network.layer_sizes = \
                 [self.data_handler.get_input_dimension()]
-        if self.optimize_activation_list:
+        if self.optimize_activation_list > 0:
             self.params.network.layer_activations = []
+
+        # Some layers may have been turned off by optuna.
+        turned_off_layers = []
+
+        # This is one because of the input layer.
+        layer_counter = 1
 
         par: HyperparameterOptuna
         for par in self.params.hyperparameters.hlist:
             if par.name == "learning_rate":
                 self.params.running.learning_rate = par.get_parameter(trial)
-            elif "layer_activation" in par.name:
-                self.params.network.layer_activations.\
-                    append(par.get_parameter(trial))
+
             elif "ff_neurons_layer" in par.name:
                 if self.params.network.nn_type == "feed-forward":
-                    self.params.network.layer_sizes.\
-                        append(par.get_parameter(trial))
+                    # Check for zero neuron layers; These indicate layers
+                    # that can be left out.
+                    layer_size = par.get_parameter(trial)
+                    if layer_size > 0:
+                        self.params.network.layer_sizes.\
+                            append(par.get_parameter(trial))
+                    else:
+                        turned_off_layers.append(layer_counter)
+                    layer_counter += 1
+
             elif "trainingtype" in par.name:
                 self.params.running.trainingtype = par.get_parameter(trial)
+
+            elif "mini_batch_size" in par.name:
+                self.params.running.mini_batch_size = par.get_parameter(trial)
+
+            elif "early_stopping_epochs" in par.name:
+                self.params.running.early_stopping_epochs = par.\
+                    get_parameter(trial)
+
+            elif "learning_rate_patience" in par.name:
+                self.params.running.learning_rate_patience = par.\
+                    get_parameter(trial)
+
+            elif "learning_rate_decay" in par.name:
+                self.params.running.learning_rate_decay = par.\
+                    get_parameter(trial)
+
+            elif "layer_activation" in par.name:
+                pass
+
             else:
                 raise Exception("Optimization of hyperparameter ", par.name,
                                 "not supported at the moment.")
+
+        # We have to process the activations separately, because they depend on
+        # the results of the layer lists.
+
+        layer_counter = 0
+        for par in self.params.hyperparameters.hlist:
+            if "layer_activation" in par.name:
+                if layer_counter not in turned_off_layers:
+                    self.params.network.layer_activations.\
+                        append(par.get_parameter(trial))
+                layer_counter += 1
+
         if self.optimize_layer_list:
             self.params.network.layer_sizes.\
                 append(self.data_handler.get_output_dimension())
