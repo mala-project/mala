@@ -328,13 +328,10 @@ class Trainer(Runner):
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
 
-<<<<<<< HEAD
-=======
         # closing tensorboard window   
         self.tensor_board.close()
 
         # Calculate final loss.
->>>>>>> 39e8119 (summary writer added for check)
         self.final_validation_loss = vloss
         printout("Final validation data loss: ", vloss)
 
