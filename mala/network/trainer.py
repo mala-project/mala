@@ -195,7 +195,9 @@ class Trainer(Runner):
             vloss_old = vloss
         else:
             vloss_old = self.last_loss
-
+        rank = 0
+        if self.parameters_full.use_horovod:
+            rank = hvd.local_rank()
         # Perform and log training.
         for epoch in range(self.last_epoch, self.parameters.max_number_epochs):
             start_time = time.time()
@@ -220,15 +222,18 @@ class Trainer(Runner):
                                      f"{self.parameters_full.device_id}")
                 training_loss += self.__process_mini_batch(self.network,
                                                            inputs, outputs)
-            print(hvd.local_rank(), processed_on_this_process)
+            print("training: ", rank, processed_on_this_process, start_time-time.time())
+            val_time = time.time()
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(self.network,
                                             self.validation_data_loader)
+            print("calc val: ", rank, val_time-time.time())
+            val_time = time.time()
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
             if self.parameters.verbosity:
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
-
+            print("average val", val_time-time.time())
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
             if self.parameters.use_shuffling_for_samplers:
