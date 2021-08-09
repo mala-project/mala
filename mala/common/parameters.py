@@ -346,6 +346,7 @@ class ParametersRunning(ParametersBase):
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
+<<<<<<< HEAD
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
 
@@ -400,6 +401,9 @@ class ParametersRunning(ParametersBase):
                                 "\"ldos\" metric for horovod runs.")
         self._after_before_training_metric = value
 
+=======
+        self.visualisation = False
+>>>>>>> 39e8119 (summary writer added for check)
 
 class ParametersHyperparameterOptimization(ParametersBase):
     """

@@ -10,6 +10,8 @@ from torch import optim
 from torch.utils.data import DataLoader
 from mala.common.parameters import printout
 from .runner import Runner
+from torch.utils.tensorboard import SummaryWriter ##summaty writer
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -49,6 +51,9 @@ class Trainer(Runner):
         self.validation_data_loader = None
         self.test_data_loader = None
         self.__prepare_to_train(optimizer_dict)
+        self.tensor_board = None
+        if self.parameters.visualisation:
+            self.tb = SummaryWriter()
 
     @classmethod
     def checkpoint_exists(cls, checkpoint_name):
@@ -242,6 +247,10 @@ class Trainer(Runner):
             if self.parameters.verbosity:
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
 
+            #summary_writer tensor board
+            if self.tb is not None:
+                self.tb.add_scalar("Loss", vloss, epoch)
+
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
             if self.parameters.use_shuffling_for_samplers:
@@ -301,6 +310,13 @@ class Trainer(Runner):
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
 
+<<<<<<< HEAD
+=======
+        # closing tensorboard window   
+        self.tb.close()
+
+        # Calculate final loss.
+>>>>>>> 39e8119 (summary writer added for check)
         self.final_validation_loss = vloss
         printout("Final validation data loss: ", vloss)
 
@@ -314,6 +330,8 @@ class Trainer(Runner):
                 tloss = self.__average_validation(tloss, 'average_loss')
             printout("Final test data loss: ", tloss)
         self.final_test_loss = tloss
+
+        
 
     def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""
@@ -638,3 +656,5 @@ class Trainer(Runner):
         tensor = torch.tensor(val)
         avg_loss = hvd.allreduce(tensor, name=name, op=hvd.Average)
         return avg_loss.item()
+
+    

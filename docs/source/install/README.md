@@ -22,6 +22,7 @@ In order to run MALA you have to have the following packages installed:
 * numpy
 * scipy
 * oapackage
+* tensorboard
 * optuna
 * ase
 * mpmath
