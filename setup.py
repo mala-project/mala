@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # Doing it as suggested here:
 # https://packaging.python.org/guides/single-sourcing-package-version/
@@ -17,13 +17,17 @@ with open("LICENSE") as f:
 setup(
     name="mala",
     version=version["__version__"],
-    description="Framework for Electronic Structure Learning",
+    description=("Materials Learning Algorithms. "
+                 "A framework for machine learning materials properties from "
+                 "first-principles data."),
     long_description=readme,
-    url="https://gitlab.com/hzdr/mala/mala",
+    long_description_content_type='text/markdown',
+    url="https://github.com/mala-project/mala",
     author="Lenz Fiedler et al.",
     author_email="l.fiedler@hzdr.de",
     license=license,
-    packages=["mala"],
+    packages=find_packages(exclude=("test", "docs", "examples", "install",
+                                    "ml-dft-sandia")),
     zip_safe=False,
     install_requires=open('requirements.txt').read().splitlines(),
     python_requires='<3.9',
