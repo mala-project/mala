@@ -482,6 +482,12 @@ class ParametersHyperparameterOptimization(ParametersBase):
         For MALA, no evidence for decreased performance using smaller
         heartbeat values could be found. So if this is used, 1s is a reasonable
         value.
+
+    number_training_per_trial : int
+        Number of network trainings performed per trial. Default is 1,
+        but it makes sense to choose a higher number, to exclude networks
+        that performed by chance (good initilization). Naturally this impedes
+        performance.
     """
 
     def __init__(self):
@@ -495,6 +501,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.study_name = None
         self.rdb_storage = None
         self.rdb_storage_heartbeat = None
+        self.number_training_per_trial = 1
 
     @property
     def rdb_storage_heartbeat(self):

@@ -1,4 +1,5 @@
 """Objective function for all training based hyperparameter optimizations."""
+import numpy as np
 from optuna import Trial
 from .hyperparameter_optuna import HyperparameterOptuna
 from .hyperparameter_oat import HyperparameterOAT
@@ -53,11 +54,15 @@ class ObjectiveBase:
         # Parse the parameters included in the trial.
         self.parse_trial(trial)
 
-        # Perform training and report best test loss.
-        test_network = Network(self.params)
-        test_trainer = Trainer(self.params, test_network, self.data_handler)
-        test_trainer.train_network()
-        return test_trainer.final_validation_loss
+        # Train a network for as often as the user desires.
+        final_validation_loss = []
+        for i in range(0, self.params.hyperparameters.
+                number_training_per_trial):
+            test_network = Network(self.params)
+            test_trainer = Trainer(self.params, test_network, self.data_handler)
+            test_trainer.train_network()
+            final_validation_loss.append(test_trainer.final_validation_loss)
+        return np.mean(final_validation_loss)
 
     def parse_trial(self, trial):
         """
