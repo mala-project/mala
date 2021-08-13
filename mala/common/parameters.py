@@ -515,6 +515,18 @@ class ParametersHyperparameterOptimization(ParametersBase):
         else:
             self._rdb_storage_heartbeat = value
 
+    @property
+    def number_training_per_trial(self):
+        """Control how many trainings are run per optuna trial."""
+        return self._number_training_per_trial
+
+    @number_training_per_trial.setter
+    def number_training_per_trial(self, value):
+        if value < 1:
+            self._number_training_per_trial = 1
+        else:
+            self._number_training_per_trial = value
+
     def show(self, indent=""):
         """
         Print name and values of all attributes of this object.
