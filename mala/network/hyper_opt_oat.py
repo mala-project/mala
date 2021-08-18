@@ -38,10 +38,11 @@ class HyperOptOAT(HyperOptBase):
         """
         Add hyperparameter such that the hyperparameter list is sorted w.r.t the number of choices.
 
+        Parameters
+        ----------
         opttype : string
             Datatype of the hyperparameter. Follows optunas naming convetions.
             Default value - categorical (list)
-
         """
         if not self.sorted_num_choices:  # if empty
             super(HyperOptOAT, self).add_hyperparameter(
@@ -61,7 +62,6 @@ class HyperOptOAT(HyperOptBase):
         This is done by sampling a certain subset of network architectures.
         In this case, these are choosen based on an orthogonal array.
         """
-
         self.OA = self.get_orthogonal_array()
         self.trial_losses = np.zeros(self.OA.shape[0])
         number_of_trial = 0
@@ -75,8 +75,15 @@ class HyperOptOAT(HyperOptBase):
         # Perform Range Analysis
         self.get_optimal_parameters()
 
-    # feature funciton to use OAT with other optimisation techniques
     def perform_trial(self, objective, trial):
+        """
+        Feature funciton to use OAT with other optimisation techniques.
+
+        Parameters
+        ----------
+        objective: ObjectiveBase
+            The current objective value that is to be optimised by using OAT
+        """
         objective.trial_type = "oat"
         objective_val = objective(trial)
         objective.trial_type = objective.params.hyperparameters.hyper_opt_method
@@ -85,8 +92,8 @@ class HyperOptOAT(HyperOptBase):
     def get_optimal_parameters(self):
         """
         Find the optimal set of hyperparameters by doing range analysis.
-        This is done using loss instead of accuracy as done in the paper.
 
+        This is done using loss instead of accuracy as done in the paper.
         """
         printout("Performing Range Analysis.")
 
@@ -101,9 +108,11 @@ class HyperOptOAT(HyperOptBase):
         self.optimal_params = np.array([i.index(min(i)) for i in A])
         self.importance = np.argsort([max(i)-min(i) for i in A])
 
-        # printout("Order of Importance: ")
-        # printout(
-        #     *[self.params.hyperparameters.hlist[idx].name for idx in self.importance], sep=" < ")
+    def show_order_of_importance(self):
+        """Print the order of importance of the hyperparameters that are being optimised."""
+        printout("Order of Importance: ")
+        printout(
+            *[self.params.hyperparameters.hlist[idx].name for idx in self.importance], sep=" < ")
 
     def set_optimal_parameters(self):
         """
@@ -117,6 +126,7 @@ class HyperOptOAT(HyperOptBase):
     def get_orthogonal_array(self):
         """
         Generate the best Orthogonal array used for optimal hyperparameter sampling.
+
         Parameters
         ----------
         factor_levels : list
@@ -131,9 +141,7 @@ class HyperOptOAT(HyperOptBase):
             Minimum number of experimental runs to be performed 
 
         This is function is taken from the example notebook of OApackage
-
         """
-
         self.n_factors = len(self.params.hyperparameters.hlist)
 
         self.factor_levels = [par.num_choices for par in self.params.
@@ -169,12 +177,10 @@ class HyperOptOAT(HyperOptBase):
 
     def number_of_runs(self):
         """
-        Calculate the minimum number of runs required for an Orthogonal array
+        Calculate the minimum number of runs required for an Orthogonal array.
 
         Based on the factor levels and the strength of the array requested
-
         """
-
         runs = [np.prod(tt) for tt in itertools.combinations(
             self.factor_levels, self.strength)]
 
