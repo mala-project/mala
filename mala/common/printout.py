@@ -38,9 +38,6 @@ def printout(*values, sep=' '):
     """
     outstring = sep.join([str(v) for v in values])
 
-    # for v in values:
-    #     outstring += str(v)+sep  # This implementation is adding an extra seperator at the end of the iterable!
-
     if use_horovod is False:
         print(outstring)
     else:
