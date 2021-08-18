@@ -1,0 +1,25 @@
+# YAML 1.2
+cff-version: 1.1.0
+message: "If you use this software, please cite it using these metadata."
+authors:
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Fiedler
+    given-names: Lenz
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Kotik
+    given-names: Daniel
+  - affiliation: "Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Schmerler
+    given-names: Steve
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Cangi
+    given-names: Attila
+#date-released: 2021-08-16
+keywords:
+  - "machine-learning"
+  - "dft"
+license: "BSD-3-Clause"
+repository-code: "https://github.com/mala-project/mala"
+title: mala
+# doi:
+version: 0.1.0
