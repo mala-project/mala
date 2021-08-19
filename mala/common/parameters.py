@@ -496,6 +496,11 @@ class ParametersHyperparameterOptimization(ParametersBase):
         the mean of all metrics plus the standard deviation is used,
         as an estimate of the minimal accuracy to be expected. Currently,
         "mean" and "mean_std" are allowed.
+
+    use_multivariate : bool
+        If True, the optuna multivariate sampler is used. It is experimental
+        since v2.2.0, but reported to perform very well.
+        http://proceedings.mlr.press/v80/falkner18a.html
     """
 
     def __init__(self):
@@ -511,6 +516,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.rdb_storage_heartbeat = None
         self.number_training_per_trial = 1
         self.trial_ensemble_evaluation = "mean"
+        self.use_multivariate = True
 
     @property
     def rdb_storage_heartbeat(self):

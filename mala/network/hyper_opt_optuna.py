@@ -29,9 +29,9 @@ class HyperOptOptuna(HyperOptBase):
 
         # Make the sample behave in a reproducible way, if so specified by
         # the user.
-        sampler = None
-        if params.manual_seed is not None:
-            sampler = optuna.samplers.TPESampler(seed=params.manual_seed)
+        sampler = optuna.samplers.TPESampler(seed=params.manual_seed,
+                                             multivariate=params. \
+                                             hyperparameters.use_multivariate)
 
         # Create the study.
         if self.params.hyperparameters.rdb_storage is None:
