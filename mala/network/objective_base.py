@@ -58,7 +58,7 @@ class ObjectiveBase:
         # Train a network for as often as the user desires.
         final_validation_loss = []
         for i in range(0, self.params.hyperparameters.
-                number_training_per_trial):
+                       number_training_per_trial):
             test_network = Network(self.params)
             test_trainer = Trainer(self.params, test_network, self.data_handler)
             test_trainer.train_network()
@@ -67,7 +67,15 @@ class ObjectiveBase:
         if self.params.hyperparameters.number_training_per_trial > 1:
             printout("Losses from multiple runs are: ")
             printout(final_validation_loss)
-        return np.mean(final_validation_loss)
+
+        if self.params.hyperparameters.trial_ensemble_evaluation == "mean":
+            return np.mean(final_validation_loss)
+        elif self.params.hyperparameters.trial_ensemble_evaluation == \
+                "mean_std":
+            return np.mean(final_validation_loss)+np.std(final_validation_loss)
+        else:
+            raise Exception("No way to estimate the trial metric from ensemble"
+                            " training provided.")
 
     def parse_trial(self, trial):
         """
