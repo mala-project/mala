@@ -16,6 +16,8 @@ with open("LICENSE") as f:
 
 extras = {
     'opt': ['oapackage'],
+    'test': ['pytest'],
+    'doc': open('docs/requirements.txt').read().splitlines(),
 }
 
 setup(
