@@ -14,6 +14,10 @@ with open("README.md") as f:
 with open("LICENSE") as f:
     license = f.read()
 
+extras = {
+    'opt': ['oapackage'],
+}
+
 setup(
     name="mala",
     version=version["__version__"],
@@ -30,5 +34,6 @@ setup(
                                     "ml-dft-sandia")),
     zip_safe=False,
     install_requires=open('requirements.txt').read().splitlines(),
+    etxras_require=extras,
     python_requires='<3.9',
 )
