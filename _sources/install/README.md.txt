@@ -21,6 +21,7 @@ In order to run MALA you have to have the following packages installed:
 * torch (PyTorch)
 * numpy
 * scipy
+* oapackage
 * optuna
 * ase
 * mpmath
@@ -38,18 +39,11 @@ or all with
 $ pip install -r requirements.txt
 ```
 
-or just install the package along with its basic dependencies
+or just install the package along with dependencies
 
 ```sh
 $ pip install -e .
 ```
-
-In order to install additional dependencies (enabling optional features, building documentaion locally, testing etc.) do
-
-```sh
-$ pip install -e .[opt,test,doc]
-```
-
 
 See below for what the `-e` option does.
 
@@ -154,11 +148,11 @@ $ pip install -r docs/requirements.txt
 ## Downloading and adding example data
 
 The examples and tests need additional data to run. The MALA team provides a data repository, that can be downloaded
-from <https://github.com/mala-project/data>. Please be sure to check out the correct tag for the data repository,
-since the data repository itself is subject to ongoing development as well. After downloading the correct revision of
-the data repository, it needs to be linked with MALA.
+from <https://github.com/mala-project/data>. Please be sure to check out the correct tag for the data repository, 
+since the data repository itself is subject to ongoing development as well. After downloading the correct revision of 
+the data repository, it needs to be linked with MALA. 
 
-1. Download data repository and check out correct tag
+1. Download data repository and check out correct tag 
 
    ```sh
    $ git clone origin_of_data_repo ~/path/to/data/repo
