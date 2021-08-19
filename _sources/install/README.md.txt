@@ -38,7 +38,7 @@ or all with
 $ pip install -r requirements.txt
 ```
 
-or just install the package along with it's basic dependencies
+or just install the package along with its basic dependencies
 
 ```sh
 $ pip install -e .
