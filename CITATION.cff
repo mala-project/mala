@@ -3,17 +3,40 @@ cff-version: 1.1.0
 message: "If you use this software, please cite it using these metadata."
 authors:
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Cangi
+    given-names: Attila
+  - affiliation: "Oak Ridge National Laboratory (ORNL)"
+    family-names: Ellis
+    given-names: J. Austin
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Fiedler
     given-names: Lenz
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Kotik
     given-names: Daniel
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Modine
+    given-names: Normand A.
+  - affiliation: "Oak Ridge National Laboratory (ORNL)"
+    family-names: Oles
+    given-names: Vladyslav
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Popoola
+    given-names: Gabriel A.
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Rajamanickam
+    given-names: Siva
   - affiliation: "Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Schmerler
     given-names: Steve
-  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
-    family-names: Cangi
-    given-names: Attila
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Stephens
+    given-names: John A.
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Thompson
+    given-names: Aidan P.
+
+
 #date-released: 2021-08-16
 keywords:
   - "machine-learning"
