@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.0.3-alpha-270-gf8a30b2
+                v0.0.3-alpha-273-gd9790d9
               </div>
             
           
@@ -220,7 +220,6 @@ for which these python bindings have been created. A list of machines on which M
 <li><p>torch (PyTorch)</p></li>
 <li><p>numpy</p></li>
 <li><p>scipy</p></li>
-<li><p>oapackage</p></li>
 <li><p>optuna</p></li>
 <li><p>ase</p></li>
 <li><p>mpmath</p></li>
@@ -234,8 +233,12 @@ You can install each Python package with</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -r requirements.txt
 </pre></div>
 </div>
-<p>or just install the package along with dependencies</p>
+<p>or just install the package along with its basic dependencies</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -e .
+</pre></div>
+</div>
+<p>In order to install additional dependencies (enabling optional features, building documentaion locally, testing etc.) do</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -e .<span class="o">[</span>opt,test,doc<span class="o">]</span>
 </pre></div>
 </div>
 <p>See below for what the <code class="docutils literal notranslate"><span class="pre">-e</span></code> option does.</p>
