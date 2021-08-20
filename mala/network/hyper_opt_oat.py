@@ -1,5 +1,12 @@
 """Hyperparameter optimizer using orthogonal array tuning."""
-import oapackage as oa
+import warnings
+try:
+    import oapackage as oa
+except ModuleNotFoundError:
+    warnings.warn("You do not have the OApackage installed. This will not "
+                  "affect MALA performance except for when attempting to use "
+                  "orthogonal array tuning. ",
+                  stacklevel=2)
 from .hyper_opt_base import HyperOptBase
 from .objective_base import ObjectiveBase
 import numpy as np
