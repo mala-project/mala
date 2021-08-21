@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.0.3-alpha-276-g69edfb3
+                v0.1.0-230-g9be0ef2
               </div>
             
           
@@ -373,29 +373,49 @@ hyperparameter optimizer was created.</p>
 </dl>
 <dl class="py method">
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter">
-<code class="sig-name descname"><span class="pre">add_hyperparameter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a hyperparameter to the current investigation.</p>
+<code class="sig-name descname"><span class="pre">add_hyperparameter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'categorical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add hyperparameter such that the hyperparameter list is sorted w.r.t the number of choices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>opttype</strong> (<em>string</em>) – Datatype of the hyperparameter. Follows optunas naming convetions.
+Default value - categorical (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters">
+<code class="sig-name descname"><span class="pre">get_optimal_parameters</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the optimal set of hyperparameters by doing range analysis.</p>
+<p>This is done using loss instead of accuracy as done in the paper.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array">
+<code class="sig-name descname"><span class="pre">get_orthogonal_array</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the best Orthogonal array used for optimal hyperparameter sampling.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>opttype</strong> (<em>string</em>) – <p>Datatype of the hyperparameter. Follows optunas naming convetions.
-Currently supported are:</p>
-<blockquote>
-<div><ul>
-<li><p>categorical (list)</p></li>
-</ul>
-</div></blockquote>
+<li><p><strong>factor_levels</strong> (<em>list</em>) – A list of number of choices of each hyperparameter</p></li>
+<li><p><strong>strength</strong> (<em>int</em>) – <dl class="simple">
+<dt>A design parameter for Orthogonal arrays</dt><dd><p>strength 2 models all 2 factor interactions
+strength 3 models all 3 factor interactions</p>
+</dd>
+</dl>
 </p></li>
-<li><p><strong>name</strong> (<em>string</em>) – Name of the hyperparameter. Please note that these names always
-have to be distinct; if you e.g. want to investigate multiple
-layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
-etc. as names.</p></li>
-<li><p><strong>low</strong> (<em>float</em><em> or </em><em>int</em>) – Currently unsupported: Lower bound for numerical parameter.</p></li>
-<li><p><strong>high</strong> (<em>float</em><em> or </em><em>int</em>) – Currently unsupported: Higher bound for numerical parameter.</p></li>
-<li><p><strong>choices</strong> – List of possible choices (for categorical parameter).</p></li>
+<li><p><strong>N_runs</strong> (<em>int</em>) – Minimum number of experimental runs to be performed</p></li>
+<li><p><strong>is function is taken from the example notebook of OApackage</strong> (<em>This</em>) – </p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs">
+<code class="sig-name descname"><span class="pre">number_of_runs</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the minimum number of runs required for an Orthogonal array.</p>
+<p>Based on the factor levels and the strength of the array requested</p>
 </dd></dl>
 
 <dl class="py method">
@@ -407,6 +427,17 @@ In this case, these are choosen based on an orthogonal array.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.network.hyper_opt_oat.HyperOptOAT.perform_trial">
+<code class="sig-name descname"><span class="pre">perform_trial</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objective</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.perform_trial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Feature funciton to use OAT with other optimisation techniques.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>objective</strong> (<a class="reference internal" href="#mala.network.objective_base.ObjectiveBase" title="mala.network.objective_base.ObjectiveBase"><em>ObjectiveBase</em></a>) – The current objective value that is to be optimised by using OAT</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT.set_optimal_parameters">
 <code class="sig-name descname"><span class="pre">set_optimal_parameters</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the optimal parameters found in the present study.</p>
@@ -415,9 +446,16 @@ hyperparameter optimizer was created.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.network.hyper_opt_oat.HyperOptOAT.orthogonal_arr">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">orthogonal_arr</span></code><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.orthogonal_arr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Orthogonal array used for optimal hyperparameter sampling.</p>
+<dt id="mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance">
+<code class="sig-name descname"><span class="pre">show_order_of_importance</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the order of importance of the hyperparameters that are being optimised.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.hyper_opt_oat.HyperOptOAT.monotonic">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">monotonic</span></code><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.monotonic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the factors are in an increasing or decreasing order.</p>
+<p>This is required for the genration of orthogonal arrays.</p>
 </dd></dl>
 
 </dd></dl>
@@ -893,14 +931,6 @@ functionalities AND possibly own saving needs.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represents the objective function of a training process.</p>
 <p>This is usually the result of a training of a network.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this objective.</p></li>
-<li><p><strong>data_handler</strong> (<a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – datahandler to be used during the hyperparameter optimization.</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="mala.network.objective_base.ObjectiveBase.parse_trial">
 <code class="sig-name descname"><span class="pre">parse_trial</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.objective_base.ObjectiveBase.parse_trial" title="Permalink to this definition">¶</a></dt>
