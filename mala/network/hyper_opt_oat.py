@@ -191,9 +191,9 @@ class HyperOptOAT(HyperOptBase):
     @property
     def monotonic(self):
         """
-        Check if the factors are in an increasing or decreasing order. 
+        Check if the factors are in an increasing or decreasing order.
 
-        This is required for the generation of orthogonal arrays.
+        This is required for the genration of orthogonal arrays.
         """
         dx = np.diff(self.factor_levels)
         return np.all(dx <= 0) or np.all(dx >= 0)
