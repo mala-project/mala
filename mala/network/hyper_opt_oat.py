@@ -162,18 +162,19 @@ class HyperOptOAT(HyperOptBase):
         options = oa.OAextend()
         options.setAlgorithmAuto(arrayclass)
 
-        try:
-            for _ in range(self.strength + 1, self.n_factors + 1):
-                arraylist_extensions = oa.extend_arraylist(arraylist, arrayclass,
-                                                           options)
-                dd = np.array([a.Defficiency() for a in arraylist_extensions])
-                idxs = np.argsort(dd)
-                arraylist = [arraylist_extensions[ii] for ii in idxs]
+        for _ in range(self.strength + 1, self.n_factors + 1):
+            arraylist_extensions = oa.extend_arraylist(arraylist, arrayclass,
+                                                        options)
+            dd = np.array([a.Defficiency() for a in arraylist_extensions])
+            idxs = np.argsort(dd)
+            arraylist = [arraylist_extensions[ii] for ii in idxs]
 
-        except:
-            if not arraylist:
-                print("No orthogonal array exists with such a parameter combination.")
-        return np.unique(np.array(arraylist[0]), axis=0)
+        
+        if not arraylist:
+            raise Exception("No orthogonal array exists with such a parameter combination.")
+            
+        else:
+            return np.unique(np.array(arraylist[0]), axis=0)
 
     def number_of_runs(self):
         """
@@ -184,10 +185,15 @@ class HyperOptOAT(HyperOptBase):
         runs = [np.prod(tt) for tt in itertools.combinations(
             self.factor_levels, self.strength)]
 
-        N = np.lcm.reduce(runs)
+        N = np.lcm.reduce(runs)*np.lcm.reduce(self.factor_levels)
         return int(N)
 
     @property
     def monotonic(self):
+        """
+        Check if the factors are in an increasing or decreasing order. 
+
+        This is required for the generation of orthogonal arrays.
+        """
         dx = np.diff(self.factor_levels)
         return np.all(dx <= 0) or np.all(dx >= 0)
