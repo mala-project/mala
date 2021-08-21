@@ -122,8 +122,9 @@ class ParametersTargets(ParametersBase):
     Attributes
     ----------
     target_type : string
-        Number of points in the energy grid that is used to calculate the
-        (L)DOS.
+        Target quantity that is learned by the model. Currently supported
+        are "LDOS" (local density of states) and "Density"
+        (electronic density).
 
     ldos_gridsize : float
         Gridspacing of the energy grid the (L)DOS is evaluated on [eV].
