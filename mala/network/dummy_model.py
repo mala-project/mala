@@ -1,4 +1,5 @@
 import torch
+import torch.nn
 from .model import Model
 
 
@@ -19,6 +20,10 @@ class DummyModel(Model):
         super(DummyModel, self).__init__(params)
         self.factor = 1
 
+        # This is a dummy for now. If we decide to use pytorch optimizer
+        # for optimization of non NN models, it will have to be filled.
+        self.dummy_layer = torch.nn.Linear(10, 10)
+
     def forward(self, inputs):
         return torch.sum(inputs)*self.factor
 
@@ -26,4 +31,6 @@ class DummyModel(Model):
         return output - target
 
     def tune_model(self, loss, step_width):
-        self.factor = self.factor - (loss*step_width)
+        print("Tuning dummy model.")
+        for i in range(0, loss.size()[0]):
+            self.factor = self.factor - (loss[i]*step_width)

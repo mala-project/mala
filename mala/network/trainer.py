@@ -456,10 +456,14 @@ class Trainer(Runner):
         """Process a mini batch."""
         prediction = network.forward(input_data)
         loss = network.calculate_loss(prediction, target_data)
-        loss.backward()
-        self.optimizer.step()
-        self.optimizer.zero_grad()
-        return loss.item()
+        if network.params.nn_type == "dummy":
+            network.tune_model(los)
+            return loss
+        else:
+            loss.backward()
+            self.optimizer.step()
+            self.optimizer.zero_grad()
+            return loss.item()
 
     def __validate_network(self, network, data_set_type, validation_type):
         """Validate a network, using test or validation data."""
