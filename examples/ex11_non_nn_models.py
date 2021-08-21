@@ -28,9 +28,11 @@ test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
 # Specify the data scaling.
 test_parameters.data.input_rescaling_type = "feature-wise-standard"
 test_parameters.data.output_rescaling_type = "normal"
+test_parameters.network.nn_type = "dummy"
+test_parameters.running.use_shuffling_for_samplers = False
 
 # Specify the training parameters.
-test_parameters.running.max_number_epochs = 20
+test_parameters.running.max_number_epochs = 1
 test_parameters.running.mini_batch_size = 40
 test_parameters.running.learning_rate = 0.001
 test_parameters.running.trainingtype = "Adam"
@@ -62,18 +64,7 @@ data_handler.prepare_data()
 printout("Read data: DONE.")
 
 model = mala.DummyModel(test_parameters)
-print(model(data_handler.training_data_inputs[0]), data_handler.training_data_outputs[0])
-print(model(data_handler.training_data_inputs[100]), data_handler.training_data_outputs[100])
-
 test_trainer = mala.Trainer(test_parameters, model, data_handler)
-
-print(model(data_handler.training_data_inputs[0]), data_handler.training_data_outputs[0])
-print(model(data_handler.training_data_inputs[100]), data_handler.training_data_outputs[100])
-#
 test_trainer.train_network()
 
-# test_network = mala.Network(test_parameters)
-# printout("Network setup: DONE.")
-# test_trainer.train_network()
-# printout("Training: DONE.")
 

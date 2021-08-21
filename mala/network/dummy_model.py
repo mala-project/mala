@@ -28,9 +28,7 @@ class DummyModel(Model):
         return torch.sum(inputs)*self.factor
 
     def calculate_loss(self, output, target):
-        return output - target
+        return (output - target).mean()
 
     def tune_model(self, loss, step_width):
-        print("Tuning dummy model.")
-        for i in range(0, loss.size()[0]):
-            self.factor = self.factor - (loss[i]*step_width)
+        self.factor = self.factor - (loss*step_width)
