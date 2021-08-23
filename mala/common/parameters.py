@@ -40,13 +40,15 @@ class ParametersBase:
         self._configuration["horovod"] = new_horovod
 
 
-class ParametersNetwork(ParametersBase):
+class ParametersModel(ParametersBase):
     """
-    Parameters necessary for constructing a neural network.
+    Parameters necessary for constructing a model.
+
+    Models could be a neural network, gaussian processes, etc.
 
     Attributes
     ----------
-    nn_type : string
+    type : string
         Type of the neural network that will be used. Currently supported is
         only feed-forward, which is also the default
 
@@ -74,8 +76,8 @@ class ParametersNetwork(ParametersBase):
     """
 
     def __init__(self):
-        super(ParametersNetwork, self).__init__()
-        self.nn_type = "feed-forward"
+        super(ParametersModel, self).__init__()
+        self.type = "feed-forward"
         self.layer_sizes = [10, 10, 10]
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
@@ -576,7 +578,7 @@ class Parameters:
     comment : string
         Characterizes a set of parameters (e.g. "experiment_ddmmyy").
 
-    network : ParametersNetwork
+    model : ParametersModel
         Contains all parameters necessary for constructing a neural network.
 
     descriptors : ParametersDescriptors
@@ -607,7 +609,7 @@ class Parameters:
         self.comment = ""
 
         # Parameters subobjects.
-        self.network = ParametersNetwork()
+        self.model = ParametersModel()
         self.descriptors = ParametersDescriptors()
         self.targets = ParametersTargets()
         self.data = ParametersData()
@@ -635,7 +637,7 @@ class Parameters:
             else:
                 warnings.warn("GPU requested, but no GPU found. MALA will "
                               "operate with CPU only.", stacklevel=3)
-        self.network._update_gpu(self.use_gpu)
+        self.model._update_gpu(self.use_gpu)
         self.descriptors._update_gpu(self.use_gpu)
         self.targets._update_gpu(self.use_gpu)
         self.data._update_gpu(self.use_gpu)
@@ -654,7 +656,7 @@ class Parameters:
             hvd.init()
         set_horovod_status(value)
         self._use_horovod = value
-        self.network._update_horovod(self.use_horovod)
+        self.model._update_horovod(self.use_horovod)
         self.descriptors._update_horovod(self.use_horovod)
         self.targets._update_horovod(self.use_horovod)
         self.data._update_horovod(self.use_horovod)

@@ -7,7 +7,7 @@ class Model(ABC, nn.Module):
     def __init__(self, params):
         # copy the models params from the input parameter object
         self.use_horovod = params.use_horovod
-        self.params = params.network
+        self.params = params.model
 
         # if the user has planted a seed (for comparibility purposes) we
         # should use it.

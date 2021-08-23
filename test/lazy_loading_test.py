@@ -37,13 +37,13 @@ class TestLazyLoading:
         test_parameters.data.data_splitting_type = "by_snapshot"
         test_parameters.descriptors.twojmax = 11
         test_parameters.targets.ldos_gridsize = 10
-        test_parameters.network.layer_activations = ["LeakyReLU"]
+        test_parameters.model.layer_activations = ["LeakyReLU"]
         test_parameters.running.max_number_epochs = 3
         test_parameters.running.mini_batch_size = 512
         test_parameters.running.learning_rate = 0.00001
         test_parameters.running.trainingtype = "Adam"
         test_parameters.comment = "Lazy loading test."
-        test_parameters.network.nn_type = "feed-forward"
+        test_parameters.model.type = "feed-forward"
         test_parameters.running.use_gpu = True
         test_parameters.data.use_lazy_loading = False
 
@@ -116,7 +116,7 @@ class TestLazyLoading:
                                           [0].sum() +
                                           (data_handler.training_data_set[4001])
                                           [0].sum())
-                    test_parameters.network.layer_sizes = \
+                    test_parameters.model.layer_sizes = \
                         [data_handler.get_input_dimension(), 100,
                          data_handler.get_output_dimension()]
 
@@ -177,12 +177,12 @@ class TestLazyLoading:
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.network.layer_activations = ["LeakyReLU"]
+        test_parameters.model.layer_activations = ["LeakyReLU"]
         test_parameters.running.max_number_epochs = 20
         test_parameters.running.mini_batch_size = 500
         test_parameters.running.trainingtype = "Adam"
         test_parameters.comment = "Horovod / lazy loading benchmark."
-        test_parameters.network.nn_type = "feed-forward"
+        test_parameters.model.type = "feed-forward"
         test_parameters.manual_seed = 2021
 
         ####################
@@ -229,7 +229,7 @@ class TestLazyLoading:
                                           add_snapshot_as="te")
 
                 data_handler.prepare_data()
-                test_parameters.network.layer_sizes = \
+                test_parameters.model.layer_sizes = \
                     [data_handler.get_input_dimension(), 100,
                      data_handler.get_output_dimension()]
 

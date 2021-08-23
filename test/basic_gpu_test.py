@@ -86,7 +86,7 @@ class TestGPUExecution:
         test_parameters.data.output_rescaling_type = "normal"
 
         # Specify the used activation function.
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.model.layer_activations = ["ReLU"]
 
         # Specify the training parameters.
         test_parameters.running.max_number_epochs = 100
@@ -125,10 +125,10 @@ class TestGPUExecution:
         # but it is safer this way.
         ####################
 
-        test_parameters.network.layer_sizes = [data_handler.
+        test_parameters.model.layer_sizes = [data_handler.
                                                get_input_dimension(),
-                                               100,
-                                               data_handler.
+                                             100,
+                                             data_handler.
                                                get_output_dimension()]
 
         # Setup network and trainer.

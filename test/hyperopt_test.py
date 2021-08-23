@@ -192,7 +192,7 @@ class TestHyperparameterOptimization:
         # Perform the actual hyperparameter optimization.
         test_hp_optimizer = mala.HyperOptInterface(test_parameters,
                                                    data_handler)
-        test_parameters.network.layer_sizes = [
+        test_parameters.model.layer_sizes = [
             data_handler.get_input_dimension(),
             100, 100,
             data_handler.get_output_dimension()]

@@ -28,7 +28,7 @@ test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
 # Specify the data scaling.
 test_parameters.data.input_rescaling_type = "feature-wise-standard"
 test_parameters.data.output_rescaling_type = "normal"
-test_parameters.network.nn_type = "dummy"
+test_parameters.model.type = "dummy"
 test_parameters.running.use_shuffling_for_samplers = False
 
 # Specify the training parameters.

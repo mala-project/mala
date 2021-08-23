@@ -235,7 +235,7 @@ class TestFullWorkflow:
         test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
-        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.model.layer_activations = ["ReLU"]
         test_parameters.running.max_number_epochs = 400
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
@@ -255,7 +255,7 @@ class TestFullWorkflow:
         data_handler.prepare_data()
 
         # Train a network.
-        test_parameters.network.layer_sizes = [
+        test_parameters.model.layer_sizes = [
             data_handler.get_input_dimension(),
             100,
             data_handler.get_output_dimension()]

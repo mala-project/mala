@@ -97,10 +97,10 @@ class ObjectiveBase:
             A set of hyperparameters encoded by optuna.
         """
         if self.optimize_layer_list:
-            self.params.network.layer_sizes = \
+            self.params.model.layer_sizes = \
                 [self.data_handler.get_input_dimension()]
         if self.optimize_activation_list > 0:
-            self.params.network.layer_activations = []
+            self.params.model.layer_activations = []
 
         # Some layers may have been turned off by optuna.
         turned_off_layers = []
@@ -114,12 +114,12 @@ class ObjectiveBase:
                 self.params.running.learning_rate = par.get_parameter(trial)
 
             elif "ff_neurons_layer" in par.name:
-                if self.params.network.nn_type == "feed-forward":
+                if self.params.model.type == "feed-forward":
                     # Check for zero neuron layers; These indicate layers
                     # that can be left out.
                     layer_size = par.get_parameter(trial)
                     if layer_size > 0:
-                        self.params.network.layer_sizes.\
+                        self.params.model.layer_sizes.\
                             append(par.get_parameter(trial))
                     else:
                         turned_off_layers.append(layer_counter)
@@ -157,12 +157,12 @@ class ObjectiveBase:
         for par in self.params.hyperparameters.hlist:
             if "layer_activation" in par.name:
                 if layer_counter not in turned_off_layers:
-                    self.params.network.layer_activations.\
+                    self.params.model.layer_activations.\
                         append(par.get_parameter(trial))
                 layer_counter += 1
 
         if self.optimize_layer_list:
-            self.params.network.layer_sizes.\
+            self.params.model.layer_sizes.\
                 append(self.data_handler.get_output_dimension())
 
     def parse_trial_oat(self, trial):
@@ -175,12 +175,12 @@ class ObjectiveBase:
             Row in an orthogonal array which respresents current trial.
         """
         if self.optimize_activation_list > 0:
-            self.params.network.layer_activations = []
+            self.params.model.layer_activations = []
 
         par: HyperparameterOAT
         for factor_idx, par in enumerate(self.params.hyperparameters.hlist):
             if "layer_activation" in par.name:
-                self.params.network.layer_activations.\
+                self.params.model.layer_activations.\
                     append(par.get_parameter(trial, factor_idx))
             elif "trainingtype" in par.name:
                 self.params.running.trainingtype = par.\

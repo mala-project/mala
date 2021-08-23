@@ -74,9 +74,9 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
     ####################
 
     test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
-    test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),
-                                           100, 100,
-                                           data_handler.get_output_dimension()]
+    test_parameters.model.layer_sizes = [data_handler.get_input_dimension(),
+                                         100, 100,
+                                         data_handler.get_output_dimension()]
 
     # Add hyperparameters we want to have optimized to the list.
     # If we do a notraining run currently we need to create an input array

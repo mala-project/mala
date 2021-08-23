@@ -456,7 +456,7 @@ class Trainer(Runner):
         """Process a mini batch."""
         prediction = network.forward(input_data)
         loss = network.calculate_loss(prediction, target_data)
-        if network.params.nn_type == "dummy":
+        if network.params.type == "dummy":
             network.tune_model(loss, self.parameters.learning_rate)
             return loss
         else:

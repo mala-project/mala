@@ -21,7 +21,7 @@ class Network(nn.Module):
     def __init__(self, params):
         # copy the network params from the input parameter object
         self.use_horovod = params.use_horovod
-        self.params = params.network
+        self.params = params.model
 
         # if the user has planted a seed (for comparibility purposes) we
         # should use it.
@@ -44,7 +44,7 @@ class Network(nn.Module):
         self.number_of_layers = len(self.params.layer_sizes) - 1
         self.layers = nn.ModuleList()
 
-        if self.params.nn_type == "feed-forward":
+        if self.params.type == "feed-forward":
             self.__initialize_as_feedforward()
         else:
             raise Exception("Unsupported network architecture.")
@@ -105,7 +105,7 @@ class Network(nn.Module):
             Predicted outputs of array.
         """
         # Forward propagate data.
-        if self.params.nn_type == "feed-forward":
+        if self.params.type == "feed-forward":
             for layer in self.layers:
                 inputs = layer(inputs)
             return inputs
