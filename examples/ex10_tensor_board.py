@@ -1,6 +1,5 @@
 import mala
 from mala import printout
-from mala.common.launch_tensorboard import Launch_tensorboard
 from tensorboard import program
 import shutil
 import webbrowser
@@ -9,9 +8,8 @@ data_path = get_data_repo_path()+"Al36/"
 
 
 """
-ex01_run_singleshot.py: Shows how a neural network can be trained on material 
-data using this framework. It uses preprocessed data, that is read in 
-from *.npy files.
+ex10. launched tensorboard in webbrowser
+the parameteres and initial configurations are similar to ex01.
 """
 
 
@@ -98,14 +96,19 @@ test_parameters.show()
 
 ####################
 # Using tensorboard and launching the link in webbrowser
+# Runs tensorboard with the given log_dir and wait for user
+# input to kill the app.
 #################### 
-class Launch_tensorboard:
+class Launchtensorboard:
+
     """
-    Runs tensorboard with the given log_dir and wait for user
-        input to kill the app.
-    :param :
-    :param clear_on_exit: If True Clears the log_dir on exit and kills the tensorboard app
-    :return:
+    Parameters necessary for Launching tensorboard.
+    
+    Attributes
+    param         : parameters are handled from a central parameters class that
+                    contains subclasses.
+    clear_on_exit : bool
+                    If True Clears the log_dir on exit and kills the tensorboard app.
     """
 
     def __init__(self, params, clear_on_exit= False):
@@ -131,5 +134,5 @@ class Launch_tensorboard:
                 shutil.rmtree(self.log_dir, ignore_errors=True)
             print("\nCleared Logdir")
 
-launch_tb = Launch_tensorboard(test_parameters)
+launch_tb = Launchtensorboard(test_parameters)
 launch_tb.run()
