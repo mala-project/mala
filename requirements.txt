@@ -6,6 +6,5 @@ mpmath
 numpy
 optuna
 scipy
-oapackage
 pandas
 tensorboard
