@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.1.0-230-g9be0ef2
+                v0.0.3-alpha-297-gd9e0451
               </div>
             
           
@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install/tested_systems.html">Successfully tested on</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install/sql_on_hpc.html">Using postgres on HPC infrastructure (for optuna)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/tensorboard_setup.html">Set up tensorboard to visualize data from HPC cluster</a></li>
 </ul>
 <p class="caption"><span class="caption-text">API Reference</span></p>
 <ul class="current">
@@ -672,7 +673,7 @@ optimizer provide interfaces for this task.</p>
 <li><p>“optuna” : Use optuna for the hyperparameter optimization.</p></li>
 <li><p>“oat” : Use orthogonal array tuning (currently limited to
 categorical hyperparemeters). Range analysis is
-currently done by simply choosing the lowest loss.</p></li>
+currently done by simply choosing the lowesr loss.</p></li>
 <li><p>“notraining” : Using a NAS without training, based on jacobians.</p></li>
 </ul>
 </div></blockquote>
@@ -1025,6 +1026,20 @@ can be performed in the same directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.visualisation">
+<code class="sig-name descname"><span class="pre">visualisation</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.visualisation" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True then Tensorboard is activated for visualisation
+case 0: No tensorboard activated
+case 1: tensorboard activated with Loss and learning rate
+case 2; additonally weights and biases and gradient</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

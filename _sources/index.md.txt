@@ -28,6 +28,7 @@ install/INSTALL_LAMMPS
 install/INSTALL_TE_QE
 install/tested_systems
 install/sql_on_hpc
+install/tensorboard_setup
 ```
 
 ```{toctree}
