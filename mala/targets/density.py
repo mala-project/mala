@@ -34,6 +34,31 @@ class Density(TargetBase):
         # there is one value for the density (spin-unpolarized calculations).
         self.target_length = 1
 
+    @staticmethod
+    def convert_units(array, in_units="None"):
+        """
+        Convert the units of a SNAP descriptor.
+
+        Since these do not really have units this function does nothing yet.
+
+        Parameters
+        ----------
+        array : numpy.array
+            Data for which the units should be converted.
+
+        in_units : string
+            Units of array.
+
+        Returns
+        -------
+        converted_array : numpy.array
+            Data in MALA units.
+        """
+        if in_units == "None":
+            return array
+        else:
+            raise Exception("Unsupported unit for electronic density.")
+
     def read_from_cube(self, file_name, directory, units=None):
         """
         Read the density data from a cube file.
@@ -80,7 +105,7 @@ class Density(TargetBase):
             grid_spacing_bohr = self.grid_spacing_Bohr
 
         # Check input data for correctness.
-        data_shape = np.shape(density_data)
+        data_shape = np.shape(np.squeeze(density_data))
         if len(data_shape) != 3:
             if len(data_shape) != 1:
                 raise Exception("Unknown Density shape, cannot calculate "

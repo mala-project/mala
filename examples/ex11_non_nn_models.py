@@ -30,6 +30,7 @@ test_parameters.data.input_rescaling_type = "feature-wise-standard"
 test_parameters.data.output_rescaling_type = "normal"
 test_parameters.model.type = "dummy"
 test_parameters.running.use_shuffling_for_samplers = False
+test_parameters.targets.target_type = "Density"
 
 # Specify the training parameters.
 test_parameters.running.max_number_epochs = 1
@@ -51,13 +52,13 @@ data_handler = mala.DataHandler(test_parameters)
 # Add all the snapshots we want to use in to the list.
 data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                           "Al_debug_2k_nr0.out.npy", data_path,
-                          output_units="1/Ry")
+                          output_units="None")
 data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                           "Al_debug_2k_nr1.out.npy", data_path,
-                          output_units="1/Ry")
+                          output_units="None")
 data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                           "Al_debug_2k_nr2.out.npy", data_path,
-                          output_units="1/Ry")
+                          output_units="None")
 data_handler.prepare_data()
 
 
@@ -78,7 +79,9 @@ test_trainer.train_network()
 ####################
 
 tester = mala.Tester(test_parameters, model, data_handler)
-actual_density, predicted_density = tester.test_snapshot(2)
+
+# Test the first and only test snapshot.
+actual_density, predicted_density = tester.test_snapshot(0)
 
 # For this model, the target calculator handles density data.
 density_calculator = data_handler.target_calculator

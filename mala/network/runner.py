@@ -76,6 +76,7 @@ class Runner:
             Precicted outputs for snapshot.
         """
         if self.data.parameters.use_lazy_loading:
+            print("HERE?")
             data_set.return_outputs_directly = True
             actual_outputs = \
                 (data_set
