@@ -63,8 +63,36 @@ data_handler.prepare_data()
 
 printout("Read data: DONE.")
 
+####################
+# TRAINING
+# Train a model.
+####################
+
 model = mala.DummyModel(test_parameters)
 test_trainer = mala.Trainer(test_parameters, model, data_handler)
 test_trainer.train_network()
+
+####################
+# TESTING
+# Evaluate model performance.
+####################
+
+tester = mala.Tester(test_parameters, model, data_handler)
+actual_density, predicted_density = tester.test_snapshot(2)
+
+# For this model, the target calculator handles density data.
+density_calculator = data_handler.target_calculator
+density_calculator.read_additional_calculation_data("qe.out",
+                                                    data_path +
+                                                    "Al.pw.scf.out")
+
+# Calculate the number of electrons.
+nr_electrons_predicted = density_calculator. \
+    get_number_of_electrons(predicted_density)
+nr_electrons_actual = density_calculator.get_number_of_electrons(actual_density)
+printout("Number of electrons (actual, predicted, error)[eV]",
+         nr_electrons_actual, nr_electrons_predicted,
+         nr_electrons_predicted - nr_electrons_actual)
+
 
 
