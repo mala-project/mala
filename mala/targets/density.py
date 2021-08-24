@@ -80,7 +80,7 @@ class Density(TargetBase):
             grid_spacing_bohr = self.grid_spacing_Bohr
 
         # Check input data for correctness.
-        data_shape = np.shape(density_data)
+        data_shape = np.shape(np.squeeze(density_data))
         if len(data_shape) != 3:
             if len(data_shape) != 1:
                 raise Exception("Unknown Density shape, cannot calculate "
