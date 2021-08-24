@@ -39,7 +39,7 @@ class HyperOptOAT(HyperOptBase):
         """
         Perform the study, i.e. the optimization.
 
-        This is done by sampling a certain subset of network architectures.
+        This is done by sampling a certain subset of models architectures.
         In this case, these are choosen based on an orthogonal array.
         """
         number_of_trial = 0

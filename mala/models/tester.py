@@ -1,4 +1,4 @@
-"""Tester class for testing a network."""
+"""Tester class for testing a models."""
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -13,7 +13,7 @@ except ModuleNotFoundError:
 
 class Tester(Runner):
     """
-    A class for testing a neural network.
+    A class for testing a model.
 
     It enables easy inference throughout a test set.
 
@@ -22,16 +22,16 @@ class Tester(Runner):
     params : mala.common.parametes.Parameters
         Parameters used to create this Tester object.
 
-    network : mala.network.network.Network
+    model : mala.model.model.Model
         Network which is being tested.
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the test data.
     """
 
-    def __init__(self, params, network, data):
+    def __init__(self, params, model, data):
         # copy the parameters into the class.
-        super(Tester, self).__init__(params, network, data)
+        super(Tester, self).__init__(params, model, data)
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
         self.__prepare_to_test()
@@ -53,7 +53,7 @@ class Tester(Runner):
         predicted_outputs : torch.Tensor
             Precicted outputs for snapshot.
         """
-        # Forward through network.
+        # Forward through models.
         return self.\
             _forward_entire_snapshot(snapshot_number,
                                      self.data.test_data_set,
@@ -76,3 +76,5 @@ class Tester(Runner):
         self.number_of_batches_per_snapshot = int(self.data.grid_size /
                                                   self.parameters.
                                                   mini_batch_size)
+        # Also prepare the models for evaluation.
+        self.model.eval()

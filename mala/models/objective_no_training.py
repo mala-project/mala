@@ -5,8 +5,8 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 from mala.common.parameters import Parameters
 from mala.datahandling.data_handler import DataHandler
-from mala.network.network import Network
-from mala.network.objective_base import ObjectiveBase
+from mala.models.network import Network
+from mala.models.objective_base import ObjectiveBase
 from mala.common.parameters import printout
 
 
@@ -51,7 +51,7 @@ class ObjectiveNoTraining(ObjectiveBase):
         # Parse the parameters using the base class.
         super(ObjectiveNoTraining, self).parse_trial(trial)
 
-        # Build the network.
+        # Build the models.
         net = Network(self.params)
         device = "cuda" if self.params.use_gpu else "cpu"
 

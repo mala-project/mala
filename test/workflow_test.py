@@ -211,15 +211,15 @@ class TestFullWorkflow:
                           atol=accuracy_total_energy)
 
     def test_training_with_postprocessing(self):
-        """Test if a trained network can be loaded for postprocessing."""
+        """Test if a trained models can be loaded for postprocessing."""
         self.__simple_training(save_network=True)
         self.__use_trained_network()
 
     def test_training_with_postprocessing_data_repo(self):
         """
-        Test if a trained network can be loaded for postprocessing.
+        Test if a trained models can be loaded for postprocessing.
 
-        For this test, a network from the data repo will be loaded.
+        For this test, a models from the data repo will be loaded.
         If this does not work, it's most likely because someting in the MALA
         parameters changed.
         """
@@ -254,17 +254,17 @@ class TestFullWorkflow:
                                   output_units="1/Ry")
         data_handler.prepare_data()
 
-        # Train a network.
+        # Train a models.
         test_parameters.model.layer_sizes = [
             data_handler.get_input_dimension(),
             100,
             data_handler.get_output_dimension()]
 
-        # Setup network and trainer.
+        # Setup models and trainer.
         test_network = mala.Network(test_parameters)
         test_trainer = mala.Trainer(test_parameters, test_network,
                                     data_handler)
-        test_trainer.train_network()
+        test_trainer.train_model()
 
         # Save, if necessary.
         if save_network:
@@ -273,7 +273,7 @@ class TestFullWorkflow:
             input_scaler_path = "workflow_test_iscaler.pkl"
             output_scaler_path = "workflow_test_oscaler.pkl"
             test_parameters.save(params_path)
-            test_network.save_network(network_path)
+            test_network.save_model(network_path)
             data_handler.input_data_scaler.save(input_scaler_path)
             data_handler.output_data_scaler.save(output_scaler_path)
 
@@ -281,14 +281,14 @@ class TestFullWorkflow:
 
     @staticmethod
     def __use_trained_network(save_path="./"):
-        """Use a trained network to make a prediction."""
+        """Use a trained models to make a prediction."""
 
         params_path = save_path+"workflow_test_params.pkl"
         network_path = save_path+"workflow_test_network.pth"
         input_scaler_path = save_path+"workflow_test_iscaler.pkl"
         output_scaler_path = save_path+"workflow_test_oscaler.pkl"
 
-        # Load parameters, network and data scalers.
+        # Load parameters, models and data scalers.
         new_parameters = mala.Parameters.load_from_file(params_path,
                                                         no_snapshots=True)
         new_parameters.targets.target_type = "LDOS"

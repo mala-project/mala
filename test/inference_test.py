@@ -1,8 +1,8 @@
 from mala.common.parameters import Parameters
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
-from mala.network.network import Network
-from mala.network.tester import Tester
+from mala.models.network import Network
+from mala.models.tester import Tester
 from mala.common.parameters import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
@@ -95,7 +95,7 @@ class TestInference:
 
     @staticmethod
     def __run(use_lazy_loading=False, batchsize=46):
-        # First we load Parameters and network.
+        # First we load Parameters and models.
         new_parameters = Parameters.load_from_file(params_path,
                                                    no_snapshots=True)
         new_parameters.data.data_splitting_snapshots = ["te"]

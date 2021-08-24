@@ -1,5 +1,4 @@
-"""Trainer class for training a network."""
-from mala.network.network import Network
+"""Trainer class for training a models."""
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
 from mala.common.parameters import Parameters
@@ -9,6 +8,7 @@ import torch
 from torch import optim
 from torch.utils.data import DataLoader
 from mala.common.parameters import printout
+from .model_interface import ModelInterface
 from .runner import Runner
 try:
     import horovod.torch as hvd
@@ -19,23 +19,23 @@ import time
 
 
 class Trainer(Runner):
-    """A class for training a neural network.
+    """A class for training a model.
 
     Parameters
     ----------
     params : mala.common.parametes.Parameters
         Parameters used to create this Trainer object.
 
-    network : mala.network.network.Network
+    model : mala.model.model.Model
         Network which is being trained.
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the training data.
     """
 
-    def __init__(self, params, network, data, optimizer_dict=None):
+    def __init__(self, params, model, data, optimizer_dict=None):
         # copy the parameters into the class.
-        super(Trainer, self).__init__(params, network, data)
+        super(Trainer, self).__init__(params, model, data)
         self.final_test_loss = float("inf")
         self.initial_test_loss = float("inf")
         self.final_validation_loss = float("inf")
@@ -68,14 +68,14 @@ class Trainer(Runner):
             True if the checkpoint exists, False otherwise.
 
         """
-        network_name = checkpoint_name + "_network.pth"
+        model_name = checkpoint_name + "_model.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
         param_name = checkpoint_name + "_params.pkl"
         optimizer_name = checkpoint_name + "_optimizer.pth"
 
         return all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
-                                        network_name, optimizer_name]))
+                                        model_name, optimizer_name]))
 
     @classmethod
     def resume_checkpoint(cls, checkpoint_name):
@@ -83,7 +83,7 @@ class Trainer(Runner):
         Prepare resumption of training from a checkpoint.
 
         Please note that to actually resume the training,
-        Trainer.train_network() still has to be called.
+        Trainer.train_model() still has to be called.
 
         Parameters
         ----------
@@ -95,8 +95,8 @@ class Trainer(Runner):
         loaded_params : mala.common.parameters.Parameters
             The Parameters saved in the checkpoint.
 
-        loaded_network : mala.network.network.Network
-            The network saved in the checkpoint.
+        loaded_model : mala.model.model.Model
+            The models saved in the checkpoint.
 
         new_datahandler : mala.datahandling.data_handler.DataHandler
             The data handler reconstructed from the checkpoint.
@@ -106,7 +106,7 @@ class Trainer(Runner):
         """
         printout("Loading training run from checkpoint.")
         # The names are based upon the checkpoint name.
-        network_name = checkpoint_name + "_network.pth"
+        model_name = checkpoint_name + "_model.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
         param_name = checkpoint_name + "_params.pkl"
@@ -116,9 +116,8 @@ class Trainer(Runner):
         loaded_params = Parameters.load_from_file(param_name)
         loaded_iscaler = DataScaler.load_from_file(iscaler_name)
         loaded_oscaler = DataScaler.load_from_file(oscaler_name)
-        loaded_network = Network.load_from_file(loaded_params,
-                                                network_name)
-
+        loaded_model = ModelInterface(loaded_params).load_from_file(
+                        loaded_params, model_name)
         printout("Preparing data used for last checkpoint.")
         # Create a new data handler and prepare the data.
         new_datahandler = DataHandler(loaded_params,
@@ -126,12 +125,12 @@ class Trainer(Runner):
                                       output_data_scaler=loaded_oscaler)
         new_datahandler.prepare_data(reparametrize_scaler=False)
         new_trainer = Trainer.load_from_file(loaded_params, optimizer_name,
-                                             loaded_network, new_datahandler)
+                                             loaded_model, new_datahandler)
 
-        return loaded_params, loaded_network, new_datahandler, new_trainer
+        return loaded_params, loaded_model, new_datahandler, new_trainer
 
     @classmethod
-    def load_from_file(cls, params, file_path, network, data):
+    def load_from_file(cls, params, file_path, model, data):
         """
         Load a trainer from a file.
 
@@ -139,13 +138,13 @@ class Trainer(Runner):
         ----------
         params : mala.common.parameters.Parameters
             Parameters object with which the trainer should be created.
-            Has to be compatible with network and data.
+            Has to be compatible with model and data.
 
         file_path : string
             Path to the file from which the trainer should be loaded.
 
-        network : mala.network.network.Network
-            Network which is being trained.
+        model : mala.model.model.Model
+            Model which is being trained.
 
         data : mala.datahandling.data_handler.DataHandler
             DataHandler holding the training data.
@@ -159,27 +158,27 @@ class Trainer(Runner):
         checkpoint = torch.load(file_path)
 
         # Now, create the Trainer class with it.
-        loaded_trainer = Trainer(params, network, data,
+        loaded_trainer = Trainer(params, model, data,
                                  optimizer_dict=checkpoint)
         return loaded_trainer
 
-    def train_network(self):
-        """Train a network using data given by a DataHandler."""
+    def train_model(self):
+        """Train a models using data given by a DataHandler."""
         ############################
         # CALCULATE INITIAL METRICS
         ############################
 
         tloss = float("inf")
-        vloss = self.__validate_network(self.network,
+        vloss = self.__validate_model(self.model,
                                         "validation",
-                                        self.parameters.
-                                        after_before_training_metric)
+                                      self.parameters.
+                                      after_before_training_metric)
 
         if self.data.test_data_set is not None:
-            tloss = self.__validate_network(self.network,
+            tloss = self.__validate_model(self.model,
                                             "test",
-                                            self.parameters.
-                                            after_before_training_metric)
+                                          self.parameters.
+                                          after_before_training_metric)
 
         # Collect and average all the losses from all the devices
         if self.parameters_full.use_horovod:
@@ -214,7 +213,7 @@ class Trainer(Runner):
             start_time = time.time()
 
             # Prepare model for training.
-            self.network.train()
+            self.model.train()
 
             # Process each mini batch and save the training loss.
             training_loss = 0
@@ -229,14 +228,14 @@ class Trainer(Runner):
 
                     inputs = inputs.to('cuda')
                     outputs = outputs.to('cuda')
-                training_loss += self.__process_mini_batch(self.network,
+                training_loss += self.__process_mini_batch(self.model,
                                                            inputs, outputs)
 
             # Calculate the validation loss. and output it.
-            vloss = self.__validate_network(self.network,
+            vloss = self.__validate_model(self.model,
                                             "validation",
-                                            self.parameters.
-                                            during_training_metric)
+                                          self.parameters.
+                                          during_training_metric)
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
             if self.parameters.verbosity:
@@ -294,10 +293,10 @@ class Trainer(Runner):
 
         if self.parameters.after_before_training_metric != \
                 self.parameters.during_training_metric:
-            vloss = self.__validate_network(self.network,
+            vloss = self.__validate_model(self.model,
                                             "validation",
-                                            self.parameters.
-                                            after_before_training_metric)
+                                          self.parameters.
+                                          after_before_training_metric)
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
 
@@ -306,10 +305,10 @@ class Trainer(Runner):
 
         tloss = float("inf")
         if self.data.test_data_set is not None:
-            tloss = self.__validate_network(self.network,
+            tloss = self.__validate_model(self.model,
                                             "test",
-                                            self.parameters.
-                                            after_before_training_metric)
+                                          self.parameters.
+                                          after_before_training_metric)
             if self.parameters_full.use_horovod:
                 tloss = self.__average_validation(tloss, 'average_loss')
             printout("Final test data loss: ", tloss)
@@ -331,12 +330,12 @@ class Trainer(Runner):
 
         # Choose an optimizer to use.
         if self.parameters.trainingtype == "SGD":
-            self.optimizer = optim.SGD(self.network.parameters(),
+            self.optimizer = optim.SGD(self.model.parameters(),
                                        lr=self.parameters.learning_rate,
                                        weight_decay=self.parameters.
                                        weight_decay)
         elif self.parameters.trainingtype == "Adam":
-            self.optimizer = optim.Adam(self.network.parameters(),
+            self.optimizer = optim.Adam(self.model.parameters(),
                                         lr=self.parameters.learning_rate,
                                         weight_decay=self.parameters.
                                         weight_decay)
@@ -389,13 +388,13 @@ class Trainer(Runner):
 
             # broadcaste parameters and optimizer state from root device to
             # other devices
-            hvd.broadcast_parameters(self.network.state_dict(), root_rank=0)
+            hvd.broadcast_parameters(self.model.state_dict(), root_rank=0)
             hvd.broadcast_optimizer_state(self.optimizer, root_rank=0)
 
             # Wraps the opimizer for multiGPU operation
             self.optimizer = hvd.DistributedOptimizer(self.optimizer,
                                                       named_parameters=
-                                                      self.network.
+                                                      self.model.
                                                       named_parameters(),
                                                       compression=compression,
                                                       op=hvd.Average)
@@ -452,12 +451,12 @@ class Trainer(Runner):
                                                sampler["test_sampler"],
                                                **self.parameters.kwargs)
 
-    def __process_mini_batch(self, network, input_data, target_data):
+    def __process_mini_batch(self, model, input_data, target_data):
         """Process a mini batch."""
-        prediction = network.forward(input_data)
-        loss = network.calculate_loss(prediction, target_data)
-        if network.params.type == "dummy":
-            network.tune_model(loss, self.parameters.learning_rate)
+        prediction = model.forward(input_data)
+        loss = model.calculate_loss(prediction, target_data)
+        if model.params.type == "dummy":
+            model.tune_model(loss, self.parameters.learning_rate)
             return loss
         else:
             loss.backward()
@@ -465,8 +464,8 @@ class Trainer(Runner):
             self.optimizer.zero_grad()
             return loss.item()
 
-    def __validate_network(self, network, data_set_type, validation_type):
-        """Validate a network, using test or validation data."""
+    def __validate_model(self, model, data_set_type, validation_type):
+        """Validate a model, using test or validation data."""
         if data_set_type == "test":
             data_loader = self.test_data_loader
             data_set = self.data.test_data_set
@@ -483,7 +482,7 @@ class Trainer(Runner):
         else:
             raise Exception("Please select test or validation"
                             "when using this function.")
-        network.eval()
+        model.eval()
         if validation_type == "ldos":
             validation_loss = []
             with torch.no_grad():
@@ -491,8 +490,8 @@ class Trainer(Runner):
                     if self.parameters_full.use_gpu:
                         x = x.to('cuda')
                         y = y.to('cuda')
-                    prediction = network(x)
-                    validation_loss.append(network.calculate_loss(prediction, y)
+                    prediction = model(x)
+                    validation_loss.append(model.calculate_loss(prediction, y)
                                            .item())
 
             return np.mean(validation_loss)
@@ -595,8 +594,8 @@ class Trainer(Runner):
         Follows https://pytorch.org/tutorials/recipes/recipes/saving_and_
         loading_a_general_checkpoint.html to some degree.
         """
-        network_name = self.parameters.checkpoint_name \
-            + "_network.pth"
+        model_name = self.parameters.checkpoint_name \
+            + "_model.pth"
         iscaler_name = self.parameters.checkpoint_name \
             + "_iscaler.pkl"
         oscaler_name = self.parameters.checkpoint_name \
@@ -610,7 +609,7 @@ class Trainer(Runner):
         self.data.input_data_scaler.save(iscaler_name)
         self.data.output_data_scaler.save(oscaler_name)
         self.parameters_full.save(param_name)
-        self.network.save_network(network_name)
+        self.model.save_model(model_name)
 
         # Next, we save all the other objects.
 

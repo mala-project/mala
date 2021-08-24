@@ -48,7 +48,7 @@ ldos.read_additional_calculation_data("qe.out",
                                       data_path+"Al.pw.scf.out")
 
 # Read in LDOS data. For actual workflows, this part will come
-# from a network.
+# from a models.
 ldos_data = np.load(data_path+"Al_ldos.npy")
 
 # Get quantities of interest.

@@ -42,7 +42,7 @@ class TestHyperoptCheckpointing:
 
         Returns
         -------
-        hyperopt: mala.network.hyper_opt_base.HyperOptBase:
+        hyperopt: mala.models.hyper_opt_base.HyperOptBase:
             The hyperopt object.
 
         """
@@ -136,7 +136,7 @@ class TestHyperoptCheckpointing:
 
         Returns
         -------
-        hyperopt: mala.network.hyper_opt_base.HyperOptBase:
+        hyperopt: mala.models.hyper_opt_base.HyperOptBase:
             The hyperopt object.
 
         """

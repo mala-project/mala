@@ -63,7 +63,7 @@ class HyperOptOptuna(HyperOptBase):
         """
         Perform the study, i.e. the optimization.
 
-        This is done by sampling a certain subset of network architectures.
+        This is done by sampling a certain subset of models architectures.
         In this case, optuna is used.
         """
         # The parameters could have changed.

@@ -4,12 +4,12 @@ import numpy as np
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
 """
-ex05_training_with_postprocessing.py: Train a network, then use this network 
+ex05_training_with_postprocessing.py: Train a models, then use this models 
 to predict the LDOS and then analyze the results of this prediction. This 
 example is structured a little bit different than other examples. It consists 
 of two functions, to show that networks can be saved and reaccessed after being
 trained once. By default, the training function is commented out. A saved 
-network architecture and parameters is provided in this repository, so this 
+models architecture and parameters is provided in this repository, so this 
 example focusses more on the analysis part. Nonetheless, the training can also
 be done by simply uncommenting the function call. Please not that the values 
 calculated at the end will be wrong, because we operate on 0.0025 % of a full 
@@ -17,11 +17,11 @@ DFT simulation cell for this example.
 """
 
 
-# Uses a trained network to make a prediction.
+# Uses a trained models to make a prediction.
 def use_trained_network(network_path, params_path, input_scaler_path,
                         output_scaler_path):
 
-    # First load Parameters and network.
+    # First load Parameters and models.
     # Parameters may have to
     new_parameters = mala.Parameters.load_from_file(params_path,
                                                     no_snapshots=True)
@@ -36,7 +36,7 @@ def use_trained_network(network_path, params_path, input_scaler_path,
     # training was not.
     new_parameters.data.use_lazy_loading = True
 
-    # Load a network from a file.
+    # Load a models from a file.
     new_network = mala.Network.load_from_file(new_parameters, network_path)
 
     # Make sure the same scaling is used for data handling.
@@ -81,7 +81,7 @@ def use_trained_network(network_path, params_path, input_scaler_path,
              nr_electrons_predicted-nr_electrons_actual)
 
 
-# Trains a network.
+# Trains a models.
 def initial_training(network_path, params_path, input_scaler_path,
                      output_scaler_path, desired_loss_improvement_factor=1):
     ####################
@@ -133,7 +133,7 @@ def initial_training(network_path, params_path, input_scaler_path,
 
     ####################
     # NETWORK SETUP
-    # Set up the network and trainer we want to use.
+    # Set up the models and trainer we want to use.
     # The layer sizes can be specified before reading data,
     # but it is safer this way.
     ####################
@@ -142,28 +142,28 @@ def initial_training(network_path, params_path, input_scaler_path,
                                          100,
                                          data_handler.get_output_dimension()]
 
-    # Setup network and trainer.
+    # Setup models and trainer.
     test_network = mala.Network(test_parameters)
     test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
     printout("Network setup: DONE.")
 
     ####################
     # TRAINING
-    # Train the network.
+    # Train the models.
     ####################
 
     printout("Starting training.")
-    test_trainer.train_network()
+    test_trainer.train_model()
     printout("Training: DONE.")
 
     ####################
     # SAVING
     # In order to be operational at a later point we need to save 4 objects:
-    # Parameters, input/output scaler, network.
+    # Parameters, input/output scaler, models.
     ####################
 
     test_parameters.save(params_path)
-    test_network.save_network(network_path)
+    test_network.save_model(network_path)
     data_handler.input_data_scaler.save(input_scaler_path)
     data_handler.output_data_scaler.save(output_scaler_path)
 

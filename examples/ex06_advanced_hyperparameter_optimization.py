@@ -131,7 +131,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
     test_network = mala.Network(test_parameters)
     test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
     printout("Network setup: DONE.")
-    test_trainer.train_network()
+    test_trainer.train_model()
     printout("Training: DONE.")
 
     printout("Parameters used for this experiment:")

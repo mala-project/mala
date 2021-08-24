@@ -71,7 +71,7 @@ printout("Read data: DONE.")
 
 model = mala.DummyModel(test_parameters)
 test_trainer = mala.Trainer(test_parameters, model, data_handler)
-test_trainer.train_network()
+test_trainer.train_model()
 
 ####################
 # TESTING

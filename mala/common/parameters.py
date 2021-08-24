@@ -44,22 +44,22 @@ class ParametersModel(ParametersBase):
     """
     Parameters necessary for constructing a model.
 
-    Models could be a neural network, gaussian processes, etc.
+    Models could be a neural models, gaussian processes, etc.
 
     Attributes
     ----------
     type : string
-        Type of the neural network that will be used. Currently supported is
+        Type of the neural models that will be used. Currently supported is
         only feed-forward, which is also the default
 
     layer_sizes : list
         A list of integers detailing the sizes of the layer of the neural
-        network. Please note that the input layer is included therein.
+        models. Please note that the input layer is included therein.
         Default: [10,10,0]
 
     layer_activations: list
         A list of strings detailing the activation functions to be used
-        by the neural network. If the dimension of layer_activations is
+        by the neural models. If the dimension of layer_activations is
         smaller than the dimension of layer_sizes-1, than the first entry
         is used for all layers.
         Currently supported activation functions are:
@@ -69,7 +69,7 @@ class ParametersModel(ParametersBase):
             - LeakyReLU
 
     loss_function_type: string
-        Loss function for the neural network
+        Loss function for the neural models
         Currently supported loss functions include:
 
             - mse (Mean squared error; default)
@@ -240,7 +240,7 @@ class ParametersData(ParametersBase):
 
 class ParametersRunning(ParametersBase):
     """
-    Parameters needed for network runs (train, test or inference).
+    Parameters needed for models runs (train, test or inference).
 
     Some of these parameters only apply to either the train or test or
     inference case.
@@ -424,7 +424,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
 
             - learning_rate (float): learning rate of the training algorithm
             - layer_activation_xxx (categorical): Activation function used for
-              the feed forward network (see Netwok  parameters for supported
+              the feed forward models (see Netwok  parameters for supported
               activation functions). Note that _xxx is only so that optuna
               will differentiate between variables. No reordering is
               performed by the; the order depends on the order in the
@@ -487,7 +487,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         value.
 
     number_training_per_trial : int
-        Number of network trainings performed per trial. Default is 1,
+        Number of models trainings performed per trial. Default is 1,
         but it makes sense to choose a higher number, to exclude networks
         that performed by chance (good initilization). Naturally this impedes
         performance.
@@ -579,7 +579,7 @@ class Parameters:
         Characterizes a set of parameters (e.g. "experiment_ddmmyy").
 
     model : ParametersModel
-        Contains all parameters necessary for constructing a neural network.
+        Contains all parameters necessary for constructing a neural models.
 
     descriptors : ParametersDescriptors
         Contains all parameters necessary for calculating/parsing descriptors.
@@ -592,7 +592,7 @@ class Parameters:
         Contains all parameters necessary for loading and preprocessing data.
 
     running : ParametersRunning
-        Contains parameters needed for network runs (train, test or inference).
+        Contains parameters needed for models runs (train, test or inference).
 
     hyperparameters : ParametersHyperparameterOptimization
         Parameters used for hyperparameter optimization.
@@ -715,7 +715,7 @@ class Parameters:
 
         no_snapshots : bool
             If True, than the snapshot list will be emptied. Useful when
-            performing inference/testing after training a network.
+            performing inference/testing after training a models.
 
         Returns
         -------

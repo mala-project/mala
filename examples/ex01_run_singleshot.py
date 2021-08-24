@@ -4,7 +4,7 @@ from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
 
 """
-ex01_run_singleshot.py: Shows how a neural network can be trained on material 
+ex01_run_singleshot.py: Shows how a neural models can be trained on material 
 data using this framework. It uses preprocessed data, that is read in 
 from *.npy files.
 """
@@ -59,7 +59,7 @@ printout("Read data: DONE.")
 
 ####################
 # NETWORK SETUP
-# Set up the network and trainer we want to use.
+# Set up the models and trainer we want to use.
 # The layer sizes can be specified before reading data,
 # but it is safer this way.
 ####################
@@ -68,18 +68,18 @@ test_parameters.model.layer_sizes = [data_handler.get_input_dimension(),
                                      100,
                                      data_handler.get_output_dimension()]
 
-# Setup network and trainer.
+# Setup models and trainer.
 test_network = mala.Network(test_parameters)
 test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
 printout("Network setup: DONE.")
 
 ####################
 # TRAINING
-# Train the network.
+# Train the models.
 ####################
 
 printout("Starting training.")
-test_trainer.train_network()
+test_trainer.train_model()
 printout("Training: DONE.")
 
 ####################

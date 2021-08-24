@@ -1,4 +1,4 @@
-"""Everything concerning network and network architecture."""
+"""Everything concerning models and models architecture."""
 from .network import Network
 from .tester import Tester
 from .trainer import Trainer

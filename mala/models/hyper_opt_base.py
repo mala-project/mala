@@ -73,7 +73,7 @@ class HyperOptBase(ABC):
         """
         Perform the study, i.e. the optimization.
 
-        This is done by sampling a certain subset of network architectures.
+        This is done by sampling a certain subset of models architectures.
         """
         pass
 

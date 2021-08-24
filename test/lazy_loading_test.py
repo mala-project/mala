@@ -3,8 +3,8 @@ from mala.common.printout import printout
 from mala.datahandling.data_handler import DataHandler
 import torch
 import numpy as np
-from mala.network.network import Network
-from mala.network.trainer import Trainer
+from mala.models.network import Network
+from mala.models.trainer import Trainer
 from data_repo_path import get_data_repo_path
 import time
 import pytest
@@ -120,11 +120,11 @@ class TestLazyLoading:
                         [data_handler.get_input_dimension(), 100,
                          data_handler.get_output_dimension()]
 
-                    # Setup network and trainer.
+                    # Setup models and trainer.
                     test_network = Network(test_parameters)
                     test_trainer = Trainer(test_parameters, test_network,
                                            data_handler)
-                    test_trainer.train_network()
+                    test_trainer.train_model()
                     training_tester.append(test_trainer.final_test_loss -
                                            test_trainer.initial_test_loss)
 
@@ -233,11 +233,11 @@ class TestLazyLoading:
                     [data_handler.get_input_dimension(), 100,
                      data_handler.get_output_dimension()]
 
-                # Setup network and trainer.
+                # Setup models and trainer.
                 test_network = Network(test_parameters)
                 test_trainer = Trainer(test_parameters, test_network,
                                        data_handler)
-                test_trainer.train_network()
+                test_trainer.train_model()
 
                 hvdstring = "no horovod"
                 if hvduse:

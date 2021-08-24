@@ -276,7 +276,7 @@ class DataHandler:
         Transform a raw numpy array into a scaled torch tensor.
 
         This tensor will also be in the right units, i.e. a tensor that can
-        simply be put into a MALA network.
+        simply be put into a MALA models.
 
         Parameters
         ----------
@@ -315,7 +315,7 @@ class DataHandler:
         else:
             desired_dimensions = None
 
-        # Convert numpy array to scaled tensor a network can work with.
+        # Convert numpy array to scaled tensor a models can work with.
         numpy_array = self.\
             __converted_numpy_to_scaled_tensor(numpy_array, desired_dimensions,
                                                data_type)
@@ -871,7 +871,7 @@ class DataHandler:
         """
         Transform a numpy array containing into a scaled torch tensor.
 
-        This tensor that can simply be put into a MALA network.
+        This tensor that can simply be put into a MALA models.
         No unit conversion is done here.
         """
         numpy_array = numpy_array.astype(np.float32)

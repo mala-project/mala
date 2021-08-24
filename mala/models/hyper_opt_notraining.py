@@ -31,7 +31,7 @@ class HyperOptNoTraining(HyperOptBase):
         """
         Perform the study, i.e. the optimization.
 
-        This is done by sampling a certain subset of network architectures.
+        This is done by sampling a certain subset of models architectures.
         Currently it is mandatory to provide a trial_list, although it
         will be optional later on.
 
@@ -40,7 +40,7 @@ class HyperOptNoTraining(HyperOptBase):
         trial_list : list
             A list containing trials from either HyperOptOptuna or HyperOptOAT.
             HyperOptNoTraining does currently not have an algorithm to
-            create network archtitectures of interestes by itself and insteads
+            create models archtitectures of interestes by itself and insteads
             investigates those sampled by a different hyperparameter
             optimizer.
         """

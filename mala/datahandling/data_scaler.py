@@ -263,7 +263,7 @@ class DataScaler:
         Transform data from unscaled to scaled.
 
         Unscaled means real world data, scaled means data as is used in
-        the network.
+        the models.
 
         Parameters
         ----------
@@ -320,7 +320,7 @@ class DataScaler:
         Transform data from scaled to unscaled.
 
         Unscaled means real world data, scaled means data as is used in
-        the network.
+        the models.
 
         Parameters
         ----------
@@ -390,7 +390,7 @@ class DataScaler:
         save_format :
             File format which will be used for saving.
         """
-        # If we use horovod, only save the network on root.
+        # If we use horovod, only save the models on root.
         if self.use_horovod:
             if hvd.rank() != 0:
                 return

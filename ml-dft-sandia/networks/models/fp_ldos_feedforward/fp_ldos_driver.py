@@ -77,12 +77,12 @@ parser.add_argument('--grad-clip', type=float, default=0.25, metavar='M',
 
 
 ### Model
-parser.add_argument('--model-lstm-network', action='store_true', default=False,
-                    help='use an lstm network')
-parser.add_argument('--model-gnn-network', action='store_true', default=False,
-                    help='use a gnn network')
-parser.add_argument('--model-transformer-network', action='store_true', default=False,
-                    help='use a transformer network')
+parser.add_argument('--model-lstm-models', action='store_true', default=False,
+                    help='use an lstm models')
+parser.add_argument('--model-gnn-models', action='store_true', default=False,
+                    help='use a gnn models')
+parser.add_argument('--model-transformer-models', action='store_true', default=False,
+                    help='use a transformer models')
 
 parser.add_argument('--stacked-auto', action='store_true', default=False,
                     help='use the stacked autoencoder layers')
@@ -625,7 +625,7 @@ if args.cuda:
 
 
 
-# Count number of network parameters
+# Count number of models parameters
 if (hvd.rank() == 0):
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print("\nNum Model Params: %d " % num_params)

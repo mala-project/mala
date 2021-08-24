@@ -12,7 +12,7 @@ class ObjectiveBase:
     """
     Represents the objective function of a training process.
 
-    This is usually the result of a training of a network.
+    This is usually the result of a training of a models.
 
     Parameters
     ----------
@@ -55,13 +55,13 @@ class ObjectiveBase:
         # Parse the parameters included in the trial.
         self.parse_trial(trial)
 
-        # Train a network for as often as the user desires.
+        # Train a models for as often as the user desires.
         final_validation_loss = []
         for i in range(0, self.params.hyperparameters.
                 number_training_per_trial):
             test_network = Network(self.params)
             test_trainer = Trainer(self.params, test_network, self.data_handler)
-            test_trainer.train_network()
+            test_trainer.train_model()
             final_validation_loss.append(test_trainer.final_validation_loss)
 
         if self.params.hyperparameters.number_training_per_trial > 1:
@@ -71,7 +71,7 @@ class ObjectiveBase:
 
     def parse_trial(self, trial):
         """
-        Parse a trial into a network architecture.
+        Parse a trial into a models architecture.
 
         Parameters
         ----------

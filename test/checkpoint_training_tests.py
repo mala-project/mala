@@ -17,15 +17,15 @@ class TestTrainingCheckpoint:
         """Test that training checkpointing works in general."""
         # First run the entire test.
         trainer = self.__original_setup(test_checkpoint_name, 40)
-        trainer.train_network()
+        trainer.train_model()
         original_final_test_loss = trainer.final_test_loss
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
         # correct result.
         trainer = self.__original_setup(test_checkpoint_name, 22)
-        trainer.train_network()
+        trainer.train_model()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
-        trainer.train_network()
+        trainer.train_model()
         new_final_test_loss = trainer.final_test_loss
         assert np.isclose(original_final_test_loss, new_final_test_loss,
                           atol=accuracy)
@@ -36,7 +36,7 @@ class TestTrainingCheckpoint:
         trainer = self.__original_setup(test_checkpoint_name, 40,
                                  learning_rate_scheduler="ReduceLROnPlateau",
                                  learning_rate=0.1)
-        trainer.train_network()
+        trainer.train_model()
         original_learning_rate = trainer.optimizer.param_groups[0]['lr']
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
@@ -44,9 +44,9 @@ class TestTrainingCheckpoint:
         trainer = self.__original_setup(test_checkpoint_name, 22,
                                  learning_rate_scheduler="ReduceLROnPlateau",
                                  learning_rate=0.1)
-        trainer.train_network()
+        trainer.train_model()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
-        trainer.train_network()
+        trainer.train_model()
         new_learning_rate = trainer.optimizer.param_groups[0]['lr']
         assert np.isclose(original_learning_rate, new_learning_rate,
                           atol=accuracy)
@@ -57,7 +57,7 @@ class TestTrainingCheckpoint:
         trainer = self.__original_setup(test_checkpoint_name, 40,
                                         early_stopping_epochs=30,
                                         learning_rate=0.1)
-        trainer.train_network()
+        trainer.train_model()
         original_nr_epochs = trainer.last_epoch
 
         # Now do the same, but cut at epoch 22 and see if it recovers the
@@ -65,9 +65,9 @@ class TestTrainingCheckpoint:
         trainer = self.__original_setup(test_checkpoint_name, 22,
                                         early_stopping_epochs=30,
                                         learning_rate=0.1)
-        trainer.train_network()
+        trainer.train_model()
         trainer = self.__resume_checkpoint(test_checkpoint_name, 40)
-        trainer.train_network()
+        trainer.train_model()
         last_nr_epochs = trainer.last_epoch
 
         # integer comparison!
@@ -99,7 +99,7 @@ class TestTrainingCheckpoint:
 
         Returns
         -------
-        trainer : mala.network.trainer.Trainer
+        trainer : mala.models.trainer.Trainer
             The trainer object created with the specified parameters.
         """
         ####################
@@ -160,7 +160,7 @@ class TestTrainingCheckpoint:
 
         ####################
         # NETWORK SETUP
-        # Set up the network and trainer we want to use.
+        # Set up the models and trainer we want to use.
         # The layer sizes can be specified before reading data,
         # but it is safer this way.
         ####################
@@ -171,7 +171,7 @@ class TestTrainingCheckpoint:
                                              data_handler.
                                                get_output_dimension()]
 
-        # Setup network and trainer.
+        # Setup models and trainer.
         test_network = mala.Network(test_parameters)
         test_trainer = mala.Trainer(test_parameters, test_network,
                                     data_handler)
@@ -194,7 +194,7 @@ class TestTrainingCheckpoint:
 
         Returns
         -------
-        trainer : mala.network.trainer.Trainer
+        trainer : mala.models.trainer.Trainer
             The trainer object created with the specified parameters.
         """
 

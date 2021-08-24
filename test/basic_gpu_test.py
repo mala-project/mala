@@ -51,7 +51,7 @@ class TestGPUExecution:
     @staticmethod
     def __run(use_gpu):
         """
-        Train a network using either GPU or CPU.
+        Train a models using either GPU or CPU.
 
         Parameters
         ----------
@@ -120,7 +120,7 @@ class TestGPUExecution:
 
         ####################
         # NETWORK SETUP
-        # Set up the network and trainer we want to use.
+        # Set up the models and trainer we want to use.
         # The layer sizes can be specified before reading data,
         # but it is safer this way.
         ####################
@@ -131,11 +131,11 @@ class TestGPUExecution:
                                              data_handler.
                                                get_output_dimension()]
 
-        # Setup network and trainer.
+        # Setup models and trainer.
         test_network = mala.Network(test_parameters)
         test_trainer = mala.Trainer(test_parameters, test_network,
                                     data_handler)
         starttime = time.time()
-        test_trainer.train_network()
+        test_trainer.train_model()
 
         return test_trainer.final_test_loss, time.time() - starttime

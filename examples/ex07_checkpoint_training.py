@@ -70,7 +70,7 @@ def initial_setup():
 
     ####################
     # NETWORK SETUP
-    # Set up the network and trainer we want to use.
+    # Set up the models and trainer we want to use.
     # The layer sizes can be specified before reading data,
     # but it is safer this way.
     ####################
@@ -79,7 +79,7 @@ def initial_setup():
                                          100,
                                          data_handler.get_output_dimension()]
 
-    # Setup network and trainer.
+    # Setup models and trainer.
     test_network = mala.Network(test_parameters)
     test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
 
@@ -99,10 +99,10 @@ def run_example07(desired_loss_improvement_factor=1):
 
     ####################
     # TRAINING
-    # Train the network. After training, load from the last checkpoint
+    # Train the models. After training, load from the last checkpoint
     # and train for more epochs.
     ####################
-    trainer.train_network()
+    trainer.train_model()
     printout("Training: DONE.")
 
     ####################

@@ -1,4 +1,4 @@
-"""Runner class for running networks."""
+"""Runner class for running models."""
 import torch
 from mala.common.parameters import printout
 from mala import Parameters
@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 
 class Runner:
     """
-    Parent class for all classes that in some sense "run" the network.
+    Parent class for all classes that in some sense "run" the models.
 
     That can be training, benchmarking, inference, etc.
 
@@ -21,17 +21,17 @@ class Runner:
     params : mala.common.parametes.Parameters
         Parameters used to create this Runner object.
 
-    network : mala.network.network.Network
+    model : mala.model.model.Model
         Network which is being run.
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the data for the run.
     """
 
-    def __init__(self, params, network, data):
+    def __init__(self, params, model, data):
         self.parameters_full: Parameters = params
         self.parameters = params.running
-        self.network = network
+        self.model = model
         self.data = data
         self.__prepare_to_run()
 
@@ -54,7 +54,7 @@ class Runner:
                                  number_of_batches_per_snapshot=0,
                                  batch_size=0):
         """
-        Forward a snapshot through the network, get actual/predicted output.
+        Forward a snapshot through the models, get actual/predicted output.
 
         Parameters
         ----------
@@ -76,7 +76,6 @@ class Runner:
             Precicted outputs for snapshot.
         """
         if self.data.parameters.use_lazy_loading:
-            print("HERE?")
             data_set.return_outputs_directly = True
             actual_outputs = \
                 (data_set
@@ -103,7 +102,7 @@ class Runner:
                 inputs = inputs.to('cuda')
             predicted_outputs[i * batch_size:(i + 1) * batch_size, :] = \
                 self.data.output_data_scaler.\
-                inverse_transform(self.network(inputs).
+                inverse_transform(self.model(inputs).
                                   to('cpu'), as_numpy=True)
 
         # Restricting the actual quantities to physical meaningful values,

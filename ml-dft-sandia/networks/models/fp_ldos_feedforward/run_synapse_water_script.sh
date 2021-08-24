@@ -95,7 +95,7 @@ MIDLYS=3
 #MIDLYS=2
 AE=.8
 
-#   --model-lstm-network \
+#   --model-lstm-models \
 #   --adam \
 #   --skip-connection \
 

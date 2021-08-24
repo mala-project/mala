@@ -1,4 +1,5 @@
-"""Neural network for MALA."""
+"""Neural models for MALA."""
+from .model import Model
 import torch
 import torch.nn as nn
 import torch.nn.functional as functional
@@ -9,28 +10,19 @@ except ModuleNotFoundError:
     pass
 
 
-class Network(nn.Module):
-    """Central network class for this framework, based on pytorch.nn.Module.
+class Network(Model):
+    """
+    Central models class for this framework, based on pytorch.nn.Module.
 
     Parameters
     ----------
     params : mala.common.parametes.Parameters
-        Parameters used to create this neural network.
+        Parameters used to create this neural models.
     """
 
     def __init__(self, params):
-        # copy the network params from the input parameter object
-        self.use_horovod = params.use_horovod
-        self.params = params.model
-
-        # if the user has planted a seed (for comparibility purposes) we
-        # should use it.
-        if params.manual_seed is not None:
-            torch.manual_seed(params.manual_seed)
-            torch.cuda.manual_seed(params.manual_seed)
-
         # initialize the parent class
-        super(Network, self).__init__()
+        super(Network, self).__init__(params)
 
         # Mappings for parsing of the activation layers.
         self.activation_mappings = {
@@ -47,7 +39,7 @@ class Network(nn.Module):
         if self.params.type == "feed-forward":
             self.__initialize_as_feedforward()
         else:
-            raise Exception("Unsupported network architecture.")
+            raise Exception("Unsupported models architecture.")
 
         # initialize the loss function
         if self.params.loss_function_type == "mse":
@@ -61,9 +53,9 @@ class Network(nn.Module):
             self.to('cuda')
 
     def __initialize_as_feedforward(self):
-        """Initialize this network as a feed-forward network."""
+        """Initialize this models as a feed-forward models."""
         # Check if multiple types of activations were selected or only one
-        # was passed to be used in the entire network.#
+        # was passed to be used in the entire models.#
         # If multiple layers have been passed, their size needs to be correct.
 
         use_only_one_activation_type = False
@@ -92,7 +84,7 @@ class Network(nn.Module):
 
     def forward(self, inputs):
         """
-        Perform a forward pass through the network.
+        Perform a forward pass through the models.
 
         Parameters
         ----------
@@ -110,7 +102,7 @@ class Network(nn.Module):
                 inputs = layer(inputs)
             return inputs
         else:
-            raise Exception("Unsupported network architecture.")
+            raise Exception("Unsupported models architecture.")
 
     def do_prediction(self, array):
         """
@@ -118,7 +110,7 @@ class Network(nn.Module):
 
         Interface to do predictions. The data put in here is assumed to be a
         scaled torch.Tensor and in the right units. Be aware that this will
-        pass the entire array through the network, which might be very
+        pass the entire array through the models, which might be very
         demanding in terms of RAM.
 
         Parameters
@@ -158,9 +150,9 @@ class Network(nn.Module):
 
     # FIXME: This guarentees downwards compatibility, but it is ugly.
     #  Rather enforce the right package versions in the repo.
-    def save_network(self, path_to_file):
+    def save_model(self, path_to_file):
         """
-        Save the network.
+        Save the models.
 
         This function serves as an interfaces to pytorchs own saving
         functionalities AND possibly own saving needs.
@@ -168,9 +160,9 @@ class Network(nn.Module):
         Parameters
         ----------
         path_to_file : string
-            Path to the file in which the network should be saved.
+            Path to the file in which the models should be saved.
         """
-        # If we use horovod, only save the network on root.
+        # If we use horovod, only save the models on root.
         if self.use_horovod:
             if hvd.rank() != 0:
                 return
@@ -180,23 +172,23 @@ class Network(nn.Module):
     @classmethod
     def load_from_file(cls, params, path_to_file):
         """
-        Load a network from a file.
+        Load a models from a file.
 
         Parameters
         ----------
         params : mala.common.parameters.Parameters
-            Parameters object with which the network should be created.
-            Has to be compatible to the network architecture. This is usually
+            Parameters object with which the models should be created.
+            Has to be compatible to the models architecture. This is usually
             enforced by using the same Parameters object (and saving/loading
             it to)
 
         path_to_file : string
-            Path to the file from which the network should be loaded.
+            Path to the file from which the models should be loaded.
 
         Returns
         -------
         loaded_network : Network
-            The network that was loaded from the file.
+            The models that was loaded from the file.
         """
         loaded_network = Network(params)
         loaded_network.load_state_dict(torch.load(path_to_file))

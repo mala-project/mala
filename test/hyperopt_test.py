@@ -246,11 +246,11 @@ class TestHyperparameterOptimization:
                                                 tmp_hp_optimizer.orthogonal_arr)
         test_hp_optimizer.set_optimal_parameters()
 
-        # Train the final network.
+        # Train the final models.
         test_network = mala.Network(test_parameters)
         test_trainer = mala.Trainer(test_parameters, test_network,
                                     data_handler)
-        test_trainer.train_network()
+        test_trainer.train_model()
         test_parameters.show()
         if hyper_optimizer == "optuna":
             return test_trainer.final_test_loss, last_optuna_study
