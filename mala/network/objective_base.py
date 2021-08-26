@@ -229,8 +229,6 @@ class ObjectiveBase:
             self.params.network.layer_sizes.\
                 append(self.data_handler.get_output_dimension())
 
-        self.params.show()
-
     def parse_trial_oat(self, trial):
         """
         Parse an OA based trial into the params attribute.
