@@ -1,6 +1,6 @@
 """Objective function for all training based hyperparameter optimizations."""
 import numpy as np
-from optuna import Trial
+from optuna import Trial, TrialPruned
 from .hyperparameter_optuna import HyperparameterOptuna
 from .hyperparameter_oat import HyperparameterOAT
 from .network import Network
@@ -69,6 +69,8 @@ class ObjectiveBase:
         """
         # Parse the parameters included in the trial.
         self.parse_trial(trial)
+        if trial.should_prune():
+            raise TrialPruned()
 
         # Train a network for as often as the user desires.
         final_validation_loss = []
@@ -82,7 +84,6 @@ class ObjectiveBase:
         if self.params.hyperparameters.number_training_per_trial > 1:
             printout("Losses from multiple runs are: ")
             printout(final_validation_loss)
-        print(self.params.hyperparameters.trial_ensemble_evaluation)
 
         if self.params.hyperparameters.trial_ensemble_evaluation == "mean":
             return np.mean(final_validation_loss)

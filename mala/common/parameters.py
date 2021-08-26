@@ -501,6 +501,10 @@ class ParametersHyperparameterOptimization(ParametersBase):
         If True, the optuna multivariate sampler is used. It is experimental
         since v2.2.0, but reported to perform very well.
         http://proceedings.mlr.press/v80/falkner18a.html
+
+    no_training_cutoff : float
+        If the surrogate loss algorithm is used as a pruner during a study,
+        this cutoff determines which trials are neglected.
     """
 
     def __init__(self):
@@ -517,6 +521,8 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.number_training_per_trial = 1
         self.trial_ensemble_evaluation = "mean"
         self.use_multivariate = True
+        self.no_training_cutoff = 0
+        self.pruner = None
 
     @property
     def rdb_storage_heartbeat(self):

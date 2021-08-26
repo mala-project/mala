@@ -8,7 +8,7 @@ from mala.common.parameters import printout
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
 from mala.common.parameters import Parameters
-
+from .no_training_pruner import NoTrainingPruner
 
 class HyperOptOptuna(HyperOptBase):
     """Hyperparameter optimizer using Optuna.
@@ -33,13 +33,19 @@ class HyperOptOptuna(HyperOptBase):
                                              multivariate=params. \
                                              hyperparameters.use_multivariate)
 
+        # See if the user specified a pruner.
+        pruner = None
+        if self.params.hyperparameters.pruner == "no_training":
+            pruner = NoTrainingPruner(self.params, data, "optuna")
+
         # Create the study.
         if self.params.hyperparameters.rdb_storage is None:
             self.study = optuna.\
                 create_study(direction=self.params.hyperparameters.direction,
                              sampler=sampler,
                              study_name=self.params.hyperparameters.
-                             study_name)
+                             study_name,
+                             pruner=pruner)
         else:
             if self.params.hyperparameters.study_name is None:
                 raise Exception("If RDB storage is used, a name for the study "
@@ -55,9 +61,10 @@ class HyperOptOptuna(HyperOptBase):
                              study_name=self.params.hyperparameters.
                              study_name,
                              storage=rdb_storage,
-                             load_if_exists=True)
-
+                             load_if_exists=True,
+                             pruner=pruner)
         self.checkpoint_counter = 0
+
 
     def perform_study(self):
         """

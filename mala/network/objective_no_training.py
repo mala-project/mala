@@ -56,11 +56,11 @@ class ObjectiveNoTraining(ObjectiveBase):
         device = "cuda" if self.params.use_gpu else "cpu"
 
         # Load the batchesand get the jacobian.
-        do_shuffle = self.params.use_shuffling_for_samplers
+        do_shuffle = self.params.running.use_shuffling_for_samplers
         if self.data_handler.parameters.use_lazy_loading or \
                 self.params.use_horovod:
             do_shuffle = False
-        if self.params.use_shuffling_for_samplers:
+        if self.params.running.use_shuffling_for_samplers:
             self.data_handler.mix_datasets()
         loader = DataLoader(self.data_handler.training_data_set,
                             batch_size=self.params.running.mini_batch_size,
