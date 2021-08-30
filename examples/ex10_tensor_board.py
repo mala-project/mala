@@ -8,8 +8,9 @@ data_path = get_data_repo_path()+"Al36/"
 
 
 """
-ex10. launched tensorboard in webbrowser
-the parameteres and initial configurations are similar to ex01.
+ex10_tensor_board.py: Shows how a NN training by MALA can be visualized using 
+tensorboard. The training is the similar to the one performed in ex01, but 
+at the end of it, tensorboard will be launched in your browser.
 """
 
 
@@ -98,17 +99,21 @@ test_parameters.show()
 # Using tensorboard and launching the link in webbrowser
 # Runs tensorboard with the given log_dir and wait for user
 # input to kill the app.
-#################### 
-class Launchtensorboard:
+####################
+
+
+class LaunchTensorboard:
 
     """
     Parameters necessary for Launching tensorboard.
-    
-    Attributes
-    param         : parameters are handled from a central parameters class that
-                    contains subclasses.
+
+    Parameters
+    ----------
+    params : mala.Parameters
+        MALA parameters for this particular run.
+
     clear_on_exit : bool
-                    If True Clears the log_dir on exit and kills the tensorboard app.
+        If True Clears the log_dir on exit and kills the tensorboard app.
     """
 
     def __init__(self, params, clear_on_exit= False):
@@ -134,5 +139,6 @@ class Launchtensorboard:
                 shutil.rmtree(self.log_dir, ignore_errors=True)
             print("\nCleared Logdir")
 
-launch_tb = Launchtensorboard(test_parameters)
+
+launch_tb = LaunchTensorboard(test_parameters)
 launch_tb.run()
