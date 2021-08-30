@@ -9,7 +9,7 @@ mala_base_path=$( echo ${script_path%/*} )
 mala_base_path=$( echo ${mala_base_path%/*} )
 examples_path=$mala_base_path/examples
 test_path=$mala_base_path/test
-pythonfile=data_repos_path.py
+pythonfile=data_repo_path.py
 
 # Ask the user for the path to the repo if none was given in the command line.
 if [ "$1" != "" ]
