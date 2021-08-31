@@ -154,7 +154,7 @@ $ pip install -r docs/requirements.txt
 ## Downloading and adding example data
 
 The examples and tests need additional data to run. The MALA team provides a data repository, that can be downloaded
-from <https://github.com/mala-project/data>. Please be sure to check out the correct tag for the data repository,
+from <https://github.com/mala-project/test-data>. Please be sure to check out the correct tag for the data repository,
 since the data repository itself is subject to ongoing development as well. After downloading the correct revision of
 the data repository, it needs to be linked with MALA.
 
