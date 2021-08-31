@@ -21,8 +21,6 @@ In order to run MALA you have to have the following packages installed:
 * torch (PyTorch)
 * numpy
 * scipy
-* oapackage
-* tensorboard
 * optuna
 * ase
 * mpmath
@@ -156,20 +154,30 @@ $ pip install -r docs/requirements.txt
 ## Downloading and adding example data
 
 The examples and tests need additional data to run. The MALA team provides a data repository, that can be downloaded
-from <https://github.com/mala-project/data>. Please be sure to check out the correct tag for the data repository,
+from <https://github.com/mala-project/test-data>. Please be sure to check out the correct tag for the data repository,
 since the data repository itself is subject to ongoing development as well. After downloading the correct revision of
 the data repository, it needs to be linked with MALA.
 
-1. Download data repository and check out correct tag
+1. Download data repository and check out correct tag.
 
    ```sh
-   $ git clone origin_of_data_repo ~/path/to/data/repo
+   $ git clone https://github.com/mala-project/test-data ~/path/to/data/repo
    $ cd ~/path/to/data/repo
    $ git checkout v0.4.0
    ```
-2. Link MALA and data repository
+
+2. Link MALA and data repository.
 
    ```sh
    $ cd ~/path/to/mala/root/directory
    $ bash install/data_repo_link/link_data_repo.sh ~/path/to/data/repo
+   ```
+
+   Afterwards, check that files named `data_repo_path.py` have been generated.
+
+   ```sh
+   $ find . -name data_repo_path.py
+   ./install/data_repo_link/data_repo_path.py
+   ./test/data_repo_path.py
+   ./examples/data_repo_path.py
    ```
