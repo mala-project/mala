@@ -444,7 +444,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
             - "optuna" : Use optuna for the hyperparameter optimization.
             - "oat" : Use orthogonal array tuning (currently limited to
               categorical hyperparemeters). Range analysis is
-              currently done by simply choosing the lowesr loss.
+              currently done by simply choosing the lowest loss.
             - "notraining" : Using a NAS without training, based on jacobians.
 
     checkpoints_each_trial : int

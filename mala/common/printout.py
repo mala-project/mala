@@ -36,9 +36,8 @@ def printout(*values, sep=' '):
     sep : string
         Separator between printed values.
     """
-    outstring = ''
-    for v in values:
-        outstring += str(v)+sep
+    outstring = sep.join([str(v) for v in values])
+
     if use_horovod is False:
         print(outstring)
     else:

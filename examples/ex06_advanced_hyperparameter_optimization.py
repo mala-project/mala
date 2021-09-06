@@ -124,7 +124,7 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_notraining="oat",
             test_hp_optimizer.perform_study(trial_list=last_optuna_study)
         else:
             test_hp_optimizer.perform_study(trial_list=
-                                            tmp_hp_optimizer.orthogonal_arr)
+                                            tmp_hp_optimizer.get_orthogonal_array())
     test_hp_optimizer.set_optimal_parameters()
     printout("Hyperparameter optimization: DONE.")
 

@@ -9,8 +9,11 @@ except ModuleNotFoundError:
                   stacklevel=2)
 from .hyper_opt_base import HyperOptBase
 from .objective_base import ObjectiveBase
+from .hyperparameter_oat import HyperparameterOAT
 import numpy as np
-from mala.common.parameters import printout
+import itertools
+from mala.common.printout import printout
+from bisect import bisect
 
 
 class HyperOptOAT(HyperOptBase):
@@ -28,12 +31,36 @@ class HyperOptOAT(HyperOptBase):
     def __init__(self, params, data):
         super(HyperOptOAT, self).__init__(params, data)
         self.objective = None
-        self.trial_losses = []
-        self.best_trial = None
+        self.trial_losses = None
+        self.sorted_num_choices = []
+        self.optimal_params = None
+        self.importance = None
         self.n_factors = None
-        self.n_levels = None
+        self.factor_levels = None
         self.strength = None
         self.N_runs = None
+        self.__OA = None
+
+    def add_hyperparameter(self, opttype="categorical", name="", choices=None, **kwargs):
+        """
+        Add hyperparameter such that the hyperparameter list is sorted w.r.t the number of choices.
+
+        Parameters
+        ----------
+        opttype : string
+            Datatype of the hyperparameter. Follows optunas naming convetions.
+            Default value - categorical (list)
+        """
+        if not self.sorted_num_choices:  # if empty
+            super(HyperOptOAT, self).add_hyperparameter(
+                opttype=opttype, name=name, choices=choices)
+            self.sorted_num_choices.append(len(choices))
+
+        else:
+            index = bisect(self.sorted_num_choices, len(choices))
+            self.sorted_num_choices.insert(index, len(choices))
+            self.params.hyperparameters.hlist.insert(
+                index, HyperparameterOAT(opttype=opttype, name=name, choices=choices))
 
     def perform_study(self):
         """
@@ -42,16 +69,57 @@ class HyperOptOAT(HyperOptBase):
         This is done by sampling a certain subset of network architectures.
         In this case, these are choosen based on an orthogonal array.
         """
+        self.__OA = self.get_orthogonal_array()
+        self.trial_losses = np.zeros(self.__OA.shape[0])
         number_of_trial = 0
         # The parameters could have changed.
         self.objective = ObjectiveBase(self.params, self.data_handler)
-        for row in self.orthogonal_arr:
+        for row in self.__OA:
             printout("Trial number", number_of_trial)
-            self.trial_losses.append(self.objective(row))
+            self.trial_losses[number_of_trial] = self.perform_trial(
+                self.objective, row)
             number_of_trial += 1
+        # Perform Range Analysis
+        self.get_optimal_parameters()
 
-        # Return the best lost value we could achieve.
-        return min(self.trial_losses)
+    def perform_trial(self, objective, trial):
+        """
+        Feature funciton to use OAT with other optimisation techniques.
+
+        Parameters
+        ----------
+        objective: ObjectiveBase
+            The current objective value that is to be optimised by using OAT
+        """
+        objective.trial_type = "oat"
+        objective_val = objective(trial)
+        objective.trial_type = objective.params.hyperparameters.hyper_opt_method
+        return objective_val
+
+    def get_optimal_parameters(self):
+        """
+        Find the optimal set of hyperparameters by doing range analysis.
+
+        This is done using loss instead of accuracy as done in the paper.
+        """
+        printout("Performing Range Analysis.")
+
+        def indices(idx, val): return np.where(
+            self.__OA[:, idx] == val)[0]
+        R = [[self.trial_losses[indices(idx, l)].sum() for l in range(levels)]
+             for (idx, levels) in enumerate(self.factor_levels)]
+
+        A = [[i/len(j) for i in j] for j in R]
+
+        # Taking loss as objective to minimise
+        self.optimal_params = np.array([i.index(min(i)) for i in A])
+        self.importance = np.argsort([max(i)-min(i) for i in A])
+
+    def show_order_of_importance(self):
+        """Print the order of importance of the hyperparameters that are being optimised."""
+        printout("Order of Importance: ")
+        printout(
+            *[self.params.hyperparameters.hlist[idx].name for idx in self.importance], sep=" < ")
 
     def set_optimal_parameters(self):
         """
@@ -60,15 +128,40 @@ class HyperOptOAT(HyperOptBase):
         The parameters will be written to the parameter object with which the
         hyperparameter optimizer was created.
         """
-        # Getting the best trial based on the test errors
-        idx = self.trial_losses.index(min(self.trial_losses))
-        self.best_trial = self.orthogonal_arr[idx]
-        self.objective.parse_trial_oat(self.best_trial)
+        self.objective.parse_trial_oat(self.optimal_params)
 
-    @property
-    def orthogonal_arr(self):
-        """Orthogonal array used for optimal hyperparameter sampling."""
-        arrayclass = oa.arraydata_t(self.n_levels, self.N_runs, self.strength,
+    def get_orthogonal_array(self):
+        """
+        Generate the best Orthogonal array used for optimal hyperparameter sampling.
+
+        Parameters
+        ----------
+        factor_levels : list
+            A list of number of choices of each hyperparameter
+
+        strength : int
+            A design parameter for Orthogonal arrays
+                strength 2 models all 2 factor interactions
+                strength 3 models all 3 factor interactions
+
+        N_runs : int 
+            Minimum number of experimental runs to be performed 
+
+        This is function is taken from the example notebook of OApackage
+        """
+        self.n_factors = len(self.params.hyperparameters.hlist)
+
+        self.factor_levels = [par.num_choices for par in self.params.
+                              hyperparameters.hlist]
+
+        if not self.monotonic:
+            raise Exception(
+                "Please use hyperparameters in increasing or decreasing order of number of choices")
+
+        self.strength = 2
+        self.N_runs = self.number_of_runs()
+        print("Generating Suitable Orthogonal Array.")
+        arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs, self.strength,
                                     self.n_factors)
         arraylist = [arrayclass.create_root()]
 
@@ -78,50 +171,36 @@ class HyperOptOAT(HyperOptBase):
 
         for _ in range(self.strength + 1, self.n_factors + 1):
             arraylist_extensions = oa.extend_arraylist(arraylist, arrayclass,
-                                                       options)
+                                                        options)
             dd = np.array([a.Defficiency() for a in arraylist_extensions])
             idxs = np.argsort(dd)
             arraylist = [arraylist_extensions[ii] for ii in idxs]
 
-        return np.unique(np.array(arraylist[0]), axis=0)
+        
+        if not arraylist:
+            raise Exception("No orthogonal array exists with such a parameter combination.")
+            
+        else:
+            return np.unique(np.array(arraylist[0]), axis=0)
 
-    def add_hyperparameter(self, opttype="float", name="", low=0, high=0,
-                           choices=None):
+    def number_of_runs(self):
         """
-        Add a hyperparameter to the current investigation.
+        Calculate the minimum number of runs required for an Orthogonal array.
 
-        Parameters
-        ----------
-        opttype : string
-            Datatype of the hyperparameter. Follows optunas naming convetions.
-            Currently supported are:
-
-                - categorical (list)
-
-        name : string
-            Name of the hyperparameter. Please note that these names always
-            have to be distinct; if you e.g. want to investigate multiple
-            layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
-            etc. as names.
-
-        low : float or int
-            Currently unsupported: Lower bound for numerical parameter.
-
-        high : float or int
-            Currently unsupported: Higher bound for numerical parameter.
-
-        choices :
-            List of possible choices (for categorical parameter).
+        Based on the factor levels and the strength of the array requested
         """
-        super(HyperOptOAT, self).add_hyperparameter(opttype=opttype, name=name,
-                                                    low=low, high=high,
-                                                    choices=choices)
-        self.n_factors = len(self.params.hyperparameters.hlist)
+        runs = [np.prod(tt) for tt in itertools.combinations(
+            self.factor_levels, self.strength)]
 
-        # if self.n_factors>4:
-        #     raise Exception("Sorry only upto 3 factors are supported")
+        N = np.lcm.reduce(runs)*np.lcm.reduce(self.factor_levels)
+        return int(N)
 
-        self.n_levels = min([par.num_choices for par in self.params.
-                            hyperparameters.hlist])
-        self.strength = 3
-        self.N_runs = pow(self.n_levels, self.n_factors)
+    @property
+    def monotonic(self):
+        """
+        Check if the factors are in an increasing or decreasing order.
+
+        This is required for the genration of orthogonal arrays.
+        """
+        dx = np.diff(self.factor_levels)
+        return np.all(dx <= 0) or np.all(dx >= 0)

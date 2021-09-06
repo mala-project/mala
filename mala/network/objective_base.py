@@ -13,17 +13,20 @@ class ObjectiveBase:
     Represents the objective function of a training process.
 
     This is usually the result of a training of a network.
-
-    Parameters
-    ----------
-    params : mala.common.parametes.Parameters
-        Parameters used to create this objective.
-
-    data_handler : mala.datahandling.data_handler.DataHandler
-        datahandler to be used during the hyperparameter optimization.
     """
 
     def __init__(self, params, data_handler):
+        """
+        Create an ObjectiveBase object.
+
+        Parameters
+        ----------
+        params : mala.common.parametes.Parameters
+            Parameters used to create this objective.
+
+        data_handler : mala.datahandling.data_handler.DataHandler
+            datahandler to be used during the hyperparameter optimization.
+        """
         self.params = params
         self.data_handler = data_handler
 
@@ -39,8 +42,6 @@ class ObjectiveBase:
         )).count(True)
 
         self.trial_type = self.params.hyperparameters.hyper_opt_method
-        if self.trial_type == "notraining":
-            self.trial_type = "optuna"
 
     def __call__(self, trial):
         """
@@ -174,17 +175,32 @@ class ObjectiveBase:
         trial : numpy.array
             Row in an orthogonal array which respresents current trial.
         """
-        if self.optimize_activation_list > 0:
+        if self.optimize_layer_list:
+            self.params.network.layer_sizes = \
+                [self.data_handler.get_input_dimension()]
+
+        if self.optimize_activation_list:
             self.params.network.layer_activations = []
 
         par: HyperparameterOAT
         for factor_idx, par in enumerate(self.params.hyperparameters.hlist):
-            if "layer_activation" in par.name:
+            if "learning_rate" in par.name:
+                self.params.running.learning_rate = \
+                    par.get_parameter(trial, factor_idx)
+            elif "layer_activation" in par.name:
                 self.params.network.layer_activations.\
                     append(par.get_parameter(trial, factor_idx))
+            elif "ff_neurons_layer" in par.name:
+                if self.params.network.nn_type == "feed-forward":
+                    self.params.network.layer_sizes.\
+                        append(par.get_parameter(trial, factor_idx))
             elif "trainingtype" in par.name:
                 self.params.running.trainingtype = par.\
                     get_parameter(trial, factor_idx)
             else:
                 raise Exception("Optimization of hyperparameter ", par.name,
                                 "not supported at the moment.")
+
+        if self.optimize_layer_list:
+            self.params.network.layer_sizes.\
+                append(self.data_handler.get_output_dimension())
