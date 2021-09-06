@@ -21,8 +21,6 @@ In order to run MALA you have to have the following packages installed:
 * torch (PyTorch)
 * numpy
 * scipy
-* oapackage
-* tensorboard
 * optuna
 * ase
 * mpmath
