@@ -32,7 +32,7 @@ class HyperOptOAT(HyperOptBase):
         self.factor_levels = None
         self.strength = None
         self.N_runs = None
-        self.OA = None
+        self.__OA = None
 
     def add_hyperparameter(self, opttype="categorical", name="", choices=None, **kwargs):
         """
@@ -62,12 +62,12 @@ class HyperOptOAT(HyperOptBase):
         This is done by sampling a certain subset of network architectures.
         In this case, these are choosen based on an orthogonal array.
         """
-        self.OA = self.get_orthogonal_array()
-        self.trial_losses = np.zeros(self.OA.shape[0])
+        self.__OA = self.get_orthogonal_array()
+        self.trial_losses = np.zeros(self.__OA.shape[0])
         number_of_trial = 0
         # The parameters could have changed.
         self.objective = ObjectiveBase(self.params, self.data_handler)
-        for row in self.OA:
+        for row in self.__OA:
             printout("Trial number", number_of_trial)
             self.trial_losses[number_of_trial] = self.perform_trial(
                 self.objective, row)
@@ -98,7 +98,7 @@ class HyperOptOAT(HyperOptBase):
         printout("Performing Range Analysis.")
 
         def indices(idx, val): return np.where(
-            self.OA[:, idx] == val)[0]
+            self.__OA[:, idx] == val)[0]
         R = [[self.trial_losses[indices(idx, l)].sum() for l in range(levels)]
              for (idx, levels) in enumerate(self.factor_levels)]
 
