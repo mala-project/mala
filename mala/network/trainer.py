@@ -262,7 +262,7 @@ class Trainer(Runner):
                         self.tensor_board.add_histogram(name,param,epoch)
                         self.tensor_board.add_histogram(f'{name}.grad',param.grad,epoch)
 
-            self.tensor_board.close() #method to make sure that all pending events have been written to disk
+                self.tensor_board.close() #method to make sure that all pending events have been written to disk
 
 
 

@@ -40,8 +40,8 @@ test_parameters.running.max_number_epochs = 20
 test_parameters.running.mini_batch_size = 40
 test_parameters.running.learning_rate = 0.00001
 test_parameters.running.trainingtype = "Adam"
-test_parameters.running.visualisation = "~/log_dir"
-test_parameters.running.visualisation_dir = "~/log_dir"
+test_parameters.running.visualisation = True
+# test_parameters.running.visualisation_dir = "~/log_dir"
 
 ####################
 # DATA
