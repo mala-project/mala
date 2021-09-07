@@ -1,4 +1,6 @@
 """SNAP descriptor class."""
+import os
+
 import warnings
 import ase
 import ase.io
@@ -99,7 +101,8 @@ class SNAP(DescriptorBase):
         self.in_format_ase = "espresso-out"
         print("Calculating SNAP descriptors from", qe_out_file, "at",
               qe_out_directory)
-        return self.__calculate_snap(qe_out_directory + qe_out_file,
+        return self.__calculate_snap(os.path.join(qe_out_directory,
+                                                  qe_out_file),
                                      qe_out_directory)
 
     def __calculate_snap(self, infile, outdir):
@@ -111,7 +114,7 @@ class SNAP(DescriptorBase):
 
         # Enforcing / Checking PBC on the read atoms.
         atoms = self.enforce_pbc(atoms)
-        ase_out_path = outdir+"lammps_input.tmp"
+        ase_out_path = os.path.join(outdir, "lammps_input.tmp")
         ase.io.write(ase_out_path, atoms, format=lammps_format)
 
         # We also need to know how big the grid is.
@@ -135,7 +138,8 @@ class SNAP(DescriptorBase):
                     nz = int(tmp.split(",")[2])
                     break
         # Build LAMMPS arguments from the data we read.
-        lmp_cmdargs = ["-screen", "none", "-log", outdir+"lammps_log.tmp"]
+        lmp_cmdargs = ["-screen", "none", "-log", os.path.join(outdir,
+                                                               "lammps_log.tmp")]
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs,
                                       {
                                         "ngridx": nx,
@@ -152,7 +156,8 @@ class SNAP(DescriptorBase):
         # An empty string means that the user wants to use the standard input.
         if self.parameters.lammps_compute_file == "":
             filepath = __file__.split("snap")[0]
-            self.parameters.lammps_compute_file = filepath+"in.bgrid.python"
+            self.parameters.lammps_compute_file = os.path.join(filepath,
+                                                               "in.bgrid.python")
 
         # Do the LAMMPS calculation.
         lmp.file(self.parameters.lammps_compute_file)

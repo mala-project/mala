@@ -50,7 +50,7 @@ class Density(TargetBase):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file in ", directory)
-        data, meta = read_cube(directory + file_name)
+        data, meta = read_cube(os.path.join(directory, file_name))
         return data
 
     def get_number_of_electrons(self, density_data, grid_spacing_bohr=None,
