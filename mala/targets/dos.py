@@ -1,4 +1,6 @@
 """DOS calculation class."""
+import os
+
 from .target_base import TargetBase
 from .calculation_helpers import *
 from scipy import integrate, interpolate
@@ -107,7 +109,7 @@ class DOS(TargetBase):
         return_dos_values = []
 
         # Open the file, then iterate through its contents.
-        with open(directory+file_name, 'r') as infile:
+        with open(os.path.join(directory, file_name), 'r') as infile:
             lines = infile.readlines()
             i = 0
 
