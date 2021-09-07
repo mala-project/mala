@@ -1,4 +1,5 @@
 """Collection of all parameter related classes and functions."""
+import os
 import pickle
 import warnings
 from .printout import printout, set_horovod_status
@@ -321,6 +322,13 @@ class ParametersRunning(ParametersBase):
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
+    visualisation : int
+        If True then Tensorboard is activated for visualisation
+        case 0: No tensorboard activated
+        case 1: tensorboard activated with Loss and learning rate
+        case 2; additonally weights and biases and gradient  
+        
+        
     """
 
     def __init__(self):
@@ -346,6 +354,9 @@ class ParametersRunning(ParametersBase):
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
+        self.visualisation = 0
+        # default visualisation_dir= "~/log_dir"
+        self.visualisation_dir= os.path.join(os.path.expanduser("~"), "log_dir")
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
 
@@ -399,6 +410,9 @@ class ParametersRunning(ParametersBase):
                 raise Exception("Currently, MALA can only operate with the "
                                 "\"ldos\" metric for horovod runs.")
         self._after_before_training_metric = value
+
+
+        
 
 
 class ParametersHyperparameterOptimization(ParametersBase):
