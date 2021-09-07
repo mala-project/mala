@@ -21,6 +21,8 @@ In order to run MALA you have to have the following packages installed:
 * torch (PyTorch)
 * numpy
 * scipy
+* oapackage
+* tensorboard
 * optuna
 * ase
 * mpmath
@@ -132,7 +134,10 @@ If you want to use this module, please refer to [Python bindings to Quantum Espr
     ```
     (note: the `-e` is absolutely crucial, so that changes in the code will be
     reflected system wide)
-3. (Optional): Download example data (see below) to run the examples.
+3. Go to the `examples` folder and run `ex0_verify_installation.py` to make
+sure the setup was successful.
+4. Enjoy!
+
 
 ### Build documentation locally (optional)
 
