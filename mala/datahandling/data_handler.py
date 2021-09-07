@@ -351,7 +351,7 @@ class DataHandler:
                                                                snapshot.input_npy_file))
             tmp_file_name = naming_scheme_input
             tmp_file_name = tmp_file_name.replace("*", str(i))
-            np.save(directory+tmp_file_name+".npy", tmp_array)
+            np.save(os.path.join(directory, tmp_file_name) +".npy", tmp_array)
 
             tmp_array = self.__load_from_npy_file(os.path.join(snapshot.output_npy_directory,
                                                                snapshot.output_npy_file))
@@ -550,9 +550,9 @@ class DataHandler:
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
                 if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.__load_from_npy_file(snapshot.
-                                                    input_npy_directory +
-                                                    snapshot.input_npy_file,
+                    tmp = self.__load_from_npy_file(os.path.join(snapshot.
+                                                    input_npy_directory,
+                                                    snapshot.input_npy_file),
                                                     mmapmode='r')
                     if self.parameters.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
@@ -598,9 +598,9 @@ class DataHandler:
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
                 if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.__load_from_npy_file(snapshot.
-                                                    output_npy_directory +
-                                                    snapshot.output_npy_file,
+                    tmp = self.__load_from_npy_file(os.path.join(snapshot.
+                                                    output_npy_directory,
+                                                    snapshot.output_npy_file),
                                                     mmapmode='r')
                     # The scalers will later operate on torch Tensors so we
                     # have to make sure they are fitted on
@@ -636,9 +636,9 @@ class DataHandler:
 
             # Data scaling is only performed on the training data sets.
             if self.parameters.data_splitting_snapshots[i] == "tr":
-                tmp = self.__load_from_npy_file(snapshot.
-                                                input_npy_directory +
-                                                snapshot.input_npy_file,
+                tmp = self.__load_from_npy_file(os.path.join(snapshot.
+                                                input_npy_directory,
+                                                snapshot.input_npy_file),
                                                 mmapmode='r')
                 if self.parameters.descriptors_contain_xyz:
                     tmp = tmp[:, :, :, 3:]
@@ -672,8 +672,9 @@ class DataHandler:
             # Data scaling is only performed on the training data sets.
             if self.parameters.data_splitting_snapshots[i] == "tr":
                 tmp = self. \
-                    __load_from_npy_file(snapshot.output_npy_directory +
-                                         snapshot.output_npy_file,
+                    __load_from_npy_file(os.path.join(
+                                         snapshot.output_npy_directory,
+                                         snapshot.output_npy_file),
                                          mmapmode='r')
                 tmp = np.array(tmp)
                 tmp *= self.target_calculator. \

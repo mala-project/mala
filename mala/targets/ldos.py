@@ -1,4 +1,6 @@
 """LDOS calculation class."""
+import os
+
 from .cube_parser import read_cube
 from .target_base import TargetBase
 from .calculation_helpers import *
@@ -134,7 +136,7 @@ class LDOS(TargetBase):
             tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
 
             # Open the cube file
-            data, meta = read_cube(directory + tmp_file_name)
+            data, meta = read_cube(os.path.join(directory, tmp_file_name))
 
             # Once we have read the first cube file, we know the dimensions
             # of the LDOS and can prepare the array
