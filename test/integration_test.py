@@ -20,11 +20,11 @@ import pytest
 # Scripts to reproduce the data files used in this test script can be found
 # in the data repo.
 
-data_path = os.path.join(get_data_repo_path(), "Al36")
-path_to_out = os.path.join(data_path, "Al.pw.scf.out")
-path_to_ldos_npy = os.path.join(data_path, "Al_ldos.npy")
-path_to_dos_npy = os.path.join(data_path, "Al_dos.npy")
-path_to_dens_npy = os.path.join(data_path, "Al_dens.npy")
+data_path = os.path.join(get_data_repo_path(), "Be2")
+path_to_out = os.path.join(data_path, "Be.pw.scf.out")
+path_to_ldos_npy = os.path.join(data_path, "Be_ldos.npy")
+path_to_dos_npy = os.path.join(data_path, "Be_dos.npy")
+path_to_dens_npy = os.path.join(data_path, "Be_dens.npy")
 
 # We can read from numpy arrays or directly from QE data.
 # In the later case, numpy arrays will be saved for the subsqeuent run.
@@ -32,13 +32,14 @@ numpy_arrays = True
 
 # Define the parameters used for the experiments.
 test_parameters = Parameters()
-test_parameters.targets.ldos_gridsize = 250
-test_parameters.targets.ldos_gridspacing_ev = 0.1
-test_parameters.targets.ldos_gridoffset_ev = -10
+test_parameters.targets.ldos_gridsize = 11
+test_parameters.targets.ldos_gridspacing_ev = 2.5
+test_parameters.targets.ldos_gridoffset_ev = -5
 
 # Define the accuracy used in the tests.
 accuracy = 1e-6
 accuracy_dos = 1e-4
+accuracy_ldos = 0.2
 
 
 class TestMALAIntegration:
@@ -175,7 +176,7 @@ class TestMALAIntegration:
         printout("Relative error for sum of DOS: ", rel_error)
 
         # Check against the constraints we put upon ourselves.
-        assert np.isclose(rel_error, 0, atol=accuracy)
+        assert np.isclose(rel_error, 0, atol=accuracy_ldos)
 
     def test_pwevaldos_vs_ppdos(self):
         """Check pp.x DOS vs. pw.x DOS (from eigenvalues in outfile)."""
