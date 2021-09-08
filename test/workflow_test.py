@@ -6,6 +6,7 @@ import importlib
 import os
 
 data_path = os.path.join(get_data_repo_path(), "Al36/")
+data_path_ldos = os.path.join(get_data_repo_path(), "Be2/")
 # Control how much the loss should be better after training compared to
 # before. This value is fairly high, but we're training on absolutely
 # minimal amounts of data.
@@ -30,8 +31,6 @@ class TestFullWorkflow:
 
     @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
                         reason="LAMMPS is currently not part of the pipeline.")
-    @pytest.mark.skipif(os.path.isdir(os.path.join(data_path, "cubes"))
-                        is False, reason="No cube files found in data repo.")
     def test_preprocessing(self):
         """
         Test whether MALA can preprocess data.
@@ -44,32 +43,33 @@ class TestFullWorkflow:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.descriptors.descriptor_type = "SNAP"
-        test_parameters.descriptors.twojmax = 10
+        test_parameters.descriptors.twojmax = 6
         test_parameters.descriptors.rcutfac = 4.67637
         test_parameters.data.descriptors_contain_xyz = True
         test_parameters.targets.target_type = "LDOS"
-        test_parameters.targets.ldos_gridsize = 10
-        test_parameters.targets.ldos_gridspacing_ev = 0.1
-        test_parameters.targets.ldos_gridoffset_ev = -10
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
 
         # Create a DataConverter, and add snapshots to it.
         data_converter = mala.DataConverter(test_parameters)
-        data_converter.add_snapshot_qeout_cube("Al.pw.scf.out", data_path,
-                                               "cubes/tmp.pp*Al_ldos.cube",
-                                               data_path, output_units="1/Ry")
+        data_converter.add_snapshot_qeout_cube("Be.pw.scf.out", data_path_ldos,
+                                               "cubes/tmp.pp*Be_ldos.cube",
+                                               data_path_ldos,
+                                               output_units="1/Ry")
 
-        data_converter.convert_snapshots("./", naming_scheme="Al_snapshot*")
+        data_converter.convert_snapshots("./", naming_scheme="Be_snapshot*")
 
         # Compare against
-        input_data = np.load("Al_snapshot0.in.npy")
+        input_data = np.load("Be_snapshot0.in.npy")
         input_data_shape = np.shape(input_data)
-        assert input_data_shape[0] == 108 and input_data_shape[1] == 108 and \
-               input_data_shape[2] == 100 and input_data_shape[3] == 94
+        assert input_data_shape[0] == 18 and input_data_shape[1] == 18 and \
+               input_data_shape[2] == 27 and input_data_shape[3] == 33
 
-        output_data = np.load("Al_snapshot0.out.npy")
+        output_data = np.load("Be_snapshot0.out.npy")
         output_data_shape = np.shape(output_data)
-        assert output_data_shape[0] == 108 and output_data_shape[1] == 108 and\
-               output_data_shape[2] == 100 and output_data_shape[3] == 10
+        assert output_data_shape[0] == 18 and output_data_shape[1] == 18 and\
+               output_data_shape[2] == 27 and output_data_shape[3] == 11
 
     def test_postprocessing_from_dos(self):
         """
@@ -106,8 +106,6 @@ class TestFullWorkflow:
         assert np.isclose(band_energy, dos.band_energy_dft_calculation,
                           atol=accuracy_band_energy)
 
-    @pytest.mark.skipif(os.path.isfile(os.path.join(data_path, "Al_ldos.npy"))
-                        is False, reason="No LDOS file in data repo found.")
     def test_postprocessing(self):
         """
         Test whether MALA can postprocess data (from LDOS)
@@ -118,15 +116,16 @@ class TestFullWorkflow:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.targets.target_type = "LDOS"
-        test_parameters.targets.ldos_gridsize = 250
-        test_parameters.targets.ldos_gridspacing_ev = 0.1
-        test_parameters.targets.ldos_gridoffset_ev = -10
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
 
         # Create a target calculator to perform postprocessing.
         ldos = mala.TargetInterface(test_parameters)
         ldos.read_additional_calculation_data("qe.out",
-                                              data_path + "Al.pw.scf.out")
-        ldos_data = np.load(data_path + "Al_ldos.npy")
+                                              data_path_ldos
+                                              + "Be.pw.scf.out")
+        ldos_data = np.load(data_path_ldos + "Be_ldos.npy")
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
@@ -154,16 +153,16 @@ class TestFullWorkflow:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.targets.target_type = "LDOS"
-        test_parameters.targets.ldos_gridsize = 250
-        test_parameters.targets.ldos_gridspacing_ev = 0.1
-        test_parameters.targets.ldos_gridoffset_ev = -10
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
         test_parameters.targets.pseudopotential_path = data_path
         # Create a target calculator to perform postprocessing.
         ldos = mala.TargetInterface(test_parameters)
         ldos.read_additional_calculation_data("qe.out",
-                                              data_path + "Al.pw.scf.out")
-        dos_data = np.load(data_path + "Al_dos.npy")
-        dens_data = np.load(data_path + "Al_dens.npy")
+                                              data_path_ldos + "Be.pw.scf.out")
+        dos_data = np.load(data_path_ldos + "Be_dos.npy")
+        dens_data = np.load(data_path_ldos + "Be_dens.npy")
         dos = mala.DOS.from_ldos(ldos)
 
         # Calculate energies
@@ -179,8 +178,6 @@ class TestFullWorkflow:
 
     @pytest.mark.skipif(importlib.util.find_spec("total_energy") is None,
                         reason="QE is currently not part of the pipeline.")
-    @pytest.mark.skipif(os.path.isfile(os.path.join(data_path, "Al_ldos.npy"))
-                        is False, reason="No LDOS file in data repo found.")
     def test_total_energy_from_ldos(self):
         """
         Test whether MALA can calculate the total energy using the LDOS.
@@ -190,16 +187,17 @@ class TestFullWorkflow:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.targets.target_type = "LDOS"
-        test_parameters.targets.ldos_gridsize = 250
-        test_parameters.targets.ldos_gridspacing_ev = 0.1
-        test_parameters.targets.ldos_gridoffset_ev = -10
-        test_parameters.targets.pseudopotential_path = data_path
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
+        test_parameters.targets.pseudopotential_path = data_path_ldos
 
         # Create a target calculator to perform postprocessing.
         ldos = mala.TargetInterface(test_parameters)
         ldos.read_additional_calculation_data("qe.out",
-                                              data_path + "Al.pw.scf.out")
-        ldos_data = np.load(data_path + "Al_ldos.npy")
+                                              data_path_ldos +
+                                              "Be.pw.scf.out")
+        ldos_data = np.load(data_path_ldos + "Be_ldos.npy")
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \

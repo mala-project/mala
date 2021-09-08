@@ -2,7 +2,7 @@ import mala
 from mala import printout
 import numpy as np
 from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al36/"
+data_path = get_data_repo_path()+"Be2/"
 
 
 """
@@ -11,6 +11,8 @@ postprocess data. Usually, this framework outputs LDOS data, thefore,
 post processing of LDOS data will be shown in the following. 
 Set do_total_energy to False, if you don't have the QuantumEspresso
 Python module installed.
+Since actual LDOS files are rather larger, this uses a drastically reduced
+LDOS. Therefore the accuracy of the overall result is rather poor. 
 """
 
 # If you don't have the total energy module installed,
@@ -26,9 +28,9 @@ test_parameters = mala.Parameters()
 
 # Specify the correct LDOS parameters.
 test_parameters.targets.target_type = "LDOS"
-test_parameters.targets.ldos_gridsize = 250
-test_parameters.targets.ldos_gridspacing_ev = 0.1
-test_parameters.targets.ldos_gridoffset_ev = -10
+test_parameters.targets.ldos_gridsize = 11
+test_parameters.targets.ldos_gridspacing_ev = 2.5
+test_parameters.targets.ldos_gridoffset_ev = -5
 # To perform a total energy calculation one also needs to provide
 # a pseudopotential(path).
 test_parameters.targets.pseudopotential_path = data_path
@@ -38,18 +40,17 @@ test_parameters.targets.pseudopotential_path = data_path
 # Create a target calculator to postprocess data.
 # Use this calculator to perform various operations.
 ####################
-
 ldos = mala.TargetInterface(test_parameters)
 
 # Read additional information about the calculation.
 # By doing this, the calculator is able to know e.g. the temperature
 # at which the calculation took place or the lattice constant used.
 ldos.read_additional_calculation_data("qe.out",
-                                      data_path+"Al.pw.scf.out")
+                                      data_path+"Be.pw.scf.out")
 
 # Read in LDOS data. For actual workflows, this part will come
 # from a network.
-ldos_data = np.load(data_path+"Al_ldos.npy")
+ldos_data = np.load(data_path+"Be_ldos.npy")
 
 # Get quantities of interest.
 # For better values in the post processing, it is recommended to
@@ -80,9 +81,15 @@ if do_total_energy:
 
 printout("Parameters used for this experiment:")
 test_parameters.show()
-
+print("Values from LDOS: ")
 print("Number of electrons:", number_of_electrons)
 print("Band energy:", band_energy)
 if do_total_energy:
     print("Total energy:", total_energy)
+
+print("Values from DFT: ")
+print("Number of electrons:", ldos.number_of_electrons)
+print("Band energy:", ldos.band_energy_dft_calculation)
+if do_total_energy:
+    print("Total energy:", ldos.total_energy_dft_calculation)
 
