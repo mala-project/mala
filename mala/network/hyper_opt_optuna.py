@@ -36,7 +36,7 @@ class HyperOptOptuna(HyperOptBase):
         # See if the user specified a pruner.
         pruner = None
         if self.params.hyperparameters.pruner == "no_training":
-            pruner = NoTrainingPruner(self.params, data, "optuna")
+            pruner = NoTrainingPruner(self.params, data)
 
         # Create the study.
         if self.params.hyperparameters.rdb_storage is None:
