@@ -339,7 +339,6 @@ class ParametersRunning(ParametersBase):
         self.trainingtype = "SGD"
         self.learning_rate = 0.5
         self.max_number_epochs = 100
-        # TODO: Find a better system for verbosity. Maybe a number.
         self.verbosity = True
         self.mini_batch_size = 10
         self.weight_decay = 0
@@ -349,9 +348,7 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_decay = 0.1
         self.learning_rate_patience = 0
         self.use_compression = False
-        # TODO: Give this parameter a more descriptive name.
         self.kwargs = {'num_workers': 0, 'pin_memory': False}
-        # TODO: Objects should not be parameters!
         self.sampler = {"train_sampler": None, "validate_sampler": None,
                         "test_sampler": None}
         self.use_shuffling_for_samplers = True
