@@ -3,9 +3,9 @@ import os
 import numpy as np
 from mala import Parameters, DataHandler, DataScaler, Network, Tester
 
-from data_repo_path import get_data_repo_path
-data_path = os.path.join(get_data_repo_path(), "Al36/")
-param_path = os.path.join(get_data_repo_path(), "workflow_test/")
+from data_repo_path import data_repo_path
+data_path = os.path.join(data_repo_path, "Al36")
+param_path = os.path.join(data_repo_path, "workflow_test/")
 params_path = param_path+"workflow_test_params.pkl"
 network_path = param_path+"workflow_test_network.pth"
 input_scaler_path = param_path+"workflow_test_iscaler.pkl"
@@ -43,12 +43,12 @@ class TestInference:
         inference_data_handler.prepare_data()
 
         # Confirm that unit conversion does not introduce any errors.
+
         from_file_1 = inference_data_handler.target_calculator.\
-            convert_units(np.load(data_path+"Al_debug_2k_nr"+str(0) +
-                                  ".out.npy"), in_units="1/Ry")
-        from_file_2 = np.load(data_path+"Al_debug_2k_nr"+str(0) +
-                              ".out.npy")*inference_data_handler.\
-            target_calculator.convert_units(1, in_units="1/Ry")
+            convert_units(np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0) + ".out.npy")),
+                          in_units="1/Ry")
+        from_file_2 = np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0) + ".out.npy"))\
+            * inference_data_handler.target_calculator.convert_units(1, in_units="1/Ry")
 
         assert from_file_1.sum() == from_file_2.sum()
 
@@ -124,12 +124,11 @@ class TestInference:
         # Compare actual_ldos with file directly.
         # This is the only comparison that counts.
         from_file = inference_data_handler.target_calculator.\
-            convert_units(np.load(data_path+"Al_debug_2k_nr" +
-                                  str(0)+".out.npy"), in_units="1/Ry")
+            convert_units(np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0)+".out.npy")),
+                          in_units="1/Ry")
 
         # Test if prediction still works.
-        raw_predicted_outputs = np.load(data_path+"Al_debug_2k_nr"+str(0) +
-                                        ".in.npy")
+        raw_predicted_outputs = np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0) + ".in.npy"))
         raw_predicted_outputs = inference_data_handler.\
             raw_numpy_to_converted_scaled_tensor(raw_predicted_outputs,
                                                  "in", "None")

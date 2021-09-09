@@ -1,8 +1,11 @@
+import os
+
 import mala
 from mala import printout
 
-from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al36/"
+from data_repo_path import data_repo_path
+data_path = os.path.join(data_repo_path, "Al36")
+
 """
 ex05_training_with_postprocessing.py: Train a network, then use this network 
 to predict the LDOS and then analyze the results of this prediction. This 
@@ -62,9 +65,9 @@ def use_trained_network(network_path, params_path, input_scaler_path,
 
     # We will use the LDOS calculator to do some preprocessing.
     ldos_calculator = inference_data_handler.target_calculator
-    ldos_calculator.read_additional_calculation_data("qe.out",
-                                                     data_path +
-                                                     "Al.pw.scf.out")
+    ldos_calculator.read_additional_calculation_data("qe.out", os.path.join(
+                                                     data_path,
+                                                     "Al.pw.scf.out"))
 
     # Calculate the Band energy.
     band_energy_predicted = ldos_calculator.get_band_energy(predicted_ldos)

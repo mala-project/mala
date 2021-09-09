@@ -1,9 +1,10 @@
+import os
+
 import mala
 from mala import printout
 
-from data_repo_path import get_data_repo_path
-import numpy as np
-data_path = get_data_repo_path()+"Be2/"
+from data_repo_path import data_repo_path
+data_path = os.path.join(data_repo_path, "Be2")
 
 """
 ex02_preprocess_data.py: Shows how this framework can be used to preprocess

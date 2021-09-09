@@ -5,8 +5,9 @@ import torch
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 
-from data_repo_path import get_data_repo_path
-data_path = os.path.join(get_data_repo_path(), "Al36")
+from data_repo_path import data_repo_path
+data_path = os.path.join(data_repo_path, "Al36")
+
 # Define the accuracy used in the tests.
 accuracy = 1e-5
 

@@ -6,7 +6,7 @@ import numpy as np
 import scipy as sp
 import pytest
 
-from data_repo_path import get_data_repo_path
+from data_repo_path import data_repo_path
 
 # In order to test the integration capabilities of MALA we need a
 # QuantumEspresso
@@ -18,7 +18,7 @@ from data_repo_path import get_data_repo_path
 # Scripts to reproduce the data files used in this test script can be found
 # in the data repo.
 
-data_path = os.path.join(get_data_repo_path(), "Be2")
+data_path = os.path.join(data_repo_path, "Be2")
 path_to_out = os.path.join(data_path, "Be.pw.scf.out")
 path_to_ldos_npy = os.path.join(data_path, "Be_ldos.npy")
 path_to_dos_npy = os.path.join(data_path, "Be_dos.npy")

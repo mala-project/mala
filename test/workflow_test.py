@@ -5,10 +5,9 @@ import mala
 import numpy as np
 import pytest
 
-from data_repo_path import get_data_repo_path
-
-data_path = os.path.join(get_data_repo_path(), "Al36/")
-data_path_ldos = os.path.join(get_data_repo_path(), "Be2/")
+from data_repo_path import data_repo_path
+data_path = os.path.join(data_repo_path, "Al36")
+data_path_ldos = os.path.join(data_repo_path, "Be2")
 # Control how much the loss should be better after training compared to
 # before. This value is fairly high, but we're training on absolutely
 # minimal amounts of data.
@@ -16,7 +15,7 @@ desired_loss_improvement_factor = 1
 
 # Control the accuracies for the postprocessing routines.
 accuracy_electrons = 1e-11
-accuracy_total_energy = 1
+accuracy_total_energy = 1.5
 accuracy_band_energy = 1
 accuracy_predictions = 5e-2
 
@@ -56,7 +55,7 @@ class TestFullWorkflow:
         # Create a DataConverter, and add snapshots to it.
         data_converter = mala.DataConverter(test_parameters)
         data_converter.add_snapshot_qeout_cube("Be.pw.scf.out", data_path_ldos,
-                                               "cubes/tmp.pp*Be_ldos.cube",
+                                               os.path.join("cubes", "tmp.pp*Be_ldos.cube"),
                                                data_path_ldos,
                                                output_units="1/Ry")
 
@@ -89,9 +88,9 @@ class TestFullWorkflow:
 
         # Create a target calculator to perform postprocessing.
         dos = mala.TargetInterface(test_parameters)
-        dos.read_additional_calculation_data("qe.out",
-                                             data_path + "Al.pw.scf.out")
-        dos_data = np.load(data_path + "Al_dos.npy")
+        dos.read_additional_calculation_data("qe.out", os.path.join(
+                                             data_path, "Al.pw.scf.out"))
+        dos_data = np.load(os.path.join(data_path, "Al_dos.npy"))
 
         # Calculate energies
         self_consistent_fermi_energy = dos. \
@@ -124,10 +123,10 @@ class TestFullWorkflow:
 
         # Create a target calculator to perform postprocessing.
         ldos = mala.TargetInterface(test_parameters)
-        ldos.read_additional_calculation_data("qe.out",
-                                              data_path_ldos
-                                              + "Be.pw.scf.out")
-        ldos_data = np.load(data_path_ldos + "Be_ldos.npy")
+        ldos.read_additional_calculation_data("qe.out", os.path.join(
+                                              data_path_ldos,
+                                               "Be.pw.scf.out"))
+        ldos_data = np.load(os.path.join(data_path_ldos, "Be_ldos.npy"))
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
@@ -158,13 +157,13 @@ class TestFullWorkflow:
         test_parameters.targets.ldos_gridsize = 11
         test_parameters.targets.ldos_gridspacing_ev = 2.5
         test_parameters.targets.ldos_gridoffset_ev = -5
-        test_parameters.targets.pseudopotential_path = data_path
+        test_parameters.targets.pseudopotential_path = data_path_ldos
         # Create a target calculator to perform postprocessing.
         ldos = mala.TargetInterface(test_parameters)
-        ldos.read_additional_calculation_data("qe.out",
-                                              data_path_ldos + "Be.pw.scf.out")
-        dos_data = np.load(data_path_ldos + "Be_dos.npy")
-        dens_data = np.load(data_path_ldos + "Be_dens.npy")
+        ldos.read_additional_calculation_data("qe.out", os.path.join(
+                                              data_path_ldos, "Be.pw.scf.out"))
+        dos_data = np.load(os.path.join(data_path_ldos, "Be_dos.npy"))
+        dens_data = np.load(os.path.join(data_path_ldos, "Be_dens.npy"))
         dos = mala.DOS.from_ldos(ldos)
 
         # Calculate energies
@@ -196,10 +195,10 @@ class TestFullWorkflow:
 
         # Create a target calculator to perform postprocessing.
         ldos = mala.TargetInterface(test_parameters)
-        ldos.read_additional_calculation_data("qe.out",
-                                              data_path_ldos +
-                                              "Be.pw.scf.out")
-        ldos_data = np.load(data_path_ldos + "Be_ldos.npy")
+        ldos.read_additional_calculation_data("qe.out", os.path.join(
+                                              data_path_ldos,
+                                              "Be.pw.scf.out"))
+        ldos_data = np.load((data_path_ldos, "Be_ldos.npy"))
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
@@ -224,7 +223,8 @@ class TestFullWorkflow:
         parameters changed.
         """
         self.__simple_training(save_network=True)
-        self.__use_trained_network(get_data_repo_path()+"workflow_test/")
+        self.__use_trained_network(os.path.join(data_repo_path,
+                                                "workflow_test/"))
 
     @staticmethod
     def __simple_training(save_network=False):
@@ -283,10 +283,10 @@ class TestFullWorkflow:
     def __use_trained_network(save_path="./"):
         """Use a trained network to make a prediction."""
 
-        params_path = save_path+"workflow_test_params.pkl"
-        network_path = save_path+"workflow_test_network.pth"
-        input_scaler_path = save_path+"workflow_test_iscaler.pkl"
-        output_scaler_path = save_path+"workflow_test_oscaler.pkl"
+        params_path = os.path.join(save_path, "workflow_test_params.pkl")
+        network_path = os.path.join(save_path, "workflow_test_network.pth")
+        input_scaler_path = os.path.join(save_path, "workflow_test_iscaler.pkl")
+        output_scaler_path = os.path.join(save_path, "workflow_test_oscaler.pkl")
 
         # Load parameters, network and data scalers.
         new_parameters = mala.Parameters.load_from_file(params_path,
@@ -317,9 +317,9 @@ class TestFullWorkflow:
                              inference_data_handler)
         actual_ldos, predicted_ldos = tester.test_snapshot(0)
         ldos_calculator = inference_data_handler.target_calculator
-        ldos_calculator.read_additional_calculation_data("qe.out",
-                                                         data_path +
-                                                         "Al.pw.scf.out")
+        ldos_calculator.read_additional_calculation_data("qe.out", os.path.join(
+                                                         data_path,
+                                                         "Al.pw.scf.out"))
         band_energy_predicted = ldos_calculator.get_band_energy(predicted_ldos)
         band_energy_actual = ldos_calculator.get_band_energy(actual_ldos)
         nr_electrons_predicted = ldos_calculator.\
@@ -332,4 +332,4 @@ class TestFullWorkflow:
                           atol=accuracy_predictions)
         assert np.isclose(nr_electrons_predicted, nr_electrons_actual,
                           atol=accuracy_predictions)
-                          
+

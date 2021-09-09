@@ -1,3 +1,4 @@
+import os
 import shutil
 import webbrowser
 
@@ -5,8 +6,8 @@ import mala
 from mala import printout
 from tensorboard import program
 
-from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al36/"
+from data_repo_path import data_repo_path
+data_path = os.path.join(data_repo_path, "Al36")
 
 
 """
