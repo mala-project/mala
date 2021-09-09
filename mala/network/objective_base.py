@@ -69,8 +69,9 @@ class ObjectiveBase:
         """
         # Parse the parameters included in the trial.
         self.parse_trial(trial)
-        if trial.should_prune():
-            raise TrialPruned()
+        if self.trial_type == "optuna":
+            if trial.should_prune():
+                raise TrialPruned()
 
         # Train a network for as often as the user desires.
         final_validation_loss = []
