@@ -1,15 +1,16 @@
 """LDOS calculation class."""
-import os
+from ase.units import Rydberg
 
-from .cube_parser import read_cube
-from .target_base import TargetBase
-from .calculation_helpers import *
-from .dos import DOS
-from .density import Density
 import numpy as np
 import math
-from ase.units import Rydberg
+import os
+
 from mala.common.parameters import printout
+from mala.targets.cube_parser import read_cube
+from mala.targets.target_base import TargetBase
+from mala.targets.calculation_helpers import *
+from mala.targets.dos import DOS
+from mala.targets.density import Density
 
 
 class LDOS(TargetBase):

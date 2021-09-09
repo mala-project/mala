@@ -1,23 +1,22 @@
 """DataHandler class that loads and scales data."""
-
 import os
 
-from torch.utils.data import TensorDataset
-
-from .data_scaler import DataScaler
-from .snapshot import Snapshot
-from .lazy_load_dataset import LazyLoadDataset
-from mala.common.parameters import Parameters, ParametersData
-from mala.targets.target_interface import TargetInterface
-from mala.descriptors.descriptor_interface import DescriptorInterface
-from mala.common.printout import printout
-import numpy as np
-import torch
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
+import numpy as np
+import torch
+from torch.utils.data import TensorDataset
+
+from mala.common.printout import printout
+from mala.common.parameters import Parameters, ParametersData
+from mala.datahandling.data_scaler import DataScaler
+from mala.datahandling.snapshot import Snapshot
+from mala.datahandling.lazy_load_dataset import LazyLoadDataset
+from mala.descriptors.descriptor_interface import DescriptorInterface
+from mala.targets.target_interface import TargetInterface
 
 
 class DataHandler:

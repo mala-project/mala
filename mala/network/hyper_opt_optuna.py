@@ -1,14 +1,17 @@
 """Hyperparameter optimizer using optuna."""
-import pickle
-import optuna
 import os
-from .hyper_opt_base import HyperOptBase
-from .objective_base import ObjectiveBase
+import pickle
+
+import optuna
+
 from mala.common.parameters import printout
+from mala.common.parameters import Parameters
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
-from mala.common.parameters import Parameters
-from .no_training_pruner import NoTrainingPruner
+from mala.network.hyper_opt_base import HyperOptBase
+from mala.network.objective_base import ObjectiveBase
+from mala.network.no_training_pruner import NoTrainingPruner
+
 
 class HyperOptOptuna(HyperOptBase):
     """Hyperparameter optimizer using Optuna.

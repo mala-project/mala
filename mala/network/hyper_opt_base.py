@@ -1,7 +1,8 @@
 """Base class for all hyperparameter optimizers."""
 from abc import abstractmethod, ABC
-from .hyperparameter_interface import HyperparameterInterface
-from .objective_base import ObjectiveBase
+
+from mala.network.hyperparameter_interface import HyperparameterInterface
+from mala.network.objective_base import ObjectiveBase
 
 
 class HyperOptBase(ABC):

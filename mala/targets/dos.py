@@ -1,8 +1,8 @@
 """DOS calculation class."""
 import os
 
-from .target_base import TargetBase
-from .calculation_helpers import *
+from mala.targets.target_base import TargetBase
+from mala.targets.calculation_helpers import *
 from scipy import integrate, interpolate
 from scipy.optimize import toms748
 from ase.units import Rydberg

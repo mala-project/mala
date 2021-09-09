@@ -1,12 +1,9 @@
-from mala.common.parameters import Parameters
-from mala.datahandling.data_handler import DataHandler
-from mala.datahandling.data_scaler import DataScaler
-from mala.network.network import Network
-from mala.network.tester import Tester
-from mala.common.parameters import printout
-import numpy as np
-from data_repo_path import get_data_repo_path
 import os
+
+import numpy as np
+from mala import Parameters, DataHandler, DataScaler, Network, Tester
+
+from data_repo_path import get_data_repo_path
 data_path = os.path.join(get_data_repo_path(), "Al36/")
 param_path = os.path.join(get_data_repo_path(), "workflow_test/")
 params_path = param_path+"workflow_test_params.pkl"

@@ -1,10 +1,10 @@
 """Prunes a network when the score is above a user defined limit."""
-
 import optuna
 from optuna.pruners import BasePruner
 from optuna.trial._state import TrialState
+
 from mala import Parameters, DataHandler
-from .objective_no_training import ObjectiveNoTraining
+from mala.network.objective_no_training import ObjectiveNoTraining
 
 
 class NoTrainingPruner(BasePruner):

@@ -1,11 +1,9 @@
 """SNAP descriptor class."""
 import os
-
 import warnings
+
 import ase
 import ase.io
-from .lammps_utils import *
-from .descriptor_base import DescriptorBase
 try:
     from lammps import lammps
 except ModuleNotFoundError:
@@ -14,6 +12,9 @@ except ModuleNotFoundError:
                   "might still work, but trying to calculate SNAP "
                   "descriptors from atomic positions will crash.",
                   stacklevel=3)
+
+from mala.descriptors.lammps_utils import *
+from mala.descriptors.descriptor_base import DescriptorBase
 
 
 class SNAP(DescriptorBase):

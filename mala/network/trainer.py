@@ -1,24 +1,24 @@
 """Trainer class for training a network."""
-from mala.network.network import Network
-from mala.datahandling.data_handler import DataHandler
-from mala.datahandling.data_scaler import DataScaler
-from mala.common.parameters import Parameters
 import os
-import numpy as np
-import torch
-from torch import optim
-from torch.utils.data import DataLoader
-from mala.common.parameters import printout
-from .runner import Runner
-from torch.utils.tensorboard import SummaryWriter 
-import os
+import time
 
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
-import time
+import numpy as np
+import torch
+from torch import optim
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
+
+from mala.common.parameters import Parameters
+from mala.common.parameters import printout
+from mala.datahandling.data_handler import DataHandler
+from mala.datahandling.data_scaler import DataScaler
+from mala.network.network import Network
+from mala.network.runner import Runner
 
 
 class Trainer(Runner):
@@ -671,4 +671,3 @@ class Trainer(Runner):
         avg_loss = hvd.allreduce(tensor, name=name, op=hvd.Average)
         return avg_loss.item()
 
-    

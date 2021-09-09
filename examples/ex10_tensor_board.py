@@ -1,8 +1,10 @@
+import shutil
+import webbrowser
+
 import mala
 from mala import printout
 from tensorboard import program
-import shutil
-import webbrowser
+
 from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
 

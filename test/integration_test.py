@@ -1,14 +1,12 @@
-import scipy as sp
+import os
+
+from mala import LDOS, Density, DOS, Parameters, printout
 from mala.targets.calculation_helpers import *
 import numpy as np
-from mala.targets.ldos import LDOS
-from mala.targets.density import Density
-from mala.targets.dos import DOS
-from mala.common.parameters import Parameters
-from mala.common.parameters import printout
-from data_repo_path import get_data_repo_path
-import os
+import scipy as sp
 import pytest
+
+from data_repo_path import get_data_repo_path
 
 # In order to test the integration capabilities of MALA we need a
 # QuantumEspresso

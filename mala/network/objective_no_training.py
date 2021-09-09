@@ -3,11 +3,12 @@ import numpy as np
 import torch
 from torch import Tensor
 from torch.utils.data import DataLoader
+
+from mala.common.printout import printout
 from mala.common.parameters import Parameters
 from mala.datahandling.data_handler import DataHandler
 from mala.network.network import Network
 from mala.network.objective_base import ObjectiveBase
-from mala.common.parameters import printout
 
 
 class ObjectiveNoTraining(ObjectiveBase):

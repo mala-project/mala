@@ -1,15 +1,13 @@
-from mala.common.parameters import Parameters
-from mala.common.printout import printout
-from mala.datahandling.data_handler import DataHandler
-import torch
-import numpy as np
-from mala.network.network import Network
-from mala.network.trainer import Trainer
-from data_repo_path import get_data_repo_path
-import time
-import pytest
 import importlib
 import os
+import time
+
+from mala import Parameters, printout, DataHandler, Network, Trainer
+import numpy as np
+import torch
+import pytest
+
+from data_repo_path import get_data_repo_path
 # This test compares the data scaling using the regular scaling procedure and
 # the lazy-loading one (incremental fitting).
 
