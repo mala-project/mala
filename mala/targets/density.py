@@ -1,13 +1,9 @@
 """Electronic density calculation class."""
 import os
-
-from .target_base import TargetBase
-from .calculation_helpers import *
-from .cube_parser import read_cube
 import warnings
+
 import ase.io
 from ase.units import Rydberg
-from mala.common.parameters import printout
 try:
     import total_energy as te
 except ModuleNotFoundError:
@@ -17,6 +13,11 @@ except ModuleNotFoundError:
                   "still mostly work, but trying to "
                   "access the total energy of a system WILL fail.",
                   stacklevel=2)
+
+from mala.common.parameters import printout
+from mala.targets.target_base import TargetBase
+from mala.targets.calculation_helpers import *
+from mala.targets.cube_parser import read_cube
 
 
 class Density(TargetBase):

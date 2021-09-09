@@ -1,6 +1,8 @@
+import os
+
 import mala
 import numpy as np
-import os
+
 
 class TestInstallation:
     """Verifies the installation."""

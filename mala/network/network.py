@@ -1,12 +1,12 @@
 """Neural network for MALA."""
-import torch
-import torch.nn as nn
-import torch.nn.functional as functional
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by parameters class
     pass
+import torch
+import torch.nn as nn
+import torch.nn.functional as functional
 
 
 class Network(nn.Module):

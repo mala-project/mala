@@ -1,13 +1,14 @@
 """Runner class for running networks."""
-import torch
-from mala.common.parameters import printout
-from mala import Parameters
-import numpy as np
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
+import numpy as np
+import torch
+
+from mala.common.parameters import printout
+from mala import Parameters
 
 
 class Runner:

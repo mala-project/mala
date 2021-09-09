@@ -1,6 +1,7 @@
 """Base class for all descriptor calculators."""
-import numpy as np
 import ase
+import numpy as np
+
 
 class DescriptorBase:
     """

@@ -1,10 +1,11 @@
+import os
+
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
-from mala.common.parameters import printout
+
 from data_repo_path import get_data_repo_path
-import os
 data_path = os.path.join(get_data_repo_path(), "Al36")
 # Define the accuracy used in the tests.
 accuracy = 1e-5

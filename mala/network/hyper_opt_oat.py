@@ -1,5 +1,9 @@
 """Hyperparameter optimizer using orthogonal array tuning."""
+from bisect import bisect
+import itertools
 import warnings
+
+import numpy as np
 try:
     import oapackage as oa
 except ModuleNotFoundError:
@@ -7,13 +11,11 @@ except ModuleNotFoundError:
                   "affect MALA performance except for when attempting to use "
                   "orthogonal array tuning. ",
                   stacklevel=2)
-from .hyper_opt_base import HyperOptBase
-from .objective_base import ObjectiveBase
-from .hyperparameter_oat import HyperparameterOAT
-import numpy as np
-import itertools
+
+from mala.network.hyper_opt_base import HyperOptBase
+from mala.network.objective_base import ObjectiveBase
+from mala.network.hyperparameter_oat import HyperparameterOAT
 from mala.common.printout import printout
-from bisect import bisect
 
 
 class HyperOptOAT(HyperOptBase):

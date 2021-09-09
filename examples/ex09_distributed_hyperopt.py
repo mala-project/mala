@@ -1,8 +1,10 @@
-import numpy as np
+import os
+
 import mala
 from mala import printout
+import numpy as np
+
 from data_repo_path import get_data_repo_path
-import os
 data_path = get_data_repo_path()+"Al36/"
 
 """

@@ -1,13 +1,14 @@
 """DataSet for lazy-loading."""
-import torch
-from torch.utils.data import Dataset
-from mala.datahandling.snapshot import Snapshot
-import numpy as np
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class.
     pass
+import numpy as np
+import torch
+from torch.utils.data import Dataset
+
+from mala.datahandling.snapshot import Snapshot
 
 
 class LazyLoadDataset(torch.utils.data.Dataset):

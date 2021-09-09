@@ -1,9 +1,11 @@
-import mala
-from data_repo_path import get_data_repo_path
-import numpy as np
-import pytest
 import importlib
 import os
+
+import mala
+import numpy as np
+import pytest
+
+from data_repo_path import get_data_repo_path
 
 data_path = os.path.join(get_data_repo_path(), "Al36/")
 data_path_ldos = os.path.join(get_data_repo_path(), "Be2/")

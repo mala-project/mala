@@ -10,14 +10,16 @@ which MALA relies on). Two things are tested:
 a training is performed. It is measured whether or not the utilization
 of the GPU results in a speed up. 
 """
+import os
+import time
+
 import mala
 from mala import printout
-from data_repo_path import get_data_repo_path
-import time
 import numpy as np
-import os
-import torch
 import pytest
+import torch
+
+from data_repo_path import get_data_repo_path
 data_path = os.path.join(get_data_repo_path(), "Al36/")
 
 test_checkpoint_name = "test"

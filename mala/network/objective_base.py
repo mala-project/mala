@@ -1,10 +1,11 @@
 """Objective function for all training based hyperparameter optimizations."""
 import numpy as np
 from optuna import Trial, TrialPruned
-from .hyperparameter_optuna import HyperparameterOptuna
-from .hyperparameter_oat import HyperparameterOAT
-from .network import Network
-from .trainer import Trainer
+
+from mala.network.hyperparameter_optuna import HyperparameterOptuna
+from mala.network.hyperparameter_oat import HyperparameterOAT
+from mala.network.network import Network
+from mala.network.trainer import Trainer
 from mala import printout
 
 

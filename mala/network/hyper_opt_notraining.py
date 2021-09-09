@@ -1,8 +1,8 @@
 """Hyperparameter optimizer working without training."""
 import optuna
 
-from .hyper_opt_base import HyperOptBase
-from .objective_no_training import ObjectiveNoTraining
+from mala.network.hyper_opt_base import HyperOptBase
+from mala.network.objective_no_training import ObjectiveNoTraining
 
 
 class HyperOptNoTraining(HyperOptBase):

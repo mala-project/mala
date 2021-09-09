@@ -1,8 +1,11 @@
+import os
+
 import mala
 from mala import printout
-from data_repo_path import get_data_repo_path
 import numpy as np
-import os
+
+from data_repo_path import get_data_repo_path
+
 data_path = os.path.join(get_data_repo_path(), "Al36/")
 checkpoint_name = "test_ho"
 

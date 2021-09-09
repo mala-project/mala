@@ -1,14 +1,13 @@
 """Tester class for testing a network."""
-import numpy as np
-import torch
-from torch.utils.data import DataLoader
-from mala.common.parameters import printout
-from .runner import Runner
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
+import torch
+
+from mala.common.parameters import printout
+from mala.network.runner import Runner
 
 
 class Tester(Runner):

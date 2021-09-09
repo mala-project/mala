@@ -2,8 +2,9 @@
 from ase.units import Rydberg, Bohr, kB
 import ase.io
 import numpy as np
+
 from mala.common.parameters import Parameters, ParametersTargets
-from .calculation_helpers import fermi_function
+from mala.targets.calculation_helpers import fermi_function
 
 
 class TargetBase:

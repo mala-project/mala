@@ -2,7 +2,7 @@
 import os
 import pickle
 import warnings
-from .printout import printout, set_horovod_status
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -11,6 +11,9 @@ except ModuleNotFoundError:
                   "attempting to set parameters.training.use_horovod = "
                   "True WILL cause a crash.", stacklevel=3)
 import torch
+
+from mala.common.printout import printout, set_horovod_status
+
 
 
 class ParametersBase:
