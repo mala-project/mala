@@ -1,9 +1,11 @@
+import os
+
 import mala
 from mala import printout
 import numpy as np
 
-from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Be2/"
+from data_repo_path import data_repo_path
+data_path = os.path.join(data_repo_path, "Be2")
 
 
 """
@@ -46,12 +48,12 @@ ldos = mala.TargetInterface(test_parameters)
 # Read additional information about the calculation.
 # By doing this, the calculator is able to know e.g. the temperature
 # at which the calculation took place or the lattice constant used.
-ldos.read_additional_calculation_data("qe.out",
-                                      data_path+"Be.pw.scf.out")
+ldos.read_additional_calculation_data("qe.out", os.path.join(
+                                      data_path, "Be.pw.scf.out"))
 
 # Read in LDOS data. For actual workflows, this part will come
 # from a network.
-ldos_data = np.load(data_path+"Be_ldos.npy")
+ldos_data = np.load(os.path.join(data_path, "Be_ldos.npy"))
 
 # Get quantities of interest.
 # For better values in the post processing, it is recommended to

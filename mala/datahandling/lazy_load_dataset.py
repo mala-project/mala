@@ -1,4 +1,6 @@
 """DataSet for lazy-loading."""
+import os
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -134,11 +136,13 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         """
         # Load the data into RAM.
         self.input_data = \
-            np.load(self.snapshot_list[file_index].input_npy_directory +
-                    self.snapshot_list[file_index].input_npy_file)
+            np.load(os.path.join(
+                    self.snapshot_list[file_index].input_npy_directory,
+                    self.snapshot_list[file_index].input_npy_file))
         self.output_data = \
-            np.load(self.snapshot_list[file_index].output_npy_directory +
-                    self.snapshot_list[file_index].output_npy_file)
+            np.load(os.path.join(
+                    self.snapshot_list[file_index].output_npy_directory,
+                    self.snapshot_list[file_index].output_npy_file))
 
         # Transform the data.
         if self.descriptors_contain_xyz:

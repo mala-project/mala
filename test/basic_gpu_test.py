@@ -19,8 +19,8 @@ import numpy as np
 import pytest
 import torch
 
-from data_repo_path import get_data_repo_path
-data_path = os.path.join(get_data_repo_path(), "Al36/")
+from data_repo_path import data_repo_path
+data_path = os.path.join(data_repo_path, "Al36")
 
 test_checkpoint_name = "test"
 
