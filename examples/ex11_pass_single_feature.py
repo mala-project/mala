@@ -1,11 +1,3 @@
-"""Show how to run a single feature vector out of a snapshot through a network.
-We load a pre-trained net and pass a single input feature vector through,
-including input and output scaling.
-
-First run ex05_training_with_postprocessing.py to create the
-ex05_* files used below.
-"""
-
 import os
 
 pj = os.path.join
@@ -15,6 +7,15 @@ import numpy as np
 import torch
 
 from data_repo_path import data_repo_path
+
+"""
+Show how to run a single feature vector out of a snapshot through a network.
+We load a pre-trained net and pass a single input feature vector through,
+including input and output scaling.
+
+First run ex05_training_with_postprocessing.py to create the
+ex05_* files used below.
+"""
 
 
 data_path = pj(data_repo_path, "Al36")
