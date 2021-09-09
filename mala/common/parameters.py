@@ -502,6 +502,23 @@ class ParametersHyperparameterOptimization(ParametersBase):
         but it makes sense to choose a higher number, to exclude networks
         that performed by chance (good initilization). Naturally this impedes
         performance.
+
+    trial_ensemble_evaluation : string
+        Control how multiple trainings performed during a trial are evaluated.
+        By default, simply "mean" is used. For smaller numbers of training
+        per trial it might make sense to use "mean_std", which means that
+        the mean of all metrics plus the standard deviation is used,
+        as an estimate of the minimal accuracy to be expected. Currently,
+        "mean" and "mean_std" are allowed.
+
+    use_multivariate : bool
+        If True, the optuna multivariate sampler is used. It is experimental
+        since v2.2.0, but reported to perform very well.
+        http://proceedings.mlr.press/v80/falkner18a.html
+
+    no_training_cutoff : float
+        If the surrogate loss algorithm is used as a pruner during a study,
+        this cutoff determines which trials are neglected.
     """
 
     def __init__(self):
@@ -516,6 +533,10 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.rdb_storage = None
         self.rdb_storage_heartbeat = None
         self.number_training_per_trial = 1
+        self.trial_ensemble_evaluation = "mean"
+        self.use_multivariate = True
+        self.no_training_cutoff = 0
+        self.pruner = None
 
     @property
     def rdb_storage_heartbeat(self):
@@ -540,6 +561,26 @@ class ParametersHyperparameterOptimization(ParametersBase):
             self._number_training_per_trial = 1
         else:
             self._number_training_per_trial = value
+
+    @property
+    def trial_ensemble_evaluation(self):
+        """
+        Control how multiple trainings performed during a trial are evaluated.
+
+        By default, simply "mean" is used. For smaller numbers of training
+        per trial it might make sense to use "mean_std", which means that
+        the mean of all metrics plus the standard deviation is used,
+        as an estimate of the minimal accuracy to be expected. Currently,
+        "mean" and "mean_std" are allowed.
+        """
+        return self._trial_ensemble_evaluation
+
+    @trial_ensemble_evaluation.setter
+    def trial_ensemble_evaluation(self, value):
+        if value != "mean" and value != "mean_std":
+            self._trial_ensemble_evaluation = "mean"
+        else:
+            self._trial_ensemble_evaluation = value
 
     def show(self, indent=""):
         """

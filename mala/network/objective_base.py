@@ -1,6 +1,6 @@
 """Objective function for all training based hyperparameter optimizations."""
 import numpy as np
-from optuna import Trial
+from optuna import Trial, TrialPruned
 from .hyperparameter_optuna import HyperparameterOptuna
 from .hyperparameter_oat import HyperparameterOAT
 from .network import Network
@@ -32,10 +32,25 @@ class ObjectiveBase:
 
         # We need to find out if we have to reparametrize the lists with the
         # layers and the activations.
-        self.optimize_layer_list = any(map(
+        contains_single_layer = any(map(
             lambda p: "ff_neurons_layer" in p.name,
             self.params.hyperparameters.hlist
         ))
+        contains_multiple_layer_neurons = any(map(
+            lambda p: "ff_multiple_layers_neurons" in p.name,
+            self.params.hyperparameters.hlist
+        ))
+        contains_multiple_layers_count = any(map(
+            lambda p: "ff_multiple_layers_count" in p.name,
+            self.params.hyperparameters.hlist
+        ))
+        if contains_multiple_layer_neurons != contains_multiple_layers_count:
+            print("You selected multiple layers to be optimized, but either "
+                  "the range of neurons or number of layers is missing. "
+                  "This input will be ignored.")
+        self.optimize_layer_list = contains_single_layer or (
+                    contains_multiple_layer_neurons and
+                    contains_multiple_layers_count)
         self.optimize_activation_list = list(map(
             lambda p: "layer_activation" in p.name,
             self.params.hyperparameters.hlist
@@ -55,11 +70,14 @@ class ObjectiveBase:
         """
         # Parse the parameters included in the trial.
         self.parse_trial(trial)
+        if self.trial_type == "optuna":
+            if trial.should_prune():
+                raise TrialPruned()
 
         # Train a network for as often as the user desires.
         final_validation_loss = []
         for i in range(0, self.params.hyperparameters.
-                number_training_per_trial):
+                       number_training_per_trial):
             test_network = Network(self.params)
             test_trainer = Trainer(self.params, test_network, self.data_handler)
             test_trainer.train_network()
@@ -68,7 +86,23 @@ class ObjectiveBase:
         if self.params.hyperparameters.number_training_per_trial > 1:
             printout("Losses from multiple runs are: ")
             printout(final_validation_loss)
-        return np.mean(final_validation_loss)
+
+        if self.params.hyperparameters.trial_ensemble_evaluation == "mean":
+            return np.mean(final_validation_loss)
+
+        elif self.params.hyperparameters.trial_ensemble_evaluation == \
+                "mean_std":
+            mean = np.mean(final_validation_loss)
+
+            # Cannot calculate the standar deviation of a bunch of infinities.
+            if np.isinf(mean):
+                return mean
+            else:
+                return np.mean(final_validation_loss) + \
+                       np.std(final_validation_loss)
+        else:
+            raise Exception("No way to estimate the trial metric from ensemble"
+                            " training provided.")
 
     def parse_trial(self, trial):
         """
@@ -113,6 +147,38 @@ class ObjectiveBase:
         for par in self.params.hyperparameters.hlist:
             if par.name == "learning_rate":
                 self.params.running.learning_rate = par.get_parameter(trial)
+
+            # If the user wants to optimize multiple layers simultaneously,
+            # we have to parse to parameters at the same time.
+            elif par.name == "ff_multiple_layers_neurons":
+                neurons_per_layer = par.get_parameter(trial)
+                number_layers = 0
+                max_number_layers = 0
+                other_par: HyperparameterOptuna
+                for other_par in self.params.hyperparameters.hlist:
+                    if other_par.name == "ff_multiple_layers_count":
+                        number_layers = other_par.get_parameter(trial)
+                        max_number_layers = max(other_par.choices)
+                if number_layers > 0:
+                    for i in range(0, number_layers):
+                        if neurons_per_layer > 0:
+                            self.params.network.layer_sizes. \
+                                append(neurons_per_layer)
+                        else:
+                            turned_off_layers.append(layer_counter)
+                        layer_counter += 1
+                    if number_layers != max_number_layers:
+                        for i in range(number_layers, max_number_layers):
+                            turned_off_layers.append(layer_counter)
+                            layer_counter += 1
+                else:
+                    for i in range(0, max_number_layers):
+                        turned_off_layers.append(layer_counter)
+                        layer_counter += 1
+
+            elif par.name == "ff_multiple_layers_count":
+                # This is parsed directly abve.
+                pass
 
             elif "ff_neurons_layer" in par.name:
                 if self.params.network.nn_type == "feed-forward":

@@ -126,6 +126,9 @@ class HyperparameterOptuna:
             Return value is based on type of hyperparameter.
         """
         if self.opttype == "categorical":
-            return trial.suggest_categorical(self.name, self.choices)
+            if len(self.choices) > 1:
+                return trial.suggest_categorical(self.name, self.choices)
+            else:
+                return self.choices[0]
         else:
             raise Exception("Wrong hyperparameter type.")

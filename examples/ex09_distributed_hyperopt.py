@@ -46,6 +46,8 @@ test_parameters.running.trainingtype = "Adam"
 # Specify the number of trials, the hyperparameter optimizer should run
 # and the type of hyperparameter.
 test_parameters.hyperparameters.n_trials = 20
+test_parameters.hyperparameters.checkpoints_each_trial = -1
+test_parameters.hyperparameters.checkpoint_name = "ex09"
 test_parameters.hyperparameters.hyper_opt_method = "optuna"
 test_parameters.hyperparameters.study_name = "ex09"
 test_parameters.hyperparameters.rdb_storage = 'sqlite:///ex09.db'
