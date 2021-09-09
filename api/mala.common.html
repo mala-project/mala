@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.1.0-282-gaf3605f
+                v0.1.0-292-gdfa5135
               </div>
             
           
@@ -710,6 +710,20 @@ but it makes sense to choose a higher number, to exclude networks
 that performed by chance (good initilization). Naturally this impedes
 performance.</p>
 </dd>
+<dt>trial_ensemble_evaluation<span class="classifier">string</span></dt><dd><p>Control how multiple trainings performed during a trial are evaluated.
+By default, simply “mean” is used. For smaller numbers of training
+per trial it might make sense to use “mean_std”, which means that
+the mean of all metrics plus the standard deviation is used,
+as an estimate of the minimal accuracy to be expected. Currently,
+“mean” and “mean_std” are allowed.</p>
+</dd>
+<dt>use_multivariate<span class="classifier">bool</span></dt><dd><p>If True, the optuna multivariate sampler is used. It is experimental
+since v2.2.0, but reported to perform very well.
+<a class="reference external" href="http://proceedings.mlr.press/v80/falkner18a.html">http://proceedings.mlr.press/v80/falkner18a.html</a></p>
+</dd>
+<dt>no_training_cutoff<span class="classifier">float</span></dt><dd><p>If the surrogate loss algorithm is used as a pruner during a study,
+this cutoff determines which trials are neglected.</p>
+</dd>
 </dl>
 <dl class="py method">
 <dt id="mala.common.parameters.ParametersHyperparameterOptimization.show">
@@ -733,6 +747,17 @@ shows itself.</p>
 <dt id="mala.common.parameters.ParametersHyperparameterOptimization.rdb_storage_heartbeat">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">rdb_storage_heartbeat</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.rdb_storage_heartbeat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Control whether a heartbeat is used for distributed optuna runs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.ParametersHyperparameterOptimization.trial_ensemble_evaluation">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">trial_ensemble_evaluation</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.trial_ensemble_evaluation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control how multiple trainings performed during a trial are evaluated.</p>
+<p>By default, simply “mean” is used. For smaller numbers of training
+per trial it might make sense to use “mean_std”, which means that
+the mean of all metrics plus the standard deviation is used,
+as an estimate of the minimal accuracy to be expected. Currently,
+“mean” and “mean_std” are allowed.</p>
 </dd></dl>
 
 </dd></dl>

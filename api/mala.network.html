@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.1.0-282-gaf3605f
+                v0.1.0-292-gdfa5135
               </div>
             
           
@@ -916,6 +916,53 @@ functionalities AND possibly own saving needs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>path_to_file</strong> (<em>string</em>) – Path to the file in which the network should be saved.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.network.no_training_pruner">
+<span id="mala-network-no-training-pruner-module"></span><h2>mala.network.no_training_pruner module<a class="headerlink" href="#module-mala.network.no_training_pruner" title="Permalink to this headline">¶</a></h2>
+<p>Prunes a network when the score is above a user defined limit.</p>
+<dl class="py class">
+<dt id="mala.network.no_training_pruner.NoTrainingPruner">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.no_training_pruner.</span></code><code class="sig-name descname"><span class="pre">NoTrainingPruner</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.no_training_pruner.NoTrainingPruner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">optuna.pruners.</span></code></p>
+<p>Implements the NASWOT method (first version of paper) as an optuna pruner.</p>
+<p>This means that before each training of a trial network the network will
+be tested against a user defined surrogate score (which has to be
+calibrated). If this score is good enough, the candidate will be trained.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>search_parameters</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this objective.</p></li>
+<li><p><strong>data_handler</strong> (<a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – datahandler to be used during the hyperparameter optimization.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.network.no_training_pruner.NoTrainingPruner.prune">
+<code class="sig-name descname"><span class="pre">prune</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">optuna.study.Study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">optuna.trial.FrozenTrial</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#mala.network.no_training_pruner.NoTrainingPruner.prune" title="Permalink to this definition">¶</a></dt>
+<dd><p>Judge whether the trial should be pruned based on the reported values.</p>
+<p>Note that this method is not supposed to be called by library users. Instead,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.report()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.should_prune()</span></code> provide
+user interfaces to implement pruning mechanism in an objective function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>study</strong> (<em>optuna.study.Study</em>) – Study object of the target study.</p></li>
+<li><p><strong>trial</strong> (<em>optuna.trial.FrozenTrial</em>) – FrozenTrial object of the target trial.
+Take a copy before modifying this object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>should_prune</strong> – A boolean indicating whether this particular trial should be
+pruned.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>

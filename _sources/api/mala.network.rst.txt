@@ -76,6 +76,14 @@ mala.network.network module
    :undoc-members:
    :show-inheritance:
 
+mala.network.no\_training\_pruner module
+----------------------------------------
+
+.. automodule:: mala.network.no_training_pruner
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mala.network.objective\_base module
 -----------------------------------
 
