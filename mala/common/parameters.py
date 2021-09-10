@@ -222,6 +222,11 @@ class ParametersData(ParametersBase):
         If True, data is lazily loaded, i.e. only the snapshots that are
         currently needed will be kept in memory. This greatly reduces memory
         demands, but adds additional computational time.
+
+    ignore_spatial_structure : bool
+        If true, the data will be saved as a list of descriptors (2 dimenstional
+        data). Otherwise snapshot data will be saved as a descriptor for each
+        xyz coordinate (4 dimenstional data).
     """
 
     def __init__(self):
@@ -234,6 +239,7 @@ class ParametersData(ParametersBase):
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
+        self.ignore_spatial_structure = True
 
 
 class ParametersRunning(ParametersBase):

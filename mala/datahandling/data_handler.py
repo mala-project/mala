@@ -124,6 +124,7 @@ class DataHandler:
         Torch tensor holding all scaled testing data output.
         """
 
+
     def get_input_dimension(self):
         """
         Get the dimension of the input vector.
@@ -656,9 +657,10 @@ class DataHandler:
         self.training_data_inputs = np.array(self.training_data_inputs)
         self.training_data_inputs = \
             self.training_data_inputs.astype(np.float32)
-        self.training_data_inputs = \
-            self.training_data_inputs.reshape(
-                [self.nr_training_data, self.get_input_dimension()])
+        if self.parameters.ignore_spatial_structure:
+            self.training_data_inputs = \
+                self.training_data_inputs.reshape(
+                    [self.nr_training_data, self.get_input_dimension()])
         self.training_data_inputs = \
             torch.from_numpy(self.training_data_inputs).float()
 
@@ -690,8 +692,9 @@ class DataHandler:
         self.training_data_outputs = np.array(self.training_data_outputs)
         self.training_data_outputs = \
             self.training_data_outputs.astype(np.float32)
-        self.training_data_outputs = self.training_data_outputs.reshape(
-            [self.nr_training_data, self.get_output_dimension()])
+        if self.parameters.ignore_spatial_structure:
+            self.training_data_outputs = self.training_data_outputs.reshape(
+                [self.nr_training_data, self.get_output_dimension()])
         self.training_data_outputs = \
             torch.from_numpy(self.training_data_outputs).float()
 
@@ -791,9 +794,10 @@ class DataHandler:
                 self.test_data_inputs = np.array(self.test_data_inputs)
                 self.test_data_inputs = \
                     self.test_data_inputs.astype(np.float32)
-                self.test_data_inputs = \
-                    self.test_data_inputs.reshape(
-                        [self.nr_test_data, self.get_input_dimension()])
+                if self.parameters.ignore_spatial_structure:
+                    self.test_data_inputs = \
+                        self.test_data_inputs.reshape(
+                            [self.nr_test_data, self.get_input_dimension()])
                 self.test_data_inputs = \
                     torch.from_numpy(self.test_data_inputs).float()
                 self.test_data_inputs = \
@@ -802,9 +806,10 @@ class DataHandler:
             self.validation_data_inputs = np.array(self.validation_data_inputs)
             self.validation_data_inputs = \
                 self.validation_data_inputs.astype(np.float32)
-            self.validation_data_inputs = \
-                self.validation_data_inputs.reshape(
-                    [self.nr_validation_data, self.get_input_dimension()])
+            if self.parameters.ignore_spatial_structure:
+                self.validation_data_inputs = \
+                    self.validation_data_inputs.reshape(
+                        [self.nr_validation_data, self.get_input_dimension()])
             self.validation_data_inputs = \
                 torch.from_numpy(self.validation_data_inputs).float()
             self.validation_data_inputs = \
@@ -816,9 +821,10 @@ class DataHandler:
                 self.test_data_outputs = np.array(self.test_data_outputs)
                 self.test_data_outputs = \
                     self.test_data_outputs.astype(np.float32)
-                self.test_data_outputs = \
-                    self.test_data_outputs.reshape(
-                        [self.nr_test_data, self.get_output_dimension()])
+                if self.parameters.ignore_spatial_structure:
+                    self.test_data_outputs = \
+                        self.test_data_outputs.reshape(
+                            [self.nr_test_data, self.get_output_dimension()])
                 self.test_data_outputs = \
                     torch.from_numpy(self.test_data_outputs).float()
                 self.test_data_outputs = \
@@ -828,9 +834,10 @@ class DataHandler:
                 np.array(self.validation_data_outputs)
             self.validation_data_outputs = \
                 self.validation_data_outputs.astype(np.float32)
-            self.validation_data_outputs = \
-                self.validation_data_outputs.reshape(
-                    [self.nr_validation_data, self.get_output_dimension()])
+            if self.parameters.ignore_spatial_structure:
+                self.validation_data_outputs = \
+                    self.validation_data_outputs.reshape(
+                        [self.nr_validation_data, self.get_output_dimension()])
             self.validation_data_outputs = \
                 torch.from_numpy(self.validation_data_outputs).float()
             self.validation_data_outputs = \
