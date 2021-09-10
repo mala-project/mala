@@ -1,7 +1,6 @@
 
 import mala
 from mala import printout
-from data_repo_path import get_data_repo_path
 data_path = "/home/fiedlerl/data/mala_data_repo_FULL/Al36_density/"
 
 """
