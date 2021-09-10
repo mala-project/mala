@@ -6,8 +6,10 @@ Training of surrogate models with MALA is often done on HPC infrastructure, yet 
 
 - You can find information on how to mount Hemera onto a local device here:
 
-https://fwcc.pages.hzdr.de/infohub/hpc/storage.html
+  <https://fwcc.pages.hzdr.de/infohub/hpc/storage.html>
 
 - Alternatively, simply use the following command
 
-sshfs username@hemera5.fz-rossendorf.de:folder/file/location folder/location/in/local
+  ```sh
+  $ sshfs username@hemera5.fz-rossendorf.de:folder/file/location folder/location/in/local
+  ```
