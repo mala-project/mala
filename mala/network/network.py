@@ -46,6 +46,8 @@ class Network(nn.Module):
 
         if self.params.nn_type == "feed-forward":
             self.__initialize_as_feedforward()
+        elif self.params.nn_type == "CNN":
+            self.__initialize_as_CNN()
         else:
             raise Exception("Unsupported network architecture.")
 
@@ -90,6 +92,12 @@ class Network(nn.Module):
             except KeyError:
                 raise Exception("Invalid activation type seleceted.")
 
+    def __initialize_as_CNN(self):
+        layers = [nn.ConvTranspose3d(94, 175, 5), nn.BatchNorm3d(94), nn.ReLU(),
+                       nn.ConvTranspose3d(175, 250, 7),nn.BatchNorm3d(175), nn.ReLU()]
+        for layer in layers:
+            self.layers.append(layer)
+
     def forward(self, inputs):
         """
         Perform a forward pass through the network.
@@ -105,7 +113,8 @@ class Network(nn.Module):
             Predicted outputs of array.
         """
         # Forward propagate data.
-        if self.params.nn_type == "feed-forward":
+        if self.params.nn_type == "feed-forward" or self.params.nn_type == "CNN":
+            print("forward got input of shape", inputs.shape)
             for layer in self.layers:
                 inputs = layer(inputs)
             return inputs
