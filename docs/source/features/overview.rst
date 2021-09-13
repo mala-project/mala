@@ -1,5 +1,5 @@
 Overview
-===========
+========
 
 List of features
 ****************
@@ -43,7 +43,7 @@ List of features
 
 
 Workflow
-*********
+********
 
 The goal of MALA is to build surrogate models for electronic structure theory.
 These surrogate models are based on neural networks. After training such
