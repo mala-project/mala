@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.1.0-316-ge8912be
+                v0.1.0-317-g7634886
               </div>
             
           
@@ -205,7 +205,7 @@ After all snapshots of interests are given to
 the data handler the necessary routines outlined above can be started with
 <code class="docutils literal notranslate"><span class="pre">prepare_data</span></code>.
 Large datasets can be lazily-loaded into the RAM, i.e. only a subset of the
-entire data will be present in the RAM simultaneously. m</p>
+entire data will be present in the RAM simultaneously.</p>
 </div>
 <div class="section" id="training-and-inference">
 <h2>Training and inference<a class="headerlink" href="#training-and-inference" title="Permalink to this headline">¶</a></h2>
@@ -218,7 +218,7 @@ can be trained using the <code class="docutils literal notranslate"><span class=
 <p>Hyperparameter optimization can be done using optuna. Two experimental methods
 are supported as well, orthogonal array tuning and neural architecture search
 without training. In order to perform a hyperparameter optimization, a
-<code class="docutils literal notranslate"><span class="pre">HyperOptOptuna</span></code> object (for optuna) is crated. Hyperparameters can be
+<code class="docutils literal notranslate"><span class="pre">HyperOptOptuna</span></code> object (for optuna) is created. Hyperparameters can be
 added to the study with the <code class="docutils literal notranslate"><span class="pre">add_hyperparameter</span></code> function. Afterwards a
 hyperparameter study can be executed.
 Optuna can be used in a distributed fashion, using e.g. PostgreSQL.</p>

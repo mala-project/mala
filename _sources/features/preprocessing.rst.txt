@@ -1,5 +1,5 @@
 Preprocessing
-==============
+=============
 
 Data Conversion
 ###############
@@ -20,7 +20,7 @@ calculating descriptors on the grid. Currently, only SNAP descriptors are
 supported. MALA uses LAMMPS to calculate these SNAP descriptors.
 
 Targets
-***********
+*******
 
 MALA is optimized for the usage of the LDOS (local density of states) as
 target quantity. The LDOS gives the DOS (density of states) at each grid point,
@@ -30,7 +30,7 @@ The LDOS can be used to :doc:`efficiently calculate quantities of interest.
 DFT calculations.
 
 Data Scaling
-#############
+############
 
 An additional step of preprocessing is scaling the data before a model is
 trained. This is done automatically in the ``DataHandler`` class, using the

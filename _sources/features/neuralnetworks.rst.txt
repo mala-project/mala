@@ -18,7 +18,7 @@ After all snapshots of interests are given to
 the data handler the necessary routines outlined above can be started with
 ``prepare_data``.
 Large datasets can be lazily-loaded into the RAM, i.e. only a subset of the
-entire data will be present in the RAM simultaneously. m
+entire data will be present in the RAM simultaneously.
 
 Training and inference
 ######################
@@ -33,7 +33,7 @@ Hyperparameter optimization
 Hyperparameter optimization can be done using optuna. Two experimental methods
 are supported as well, orthogonal array tuning and neural architecture search
 without training. In order to perform a hyperparameter optimization, a
-``HyperOptOptuna`` object (for optuna) is crated. Hyperparameters can be
+``HyperOptOptuna`` object (for optuna) is created. Hyperparameters can be
 added to the study with the ``add_hyperparameter`` function. Afterwards a
 hyperparameter study can be executed.
 Optuna can be used in a distributed fashion, using e.g. PostgreSQL.
