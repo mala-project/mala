@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.1.0-313-g429f769
+                v0.1.0-316-ge8912be
               </div>
             
           
@@ -92,9 +92,15 @@
             
               <p class="caption"><span class="caption-text">Features</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="background.html">Theoretical Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="preprocessing.html">Preprocessing</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Neural Networks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Neural Networks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data-handling">Data Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#training-and-inference">Training and inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hyperparameter-optimization">Hyperparameter optimization</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="postprocessing.html">Postprocessing</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Installation</span></p>
@@ -187,6 +193,36 @@
 <p>Neural networks are powerful machine learning tools in principle capable of
 approximating any function. In MALA, neural networks are built using PyTorch.
 Hyperparameter optimization can be done using optuna and custom routines.</p>
+<div class="section" id="data-handling">
+<h2>Data Handling<a class="headerlink" href="#data-handling" title="Permalink to this headline">¶</a></h2>
+<p>MALA provides a <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> class that takes care of all the necessary data
+operations. It loads, scales and performs inference on data, as well as
+unit conversion. Raw simulation data has to be processed into data that can
+be used with a <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> using the <code class="docutils literal notranslate"><span class="pre">DataConverter</span></code> class. In MALA,
+data handling works on a per-snapshot basis; i.e. paths to individual snapshots are
+added to the data handler via <code class="docutils literal notranslate"><span class="pre">add_snapshot</span></code>.
+After all snapshots of interests are given to
+the data handler the necessary routines outlined above can be started with
+<code class="docutils literal notranslate"><span class="pre">prepare_data</span></code>.
+Large datasets can be lazily-loaded into the RAM, i.e. only a subset of the
+entire data will be present in the RAM simultaneously. m</p>
+</div>
+<div class="section" id="training-and-inference">
+<h2>Training and inference<a class="headerlink" href="#training-and-inference" title="Permalink to this headline">¶</a></h2>
+<p>Neural networks are built using <code class="docutils literal notranslate"><span class="pre">pytorch</span></code> and the <code class="docutils literal notranslate"><span class="pre">Network</span></code> class. They
+can be trained using the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> class and can be tested using the
+<code class="docutils literal notranslate"><span class="pre">Tester</span></code> class. Currently, only feed-forward neural-networks are implemented.</p>
+</div>
+<div class="section" id="hyperparameter-optimization">
+<h2>Hyperparameter optimization<a class="headerlink" href="#hyperparameter-optimization" title="Permalink to this headline">¶</a></h2>
+<p>Hyperparameter optimization can be done using optuna. Two experimental methods
+are supported as well, orthogonal array tuning and neural architecture search
+without training. In order to perform a hyperparameter optimization, a
+<code class="docutils literal notranslate"><span class="pre">HyperOptOptuna</span></code> object (for optuna) is crated. Hyperparameters can be
+added to the study with the <code class="docutils literal notranslate"><span class="pre">add_hyperparameter</span></code> function. Afterwards a
+hyperparameter study can be executed.
+Optuna can be used in a distributed fashion, using e.g. PostgreSQL.</p>
+</div>
 </div>
 
 

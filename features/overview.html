@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Postprocessing &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>Overview &mdash; Materials Learning Algorithms (MALA)  documentation</title>
   
 
   
@@ -40,8 +40,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Installation of MALA" href="../install/README.html" />
-    <link rel="prev" title="Neural Networks" href="neuralnetworks.html" /> 
+    <link rel="next" title="Theoretical Background" href="background.html" />
+    <link rel="prev" title="Welcome to MALA’s documentation!" href="../index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -92,16 +92,15 @@
             
               <p class="caption"><span class="caption-text">Features</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#list-of-features">List of features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#workflow">Workflow</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="background.html">Theoretical Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="preprocessing.html">Preprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="neuralnetworks.html">Neural Networks</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Postprocessing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#ldos">LDOS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dos">DOS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#density">Density</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="postprocessing.html">Postprocessing</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Installation</span></p>
 <ul>
@@ -167,14 +166,14 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Postprocessing</li>
+      <li>Overview</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
             
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/features/postprocessing.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/features/overview.rst" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -188,27 +187,61 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="postprocessing">
-<h1>Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h1>
-<p>MALA provides routines to calculate quantities of interests from the physical
-data such as the LDOS, DOS and electronic density.</p>
-<div class="section" id="ldos">
-<h2>LDOS<a class="headerlink" href="#ldos" title="Permalink to this headline">¶</a></h2>
-<p>The LDOS can be used to calculate the number of electrons and band energy
-(both via the DOS) and the total energy (via the DOS and the electronic
-density) of a system. In order to do that, the LDOS is usually integrated
-either on the spatial or the energy grid, yielding the DOS or density
-respectively.</p>
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="list-of-features">
+<h2>List of features<a class="headerlink" href="#list-of-features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>General features</p>
+<ul>
+<li><p>Central parameters class that holds all necessary parameters and allows for saving and loading for later use</p></li>
+</ul>
+</li>
+<li><p>Preprocesing of simulation data</p>
+<ul>
+<li><p>Calculation of atomic descriptors from simulation data</p></li>
+<li><p>Parsing of LDOS data files</p></li>
+<li><p>Scaling and Conversion of data</p></li>
+</ul>
+</li>
+<li><p>Training of Surrogate models</p>
+<ul>
+<li><p>Creation, training and evaluation of feed-forward neural networks</p></li>
+<li><p>Training progress can be checkpointed, neural networks can be saved for later use</p></li>
+<li><p>Distributed training with horovod (experimental)</p></li>
+<li><p>(Distributed) hyperparameter optimization with optuna</p></li>
+<li><p>Hyperparameter optimization with orthogonal array tuning and neural architecure search without training (both experimental)</p></li>
+</ul>
+</li>
+<li><p>Postprocessing of surogate model output</p>
+<ul>
+<li><p>LDOS can be used to calculate DOS and/or density</p></li>
+<li><p>Different quantities of interest can be calculated</p>
+<ul>
+<li><p>Number of electrons (from LDOS, DOS or density)</p></li>
+<li><p>Band energy (from LDOS or DOS)</p></li>
+<li><p>Total energy (requires QE; from LDOS or DOS + density)</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 </div>
-<div class="section" id="dos">
-<h2>DOS<a class="headerlink" href="#dos" title="Permalink to this headline">¶</a></h2>
-<p>The DOS can be used to calculate the number of electrons and band energy
-as well as the entropy contribution to the total energy.</p>
-</div>
-<div class="section" id="density">
-<h2>Density<a class="headerlink" href="#density" title="Permalink to this headline">¶</a></h2>
-<p>The Density can be used to calculate the number of electrons and density
-based contributions to the total energy.</p>
+<div class="section" id="workflow">
+<h2>Workflow<a class="headerlink" href="#workflow" title="Permalink to this headline">¶</a></h2>
+<p>The goal of MALA is to build surrogate models for electronic structure theory.
+These surrogate models are based on neural networks. After training such
+a model, it allows the fast evaluation of the total energy and atomic forces.
+MALA is build around Density Functional Theory, but can in
+principle be used with all electronic structure methods that calculate the
+total energy and atomic forces given atomic positions as input.
+Building these surrogate models requires preprocessing
+<a class="reference internal" href="preprocessing.html"><span class="doc">preprocessing</span></a> of the data, training of a
+<a class="reference internal" href="neuralnetworks.html"><span class="doc">neural network</span></a> and
+<a class="reference internal" href="postprocessing.html"><span class="doc">postprocessing</span></a> of the results.
+MALA is designed for the investigation of systems at non-zero temperatures and
+operates in a “per-grid-point” manner, meaning that every grid point of a
+simulation cell is passed through the network individually.</p>
 </div>
 </div>
 
@@ -218,8 +251,8 @@ based contributions to the total energy.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../install/README.html" class="btn btn-neutral float-right" title="Installation of MALA" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="neuralnetworks.html" class="btn btn-neutral float-left" title="Neural Networks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="background.html" class="btn btn-neutral float-right" title="Theoretical Background" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to MALA’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Background &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>Theoretical Background &mdash; Materials Learning Algorithms (MALA)  documentation</title>
   
 
   
@@ -43,7 +43,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Preprocessing" href="preprocessing.html" />
-    <link rel="prev" title="Welcome to MALA’s documentation!" href="../index.html" /> 
+    <link rel="prev" title="Overview" href="overview.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                v0.1.0-313-g429f769
+                v0.1.0-316-ge8912be
               </div>
             
           
@@ -94,8 +94,8 @@
             
               <p class="caption"><span class="caption-text">Features</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Background</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#workflow">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Theoretical Background</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#density-functional-theory">Density Functional Theory</a></li>
 </ul>
 </li>
@@ -167,7 +167,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Background</li>
+      <li>Theoretical Background</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -188,24 +188,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="background">
-<h1>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="workflow">
-<h2>Workflow<a class="headerlink" href="#workflow" title="Permalink to this headline">¶</a></h2>
-<p>The goal of MALA is to build surrogate models for electronic structure theory.
-These surrogate models are based on neural networks. After training such
-a model, it allows the fast evaluation of the total energy and atomic forces.
-MALA is build around Density Functional Theory, but can in
-principle be used with all electronic structure methods that calculate the
-total energy and atomic forces given atomic positions as input.
-Building these surrogate models requires preprocessing
-<a class="reference internal" href="preprocessing.html"><span class="doc">preprocessing</span></a> of the data, training of a
-<a class="reference internal" href="neuralnetworks.html"><span class="doc">neural network</span></a> and
-<a class="reference internal" href="postprocessing.html"><span class="doc">postprocessing</span></a> of the results.
-MALA is designed for the investigation of systems at non-zero temperatures and
-operates in a “per-grid-point” manner, meaning that every grid point of a
-simulation cell is passed through the network individually.</p>
-</div>
+  <div class="section" id="theoretical-background">
+<h1>Theoretical Background<a class="headerlink" href="#theoretical-background" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="density-functional-theory">
 <h2>Density Functional Theory<a class="headerlink" href="#density-functional-theory" title="Permalink to this headline">¶</a></h2>
 <p>Density Functional Theiry is one of the most popular electronic structure
@@ -246,7 +230,7 @@ E_\mathrm{{\scriptscriptstyle XC}}[n](\underline{\boldsymbol{r}})
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="preprocessing.html" class="btn btn-neutral float-right" title="Preprocessing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to MALA’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
