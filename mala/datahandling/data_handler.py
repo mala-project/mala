@@ -206,7 +206,7 @@ class DataHandler:
         self.parameters.data_splitting_snapshots = []
         self.parameters.snapshot_directories_list = []
 
-    def prepare_data(self, reparametrize_scaler=True):
+    def prepare_data(self, reparametrize_scaler=True, transpose_data=False):
         """
         Prepare the data to be used in a training process.
 
@@ -253,7 +253,7 @@ class DataHandler:
 
         # Build Datasets.
         printout("Build datasets.")
-        self.__build_datasets()
+        self.__build_datasets(transpose_data)
         printout("Build dataset done.")
 
         # Wait until all ranks are finished with data preparation.
@@ -691,7 +691,7 @@ class DataHandler:
         self.training_data_outputs = \
             torch.from_numpy(self.training_data_outputs).float()
 
-    def __build_datasets(self):
+    def __build_datasets(self, transpose_data=False):
         """Build the DataSets that are used during training."""
         if self.parameters.use_lazy_loading:
 
@@ -834,6 +834,8 @@ class DataHandler:
             self.training_data_outputs = \
                 self.output_data_scaler.transform(self.training_data_outputs)
 
+            if transpose_data:
+                self.__transpose_data()
             if self.nr_training_data != 0:
                 self.training_data_set = \
                     TensorDataset(self.training_data_inputs,
@@ -886,3 +888,20 @@ class DataHandler:
             raise Exception("Please choose either \"in\" or \"out\" for "
                             "this function.")
         return numpy_array
+
+    def __transpose_data(self):
+        """
+        This is needed for e.g. Gaussian Processes.
+        Returns
+        -------
+
+        """
+        if self.nr_training_data > 0:
+            self.training_data_inputs = self.training_data_inputs.transpose(0, 1).reshape(1, self.grid_size, self.get_input_dimension())
+            self.training_data_outputs = self.training_data_outputs.transpose(0, 1)
+        if self.nr_validation_data > 0:
+            self.validation_data_inputs = self.validation_data_inputs.transpose(0, 1).reshape(1, self.grid_size, self.get_input_dimension())
+            self.validation_data_outputs = self.validation_data_outputs.transpose(0, 1)
+        if self.nr_test_data > 0:
+            self.test_data_inputs = self.test_data_inputs.transpose(0, 1).reshape(1, self.grid_size, self.get_input_dimension())
+            self.test_data_outputs = self.test_data_outputs.transpose(0, 1)

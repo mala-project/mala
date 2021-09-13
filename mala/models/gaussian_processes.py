@@ -69,3 +69,11 @@ class GaussianProcesses(gpytorch.models.ExactGP):
     def save_model(self, path_to_file):
         pass
 
+    def train(self, mode=True):
+        self.likelihood.train()
+        return super(GaussianProcesses, self).train(mode=mode)
+
+    def eval(self):
+        self.likelihood.eval()
+        return super(GaussianProcesses, self).eval()
+
