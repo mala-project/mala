@@ -692,8 +692,11 @@ class DataHandler:
         self.training_data_outputs = np.array(self.training_data_outputs)
         self.training_data_outputs = \
             self.training_data_outputs.astype(np.float32)
-        if self.parameters.ignore_spatial_structure:
-            self.training_data_outputs = self.training_data_outputs.reshape(
+        # if self.parameters.ignore_spatial_structure:
+        #     self.training_data_outputs = self.training_data_outputs.reshape(
+        #         [self.nr_training_data, self.get_output_dimension()])
+        #
+        self.training_data_outputs = self.training_data_outputs.reshape(
                 [self.nr_training_data, self.get_output_dimension()])
         self.training_data_outputs = \
             torch.from_numpy(self.training_data_outputs).float()
@@ -844,6 +847,15 @@ class DataHandler:
                 self.output_data_scaler.transform(self.validation_data_outputs)
             self.training_data_outputs = \
                 self.output_data_scaler.transform(self.training_data_outputs)
+
+            if not self.parameters.ignore_spatial_structure:
+                # Transpose data as expected by convolution (spatial dimenstions at the end)
+                self.training_data_inputs = np.transpose(self.training_data_inputs, (0, 4, 1, 2, 3))
+                self.validation_data_inputs = np.transpose(self.validation_data_inputs, (0, 4, 1, 2, 3))
+                self.test_data_inputs = np.transpose(self.test_data_inputs, (0, 4, 1, 2, 3))
+                self.training_data_outputs = np.transpose(self.training_data_outputs, (0, 4, 1, 2, 3))
+                self.validation_data_outputs = np.transpose(self.validation_data_outputs, (0, 4, 1, 2, 3))
+                self.test_data_outputs = np.transpose(self.test_data_outputs, (0, 4, 1, 2, 3))
 
             if self.nr_training_data != 0:
                 self.training_data_set = \

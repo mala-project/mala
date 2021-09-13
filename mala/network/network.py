@@ -93,8 +93,8 @@ class Network(nn.Module):
                 raise Exception("Invalid activation type seleceted.")
 
     def __initialize_as_CNN(self):
-        layers = [nn.ConvTranspose3d(94, 175, 5), nn.BatchNorm3d(94), nn.ReLU(),
-                       nn.ConvTranspose3d(175, 250, 7),nn.BatchNorm3d(175), nn.ReLU()]
+        layers = [nn.ConvTranspose3d(91, 175, 5, padding=2), nn.BatchNorm3d(175), nn.ReLU(),
+                       nn.ConvTranspose3d(175, 250, 7, padding=2),nn.BatchNorm3d(250), nn.ReLU()]
         for layer in layers:
             self.layers.append(layer)
 
@@ -114,7 +114,6 @@ class Network(nn.Module):
         """
         # Forward propagate data.
         if self.params.nn_type == "feed-forward" or self.params.nn_type == "CNN":
-            print("forward got input of shape", inputs.shape)
             for layer in self.layers:
                 inputs = layer(inputs)
             return inputs
