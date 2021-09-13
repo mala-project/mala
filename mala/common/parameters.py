@@ -81,6 +81,10 @@ class ParametersModel(ParametersBase):
         self.layer_sizes = [10, 10, 10]
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
+        # For GP
+        self.gp_mean = "constant"
+        self.kernel = "rbf"
+        self.multivariate_distribution = "normal"
 
 
 class ParametersDescriptors(ParametersBase):
