@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.1.0-311-g8fe32e9
+                v0.1.0-313-g429f769
               </div>
             
           
@@ -190,14 +190,16 @@
 <p>Training of surrogate models with MALA is often done on HPC infrastructure, yet the visualization should take place locally. Files that TensorBoard saves data into are called event files. These files have to be on the local device to get access. The best way to achieve this is by either downloading or mounting the relevant folders on the HPC cluster to your local machine.</p>
 <div class="section" id="hemera5-hzdr">
 <h2>Hemera5 (HZDR)<a class="headerlink" href="#hemera5-hzdr" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>You can find information on how to mount Hemera onto a local device here:</p></li>
+<ul>
+<li><p>You can find information on how to mount Hemera onto a local device here:</p>
+<p><a class="reference external" href="https://fwcc.pages.hzdr.de/infohub/hpc/storage.html">https://fwcc.pages.hzdr.de/infohub/hpc/storage.html</a></p>
+</li>
+<li><p>Alternatively, simply use the following command</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ sshfs username@hemera5.fz-rossendorf.de:folder/file/location folder/location/in/local
+</pre></div>
+</div>
+</li>
 </ul>
-<p>https://fwcc.pages.hzdr.de/infohub/hpc/storage.html</p>
-<ul class="simple">
-<li><p>Alternatively, simply use the following command</p></li>
-</ul>
-<p>sshfs username&#64;hemera5.fz-rossendorf.de:folder/file/location folder/location/in/local</p>
 </div>
 </div>
 
