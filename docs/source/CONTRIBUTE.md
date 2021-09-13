@@ -19,6 +19,7 @@ the form `MAJOR.MINOR.FIX`:
 * `MINOR`: new features have beend added to the code.
 * `FIX`: A bug in a feature has been fixed.
 
+Every new version should be accompanied by a changelog. 
 
 ## Branching strategy
 
