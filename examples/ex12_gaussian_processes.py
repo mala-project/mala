@@ -1,3 +1,6 @@
+import gpytorch
+import torch
+
 import mala
 from mala import printout
 data_path = "/home/fiedlerl/jobs/qe/Be2/data_for_qgp/"
@@ -25,7 +28,7 @@ params.running.mini_batch_size = 40
 params.running.learning_rate = 0.0001
 params.running.trainingtype = "Adam"
 params.targets.target_type = "Density"
-
+params.debug.grid_dimensions = [10, 10, 1]
 ####################
 # DATA
 # Add and prepare snapshots for training.
@@ -39,14 +42,7 @@ additional_folder = data_path+"additional_info_qeouts/"
 data_handler.add_snapshot("snapshot0.in.npy", inputs_folder,
                           "snapshot0.out.npy", outputs_folder, add_snapshot_as="tr", output_units="None")
 data_handler.add_snapshot("snapshot1.in.npy", inputs_folder,
-                          "snapshot1.out.npy", outputs_folder, add_snapshot_as="tr", output_units="None")
-data_handler.add_snapshot("snapshot2.in.npy", inputs_folder,
-                          "snapshot2.out.npy", outputs_folder, add_snapshot_as="tr", output_units="None")
-data_handler.add_snapshot("snapshot3.in.npy", inputs_folder,
-                          "snapshot3.out.npy", outputs_folder, add_snapshot_as="va", output_units="None")
-data_handler.add_snapshot("snapshot4.in.npy", inputs_folder,
-                          "snapshot4.out.npy", outputs_folder, add_snapshot_as="te", output_units="None",
-                          calculation_output_file=additional_folder+"snapshot4.out")
+                          "snapshot1.out.npy", outputs_folder, add_snapshot_as="va", output_units="None")
 data_handler.prepare_data()
 printout("Read data: DONE.")
 
@@ -56,35 +52,70 @@ printout("Read data: DONE.")
 # The layer sizes can be specified before reading data,
 # but it is safer this way.
 ####################
-
-params.model.layer_sizes = [data_handler.get_input_dimension(),
-                                       100,
-                                       data_handler.get_output_dimension()]
-
-# Setup network and trainer.
+print(data_handler.training_data_inputs.size())
+data_handler.training_data_inputs = data_handler.training_data_inputs.transpose(0, 1)
+data_handler.training_data_inputs = data_handler.training_data_inputs.reshape(2, 100, 1)
+data_handler.training_data_outputs = data_handler.training_data_outputs.transpose(0, 1)
+# data_handler.training_data_outputs = data_handler.training_data_outputs.reshape(1, 100, 1)
+print(data_handler.training_data_inputs.size())
 model = mala.GaussianProcesses(params, data_handler)
-trainer = mala.Trainer(params, model, data_handler)
-printout("Network setup: DONE.")
+model.train()
+model.likelihood.train()
 
-####################
-# TRAINING
-# Train the network.
-####################
+# Use the adam optimizer
+optimizer = torch.optim.Adam(model.parameters(), lr=0.1)  # Includes GaussianLikelihood parameters
 
-printout("Starting training.")
-trainer.train_model()
-printout("Training: DONE.")
+# "Loss" for GPs - the marginal log likelihood
+mll = gpytorch.mlls.ExactMarginalLogLikelihood(model.likelihood, model)
+training_iter = 50
+for i in range(training_iter):
+    model.train()
+    model.likelihood.train()
+    # Zero gradients from previous iteration
+    optimizer.zero_grad()
+    # Output from model
+    output = model(data_handler.training_data_inputs)
+    # Calc loss and backprop gradients
+    loss = -mll(output, data_handler.training_data_outputs).sum()
+    loss.backward()
+    print('Iter %d/%d - Loss: %.3f   lengthscale: %.3f   noise: %.3f' % (
+        i + 1, training_iter, loss.item(),
+        model.covar_module.base_kernel.lengthscale.item(),
+        model.likelihood.noise.item()
+    ))
+    optimizer.step()
 
-tester = mala.Tester(params, model, data_handler)
 
-####################
-# TESTING
-# Pass the first test set snapshot (the test snapshot).
-####################
+with torch.no_grad(), gpytorch.settings.fast_pred_var():
+    model.eval()
+    model.likelihood.eval()
+    test = model.likelihood(model(data_handler.validation_data_inputs.transpose(0, 1).reshape(2, 100, 1)))
 
-actual_density, predicted_density = tester.test_snapshot(0)
-# First test snapshot --> 4th in total
-data_handler.target_calculator.read_additional_calculation_data("qe.out", data_handler.get_snapshot_calculation_output(4))
-actual_number_of_electrons = data_handler.target_calculator.get_number_of_electrons(actual_density)
-predicted_number_of_electrons = data_handler.target_calculator.get_number_of_electrons(predicted_density)
-printout(actual_number_of_electrons, predicted_number_of_electrons)
+
+# # Setup network and trainer.
+# model = mala.GaussianProcesses(params, data_handler)
+# trainer = mala.Trainer(params, model, data_handler)
+# printout("Network setup: DONE.")
+#
+# ####################
+# # TRAINING
+# # Train the network.
+# ####################
+#
+# printout("Starting training.")
+# trainer.train_model()
+# printout("Training: DONE.")
+#
+# tester = mala.Tester(params, model, data_handler)
+#
+# ####################
+# # TESTING
+# # Pass the first test set snapshot (the test snapshot).
+# ####################
+#
+# actual_density, predicted_density = tester.test_snapshot(0)
+# # First test snapshot --> 4th in total
+# data_handler.target_calculator.read_additional_calculation_data("qe.out", data_handler.get_snapshot_calculation_output(4))
+# actual_number_of_electrons = data_handler.target_calculator.get_number_of_electrons(actual_density)
+# predicted_number_of_electrons = data_handler.target_calculator.get_number_of_electrons(predicted_density)
+# printout(actual_number_of_electrons, predicted_number_of_electrons)

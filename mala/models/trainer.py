@@ -168,6 +168,7 @@ class Trainer(Runner):
         # CALCULATE INITIAL METRICS
         ############################
 
+
         tloss = float("inf")
         vloss = self.__validate_model(self.model,
                                         "validation",
@@ -437,8 +438,7 @@ class Trainer(Runner):
                                                shuffle=do_shuffle)
 
         self.validation_data_loader = DataLoader(self.data.validation_data_set,
-                                                 batch_size=self.parameters.
-                                                 mini_batch_size * 1,
+                                                 batch_size=1 * 1,
                                                  sampler=self.parameters.
                                                  sampler["validate_sampler"],
                                                  **self.parameters.kwargs)

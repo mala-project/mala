@@ -29,8 +29,6 @@ class GaussianProcesses(gpytorch.models.ExactGP):
                                                 data_handler.
                                                 training_data_outputs,
                                                 likelihood)
-        self.likelihood = likelihood
-
         # Mean.
         self.mean_module = None
         if self.params.gp_mean == "constant":
@@ -55,15 +53,13 @@ class GaussianProcesses(gpytorch.models.ExactGP):
         if self.multivariate_distribution is None:
             raise Exception("Invalid multivariate distribution selected.")
 
-        self.loss_function = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self)
-
     def forward(self, x):
         mean_x = self.mean_module(x)
         covar_x = self.covar_module(x)
         return self.multivariate_distribution(mean_x, covar_x)
 
     def calculate_loss(self, output, target):
-        return -self.loss_function(output, target)
+        return -gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self)(output, target).sum()
 
     # TODO: implement this.
     def load_from_file(cls, params, path_to_file):
