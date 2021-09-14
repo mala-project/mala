@@ -847,17 +847,24 @@ class DataHandler:
 
             if not self.parameters.ignore_spatial_structure:
                 # Transpose data as expected by convolution (spatial dimenstions at the end)
-                self.training_data_inputs = np.transpose(self.training_data_inputs, (0, 4, 1, 2, 3))
-                self.validation_data_inputs = np.transpose(self.validation_data_inputs, (0, 4, 1, 2, 3))
-                self.test_data_inputs = np.transpose(self.test_data_inputs, (0, 4, 1, 2, 3))
-                self.training_data_outputs = np.transpose(self.training_data_outputs, (0, 4, 1, 2, 3))
-                self.validation_data_outputs = np.transpose(self.validation_data_outputs, (0, 4, 1, 2, 3))
-                self.test_data_outputs = np.transpose(self.test_data_outputs, (0, 4, 1, 2, 3))
+                self.training_data_inputs = np.transpose(
+                    self.training_data_inputs, (0, 4, 1, 2, 3))
+                self.validation_data_inputs = np.transpose(
+                    self.validation_data_inputs, (0, 4, 1, 2, 3))
+                self.test_data_inputs = np.transpose(
+                    self.test_data_inputs, (0, 4, 1, 2, 3))
+                self.training_data_outputs = np.transpose(
+                    self.training_data_outputs, (0, 4, 1, 2, 3))
+                self.validation_data_outputs = np.transpose(
+                    self.validation_data_outputs, (0, 4, 1, 2, 3))
+                self.test_data_outputs = np.transpose(
+                    self.test_data_outputs, (0, 4, 1, 2, 3))
 
             if self.nr_training_data != 0:
                 self.training_data_set = \
                     TensorDataset(self.training_data_inputs,
                                   self.training_data_outputs)
+                printout("#### Training inputs shape: ", self.training_data_inputs.shape)
             if self.nr_validation_data != 0:
                 self.validation_data_set = \
                     TensorDataset(self.validation_data_inputs,
