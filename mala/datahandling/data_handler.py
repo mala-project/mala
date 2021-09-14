@@ -692,11 +692,8 @@ class DataHandler:
         self.training_data_outputs = np.array(self.training_data_outputs)
         self.training_data_outputs = \
             self.training_data_outputs.astype(np.float32)
-        # if self.parameters.ignore_spatial_structure:
-        #     self.training_data_outputs = self.training_data_outputs.reshape(
-        #         [self.nr_training_data, self.get_output_dimension()])
-        #
-        self.training_data_outputs = self.training_data_outputs.reshape(
+        if self.parameters.ignore_spatial_structure:
+            self.training_data_outputs = self.training_data_outputs.reshape(
                 [self.nr_training_data, self.get_output_dimension()])
         self.training_data_outputs = \
             torch.from_numpy(self.training_data_outputs).float()

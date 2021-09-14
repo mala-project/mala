@@ -54,7 +54,7 @@ class ParametersNetwork(ParametersBase):
     layer_sizes : list
         A list of integers detailing the sizes of the layer of the neural
         network. Please note that the input layer is included therein.
-        Default: [10,10,0]
+        Default: [10,10,10]
 
     layer_activations: list
         A list of strings detailing the activation functions to be used

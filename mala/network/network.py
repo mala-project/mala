@@ -48,6 +48,8 @@ class Network(nn.Module):
             self.__initialize_as_feedforward()
         elif self.params.nn_type == "CNN":
             self.__initialize_as_CNN()
+        elif self.params.nn_type == "U-Net":
+            self.__initialize_as_U_Net()
         else:
             raise Exception("Unsupported network architecture.")
 
@@ -93,10 +95,18 @@ class Network(nn.Module):
                 raise Exception("Invalid activation type seleceted.")
 
     def __initialize_as_CNN(self):
-        layers = [nn.ConvTranspose3d(91, 175, 5, padding=2), nn.BatchNorm3d(175), nn.ReLU(),
-                       nn.ConvTranspose3d(175, 250, 7, padding=2),nn.BatchNorm3d(250), nn.ReLU()]
+        input_channels = self.params.layer_sizes[0]
+        output_channels = self.params.layer_sizes[-1]
+        hidden_layer = self.params.layer_sizes[1]
+        layers = [nn.ConvTranspose3d(input_channels, hidden_layer, 5, padding=2),
+                  nn.BatchNorm3d(hidden_layer), nn.ReLU(),
+                  nn.ConvTranspose3d(hidden_layer, output_channels, 7, padding=2),
+                  nn.BatchNorm3d(output_channels), nn.ReLU()]
         for layer in layers:
             self.layers.append(layer)
+
+    def __initialize_as_U_Net(self):
+        pass
 
     def forward(self, inputs):
         """
