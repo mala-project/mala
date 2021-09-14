@@ -1,6 +1,8 @@
 """Runner class for running models."""
 import torch
-from mala.common.parameters import printout
+from mala.common.printout import printout
+from mala.common.parameters import ParametersRunning
+from mala.models.gaussian_processes import GaussianProcesses
 from mala import Parameters
 import numpy as np
 try:
@@ -30,9 +32,13 @@ class Runner:
 
     def __init__(self, params, model, data):
         self.parameters_full: Parameters = params
-        self.parameters = params.running
+        self.parameters: ParametersRunning = params.running
         self.model = model
         self.data = data
+        if isinstance(self.parameters_full.model, GaussianProcesses):
+            printout("Adjusting mini batch size because Gaussian processes are "
+                     "being used.")
+            self.parameters.mini_batch_size = 1
         self.__prepare_to_run()
 
     def __prepare_to_run(self):

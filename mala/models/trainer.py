@@ -438,7 +438,8 @@ class Trainer(Runner):
                                                shuffle=do_shuffle)
 
         self.validation_data_loader = DataLoader(self.data.validation_data_set,
-                                                 batch_size=1 * 1,
+                                                 batch_size=self.parameters.
+                                                 mini_batch_size,
                                                  sampler=self.parameters.
                                                  sampler["validate_sampler"],
                                                  **self.parameters.kwargs)
@@ -446,7 +447,7 @@ class Trainer(Runner):
         if self.data.test_data_set is not None:
             self.test_data_loader = DataLoader(self.data.test_data_set,
                                                batch_size=self.parameters.
-                                               mini_batch_size * 1,
+                                               mini_batch_size,
                                                sampler=self.parameters.
                                                sampler["test_sampler"],
                                                **self.parameters.kwargs)

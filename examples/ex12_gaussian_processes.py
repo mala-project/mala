@@ -24,7 +24,7 @@ params.model.loss_function_type = "gaussian_likelihood"
 
 # Specify the training parameters.
 params.running.max_number_epochs = 100
-params.running.mini_batch_size = 40
+params.running.mini_batch_size = 1
 params.running.learning_rate = 0.0001
 params.running.trainingtype = "Adam"
 params.targets.target_type = "Density"
