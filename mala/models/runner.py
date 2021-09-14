@@ -35,7 +35,11 @@ class Runner:
         self.parameters: ParametersRunning = params.running
         self.model = model
         self.data = data
-        if isinstance(self.parameters_full.model, GaussianProcesses):
+        self.gaussian_processes_used = False
+        if isinstance(self.model, GaussianProcesses):
+            self.gaussian_processes_used = True
+        if self.gaussian_processes_used and self.parameters.mini_batch_size \
+                != 1:
             printout("Adjusting mini batch size because Gaussian processes are "
                      "being used.")
             self.parameters.mini_batch_size = 1
@@ -106,11 +110,21 @@ class Runner:
                 data_set[offset+(i * batch_size):offset+((i + 1) * batch_size)]
             if self.parameters_full.use_gpu:
                 inputs = inputs.to('cuda')
-            predicted_outputs[i * batch_size:(i + 1) * batch_size, :] = \
-                self.data.output_data_scaler.\
-                inverse_transform(self.model(inputs).
-                                  to('cpu'), as_numpy=True)
+            if not self.gaussian_processes_used:
 
+                predicted_outputs[i * batch_size:(i + 1) * batch_size, :] = \
+                    self.data.output_data_scaler.\
+                    inverse_transform(self.model(inputs).
+                                      to('cpu'), as_numpy=True)
+            else:
+                test = self.model.likelihood(
+                                      self.model(inputs)).mean.to('cpu')
+                test2 = predicted_outputs[i * batch_size:(i + 1) * batch_size, :]
+                predicted_outputs = \
+                    self.data.output_data_scaler.\
+                    inverse_transform(self.model.likelihood(
+                                      self.model(inputs)).mean.to('cpu'),
+                                      as_numpy=True)
         # Restricting the actual quantities to physical meaningful values,
         # i.e. restricting the (L)DOS to positive values.
         predicted_outputs = self.data.target_calculator.\

@@ -897,11 +897,11 @@ class DataHandler:
 
         """
         if self.nr_training_data > 0:
-            self.training_data_inputs = self.training_data_inputs.transpose(0, 1).reshape(1, self.grid_size, self.get_input_dimension())
+            self.training_data_inputs = self.training_data_inputs.transpose(0, 1).reshape(1, self.nr_training_data, self.get_input_dimension())
             self.training_data_outputs = self.training_data_outputs.transpose(0, 1)
         if self.nr_validation_data > 0:
-            self.validation_data_inputs = self.validation_data_inputs.transpose(0, 1).reshape(1, self.grid_size, self.get_input_dimension())
+            self.validation_data_inputs = self.validation_data_inputs.transpose(0, 1).reshape(1, self.nr_validation_data, self.get_input_dimension())
             self.validation_data_outputs = self.validation_data_outputs.transpose(0, 1)
         if self.nr_test_data > 0:
-            self.test_data_inputs = self.test_data_inputs.transpose(0, 1).reshape(1, self.grid_size, self.get_input_dimension())
+            self.test_data_inputs = self.test_data_inputs.transpose(0, 1).reshape(1, self.nr_test_data, self.get_input_dimension())
             self.test_data_outputs = self.test_data_outputs.transpose(0, 1)
