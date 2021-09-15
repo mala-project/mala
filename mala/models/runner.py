@@ -105,26 +105,29 @@ class Runner:
                                       self.data.get_output_dimension()))
 
         offset = snapshot_number * self.data.grid_size
-        for i in range(0, number_of_batches_per_snapshot):
-            inputs, outputs = \
-                data_set[offset+(i * batch_size):offset+((i + 1) * batch_size)]
-            if self.parameters_full.use_gpu:
-                inputs = inputs.to('cuda')
-            if not self.gaussian_processes_used:
+        if not self.gaussian_processes_used:
+            for i in range(0, number_of_batches_per_snapshot):
+                inputs, outputs = \
+                    data_set[offset+(i * batch_size):offset+((i + 1) * batch_size)]
+                if self.parameters_full.use_gpu:
+                    inputs = inputs.to('cuda')
 
                 predicted_outputs[i * batch_size:(i + 1) * batch_size, :] = \
                     self.data.output_data_scaler.\
                     inverse_transform(self.model(inputs).
                                       to('cpu'), as_numpy=True)
-            else:
-                test = self.model.likelihood(
-                                      self.model(inputs)).mean.to('cpu')
-                test2 = predicted_outputs[i * batch_size:(i + 1) * batch_size, :]
-                predicted_outputs = \
-                    self.data.output_data_scaler.\
-                    inverse_transform(self.model.likelihood(
-                                      self.model(inputs)).mean.to('cpu'),
-                                      as_numpy=True)
+        else:
+            predicted_outputs = \
+                self.data.output_data_scaler.\
+                inverse_transform(self.model.likelihood(
+                                  self.model(data_set[snapshot_number *
+                                        self.data.grid_size:
+                                        (snapshot_number + 1) *
+                                        self.data.grid_size][0])).mean.to('cpu'),
+                                  as_numpy=True)
+            predicted_outputs = predicted_outputs.transpose(1, 0)
+            actual_outputs = actual_outputs.transpose(1, 0)
+
         # Restricting the actual quantities to physical meaningful values,
         # i.e. restricting the (L)DOS to positive values.
         predicted_outputs = self.data.target_calculator.\

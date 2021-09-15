@@ -231,7 +231,6 @@ class Trainer(Runner):
                     outputs = outputs.to('cuda')
                 training_loss += self.__process_mini_batch(self.model,
                                                            inputs, outputs)
-                print(training_loss)
             # Calculate the validation loss. and output it.
             vloss = self.__validate_model(self.model,
                                             "validation",

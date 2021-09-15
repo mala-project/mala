@@ -51,6 +51,12 @@ printout("Read data: DONE.")
 ####################
 
 model = mala.GaussianProcesses(params, data_handler)
+
+# Uncomment the following lines for comparison with NN, but also
+# make sure that transpose_data in the DataLoader is set to False.
+# params.model.layer_sizes = [2, 100, 1]
+# params.model.loss_function_type = "mse"
+# model = mala.Network(params)
 trainer = mala.Trainer(params, model, data_handler)
 printout("Network setup: DONE.")
 
