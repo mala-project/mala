@@ -17,14 +17,14 @@ params.data.output_rescaling_type = "normal"
 params.model.loss_function_type = "gaussian_likelihood"
 
 # Specify the training parameters.
-params.running.max_number_epochs = 50
+params.running.max_number_epochs = 10
 
 # This should be 1, and MALA will set it automatically to, if we don't.
 params.running.mini_batch_size = 40
 params.running.learning_rate = 0.1
 params.running.trainingtype = "Adam"
 params.targets.target_type = "Density"
-params.debug.grid_dimensions = [10, 10, 1]
+#params.debug.grid_dimensions = [10, 10, 1]
 ####################
 # DATA
 # Add and prepare snapshots for training.
@@ -49,7 +49,7 @@ printout("Read data: DONE.")
 # MODEL SETUP
 # Set up the model and trainer we want to use.
 ####################
-
+params.model.kernel = "linear"
 model = mala.GaussianProcesses(params, data_handler)
 
 # Uncomment the following lines for comparison with NN, but also
@@ -57,6 +57,7 @@ model = mala.GaussianProcesses(params, data_handler)
 # params.model.layer_sizes = [2, 100, 1]
 # params.model.loss_function_type = "mse"
 # model = mala.Network(params)
+# params.running.learning_rate = 0.0001
 trainer = mala.Trainer(params, model, data_handler)
 printout("Network setup: DONE.")
 

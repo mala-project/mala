@@ -41,6 +41,8 @@ class GaussianProcesses(gpytorch.models.ExactGP):
         self.covar_module = None
         if self.params.kernel == "rbf":
             self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel())
+        if self.params.kernel == "linear":
+            self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.LinearKernel())
 
         if self.covar_module is None:
             raise Exception("Invalid kernel selectded.")
