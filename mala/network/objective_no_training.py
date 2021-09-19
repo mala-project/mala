@@ -72,7 +72,8 @@ class ObjectiveNoTraining(ObjectiveBase):
         surrogate_loss = float('inf')
         try:
             surrogate_loss = - ObjectiveNoTraining.__calc_score(jac)
-            surrogate_loss = surrogate_loss.detach().numpy().astype(np.float64)
+            surrogate_loss = surrogate_loss.cpu().detach().numpy().astype(
+                np.float64)
         except RuntimeError:
             printout("Got a NaN, ignoring sample.")
         return surrogate_loss
