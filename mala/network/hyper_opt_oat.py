@@ -86,6 +86,9 @@ class HyperOptOAT(HyperOptBase):
         if self.trial_losses is None:
             self.trial_losses = np.zeros(self.__OA.shape[0])+float("inf")
 
+        printout("Performing",self.N_runs,
+                 "trials, starting with trial number", self.current_trial)
+
         # The parameters could have changed.
         self.objective = ObjectiveBase(self.params, self.data_handler)
 
