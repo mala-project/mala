@@ -162,14 +162,12 @@ class HyperOptOAT(HyperOptBase):
 
         This is function is taken from the example notebook of OApackage
         """
+        self.__check_factor_levels()
+        print(self.sorted_num_choices)
         self.n_factors = len(self.params.hyperparameters.hlist)
 
         self.factor_levels = [par.num_choices for par in self.params.
                               hyperparameters.hlist]
-
-        if not self.monotonic:
-            raise Exception(
-                "Please use hyperparameters in increasing or decreasing order of number of choices")
 
         self.strength = 2
         self.N_runs = self.number_of_runs()
@@ -189,7 +187,6 @@ class HyperOptOAT(HyperOptBase):
             idxs = np.argsort(dd)
             arraylist = [arraylist_extensions[ii] for ii in idxs]
 
-        
         if not arraylist:
             raise Exception("No orthogonal array exists with such a parameter combination.")
             
@@ -218,16 +215,19 @@ class HyperOptOAT(HyperOptBase):
             raise Exception("Invalid direction for hyperparameter optimization"
                             "selected.")
 
-
-    @property
-    def monotonic(self):
-        """
-        Check if the factors are in an increasing or decreasing order.
-
-        This is required for the genration of orthogonal arrays.
-        """
-        dx = np.diff(self.factor_levels)
-        return np.all(dx <= 0) or np.all(dx >= 0)
+    def __check_factor_levels(self):
+        """Checks that the factors are in a decreasing order."""
+        dx = np.diff(self.sorted_num_choices)
+        if np.all(dx >= 0):
+            # Factors in increasing order, we have to reverse the order.
+            self.sorted_num_choices.reverse()
+            self.params.hyperparameters.hlist.reverse()
+        elif np.all(dx <= 0):
+            # Factors are in decreasing order, we don't have to do anything.
+            pass
+        else:
+            raise Exception("Please use hyperparameters in increasing or "
+                            "decreasing order of number of choices")
 
     @classmethod
     def checkpoint_exists(cls, checkpoint_name):
