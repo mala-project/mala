@@ -245,7 +245,7 @@ class DataHandler:
                                 "parametrized DataScalers, "
                                 "while you provided unparametrized "
                                 "DataScalers.")
-
+       
         # Parametrize the scalers, if needed.
         printout("Initializing the data scalers.")
         if reparametrize_scaler:
@@ -254,7 +254,7 @@ class DataHandler:
             if self.parameters.use_lazy_loading is False:
                 self.__load_training_data_into_ram()
         printout("Data scalers initialized.")
-
+       
         # Build Datasets.
         printout("Build datasets.")
         self.__build_datasets()
@@ -306,7 +306,7 @@ class DataHandler:
                             "data_type.")
 
         # Convert units of numpy array.
-        numpy_array = self.__raw_numpy_to_converted_numpy(numpy_array,
+        numpy_array = self.__raw_numpy_to_converted_numpy(numpy_array, 
                                                           data_type, units)
 
         # If desired, the dimensions can be changed.
@@ -576,7 +576,11 @@ class DataHandler:
 
         else:
             self.__load_training_data_into_ram()
-            self.input_data_scaler.fit(self.training_data_inputs)
+            printout(self.training_data_inputs.shape)
+            if self.parameters.ignore_spatial_structure: 
+                 self.input_data_scaler.fit(self.training_data_inputs)
+            else:
+                 self.input_data_scaler.fit(self.training_data_inputs.reshape((self.nr_training_data, self.get_input_dimension())))
 
         printout("Input scaler parametrized.")
 
@@ -664,7 +668,7 @@ class DataHandler:
         self.training_data_inputs = \
             torch.from_numpy(self.training_data_inputs).float()
 
-        # Outputs.
+        # OUTPUTS.
         self.training_data_outputs = []
         i = 0
         # We need to perform the data scaling over the entirety of
@@ -844,27 +848,23 @@ class DataHandler:
                 self.output_data_scaler.transform(self.validation_data_outputs)
             self.training_data_outputs = \
                 self.output_data_scaler.transform(self.training_data_outputs)
-
+           
             if not self.parameters.ignore_spatial_structure:
                 # Transpose data as expected by convolution (spatial dimenstions at the end)
-                self.training_data_inputs = np.transpose(
-                    self.training_data_inputs, (0, 4, 1, 2, 3))
-                self.validation_data_inputs = np.transpose(
-                    self.validation_data_inputs, (0, 4, 1, 2, 3))
-                self.test_data_inputs = np.transpose(
-                    self.test_data_inputs, (0, 4, 1, 2, 3))
-                self.training_data_outputs = np.transpose(
-                    self.training_data_outputs, (0, 4, 1, 2, 3))
-                self.validation_data_outputs = np.transpose(
-                    self.validation_data_outputs, (0, 4, 1, 2, 3))
-                self.test_data_outputs = np.transpose(
-                    self.test_data_outputs, (0, 4, 1, 2, 3))
+                if self.nr_training_data != 0:
+                    self.training_data_inputs = self.training_data_inputs.permute(0, 4, 1, 2, 3)
+                    self.training_data_outputs = self.training_data_outputs.permute(0, 4, 1, 2, 3)
+                if self.nr_validation_data != 0:
+                    self.validation_data_inputs = self.validation_data_inputs.permute(0, 4, 1, 2, 3)
+                    self.validation_data_outputs = self.validation_data_outputs.permute(0, 4, 1, 2, 3)
+                if self.nr_test_data != 0:
+                    self.test_data_inputs = self.test_data_inputs.permute(0, 4, 1, 2, 3)
+                    self.test_data_outputs = self.test_data_outputs.permute(0, 4, 1, 2, 3)
 
             if self.nr_training_data != 0:
                 self.training_data_set = \
                     TensorDataset(self.training_data_inputs,
                                   self.training_data_outputs)
-                printout("#### Training inputs shape: ", self.training_data_inputs.shape)
             if self.nr_validation_data != 0:
                 self.validation_data_set = \
                     TensorDataset(self.validation_data_inputs,
