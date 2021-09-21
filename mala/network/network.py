@@ -97,11 +97,18 @@ class Network(nn.Module):
     def __initialize_as_CNN(self):
         input_channels = self.params.layer_sizes[0]
         output_channels = self.params.layer_sizes[-1]
-        hidden_layer = self.params.layer_sizes[1]
-        layers = [nn.ConvTranspose3d(input_channels, hidden_layer, 5, padding=2),
-                  nn.BatchNorm3d(hidden_layer), nn.ReLU(),
-                  nn.ConvTranspose3d(hidden_layer, output_channels, 7, padding=2),
-                  nn.BatchNorm3d(output_channels), nn.ReLU()]
+        k = 3 # dimension reduction parameter
+
+        layers = [nn.Linear(input_channels, k),
+                  nn.ConvTranspose3d(in_channels=k, out_channels=100, kernel_size=3, padding=1),
+                  nn.BatchNorm3d(100), nn.ReLU(),
+                  nn.ConvTranspose3d(in_channels=100, out_channels=20, kernel_size=5, padding=2),
+                  nn.BatchNorm3d(20), nn.ReLU(),
+                  nn.ConvTranspose3d(in_channels=20, out_channels=10, kernel_size=11, padding=5),
+                  nn.BatchNorm3d(10), nn.ReLU(),
+                  nn.Linear(10, output_channels)
+                  ]
+
         for layer in layers:
             self.layers.append(layer)
 
@@ -123,9 +130,19 @@ class Network(nn.Module):
             Predicted outputs of array.
         """
         # Forward propagate data.
-        if self.params.nn_type == "feed-forward" or self.params.nn_type == "CNN":
+        if self.params.nn_type == "feed-forward":
             for layer in self.layers:
                 inputs = layer(inputs)
+            return inputs
+        elif self.params.nn_type == "CNN":
+            inputs = inputs.permute(0, 2, 3, 4, 1)
+            inputs = self.layers[0](inputs)
+            inputs = inputs.permute(0, 4, 1, 2, 3)
+            for i in range(1, 10):
+                inputs = self.layers[i](inputs) 
+            inputs = inputs.permute(0, 2, 3, 4, 1)
+            inputs = self.layers[10](inputs)  
+            inputs = inputs.permute(0, 4, 1, 2, 3)
             return inputs
         else:
             raise Exception("Unsupported network architecture.")

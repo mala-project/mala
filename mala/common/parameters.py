@@ -322,7 +322,7 @@ class ParametersRunning(ParametersBase):
         a "by snapshot" basis.
 
     checkpoints_each_epoch : int
-        If not 0, checkpoint files will be saved after eac
+        If not 0, checkpoint files will be saved after each
         checkpoints_each_epoch epoch.
 
     checkpoint_name : string
@@ -333,8 +333,13 @@ class ParametersRunning(ParametersBase):
         case 0: No tensorboard activated
         case 1: tensorboard activated with Loss and learning rate
         case 2; additonally weights and biases and gradient  
-        
-        
+         
+    patches_datasets : bool
+        If true, the DataLoaders will load patches and not entire snapshots
+        This allows convolutional architectures to train faster.
+        Patch dimensions: (11,11,11, input_size) for inputs,
+                          (11,11,11, output_size) for outputs.
+        This attribute is ignored if ignore_spatial_structure is True.
     """
 
     def __init__(self):
@@ -365,6 +370,7 @@ class ParametersRunning(ParametersBase):
         self.visualisation_dir= os.path.join(os.path.expanduser("~"), "log_dir")
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
+        self.patches_datasets = False
 
     def _update_horovod(self, new_horovod):
         super(ParametersRunning, self)._update_horovod(new_horovod)

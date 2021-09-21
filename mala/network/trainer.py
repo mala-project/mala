@@ -3,6 +3,7 @@ from mala.network.network import Network
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
 from mala.common.parameters import Parameters
+from mala.network.patches_dataloader import PatchesIterableDataset
 import os
 import numpy as np
 import torch
@@ -251,6 +252,7 @@ class Trainer(Runner):
                 vloss = self.__average_validation(vloss, 'average_loss')
             if self.parameters.verbosity:
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
+                printout("Training data loss:", training_loss)
 
             #summary_writer tensor board
             if self.parameters.visualisation:
@@ -460,8 +462,32 @@ class Trainer(Runner):
                 use_horovod:
             do_shuffle = False
 
-        # Prepare data loaders.(look into mini-batch size)
-        self.training_data_loader = DataLoader(self.data.training_data_set,
+
+        if self.parameters.patches_datasets:
+            iterable_training_data = PatchesIterableDataset(self.data.training_data_set, 11)
+            self.training_data_loader = DataLoader(iterable_training_data, 
+                                                   batch_size=self.parameters.
+                                                   mini_batch_size
+                                                   **self.parameters.kwargs,
+                                                   shuffle=do_shuffle)
+        
+            iterable_validation_data = PatchesIterableDataset(self.data.validation_data_set, 11) 
+            self.validation_data_loader = DataLoader(iterable_validation_data, 
+                                                   batch_size=self.parameters.
+                                                   mini_batch_size
+                                                   **self.parameters.kwargs,
+                                                   shuffle=do_shuffle)
+            if self.data.test_data_set is not None:
+                iterable_test_data = PatchesIterableDataset(self.data.test_data_set, 11)
+                self.test_data_loader = DataLoader(iterable_test_data, 
+                                                   batch_size=self.parameters.
+                                                   mini_batch_size
+                                                   **self.parameters.kwargs,
+                                                   shuffle=do_shuffle)
+
+        else:
+            # Prepare data loaders.(look into mini-batch size)
+            self.training_data_loader = DataLoader(self.data.training_data_set,
                                                batch_size=self.parameters.
                                                mini_batch_size,
                                                sampler=self.parameters.
@@ -469,15 +495,15 @@ class Trainer(Runner):
                                                **self.parameters.kwargs,
                                                shuffle=do_shuffle)
 
-        self.validation_data_loader = DataLoader(self.data.validation_data_set,
+            self.validation_data_loader = DataLoader(self.data.validation_data_set,
                                                  batch_size=self.parameters.
                                                  mini_batch_size * 1,
                                                  sampler=self.parameters.
                                                  sampler["validate_sampler"],
                                                  **self.parameters.kwargs)
 
-        if self.data.test_data_set is not None:
-            self.test_data_loader = DataLoader(self.data.test_data_set,
+            if self.data.test_data_set is not None:
+                self.test_data_loader = DataLoader(self.data.test_data_set,
                                                batch_size=self.parameters.
                                                mini_batch_size * 1,
                                                sampler=self.parameters.
@@ -518,11 +544,10 @@ class Trainer(Runner):
                 for x, y in data_loader:
                     if self.parameters_full.use_gpu:
                         x = x.to('cuda')
-                        y = y.to('cuda')
+                        y = y.to('cuda') 
                     prediction = network(x)
                     validation_loss.append(network.calculate_loss(prediction, y)
                                            .item())
-
             return np.mean(validation_loss)
         elif validation_type == "band_energy":
             # Get optimal batch size and number of batches per snapshots.

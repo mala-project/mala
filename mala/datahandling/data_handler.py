@@ -576,7 +576,6 @@ class DataHandler:
 
         else:
             self.__load_training_data_into_ram()
-            printout(self.training_data_inputs.shape)
             if self.parameters.ignore_spatial_structure: 
                  self.input_data_scaler.fit(self.training_data_inputs)
             else:
@@ -897,7 +896,6 @@ class DataHandler:
                                            data_type="in"):
         """
         Transform a numpy array containing into a scaled torch tensor.
-
         This tensor that can simply be put into a MALA network.
         No unit conversion is done here.
         """
