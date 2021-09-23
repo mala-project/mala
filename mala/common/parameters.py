@@ -72,6 +72,11 @@ class ParametersNetwork(ParametersBase):
         Currently supported loss functions include:
 
             - mse (Mean squared error; default)
+
+    CNN_dim_reduction_const: int
+        A constant of the convolution neural network architecture determining
+        the compression of the input descriptors. Larger values mean slower
+        training but could result in more accurate predictions.
     """
 
     def __init__(self):
@@ -80,7 +85,7 @@ class ParametersNetwork(ParametersBase):
         self.layer_sizes = [10, 10, 10]
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
-
+        self.CNN_dim_reduction_const = 5
 
 class ParametersDescriptors(ParametersBase):
     """
