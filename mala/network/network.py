@@ -97,7 +97,7 @@ class Network(nn.Module):
     def __initialize_as_CNN(self):
         input_channels = self.params.layer_sizes[0]
         output_channels = self.params.layer_sizes[-1]
-        k = 3 # dimension reduction parameter
+        k = self.params.CNN_dim_reduction_const
 
         layers = [nn.Linear(input_channels, k),
                   nn.ConvTranspose3d(in_channels=k, out_channels=100, kernel_size=3, padding=1),
@@ -135,6 +135,7 @@ class Network(nn.Module):
                 inputs = layer(inputs)
             return inputs
         elif self.params.nn_type == "CNN":
+            print("forward recieved input with shape", inputs.shape)
             inputs = inputs.permute(0, 2, 3, 4, 1)
             inputs = self.layers[0](inputs)
             inputs = inputs.permute(0, 4, 1, 2, 3)
