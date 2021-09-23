@@ -60,7 +60,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
     def __init__(self, input_dimension, output_dimension, input_data_scaler,
                  output_data_scaler, descriptor_calculator,
                  target_calculator, grid_dimensions, grid_size,
-                 descriptors_contain_xyz, use_horovod):
+		 descriptors_contain_xyz, use_horovod, ignore_spatial_dimension=False):
         self.snapshot_list = []
         self.input_dimension = input_dimension
         self.output_dimension = output_dimension
@@ -78,6 +78,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.output_data = np.empty(0)
         self.use_horovod = use_horovod
         self.return_outputs_directly = False
+        self.ignore_spatial_dimension = ignore_spatial_dimension
 
     @property
     def return_outputs_directly(self):
@@ -142,17 +143,31 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         # Transform the data.
         if self.descriptors_contain_xyz:
             self.input_data = self.input_data[:, :, :, 3:]
-        self.input_data = \
-            self.input_data.reshape([self.grid_size, self.input_dimension])
+        if self.ignore_spatial_dimension:
+            self.input_data = \
+                self.input_data.reshape([self.grid_size, self.input_dimension])
+        else:
+             self.input_data = \
+                self.input_data[np.newaxis, ...]
         self.input_data *= \
             self.descriptor_calculator.\
             convert_units(1, self.snapshot_list[file_index].input_units)
         self.input_data = self.input_data.astype(np.float32)
         self.input_data = torch.from_numpy(self.input_data).float()
         self.input_data = self.input_data_scaler.transform(self.input_data)
+        if not self.ignore_spatial_dimension:
+              self.input_data = \
+                np.transpose(self.input_data, (0, 4, 1, 2, 3))
+       
+        print("### LazyLoadDataset's get_new_data() loaded input file with shape")
+        print(self.input_data.shape)
 
-        self.output_data = \
-            self.output_data.reshape([self.grid_size, self.output_dimension])
+        if self.ignore_spatial_dimension:
+            self.output_data = \
+                self.output_data.reshape([self.grid_size, self.output_dimension])
+        else:
+             self.output_data = \
+                self.output_data[np.newaxis, ...] 
         self.output_data *= \
             self.target_calculator.\
             convert_units(1, self.snapshot_list[file_index].output_units)
