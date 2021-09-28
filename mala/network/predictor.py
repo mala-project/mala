@@ -77,28 +77,47 @@ class Predictor(Runner):
             calculate_from_atoms(atoms, self.data.grid_dimension)
 
         # Now reshape and scale the descriptors.
+        feature_length = self.data.descriptor_calculator.fingerprint_length
         if self.parameters_full.data.descriptors_contain_xyz:
             snap_descriptors = snap_descriptors[:, :, :, 3:]
+            feature_length -= 3
+
         snap_descriptors = \
             snap_descriptors.astype(np.float32)
         snap_descriptors = \
             snap_descriptors.reshape(
-                [self.data.grid_size, self.data.descriptor_calculator.
-                    fingerprint_length])
+                [self.data.grid_size, feature_length])
         snap_descriptors = \
             torch.from_numpy(snap_descriptors).float()
         snap_descriptors = \
-            snap_descriptors.transform(snap_descriptors)
-
+            self.data.input_data_scaler.transform(snap_descriptors)
 
         # Forward the SNAP descriptors through the network.
-        ldos = self.\
+        return self.\
                _forward_snap_descriptors(snap_descriptors)
 
     def _forward_snap_descriptors(self, snap_descriptors):
         """Forwards a scaled tensor of SNAP descriptors through the NN."""
+        predicted_outputs = np.zeros((self.data.grid_size,
+                                      self.data.target_calculator.\
+                                      get_feature_size()))
 
+        for i in range(0, self.number_of_batches_per_snapshot):
+            inputs = snap_descriptors[i * self.parameters.mini_batch_size:
+                                      (i+1)*self.parameters.mini_batch_size]
+            if self.parameters_full.use_gpu:
+                inputs = inputs.to('cuda')
+            predicted_outputs[i * self.parameters.mini_batch_size:
+                                      (i+1)*self.parameters.mini_batch_size] \
+                = self.data.output_data_scaler.\
+                inverse_transform(self.network(inputs).
+                                  to('cpu'), as_numpy=True)
 
+        # Restricting the actual quantities to physical meaningful values,
+        # i.e. restricting the (L)DOS to positive values.
+        predicted_outputs = self.data.target_calculator.\
+            restrict_data(predicted_outputs)
+        return predicted_outputs
 
     # Currently a copy of the prepare_to_test function of the Tester class.
     # Might change in the future.

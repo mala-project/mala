@@ -1,4 +1,6 @@
 """Base class for all target calculators."""
+from abc import ABC, abstractmethod
+
 from ase.units import Rydberg, Bohr, kB
 import ase.io
 import numpy as np
@@ -7,7 +9,7 @@ from mala.common.parameters import Parameters, ParametersTargets
 from mala.targets.calculation_helpers import fermi_function
 
 
-class TargetBase:
+class TargetBase(ABC):
     """
     Base class for all target quantity parser.
 
@@ -66,6 +68,10 @@ class TargetBase:
         # The small inaccuracies are neglected for now.
         self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
+
+    @abstractmethod
+    def get_feature_size(self):
+        pass
 
     @property
     def qe_input_data(self):

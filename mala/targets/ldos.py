@@ -30,6 +30,8 @@ class LDOS(TargetBase):
         self.cached_density_exists = False
         self.cached_density = []
 
+    def get_feature_size(self):
+        return self.parameters.ldos_gridsize
 
     @staticmethod
     def convert_units(array, in_units="1/eV"):
