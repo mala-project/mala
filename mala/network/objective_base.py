@@ -264,6 +264,12 @@ class ObjectiveBase:
             elif "trainingtype" in par.name:
                 self.params.running.trainingtype = par.\
                     get_parameter(trial, factor_idx)
+            elif "mini_batch_size" in par.name:
+                self.params.running.mini_batch_size = par.get_parameter(trial,
+                                                                        factor_idx)
+            elif "early_stopping_epochs" in par.name:
+                self.params.running.early_stopping_epochs = par.\
+                    get_parameter(trial, factor_idx)
             else:
                 raise Exception("Optimization of hyperparameter ", par.name,
                                 "not supported at the moment.")
