@@ -1,9 +1,12 @@
 """Base class for all descriptor calculators."""
 import ase
 import numpy as np
+from abc import ABC, abstractmethod
+
+from mala.common.parameters import ParametersDescriptors
 
 
-class DescriptorBase:
+class DescriptorBase(ABC):
     """
     Base class for all descriptors available in MALA.
 
@@ -17,7 +20,7 @@ class DescriptorBase:
     """
 
     def __init__(self, parameters):
-        self.parameters = parameters.descriptors
+        self.parameters: ParametersDescriptors = parameters.descriptors
         self.fingerprint_length = -1  # so iterations will fail
         self.dbg_grid_dimensions = parameters.debug.grid_dimensions
 
@@ -100,5 +103,48 @@ class DescriptorBase:
         print("Descriptor calculation: had to enforce periodic boundary "
               "conditions on", rescaled_atoms, "atoms before calculation.")
         return new_atoms
+
+    @abstractmethod
+    def calculate_from_qe_out(self, qe_out_file, qe_out_directory):
+        """
+        Calculate the descriptors based on a Quantum Espresso outfile.
+
+        Parameters
+        ----------
+        qe_out_file : string
+            Name of Quantum Espresso output file for snapshot.
+
+        qe_out_directory : string
+            Path to Quantum Espresso output file for snapshot.
+
+        Returns
+        -------
+        descriptors : numpy.array
+            Numpy array containing the descriptors with the dimension
+            (x,y,z,descriptor_dimension)
+
+        """
+        pass
+
+    @abstractmethod
+    def calculate_from_atoms(self, atoms, grid_dimensions):
+        """
+        Calculate the descriptors based on the atomic configurations.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            Atoms object holding the atomic configuration.
+
+        grid_dimensions : list
+            Grid dimensions to be used, in the format [x,y,z].
+
+        Returns
+        -------
+        descriptors : numpy.array
+            Numpy array containing the descriptors with the dimension
+            (x,y,z,descriptor_dimension)
+        """
+        pass
 
 

@@ -102,19 +102,59 @@ class SNAP(DescriptorBase):
         self.in_format_ase = "espresso-out"
         print("Calculating SNAP descriptors from", qe_out_file, "at",
               qe_out_directory)
-        return self.__calculate_snap(os.path.join(qe_out_directory,
-                                                  qe_out_file),
-                                     qe_out_directory)
-
-    def __calculate_snap(self, infile, outdir):
-        """Perform actual SNAP calculation."""
-        from lammps import lammps
-        lammps_format = "lammps-data"
         # We get the atomic information by using ASE.
+        infile = os.path.join(qe_out_directory, qe_out_file)
         atoms = ase.io.read(infile, format=self.in_format_ase)
 
         # Enforcing / Checking PBC on the read atoms.
         atoms = self.enforce_pbc(atoms)
+
+        # Get the grid dimensions.
+        qe_outfile = open(infile, "r")
+        lines = qe_outfile.readlines()
+        nx = 0
+        ny = 0
+        nz = 0
+
+        for line in lines:
+            if "FFT dimensions" in line:
+                tmp = line.split("(")[1].split(")")[0]
+                nx = int(tmp.split(",")[0])
+                ny = int(tmp.split(",")[1])
+                nz = int(tmp.split(",")[2])
+                break
+
+        return self.__calculate_snap(atoms,
+                                     qe_out_directory, [nx, ny, nz])
+
+    def calculate_from_atoms(self, atoms, grid_dimensions,
+                             working_directory="."):
+        """
+        Calculate the SNAP descriptors based on the atomic configurations.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            Atoms object holding the atomic configuration.
+
+        grid_dimensions : list
+            Grid dimensions to be used, in the format [x,y,z].
+
+        working_directory : string
+            A directory in which to perform the LAMMPS calculation.
+
+        Returns
+        -------
+        descriptors : numpy.array
+            Numpy array containing the descriptors with the dimension
+            (x,y,z,descriptor_dimension)
+        """
+        return self.__calculate_snap(atoms, working_directory, grid_dimensions)
+
+    def __calculate_snap(self, atoms, outdir, grid_dimensions):
+        """Perform actual SNAP calculation."""
+        from lammps import lammps
+        lammps_format = "lammps-data"
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")
         ase.io.write(ase_out_path, atoms, format=lammps_format)
 
@@ -129,15 +169,10 @@ class SNAP(DescriptorBase):
             ny = self.dbg_grid_dimensions[1]
             nz = self.dbg_grid_dimensions[2]
         else:
-            qe_outfile = open(infile, "r")
-            lines = qe_outfile.readlines()
-            for line in lines:
-                if "FFT dimensions" in line:
-                    tmp = line.split("(")[1].split(")")[0]
-                    nx = int(tmp.split(",")[0])
-                    ny = int(tmp.split(",")[1])
-                    nz = int(tmp.split(",")[2])
-                    break
+            nx = grid_dimensions[0]
+            ny = grid_dimensions[1]
+            nz = grid_dimensions[2]
+
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log", os.path.join(outdir,
                                                                "lammps_log.tmp")]
