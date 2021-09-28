@@ -145,47 +145,49 @@ class HyperOptOAT(HyperOptBase):
 
     def get_orthogonal_array(self):
         """
-        Generate the best Orthogonal array used for optimal hyperparameter sampling.
-
-        Parameters
-        ----------
-        factor_levels : list
-            A list of number of choices of each hyperparameter
-
-        strength : int
-            A design parameter for Orthogonal arrays
-                strength 2 models all 2 factor interactions
-                strength 3 models all 3 factor interactions
-
-        N_runs : int 
-            Minimum number of experimental runs to be performed 
+        Generate the best OA used for optimal hyperparameter sampling.
 
         This is function is taken from the example notebook of OApackage
         """
         self.__check_factor_levels()
-        print(self.sorted_num_choices)
+        print("Sorted factor levels:", self.sorted_num_choices)
         self.n_factors = len(self.params.hyperparameters.hlist)
 
         self.factor_levels = [par.num_choices for par in self.params.
                               hyperparameters.hlist]
 
         self.strength = 2
-        self.N_runs = self.number_of_runs()
-        print("Generating Suitable Orthogonal Array.")
-        arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs, self.strength,
-                                    self.n_factors)
-        arraylist = [arrayclass.create_root()]
+        arraylist = None
 
-        # extending the orthogonal array
-        options = oa.OAextend()
-        options.setAlgorithmAuto(arrayclass)
+        # This is a little bit hacky.
+        # What happens is that while we can _technically_ evaluate N_runs
+        # analytically, depending on the actual factor levels, such an array
+        # might not exist. We know however, that one exists with N_runs_actual
+        # for which:
+        # N_runs_actual = N_runs_analytical * x
+        # holds. x is unknown, but we can be confident that it should be
+        # small. So simply trying 3 time should be fine for now.
+        for i in range(1, 4):
+            self.N_runs = self.number_of_runs()*i
+            print("Trying run size:", self.N_runs)
+            print(self.N_runs)
+            print("Generating Suitable Orthogonal Array.")
+            arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs, self.strength,
+                                        self.n_factors)
+            arraylist = [arrayclass.create_root()]
 
-        for _ in range(self.strength + 1, self.n_factors + 1):
-            arraylist_extensions = oa.extend_arraylist(arraylist, arrayclass,
-                                                        options)
-            dd = np.array([a.Defficiency() for a in arraylist_extensions])
-            idxs = np.argsort(dd)
-            arraylist = [arraylist_extensions[ii] for ii in idxs]
+            # extending the orthogonal array
+            options = oa.OAextend()
+            options.setAlgorithmAuto(arrayclass)
+
+            for _ in range(self.strength + 1, self.n_factors + 1):
+                arraylist_extensions = oa.extend_arraylist(arraylist, arrayclass,
+                                                            options)
+                dd = np.array([a.Defficiency() for a in arraylist_extensions])
+                idxs = np.argsort(dd)
+                arraylist = [arraylist_extensions[ii] for ii in idxs]
+            if arraylist:
+                break
 
         if not arraylist:
             raise Exception("No orthogonal array exists with such a parameter combination.")
@@ -197,7 +199,9 @@ class HyperOptOAT(HyperOptBase):
         """
         Calculate the minimum number of runs required for an Orthogonal array.
 
-        Based on the factor levels and the strength of the array requested
+        Based on the factor levels and the strength of the array requested.
+        See also here:
+        https://oapackage.readthedocs.io/en/latest/examples/example_minimal_number_of_runs_oa.html
         """
         runs = [np.prod(tt) for tt in itertools.combinations(
             self.factor_levels, self.strength)]

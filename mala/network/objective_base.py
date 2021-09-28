@@ -267,10 +267,11 @@ class ObjectiveBase:
                 number_layers = 0
                 max_number_layers = 0
                 other_par: HyperparameterOAT
-                for other_par in self.params.hyperparameters.hlist:
+                for other_idx, other_par in enumerate(self.params.
+                                                      hyperparameters.hlist):
                     if other_par.name == "ff_multiple_layers_count":
                         number_layers = other_par.get_parameter(trial,
-                                                                factor_idx)
+                                                                other_idx)
                         max_number_layers = max(other_par.choices)
                 if number_layers > 0:
                     for i in range(0, number_layers):
@@ -297,10 +298,10 @@ class ObjectiveBase:
                 if self.params.network.nn_type == "feed-forward":
                     # Check for zero neuron layers; These indicate layers
                     # that can be left out.
-                    layer_size = par.get_parameter(trial)
+                    layer_size = par.get_parameter(trial, factor_idx)
                     if layer_size > 0:
                         self.params.network.layer_sizes. \
-                            append(par.get_parameter(trial))
+                            append(par.get_parameter(trial, factor_idx))
                     else:
                         turned_off_layers.append(layer_counter)
                     layer_counter += 1
@@ -326,11 +327,12 @@ class ObjectiveBase:
         # the results of the layer lists.
 
         layer_counter = 0
-        for par in self.params.hyperparameters.hlist:
+        par: HyperparameterOAT
+        for factor_idx, par in enumerate(self.params.hyperparameters.hlist):
             if "layer_activation" in par.name:
                 if layer_counter not in turned_off_layers:
                     self.params.network.layer_activations.\
-                        append(par.get_parameter(trial))
+                        append(par.get_parameter(trial, factor_idx))
                 layer_counter += 1
 
         if self.optimize_layer_list:
