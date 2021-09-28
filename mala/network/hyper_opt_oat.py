@@ -82,7 +82,9 @@ class HyperOptOAT(HyperOptBase):
         This is done by sampling a certain subset of network architectures.
         In this case, these are choosen based on an orthogonal array.
         """
-        self.__OA = self.get_orthogonal_array()
+        if self.__OA is None:
+            self.__OA = self.get_orthogonal_array()
+        print(self.__OA)
         if self.trial_losses is None:
             self.trial_losses = np.zeros(self.__OA.shape[0])+float("inf")
 
@@ -170,7 +172,6 @@ class HyperOptOAT(HyperOptBase):
         for i in range(1, 4):
             self.N_runs = self.number_of_runs()*i
             print("Trying run size:", self.N_runs)
-            print(self.N_runs)
             print("Generating Suitable Orthogonal Array.")
             arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs, self.strength,
                                         self.n_factors)
@@ -341,9 +342,15 @@ class HyperOptOAT(HyperOptBase):
         with open(file_path, 'rb') as handle:
             loaded_tracking_data = pickle.load(handle)
             loaded_hyperopt = HyperOptOAT(params, data)
-            loaded_hyperopt.sorted_num_choices = loaded_tracking_data[0]
-            loaded_hyperopt.current_trial = loaded_tracking_data[1]
-            loaded_hyperopt.trial_losses = loaded_tracking_data[2]
+            loaded_hyperopt.sorted_num_choices = loaded_tracking_data["sorted_num_choices"]
+            loaded_hyperopt.current_trial = loaded_tracking_data["current_trial"]
+            loaded_hyperopt.trial_losses = loaded_tracking_data["trial_losses"]
+            loaded_hyperopt.importance = loaded_tracking_data["importance"]
+            loaded_hyperopt.n_factors = loaded_tracking_data["n_factors"]
+            loaded_hyperopt.factor_levels = loaded_tracking_data["factor_levels"]
+            loaded_hyperopt.strength = loaded_tracking_data["strength"]
+            loaded_hyperopt.N_runs = loaded_tracking_data["N_runs"]
+            loaded_hyperopt.__OA = loaded_tracking_data["OA"]
 
         return loaded_hyperopt
 
@@ -393,7 +400,15 @@ class HyperOptOAT(HyperOptBase):
             if self.params.hyperparameters.rdb_storage is None:
                 hyperopt_name = self.params.hyperparameters.checkpoint_name \
                             + "_hyperopt.pth"
-                study = [self.sorted_num_choices, self.current_trial,
-                         self.trial_losses]
+
+                study = {"sorted_num_choices": self.sorted_num_choices,
+                         "current_trial": self.current_trial,
+                         "trial_losses": self.trial_losses,
+                         "importance": self.importance,
+                         "n_factors": self.n_factors,
+                         "factor_levels": self.factor_levels,
+                         "strength": self.strength,
+                         "N_runs": self.N_runs,
+                         "OA": self.__OA}
                 with open(hyperopt_name, 'wb') as handle:
                     pickle.dump(study, handle, protocol=4)
