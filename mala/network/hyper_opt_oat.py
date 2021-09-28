@@ -202,7 +202,7 @@ class HyperOptOAT(HyperOptBase):
         runs = [np.prod(tt) for tt in itertools.combinations(
             self.factor_levels, self.strength)]
 
-        N = np.lcm.reduce(runs)*np.lcm.reduce(self.factor_levels)
+        N = np.lcm.reduce(runs)
         return int(N)
 
     def get_best_trial_results(self):
