@@ -249,18 +249,62 @@ class ObjectiveBase:
         if self.optimize_activation_list:
             self.params.network.layer_activations = []
 
+        # Some layers may have been turned off by optuna.
+        turned_off_layers = []
+
+        # This is one because of the input layer.
+        layer_counter = 1
+
         par: HyperparameterOAT
         for factor_idx, par in enumerate(self.params.hyperparameters.hlist):
             if "learning_rate" in par.name:
                 self.params.running.learning_rate = \
                     par.get_parameter(trial, factor_idx)
-            elif "layer_activation" in par.name:
-                self.params.network.layer_activations.\
-                    append(par.get_parameter(trial, factor_idx))
+                # If the user wants to optimize multiple layers simultaneously,
+                # we have to parse to parameters at the same time.
+            elif par.name == "ff_multiple_layers_neurons":
+                neurons_per_layer = par.get_parameter(trial, factor_idx)
+                number_layers = 0
+                max_number_layers = 0
+                other_par: HyperparameterOAT
+                for other_par in self.params.hyperparameters.hlist:
+                    if other_par.name == "ff_multiple_layers_count":
+                        number_layers = other_par.get_parameter(trial,
+                                                                factor_idx)
+                        max_number_layers = max(other_par.choices)
+                if number_layers > 0:
+                    for i in range(0, number_layers):
+                        if neurons_per_layer > 0:
+                            self.params.network.layer_sizes. \
+                                append(neurons_per_layer)
+                        else:
+                            turned_off_layers.append(layer_counter)
+                        layer_counter += 1
+                    if number_layers != max_number_layers:
+                        for i in range(number_layers, max_number_layers):
+                            turned_off_layers.append(layer_counter)
+                            layer_counter += 1
+                else:
+                    for i in range(0, max_number_layers):
+                        turned_off_layers.append(layer_counter)
+                        layer_counter += 1
+
+            elif par.name == "ff_multiple_layers_count":
+                # This is parsed directly abve.
+                pass
+
             elif "ff_neurons_layer" in par.name:
                 if self.params.network.nn_type == "feed-forward":
-                    self.params.network.layer_sizes.\
-                        append(par.get_parameter(trial, factor_idx))
+                    # Check for zero neuron layers; These indicate layers
+                    # that can be left out.
+                    layer_size = par.get_parameter(trial)
+                    if layer_size > 0:
+                        self.params.network.layer_sizes. \
+                            append(par.get_parameter(trial))
+                    else:
+                        turned_off_layers.append(layer_counter)
+                    layer_counter += 1
+
             elif "trainingtype" in par.name:
                 self.params.running.trainingtype = par.\
                     get_parameter(trial, factor_idx)
@@ -270,9 +314,24 @@ class ObjectiveBase:
             elif "early_stopping_epochs" in par.name:
                 self.params.running.early_stopping_epochs = par.\
                     get_parameter(trial, factor_idx)
+
+            elif "layer_activation" in par.name:
+                pass
+
             else:
                 raise Exception("Optimization of hyperparameter ", par.name,
                                 "not supported at the moment.")
+
+        # We have to process the activations separately, because they depend on
+        # the results of the layer lists.
+
+        layer_counter = 0
+        for par in self.params.hyperparameters.hlist:
+            if "layer_activation" in par.name:
+                if layer_counter not in turned_off_layers:
+                    self.params.network.layer_activations.\
+                        append(par.get_parameter(trial))
+                layer_counter += 1
 
         if self.optimize_layer_list:
             self.params.network.layer_sizes.\
