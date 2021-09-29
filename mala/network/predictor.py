@@ -102,7 +102,7 @@ class Predictor(Runner):
                     _forward_snap_descriptors(snap_descriptors)
 
     def _forward_snap_descriptors(self, snap_descriptors):
-        """Forwards a scaled tensor of SNAP descriptors through the NN."""
+        """Forward a scaled tensor of SNAP descriptors through the NN."""
         predicted_outputs = np.zeros((self.data.grid_size,
                                       self.data.target_calculator.\
                                       get_feature_size()))

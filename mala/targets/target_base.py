@@ -71,6 +71,7 @@ class TargetBase(ABC):
 
     @abstractmethod
     def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
         pass
 
     @property

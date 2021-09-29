@@ -24,6 +24,7 @@ class DOS(TargetBase):
         self.target_length = self.parameters.ldos_gridsize
 
     def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
         return self.parameters.ldos_gridsize
 
     @staticmethod

@@ -38,6 +38,7 @@ class Density(TargetBase):
         self.target_length = 1
 
     def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
         return 1
 
     def read_from_cube(self, file_name, directory, units=None):
