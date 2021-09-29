@@ -100,6 +100,14 @@ mala.network.objective\_no\_training module
    :undoc-members:
    :show-inheritance:
 
+mala.network.predictor module
+-----------------------------
+
+.. automodule:: mala.network.predictor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mala.network.runner module
 --------------------------
 

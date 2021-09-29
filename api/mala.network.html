@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.1.0-318-g3f4b325
+                v0.1.0-326-g3176ead
               </div>
             
           
@@ -1043,6 +1043,61 @@ choices are:</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.network.predictor">
+<span id="mala-network-predictor-module"></span><h2>mala.network.predictor module<a class="headerlink" href="#module-mala.network.predictor" title="Permalink to this headline">¶</a></h2>
+<p>Tester class for testing a network.</p>
+<dl class="py class">
+<dt id="mala.network.predictor.Predictor">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.predictor.</span></code><code class="sig-name descname"><span class="pre">Predictor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.predictor.Predictor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.network.runner.Runner" title="mala.network.runner.Runner"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.runner.Runner</span></code></a></p>
+<p>A class for testing a neural network.</p>
+<p>It enables easy inference throughout a test set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this Tester object.</p></li>
+<li><p><strong>network</strong> (<a class="reference internal" href="#mala.network.network.Network" title="mala.network.network.Network"><em>mala.network.network.Network</em></a>) – Network which is being tested.</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the test data.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.network.predictor.Predictor.predict_for_atoms">
+<code class="sig-name descname"><span class="pre">predict_for_atoms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.predictor.Predictor.predict_for_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get predicted LDOS for an atomic configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>atoms</strong> (<em>ase.Atoms</em>) – ASE atoms for which the prediction should be done.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>predicted_ldos</strong> – Precicted LDOS for these atomic positions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.predictor.Predictor.predict_from_qeout">
+<code class="sig-name descname"><span class="pre">predict_from_qeout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_to_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.predictor.Predictor.predict_from_qeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get predicted LDOS for the atomic configuration of a QE.out file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path_to_file</strong> (<em>string</em>) – Path from which to read the atomic configuration.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>predicted_ldos</strong> – Precicted LDOS for these atomic positions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>

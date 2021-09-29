@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.1.0-318-g3f4b325
+                v0.1.0-326-g3176ead
               </div>
             
           
@@ -780,6 +780,12 @@ interface. If None (recommended), MALA will create one.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.targets.density.Density.get_feature_size">
+<code class="sig-name descname"><span class="pre">get_feature_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.density.Density.get_feature_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get dimension of this target if used as feature in ML.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.targets.density.Density.get_number_of_electrons">
 <code class="sig-name descname"><span class="pre">get_number_of_electrons</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.density.Density.get_number_of_electrons" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the number of electrons from given density data.</p>
@@ -1005,6 +1011,12 @@ calculated.</p>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.get_feature_size">
+<code class="sig-name descname"><span class="pre">get_feature_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS.get_feature_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get dimension of this target if used as feature in ML.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1391,6 +1403,12 @@ Currently supported:</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.targets.ldos.LDOS.get_feature_size">
+<code class="sig-name descname"><span class="pre">get_feature_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_feature_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get dimension of this target if used as feature in ML.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.targets.ldos.LDOS.get_number_of_electrons">
 <code class="sig-name descname"><span class="pre">get_number_of_electrons</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_number_of_electrons" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the number of electrons from given LDOS data.</p>
@@ -1568,7 +1586,7 @@ interface. If None (recommended), MALA will create one.</p></li>
 <dl class="py class">
 <dt id="mala.targets.target_base.TargetBase">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.targets.target_base.</span></code><code class="sig-name descname"><span class="pre">TargetBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Base class for all target quantity parser.</p>
 <p>Target parsers read the target quantity
 (i.e. the quantity the NN will learn to predict) from a specified file
@@ -1646,6 +1664,12 @@ format and performs postprocessing calculations on the quantity.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.targets.target_base.TargetBase.get_feature_size">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">get_feature_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase.get_feature_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get dimension of this target if used as feature in ML.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.targets.target_base.TargetBase.get_number_of_electrons">
 <code class="sig-name descname"><span class="pre">get_number_of_electrons</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase.get_number_of_electrons" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the number of electrons.</p>
@@ -1659,7 +1683,7 @@ format and performs postprocessing calculations on the quantity.</p>
 
 <dl class="py method">
 <dt id="mala.targets.target_base.TargetBase.read_additional_calculation_data">
-<code class="sig-name descname"><span class="pre">read_additional_calculation_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase.read_additional_calculation_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">read_additional_calculation_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase.read_additional_calculation_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read in additional input about a calculation.</p>
 <p>This is e.g. necessary when we operate with preprocessed
 data for the training itself but want to take into account other
@@ -1670,7 +1694,7 @@ temperature) for post processing.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data_type</strong> (<em>string</em>) – Type of data or file that is used. Currently only supports
 qe.out for Quantum Espresso outfiles.</p></li>
-<li><p><strong>path_to_file</strong> (<em>string</em>) – Path to the file that is used.</p></li>
+<li><p><strong>data</strong> (<em>string</em><em> or </em><em>list</em>) – Data from which additional calculation data is inputted.</p></li>
 </ul>
 </dd>
 </dl>
