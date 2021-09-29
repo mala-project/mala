@@ -101,7 +101,11 @@ def use_predictor(network_path, params_path, input_scaler_path,
     ldos = predictor.predict_from_qeout(os.path.join(
                                                      data_path,
                                                      "outputs/Be_snapshot2.out"))
+    inference_data_handler.target_calculator.read_additional_calculation_data("qe.out", os.path.join(
+                                                     data_path,
+                                                     "outputs/Be_snapshot2.out"))
     number_of_electrons = inference_data_handler.target_calculator.get_number_of_electrons(ldos)
+    print(number_of_electrons)
     printout("Sucess!")
 
 
@@ -191,7 +195,7 @@ def initial_training(network_path, params_path, input_scaler_path,
 
 # initial_training(network_path, params_path, input_scaler_path,
 #                  output_scaler_path)
-# use_tester_class(network_path, params_path, input_scaler_path,
-#                     output_scaler_path)
+use_tester_class(network_path, params_path, input_scaler_path,
+                    output_scaler_path)
 use_predictor(network_path, params_path, input_scaler_path,
                     output_scaler_path)

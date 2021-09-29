@@ -124,7 +124,7 @@ class TargetBase(ABC):
                         "of electons has been implemented for this target "
                         "type.")
 
-    def read_additional_calculation_data(self, data_type, path_to_file=""):
+    def read_additional_calculation_data(self, data_type, data=""):
         """
         Read in additional input about a calculation.
 
@@ -139,8 +139,8 @@ class TargetBase(ABC):
             Type of data or file that is used. Currently only supports
             qe.out for Quantum Espresso outfiles.
 
-        path_to_file : string
-            Path to the file that is used.
+        data : string or list
+            Data from which additional calculation data is inputted.
         """
         if data_type == "qe.out":
             # Reset everything.
@@ -154,7 +154,7 @@ class TargetBase(ABC):
             self.atoms = None
 
             # Read the file.
-            self.atoms = ase.io.read(path_to_file, format="espresso-out")
+            self.atoms = ase.io.read(data, format="espresso-out")
             vol = self.atoms.get_volume()
             self.fermi_energy_eV = self.atoms.get_calculator().\
                 get_fermi_level()
@@ -163,7 +163,7 @@ class TargetBase(ABC):
             total_energy = None
             past_calculation_part = False
             bands_included = True
-            with open(path_to_file) as out:
+            with open(data) as out:
                 pseudolinefound = False
                 lastpseudo = None
                 for line in out:
@@ -243,6 +243,33 @@ class TargetBase(ABC):
                                                self.temperature_K)
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
+        elif data_type == "atoms+grid":
+            # Reset everything.
+            self.fermi_energy_eV = None
+            self.temperature_K = None
+            self.grid_spacing_Bohr = None
+            self.number_of_electrons = None
+            self.band_energy_dft_calculation = None
+            self.total_energy_dft_calculation = None
+            self.grid_dimensions = [0, 0, 0]
+            self.atoms: ase.Atoms = data[0]
+
+            # Read the file.
+            vol = self.atoms.get_volume()
+
+            # Parse the file for energy values.
+            total_energy = None
+            past_calculation_part = False
+            bands_included = True
+            self.grid_dimensions[0] = data[1][0]
+            self.grid_dimensions[1] = data[1][1]
+            self.grid_dimensions[2] = data[1][2]
+
+            # Post process the text values.
+            cell_volume = vol / (self.grid_dimensions[0] *
+                                 self.grid_dimensions[1] *
+                                 self.grid_dimensions[2] * Bohr ** 3)
+            self.grid_spacing_Bohr = cell_volume ** (1 / 3)
         else:
             raise Exception("Unsupported auxiliary file type.")
 

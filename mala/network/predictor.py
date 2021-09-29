@@ -92,9 +92,14 @@ class Predictor(Runner):
         snap_descriptors = \
             self.data.input_data_scaler.transform(snap_descriptors)
 
+        # Provide info from current snapshot to target calculator.
+        self.data.target_calculator.\
+            read_additional_calculation_data("atoms+grid",
+                                             [atoms, self.data.grid_dimension])
+
         # Forward the SNAP descriptors through the network.
         return self.\
-               _forward_snap_descriptors(snap_descriptors)
+                    _forward_snap_descriptors(snap_descriptors)
 
     def _forward_snap_descriptors(self, snap_descriptors):
         """Forwards a scaled tensor of SNAP descriptors through the NN."""
