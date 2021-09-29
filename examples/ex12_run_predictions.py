@@ -4,83 +4,21 @@ import mala
 from mala import printout
 
 from data_repo_path import data_repo_path
-data_path = "/home/fiedlerl/jobs/qe/Be2/"
+data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 
-params_path = "./ex12_params.pkl"
-network_path = "./ex12_network.pth"
-input_scaler_path = "./ex12_iscaler.pkl"
-output_scaler_path = "./ex12_oscaler.pkl"
+"""
+ex12_run_predictions.py: Show how a prediction can be made using MALA.
+Using nothing more then the trained network and atomic configurations, 
+predictions can be made. 
+"""
 
-# Uses a trained network to make a prediction.
-def use_tester_class(network_path, params_path, input_scaler_path,
-                        output_scaler_path):
 
-    # First load Parameters and network.
-    # Parameters may have to
-    new_parameters = mala.Parameters.load_from_file(params_path,
-                                                    no_snapshots=True)
-
-    # Specify the correct LDOS parameters.
-    new_parameters.targets.target_type = "LDOS"
-    new_parameters.targets.ldos_gridsize = 11
-    new_parameters.targets.ldos_gridspacing_ev = 2.5
-    new_parameters.targets.ldos_gridoffset_ev = -5
-
-    # Inference should ALWAYS be done with lazy loading activated, even if
-    # training was not.
-    new_parameters.data.use_lazy_loading = True
-
-    # Load a network from a file.
-    new_network = mala.Network.load_from_file(new_parameters, network_path)
-
-    # Make sure the same scaling is used for data handling.
-    iscaler = mala.DataScaler.load_from_file(input_scaler_path)
-    oscaler = mala.DataScaler.load_from_file(output_scaler_path)
-    inference_data_handler = mala.DataHandler(new_parameters,
-                                              input_data_scaler=iscaler,
-                                              output_data_scaler=oscaler)
-
-    # Add snapshots that are to be tested and make sure that the
-    # data_splitting_snapshots list is correct.
-    new_parameters.data.data_splitting_snapshots = ["te"]
-    inference_data_handler.add_snapshot("Be_snapshot2.in.npy", data_path+"snap/",
-                              "Be_snapshot2.out.npy", data_path+"ldos/",)
-    inference_data_handler.prepare_data(reparametrize_scaler=False)
-
-    # The Tester class is the testing analogon to the training class.
-    tester = mala.Tester(new_parameters, new_network, inference_data_handler)
-
-    # Get the results for the first (and only= snapshot.
-    actual_ldos, predicted_ldos = tester.test_snapshot(0)
-
-    # We will use the LDOS calculator to do some preprocessing.
-    ldos_calculator = inference_data_handler.target_calculator
-    ldos_calculator.read_additional_calculation_data("qe.out", os.path.join(
-                                                     data_path,
-                                                     "outputs/Be_snapshot2.out"))
-
-    # Calculate the Band energy.
-    band_energy_predicted = ldos_calculator.get_band_energy(predicted_ldos)
-    band_energy_actual = ldos_calculator.get_band_energy(actual_ldos)
-    printout("Band energy (actual, predicted, error)[eV]", band_energy_actual,
-             band_energy_predicted, band_energy_predicted-band_energy_actual)
-
-    # Calculate the number of electrons.
-    nr_electrons_predicted = ldos_calculator.\
-        get_number_of_electrons(predicted_ldos)
-    nr_electrons_actual = ldos_calculator.get_number_of_electrons(actual_ldos)
-    printout("Number of electrons (actual, predicted, error)[eV]",
-             nr_electrons_actual, nr_electrons_predicted,
-             nr_electrons_predicted-nr_electrons_actual)
-
-def use_predictor(network_path, params_path, input_scaler_path,
-                     output_scaler_path):
-    # First load Parameters and network.
-    # Parameters may have to
-    new_parameters = mala.Parameters.load_from_file(params_path,
-                                                    no_snapshots=True)
-
-    # Specify the correct LDOS parameters.
+# Uses a network to make a prediction.
+def use_predictor(new_network, new_parameters, iscaler, oscaler):
+    ####################
+    # PARAMETERS
+    # Specify the correct LDOS parameters and load network.
+    ####################
     new_parameters.targets.target_type = "LDOS"
     new_parameters.targets.ldos_gridsize = 11
     new_parameters.targets.ldos_gridspacing_ev = 2.5
@@ -91,31 +29,44 @@ def use_predictor(network_path, params_path, input_scaler_path,
     new_parameters.descriptors.twojmax = 10
     new_parameters.descriptors.rcutfac = 4.67637
 
-    # Load a network from a file.
-    new_network = mala.Network.load_from_file(new_parameters, network_path)
-
-    # Make sure the same scaling is used for data handling.
-    iscaler = mala.DataScaler.load_from_file(input_scaler_path)
-    oscaler = mala.DataScaler.load_from_file(output_scaler_path)
     inference_data_handler = mala.DataHandler(new_parameters,
                                               input_data_scaler=iscaler,
                                               output_data_scaler=oscaler)
 
-    predictor = mala.Predictor(new_parameters, new_network, inference_data_handler)
+    ####################
+    # PREDICTION
+    # Create a Predictor object and make a prediction.
+    ####################
+
+    predictor = mala.Predictor(new_parameters, new_network,
+                               inference_data_handler)
+
+    # Using a QE out is simply for convenience; with the function
+    # .predict_from_atoms, prediction can be made directly from atomic
+    # configurations.
     ldos = predictor.predict_from_qeout(os.path.join(
                                                      data_path,
-                                                     "outputs/Be_snapshot2.out"))
-    inference_data_handler.target_calculator.read_additional_calculation_data("qe.out", os.path.join(
-                                                     data_path,
-                                                     "outputs/Be_snapshot2.out"))
-    number_of_electrons = inference_data_handler.target_calculator.get_number_of_electrons(ldos)
-    print(number_of_electrons)
-    printout("Sucess!")
+                                                     "Be_snapshot3.out"))
+    ldos_calculator: mala.LDOS = inference_data_handler.target_calculator
+
+    # Fermi energy has to be calculated self-consistently for predictions,
+    # and for that we also have to tell the calculator how many electrons
+    # the system has and at which temperature we perform calculations.
+    ldos_calculator.number_of_electrons = 4
+    ldos_calculator.temperature_K = 298
+
+    fermi_energy = ldos_calculator.get_self_consistent_fermi_energy_ev(ldos)
+
+    number_of_electrons = ldos_calculator.\
+        get_number_of_electrons(ldos, fermi_energy_eV=fermi_energy)
+    band_energy = ldos_calculator. \
+        get_band_energy(ldos, fermi_energy_eV=fermi_energy)
+    printout("Predicted number of electrons: ", number_of_electrons)
+    printout("Predicted band energy: ", band_energy)
 
 
 # Trains a network.
-def initial_training(network_path, params_path, input_scaler_path,
-                     output_scaler_path, desired_loss_improvement_factor=1):
+def initial_training():
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
@@ -128,7 +79,7 @@ def initial_training(network_path, params_path, input_scaler_path,
     # done by providing a list containing entries of the form
     # "tr", "va" and "te".
     test_parameters.data.data_splitting_type = "by_snapshot"
-    test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
+    test_parameters.data.data_splitting_snapshots = ["tr", "va"]
 
     # Specify the data scaling.
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
@@ -138,7 +89,7 @@ def initial_training(network_path, params_path, input_scaler_path,
     test_parameters.network.layer_activations = ["ReLU"]
 
     # Specify the training parameters.
-    test_parameters.running.max_number_epochs = 400
+    test_parameters.running.max_number_epochs = 100
     test_parameters.running.mini_batch_size = 40
     test_parameters.running.learning_rate = 0.00001
     test_parameters.running.trainingtype = "Adam"
@@ -151,12 +102,10 @@ def initial_training(network_path, params_path, input_scaler_path,
     data_handler = mala.DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
-    data_handler.add_snapshot("Be_snapshot0.in.npy", data_path+"snap/",
-                              "Be_snapshot0.out.npy", data_path+"ldos/")
-    data_handler.add_snapshot("Be_snapshot1.in.npy", data_path+"snap/",
-                              "Be_snapshot1.out.npy", data_path+"ldos/")
-    data_handler.add_snapshot("Be_snapshot2.in.npy", data_path+"snap/",
-                              "Be_snapshot2.out.npy", data_path+"ldos/",)
+    data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                              "Be_snapshot1.out.npy", data_path)
+    data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                              "Be_snapshot2.out.npy", data_path)
     data_handler.prepare_data()
     printout("Read data: DONE.")
 
@@ -191,15 +140,9 @@ def initial_training(network_path, params_path, input_scaler_path,
     # Parameters, input/output scaler, network.
     ####################
 
-    test_parameters.save(params_path)
-    test_network.save_network(network_path)
-    data_handler.input_data_scaler.save(input_scaler_path)
-    data_handler.output_data_scaler.save(output_scaler_path)
+    return test_network, test_parameters, data_handler.input_data_scaler,\
+           data_handler.output_data_scaler
 
 
-# initial_training(network_path, params_path, input_scaler_path,
-#                  output_scaler_path)
-use_tester_class(network_path, params_path, input_scaler_path,
-                    output_scaler_path)
-use_predictor(network_path, params_path, input_scaler_path,
-                    output_scaler_path)
+network, params, input_scaler, output_scaler = initial_training()
+use_predictor(network, params, input_scaler, output_scaler)
