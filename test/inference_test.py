@@ -1,11 +1,16 @@
+import importlib
 import os
 
+import pytest
 import numpy as np
-from mala import Parameters, DataHandler, DataScaler, Network, Tester
+from mala import Parameters, DataHandler, DataScaler, Network, Tester, \
+                 Trainer, Predictor
 
 from data_repo_path import data_repo_path
 data_path = os.path.join(data_repo_path, "Al36")
 param_path = os.path.join(data_repo_path, "workflow_test/")
+beryllium_path = os.path.join(os.path.join(data_repo_path, "Be2"),
+                               "training_data")
 params_path = param_path+"workflow_test_params.pkl"
 network_path = param_path+"workflow_test_network.pth"
 input_scaler_path = param_path+"workflow_test_iscaler.pkl"
@@ -89,6 +94,115 @@ class TestInference:
                 self.__run(use_lazy_loading=True, batchsize=batchsize)
             assert np.isclose(actual_ldos.sum(), from_file.sum(),
                               atol=accuracy_strict)
+
+    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
+                        reason="LAMMPS is currently not part of the pipeline.")
+    def test_predictions(self):
+        """
+        Test that Predictor class and Tester class give the same results.
+
+        They in principle do the same, but use slightly different routines
+        under the hood. To test this, a small network is trained, and
+        afterwards, objects from bot classes are used to predict the
+        number of electrons and band energy.
+        """
+        ####################
+        # Set up and train a network to be used for the tests.
+        ####################
+
+        test_parameters = Parameters()
+        test_parameters.data.data_splitting_type = "by_snapshot"
+        test_parameters.data.data_splitting_snapshots = ["tr", "va"]
+        test_parameters.data.input_rescaling_type = "feature-wise-standard"
+        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.running.max_number_epochs = 100
+        test_parameters.running.mini_batch_size = 40
+        test_parameters.running.learning_rate = 0.00001
+        test_parameters.running.trainingtype = "Adam"
+        test_parameters.targets.target_type = "LDOS"
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
+        test_parameters.running.inference_data_grid = [18, 18, 27]
+        test_parameters.descriptors.descriptor_type = "SNAP"
+        test_parameters.descriptors.twojmax = 10
+        test_parameters.descriptors.rcutfac = 4.67637
+
+        data_handler = DataHandler(test_parameters)
+        data_handler.add_snapshot("Be_snapshot1.in.npy", beryllium_path,
+                                  "Be_snapshot1.out.npy", beryllium_path)
+        data_handler.add_snapshot("Be_snapshot2.in.npy", beryllium_path,
+                                  "Be_snapshot2.out.npy", beryllium_path)
+        data_handler.prepare_data()
+
+        test_parameters.network.layer_sizes = [
+            data_handler.get_input_dimension(),
+            100,
+            data_handler.get_output_dimension()]
+        test_network = Network(test_parameters)
+        test_trainer = Trainer(test_parameters, test_network,
+                                    data_handler)
+        test_trainer.train_network()
+
+        ####################
+        # Now, first use the Tester class to make a prediction.
+        ####################
+
+        test_parameters.data.use_lazy_loading = True
+        inference_data_handler = DataHandler(test_parameters,
+                                             input_data_scaler=data_handler.
+                                             input_data_scaler,
+                                             output_data_scaler=data_handler.
+                                             output_data_scaler)
+        inference_data_handler.clear_data()
+        test_parameters.data.data_splitting_snapshots = ["te"]
+        inference_data_handler.add_snapshot("Be_snapshot3.in.npy",
+                                            beryllium_path,
+                                            "Be_snapshot3.out.npy",
+                                            beryllium_path)
+        inference_data_handler.prepare_data(reparametrize_scaler=False)
+
+        tester = Tester(test_parameters, test_network, inference_data_handler)
+        actual_ldos, predicted_ldos = tester.test_snapshot(0)
+        ldos_calculator = inference_data_handler.target_calculator
+        ldos_calculator.read_additional_calculation_data("qe.out", os.path.join(
+                                                         beryllium_path,
+                                                         "Be_snapshot3.out"))
+
+        band_energy_tester_class = ldos_calculator.get_band_energy(predicted_ldos)
+        nr_electrons_tester_class = ldos_calculator.\
+            get_number_of_electrons(predicted_ldos)
+
+        ####################
+        # Now, use the predictor class to make the same prediction.
+        ####################
+
+        predictor = Predictor(test_parameters, test_network,
+                              inference_data_handler)
+        predicted_ldos = predictor.predict_from_qeout(os.path.join(
+                                                         beryllium_path,
+                                                         "Be_snapshot3.out"))
+
+        # In order for the results to be the same, we have to use the same
+        # parameters.
+        inference_data_handler. \
+            target_calculator.\
+            read_additional_calculation_data("qe.out", os.path.join(
+                                             beryllium_path,
+                                             "Be_snapshot3.out"))
+
+        nr_electrons_predictor_class = inference_data_handler.\
+            target_calculator.get_number_of_electrons(predicted_ldos)
+        band_energy_predictor_class = inference_data_handler.\
+            target_calculator.get_band_energy(predicted_ldos)
+
+        assert np.isclose(band_energy_predictor_class,
+                          band_energy_tester_class,
+                          atol=accuracy_strict)
+        assert np.isclose(nr_electrons_predictor_class,
+                          nr_electrons_tester_class,
+                          atol=accuracy_strict)
 
     @staticmethod
     def __run(use_lazy_loading=False, batchsize=46):

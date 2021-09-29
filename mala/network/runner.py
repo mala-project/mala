@@ -7,7 +7,8 @@ except ModuleNotFoundError:
 import numpy as np
 import torch
 
-from mala.common.parameters import printout
+from mala.common.printout import printout
+from mala.common.parameters import ParametersRunning
 from mala import Parameters
 
 
@@ -31,7 +32,7 @@ class Runner:
 
     def __init__(self, params, network, data):
         self.parameters_full: Parameters = params
-        self.parameters = params.running
+        self.parameters: ParametersRunning = params.running
         self.network = network
         self.data = data
         self.__prepare_to_run()

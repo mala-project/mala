@@ -325,13 +325,16 @@ class ParametersRunning(ParametersBase):
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
+
     visualisation : int
         If True then Tensorboard is activated for visualisation
         case 0: No tensorboard activated
         case 1: tensorboard activated with Loss and learning rate
         case 2; additonally weights and biases and gradient  
-        
-        
+
+    inference_data_grid : list
+        List holding the grid to be used for inference in the form of
+        [x,y,z].
     """
 
     def __init__(self):
@@ -359,6 +362,7 @@ class ParametersRunning(ParametersBase):
         self.visualisation_dir= os.path.join(os.path.expanduser("~"), "log_dir")
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
+        self.inference_data_grid = [0, 0, 0]
 
     def _update_horovod(self, new_horovod):
         super(ParametersRunning, self)._update_horovod(new_horovod)

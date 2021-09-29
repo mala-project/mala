@@ -23,6 +23,10 @@ class DOS(TargetBase):
         super(DOS, self).__init__(params)
         self.target_length = self.parameters.ldos_gridsize
 
+    def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return self.parameters.ldos_gridsize
+
     @staticmethod
     def convert_units(array, in_units="1/eV"):
         """
