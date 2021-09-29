@@ -43,7 +43,7 @@ def use_tester_class(network_path, params_path, input_scaler_path,
     # Add snapshots that are to be tested and make sure that the
     # data_splitting_snapshots list is correct.
     new_parameters.data.data_splitting_snapshots = ["te"]
-    inference_data_handler.add_snapshot("Be_snapshot0.in.npy", data_path+"snap/",
+    inference_data_handler.add_snapshot("Be_snapshot2.in.npy", data_path+"snap/",
                               "Be_snapshot2.out.npy", data_path+"ldos/",)
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 
@@ -86,6 +86,10 @@ def use_predictor(network_path, params_path, input_scaler_path,
     new_parameters.targets.ldos_gridspacing_ev = 2.5
     new_parameters.targets.ldos_gridoffset_ev = -5
     new_parameters.running.inference_data_grid = [18, 18, 27]
+
+    new_parameters.descriptors.descriptor_type = "SNAP"
+    new_parameters.descriptors.twojmax = 10
+    new_parameters.descriptors.rcutfac = 4.67637
 
     # Load a network from a file.
     new_network = mala.Network.load_from_file(new_parameters, network_path)

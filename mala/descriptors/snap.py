@@ -149,6 +149,9 @@ class SNAP(DescriptorBase):
             Numpy array containing the descriptors with the dimension
             (x,y,z,descriptor_dimension)
         """
+
+        # Enforcing / Checking PBC on the input atoms.
+        atoms = self.enforce_pbc(atoms)
         return self.__calculate_snap(atoms, working_directory, grid_dimensions)
 
     def __calculate_snap(self, atoms, outdir, grid_dimensions):
