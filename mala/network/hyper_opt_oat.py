@@ -221,7 +221,7 @@ class HyperOptOAT(HyperOptBase):
                             "selected.")
 
     def __check_factor_levels(self):
-        """Checks that the factors are in a decreasing order."""
+        """Check that the factors are in a decreasing order."""
         dx = np.diff(self.sorted_num_choices)
         if np.all(dx >= 0):
             # Factors in increasing order, we have to reverse the order.
