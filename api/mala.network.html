@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.1.0-326-g3176ead
+                v0.1.0-338-g6a258e0
               </div>
             
           
@@ -386,6 +386,30 @@ Default value - categorical (list)</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.network.hyper_opt_oat.HyperOptOAT.checkpoint_exists">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">checkpoint_exists</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.checkpoint_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a hyperparameter optimization checkpoint exists.</p>
+<p>Returns True if it does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>checkpoint_exists</strong> – True if the checkpoint exists, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.hyper_opt_oat.HyperOptOAT.get_best_trial_results">
+<code class="sig-name descname"><span class="pre">get_best_trial_results</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.get_best_trial_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the best trial out of the list, including the value.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters">
 <code class="sig-name descname"><span class="pre">get_optimal_parameters</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the optimal set of hyperparameters by doing range analysis.</p>
@@ -395,20 +419,29 @@ Default value - categorical (list)</p>
 <dl class="py method">
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array">
 <code class="sig-name descname"><span class="pre">get_orthogonal_array</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate the best Orthogonal array used for optimal hyperparameter sampling.</p>
+<dd><p>Generate the best OA used for optimal hyperparameter sampling.</p>
+<p>This is function is taken from the example notebook of OApackage</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.hyper_opt_oat.HyperOptOAT.load_from_file">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.load_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a hyperparameter optimizer from a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>factor_levels</strong> (<em>list</em>) – A list of number of choices of each hyperparameter</p></li>
-<li><p><strong>strength</strong> (<em>int</em>) – <dl class="simple">
-<dt>A design parameter for Orthogonal arrays</dt><dd><p>strength 2 models all 2 factor interactions
-strength 3 models all 3 factor interactions</p>
-</dd>
-</dl>
-</p></li>
-<li><p><strong>N_runs</strong> (<em>int</em>) – Minimum number of experimental runs to be performed</p></li>
-<li><p><strong>is function is taken from the example notebook of OApackage</strong> (<em>This</em>) – </p></li>
+<li><p><strong>params</strong> (<a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters object with which the hyperparameter optimizer
+should be created Has to be compatible with data.</p></li>
+<li><p><strong>file_path</strong> (<em>string</em>) – Path to the file from which the hyperparameter optimizer should
+be loaded.</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the training data.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loaded_hyperopt</strong> – The hyperparameter optimizer that was loaded from the file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.network.hyper_opt_oat.HyperOptOAT" title="mala.network.hyper_opt_oat.HyperOptOAT">HyperOptOAT</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -417,7 +450,9 @@ strength 3 models all 3 factor interactions</p>
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs">
 <code class="sig-name descname"><span class="pre">number_of_runs</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the minimum number of runs required for an Orthogonal array.</p>
-<p>Based on the factor levels and the strength of the array requested</p>
+<p>Based on the factor levels and the strength of the array requested.
+See also here:
+<a class="reference external" href="https://oapackage.readthedocs.io/en/latest/examples/example_minimal_number_of_runs_oa.html">https://oapackage.readthedocs.io/en/latest/examples/example_minimal_number_of_runs_oa.html</a></p>
 </dd></dl>
 
 <dl class="py method">
@@ -429,12 +464,27 @@ In this case, these are choosen based on an orthogonal array.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.network.hyper_opt_oat.HyperOptOAT.perform_trial">
-<code class="sig-name descname"><span class="pre">perform_trial</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objective</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.perform_trial" title="Permalink to this definition">¶</a></dt>
-<dd><p>Feature funciton to use OAT with other optimisation techniques.</p>
+<dt id="mala.network.hyper_opt_oat.HyperOptOAT.resume_checkpoint">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare resumption of hyperparameter optimization from a checkpoint.</p>
+<p>Please note that to actually resume the optimization,
+HyperOptOptuna.perform_study() still has to be called.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>objective</strong> (<a class="reference internal" href="#mala.network.objective_base.ObjectiveBase" title="mala.network.objective_base.ObjectiveBase"><em>ObjectiveBase</em></a>) – The current objective value that is to be optimised by using OAT</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint from which the checkpoint is loaded.</p></li>
+<li><p><strong>no_data</strong> (<em>bool</em>) – If True, the data won’t actually be loaded into RAM or scaled.
+This can be useful for cases where a checkpoint is loaded
+for analysis purposes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>loaded_params</strong> (<em>mala.common.parameters.Parameters</em>) – The Parameters saved in the checkpoint.</p></li>
+<li><p><strong>new_datahandler</strong> (<em>mala.datahandling.data_handler.DataHandler</em>) – The data handler reconstructed from the checkpoint.</p></li>
+<li><p><strong>new_hyperopt</strong> (<em>HyperOptOAT</em>) – The hyperparameter optimizer reconstructed from the checkpoint.</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -451,13 +501,6 @@ hyperparameter optimizer was created.</p>
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance">
 <code class="sig-name descname"><span class="pre">show_order_of_importance</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print the order of importance of the hyperparameters that are being optimised.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mala.network.hyper_opt_oat.HyperOptOAT.monotonic">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">monotonic</span></code><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.monotonic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if the factors are in an increasing or decreasing order.</p>
-<p>This is required for the genration of orthogonal arrays.</p>
 </dd></dl>
 
 </dd></dl>
