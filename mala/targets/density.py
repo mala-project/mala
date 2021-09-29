@@ -37,6 +37,10 @@ class Density(TargetBase):
         # there is one value for the density (spin-unpolarized calculations).
         self.target_length = 1
 
+    def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return 1
+
     def read_from_cube(self, file_name, directory, units=None):
         """
         Read the density data from a cube file.

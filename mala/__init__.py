@@ -10,5 +10,5 @@ from .common import Parameters, printout
 from .descriptors import DescriptorInterface, SNAP, DescriptorBase
 from .datahandling import DataHandler, DataScaler, DataConverter
 from .network import Network, Tester, Trainer, HyperOptInterface, \
-    HyperOptOptuna, HyperOptNoTraining
+    HyperOptOptuna, HyperOptNoTraining, Predictor
 from .targets import TargetInterface, LDOS, DOS, Density, fermi_function

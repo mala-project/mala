@@ -198,7 +198,7 @@ class TestFullWorkflow:
         ldos.read_additional_calculation_data("qe.out", os.path.join(
                                               data_path_ldos,
                                               "Be.pw.scf.out"))
-        ldos_data = np.load((data_path_ldos, "Be_ldos.npy"))
+        ldos_data = np.load(os.path.join(data_path_ldos, "Be_ldos.npy"))
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
