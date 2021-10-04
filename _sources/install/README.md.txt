@@ -162,7 +162,7 @@ the data repository, it needs to be linked with MALA.
    ```sh
    $ git clone https://github.com/mala-project/test-data ~/path/to/data/repo
    $ cd ~/path/to/data/repo
-   $ git checkout v0.4.0
+   $ git checkout v1.1.0
    ```
 
 2. Link MALA and data repository.
