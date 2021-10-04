@@ -44,6 +44,13 @@ class HyperOptNoTraining(HyperOptBase):
             investigates those sampled by a different hyperparameter
             optimizer.
         """
+
+        # The minibatch size can not vary in the analysis.
+        # This check ensures that e.g. optuna results can be used.
+        for idx, par in enumerate(self.params.hyperparameters.hlist):
+            if par.name == "mini_batch_size":
+                self.params.hyperparameters.hlist.pop(idx)
+
         # Ideally, this type of HO is called with a list of trials for which
         # the parameter has to be identified.
         self.trial_list = trial_list
