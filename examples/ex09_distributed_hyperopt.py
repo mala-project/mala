@@ -53,6 +53,13 @@ test_parameters.hyperparameters.hyper_opt_method = "optuna"
 test_parameters.hyperparameters.study_name = "ex09"
 test_parameters.hyperparameters.rdb_storage = 'sqlite:///ex09.db'
 
+# Hyperparameter optimization can be further refined by using ensemble training
+# at each step and by using a different metric then the validation loss
+# (e.g. the band energy). It is recommended not to use the ensemble training
+# method in Single-GPU use, as it naturally drastically decreases performance.
+test_parameters.hyperparameters.number_training_per_trial = 5
+test_parameters.running.after_before_training_metric = "band_energy"
+
 ####################
 # DATA
 # Add and prepare snapshots for training.
