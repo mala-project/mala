@@ -1,6 +1,7 @@
 """Hyperparameter optimizer working without training."""
 import optuna
 
+from mala.common.printout import printout
 from mala.network.hyper_opt_base import HyperOptBase
 from mala.network.objective_no_training import ObjectiveNoTraining
 
@@ -49,6 +50,8 @@ class HyperOptNoTraining(HyperOptBase):
         # This check ensures that e.g. optuna results can be used.
         for idx, par in enumerate(self.params.hyperparameters.hlist):
             if par.name == "mini_batch_size":
+                printout("Removing mini batch size from hyperparameter list,"
+                         "because NASWOT is used.")
                 self.params.hyperparameters.hlist.pop(idx)
 
         # Ideally, this type of HO is called with a list of trials for which
