@@ -49,7 +49,7 @@ class HyperOptNoTraining(HyperOptBase):
         # This check ensures that e.g. optuna results can be used.
         for idx, par in enumerate(self.params.hyperparameters.hlist):
             if par.name == "mini_batch_size":
-                printout("Removing mini batch size from hyperparameter list,"
+                printout("Removing mini batch size from hyperparameter list, "
                          "because NASWOT is used.")
                 self.params.hyperparameters.hlist.pop(idx)
 
@@ -71,7 +71,7 @@ class HyperOptNoTraining(HyperOptBase):
         self.trial_losses = [self.objective(row) for row in self.trial_list]
 
         # Return the best lost value we could achieve.
-        return min(self.trial_losses)
+        return max(self.trial_losses)
 
     def set_optimal_parameters(self):
         """
@@ -81,6 +81,6 @@ class HyperOptNoTraining(HyperOptBase):
         hyperparameter optimizer was created.
         """
         # Getting the best trial based on the test errors
-        idx = self.trial_losses.index(min(self.trial_losses))
+        idx = self.trial_losses.index(max(self.trial_losses))
         self.best_trial = self.trial_list[idx]
         self.objective.parse_trial(self.best_trial)
