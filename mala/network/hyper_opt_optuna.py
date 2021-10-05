@@ -110,7 +110,8 @@ class HyperOptOptuna(HyperOptBase):
         last_trials: list
             A list of optuna.FrozenTrial objects.
         """
-        return self.study.get_trials()
+        return self.study.get_trials(states=(optuna.trial.
+                                              TrialState.COMPLETE, ))
 
     @classmethod
     def checkpoint_exists(cls, checkpoint_name):
