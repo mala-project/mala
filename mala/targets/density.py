@@ -1,11 +1,9 @@
 """Electronic density calculation class."""
-from .target_base import TargetBase
-from .calculation_helpers import *
-from .cube_parser import read_cube
+import os
 import warnings
+
 import ase.io
 from ase.units import Rydberg
-from mala.common.parameters import printout
 try:
     import total_energy as te
 except ModuleNotFoundError:
@@ -15,6 +13,11 @@ except ModuleNotFoundError:
                   "still mostly work, but trying to "
                   "access the total energy of a system WILL fail.",
                   stacklevel=2)
+
+from mala.common.parameters import printout
+from mala.targets.target_base import TargetBase
+from mala.targets.calculation_helpers import *
+from mala.targets.cube_parser import read_cube
 
 
 class Density(TargetBase):
@@ -34,6 +37,10 @@ class Density(TargetBase):
         # there is one value for the density (spin-unpolarized calculations).
         self.target_length = 1
 
+    def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return 1
+
     def read_from_cube(self, file_name, directory, units=None):
         """
         Read the density data from a cube file.
@@ -50,7 +57,7 @@ class Density(TargetBase):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file in ", directory)
-        data, meta = read_cube(directory + file_name)
+        data, meta = read_cube(os.path.join(directory, file_name))
         return data
 
     def get_number_of_electrons(self, density_data, grid_spacing_bohr=None,
@@ -80,7 +87,7 @@ class Density(TargetBase):
             grid_spacing_bohr = self.grid_spacing_Bohr
 
         # Check input data for correctness.
-        data_shape = np.shape(density_data)
+        data_shape = np.shape(np.squeeze(density_data))
         if len(data_shape) != 3:
             if len(data_shape) != 1:
                 raise Exception("Unknown Density shape, cannot calculate "
@@ -377,5 +384,6 @@ class Density(TargetBase):
         return_density_object.total_energy_dft_calculation = \
             ldos_object.total_energy_dft_calculation
         return_density_object.kpoints = ldos_object.kpoints
-
+        return_density_object.number_of_electrons_from_eigenvals = \
+            ldos_object.number_of_electrons_from_eigenvals
         return return_density_object

@@ -27,7 +27,7 @@ install/README
 install/INSTALL_LAMMPS
 install/INSTALL_TE_QE
 install/tested_systems
-install/install_on_cluster
+install/tensorboard_setup
 ```
 
 ```{toctree}

@@ -1,13 +1,15 @@
 """DataScaler class for scaling DFT data."""
-import torch
 import pickle
-import numpy as np
-from mala.common.parameters import printout
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by parameters class
     pass
+import numpy as np
+import torch
+
+from mala.common.parameters import printout
 
 
 class DataScaler:

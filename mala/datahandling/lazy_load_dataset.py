@@ -1,15 +1,17 @@
 """DataSet for lazy-loading."""
+import os
 import time
 
-import torch
-from torch.utils.data import Dataset
-from mala.datahandling.snapshot import Snapshot
-import numpy as np
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class.
     pass
+import numpy as np
+import torch
+from torch.utils.data import Dataset
+
+from mala.datahandling.snapshot import Snapshot
 
 
 class LazyLoadDataset(torch.utils.data.Dataset):
@@ -139,11 +141,13 @@ class LazyLoadDataset(torch.utils.data.Dataset):
             rank = hvd.local_rank()
         start_time = time.time()
         self.input_data = \
-            np.load(self.snapshot_list[file_index].input_npy_directory +
-                    self.snapshot_list[file_index].input_npy_file)
+            np.load(os.path.join(
+                    self.snapshot_list[file_index].input_npy_directory,
+                    self.snapshot_list[file_index].input_npy_file))
         self.output_data = \
-            np.load(self.snapshot_list[file_index].output_npy_directory +
-                    self.snapshot_list[file_index].output_npy_file)
+            np.load(os.path.join(
+                    self.snapshot_list[file_index].output_npy_directory,
+                    self.snapshot_list[file_index].output_npy_file))
 
         # Transform the data.
         if self.descriptors_contain_xyz:

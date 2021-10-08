@@ -1,9 +1,12 @@
 """DataConverter class for converting snapshots into numpy arrays."""
+import os
+
+import numpy as np
+
 from mala.common.printout import printout
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor_interface import DescriptorInterface
 from mala.targets.target_interface import TargetInterface
-import numpy as np
 
 
 class DataConverter:
@@ -176,5 +179,7 @@ class DataConverter:
             snapshot_name = naming_scheme
             snapshot_name = snapshot_name.replace("*", str(snapshot_number))
             printout("Saving snapshot", snapshot_number, "at ", save_path)
-            np.save(save_path+snapshot_name+".in.npy", input_data)
-            np.save(save_path+snapshot_name+".out.npy", output_data)
+            np.save(os.path.join(save_path, snapshot_name+".in.npy"),
+                    input_data)
+            np.save(os.path.join(save_path, snapshot_name+".out.npy"),
+                    output_data)

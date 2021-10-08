@@ -1,12 +1,15 @@
 """Base class for all target calculators."""
+from abc import ABC, abstractmethod
+
 from ase.units import Rydberg, Bohr, kB
 import ase.io
 import numpy as np
+
 from mala.common.parameters import Parameters, ParametersTargets
-from .calculation_helpers import fermi_function
+from mala.targets.calculation_helpers import fermi_function
 
 
-class TargetBase:
+class TargetBase(ABC):
     """
     Base class for all target quantity parser.
 
@@ -33,6 +36,7 @@ class TargetBase:
         self.temperature_K = None
         self.grid_spacing_Bohr = None
         self.number_of_electrons = None
+        self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
         self.grid_dimensions = [0, 0, 0]
@@ -42,7 +46,7 @@ class TargetBase:
                 "calculation": 'scf',
                 "restart_mode": 'from_scratch',
                 "prefix": 'MALA',
-                "pseudo_dir": None,
+                "pseudo_dir": self.parameters.pseudopotential_path,
                 "outdir": './',
                 "ibrav": None,
                 "smearing": 'fermi-dirac',
@@ -64,6 +68,23 @@ class TargetBase:
         # The small inaccuracies are neglected for now.
         self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
+
+    @abstractmethod
+    def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        pass
+
+    @property
+    def qe_input_data(self):
+        """Input data for QE TEM calls."""
+        # Update the pseudopotential path from Parameters.
+        self._qe_input_data["pseudo_dir"] = \
+            self.parameters.pseudopotential_path
+        return self._qe_input_data
+
+    @qe_input_data.setter
+    def qe_input_data(self, value):
+        self._qe_input_data = value
 
     def read_from_cube(self):
         """Read the quantity from a .cube file."""
@@ -104,7 +125,7 @@ class TargetBase:
                         "of electons has been implemented for this target "
                         "type.")
 
-    def read_additional_calculation_data(self, data_type, path_to_file=""):
+    def read_additional_calculation_data(self, data_type, data=""):
         """
         Read in additional input about a calculation.
 
@@ -119,8 +140,8 @@ class TargetBase:
             Type of data or file that is used. Currently only supports
             qe.out for Quantum Espresso outfiles.
 
-        path_to_file : string
-            Path to the file that is used.
+        data : string or list
+            Data from which additional calculation data is inputted.
         """
         if data_type == "qe.out":
             # Reset everything.
@@ -134,7 +155,7 @@ class TargetBase:
             self.atoms = None
 
             # Read the file.
-            self.atoms = ase.io.read(path_to_file, format="espresso-out")
+            self.atoms = ase.io.read(data, format="espresso-out")
             vol = self.atoms.get_volume()
             self.fermi_energy_eV = self.atoms.get_calculator().\
                 get_fermi_level()
@@ -143,7 +164,7 @@ class TargetBase:
             total_energy = None
             past_calculation_part = False
             bands_included = True
-            with open(path_to_file) as out:
+            with open(data) as out:
                 pseudolinefound = False
                 lastpseudo = None
                 for line in out:
@@ -218,16 +239,40 @@ class TargetBase:
                                                        self.temperature_K)
                 eband_per_band = kweights[np.newaxis, :] * eband_per_band
                 self.band_energy_dft_calculation = np.sum(eband_per_band)
+                enum_per_band = fermi_function(eigs,
+                                               self.fermi_energy_eV,
+                                               self.temperature_K)
+                enum_per_band = kweights[np.newaxis, :] * enum_per_band
+                self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
+        elif data_type == "atoms+grid":
+            # Reset everything.
+            self.fermi_energy_eV = None
+            self.temperature_K = None
+            self.grid_spacing_Bohr = None
+            self.number_of_electrons = None
+            self.band_energy_dft_calculation = None
+            self.total_energy_dft_calculation = None
+            self.grid_dimensions = [0, 0, 0]
+            self.atoms: ase.Atoms = data[0]
+
+            # Read the file.
+            vol = self.atoms.get_volume()
+
+            # Parse the file for energy values.
+            total_energy = None
+            past_calculation_part = False
+            bands_included = True
+            self.grid_dimensions[0] = data[1][0]
+            self.grid_dimensions[1] = data[1][1]
+            self.grid_dimensions[2] = data[1][2]
+
+            # Post process the text values.
+            cell_volume = vol / (self.grid_dimensions[0] *
+                                 self.grid_dimensions[1] *
+                                 self.grid_dimensions[2] * Bohr ** 3)
+            self.grid_spacing_Bohr = cell_volume ** (1 / 3)
         else:
             raise Exception("Unsupported auxiliary file type.")
-
-    def set_pseudopotential_path(self, newpath):
-        """
-        Set a path where your pseudopotentials are stored.
-
-        This is needed for doing QE calculations.
-        """
-        self.qe_input_data["pseudo_dir"] = newpath
 
     def get_energy_grid(self):
         """Get energy grid."""

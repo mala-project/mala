@@ -19,6 +19,9 @@ the form `MAJOR.MINOR.FIX`:
 * `MINOR`: new features have beend added to the code.
 * `FIX`: A bug in a feature has been fixed.
 
+Every new version should be accompanied by a changelog. Please include the 
+version of the test data repository with which this version is supposed to be
+used in this changelog. 
 
 ## Branching strategy
 

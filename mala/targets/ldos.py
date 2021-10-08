@@ -1,13 +1,16 @@
 """LDOS calculation class."""
-from .cube_parser import read_cube
-from .target_base import TargetBase
-from .calculation_helpers import *
-from .dos import DOS
-from .density import Density
+from ase.units import Rydberg
+
 import numpy as np
 import math
-from ase.units import Rydberg
+import os
+
 from mala.common.parameters import printout
+from mala.targets.cube_parser import read_cube
+from mala.targets.target_base import TargetBase
+from mala.targets.calculation_helpers import *
+from mala.targets.dos import DOS
+from mala.targets.density import Density
 
 
 class LDOS(TargetBase):
@@ -27,6 +30,9 @@ class LDOS(TargetBase):
         self.cached_density_exists = False
         self.cached_density = []
 
+    def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return self.parameters.ldos_gridsize
 
     @staticmethod
     def convert_units(array, in_units="1/eV"):
@@ -134,7 +140,7 @@ class LDOS(TargetBase):
             tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
 
             # Open the cube file
-            data, meta = read_cube(directory + tmp_file_name)
+            data, meta = read_cube(os.path.join(directory, tmp_file_name))
 
             # Once we have read the first cube file, we know the dimensions
             # of the LDOS and can prepare the array

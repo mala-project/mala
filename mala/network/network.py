@@ -1,12 +1,12 @@
 """Neural network for MALA."""
-import torch
-import torch.nn as nn
-import torch.nn.functional as functional
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by parameters class
     pass
+import torch
+import torch.nn as nn
+import torch.nn.functional as functional
 
 
 class Network(nn.Module):
@@ -37,7 +37,8 @@ class Network(nn.Module):
         self.activation_mappings = {
             "Sigmoid": nn.Sigmoid,
             "ReLU": nn.ReLU,
-            "LeakyReLU": nn.LeakyReLU
+            "LeakyReLU": nn.LeakyReLU,
+            "Tanh": nn.Tanh
         }
 
         # initialize the layers
@@ -71,6 +72,8 @@ class Network(nn.Module):
             use_only_one_activation_type = True
         elif len(self.params.layer_activations) < self.number_of_layers:
             raise Exception("Not enough activation layers provided.")
+        elif len(self.params.layer_activations) > self.number_of_layers:
+            raise Exception("Too many activation layers provided.")
 
         # Add the layers.
         # As this is a feedforward layer we always add linear layers, and then

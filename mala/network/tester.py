@@ -1,14 +1,13 @@
 """Tester class for testing a network."""
-import numpy as np
-import torch
-from torch.utils.data import DataLoader
-from mala.common.parameters import printout
-from .runner import Runner
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
+import torch
+
+from mala.common.parameters import printout
+from mala.network.runner import Runner
 
 
 class Tester(Runner):
@@ -53,6 +52,12 @@ class Tester(Runner):
         predicted_outputs : torch.Tensor
             Precicted outputs for snapshot.
         """
+        # Forward through network.
+        return self.\
+            _forward_entire_snapshot(snapshot_number,
+                                     self.data.test_data_set,
+                                     self.number_of_batches_per_snapshot,
+                                     self.parameters.mini_batch_size)
         self.data.prepare_for_testing()
         if self.data.parameters.use_lazy_loading:
             actual_outputs = \
@@ -96,37 +101,17 @@ class Tester(Runner):
 
     def __prepare_to_test(self):
         """Prepare the tester class to for test run."""
-        if self.parameters_full.use_horovod:
-            self.parameters.sampler["test_sampler"] = torch.utils.data.\
-                distributed.DistributedSampler(self.data.test_data_set,
-                                               num_replicas=hvd.size(),
-                                               rank=hvd.rank())
-        # We will use the DataLoader iterator to iterate over the test data.
+        # We will use the DataSet iterator to iterate over the test data.
         # But since we only want the data per snapshot,
         # we need to make sure the batch size is compatible with that.
-        self.__check_and_adjust_batch_size(self.data.grid_size)
-        self.test_data_loader = DataLoader(self.data.test_data_set,
-                                           batch_size=self.parameters.
-                                           mini_batch_size * 1,
-                                           sampler=self.parameters.
-                                           sampler["test_sampler"],
-                                           **self.parameters.kwargs,
-                                           shuffle=False)
+        optimal_batch_size = self.\
+            _correct_batch_size_for_testing(self.data.grid_size,
+                                            self.parameters.mini_batch_size)
+        if optimal_batch_size != self.parameters.mini_batch_size:
+            printout("Had to readjust batch size from",
+                     self.parameters.mini_batch_size, "to",
+                     optimal_batch_size)
+            self.parameters.mini_batch_size = optimal_batch_size
         self.number_of_batches_per_snapshot = int(self.data.grid_size /
                                                   self.parameters.
                                                   mini_batch_size)
-
-    def __check_and_adjust_batch_size(self, datasize):
-        """
-        Check batch size and adjust it if necessary.
-
-        For testing the batch size needs to be such that data_per_snapshot /
-        batch_size will result in an integer division without any residual
-        value.
-        """
-        if datasize % self.parameters.mini_batch_size != 0:
-            old_batch_size = self.parameters.mini_batch_size
-            while datasize % self.parameters.mini_batch_size != 0:
-                self.parameters.mini_batch_size += 1
-            printout("Had to readjust batch size from", old_batch_size, "to",
-                     self.parameters.mini_batch_size)

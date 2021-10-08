@@ -1,7 +1,10 @@
+import os
+
 import mala
 from mala import printout
-from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al36/"
+
+from data_repo_path import data_repo_path
+data_path = os.path.join(data_repo_path, "Al36")
 
 """
 ex04_hyperparameter_optimization.py: Shows how a hyperparameter 
@@ -10,8 +13,7 @@ hyperparameter optimizers available in this framework. This example focusses
 on the most universal one - optuna.  
 """
 
-
-def run_example04(desired_loss_improvement_factor=2):
+def initial_setup():
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
@@ -38,8 +40,11 @@ def run_example04(desired_loss_improvement_factor=2):
     # Specify the number of trials, the hyperparameter optimizer should run
     # and the type of hyperparameter.
     test_parameters.hyperparameters.n_trials = 20
-    test_parameters.hyperparameters.hyper_opt_method = "optuna"
-
+    test_parameters.hyperparameters.hyper_opt_method = "oat"
+    test_parameters.hyperparameters.number_training_per_trial = 1
+    test_parameters.running.verbosity = False
+    test_parameters.hyperparameters.checkpoint_name = "ex04"
+    test_parameters.hyperparameters.checkpoints_each_trial = -1
     ####################
     # DATA
     # Add and prepare snapshots for training.
@@ -71,64 +76,52 @@ def run_example04(desired_loss_improvement_factor=2):
     test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
 
     # Learning rate will be optimized.
-    test_hp_optimizer.add_hyperparameter("float", "learning_rate",
-                                         0.0000001, 0.01)
+    test_hp_optimizer.add_hyperparameter("categorical", "learning_rate",
+                                         choices=[0.005, 0.01, 0.015])
 
     # Number of neurons per layer will be optimized.
-    test_hp_optimizer.add_hyperparameter("int", "ff_neurons_layer_00", 10, 100)
-    test_hp_optimizer.add_hyperparameter("int", "ff_neurons_layer_01", 10, 100)
+    test_hp_optimizer.add_hyperparameter(
+        "categorical", "ff_neurons_layer_00", choices=[32, 64, 96])
+    test_hp_optimizer.add_hyperparameter(
+        "categorical", "ff_neurons_layer_01", choices=[32, 64, 96])
 
     # Choices for activation function at each layer will be optimized.
     test_hp_optimizer.add_hyperparameter("categorical", "layer_activation_00",
-                                         choices=["ReLU", "Sigmoid"])
-    test_hp_optimizer.add_hyperparameter("categorical", "layer_activation_01",
-                                         choices=["ReLU", "Sigmoid"])
-    test_hp_optimizer.add_hyperparameter("categorical", "layer_activation_02",
-                                         choices=["ReLU", "Sigmoid"])
-
-    # Perform hyperparameter optimization.
-    printout("Starting Hyperparameter optimization.")
-    test_hp_optimizer.perform_study()
-    test_hp_optimizer.set_optimal_parameters()
-    printout("Hyperparameter optimization: DONE.")
-
-    ####################
-    # TRAINING
-    # Train with these new parameters.
-    ####################
-
-    test_network = mala.Network(test_parameters)
-    test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
-    printout("Network setup: DONE.")
-    test_trainer.train_network()
-    printout("Training: DONE.")
-
-    ####################
-    # RESULTS.
-    # Print the used parameters and check whether the loss decreased enough.
-    ####################
-
-    printout("Parameters used for this experiment:")
-    test_parameters.show()
-
-    # To see if the hyperparameter optimization actually worked,
-    # check if the best trial is better then the worst trial
-    # by a certain factor.
-    performed_trials_values = test_hp_optimizer.study.\
-        trials_dataframe()["value"]
-    if desired_loss_improvement_factor*min(performed_trials_values) > \
-            max(performed_trials_values):
-        return False
-    else:
-        return True
+                                         choices=["ReLU", "Sigmoid", "LeakyReLU"])
+    return test_parameters, data_handler, test_hp_optimizer
 
 
-if __name__ == "__main__":
-    if run_example04():
-        printout("Successfully ran ex04_hyperparameter_optimization.py.")
-    else:
-        raise Exception("Ran ex04_hyperparameter_optimization but something "
-                        "was off. If you haven't changed any parameters in "
-                        "the example, there might be a problem with "
-                        "your installation.")
+if mala.HyperOptOptuna.checkpoint_exists("ex04"):
+    parameters, datahandler, hyperoptimizer = \
+        mala.HyperOptOAT.resume_checkpoint(
+            "ex04")
+    printout("Starting resumed hyperparameter optimization.")
+else:
+    parameters, datahandler, hyperoptimizer = initial_setup()
+    printout("Starting original hyperparameter optimization.")
 
+
+# Perform hyperparameter optimization.
+printout("Starting Hyperparameter optimization.")
+hyperoptimizer.perform_study()
+hyperoptimizer.set_optimal_parameters()
+printout("Hyperparameter optimization: DONE.")
+
+####################
+# TRAINING
+# Train with these new parameters.
+####################
+
+test_network = mala.Network(parameters)
+test_trainer = mala.Trainer(parameters, test_network, datahandler)
+printout("Network setup: DONE.")
+test_trainer.train_network()
+printout("Training: DONE.")
+
+####################
+# RESULTS.
+# Print the used parameters and check whether the loss decreased enough.
+####################
+
+printout("Parameters used for this experiment:")
+parameters.show()

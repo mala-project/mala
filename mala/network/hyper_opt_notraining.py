@@ -1,8 +1,9 @@
 """Hyperparameter optimizer working without training."""
 import optuna
 
-from .hyper_opt_base import HyperOptBase
-from .objective_no_training import ObjectiveNoTraining
+from mala.common.printout import printout
+from mala.network.hyper_opt_base import HyperOptBase
+from mala.network.objective_no_training import ObjectiveNoTraining
 
 
 class HyperOptNoTraining(HyperOptBase):
@@ -44,6 +45,14 @@ class HyperOptNoTraining(HyperOptBase):
             investigates those sampled by a different hyperparameter
             optimizer.
         """
+        # The minibatch size can not vary in the analysis.
+        # This check ensures that e.g. optuna results can be used.
+        for idx, par in enumerate(self.params.hyperparameters.hlist):
+            if par.name == "mini_batch_size":
+                printout("Removing mini batch size from hyperparameter list, "
+                         "because NASWOT is used.")
+                self.params.hyperparameters.hlist.pop(idx)
+
         # Ideally, this type of HO is called with a list of trials for which
         # the parameter has to be identified.
         self.trial_list = trial_list
@@ -62,7 +71,7 @@ class HyperOptNoTraining(HyperOptBase):
         self.trial_losses = [self.objective(row) for row in self.trial_list]
 
         # Return the best lost value we could achieve.
-        return min(self.trial_losses)
+        return max(self.trial_losses)
 
     def set_optimal_parameters(self):
         """
@@ -72,6 +81,6 @@ class HyperOptNoTraining(HyperOptBase):
         hyperparameter optimizer was created.
         """
         # Getting the best trial based on the test errors
-        idx = self.trial_losses.index(min(self.trial_losses))
+        idx = self.trial_losses.index(max(self.trial_losses))
         self.best_trial = self.trial_list[idx]
         self.objective.parse_trial(self.best_trial)

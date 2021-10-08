@@ -1,7 +1,8 @@
 """Collection of all parameter related classes and functions."""
+import os
 import pickle
 import warnings
-from .printout import printout, set_horovod_status
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -11,11 +12,15 @@ except ModuleNotFoundError:
                   "True WILL cause a crash.", stacklevel=3)
 import torch
 
+from mala.common.printout import printout, set_horovod_status
+
+
 
 class ParametersBase:
     """Base parameter class for MALA."""
 
-    def __init__(self):
+    def __init__(self,):
+        self._configuration = {"gpu": False, "horovod": False}
         pass
 
     def show(self, indent=""):
@@ -31,6 +36,12 @@ class ParametersBase:
         """
         for v in vars(self):
             printout(indent + '%-15s: %s' % (v, getattr(self, v)))
+
+    def _update_gpu(self, new_gpu):
+        self._configuration["gpu"] = new_gpu
+
+    def _update_horovod(self, new_horovod):
+        self._configuration["horovod"] = new_horovod
 
 
 class ParametersNetwork(ParametersBase):
@@ -127,6 +138,8 @@ class ParametersTargets(ParametersBase):
 
     ldos_gridoffset_ev: float
         Lowest energy value on the (L)DOS energy grid [eV].
+
+
     """
 
     def __init__(self):
@@ -136,6 +149,7 @@ class ParametersTargets(ParametersBase):
         self.ldos_gridspacing_ev = 0
         self.ldos_gridoffset_ev = 0
         self.restrict_targets = "zero_out_negative"
+        self.pseudopotential_path = None
 
     @property
     def restrict_targets(self):
@@ -311,6 +325,16 @@ class ParametersRunning(ParametersBase):
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
+
+    visualisation : int
+        If True then Tensorboard is activated for visualisation
+        case 0: No tensorboard activated
+        case 1: tensorboard activated with Loss and learning rate
+        case 2; additonally weights and biases and gradient
+
+    inference_data_grid : list
+        List holding the grid to be used for inference in the form of
+        [x,y,z].
     """
 
     def __init__(self):
@@ -336,6 +360,66 @@ class ParametersRunning(ParametersBase):
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
+        self.visualisation = 0
+        # default visualisation_dir= "~/log_dir"
+        self.visualisation_dir= os.path.join(os.path.expanduser("~"), "log_dir")
+        self.during_training_metric = "ldos"
+        self.after_before_training_metric = "ldos"
+        self.inference_data_grid = [0, 0, 0]
+
+    def _update_horovod(self, new_horovod):
+        super(ParametersRunning, self)._update_horovod(new_horovod)
+        self.during_training_metric = self.during_training_metric
+        self.after_before_training_metric = self.after_before_training_metric
+
+    @property
+    def during_training_metric(self):
+        """
+        Control the metric used during training.
+
+        Metric for evaluated on the validation set during training.
+        Default is "ldos", meaning that the regular loss on the LDOS will be
+        used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
+        """
+        return self._during_training_metric
+
+    @during_training_metric.setter
+    def during_training_metric(self, value):
+        if value != "ldos":
+            if self._configuration["horovod"]:
+                raise Exception("Currently, MALA can only operate with the "
+                                "\"ldos\" metric for horovod runs.")
+        self._during_training_metric = value
+
+    @property
+    def after_before_training_metric(self):
+        """
+        Get the metric used during training.
+
+        Metric for evaluated on the validation and test set before and after
+        training. Default is "LDOS", meaning that the regular loss on the LDOS
+        will be used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
+        """
+        return self._after_before_training_metric
+
+    @after_before_training_metric.setter
+    def after_before_training_metric(self, value):
+        if value != "ldos":
+            if self._configuration["horovod"]:
+                raise Exception("Currently, MALA can only operate with the "
+                                "\"ldos\" metric for horovod runs.")
+        self._after_before_training_metric = value
+
+
+
 
 
 class ParametersHyperparameterOptimization(ParametersBase):
@@ -381,7 +465,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
             - "optuna" : Use optuna for the hyperparameter optimization.
             - "oat" : Use orthogonal array tuning (currently limited to
               categorical hyperparemeters). Range analysis is
-              currently done by simply choosing the lowesr loss.
+              currently done by simply choosing the lowest loss.
             - "notraining" : Using a NAS without training, based on jacobians.
 
     checkpoints_each_trial : int
@@ -419,6 +503,29 @@ class ParametersHyperparameterOptimization(ParametersBase):
         For MALA, no evidence for decreased performance using smaller
         heartbeat values could be found. So if this is used, 1s is a reasonable
         value.
+
+    number_training_per_trial : int
+        Number of network trainings performed per trial. Default is 1,
+        but it makes sense to choose a higher number, to exclude networks
+        that performed by chance (good initilization). Naturally this impedes
+        performance.
+
+    trial_ensemble_evaluation : string
+        Control how multiple trainings performed during a trial are evaluated.
+        By default, simply "mean" is used. For smaller numbers of training
+        per trial it might make sense to use "mean_std", which means that
+        the mean of all metrics plus the standard deviation is used,
+        as an estimate of the minimal accuracy to be expected. Currently,
+        "mean" and "mean_std" are allowed.
+
+    use_multivariate : bool
+        If True, the optuna multivariate sampler is used. It is experimental
+        since v2.2.0, but reported to perform very well.
+        http://proceedings.mlr.press/v80/falkner18a.html
+
+    no_training_cutoff : float
+        If the surrogate loss algorithm is used as a pruner during a study,
+        this cutoff determines which trials are neglected.
     """
 
     def __init__(self):
@@ -432,6 +539,11 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.study_name = None
         self.rdb_storage = None
         self.rdb_storage_heartbeat = None
+        self.number_training_per_trial = 1
+        self.trial_ensemble_evaluation = "mean"
+        self.use_multivariate = True
+        self.no_training_cutoff = 0
+        self.pruner = None
 
     @property
     def rdb_storage_heartbeat(self):
@@ -444,6 +556,38 @@ class ParametersHyperparameterOptimization(ParametersBase):
             self._rdb_storage_heartbeat = None
         else:
             self._rdb_storage_heartbeat = value
+
+    @property
+    def number_training_per_trial(self):
+        """Control how many trainings are run per optuna trial."""
+        return self._number_training_per_trial
+
+    @number_training_per_trial.setter
+    def number_training_per_trial(self, value):
+        if value < 1:
+            self._number_training_per_trial = 1
+        else:
+            self._number_training_per_trial = value
+
+    @property
+    def trial_ensemble_evaluation(self):
+        """
+        Control how multiple trainings performed during a trial are evaluated.
+
+        By default, simply "mean" is used. For smaller numbers of training
+        per trial it might make sense to use "mean_std", which means that
+        the mean of all metrics plus the standard deviation is used,
+        as an estimate of the minimal accuracy to be expected. Currently,
+        "mean" and "mean_std" are allowed.
+        """
+        return self._trial_ensemble_evaluation
+
+    @trial_ensemble_evaluation.setter
+    def trial_ensemble_evaluation(self, value):
+        if value != "mean" and value != "mean_std":
+            self._trial_ensemble_evaluation = "mean"
+        else:
+            self._trial_ensemble_evaluation = value
 
     def show(self, indent=""):
         """
@@ -518,22 +662,12 @@ class Parameters:
     manual_seed: int
         If not none, this value is used as manual seed for the neural networks.
         Can be used to make experiments comparable. Default: None.
-
-    use_horovod: bool
-        Determines if the data-parallel Horovod package is being used. Default: False.
-
-    use_gpu: bool
-        Determines if Nvidia GPUs are being used. Default: False.
-
-    device_type: String
-        Which device type to train on. Default: "cpu".
-
-    device_id: Int
-        Which node-local device id to train on. Default: 0.
     """
 
     def __init__(self):
         self.comment = ""
+
+        # Parameters subobjects.
         self.network = ParametersNetwork()
         self.descriptors = ParametersDescriptors()
         self.targets = ParametersTargets()
@@ -566,6 +700,13 @@ class Parameters:
             else:
                 warnings.warn("GPU requested, but no GPU found. MALA will "
                               "operate with CPU only.", stacklevel=3)
+        self.network._update_gpu(self.use_gpu)
+        self.descriptors._update_gpu(self.use_gpu)
+        self.targets._update_gpu(self.use_gpu)
+        self.data._update_gpu(self.use_gpu)
+        self.running._update_gpu(self.use_gpu)
+        self.hyperparameters._update_gpu(self.use_gpu)
+        self.debug._update_gpu(self.use_gpu)
 
     @property
     def use_horovod(self):
@@ -579,9 +720,15 @@ class Parameters:
             self.device_id = hvd.local_rank()
         else:
             self.device_id = 0
-
         set_horovod_status(value)
         self._use_horovod = value
+        self.network._update_horovod(self.use_horovod)
+        self.descriptors._update_horovod(self.use_horovod)
+        self.targets._update_horovod(self.use_horovod)
+        self.data._update_horovod(self.use_horovod)
+        self.running._update_horovod(self.use_horovod)
+        self.hyperparameters._update_horovod(self.use_horovod)
+        self.debug._update_horovod(self.use_horovod)
 
     @property
     def device_id(self):
