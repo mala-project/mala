@@ -60,7 +60,7 @@ class NoTrainingPruner(BasePruner):
         objective = ObjectiveNoTraining(self._params, self._data_handler,
                                         self._trial_type)
         surrogate_loss = objective(trial)
-        if surrogate_loss > self._params.hyperparameters.no_training_cutoff:
+        if surrogate_loss < self._params.hyperparameters.no_training_cutoff:
             return True
         else:
             return False
