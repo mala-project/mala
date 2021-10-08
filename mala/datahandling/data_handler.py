@@ -1,15 +1,22 @@
 """DataHandler class that loads and scales data."""
-from torch.utils.data import TensorDataset
+import os
 
-from .data_scaler import DataScaler
-from .snapshot import Snapshot
-from .lazy_load_dataset import LazyLoadDataset
-from mala.common.parameters import Parameters
-from mala.targets.target_interface import TargetInterface
-from mala.descriptors.descriptor_interface import DescriptorInterface
-from mala.common.printout import printout
+try:
+    import horovod.torch as hvd
+except ModuleNotFoundError:
+    # Warning is thrown by Parameters class
+    pass
 import numpy as np
 import torch
+from torch.utils.data import TensorDataset
+
+from mala.common.printout import printout
+from mala.common.parameters import Parameters, ParametersData
+from mala.datahandling.data_scaler import DataScaler
+from mala.datahandling.snapshot import Snapshot
+from mala.datahandling.lazy_load_dataset import LazyLoadDataset
+from mala.descriptors.descriptor_interface import DescriptorInterface
+from mala.targets.target_interface import TargetInterface
 
 
 class DataHandler:
@@ -18,34 +25,31 @@ class DataHandler:
 
     Data that is not in a numpy array can be converted using the DataConverter
     class.
+
+    Parameters
+    ----------
+    parameters : mala.common.parameters.Parameters
+    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
+        Used to do unit conversion on input data. If None, then one will
+        be created by this class.
+
+    target_calculator : mala.targets.target_base.TargetBase
+        Used to do unit conversion on output data. If None, then one will
+        be created by this class.
+
+    input_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the input data. If None, then one will be created by
+        this class.
+
+    output_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the output data. If None, then one will be created by
+        this class.
     """
 
     def __init__(self, parameters: Parameters, target_calculator=None,
                  descriptor_calculator=None, input_data_scaler=None,
                  output_data_scaler=None):
-        """
-        Create an instance of DataHandler.
-
-        Parameters
-        ----------
-        parameters : mala.common.parameters.Parameters
-        descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
-            Used to do unit conversion on input data. If None, then one will
-            be created by this class.
-
-        target_calculator : mala.targets.target_base.TargetBase
-            Used to do unit conversion on output data. If None, then one will
-            be created by this class.
-
-        input_data_scaler : mala.datahandling.data_scaler.DataScaler
-            Used to scale the input data. If None, then one will be created by
-            this class.
-
-        output_data_scaler : mala.datahandling.data_scaler.DataScaler
-            Used to scale the output data. If None, then one will be created by
-            this class.
-        """
-        self.parameters = parameters.data
+        self.parameters: ParametersData = parameters.data
         self.dbg_grid_dimensions = parameters.debug.grid_dimensions
         self.use_horovod = parameters.use_horovod
         self.training_data_set = None
@@ -77,9 +81,17 @@ class DataHandler:
         self.nr_snapshots = 0
         self.grid_dimension = [0, 0, 0]
         self.grid_size = 0
+
+        # Actual data points in the different categories.
         self.nr_training_data = 0
         self.nr_test_data = 0
         self.nr_validation_data = 0
+
+        # Number of snapshots in these categories.
+        self.nr_training_snapshots = 0
+        self.nr_test_snapshots = 0
+        self.nr_validation_snapshots = 0
+
 
         self.training_data_inputs = torch.empty(0)
         """
@@ -190,6 +202,9 @@ class DataHandler:
         self.nr_training_data = 0
         self.nr_test_data = 0
         self.nr_validation_data = 0
+        self.nr_training_snapshots = 0
+        self.nr_test_snapshots = 0
+        self.nr_validation_snapshots = 0
         self.parameters.data_splitting_snapshots = []
         self.parameters.snapshot_directories_list = []
 
@@ -243,13 +258,19 @@ class DataHandler:
         self.__build_datasets()
         printout("Build dataset done.")
 
+        # Wait until all ranks are finished with data preparation.
+        if self.use_horovod:
+            hvd.allreduce(torch.tensor(0), name='barrier')
+
     def mix_datasets(self):
-        """For lazily-loaded data sets, the snapshot ordering is (re-)mixed."""
+        """
+        For lazily-loaded data sets, the snapshot ordering is (re-)mixed.
+
+        This applies only to the training data set. For the validation and
+        test set it does not matter.
+        """
         if self.parameters.use_lazy_loading:
-            self.validation_data_set.mix_datasets()
             self.training_data_set.mix_datasets()
-            if self.test_data_set is not None:
-                self.test_data_set.mix_datasets()
 
     def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type,
                                              units, convert3Dto1D=False):
@@ -325,17 +346,17 @@ class DataHandler:
         i = 0
         snapshot: Snapshot
         for snapshot in self.parameters.snapshot_directories_list:
-            tmp_array = self.__load_from_npy_file(snapshot.input_npy_directory
-                                                  + snapshot.input_npy_file)
+            tmp_array = self.__load_from_npy_file(os.path.join(snapshot.input_npy_directory,
+                                                               snapshot.input_npy_file))
             tmp_file_name = naming_scheme_input
             tmp_file_name = tmp_file_name.replace("*", str(i))
-            np.save(directory+tmp_file_name+".npy", tmp_array)
+            np.save(os.path.join(directory, tmp_file_name) +".npy", tmp_array)
 
-            tmp_array = self.__load_from_npy_file(snapshot.output_npy_directory
-                                                  + snapshot.output_npy_file)
+            tmp_array = self.__load_from_npy_file(os.path.join(snapshot.output_npy_directory,
+                                                               snapshot.output_npy_file))
             tmp_file_name = naming_scheme_output
             tmp_file_name = tmp_file_name.replace("*", str(i))
-            np.save(directory+tmp_file_name+".npy", tmp_array)
+            np.save(os.path.join(directory, tmp_file_name + ".npy"), tmp_array)
             i += 1
 
     def get_snapshot_calculation_output(self, snapshot_number):
@@ -379,8 +400,8 @@ class DataHandler:
 
             printout("Checking descriptor file ", snapshot.input_npy_file,
                      "at", snapshot.input_npy_directory)
-            tmp = self.__load_from_npy_file(snapshot.input_npy_directory +
-                                            snapshot.input_npy_file,
+            tmp = self.__load_from_npy_file(os.path.join(snapshot.input_npy_directory,
+                                                         snapshot.input_npy_file),
                                             mmapmode='r')
 
             # We have to cut xyz information, if we have xyz information in
@@ -411,8 +432,8 @@ class DataHandler:
 
             printout("Checking targets file ", snapshot.output_npy_file, "at",
                      snapshot.output_npy_directory)
-            tmp_out = self.__load_from_npy_file(snapshot.output_npy_directory +
-                                                snapshot.output_npy_file,
+            tmp_out = self.__load_from_npy_file(os.path.join(snapshot.output_npy_directory,
+                                                             snapshot.output_npy_file),
                                                 mmapmode='r')
 
             # The first snapshot determines the data size to be used.
@@ -443,37 +464,37 @@ class DataHandler:
         if self.parameters.data_splitting_type == "by_snapshot":
             for snapshot_function in self.parameters.data_splitting_snapshots:
                 if snapshot_function == "tr":
-                    self.nr_training_data += 1
+                    self.nr_training_snapshots += 1
                 elif snapshot_function == "te":
-                    self.nr_test_data += 1
+                    self.nr_test_snapshots += 1
                 elif snapshot_function == "va":
-                    self.nr_validation_data += 1
+                    self.nr_validation_snapshots += 1
                 else:
                     raise Exception("Unknown option for snapshot splitting "
                                     "selected.")
 
             # Now we need to check whether or not this input is believable.
             nr_of_snapshots = len(self.parameters.snapshot_directories_list)
-            if nr_of_snapshots != (self.nr_training_data +
-                                   self.nr_validation_data +
-                                   self.nr_test_data):
+            if nr_of_snapshots != (self.nr_training_snapshots +
+                                   self.nr_test_snapshots +
+                                   self.nr_validation_snapshots):
                 raise Exception("Cannot split snapshots with specified "
                                 "splitting scheme, "
                                 "too few or too many options selected")
-            if self.nr_training_data == 0 and self.nr_test_data == 0:
+            if self.nr_training_snapshots == 0 and self.nr_test_snapshots == 0:
                 raise Exception("No training snapshots provided.")
-            if self.nr_validation_data == 0 and self.nr_test_data == 0:
+            if self.nr_validation_snapshots == 0 and self.nr_test_snapshots == 0:
                 raise Exception("No validation snapshots provided.")
-            if self.nr_training_data == 0 and self.nr_test_data != 0:
+            if self.nr_training_snapshots == 0 and self.nr_test_snapshots != 0:
                 printout("DataHandler prepared for inference. No training "
                          "possible with this setup. "
                          "If this is not what you wanted, please revise the "
                          "input script.")
-                if self.nr_validation_data != 0:
+                if self.nr_validation_snapshots != 0:
                     printout("As this DataHandler can only be used for "
                              "inference, the validation data you have "
                              "provided will be ignored.")
-            if self.nr_test_data == 0:
+            if self.nr_test_snapshots == 0:
                 printout("Running MALA without test data. If this is not "
                          "what you wanted, "
                          "please revise the input script.")
@@ -483,9 +504,19 @@ class DataHandler:
 
         # As we are not actually interested in the number of snapshots, but in
         # the number of datasets,we need to multiply by that.
-        self.nr_training_data *= self.grid_size
-        self.nr_validation_data *= self.grid_size
-        self.nr_test_data *= self.grid_size
+        self.nr_training_data = self.nr_training_snapshots*self.grid_size
+        self.nr_validation_data = self.nr_validation_snapshots*self.grid_size
+        self.nr_test_data = self.nr_test_snapshots*self.grid_size
+
+        # Reordering the lists.
+        snapshot_order = ['tr', 'va', 'te']
+        combined = zip(self.parameters.data_splitting_snapshots,
+                       self.parameters.snapshot_directories_list)
+        order = {key: i for i, key in enumerate(snapshot_order)}
+        combined_sorted = sorted(combined, key=lambda d: order[d[0]])
+        self.parameters.data_splitting_snapshots, \
+            self.parameters.snapshot_directories_list = \
+            map(list, zip(*combined_sorted))
 
     def __load_from_npy_file(self, file, mmapmode=None):
         """Load a numpy array from a file."""
@@ -518,9 +549,9 @@ class DataHandler:
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
                 if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.__load_from_npy_file(snapshot.
-                                                    input_npy_directory +
-                                                    snapshot.input_npy_file,
+                    tmp = self.__load_from_npy_file(os.path.join(snapshot.
+                                                    input_npy_directory,
+                                                    snapshot.input_npy_file),
                                                     mmapmode='r')
                     if self.parameters.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
@@ -566,9 +597,9 @@ class DataHandler:
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
                 if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.__load_from_npy_file(snapshot.
-                                                    output_npy_directory +
-                                                    snapshot.output_npy_file,
+                    tmp = self.__load_from_npy_file(os.path.join(snapshot.
+                                                    output_npy_directory,
+                                                    snapshot.output_npy_file),
                                                     mmapmode='r')
                     # The scalers will later operate on torch Tensors so we
                     # have to make sure they are fitted on
@@ -604,9 +635,9 @@ class DataHandler:
 
             # Data scaling is only performed on the training data sets.
             if self.parameters.data_splitting_snapshots[i] == "tr":
-                tmp = self.__load_from_npy_file(snapshot.
-                                                input_npy_directory +
-                                                snapshot.input_npy_file,
+                tmp = self.__load_from_npy_file(os.path.join(snapshot.
+                                                input_npy_directory,
+                                                snapshot.input_npy_file),
                                                 mmapmode='r')
                 if self.parameters.descriptors_contain_xyz:
                     tmp = tmp[:, :, :, 3:]
@@ -640,8 +671,9 @@ class DataHandler:
             # Data scaling is only performed on the training data sets.
             if self.parameters.data_splitting_snapshots[i] == "tr":
                 tmp = self. \
-                    __load_from_npy_file(snapshot.output_npy_directory +
-                                         snapshot.output_npy_file,
+                    __load_from_npy_file(os.path.join(
+                                         snapshot.output_npy_directory,
+                                         snapshot.output_npy_file),
                                          mmapmode='r')
                 tmp = np.array(tmp)
                 tmp *= self.target_calculator. \
@@ -723,8 +755,8 @@ class DataHandler:
                 if self.parameters.data_splitting_snapshots[i] == "va" \
                         or self.parameters.data_splitting_snapshots[i] == "te":
                     tmp = self.\
-                        __load_from_npy_file(snapshot.input_npy_directory +
-                                             snapshot.input_npy_file,
+                        __load_from_npy_file(os.path.join(snapshot.input_npy_directory,
+                                                          snapshot.input_npy_file),
                                              mmapmode='r')
                     if self.parameters.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
@@ -736,8 +768,8 @@ class DataHandler:
                     if self.parameters.data_splitting_snapshots[i] == "te":
                         self.test_data_inputs.append(tmp)
                     tmp = self.\
-                        __load_from_npy_file(snapshot.output_npy_directory +
-                                             snapshot.output_npy_file,
+                        __load_from_npy_file(os.path.join(snapshot.output_npy_directory,
+                                                          snapshot.output_npy_file),
                                              mmapmode='r')
                     tmp = np.array(tmp)
                     tmp *= self.target_calculator.\

@@ -1,7 +1,6 @@
 """Collection of useful functions for working with LAMMPS."""
-
-import numpy as np
 import ctypes
+import numpy as np
 
 
 def set_cmdlinevars(cmdargs, argdict):

@@ -1,57 +1,60 @@
 """
 Cube parser, taken from cubetools (see below).
 
-#------------------------------------------------------------------------------
-# Module: cubetools
-#------------------------------------------------------------------------------
-#
-# Description:
-# Module to work with Gaussian cube format files
-# (see http://paulbourke.net/dataformats/cube/)
-#
-#------------------------------------------------------------------------------
-#
-# What does it do:
-# * Read/write cube files to/from numpy arrays (dtype=float*)
-# * Read/write pairse of cube files to/from numpy arrays (dtype=complex*)
-# * Provides a CubeFile object, to be used when cubefiles with 
-#   constant and static data is required. It simulates the readline method
-#   of a file object with a cube file opened, without creating a file
-#
-#------------------------------------------------------------------------------
-#
-# Dependency: numpy
-#
-#------------------------------------------------------------------------------
-#
-# Author: P. R. Vaidyanathan (aditya95sriram <at> gmail <dot> com)
-# Date: 25th June 2017
-#
-#------------------------------------------------------------------------------
-#
-# MIT License
-# 
-# Copyright (c) 2019 P. R. Vaidyanathan
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-# 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
-#------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+Module: cubetools
+
+------------------------------------------------------------------------------
+
+Description:
+Module to work with Gaussian cube format files
+(see http://paulbourke.net/dataformats/cube/)
+
+------------------------------------------------------------------------------
+
+What does it do:
+
+- Read/write cube files to/from numpy arrays (dtype=float*)
+- Read/write pairse of cube files to/from numpy arrays (dtype=complex*)
+- Provides a CubeFile object, to be used when cubefiles with constant and
+  static data is required. It simulates the readline method
+  of a file object with a cube file opened, without creating a file
+
+------------------------------------------------------------------------------
+
+Dependency: numpy
+
+------------------------------------------------------------------------------
+
+Author: P. R. Vaidyanathan (aditya95sriram <at> gmail <dot> com)
+Date: 25th June 2017
+
+------------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2019 P. R. Vaidyanathan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+------------------------------------------------------------------------------
 """
 import numpy as np
 
@@ -77,20 +80,18 @@ class CubeFile(object):
     Doesn't copy atoms metadata, retains number of atoms, but
     returns dummy atoms
     Mimics file object's readline method.
+
+    Parameters
+    ----------
+    srcname: string
+        source file to copy metadata from
+
+    const: int
+        numeric value to return instead of volumetric data
     """
 
     def __init__(self, srcname, const=1):
-        """Create cube file object.
-
-        Parameters
-        ----------
-        srcname: string
-            source file to copy metadata from
-
-        const: int
-            numeric value to return instead of volumetric data
-        """
-        self.cursor = 0 
+        self.cursor = 0
         self.const = const
         self.src = src = open(srcname)
         # comments
@@ -151,10 +152,15 @@ def _getline(cube):
 
     First field is an int and the remaining fields are floats.
     
-    params:
-        cube:
-    
-    returns: (int, list<float>)
+    Parameters
+    ----------
+    cube : TextIO
+        The cubefile from which the line is read.
+
+    Returns
+    -------
+    line : tuple
+        First entry is an int, and the rests are floats.
     """
     line = cube.readline().strip().split()
     return int(line[0]), map(float, line[1:])
@@ -165,11 +171,16 @@ def _putline(*args):
     Generate a line to be written to a cube file.
 
     The first field is an int and the remaining fields are floats.
-    
-    params:
-        *args: first arg is formatted as int and remaining as floats
-    
-    returns: formatted string to be written to file with trailing newline
+
+    Parameters
+    ----------
+    args : tuple
+        First arg is formatted as int and remaining as floats.
+
+    Returns
+    -------
+    line : string
+        Formatted string to be written to file with trailing newline.
     """
     s = "{0:^ 8d}".format(args[0])
     s += "".join("{0:< 12.6f}".format(arg) for arg in args[1:])

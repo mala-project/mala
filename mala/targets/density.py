@@ -1,11 +1,9 @@
 """Electronic density calculation class."""
-from .target_base import TargetBase
-from .calculation_helpers import *
-from .cube_parser import read_cube
+import os
 import warnings
+
 import ase.io
 from ase.units import Rydberg
-from mala.common.parameters import printout
 try:
     import total_energy as te
 except ModuleNotFoundError:
@@ -16,26 +14,32 @@ except ModuleNotFoundError:
                   "access the total energy of a system WILL fail.",
                   stacklevel=2)
 
+from mala.common.parameters import printout
+from mala.targets.target_base import TargetBase
+from mala.targets.calculation_helpers import *
+from mala.targets.cube_parser import read_cube
+
 
 class Density(TargetBase):
-    """Postprocessing / parsing functions for the electronic density."""
+    """Postprocessing / parsing functions for the electronic density.
+
+    Parameters
+    ----------
+    params : mala.common.parameters.Parameters
+        Parameters used to create this TargetBase object.
+    """
 
     te_mutex = False
 
     def __init__(self, params):
-        """
-        Create a Density object.
-
-        Parameters
-        ----------
-        params : mala.common.parameters.Parameters
-            Parameters used to create this TargetBase object.
-
-        """
         super(Density, self).__init__(params)
         # We operate on a per gridpoint basis. Per gridpoint,
         # there is one value for the density (spin-unpolarized calculations).
         self.target_length = 1
+
+    def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return 1
 
     def read_from_cube(self, file_name, directory, units=None):
         """
@@ -53,7 +57,7 @@ class Density(TargetBase):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file in ", directory)
-        data, meta = read_cube(directory + file_name)
+        data, meta = read_cube(os.path.join(directory, file_name))
         return data
 
     def get_number_of_electrons(self, density_data, grid_spacing_bohr=None,
@@ -83,7 +87,7 @@ class Density(TargetBase):
             grid_spacing_bohr = self.grid_spacing_Bohr
 
         # Check input data for correctness.
-        data_shape = np.shape(density_data)
+        data_shape = np.shape(np.squeeze(density_data))
         if len(data_shape) != 3:
             if len(data_shape) != 1:
                 raise Exception("Unknown Density shape, cannot calculate "
@@ -309,12 +313,11 @@ class Density(TargetBase):
                                               convert_to_threedimensional=True)
             density_for_qe = np.reshape(density_for_qe, [number_of_gridpoints,
                                                          1], order='F')
-
-        # Reset the positions. For some reason creating the positions
-        # directly from ASE (see above) sometimes
-        # causes slight errors. This is more accurate.
-        te.set_positions(np.transpose(atoms_Angstrom.get_scaled_positions()),
-                         number_of_atoms)
+        # Reset the positions. Some calculations (such as the Ewald sum)
+        # is directly performed here, so it is not enough to simply
+        # instantiate the process with the file.
+        positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
+        te.set_positions(np.transpose(positions_for_qe), number_of_atoms)
 
         # Now we can set the new density.
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
@@ -322,6 +325,31 @@ class Density(TargetBase):
         # Get and return the energies.
         energies = np.array(te.get_energies())*Rydberg
         return energies
+
+    @staticmethod
+    def get_scaled_positions_for_qe(atoms):
+        """
+        Get the positions correctly scaled for QE.
+
+        QE (for ibrav=0) scales a little bit different then ASE would.
+        ASE uses all provided cell parameters, while QE simply sets the
+        first entry in the cell parameter matrix as reference and divides
+        all positions by this value.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            The atom objects for which the scaled positions should be
+            calculated.
+
+        Returns
+        -------
+        scaled_positions : numpy.array
+            The scaled positions.
+        """
+        principal_axis = atoms.get_cell()[0][0]
+        scaled_positions = atoms.get_positions()/principal_axis
+        return scaled_positions
 
     @classmethod
     def from_ldos(cls, ldos_object):
@@ -356,5 +384,6 @@ class Density(TargetBase):
         return_density_object.total_energy_dft_calculation = \
             ldos_object.total_energy_dft_calculation
         return_density_object.kpoints = ldos_object.kpoints
-
+        return_density_object.number_of_electrons_from_eigenvals = \
+            ldos_object.number_of_electrons_from_eigenvals
         return return_density_object

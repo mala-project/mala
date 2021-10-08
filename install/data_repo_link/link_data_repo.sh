@@ -27,14 +27,17 @@ then
   data_repo_path=$data_repo_path/
 fi
 
+# Append a / if we have to.
+lastcharacter="${mala_base_path: -1}"
+if [ "$lastcharacter" != "/" ]
+then
+  mala_base_path=$mala_base_path/
+fi
+
 # Write the python file.
 rm -f ${script_path}/${pythonfile}
 touch ${script_path}/${pythonfile}
 echo "data_repo_path = \"${data_repo_path}\""   >> ${script_path}/${pythonfile}
-echo "" >> ${script_path}/${pythonfile}
-echo "" >> ${script_path}/${pythonfile}
-echo "def get_data_repo_path():"   >> ${script_path}/${pythonfile}
-echo "    return data_repo_path"   >> ${script_path}/${pythonfile}
 
 # copy the file to test and example folders.
 cp ${script_path}/${pythonfile} ${test_path}

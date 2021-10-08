@@ -1,0 +1,50 @@
+# YAML 1.2
+cff-version: 1.1.0
+message: "If you use this software, please cite it using these metadata."
+authors:
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Cangi
+    given-names: Attila
+  - affiliation: "Oak Ridge National Laboratory (ORNL)"
+    family-names: Ellis
+    given-names: J. Austin
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Fiedler
+    given-names: Lenz
+    orcid: https://orcid.org/0000-0002-8311-0613
+  - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Kotik
+    given-names: Daniel
+    orcid: https://orcid.org/0000-0001-8735-3199
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Modine
+    given-names: Normand A.
+  - affiliation: "Oak Ridge National Laboratory (ORNL)"
+    family-names: Oles
+    given-names: Vladyslav
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Popoola
+    given-names: Gabriel A.
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Rajamanickam
+    given-names: Siva
+  - affiliation: "Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
+    family-names: Schmerler
+    given-names: Steve
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Stephens
+    given-names: J. Adam
+  - affiliation: "Sandia National Laboratories (SNL)"
+    family-names: Thompson
+    given-names: Aidan P.
+
+
+date-released: 2021-07-07
+keywords:
+  - "machine-learning"
+  - "dft"
+license: "BSD-3-Clause"
+repository-code: "https://github.com/mala-project/mala"
+title: mala
+# doi:
+version: 0.1.0
