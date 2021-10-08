@@ -104,6 +104,20 @@ class Tester(Runner):
         # We will use the DataSet iterator to iterate over the test data.
         # But since we only want the data per snapshot,
         # we need to make sure the batch size is compatible with that.
+        # TODO: Check if this is still needed.
+        # if self.parameters_full.use_horovod:
+        #     self.parameters.sampler["test_sampler"] = torch.utils.data. \
+        #         distributed.DistributedSampler(self.data.test_data_set,
+        #                                        num_replicas=hvd.size(),
+        #                                        rank=hvd.rank())
+        #     self.test_data_loader = DataLoader(self.data.test_data_set,
+        #                                        batch_size=self.parameters.
+        #                                        mini_batch_size * 1,
+        #                                        sampler=self.parameters.
+        #                                        sampler["test_sampler"],
+        #                                        **self.parameters.kwargs,
+        #                                        shuffle=False)
+
         optimal_batch_size = self.\
             _correct_batch_size_for_testing(self.data.grid_size,
                                             self.parameters.mini_batch_size)

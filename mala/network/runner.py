@@ -100,8 +100,8 @@ class Runner:
         for i in range(0, number_of_batches_per_snapshot):
             inputs, outputs = \
                 data_set[offset+(i * batch_size):offset+((i + 1) * batch_size)]
-            if self.parameters_full.use_gpu:
-                inputs = inputs.to('cuda')
+            inputs = inputs.to(f"{self.parameters_full.device_type}:"
+                               f"{self.parameters_full.device_id}")
             predicted_outputs[i * batch_size:(i + 1) * batch_size, :] = \
                 self.data.output_data_scaler.\
                 inverse_transform(self.network(inputs).
