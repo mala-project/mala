@@ -1,7 +1,7 @@
 """Interface to get correct hyperparameter optimizer."""
-from .hyper_opt_notraining import HyperOptNoTraining
-from .hyper_opt_oat import HyperOptOAT
-from .hyper_opt_optuna import HyperOptOptuna
+from mala.network.hyper_opt_notraining import HyperOptNoTraining
+from mala.network.hyper_opt_oat import HyperOptOAT
+from mala.network.hyper_opt_optuna import HyperOptOptuna
 
 
 def HyperOptInterface(params, data):

@@ -1,11 +1,6 @@
-"""
-Collection of useful functions for working with LAMMPS.
-
-Courtesy of the Sandia code. We have to talk about licensing.
-"""
-
-import numpy as np
+"""Collection of useful functions for working with LAMMPS."""
 import ctypes
+import numpy as np
 
 
 def set_cmdlinevars(cmdargs, argdict):

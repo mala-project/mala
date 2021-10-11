@@ -1,15 +1,22 @@
+import os
+
 import mala
 from mala import printout
-from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al36/"
+
+from data_repo_path import data_repo_path
+data_path = os.path.join(data_repo_path, "Al36")
 
 """
 ex08_checkpoint_hyperopt.py: Shows how a hyperparameter optimization run can 
-be paused and resumed.
+be paused and resumed. Delete all ex08_*.pkl and ex08_*.pth prior to execution.
+Afterwards, execute this script twice to see how MALA progresses from a 
+checkpoint. As the number of trials cannot be divided by the number
+of epochs after which a checkpoint is created without residual, this will 
+lead to MALA performing the missing trials again.
 """
 
 
-def run_example08():
+def initial_setup():
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
@@ -91,13 +98,21 @@ def run_example08():
     test_hp_optimizer.add_hyperparameter("categorical", "layer_activation_02",
                                          choices=["ReLU", "Sigmoid"])
 
-    # Perform hyperparameter optimization.
-    printout("Starting Hyperparameter optimization.")
-    test_hp_optimizer.perform_study()
+    return test_parameters, data_handler, test_hp_optimizer
 
-    loaded_params, new_datahandler, new_hyperopt = \
-        mala.HyperOptOptuna.resume_checkpoint("ex08")
-    new_hyperopt.perform_study()
+
+def run_example08():
+    if mala.HyperOptOptuna.checkpoint_exists("ex08"):
+        parameters, datahandler, hyperoptimizer = \
+            mala.HyperOptOptuna.resume_checkpoint(
+                "ex08")
+        printout("Starting resumed hyperparameter optimization.")
+    else:
+        parameters, datahandler, hyperoptimizer = initial_setup()
+        printout("Starting original hyperparameter optimization.")
+
+    # Perform hyperparameter optimization.
+    hyperoptimizer.perform_study()
 
     ####################
     # RESULTS.
@@ -105,7 +120,7 @@ def run_example08():
     ####################
 
     printout("Parameters used for this experiment:")
-    test_parameters.show()
+    parameters.show()
     return True
 
 

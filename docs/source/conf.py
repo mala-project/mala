@@ -11,6 +11,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import subprocess
 import sys
 # sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../../'))
@@ -18,9 +19,20 @@ sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'MALA'
-copyright = '2021, HZDR'
-author = 'HZDR'
+project = 'Materials Learning Algorithms (MALA)'
+copyright = '2021 National Technology & Engineering Solutions of Sandia, ' \
+            'LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, ' \
+            'the U.S. Government retains certain rights in this software. ' \
+            'Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, ' \
+            'Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson'
+
+author = 'Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, ' \
+         'Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson'
+
+# The version info for the project
+tag = subprocess.run(['git', 'describe', '--tags'], capture_output=True,
+                        text=True)
+version = tag.stdout.strip()
 
 
 # -- General configuration ---------------------------------------------------
@@ -37,7 +49,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
+#    'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
 ]
 
@@ -57,6 +69,8 @@ autodoc_mock_imports = [
     'lammps',
     'total_energy',
 ]
+
+autodoc_member_order = 'groupwise'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -79,6 +93,13 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
 
+html_context = {
+  'display_github': True,
+  'github_repo': 'mala-project/mala',
+  'github_version': 'develop',
+  'conf_py_path': '/docs/source/',
+}
+
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 #html_logo = "./img/logos/mala_vertical.png"
@@ -86,7 +107,6 @@ html_static_path = []
 # The name of an image file (relative to this directory) to use as a favicon of
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = "../resources/theme/favicon.ico"
 html_favicon = "./img/logos/mala_favicon.png"
 
 # The suffix of source file names.

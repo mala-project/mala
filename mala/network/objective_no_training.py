@@ -3,11 +3,12 @@ import numpy as np
 import torch
 from torch import Tensor
 from torch.utils.data import DataLoader
+
+from mala.common.printout import printout
 from mala.common.parameters import Parameters
 from mala.datahandling.data_handler import DataHandler
 from mala.network.network import Network
 from mala.network.objective_base import ObjectiveBase
-from mala.common.parameters import printout
 
 
 class ObjectiveNoTraining(ObjectiveBase):
@@ -15,28 +16,25 @@ class ObjectiveNoTraining(ObjectiveBase):
     Represents the objective function using no NN training.
 
     The objective value is calculated using the Jacobian.
+
+    Parameters
+    ----------
+    search_parameters : mala.common.parameters.Parameters
+        Parameters used to create this objective.
+
+    data_handler : mala.datahandling.data_handler.DataHandler
+        datahandler to be used during the hyperparameter optimization.
+
+    trial_type : string
+        Format of hyperparameters used in this objective. Supported
+        choices are:
+
+            - optuna
+            - oat
     """
 
     def __init__(self, search_parameters: Parameters, data_handler:
                  DataHandler, trial_type):
-        """
-        Create an ObjectiveNoTraining object.
-        
-        Parameters
-        ----------
-        search_parameters : mala.common.parameters.Parameters
-            Parameters used to create this objective.
-            
-        data_handler : mala.datahandling.data_handler.DataHandler
-            datahandler to be used during the hyperparameter optimization.
-        
-        trial_type : string
-            Format of hyperparameters used in this objective. Supported 
-            choices are:
-            
-                - optuna
-                - oat
-        """
         super(ObjectiveNoTraining, self).__init__(search_parameters,
                                                   data_handler)
         self.trial_type = trial_type
@@ -55,23 +53,54 @@ class ObjectiveNoTraining(ObjectiveBase):
         super(ObjectiveNoTraining, self).parse_trial(trial)
 
         # Build the network.
-        net = Network(self.params)
-        device = "cuda" if self.params.use_gpu else "cpu"
+        surrogate_losses = []
+        for i in range(0, self.params.hyperparameters.
+                       number_training_per_trial):
+            net = Network(self.params)
+            device = "cuda" if self.params.use_gpu else "cpu"
 
-        # Load the batchesand get the jacobian.
-        loader = DataLoader(self.data_handler.training_data_set,
-                            batch_size=self.params.running.mini_batch_size,
-                            shuffle=True)
-        jac = ObjectiveNoTraining.__get_batch_jacobian(net, loader, device)
+            # Load the batchesand get the jacobian.
+            do_shuffle = self.params.running.use_shuffling_for_samplers
+            if self.data_handler.parameters.use_lazy_loading or \
+                    self.params.use_horovod:
+                do_shuffle = False
+            if self.params.running.use_shuffling_for_samplers:
+                self.data_handler.mix_datasets()
+            loader = DataLoader(self.data_handler.training_data_set,
+                                batch_size=self.params.running.mini_batch_size,
+                                shuffle=do_shuffle)
+            jac = ObjectiveNoTraining.__get_batch_jacobian(net, loader, device)
 
-        # Loss = - score!
-        surrogate_loss = float('inf')
-        try:
-            surrogate_loss = - ObjectiveNoTraining.__calc_score(jac)
-            surrogate_loss = surrogate_loss.detach().numpy().astype(np.float64)
-        except RuntimeError:
-            printout("Got a NaN, ignoring sample.")
-        return surrogate_loss
+            # Loss = - score!
+            surrogate_loss = float('inf')
+            try:
+                surrogate_loss = - ObjectiveNoTraining.__calc_score(jac)
+                surrogate_loss = surrogate_loss.cpu().detach().numpy().astype(
+                    np.float64)
+            except RuntimeError:
+                printout("Got a NaN, ignoring sample.")
+            surrogate_losses.append(surrogate_loss)
+
+        if self.params.hyperparameters.number_training_per_trial > 1:
+            printout("Losses from multiple runs are: ")
+            printout(surrogate_losses)
+
+        if self.params.hyperparameters.trial_ensemble_evaluation == "mean":
+            return np.mean(surrogate_losses)
+
+        elif self.params.hyperparameters.trial_ensemble_evaluation == \
+                "mean_std":
+            mean = np.mean(surrogate_losses)
+
+            # Cannot calculate the standar deviation of a bunch of infinities.
+            if np.isinf(mean):
+                return mean
+            else:
+                return np.mean(surrogate_losses) + \
+                       np.std(surrogate_losses)
+        else:
+            raise Exception("No way to estimate the trial metric from ensemble"
+                            " training provided.")
 
     @staticmethod
     def __get_batch_jacobian(net: Network, loader: DataLoader, device) \

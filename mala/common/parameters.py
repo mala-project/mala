@@ -1,7 +1,8 @@
 """Collection of all parameter related classes and functions."""
+import os
 import pickle
 import warnings
-from .printout import printout, set_horovod_status
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -11,12 +12,15 @@ except ModuleNotFoundError:
                   "True WILL cause a crash.", stacklevel=3)
 import torch
 
+from mala.common.printout import printout, set_horovod_status
+
+
 
 class ParametersBase:
     """Base parameter class for MALA."""
 
-    def __init__(self):
-        """Create an instance of ParameterBase."""
+    def __init__(self,):
+        self._configuration = {"gpu": False, "horovod": False}
         pass
 
     def show(self, indent=""):
@@ -32,6 +36,12 @@ class ParametersBase:
         """
         for v in vars(self):
             printout(indent + '%-15s: %s' % (v, getattr(self, v)))
+
+    def _update_gpu(self, new_gpu):
+        self._configuration["gpu"] = new_gpu
+
+    def _update_horovod(self, new_horovod):
+        self._configuration["horovod"] = new_horovod
 
 
 class ParametersNetwork(ParametersBase):
@@ -68,7 +78,6 @@ class ParametersNetwork(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersNetwork."""
         super(ParametersNetwork, self).__init__()
         self.nn_type = "feed-forward"
         self.layer_sizes = [10, 10, 10]
@@ -103,7 +112,6 @@ class ParametersDescriptors(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersDescriptors."""
         super(ParametersDescriptors, self).__init__()
         self.descriptor_type = "SNAP"
         self.twojmax = 10
@@ -130,16 +138,18 @@ class ParametersTargets(ParametersBase):
 
     ldos_gridoffset_ev: float
         Lowest energy value on the (L)DOS energy grid [eV].
+
+
     """
 
     def __init__(self):
-        """Create an instance of ParameterTargets."""
         super(ParametersTargets, self).__init__()
         self.target_type = "LDOS"
         self.ldos_gridsize = 0
         self.ldos_gridspacing_ev = 0
         self.ldos_gridoffset_ev = 0
         self.restrict_targets = "zero_out_negative"
+        self.pseudopotential_path = None
 
     @property
     def restrict_targets(self):
@@ -218,13 +228,12 @@ class ParametersData(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersData."""
         super(ParametersData, self).__init__()
         self.descriptors_contain_xyz = True
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
         # self.data_splitting_percent = [0,0,0]
-        self.data_splitting_snapshots = ["tr", "va", "te"]
+        self.data_splitting_snapshots = []
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
@@ -316,15 +325,23 @@ class ParametersRunning(ParametersBase):
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
+
+    visualisation : int
+        If True then Tensorboard is activated for visualisation
+        case 0: No tensorboard activated
+        case 1: tensorboard activated with Loss and learning rate
+        case 2; additonally weights and biases and gradient  
+
+    inference_data_grid : list
+        List holding the grid to be used for inference in the form of
+        [x,y,z].
     """
 
     def __init__(self):
-        """Create an instance of ParametersRunning."""
         super(ParametersRunning, self).__init__()
         self.trainingtype = "SGD"
         self.learning_rate = 0.5
         self.max_number_epochs = 100
-        # TODO: Find a better system for verbosity. Maybe a number.
         self.verbosity = True
         self.mini_batch_size = 10
         self.weight_decay = 0
@@ -334,14 +351,72 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_decay = 0.1
         self.learning_rate_patience = 0
         self.use_compression = False
-        # TODO: Give this parameter a more descriptive name.
         self.kwargs = {'num_workers': 0, 'pin_memory': False}
-        # TODO: Objects should not be parameters!
         self.sampler = {"train_sampler": None, "validate_sampler": None,
                         "test_sampler": None}
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
+        self.visualisation = 0
+        # default visualisation_dir= "~/log_dir"
+        self.visualisation_dir= os.path.join(os.path.expanduser("~"), "log_dir")
+        self.during_training_metric = "ldos"
+        self.after_before_training_metric = "ldos"
+        self.inference_data_grid = [0, 0, 0]
+
+    def _update_horovod(self, new_horovod):
+        super(ParametersRunning, self)._update_horovod(new_horovod)
+        self.during_training_metric = self.during_training_metric
+        self.after_before_training_metric = self.after_before_training_metric
+
+    @property
+    def during_training_metric(self):
+        """
+        Control the metric used during training.
+
+        Metric for evaluated on the validation set during training.
+        Default is "ldos", meaning that the regular loss on the LDOS will be
+        used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
+        """
+        return self._during_training_metric
+
+    @during_training_metric.setter
+    def during_training_metric(self, value):
+        if value != "ldos":
+            if self._configuration["horovod"]:
+                raise Exception("Currently, MALA can only operate with the "
+                                "\"ldos\" metric for horovod runs.")
+        self._during_training_metric = value
+
+    @property
+    def after_before_training_metric(self):
+        """
+        Get the metric used during training.
+
+        Metric for evaluated on the validation and test set before and after
+        training. Default is "LDOS", meaning that the regular loss on the LDOS
+        will be used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
+        """
+        return self._after_before_training_metric
+
+    @after_before_training_metric.setter
+    def after_before_training_metric(self, value):
+        if value != "ldos":
+            if self._configuration["horovod"]:
+                raise Exception("Currently, MALA can only operate with the "
+                                "\"ldos\" metric for horovod runs.")
+        self._after_before_training_metric = value
+
+
+        
 
 
 class ParametersHyperparameterOptimization(ParametersBase):
@@ -387,7 +462,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
             - "optuna" : Use optuna for the hyperparameter optimization.
             - "oat" : Use orthogonal array tuning (currently limited to
               categorical hyperparemeters). Range analysis is
-              currently done by simply choosing the lowesr loss.
+              currently done by simply choosing the lowest loss.
             - "notraining" : Using a NAS without training, based on jacobians.
 
     checkpoints_each_trial : int
@@ -399,10 +474,58 @@ class ParametersHyperparameterOptimization(ParametersBase):
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory. Currently. this
         only works with optuna.
+
+    study_name : string
+        Name used for this study (in optuna#s storage). Necessary
+        when operating with a RDB storage.
+
+    rdb_storage : string
+        Adress of the RDB storage to be used by optuna.
+
+    rdb_storage_heartbeat : int
+        Heartbeat interval for optuna (in seconds). Default is None.
+        If not None and above 0, optuna will record the heartbeat of intervals.
+        If no action on a RUNNING trial is recognized for longer then this
+        interval, then this trial will be moved to FAILED. In distributed
+        training, setting a heartbeat is currently the only way to achieve
+        a precise number of trials:
+
+        https://github.com/optuna/optuna/issues/1883
+
+        For optuna versions below 2.8.0, larger heartbeat intervals are
+        detrimental to performance and should be avoided:
+
+        https://github.com/optuna/optuna/issues/2685
+
+        For MALA, no evidence for decreased performance using smaller
+        heartbeat values could be found. So if this is used, 1s is a reasonable
+        value.
+
+    number_training_per_trial : int
+        Number of network trainings performed per trial. Default is 1,
+        but it makes sense to choose a higher number, to exclude networks
+        that performed by chance (good initilization). Naturally this impedes
+        performance.
+
+    trial_ensemble_evaluation : string
+        Control how multiple trainings performed during a trial are evaluated.
+        By default, simply "mean" is used. For smaller numbers of training
+        per trial it might make sense to use "mean_std", which means that
+        the mean of all metrics plus the standard deviation is used,
+        as an estimate of the minimal accuracy to be expected. Currently,
+        "mean" and "mean_std" are allowed.
+
+    use_multivariate : bool
+        If True, the optuna multivariate sampler is used. It is experimental
+        since v2.2.0, but reported to perform very well.
+        http://proceedings.mlr.press/v80/falkner18a.html
+
+    no_training_cutoff : float
+        If the surrogate loss algorithm is used as a pruner during a study,
+        this cutoff determines which trials are neglected.
     """
 
     def __init__(self):
-        """Create an instance of ParametersHyperparameterOptimization."""
         super(ParametersHyperparameterOptimization, self).__init__()
         self.direction = 'minimize'
         self.n_trials = 100
@@ -410,6 +533,58 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.hyper_opt_method = "optuna"
         self.checkpoints_each_trial = 0
         self.checkpoint_name = "checkpoint_mala_ho"
+        self.study_name = None
+        self.rdb_storage = None
+        self.rdb_storage_heartbeat = None
+        self.number_training_per_trial = 1
+        self.trial_ensemble_evaluation = "mean"
+        self.use_multivariate = True
+        self.no_training_cutoff = 0
+        self.pruner = None
+
+    @property
+    def rdb_storage_heartbeat(self):
+        """Control whether a heartbeat is used for distributed optuna runs."""
+        return self._rdb_storage_heartbeat
+
+    @rdb_storage_heartbeat.setter
+    def rdb_storage_heartbeat(self, value):
+        if value == 0:
+            self._rdb_storage_heartbeat = None
+        else:
+            self._rdb_storage_heartbeat = value
+
+    @property
+    def number_training_per_trial(self):
+        """Control how many trainings are run per optuna trial."""
+        return self._number_training_per_trial
+
+    @number_training_per_trial.setter
+    def number_training_per_trial(self, value):
+        if value < 1:
+            self._number_training_per_trial = 1
+        else:
+            self._number_training_per_trial = value
+
+    @property
+    def trial_ensemble_evaluation(self):
+        """
+        Control how multiple trainings performed during a trial are evaluated.
+
+        By default, simply "mean" is used. For smaller numbers of training
+        per trial it might make sense to use "mean_std", which means that
+        the mean of all metrics plus the standard deviation is used,
+        as an estimate of the minimal accuracy to be expected. Currently,
+        "mean" and "mean_std" are allowed.
+        """
+        return self._trial_ensemble_evaluation
+
+    @trial_ensemble_evaluation.setter
+    def trial_ensemble_evaluation(self, value):
+        if value != "mean" and value != "mean_std":
+            self._trial_ensemble_evaluation = "mean"
+        else:
+            self._trial_ensemble_evaluation = value
 
     def show(self, indent=""):
         """
@@ -446,7 +621,6 @@ class ParametersDebug(ParametersBase):
     """
 
     def __init__(self):
-        """Create an instance of ParametersDebug."""
         super(ParametersDebug, self).__init__()
         self.grid_dimensions = []
 
@@ -488,8 +662,9 @@ class Parameters:
     """
 
     def __init__(self):
-        """Create an instance of Parameters."""
         self.comment = ""
+
+        # Parameters subobjects.
         self.network = ParametersNetwork()
         self.descriptors = ParametersDescriptors()
         self.targets = ParametersTargets()
@@ -497,11 +672,11 @@ class Parameters:
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
         self.debug = ParametersDebug()
-        self.manual_seed = None
 
         # Properties
         self.use_horovod = False
         self.use_gpu = False
+        self.manual_seed = None
 
     @property
     def use_gpu(self):
@@ -518,6 +693,13 @@ class Parameters:
             else:
                 warnings.warn("GPU requested, but no GPU found. MALA will "
                               "operate with CPU only.", stacklevel=3)
+        self.network._update_gpu(self.use_gpu)
+        self.descriptors._update_gpu(self.use_gpu)
+        self.targets._update_gpu(self.use_gpu)
+        self.data._update_gpu(self.use_gpu)
+        self.running._update_gpu(self.use_gpu)
+        self.hyperparameters._update_gpu(self.use_gpu)
+        self.debug._update_gpu(self.use_gpu)
 
     @property
     def use_horovod(self):
@@ -530,6 +712,13 @@ class Parameters:
             hvd.init()
         set_horovod_status(value)
         self._use_horovod = value
+        self.network._update_horovod(self.use_horovod)
+        self.descriptors._update_horovod(self.use_horovod)
+        self.targets._update_horovod(self.use_horovod)
+        self.data._update_horovod(self.use_horovod)
+        self.running._update_horovod(self.use_horovod)
+        self.hyperparameters._update_horovod(self.use_horovod)
+        self.debug._update_horovod(self.use_horovod)
 
     def show(self):
         """Print name and values of all attributes of this object."""

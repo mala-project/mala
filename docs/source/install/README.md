@@ -22,6 +22,7 @@ In order to run MALA you have to have the following packages installed:
 * numpy
 * scipy
 * oapackage
+* tensorboard
 * optuna
 * ase
 * mpmath
@@ -39,11 +40,18 @@ or all with
 $ pip install -r requirements.txt
 ```
 
-or just install the package along with dependencies
+or just install the package along with its basic dependencies
 
 ```sh
 $ pip install -e .
 ```
+
+In order to install additional dependencies (enabling optional features, building documentaion locally, testing etc.) do
+
+```sh
+$ pip install -e .[opt,test,doc]
+```
+
 
 See below for what the `-e` option does.
 
@@ -126,10 +134,7 @@ If you want to use this module, please refer to [Python bindings to Quantum Espr
     ```
     (note: the `-e` is absolutely crucial, so that changes in the code will be
     reflected system wide)
-3. Go to the `examples` folder and run `ex0_verify_installation.py` to make
-sure the setup was successful.
-4. Enjoy!
-
+3. (Optional): Download example data (see below) to run the examples.
 
 ### Build documentation locally (optional)
 
@@ -148,10 +153,30 @@ $ pip install -r docs/requirements.txt
 ## Downloading and adding example data
 
 The examples and tests need additional data to run. The MALA team provides a data repository, that can be downloaded
-from <https://gitlab.com/hzdr/mala/data>. After downloading it, the data repository
-needs to be linked to the MALA repository by using
-```sh
-$ cd ~/path/to/this/git/root/directory
-$ bash install/data_repo_link/link_data_repo.sh ~/path/to/data/repo
-```
-Afterwards, all the examples and tests will run out-of-the.box.
+from <https://github.com/mala-project/test-data>. Please be sure to check out the correct tag for the data repository,
+since the data repository itself is subject to ongoing development as well. After downloading the correct revision of
+the data repository, it needs to be linked with MALA.
+
+1. Download data repository and check out correct tag.
+
+   ```sh
+   $ git clone https://github.com/mala-project/test-data ~/path/to/data/repo
+   $ cd ~/path/to/data/repo
+   $ git checkout v1.1.0
+   ```
+
+2. Link MALA and data repository.
+
+   ```sh
+   $ cd ~/path/to/mala/root/directory
+   $ bash install/data_repo_link/link_data_repo.sh ~/path/to/data/repo
+   ```
+
+   Afterwards, check that files named `data_repo_path.py` have been generated.
+
+   ```sh
+   $ find . -name data_repo_path.py
+   ./install/data_repo_link/data_repo_path.py
+   ./test/data_repo_path.py
+   ./examples/data_repo_path.py
+   ```

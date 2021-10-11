@@ -1,14 +1,13 @@
 """Tester class for testing a network."""
-import numpy as np
-import torch
-from torch.utils.data import DataLoader
-from mala.common.parameters import printout
-from .runner import Runner
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
+import torch
+
+from mala.common.parameters import printout
+from mala.network.runner import Runner
 
 
 class Tester(Runner):
@@ -16,30 +15,27 @@ class Tester(Runner):
     A class for testing a neural network.
 
     It enables easy inference throughout a test set.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this Tester object.
+
+    network : mala.network.network.Network
+        Network which is being tested.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler holding the test data.
     """
 
     def __init__(self, params, network, data):
-        """
-        Create a Tester object to run a Network.
-
-        Parameters
-        ----------
-        params : mala.common.parametes.Parameters
-            Parameters used to create this Tester object.
-
-        network : mala.network.network.Network
-            Network which is being tested.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the test data.
-        """
         # copy the parameters into the class.
         super(Tester, self).__init__(params, network, data)
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
         self.__prepare_to_test()
 
-    def test_snapshot(self, snapshot_number, as_unscaled_numpy=True):
+    def test_snapshot(self, snapshot_number):
         """
         Get actual and predicted output for a snapshot.
 
@@ -47,11 +43,6 @@ class Tester(Runner):
         ----------
         snapshot_number : int
             Snapshot for which the prediction is done.
-
-        as_unscaled_numpy: bool
-            If True, the prediced and actual LDOS will be returned as numpy
-            arrays in 1/eV. If False they will be returned as torch Tensors
-            with correct scaling i.e. as outputted from the network directly.
 
         Returns
         -------
@@ -61,92 +52,26 @@ class Tester(Runner):
         predicted_outputs : torch.Tensor
             Precicted outputs for snapshot.
         """
-        self.data.prepare_for_testing()
-        if self.data.parameters.use_lazy_loading:
-            actual_outputs = \
-                (self.data.test_data_set
-                 [snapshot_number * self.data.
-                     grid_size:(snapshot_number + 1) * self.data.grid_size])[1]
-        else:
-            if as_unscaled_numpy is True:
-                actual_outputs = \
-                    self.data.output_data_scaler.\
-                    inverse_transform(
-                        (self.data.test_data_set[snapshot_number *
-                                                 self.data.grid_size:
-                                                 (snapshot_number + 1) *
-                                                 self.data.grid_size])[1],
-                                                 as_numpy=True)
-            else:
-                actual_outputs = (self.data.test_data_set[snapshot_number *
-                                                 self.data.grid_size:
-                                                 (snapshot_number + 1) *
-                                                 self.data.grid_size])[1]
-
-        predicted_outputs = torch.zeros((self.data.grid_size,
-                                         self.data.get_output_dimension()))
-
-        offset = snapshot_number * self.data.grid_size
-        for i in range(0, self.number_of_batches_per_snapshot):
-            inputs, outputs = \
-                self.data.test_data_set[offset+(i * self.parameters.
-                                        mini_batch_size):
-                                        offset+((i + 1) * self.parameters.
-                                        mini_batch_size)]
-            if self.parameters_full.use_gpu:
-                inputs = inputs.to('cuda')
-            predicted_outputs[i * self.parameters.
-                              mini_batch_size:(i + 1) * self.parameters.
-                              mini_batch_size, :] = \
-                              self.network(inputs).to('cpu')
-
-        if as_unscaled_numpy is True:
-            predicted_outputs = \
-                self.data.output_data_scaler.\
-                inverse_transform(self.network(predicted_outputs).
-                                  to('cpu'), as_numpy=True)
-
-        # Restricting the actual quantities to physical meaningful values,
-        # i.e. restricting the (L)DOS to positive values.
-        # Can only be done if a numpy array in 1/eV is requested.
-        if as_unscaled_numpy is True:
-            predicted_outputs = self.data.target_calculator.\
-                restrict_data(predicted_outputs)
-        return actual_outputs, predicted_outputs
+        # Forward through network.
+        return self.\
+            _forward_entire_snapshot(snapshot_number,
+                                     self.data.test_data_set,
+                                     self.number_of_batches_per_snapshot,
+                                     self.parameters.mini_batch_size)
 
     def __prepare_to_test(self):
         """Prepare the tester class to for test run."""
-        if self.parameters_full.use_horovod:
-            self.parameters.sampler["test_sampler"] = torch.utils.data.\
-                distributed.DistributedSampler(self.data.test_data_set,
-                                               num_replicas=hvd.size(),
-                                               rank=hvd.rank())
-        # We will use the DataLoader iterator to iterate over the test data.
+        # We will use the DataSet iterator to iterate over the test data.
         # But since we only want the data per snapshot,
         # we need to make sure the batch size is compatible with that.
-        self.__check_and_adjust_batch_size(self.data.grid_size)
-        self.test_data_loader = DataLoader(self.data.test_data_set,
-                                           batch_size=self.parameters.
-                                           mini_batch_size * 1,
-                                           sampler=self.parameters.
-                                           sampler["test_sampler"],
-                                           **self.parameters.kwargs,
-                                           shuffle=False)
+        optimal_batch_size = self.\
+            _correct_batch_size_for_testing(self.data.grid_size,
+                                            self.parameters.mini_batch_size)
+        if optimal_batch_size != self.parameters.mini_batch_size:
+            printout("Had to readjust batch size from",
+                     self.parameters.mini_batch_size, "to",
+                     optimal_batch_size)
+            self.parameters.mini_batch_size = optimal_batch_size
         self.number_of_batches_per_snapshot = int(self.data.grid_size /
                                                   self.parameters.
                                                   mini_batch_size)
-
-    def __check_and_adjust_batch_size(self, datasize):
-        """
-        Check batch size and adjust it if necessary.
-
-        For testing the batch size needs to be such that data_per_snapshot /
-        batch_size will result in an integer division without any residual
-        value.
-        """
-        if datasize % self.parameters.mini_batch_size != 0:
-            old_batch_size = self.parameters.mini_batch_size
-            while datasize % self.parameters.mini_batch_size != 0:
-                self.parameters.mini_batch_size += 1
-            printout("Had to readjust batch size from", old_batch_size, "to",
-                     self.parameters.mini_batch_size)
