@@ -277,6 +277,11 @@ class Density(TargetBase):
                 qe_input_data["nr1s"] = self.grid_dimensions[0]
                 qe_input_data["nr2s"] = self.grid_dimensions[1]
                 qe_input_data["nr3s"] = self.grid_dimensions[2]
+            # Might be needed for test purposes, the Be2 test data
+            # for example has symmetry, even though it was deactivated for
+            # the DFT calculation. If symmetry is then on in here, that
+            # leads to errors.
+            # qe_input_data["nosym"] = False
             ase.io.write("mala.pw.scf.in", atoms_Angstrom, "espresso-in",
                          input_data=qe_input_data,
                          pseudopotentials=qe_pseudopotentials,
