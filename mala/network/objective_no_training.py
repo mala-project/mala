@@ -31,13 +31,21 @@ class ObjectiveNoTraining(ObjectiveBase):
 
             - optuna
             - oat
+
+    batch_size : int
+        Batch size for the forwarding. Default (None) means that the regular
+        mini batch size from ParametersRunning is used; however, for some
+        applications it might make sense to specify something different.
     """
 
     def __init__(self, search_parameters: Parameters, data_handler:
-                 DataHandler, trial_type):
+                 DataHandler, trial_type, batch_size=None):
         super(ObjectiveNoTraining, self).__init__(search_parameters,
                                                   data_handler)
         self.trial_type = trial_type
+        self.batch_size = batch_size
+        if self.batch_size is None:
+            self.batch_size = search_parameters.running.mini_batch_size
 
     def __call__(self, trial):
         """
@@ -67,7 +75,7 @@ class ObjectiveNoTraining(ObjectiveBase):
             if self.params.running.use_shuffling_for_samplers:
                 self.data_handler.mix_datasets()
             loader = DataLoader(self.data_handler.training_data_set,
-                                batch_size=self.params.running.mini_batch_size,
+                                batch_size=self.batch_size,
                                 shuffle=do_shuffle)
             jac = ObjectiveNoTraining.__get_batch_jacobian(net, loader, device)
 
