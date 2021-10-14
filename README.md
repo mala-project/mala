@@ -1,77 +1,40 @@
-![image](./docs/source/img/logos/mala_horizontal.png)
+# Accelerating Electronic Structure Calcualtion with Atom-Decomposed Neural Modeling
 
-# MALA
+## Overview
+This library contains a PyTorch implementation of atom-decomposed neural modeling (ADOS) of the electronic density of states (DOS) of aluminum.
+Atomic environment descriptors are learned during training using Concentrical Spherical GNN (CSGNN) model.
+It was originally run using Python 3.8, PyTorch 1.9, and CUDA Toolkit 11.1 on NVIDIA V100 GPU.
 
-[![CPU](https://github.com/mala-project/mala/actions/workflows/cpu-tests.yml/badge.svg)](https://github.com/mala-project/mala/actions/workflows/cpu-tests.yml)
-[![image](https://github.com/mala-project/mala/actions/workflows/gh-pages.yml/badge.svg)](https://mala-project.github.io/mala/)
-[![image](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5557255.svg)](https://doi.org/10.5281/zenodo.5557255)
-
-
-MALA (Materials Learning Algorithms) is a data-driven framework to generate surrogate models of density functional theory calculations based on machine learning. Its purpose is to enable multiscale modeling by bypassing computationally expensive steps in state-of-the-art density functional simulations.
-
-MALA is designed as a modular and open-source python package. It enables users to perform the entire modeling toolchain using only a few lines of code. MALA is jointly developed by the Sandia National Laboratories (SNL) and the Center for Advanced Systems Understanding (CASUS). See [Contributing](docs/source/CONTRIBUTE.md) for contributing code to the repository.
-
-This repository is structured as follows:
-```
-├── examples : contains useful examples to get you started with the package
-├── install : contains scripts for setting up this package on your machine
-├── mala : the source code itself
-├── test : test scripts used during development, will hold tests for CI in the future
-└── docs : Sphinx documentation folder
+## Dependencies
+The following installs dependencies to Anaconda virtual environment. 
+```bash
+conda create --name csgnn python=3.8
+conda activate csgnn
+conda install pytorch torchvision cudatoolkit=11.1 -c pytorch -c nvidia
+conda install -c dglteam dgl-cuda11.1
+pip install pymatgen
+pip install scikit-learn
 ```
 
-## Installation
+### Atom-centered Density of States for Aluminum
+Use the calculate\_ADOS.py script to generate ADOS reference values for
+training and evaluation, per snapshot.
+The ADOS is generated from LDOS, and so the script requires location of
+LDOS and relevant Quantum ESPRESSO output files ('input_dir').
+The generated references are saved to output directory ('output_dir').
+```bash
+python -m ados.calculate_ADOS [input_dir] [output_dir]
+```
 
-Please refer to [Installation of MALA](docs/source/install/README.md).
+To evaluate pre-trained model for DOS and band energy error:
+```bash
+python -m dos.test saved/csgnn-ados-933K.pkl -d [data_dir]
+```
+'data_dir' specifies location where snapshots, ADOS reference values, and
+other relevant data are stored.
 
-## Running
 
-You can familiarize yourself with the usage of this package by running
-the examples in the `example/` folder.
-
-## Institutions
-### Founding Institutions
-
-- [Sandia National Laboratories](https://www.sandia.gov/) (SNL), USA.
-- [Center for Advanced Systems Understanding](https://www.casus.science/) (CASUS), Germany.
-
-### Contributing Institutions
-
-- [Oak Ridge National Laboratory](https://www.ornl.gov/) (ORNL), USA
-
-## Developers
-### Scientific Supervision
-- Attila Cangi (CASUS)
-- Siva Rajamanickam (SNL)
-
-### Core Developers
-
-- Austin Ellis (ORNL)
-- Lenz Fiedler (CASUS)
-- Daniel Kotik (CASUS)
-- Normand Modine (SNL)
-- Vladyslav Oles (ORNL)
-- Gabriel Popoola (SNL)
-- Aidan Thompson (SNL)
-- Steve Schmerler (HZDR)
-- Adam Stephens (SNL)
-
-### Contributors
-
-- Sneha Verma (CASUS)
-- Parvez Mohammed (CASUS)
-- Nils Hoffmann (CASUS)
-- Omar Faruk (CASUS)
-- Somashekhar Kulkarni (CASUS)
-
-## Citing MALA
-
-If you publish work which uses or mentions MALA, please cite the following paper:
-
-J. A. Ellis, L. Fiedler, G. A. Popoola, N. A. Modine, J. A. Stephens, A. P. Thompson,
-A. Cangi, S. Rajamanickam (2021). Accelerating Finite-temperature
-Kohn-Sham Density Functional Theory with Deep Neural Networks.
-[Phys. Rev. B 104, 035120 (2021)](https://doi.org/10.1103/PhysRevB.104.035120)
-
-alongside this repository.
+To train the model from scratch with default settings:
+```bash
+python -m dos.train -d [data_dir]
+```

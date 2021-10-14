@@ -1,4 +1,0 @@
-name: mala-gpu
-channels:
-  - defaults
-  - conda-forge
