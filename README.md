@@ -5,6 +5,8 @@ This library contains a PyTorch implementation of atom-decomposed neural modelin
 Atomic environment descriptors are learned during training using Concentrical Spherical GNN (CSGNN) model.
 It was originally run using Python 3.8, PyTorch 1.9, and CUDA Toolkit 11.1 on NVIDIA V100 GPU.
 
+Authors: James Fox (jfox43@gatech.edu), Normand A. Modine (namodin@sandia.gov)
+
 ## Dependencies
 The following installs dependencies to Anaconda virtual environment. 
 ```bash
