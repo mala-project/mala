@@ -1,4 +1,4 @@
-# Accelerating Electronic Structure Calcualtion with Atom-Decomposed Neural Modeling
+# Accelerating Electronic Structure Calculation with Atom-Decomposed Neural Modeling
 
 ## Overview
 This library contains a PyTorch implementation of atom-decomposed neural modeling (ADOS) of the electronic density of states (DOS) of aluminum.
