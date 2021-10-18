@@ -85,7 +85,7 @@ class HyperOptOptuna(HyperOptBase):
             callback_list.append(self.__create_checkpointing)
 
         self.study.optimize(self.objective,
-                            n_trials=self.params.hyperparameters.n_trials,
+                            n_trials=None,
                             callbacks=callback_list)
 
         # Return the best lost value we could achieve.
