@@ -31,7 +31,6 @@ class TargetBase(ABC):
             self.parameters = params
         else:
             raise Exception("Wrong type of parameters for Targets class.")
-        self.target_length = 0
         self.fermi_energy_eV = None
         self.temperature_K = None
         self.grid_spacing_Bohr = None
@@ -277,7 +276,6 @@ class TargetBase(ABC):
 
     def get_real_space_grid(self):
         """Get the real space grid."""
-
         grid3D = np.zeros((self.grid_dimensions[0], self.grid_dimensions[1],
                            self.grid_dimensions[2], 3), dtype=np.float64)
         for i in range(0, self.grid_dimensions[0]):

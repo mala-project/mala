@@ -1,3 +1,5 @@
+"""ASE calculator for MALA predictions."""
+
 from ase.calculators.calculator import Calculator, all_changes
 
 from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density
@@ -32,7 +34,6 @@ class ASECalculator(Calculator):
 
     implemented_properties = ['energy', 'forces']
 
-    # TODO: Get rid of pp_valence_ectrons
     def __init__(self, params: Parameters, network: Network,
                  data: DataHandler, reference_data):
         super(ASECalculator, self).__init__()
@@ -75,6 +76,8 @@ class ASECalculator(Calculator):
             any combination of these six: 'positions', 'numbers', 'cell',
             'pbc', 'initial_charges' and 'initial_magmoms'.
         """
+        Calculator.calculate(self, atoms, properties, system_changes)
+
         # Get the LDOS from the NN.
         ldos = self.predictor.predict_for_atoms(atoms)
 
@@ -84,15 +87,11 @@ class ASECalculator(Calculator):
         # use the LDOS to determine energies and/or forces.
         fermi_energy_ev = ldos_calculator.\
             get_self_consistent_fermi_energy_ev(ldos)
-        if "energy" in properties:
-            self.results["energy"] = ldos_calculator.\
-                get_total_energy(ldos, fermi_energy_eV=fermi_energy_ev)
-        if "forces" in properties:
-            # For now, only the Hellman-Feynman forces can be calculated.
-            density_calculator = Density.from_ldos(ldos_calculator)
-            density = ldos_calculator.get_density(ldos, fermi_energy_ev=fermi_energy_ev)
-            self.results["forces"] = density_calculator.get_atomic_forces(density)
-
-
-
-
+        print("ENERGIES")
+        self.results["energy"] = ldos_calculator.\
+            get_total_energy(ldos, fermi_energy_eV=fermi_energy_ev)
+        print("FORCES")
+        # For now, only the Hellman-Feynman forces can be calculated.
+        density_calculator = Density.from_ldos(ldos_calculator)
+        density = ldos_calculator.get_density(ldos, fermi_energy_ev=fermi_energy_ev)
+        self.results["forces"] = density_calculator.get_atomic_forces(density)

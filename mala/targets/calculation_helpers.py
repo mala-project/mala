@@ -273,21 +273,6 @@ def get_s1_value(x, beta):
     return results
 
 
-def neighboring_cells(order):
-    max_min = list(range(-order, order+1))
-    if order > 0:
-        combinations = list(itertools.product(max_min, repeat=3))
-    else:
-        combinations = [(0, 0, 0)]
-    points = np.array(combinations)
-    filtered_points = []
-    # for i in range(0, np.shape(points)[0]):
-    #     if np.linalg.norm(points[i]) <= np.sqrt(order)+0.01:
-    #         filtered_points.append(points[i])
-    # filtered_points = np.array(filtered_points)
-    return points
-
-
 def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
                            temperature_k):
     """

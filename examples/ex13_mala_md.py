@@ -155,15 +155,25 @@ def initial_training():
     # In order to be operational at a later point we need to save 4 objects:
     # Parameters, input/output scaler, network.
     ####################
-
+    # Save networks for debugging.
+    test_network.save_network("ex13.network.pth")
+    test_parameters.save("ex13.params.pkl")
+    data_handler.input_data_scaler.save("ex13.iscaler.pkl")
+    data_handler.output_data_scaler.save("ex13.oscaler.pkl")
     return test_network, test_parameters, data_handler.input_data_scaler,\
            data_handler.output_data_scaler
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     # First, train a MALA network.
     network, parameters, input_scaler, output_scaler = \
         initial_training()
+
+    # Instead of training, these can also be loaded.
+    # parameters = mala.Parameters.load_from_file("ex13.params.pkl")
+    # input_scaler = mala.DataScaler.load_from_file("ex13.iscaler.pkl")
+    # output_scaler = mala.DataScaler.load_from_file("ex13.oscaler.pkl")
+    # network = mala.Network.load_from_file(parameters, "ex13.network.pth")
 
     # Next, use these values to run an MD simulation.
     md_mala(network, parameters, input_scaler, output_scaler)

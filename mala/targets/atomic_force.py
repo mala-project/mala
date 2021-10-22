@@ -7,6 +7,14 @@ from mala.common.parameters import printout
 
 
 class AtomicForce(TargetBase):
+    """Postprocessing / parsing functions for atomic forces.
+
+    Parameters
+    ----------
+    params : mala.common.parameters.Parameters
+        Parameters used to create this TargetBase object.
+    """
+
     def __init__(self, params):
         """
         Create a Density object.
@@ -18,10 +26,10 @@ class AtomicForce(TargetBase):
 
         """
         super(AtomicForce, self).__init__(params)
-        # We operate on a per gridpoint basis. Per gridpoint,
-        # there is one value for the density (spin-unpolarized calculations).
-        self.target_length = 3
 
+    def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return 3
 
     @staticmethod
     def convert_units(array, in_units="eV/Ang"):

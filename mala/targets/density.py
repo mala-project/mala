@@ -34,9 +34,6 @@ class Density(TargetBase):
 
     def __init__(self, params):
         super(Density, self).__init__(params)
-        # We operate on a per gridpoint basis. Per gridpoint,
-        # there is one value for the density (spin-unpolarized calculations).
-        self.target_length = 1
 
     def get_feature_size(self):
         """Get dimension of this target if used as feature in ML."""
@@ -242,7 +239,45 @@ class Density(TargetBase):
     def get_atomic_forces(self, density_data, create_file=True,
                           atoms_Angstrom=None, qe_input_data=None,
                           qe_pseudopotentials=None):
+        """
+        Calculate the atomic forces.
 
+        This function uses an interface to QE. The atomic forces are
+        calculated via the Hellman-Feynman theorem, although only the local
+        contributions are calculated. The non-local contributions, as well
+        as the SCF correction (so anythin wavefunction dependent) is ignored.
+        Therefore, this function is best used for data that was created using
+        local pseudopotentials.
+
+        Parameters
+        ----------
+        density_data : numpy.array
+            Density data on a grid.
+
+        create_file : bool
+            If False, the last mala.pw.scf.in file will be used as input for
+            Quantum Espresso. If True (recommended), MALA will create this
+            file according to calculation parameters.
+
+        atoms_Angstrom : ase.Atoms
+            ASE atoms object for the current system. If None, MALA will
+            create one.
+
+        qe_input_data : dict
+            Quantum Espresso parameters dictionary for the ASE<->QE interface.
+            If None (recommended), MALA will create one.
+
+        qe_pseudopotentials : dict
+            Quantum Espresso pseudopotential dictionaty for the ASE<->QE
+            interface. If None (recommended), MALA will create one.
+
+        Returns
+        -------
+        atomic_forces : numpy.ndarray
+            An array of the form (natoms, 3), containing the atomic forces
+            in eV/Ang.
+
+        """
         # First, set up the total energy module for calculation.
         if atoms_Angstrom is None:
             atoms_Angstrom = self.atoms

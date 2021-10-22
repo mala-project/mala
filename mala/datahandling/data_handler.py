@@ -405,6 +405,8 @@ class DataHandler:
 
         Returns
         -------
+        torch.Tensor
+            Tensor holding the gradient.
 
         """
         if self.parameters.use_lazy_loading:
