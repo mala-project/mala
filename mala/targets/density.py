@@ -254,8 +254,11 @@ class Density(TargetBase):
 
         # Now calculate the forces.
         atomic_forces = np.array(te.calc_forces(len(atoms_Angstrom))).transpose()
-        return atomic_forces
 
+        # QE returns the forces in Ry/Bohr.
+        atomic_forces = AtomicForce.convert_units(atomic_forces,
+                                                  in_units="Ry/Bohr")
+        return atomic_forces
 
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
                                         create_file=True, qe_input_data=None,
@@ -355,7 +358,6 @@ class Density(TargetBase):
         # Now we can set the new density.
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
         return atoms_Angstrom
-
 
     @staticmethod
     def get_scaled_positions_for_qe(atoms):

@@ -245,11 +245,8 @@ class TargetBase(ABC):
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
         elif data_type == "atoms+grid":
-            # Reset everything.
-            self.fermi_energy_eV = None
-            self.temperature_K = None
+            # Reset everything that we can get this way.
             self.grid_spacing_Bohr = None
-            self.number_of_electrons = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]

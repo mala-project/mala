@@ -2,13 +2,7 @@
 from .target_base import TargetBase
 from .calculation_helpers import *
 import warnings
-from scipy.constants import physical_constants
-from scipy.constants import e
-from scipy.constants import epsilon_0
-from scipy.constants import pi
-from scipy.constants import Rydberg
-from scipy.constants import h
-from scipy.constants import c
+from ase.units import Rydberg, Bohr
 from mala.common.parameters import printout
 
 
@@ -28,20 +22,34 @@ class AtomicForce(TargetBase):
         # there is one value for the density (spin-unpolarized calculations).
         self.target_length = 3
 
+
     @staticmethod
-    def get_hellman_feynman_factor():
+    def convert_units(array, in_units="eV/Ang"):
         """
-        Calculate the prefactor for the Hellman-Feynman forces.
+        Convert the units of an array into the MALA units.
+
+        MALA units for the LDOS means 1/eV.
+
+        Parameters
+        ----------
+        array : numpy.array
+            Data for which the units should be converted.
+
+        in_units : string
+            Units of array. Currently supported are:
+
+                 - 1/eV (no conversion, MALA unit)
+                 - 1/Ry
 
         Returns
         -------
+        converted_array : numpy.array
+            Data in 1/eV.
         """
-
-        prefactor_J_m = (e*e / (4 * pi * epsilon_0))
-        Ry_in_Joule = Rydberg*h*c
-        # This should be the correct formula but it doesn't work yet.
-        prefactor_Ry_Bohr = prefactor_J_m*(physical_constants["Bohr radius"][0]/Ry_in_Joule)
-        final_prefactor = prefactor_Ry_Bohr / (
-                    physical_constants["Bohr radius"][0] *
-                    physical_constants["Bohr radius"][0])
-        return final_prefactor
+        if in_units == "eV/Ang":
+            return array
+        elif in_units == "Ry/Bohr":
+            return array * (Rydberg/Bohr)
+        else:
+            printout(in_units)
+            raise Exception("Unsupported unit for LDOS.")
