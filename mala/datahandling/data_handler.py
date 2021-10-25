@@ -751,7 +751,8 @@ class DataHandler:
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
                     self.grid_dimension, self.grid_size,
-                    self.parameters.descriptors_contain_xyz, self.use_horovod)
+                    self.parameters.descriptors_contain_xyz, self.use_horovod,
+                    input_requires_grad=True)
 
             # Add snapshots to the lazy loading data sets.
             i = 0

@@ -58,12 +58,16 @@ class LazyLoadDataset(torch.utils.data.Dataset):
 
     use_horovod : bool
         If true, it is assumed that horovod is used.
+
+    input_requires_grad : bool
+        If True, then the gradient is stored for the inputs.
     """
 
     def __init__(self, input_dimension, output_dimension, input_data_scaler,
                  output_data_scaler, descriptor_calculator,
                  target_calculator, grid_dimensions, grid_size,
-                 descriptors_contain_xyz, use_horovod):
+                 descriptors_contain_xyz, use_horovod,
+                 input_requires_grad=False):
         self.snapshot_list = []
         self.input_dimension = input_dimension
         self.output_dimension = output_dimension
@@ -81,6 +85,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.output_data = np.empty(0)
         self.use_horovod = use_horovod
         self.return_outputs_directly = False
+        self.input_requires_grad = input_requires_grad
 
     @property
     def return_outputs_directly(self):
@@ -155,7 +160,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.input_data = self.input_data.astype(np.float32)
         self.input_data = torch.from_numpy(self.input_data).float()
         self.input_data = self.input_data_scaler.transform(self.input_data)
-        self.input_data.requires_grad = True
+        self.input_data.requires_grad = self.input_requires_grad
 
         self.output_data = \
             self.output_data.reshape([self.grid_size, self.output_dimension])
