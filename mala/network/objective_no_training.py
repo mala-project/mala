@@ -4,7 +4,7 @@ import torch
 from torch import Tensor
 from torch.utils.data import DataLoader
 
-from mala.common.printout import printout
+from mala.common.parallelizer import printout
 from mala.common.parameters import Parameters
 from mala.datahandling.data_handler import DataHandler
 from mala.network.network import Network

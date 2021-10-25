@@ -7,7 +7,7 @@ except ModuleNotFoundError:
 import numpy as np
 import torch
 
-from mala.common.printout import printout
+from mala.common.parallelizer import printout
 from mala.common.parameters import ParametersRunning
 from mala import Parameters
 
