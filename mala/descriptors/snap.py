@@ -193,10 +193,15 @@ class SNAP(DescriptorBase):
         lmp = lammps(cmdargs=lmp_cmdargs)
 
         # An empty string means that the user wants to use the standard input.
+        # What that is differs depending on serial/parallel execution.
         if self.parameters.lammps_compute_file == "":
             filepath = __file__.split("snap")[0]
-            self.parameters.lammps_compute_file = os.path.join(filepath,
-                                                               "in.bgrid.python")
+            if self.parameters._configuration["mpi"]:
+                self.parameters.lammps_compute_file = \
+                    os.path.join(filepath, "in.bgridlocal.python")
+            else:
+                self.parameters.lammps_compute_file = \
+                    os.path.join(filepath, "in.bgrid.python")
 
         # Do the LAMMPS calculation.
         lmp.file(self.parameters.lammps_compute_file)
@@ -210,30 +215,33 @@ class SNAP(DescriptorBase):
                  (self.parameters.twojmax+3)*(self.parameters.twojmax+4)
         ncoeff = ncoeff // 24   # integer division
         self.fingerprint_length = ncols0+ncoeff
+
         # Extract data from LAMMPS calculation.
-        nrows_local = extract_compute_np(lmp, "bgridlocal",
-                                         lammps_constants.LMP_STYLE_LOCAL,
-                                         lammps_constants.LMP_SIZE_ROWS)
-        ncols_local = extract_compute_np(lmp, "bgridlocal",
-                                         lammps_constants.LMP_STYLE_LOCAL,
-                                         lammps_constants.LMP_SIZE_COLS)
-        print(nrows_local, ncols_local)
+        # This is different for the parallel and the serial case.
+        # In the serial case we can expect to have a full SNAP array at the
+        # end of this function.
+        # This is not necessarily true for the parallel case.
 
-        snap_descriptors_np = \
-            extract_compute_np(lmp, "bgridlocal",
-                               lammps_constants.LMP_STYLE_LOCAL, 2,
-                               array_shape=
-                               (nz, ny, nx, self.fingerprint_length))
+        if self.parameters._configuration["mpi"]:
+            nrows_local = extract_compute_np(lmp, "bgridlocal",
+                                             lammps_constants.LMP_STYLE_LOCAL,
+                                             lammps_constants.LMP_SIZE_ROWS)
+            ncols_local = extract_compute_np(lmp, "bgridlocal",
+                                             lammps_constants.LMP_STYLE_LOCAL,
+                                             lammps_constants.LMP_SIZE_COLS)
+            print(nrows_local, ncols_local)
 
-        # switch from x-fastest to z-fastest order (swaps 0th and 2nd
-        # dimension)
-        snap_descriptors_np = snap_descriptors_np.transpose([2, 1, 0, 3])
+            snap_descriptors_np = \
+                extract_compute_np(lmp, "bgridlocal",
+                                   lammps_constants.LMP_STYLE_LOCAL, 2,
+                                   array_shape=(nrows_local, ncols_local))
+        else:
+            # Extract data from LAMMPS calculation.
+            snap_descriptors_np = \
+                extract_compute_np(lmp, "bgrid", 0, 2,
+                                   (nz, ny, nx, self.fingerprint_length))
+            # switch from x-fastest to z-fastest order (swaps 0th and 2nd
+            # dimension)
+            snap_descriptors_np = snap_descriptors_np.transpose([2, 1, 0, 3])
 
-        # The next two commands can be used to check whether the calculated
-        # SNAP descriptors
-        # are identical to the ones calculated with the Sandia workflow.
-        # They generally are.
-        # print("snap_descriptors_np shape = ",snap_descriptors_np.shape,
-        # flush=True)
-        # np.save(set[4]+"test.npy", snap_descriptors_np, allow_pickle=True)
         return snap_descriptors_np
