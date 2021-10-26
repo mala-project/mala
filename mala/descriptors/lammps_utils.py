@@ -67,4 +67,4 @@ def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None):
         array_np.shape = array_shape
         return array_np
     if result_type == 4 or result_type == 5:
-        return ptr.contents
+        return ptr #ptr is an int

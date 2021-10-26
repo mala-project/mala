@@ -210,7 +210,6 @@ class SNAP(DescriptorBase):
                  (self.parameters.twojmax+3)*(self.parameters.twojmax+4)
         ncoeff = ncoeff // 24   # integer division
         self.fingerprint_length = ncols0+ncoeff
-        print("HERE!")
         # Extract data from LAMMPS calculation.
         nrows_local = extract_compute_np(lmp, "bgridlocal",
                                          lammps_constants.LMP_STYLE_LOCAL,
