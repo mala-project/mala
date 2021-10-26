@@ -6,6 +6,7 @@ import ase
 import ase.io
 try:
     from lammps import lammps
+    from lammps import constants as lammps_constants
 except ModuleNotFoundError:
     warnings.warn("You either don't have LAMMPS installed or it is not "
                   "configured correctly. Using SNAP descriptors "
@@ -209,10 +210,20 @@ class SNAP(DescriptorBase):
                  (self.parameters.twojmax+3)*(self.parameters.twojmax+4)
         ncoeff = ncoeff // 24   # integer division
         self.fingerprint_length = ncols0+ncoeff
-
+        print("HERE!")
         # Extract data from LAMMPS calculation.
+        nrows_local = extract_compute_np(lmp, "bgridlocal",
+                                         lammps_constants.LMP_STYLE_LOCAL,
+                                         lammps_constants.LMP_SIZE_ROWS)
+        ncols_local = extract_compute_np(lmp, "bgridlocal",
+                                         lammps_constants.LMP_STYLE_LOCAL,
+                                         lammps_constants.LMP_SIZE_COLS)
+        print(nrows_local, ncols_local)
+
         snap_descriptors_np = \
-            extract_compute_np(lmp, "bgrid", 0, 2,
+            extract_compute_np(lmp, "bgridlocal",
+                               lammps_constants.LMP_STYLE_LOCAL, 2,
+                               array_shape=
                                (nz, ny, nx, self.fingerprint_length))
 
         # switch from x-fastest to z-fastest order (swaps 0th and 2nd

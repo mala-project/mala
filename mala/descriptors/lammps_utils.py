@@ -28,7 +28,7 @@ def set_cmdlinevars(cmdargs, argdict):
 #     return [x for x in string.splitlines() if x.strip() != '']
 
 
-def extract_compute_np(lmp, name, compute_type, result_type, array_shape):
+def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None):
     """
     Convert a lammps compute to a numpy array.
 
@@ -61,8 +61,10 @@ def extract_compute_np(lmp, name, compute_type, result_type, array_shape):
         return ptr  # No casting needed, lammps.py already works
     if result_type == 2:
         ptr = ptr.contents
-    total_size = np.prod(array_shape)
-    buffer_ptr = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double * total_size))
-    array_np = np.frombuffer(buffer_ptr.contents, dtype=float)
-    array_np.shape = array_shape
-    return array_np
+        total_size = np.prod(array_shape)
+        buffer_ptr = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double * total_size))
+        array_np = np.frombuffer(buffer_ptr.contents, dtype=float)
+        array_np.shape = array_shape
+        return array_np
+    if result_type == 4 or result_type == 5:
+        return ptr.contents
