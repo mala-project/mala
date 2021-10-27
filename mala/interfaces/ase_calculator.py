@@ -15,13 +15,14 @@ class ASECalculator(Calculator):
     Parameters
     ----------
     params : mala.common.parametes.Parameters
-        Parameters used to create this Tester object.
+        Parameters used to create this Interface.
 
     network : mala.network.network.Network
-        Network which is being tested.
+        Network which is being used for the run.
 
     data : mala.datahandling.data_handler.DataHandler
-        DataHandler holding the test data.
+        DataHandler; not really used in the classical sense, more as a
+        collector of properties and objects (such as a target calculator).
 
     reference_data : list
         A list containing
