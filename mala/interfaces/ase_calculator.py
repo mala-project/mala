@@ -2,7 +2,8 @@
 
 from ase.calculators.calculator import Calculator, all_changes
 
-from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density
+from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, \
+                 DOS
 
 
 class ASECalculator(Calculator):
@@ -81,17 +82,20 @@ class ASECalculator(Calculator):
         # Get the LDOS from the NN.
         ldos = self.predictor.predict_for_atoms(atoms)
 
-        # Set additional parameters.
+        # Define calculator objects.
         ldos_calculator: LDOS = self.data_handler.target_calculator
-
-        # use the LDOS to determine energies and/or forces.
-        fermi_energy_ev = ldos_calculator.\
-            get_self_consistent_fermi_energy_ev(ldos)
-        print("ENERGIES")
-        self.results["energy"] = ldos_calculator.\
-            get_total_energy(ldos, fermi_energy_eV=fermi_energy_ev)
-        print("FORCES")
-        # For now, only the Hellman-Feynman forces can be calculated.
         density_calculator = Density.from_ldos(ldos_calculator)
-        density = ldos_calculator.get_density(ldos, fermi_energy_ev=fermi_energy_ev)
+        dos_calculator = DOS.from_ldos(ldos_calculator)
+
+        # Get DOS and density.
+        dos = ldos_calculator.get_density_of_states(ldos)
+        fermi_energy_ev = dos_calculator.get_self_consistent_fermi_energy_ev(
+            dos)
+        density = ldos_calculator.get_density(ldos,
+                                              fermi_energy_ev=fermi_energy_ev)
+
+        # Use the LDOS determined DOS and density to get energy and forces.
+        self.results["energy"] = ldos_calculator.\
+            get_total_energy(dos_data=dos, density_data=density,
+                             fermi_energy_eV=fermi_energy_ev)
         self.results["forces"] = density_calculator.get_atomic_forces(density)

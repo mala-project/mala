@@ -31,7 +31,9 @@ def md_qe():
     params = mala.Parameters()
     params.targets.pseudopotential_path = os.path.join(data_repo_path, "Be2")
     ldos = mala.LDOS(params)
-    ldos.read_additional_calculation_data("qe.out", os.path.join(data_path, "Be_snapshot1.out"))
+    ldos.read_additional_calculation_data("qe.out",
+                                          os.path.join(data_path,
+                                                       "Be_snapshot1.out"))
     ldos.qe_input_data["tprnfor"] = True
 
     # Set up the ASE objects.
@@ -61,7 +63,8 @@ def md_mala(network, new_parameters, iscaler, oscaler):
     new_parameters.descriptors.descriptor_type = "SNAP"
     new_parameters.descriptors.twojmax = 10
     new_parameters.descriptors.rcutfac = 4.67637
-    new_parameters.targets.pseudopotential_path = os.path.join(data_repo_path, "Be2")
+    new_parameters.targets.pseudopotential_path = os.path.join(data_repo_path,
+                                                               "Be2")
 
     # Construct a DataHandler object.
     inference_data_handler = mala.DataHandler(new_parameters,
@@ -72,7 +75,10 @@ def md_mala(network, new_parameters, iscaler, oscaler):
     atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
     calculator = mala.ASECalculator(new_parameters, network,
                                     inference_data_handler,
-                                    reference_data=["qe.out", os.path.join(data_path, "Be_snapshot1.out")])
+                                    reference_data=
+                                    ["qe.out",
+                                     os.path.join(data_path,
+                                                  "Be_snapshot1.out")])
     atoms.set_calculator(calculator)
 
     # Define and run the MD.
