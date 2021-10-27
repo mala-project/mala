@@ -1,6 +1,7 @@
 """SNAP descriptor class."""
 import os
 import warnings
+import time
 
 import ase
 import ase.io
@@ -136,7 +137,7 @@ class SNAP(DescriptorBase):
         Parameters
         ----------
         atoms : ase.Atoms
-            Atoms object holding the atomic configuration.
+            Atoms object holding the atomic configuration.l
 
         grid_dimensions : list
             Grid dimensions to be used, in the format [x,y,z].
@@ -153,6 +154,10 @@ class SNAP(DescriptorBase):
         # Enforcing / Checking PBC on the input atoms.
         atoms = self.enforce_pbc(atoms)
         return self.__calculate_snap(atoms, working_directory, grid_dimensions)
+
+    def gather_descriptors(self, snap_descriptors_np):
+        # Gather all SNAP descriptors on rank 0.
+        l
 
     def __calculate_snap(self, atoms, outdir, grid_dimensions):
         """Perform actual SNAP calculation."""
@@ -230,6 +235,8 @@ class SNAP(DescriptorBase):
                                              lammps_constants.LMP_STYLE_LOCAL,
                                              lammps_constants.LMP_SIZE_COLS)
             print(nrows_local, ncols_local)
+            if ncols_local != self.fingerprint_length + 3:
+                raise Exception("Inconsistent number of features.")
 
             snap_descriptors_np = \
                 extract_compute_np(lmp, "bgridlocal",
