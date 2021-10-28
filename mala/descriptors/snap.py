@@ -17,7 +17,7 @@ except ModuleNotFoundError:
 
 from mala.descriptors.lammps_utils import *
 from mala.descriptors.descriptor_base import DescriptorBase
-
+from mala.common.parallelizer import get_comm
 
 class SNAP(DescriptorBase):
     """Class for calculation and parsing of SNAP descriptors.
@@ -157,7 +157,8 @@ class SNAP(DescriptorBase):
 
     def gather_descriptors(self, snap_descriptors_np):
         # Gather all SNAP descriptors on rank 0.
-        l
+        comm = get_comm()
+        all_snap_descriptors = comm.gather(snap_descriptors_np, root=0)
 
     def __calculate_snap(self, atoms, outdir, grid_dimensions):
         """Perform actual SNAP calculation."""

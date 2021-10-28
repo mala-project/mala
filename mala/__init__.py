@@ -6,7 +6,7 @@ predict LDOS and postprocess LDOS into energies (and forces, soon).
 """
 
 from .version import __version__
-from .common import Parameters, printout, get_rank
+from .common import Parameters, printout
 from .descriptors import DescriptorInterface, SNAP, DescriptorBase
 from .datahandling import DataHandler, DataScaler, DataConverter
 from .network import Network, Tester, Trainer, HyperOptInterface, \

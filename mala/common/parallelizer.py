@@ -50,7 +50,7 @@ def set_mpi_status(new_value):
                         "the same time yet.")
     global use_mpi
     use_mpi = new_value
-    if use_mpi is True:
+    if use_mpi:
         global comm
         comm = MPI.COMM_WORLD
 
@@ -68,6 +68,9 @@ def get_size():
     if use_mpi:
         return comm.Get_size()
 
+# TODO: This is hacky, improve it.
+def get_comm():
+    return comm
 
 def printout(*values, sep=' '):
     """
