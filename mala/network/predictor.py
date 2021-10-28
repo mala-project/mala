@@ -8,7 +8,7 @@ import ase.io
 import numpy as np
 import torch
 
-from mala.common.parameters import printout
+from mala.common.parallelizer import printout, get_rank
 from mala.network.runner import Runner
 
 
@@ -78,28 +78,34 @@ class Predictor(Runner):
 
         # Now reshape and scale the descriptors.
         feature_length = self.data.descriptor_calculator.fingerprint_length
-        if self.parameters_full.data.descriptors_contain_xyz:
-            snap_descriptors = snap_descriptors[:, :, :, 3:]
-            feature_length -= 3
+        if self.parameters._configuration["mpi"]:
+            snap_descriptors = self.data.descriptor_calculator.\
+                               gather_descriptors(snap_descriptors)
+        if get_rank() == 0:
+            if self.parameters_full.data.descriptors_contain_xyz:
+                snap_descriptors = snap_descriptors[:, :, :, 3:]
+                feature_length -= 3
 
-        snap_descriptors = \
-            snap_descriptors.astype(np.float32)
-        snap_descriptors = \
-            snap_descriptors.reshape(
-                [self.data.grid_size, feature_length])
-        snap_descriptors = \
-            torch.from_numpy(snap_descriptors).float()
-        snap_descriptors = \
-            self.data.input_data_scaler.transform(snap_descriptors)
+            snap_descriptors = \
+                snap_descriptors.astype(np.float32)
+            snap_descriptors = \
+                snap_descriptors.reshape(
+                    [self.data.grid_size, feature_length])
+            snap_descriptors = \
+                torch.from_numpy(snap_descriptors).float()
+            snap_descriptors = \
+                self.data.input_data_scaler.transform(snap_descriptors)
 
-        # Provide info from current snapshot to target calculator.
-        self.data.target_calculator.\
-            read_additional_calculation_data("atoms+grid",
-                                             [atoms, self.data.grid_dimension])
+            # Provide info from current snapshot to target calculator.
+            self.data.target_calculator.\
+                read_additional_calculation_data("atoms+grid",
+                                                 [atoms, self.data.grid_dimension])
 
-        # Forward the SNAP descriptors through the network.
-        return self.\
-                    _forward_snap_descriptors(snap_descriptors)
+            # Forward the SNAP descriptors through the network.
+            return self.\
+                        _forward_snap_descriptors(snap_descriptors)
+        else:
+            return None
 
     def _forward_snap_descriptors(self, snap_descriptors):
         """Forward a scaled tensor of SNAP descriptors through the NN."""

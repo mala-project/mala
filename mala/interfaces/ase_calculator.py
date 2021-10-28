@@ -1,9 +1,11 @@
 """ASE calculator for MALA predictions."""
 
 from ase.calculators.calculator import Calculator, all_changes
-
+import numpy as np
+from mpi4py import MPI
 from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, \
                  DOS
+from mala.common.parallelizer import get_rank, get_comm
 
 
 class ASECalculator(Calculator):
@@ -83,20 +85,29 @@ class ASECalculator(Calculator):
         # Get the LDOS from the NN.
         ldos = self.predictor.predict_for_atoms(atoms)
 
-        # Define calculator objects.
-        ldos_calculator: LDOS = self.data_handler.target_calculator
-        density_calculator = Density.from_ldos(ldos_calculator)
-        dos_calculator = DOS.from_ldos(ldos_calculator)
+        energy = 0.0
+        forces = np.zeros([len(atoms), 3])
+        if get_rank() == 0:
+            # Define calculator objects.
+            ldos_calculator: LDOS = self.data_handler.target_calculator
+            density_calculator = Density.from_ldos(ldos_calculator)
+            dos_calculator = DOS.from_ldos(ldos_calculator)
 
-        # Get DOS and density.
-        dos = ldos_calculator.get_density_of_states(ldos)
-        fermi_energy_ev = dos_calculator.get_self_consistent_fermi_energy_ev(
-            dos)
-        density = ldos_calculator.get_density(ldos,
-                                              fermi_energy_ev=fermi_energy_ev)
-
-        # Use the LDOS determined DOS and density to get energy and forces.
-        self.results["energy"] = ldos_calculator.\
+            # Get DOS and density.
+            dos = ldos_calculator.get_density_of_states(ldos)
+            fermi_energy_ev = dos_calculator.get_self_consistent_fermi_energy_ev(
+                dos)
+            density = ldos_calculator.get_density(ldos,
+                                                  fermi_energy_ev=fermi_energy_ev)
+            energy = ldos_calculator.\
             get_total_energy(dos_data=dos, density_data=density,
                              fermi_energy_eV=fermi_energy_ev)
-        self.results["forces"] = density_calculator.get_atomic_forces(density)
+            forces = density_calculator.get_atomic_forces(density)
+
+        get_comm().Barrier()
+        energy = get_comm().bcast(energy, root=0)
+        get_comm().Bcast([forces, MPI.DOUBLE], root=0)
+        print(get_rank(), forces, energy)
+        # Use the LDOS determined DOS and density to get energy and forces.
+        self.results["energy"] = energy
+        self.results["forces"] = forces

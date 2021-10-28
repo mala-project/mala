@@ -173,11 +173,11 @@ class SNAP(DescriptorBase):
 
         # Gather the SNAP descriptors into a list.
         all_snap_descriptors_list = comm.gather(snap_descriptors_np, root=0)
-        if get_rank() == 0:
-            printout(np.shape(all_snap_descriptors_list[0]))
-            printout(np.shape(all_snap_descriptors_list[1]))
-            printout(np.shape(all_snap_descriptors_list[2]))
-            printout(np.shape(all_snap_descriptors_list[3]))
+        # if get_rank() == 0:
+        #     printout(np.shape(all_snap_descriptors_list[0]))
+        #     printout(np.shape(all_snap_descriptors_list[1]))
+        #     printout(np.shape(all_snap_descriptors_list[2]))
+        #     printout(np.shape(all_snap_descriptors_list[3]))
 
         # Dummy for the other ranks.
         # (For now, might later simply broadcast to other ranks).
@@ -197,9 +197,9 @@ class SNAP(DescriptorBase):
                 first_x = int(local_snap_grid[0][0])
                 first_y = int(local_snap_grid[0][1])
                 first_z = int(local_snap_grid[0][2])
-                last_x =  int(local_snap_grid[-1][0])+1
-                last_y =  int(local_snap_grid[-1][1])+1
-                last_z =  int(local_snap_grid[-1][2])+1
+                last_x = int(local_snap_grid[-1][0])+1
+                last_y = int(local_snap_grid[-1][1])+1
+                last_z = int(local_snap_grid[-1][2])+1
                 snap_descriptors_full[first_x:last_x,
                                       first_y:last_y,
                                       first_z:last_z] = \
@@ -216,7 +216,6 @@ class SNAP(DescriptorBase):
                 #     z = int(entry[2])
                 #     snap_descriptors_full[x, y, z] = entry[3:]
         return snap_descriptors_full
-
 
     def __calculate_snap(self, atoms, outdir, grid_dimensions):
         """Perform actual SNAP calculation."""
@@ -293,7 +292,6 @@ class SNAP(DescriptorBase):
             ncols_local = extract_compute_np(lmp, "bgridlocal",
                                              lammps_constants.LMP_STYLE_LOCAL,
                                              lammps_constants.LMP_SIZE_COLS)
-            print(nrows_local, ncols_local)
             if ncols_local != self.fingerprint_length + 3:
                 raise Exception("Inconsistent number of features.")
 
