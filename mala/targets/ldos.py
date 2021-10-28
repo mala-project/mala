@@ -181,7 +181,8 @@ class LDOS(TargetBase):
                          grid_integration_method="summation",
                          energy_integration_method="analytical",
                          atoms_Angstrom=None,
-                         qe_input_data=None, qe_pseudopotentials=None):
+                         qe_input_data=None, qe_pseudopotentials=None,
+                         create_qe_file=True):
         """
         Calculate the total energy from LDOS or given DOS + density data.
 
@@ -305,7 +306,8 @@ class LDOS(TargetBase):
             = density_calculator.\
             get_energy_contributions(density_data, qe_input_data=qe_input_data,
                                      atoms_Angstrom=atoms_Angstrom,
-                                     qe_pseudopotentials=qe_pseudopotentials)
+                                     qe_pseudopotentials=qe_pseudopotentials,
+                                     create_file=create_qe_file)
         e_total = e_band + e_rho_times_v_hxc + e_hartree + e_xc + e_ewald +\
             e_entropy_contribution
 

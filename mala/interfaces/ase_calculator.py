@@ -6,7 +6,7 @@ from mpi4py import MPI
 from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, \
                  DOS
 from mala.common.parallelizer import get_rank, get_comm
-
+import total_energy as te
 
 class ASECalculator(Calculator):
     """
@@ -80,13 +80,28 @@ class ASECalculator(Calculator):
             any combination of these six: 'positions', 'numbers', 'cell',
             'pbc', 'initial_charges' and 'initial_magmoms'.
         """
-        Calculator.calculate(self, atoms, properties, system_changes)
+        get_comm().Barrier()
+        # Calculator.calculate(self, atoms, properties, system_changes)
 
         # Get the LDOS from the NN.
         ldos = self.predictor.predict_for_atoms(atoms)
 
         energy = 0.0
-        forces = np.zeros([len(atoms), 3])
+        forces = np.zeros([len(atoms), 3], dtype=np.float64)
+        if self.params.use_mpi:
+            # TODO: For whatever reason the ase.io.read command we issue
+            #  during the
+            # first initilization of the TEM causes an error when used in
+            # parallel. I have tracked the issue to this command and I think
+            # it is stemming from ASE itself. Apparently, ASE detects
+            # present MPI environmnents, and tries to use them. I am guessing
+            # this goes wrong, because we only call the TEM on rank 0.
+            # We could mitigate this by calling the file I/O on all ranks
+            # (possible, but requires some changes in the interface) or,
+            # for simplicity simply provide the file ourselves.
+            create_file = False
+        else:
+            create_file = True
         if get_rank() == 0:
             # Define calculator objects.
             ldos_calculator: LDOS = self.data_handler.target_calculator
@@ -101,13 +116,16 @@ class ASECalculator(Calculator):
                                                   fermi_energy_ev=fermi_energy_ev)
             energy = ldos_calculator.\
             get_total_energy(dos_data=dos, density_data=density,
-                             fermi_energy_eV=fermi_energy_ev)
-            forces = density_calculator.get_atomic_forces(density)
-
+                             fermi_energy_eV=fermi_energy_ev,
+                             create_qe_file=create_file)
+            forces = density_calculator.get_atomic_forces(density,
+                                                          create_file=create_file)
+        print("Before Final barrier")
         get_comm().Barrier()
+        print("After Final barrier")
         energy = get_comm().bcast(energy, root=0)
         get_comm().Bcast([forces, MPI.DOUBLE], root=0)
-        print(get_rank(), forces, energy)
+        print(get_rank(), forces)
         # Use the LDOS determined DOS and density to get energy and forces.
         self.results["energy"] = energy
         self.results["forces"] = forces

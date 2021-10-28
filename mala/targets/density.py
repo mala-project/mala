@@ -19,6 +19,7 @@ from mala.targets.target_base import TargetBase
 from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube
 from mala.targets.atomic_force import AtomicForce
+from mala.common.parallelizer import get_rank
 
 
 class Density(TargetBase):
@@ -296,8 +297,8 @@ class Density(TargetBase):
         return atomic_forces
 
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
-                                        create_file=True, qe_input_data=None,
-                                      qe_pseudopotentials=None):
+                                    create_file=True, qe_input_data=None,
+                                    qe_pseudopotentials=None):
         if create_file:
             # If not otherwise specified, use values as read in.
             if qe_input_data is None:

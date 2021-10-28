@@ -64,7 +64,7 @@ def md_mala(network, new_parameters, iscaler, oscaler):
     if get_rank() == 0:
         dyn.attach(MDLogger(dyn, atoms, 'mala_md.log', mode="w"), interval=1)
     print("Starting the MD run")
-    dyn.run(10)
+    dyn.run(100)
 
 
 # Trains a network.
