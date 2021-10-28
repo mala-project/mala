@@ -192,12 +192,29 @@ class SNAP(DescriptorBase):
                 [nx, ny, nz, self.fingerprint_length])
 
             # Fill the full SNAP descriptors array.
-            for local_snap_grid in all_snap_descriptors_list:
-                for entry in local_snap_grid:
-                    x = int(entry[0])
-                    y = int(entry[1])
-                    z = int(entry[2])
-                    snap_descriptors_full[x, y, z] = entry[3:]
+            for idx, local_snap_grid in enumerate(all_snap_descriptors_list):
+                # We glue the individual cells back together, and transpose.
+                first_x = int(local_snap_grid[0][0])
+                first_y = int(local_snap_grid[0][1])
+                first_z = int(local_snap_grid[0][2])
+                last_x =  int(local_snap_grid[-1][0])+1
+                last_y =  int(local_snap_grid[-1][1])+1
+                last_z =  int(local_snap_grid[-1][2])+1
+                snap_descriptors_full[first_x:last_x,
+                                      first_y:last_y,
+                                      first_z:last_z] = \
+                    np.reshape(local_snap_grid[:,3:],[last_z-first_z,
+                                                      last_y-first_y,
+                                                      last_x-first_x,
+                                                      self.fingerprint_length]).transpose([2, 1, 0, 3])
+
+                # Leaving this in here for debugging purposes.
+                # This is the slow way to reshape the descriptors.
+                # for entry in local_snap_grid:
+                #     x = int(entry[0])
+                #     y = int(entry[1])
+                #     z = int(entry[2])
+                #     snap_descriptors_full[x, y, z] = entry[3:]
         return snap_descriptors_full
 
 
