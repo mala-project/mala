@@ -17,7 +17,7 @@ except ModuleNotFoundError:
 
 from mala.descriptors.lammps_utils import *
 from mala.descriptors.descriptor_base import DescriptorBase
-from mala.common.parallelizer import get_comm
+from mala.common.parallelizer import get_comm, printout, get_rank
 
 class SNAP(DescriptorBase):
     """Class for calculation and parsing of SNAP descriptors.
@@ -31,6 +31,7 @@ class SNAP(DescriptorBase):
     def __init__(self, parameters):
         super(SNAP, self).__init__(parameters)
         self.in_format_ase = ""
+        self.grid_dimensions = []
 
     @staticmethod
     def convert_units(array, in_units="None"):
@@ -102,8 +103,8 @@ class SNAP(DescriptorBase):
 
         """
         self.in_format_ase = "espresso-out"
-        print("Calculating SNAP descriptors from", qe_out_file, "at",
-              qe_out_directory)
+        printout("Calculating SNAP descriptors from", qe_out_file, "at",
+                  qe_out_directory)
         # We get the atomic information by using ASE.
         infile = os.path.join(qe_out_directory, qe_out_file)
         atoms = ase.io.read(infile, format=self.in_format_ase)
@@ -156,9 +157,49 @@ class SNAP(DescriptorBase):
         return self.__calculate_snap(atoms, working_directory, grid_dimensions)
 
     def gather_descriptors(self, snap_descriptors_np):
+        """
+        Gathers all SNAP descriptors on rank 0 and sorts them.
+
+        This is useful for e.g. parallel preprocessing.
+
+        Parameters
+        ----------
+        snap_descriptors_np : numpy.array
+            Numpy array with the SNAP descriptors of this ranks local grid.
+
+        """
         # Gather all SNAP descriptors on rank 0.
         comm = get_comm()
-        all_snap_descriptors = comm.gather(snap_descriptors_np, root=0)
+
+        # Gather the SNAP descriptors into a list.
+        all_snap_descriptors_list = comm.gather(snap_descriptors_np, root=0)
+        if get_rank() == 0:
+            printout(np.shape(all_snap_descriptors_list[0]))
+            printout(np.shape(all_snap_descriptors_list[1]))
+            printout(np.shape(all_snap_descriptors_list[2]))
+            printout(np.shape(all_snap_descriptors_list[3]))
+
+        # Dummy for the other ranks.
+        # (For now, might later simply broadcast to other ranks).
+        snap_descriptors_full = np.zeros([1,1,1,1])
+
+        if get_rank() == 0:
+            # Prepare the SNAP descriptor array.
+            nx = self.grid_dimensions[0]
+            ny = self.grid_dimensions[1]
+            nz = self.grid_dimensions[2]
+            snap_descriptors_full = np.zeros(
+                [nx, ny, nz, self.fingerprint_length])
+
+            # Fill the full SNAP descriptors array.
+            for local_snap_grid in all_snap_descriptors_list:
+                for entry in local_snap_grid:
+                    x = int(entry[0])
+                    y = int(entry[1])
+                    z = int(entry[2])
+                    snap_descriptors_full[x, y, z] = entry[3:]
+        return snap_descriptors_full
+
 
     def __calculate_snap(self, atoms, outdir, grid_dimensions):
         """Perform actual SNAP calculation."""
@@ -251,5 +292,7 @@ class SNAP(DescriptorBase):
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd
             # dimension)
             snap_descriptors_np = snap_descriptors_np.transpose([2, 1, 0, 3])
+
+        self.grid_dimensions = [nx, ny, nz]
 
         return snap_descriptors_np
