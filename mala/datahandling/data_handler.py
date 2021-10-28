@@ -387,6 +387,39 @@ class DataHandler:
         if self.parameters.use_lazy_loading:
             self.test_data_set.return_outputs_directly = True
 
+    def get_test_input_gradient(self, snapshot_number):
+        """
+        Get the gradient of the test inputs for an entire snapshot.
+
+        This gradient will be returned as scaled Tensor.
+        The reason the gradient is returned (rather then returning the entire
+        inputs themselves) is that by slicing a variable, pytorch no longer
+        considers it a "leaf" variable and will stop tracking and evaluating
+        its gradient. Thus, it is easier to obtain the gradient and then
+        slice it.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            Number of the snapshot for which the entire test inputs.
+
+        Returns
+        -------
+        torch.Tensor
+            Tensor holding the gradient.
+
+        """
+        if self.parameters.use_lazy_loading:
+            # This fails if an incorrect snapshot was loaded.
+            if self.test_data_set.currently_loaded_file != snapshot_number:
+                raise Exception("Cannot calculate gradients, wrong file "
+                                "was lazily loaded.")
+            return self.test_data_set.input_data.grad
+        else:
+            return self.test_data_inputs.\
+                       grad[self.grid_size*snapshot_number:
+                            self.grid_size*(snapshot_number+1)]
+
     def __check_snapshots(self):
         """Check the snapshots for consistency."""
         self.nr_snapshots = len(self.parameters.snapshot_directories_list)
@@ -718,7 +751,8 @@ class DataHandler:
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
                     self.grid_dimension, self.grid_size,
-                    self.parameters.descriptors_contain_xyz, self.use_horovod)
+                    self.parameters.descriptors_contain_xyz, self.use_horovod,
+                    input_requires_grad=True)
 
             # Add snapshots to the lazy loading data sets.
             i = 0
@@ -797,6 +831,7 @@ class DataHandler:
                     torch.from_numpy(self.test_data_inputs).float()
                 self.test_data_inputs = \
                     self.input_data_scaler.transform(self.test_data_inputs)
+                self.test_data_inputs.requires_grad = True
 
             self.validation_data_inputs = np.array(self.validation_data_inputs)
             self.validation_data_inputs = \

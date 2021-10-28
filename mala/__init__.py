@@ -11,4 +11,6 @@ from .descriptors import DescriptorInterface, SNAP, DescriptorBase
 from .datahandling import DataHandler, DataScaler, DataConverter
 from .network import Network, Tester, Trainer, HyperOptInterface, \
     HyperOptOptuna, HyperOptNoTraining, HyperOptOAT, Predictor
-from .targets import TargetInterface, LDOS, DOS, Density, fermi_function
+from .targets import TargetInterface, LDOS, DOS, Density, fermi_function, \
+    AtomicForce
+from .interfaces import ASECalculator

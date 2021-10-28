@@ -31,7 +31,6 @@ class TargetBase(ABC):
             self.parameters = params
         else:
             raise Exception("Wrong type of parameters for Targets class.")
-        self.target_length = 0
         self.fermi_energy_eV = None
         self.temperature_K = None
         self.grid_spacing_Bohr = None
@@ -245,11 +244,8 @@ class TargetBase(ABC):
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
         elif data_type == "atoms+grid":
-            # Reset everything.
-            self.fermi_energy_eV = None
-            self.temperature_K = None
+            # Reset everything that we can get this way.
             self.grid_spacing_Bohr = None
-            self.number_of_electrons = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
@@ -277,6 +273,18 @@ class TargetBase(ABC):
     def get_energy_grid(self):
         """Get energy grid."""
         raise Exception("No method implement to calculate an energy grid.")
+
+    def get_real_space_grid(self):
+        """Get the real space grid."""
+        grid3D = np.zeros((self.grid_dimensions[0], self.grid_dimensions[1],
+                           self.grid_dimensions[2], 3), dtype=np.float64)
+        for i in range(0, self.grid_dimensions[0]):
+            for j in range(0, self.grid_dimensions[1]):
+                for k in range(0, self.grid_dimensions[2]):
+                    grid3D[i, j, k, 0] = i * self.grid_spacing_Bohr
+                    grid3D[i, j, k, 1] = j * self.grid_spacing_Bohr
+                    grid3D[i, j, k, 2] = k * self.grid_spacing_Bohr
+        return grid3D
 
     @staticmethod
     def convert_units(array, in_units="eV"):
