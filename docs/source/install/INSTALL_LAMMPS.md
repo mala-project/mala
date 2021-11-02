@@ -2,7 +2,7 @@
 
 ## Installing LAMMPS
 
-* checkout <https://github.com/athomps/lammps/tree/compute-grid>
+* checkout <https://github.com/athomps/lammps/tree/compute-grid-new>
 * Make sure the compute-grid tree is checked out!
 * Compile the LAMMPS shared library with the SNAP package installed
     - cd into `/path/to/lammps/src` folder of LAMMPS
@@ -19,4 +19,4 @@
 
 ### Method 2 (package, recommended)
 
-* `python3 install.py -m lammps.py -l ../src/liblammps.so -v ../src/version.h`
+* `python3 install.py -p lammps -l ../src/liblammps.so -v ../src/version.h`
