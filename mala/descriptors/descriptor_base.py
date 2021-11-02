@@ -4,6 +4,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 
 from mala.common.parameters import ParametersDescriptors
+from mala.common.parallelizer import printout
 
 
 class DescriptorBase(ABC):
@@ -100,8 +101,8 @@ class DescriptorBase(ABC):
             if False in (np.isclose(new_atoms[i].position,
                           atoms[i].position, atol=0.001)):
                 rescaled_atoms += 1
-        print("Descriptor calculation: had to enforce periodic boundary "
-              "conditions on", rescaled_atoms, "atoms before calculation.")
+        printout("Descriptor calculation: had to enforce periodic boundary "
+                 "conditions on", rescaled_atoms, "atoms before calculation.")
         return new_atoms
 
     @abstractmethod

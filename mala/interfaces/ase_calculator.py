@@ -6,7 +6,7 @@ from mpi4py import MPI
 from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, \
                  DOS
 from mala.common.parallelizer import get_rank, get_comm
-import total_energy as te
+
 
 class ASECalculator(Calculator):
     """

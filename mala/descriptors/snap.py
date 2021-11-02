@@ -242,15 +242,15 @@ class SNAP(DescriptorBase):
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log", os.path.join(outdir,
                                                                "lammps_log.tmp")]
-        lmp_cmdargs = set_cmdlinevars(lmp_cmdargs,
-                                      {
-                                        "ngridx": nx,
-                                        "ngridy": ny,
-                                        "ngridz": nz,
-                                        "twojmax": self.parameters.twojmax,
-                                        "rcutfac": self.parameters.rcutfac,
-                                        "atom_config_fname": ase_out_path
-                                      })
+        lammps_dict = {"ngridx": nx,
+                       "ngridy": ny,
+                       "ngridz": nz,
+                       "twojmax": self.parameters.twojmax,
+                       "rcutfac": self.parameters.rcutfac,
+                       "atom_config_fname": ase_out_path}
+        if self.parameters._configuration["mpi"]:
+            lammps_dict["bgridglobalflag"] = False
+        lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
 
         # Build the LAMMPS object.
         lmp = lammps(cmdargs=lmp_cmdargs)
