@@ -1,11 +1,13 @@
 """SNAP descriptor class."""
 import os
 import warnings
+import time
 
 import ase
 import ase.io
 try:
     from lammps import lammps
+    from lammps import constants as lammps_constants
 except ModuleNotFoundError:
     warnings.warn("You either don't have LAMMPS installed or it is not "
                   "configured correctly. Using SNAP descriptors "
@@ -15,7 +17,7 @@ except ModuleNotFoundError:
 
 from mala.descriptors.lammps_utils import *
 from mala.descriptors.descriptor_base import DescriptorBase
-
+from mala.common.parallelizer import get_comm, printout, get_rank
 
 class SNAP(DescriptorBase):
     """Class for calculation and parsing of SNAP descriptors.
@@ -29,6 +31,7 @@ class SNAP(DescriptorBase):
     def __init__(self, parameters):
         super(SNAP, self).__init__(parameters)
         self.in_format_ase = ""
+        self.grid_dimensions = []
 
     @staticmethod
     def convert_units(array, in_units="None"):
@@ -100,8 +103,8 @@ class SNAP(DescriptorBase):
 
         """
         self.in_format_ase = "espresso-out"
-        print("Calculating SNAP descriptors from", qe_out_file, "at",
-              qe_out_directory)
+        printout("Calculating SNAP descriptors from", qe_out_file, "at",
+                  qe_out_directory)
         # We get the atomic information by using ASE.
         infile = os.path.join(qe_out_directory, qe_out_file)
         atoms = ase.io.read(infile, format=self.in_format_ase)
@@ -135,7 +138,7 @@ class SNAP(DescriptorBase):
         Parameters
         ----------
         atoms : ase.Atoms
-            Atoms object holding the atomic configuration.
+            Atoms object holding the atomic configuration.l
 
         grid_dimensions : list
             Grid dimensions to be used, in the format [x,y,z].
@@ -152,6 +155,67 @@ class SNAP(DescriptorBase):
         # Enforcing / Checking PBC on the input atoms.
         atoms = self.enforce_pbc(atoms)
         return self.__calculate_snap(atoms, working_directory, grid_dimensions)
+
+    def gather_descriptors(self, snap_descriptors_np):
+        """
+        Gathers all SNAP descriptors on rank 0 and sorts them.
+
+        This is useful for e.g. parallel preprocessing.
+
+        Parameters
+        ----------
+        snap_descriptors_np : numpy.array
+            Numpy array with the SNAP descriptors of this ranks local grid.
+
+        """
+        # Gather all SNAP descriptors on rank 0.
+        comm = get_comm()
+
+        # Gather the SNAP descriptors into a list.
+        all_snap_descriptors_list = comm.gather(snap_descriptors_np, root=0)
+        # if get_rank() == 0:
+        #     printout(np.shape(all_snap_descriptors_list[0]))
+        #     printout(np.shape(all_snap_descriptors_list[1]))
+        #     printout(np.shape(all_snap_descriptors_list[2]))
+        #     printout(np.shape(all_snap_descriptors_list[3]))
+
+        # Dummy for the other ranks.
+        # (For now, might later simply broadcast to other ranks).
+        snap_descriptors_full = np.zeros([1,1,1,1])
+
+        if get_rank() == 0:
+            # Prepare the SNAP descriptor array.
+            nx = self.grid_dimensions[0]
+            ny = self.grid_dimensions[1]
+            nz = self.grid_dimensions[2]
+            snap_descriptors_full = np.zeros(
+                [nx, ny, nz, self.fingerprint_length])
+
+            # Fill the full SNAP descriptors array.
+            for idx, local_snap_grid in enumerate(all_snap_descriptors_list):
+                # We glue the individual cells back together, and transpose.
+                first_x = int(local_snap_grid[0][0])
+                first_y = int(local_snap_grid[0][1])
+                first_z = int(local_snap_grid[0][2])
+                last_x = int(local_snap_grid[-1][0])+1
+                last_y = int(local_snap_grid[-1][1])+1
+                last_z = int(local_snap_grid[-1][2])+1
+                snap_descriptors_full[first_x:last_x,
+                                      first_y:last_y,
+                                      first_z:last_z] = \
+                    np.reshape(local_snap_grid[:,3:],[last_z-first_z,
+                                                      last_y-first_y,
+                                                      last_x-first_x,
+                                                      self.fingerprint_length]).transpose([2, 1, 0, 3])
+
+                # Leaving this in here for debugging purposes.
+                # This is the slow way to reshape the descriptors.
+                # for entry in local_snap_grid:
+                #     x = int(entry[0])
+                #     y = int(entry[1])
+                #     z = int(entry[2])
+                #     snap_descriptors_full[x, y, z] = entry[3:]
+        return snap_descriptors_full
 
     def __calculate_snap(self, atoms, outdir, grid_dimensions):
         """Perform actual SNAP calculation."""
@@ -178,24 +242,29 @@ class SNAP(DescriptorBase):
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log", os.path.join(outdir,
                                                                "lammps_log.tmp")]
-        lmp_cmdargs = set_cmdlinevars(lmp_cmdargs,
-                                      {
-                                        "ngridx": nx,
-                                        "ngridy": ny,
-                                        "ngridz": nz,
-                                        "twojmax": self.parameters.twojmax,
-                                        "rcutfac": self.parameters.rcutfac,
-                                        "atom_config_fname": ase_out_path
-                                      })
+        lammps_dict = {"ngridx": nx,
+                       "ngridy": ny,
+                       "ngridz": nz,
+                       "twojmax": self.parameters.twojmax,
+                       "rcutfac": self.parameters.rcutfac,
+                       "atom_config_fname": ase_out_path}
+        if self.parameters._configuration["mpi"]:
+            lammps_dict["bgridglobalflag"] = False
+        lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
 
         # Build the LAMMPS object.
         lmp = lammps(cmdargs=lmp_cmdargs)
 
         # An empty string means that the user wants to use the standard input.
+        # What that is differs depending on serial/parallel execution.
         if self.parameters.lammps_compute_file == "":
             filepath = __file__.split("snap")[0]
-            self.parameters.lammps_compute_file = os.path.join(filepath,
-                                                               "in.bgrid.python")
+            if self.parameters._configuration["mpi"]:
+                self.parameters.lammps_compute_file = \
+                    os.path.join(filepath, "in.bgridlocal.python")
+            else:
+                self.parameters.lammps_compute_file = \
+                    os.path.join(filepath, "in.bgrid.python")
 
         # Do the LAMMPS calculation.
         lmp.file(self.parameters.lammps_compute_file)
@@ -211,19 +280,34 @@ class SNAP(DescriptorBase):
         self.fingerprint_length = ncols0+ncoeff
 
         # Extract data from LAMMPS calculation.
-        snap_descriptors_np = \
-            extract_compute_np(lmp, "bgrid", 0, 2,
-                               (nz, ny, nx, self.fingerprint_length))
+        # This is different for the parallel and the serial case.
+        # In the serial case we can expect to have a full SNAP array at the
+        # end of this function.
+        # This is not necessarily true for the parallel case.
 
-        # switch from x-fastest to z-fastest order (swaps 0th and 2nd
-        # dimension)
-        snap_descriptors_np = snap_descriptors_np.transpose([2, 1, 0, 3])
+        if self.parameters._configuration["mpi"]:
+            nrows_local = extract_compute_np(lmp, "bgridlocal",
+                                             lammps_constants.LMP_STYLE_LOCAL,
+                                             lammps_constants.LMP_SIZE_ROWS)
+            ncols_local = extract_compute_np(lmp, "bgridlocal",
+                                             lammps_constants.LMP_STYLE_LOCAL,
+                                             lammps_constants.LMP_SIZE_COLS)
+            if ncols_local != self.fingerprint_length + 3:
+                raise Exception("Inconsistent number of features.")
 
-        # The next two commands can be used to check whether the calculated
-        # SNAP descriptors
-        # are identical to the ones calculated with the Sandia workflow.
-        # They generally are.
-        # print("snap_descriptors_np shape = ",snap_descriptors_np.shape,
-        # flush=True)
-        # np.save(set[4]+"test.npy", snap_descriptors_np, allow_pickle=True)
+            snap_descriptors_np = \
+                extract_compute_np(lmp, "bgridlocal",
+                                   lammps_constants.LMP_STYLE_LOCAL, 2,
+                                   array_shape=(nrows_local, ncols_local))
+        else:
+            # Extract data from LAMMPS calculation.
+            snap_descriptors_np = \
+                extract_compute_np(lmp, "bgrid", 0, 2,
+                                   (nz, ny, nx, self.fingerprint_length))
+            # switch from x-fastest to z-fastest order (swaps 0th and 2nd
+            # dimension)
+            snap_descriptors_np = snap_descriptors_np.transpose([2, 1, 0, 3])
+
+        self.grid_dimensions = [nx, ny, nz]
+
         return snap_descriptors_np
