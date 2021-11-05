@@ -343,6 +343,17 @@ class SNAP(DescriptorBase):
                 extract_compute_np(lmp, "bgridlocal",
                                    lammps_constants.LMP_STYLE_LOCAL, 2,
                                    array_shape=(nrows_local, ncols_local))
+
+            # Copy the grid dimensions only at the end.
+            self.grid_dimensions = [nx, ny, nz]
+
+            # If I directly return the descriptors, this sometimes leads
+            # to errors, because presumably the python garbage collection
+            # deallocates memory to quickly. This copy is more memory
+            # hungry, and we might have to tackle this later on, but
+            # for now it works.
+            return snap_descriptors_np.copy()
+
         else:
             # Extract data from LAMMPS calculation.
             snap_descriptors_np = \
@@ -351,12 +362,7 @@ class SNAP(DescriptorBase):
             # switch from x-fastest to z-fastest order (swaps 0th and 2nd
             # dimension)
             snap_descriptors_np = snap_descriptors_np.transpose([2, 1, 0, 3])
-
-        self.grid_dimensions = [nx, ny, nz]
-         
-        # If I directly return the descriptors, this sometimes leads
-        # to errors, because presumably the python garbage collection
-        # deallocates memory to quickly. This copy is more memory 
-        # hungry, and we might have to tackle this later on, but 
-        # for now it works. 
-        return snap_descriptors_np.copy()
+            # Copy the grid dimensions only at the end.
+            self.grid_dimensions = [nx, ny, nz]
+            # No copy needed here because of transpose.
+            return snap_descriptors_np
