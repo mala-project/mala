@@ -195,8 +195,8 @@ class SNAP(DescriptorBase):
             raw_feature_length = self.fingerprint_length+3
 
             if get_rank() == 0:
-                print("sendcounts: {}, total: {}".format(sendcounts,
-                                                         sum(sendcounts)))
+                # print("sendcounts: {}, total: {}".format(sendcounts,
+                #                                          sum(sendcounts)))
 
                 # Preparing the list of buffers.
                 all_snap_descriptors_list = []

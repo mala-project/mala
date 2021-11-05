@@ -81,7 +81,7 @@ class ASECalculator(Calculator):
             'pbc', 'initial_charges' and 'initial_magmoms'.
         """
         get_comm().Barrier()
-        # Calculator.calculate(self, atoms, properties, system_changes)
+        Calculator.calculate(self, atoms, properties, system_changes)
 
         # Get the LDOS from the NN.
         ldos = self.predictor.predict_for_atoms(atoms)
@@ -120,12 +120,9 @@ class ASECalculator(Calculator):
                              create_qe_file=create_file)
             forces = density_calculator.get_atomic_forces(density,
                                                           create_file=create_file)
-        print("Before Final barrier")
         get_comm().Barrier()
-        print("After Final barrier")
         energy = get_comm().bcast(energy, root=0)
         get_comm().Bcast([forces, MPI.DOUBLE], root=0)
-        print(get_rank(), forces)
         # Use the LDOS determined DOS and density to get energy and forces.
         self.results["energy"] = energy
         self.results["forces"] = forces
