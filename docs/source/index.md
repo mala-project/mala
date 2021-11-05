@@ -11,6 +11,7 @@ caption: Features
 maxdepth: 2
 ---
 
+features/overview
 features/background
 features/preprocessing
 features/neuralnetworks
@@ -28,6 +29,7 @@ install/INSTALL_LAMMPS
 install/INSTALL_TE_QE
 install/tested_systems
 install/sql_on_hpc
+install/tensorboard_setup
 ```
 
 ```{toctree}

@@ -2,34 +2,32 @@
 
 
 class HyperparameterOAT:
-    """Represents a hyperparameter for OAT."""
+    """Represents a hyperparameter for OAT.
+
+    Parameters
+    ----------
+    opttype : string
+        Datatype of the hyperparameter. Follows optunas naming convetions.
+        In principle supported are:
+
+            - float
+            - int
+            - categorical (list)
+
+        Float and int are not available for OA based approaches at the
+        moment.
+
+    name : string
+        Name of the hyperparameter. Please note that these names always
+        have to be distinct; if you e.g. want to investigate multiple
+        layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
+        etc. as names.
+
+    choices :
+        List of possible choices (for categorical parameter).
+    """
 
     def __init__(self, opttype="categorical", name="", choices=None):
-        """
-        Create an OAT compatible hyperparameter.
-
-        Parameters
-        ----------
-        opttype : string
-            Datatype of the hyperparameter. Follows optunas naming convetions.
-            In principle supported are:
-
-                - float
-                - int
-                - categorical (list)
-
-            Float and int are not available for OA based approaches at the
-            moment.
-
-        name : string
-            Name of the hyperparameter. Please note that these names always
-            have to be distinct; if you e.g. want to investigate multiple
-            layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
-             etc. as names.
-
-        choices :
-            List of possible choices (for categorical parameter).
-        """
         self.name = name
         self.opttype = opttype
         self.choices = choices
@@ -37,7 +35,7 @@ class HyperparameterOAT:
 
         if self.opttype != "categorical":
             raise Exception("Unsupported Hyperparameter type.")
-    
+
     def get_parameter(self, trial, idx):
         """
         Extract current value of hyperparameter from an orthogonal array.

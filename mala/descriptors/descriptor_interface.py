@@ -1,5 +1,5 @@
 """Interface functions to automatically get descriptors."""
-from .snap import SNAP
+from mala.descriptors.snap import SNAP
 
 
 def DescriptorInterface(params):
