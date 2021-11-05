@@ -14,10 +14,15 @@ except ModuleNotFoundError:
                   "might still work, but trying to calculate SNAP "
                   "descriptors from atomic positions will crash.",
                   stacklevel=3)
+try:
+    from mpi4py import MPI
+except:
+    # Error handled in parameters.
+    pass
 
 from mala.descriptors.lammps_utils import *
 from mala.descriptors.descriptor_base import DescriptorBase
-from mala.common.parallelizer import get_comm, printout, get_rank
+from mala.common.parallelizer import get_comm, printout, get_rank, get_size
 
 class SNAP(DescriptorBase):
     """Class for calculation and parsing of SNAP descriptors.
@@ -156,7 +161,7 @@ class SNAP(DescriptorBase):
         atoms = self.enforce_pbc(atoms)
         return self.__calculate_snap(atoms, working_directory, grid_dimensions)
 
-    def gather_descriptors(self, snap_descriptors_np):
+    def gather_descriptors(self, snap_descriptors_np, use_pickled_comm=False):
         """
         Gathers all SNAP descriptors on rank 0 and sorts them.
 
@@ -167,15 +172,52 @@ class SNAP(DescriptorBase):
         snap_descriptors_np : numpy.array
             Numpy array with the SNAP descriptors of this ranks local grid.
 
+        use_pickled_comm : bool
+            If True, the pickled communication route from mpi4py is used.
+            If False, a Recv/Sendv combination is used. I am not entirely
+            sure what is faster. Technically Recv/Sendv should be faster,
+            but I doubt my implementation is all that optimal. For the pickled
+            route we can use gather(), which should be fairly quick.
+            However, for large grids, one CANNOT use the pickled route;
+            too large python objects will break it. Therefore, I am setting
+            the Recv/Sendv route as default.
         """
-        # Gather all SNAP descriptors on rank 0.
+        # Barrier to make sure all ranks have descriptors..
         comm = get_comm()
         comm.Barrier()
-        print(snap_descriptors_np[-1, 0:6])
-
 
         # Gather the SNAP descriptors into a list.
-        all_snap_descriptors_list = comm.gather(snap_descriptors_np, root=0)
+        if use_pickled_comm:
+            all_snap_descriptors_list = comm.gather(snap_descriptors_np, root=0)
+        else:
+            sendcounts = np.array(comm.gather(np.shape(snap_descriptors_np)[0],
+                                              root=0))
+            raw_feature_length = self.fingerprint_length+3
+
+            if get_rank() == 0:
+                print("sendcounts: {}, total: {}".format(sendcounts,
+                                                         sum(sendcounts)))
+
+                # Preparing the list of buffers.
+                all_snap_descriptors_list = []
+                for i in range(0, get_size()):
+                    all_snap_descriptors_list.append(np.empty(sendcounts[i] *
+                                                              raw_feature_length,
+                                                              dtype=np.float64))
+
+                # No MPI necessary for first rank. For all the others,
+                # collect the buffers.
+                all_snap_descriptors_list[0] = snap_descriptors_np
+                for i in range(1, get_size()):
+                    comm.Recv(all_snap_descriptors_list[i], source=i,
+                              tag=100+i)
+                    all_snap_descriptors_list[i] = \
+                        np.reshape(all_snap_descriptors_list[i],
+                                   (sendcounts[i], raw_feature_length))
+            else:
+                comm.Send(snap_descriptors_np, dest=0, tag=get_rank()+100)
+            comm.Barrier()
+
         # if get_rank() == 0:
         #     printout(np.shape(all_snap_descriptors_list[0]))
         #     printout(np.shape(all_snap_descriptors_list[1]))
@@ -186,6 +228,7 @@ class SNAP(DescriptorBase):
         # (For now, might later simply broadcast to other ranks).
         snap_descriptors_full = np.zeros([1,1,1,1])
 
+        # Reorder the list.
         if get_rank() == 0:
             # Prepare the SNAP descriptor array.
             nx = self.grid_dimensions[0]
