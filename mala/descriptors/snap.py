@@ -170,6 +170,9 @@ class SNAP(DescriptorBase):
         """
         # Gather all SNAP descriptors on rank 0.
         comm = get_comm()
+        comm.Barrier()
+        print(snap_descriptors_np[-1, 0:6])
+
 
         # Gather the SNAP descriptors into a list.
         all_snap_descriptors_list = comm.gather(snap_descriptors_np, root=0)
@@ -190,7 +193,6 @@ class SNAP(DescriptorBase):
             nz = self.grid_dimensions[2]
             snap_descriptors_full = np.zeros(
                 [nx, ny, nz, self.fingerprint_length])
-
             # Fill the full SNAP descriptors array.
             for idx, local_snap_grid in enumerate(all_snap_descriptors_list):
                 # We glue the individual cells back together, and transpose.
@@ -284,7 +286,6 @@ class SNAP(DescriptorBase):
         # In the serial case we can expect to have a full SNAP array at the
         # end of this function.
         # This is not necessarily true for the parallel case.
-
         if self.parameters._configuration["mpi"]:
             nrows_local = extract_compute_np(lmp, "bgridlocal",
                                              lammps_constants.LMP_STYLE_LOCAL,
@@ -309,5 +310,10 @@ class SNAP(DescriptorBase):
             snap_descriptors_np = snap_descriptors_np.transpose([2, 1, 0, 3])
 
         self.grid_dimensions = [nx, ny, nz]
-
-        return snap_descriptors_np
+         
+        # If I directly return the descriptors, this sometimes leads
+        # to errors, because presumably the python garbage collection
+        # deallocates memory to quickly. This copy is more memory 
+        # hungry, and we might have to tackle this later on, but 
+        # for now it works. 
+        return snap_descriptors_np.copy()
