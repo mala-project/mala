@@ -3,12 +3,12 @@ import os
 import mala
 from mala import printout
 
-from data_repo_path import data_repo_path
+from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Al36")
 
 """
-ex01_run_singleshot.py: Shows how a neural network can be trained on material 
-data using this framework. It uses preprocessed data, that is read in 
+ex01_run_singleshot.py: Shows how a neural network can be trained on material
+data using this framework. It uses preprocessed data, that is read in
 from *.npy files.
 """
 
