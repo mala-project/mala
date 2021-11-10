@@ -24,7 +24,7 @@ params.running.mini_batch_size = 40
 params.running.learning_rate = 0.1
 params.running.trainingtype = "Adam"
 params.targets.target_type = "Density"
-#params.debug.grid_dimensions = [10, 10, 1]
+params.debug.grid_dimensions = [10, 10, 1]
 ####################
 # DATA
 # Add and prepare snapshots for training.
@@ -50,7 +50,11 @@ printout("Read data: DONE.")
 # Set up the model and trainer we want to use.
 ####################
 params.model.kernel = "linear"
+params.model.kernel = "rbf"
 model = mala.GaussianProcesses(params, data_handler)
+for name, param in model.named_parameters():
+    if param.requires_grad:
+        print(name, param.data)
 
 # Uncomment the following lines for comparison with NN, but also
 # make sure that transpose_data in the DataLoader is set to False.

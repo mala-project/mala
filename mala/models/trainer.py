@@ -2,6 +2,7 @@
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
 from mala.common.parameters import Parameters
+from mala.models.gaussian_processes import GaussianProcesses
 import os
 import numpy as np
 import torch
@@ -239,6 +240,9 @@ class Trainer(Runner):
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
             if self.parameters.verbosity:
+                model: GaussianProcesses
+                model = self.model
+                printout(model.covar_module.base_kernel.lengthscale.item())
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
 
             # Mix the DataSets up (this function only does something
@@ -453,7 +457,7 @@ class Trainer(Runner):
 
     def __process_mini_batch(self, model, input_data, target_data):
         """Process a mini batch."""
-        prediction = model.forward(input_data)
+        prediction = model(input_data)
         loss = model.calculate_loss(prediction, target_data)
         if model.params.type == "dummy":
             model.tune_model(loss, self.parameters.learning_rate)
