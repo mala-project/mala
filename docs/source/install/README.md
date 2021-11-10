@@ -120,7 +120,7 @@ preprocessed data. If you need/want to install LAMMPS, please refer to
 
 It is possible to utilize Quantum Espresso to calculate the total energy of a given system using python bindings.
 This provides an additional post-processing capability, but is not necessarily needed for using this workflow.
-If you want to use this module, please refer to [Python bindings to Quantum Espresso](INSTALL_TE_QE.md).
+If you want to use this module, please refer to [Python bindings to Quantum Espresso](INSTALL_TE_QE.rst).
 
 
 ## Installing the MALA package
