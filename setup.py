@@ -37,5 +37,4 @@ setup(
     zip_safe=False,
     install_requires=open('requirements.txt').read().splitlines(),
     etxras_require=extras,
-    python_requires='<3.9',
 )
