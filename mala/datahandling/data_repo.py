@@ -9,7 +9,14 @@ https://github.com/mala-project/test-data .
 """
 
 import os
+import warnings
 
 name = "MALA_DATA_REPO"
-assert name in os.environ, f"Environment variable {name} not set."
-data_repo_path = os.environ[name]
+if name in os.environ:
+    data_repo_path = os.environ[name]
+else:
+    warnings.warn(
+        f"Environment variable {name} not set. You won't be able "
+        "to run all examples and tests."
+    )
+    data_repo_path = None
