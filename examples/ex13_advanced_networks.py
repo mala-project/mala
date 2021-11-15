@@ -63,13 +63,9 @@ printout("Read data: DONE.")
 # The layer sizes can be specified before reading data,
 # but it is safer this way.
 ####################
-<<<<<<< HEAD:examples/ex13_advanced_networks.py
-test_parameters.network.nn_type = "transformer"
-# test_parameters.network.nn_type = "lstm"
-=======
 # test_parameters.network.nn_type = "transformer"
+# test_parameters.network.nn_type = "lstm"
 test_parameters.network.nn_type = "gru"
->>>>>>> 7630b95... added changed for GRU:examples/ex10_advanced_networks.py
 
 test_parameters.network.num_hidden_layers = 1
 test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),100,
