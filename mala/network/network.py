@@ -13,7 +13,6 @@ except ModuleNotFoundError:
     pass
 
 
-
 class BaseNetwork(nn.Module):
     """Central network class for this framework, based on pytorch.nn.Module.
 
@@ -207,16 +206,24 @@ class FeedForwardNet(BaseNetwork):
         predicted_array : torch.Tensor
             Predicted outputs of array.
         """
+
         # Forward propagate data.
         for layer in self.layers:
             inputs = layer(inputs)
         return inputs
 
 class LSTM(BaseNetwork):
+    """Initialize this network as a LSTM network."""
+        
+    # was passed to be used in the entire network.
+
     def __init__(self, params):
         super(LSTM, self).__init__(params)
+
         self.hidden_dim = self.params.layer_sizes[-1]
         self.hidden = self.init_hidden()# check for size for validate and train
+
+        print("initialising LSTM network")
 
         # First Layer
         self.first_layer = nn.Linear(self.params.layer_sizes[0], self.params.layer_sizes[1])
@@ -224,20 +231,35 @@ class LSTM(BaseNetwork):
         # size of lstm based on bidirectional or not: 
         # https://en.wikipedia.org/wiki/Bidirectional_recurrent_neural_networks
         if (self.params.bidirection):
-            self.lstm_layer = nn.LSTM(self.params.layer_sizes[1], 
+            self.lstm_gru_layer = nn.LSTM(self.params.layer_sizes[1], 
                                         int(self.hidden_dim / 2), 
                                         self.params.num_hidden_layers, 
                                         batch_first=True, 
                                         bidirectional=True)
         else:
             
-            self.lstm_layer = nn.LSTM(self.params.layer_sizes[1],
+            self.lstm_gru_layer = nn.LSTM(self.params.layer_sizes[1],
                                         self.hidden_dim, 
                                         self.params.num_hidden_layers, 
                                         batch_first=True)
         self.activation = self.activation_mappings[self.params.layer_activations[0]]()
+
     # Apply Network
     def forward(self, x):
+        """
+        Perform a forward pass through the network.
+
+        Parameters
+        ----------
+        inputs : torch.Tensor
+            Input array for which the forward pass is to be performed.
+
+        Returns
+        -------
+        predicted_array : torch.Tensor
+            Predicted outputs of array.
+        """
+
         self.batch_size = x.shape[0]
 
         if (self.params.no_hidden_state):
@@ -249,12 +271,12 @@ class LSTM(BaseNetwork):
         x = self.activation(self.first_layer(x))
 
         if (self.params.bidirection):
-            x, self.hidden = self.lstm_layer(x.view(self.batch_size, 
+            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size, 
                                                 self.params.num_hidden_layers, 
                                                 self.params.layer_sizes[1]), 
                                             self.hidden)
         else:
-            x, self.hidden = self.lstm_layer(x.view(self.batch_size, 
+            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size, 
                                                 self.params.num_hidden_layers, 
                                                 self.params.layer_sizes[1]), 
                                             self.hidden)
@@ -266,7 +288,16 @@ class LSTM(BaseNetwork):
 
     # Initialize hidden and cell states
     def init_hidden(self):
-                
+        """
+        Initialises Hidden state and cell state to zero when called and assigns specific sizes.
+
+        Returns
+        -------
+        Hidden state and cell state : torch.Tensor
+            initialised to zeros.
+        """
+        print("init_hidden is called")
+
         if (self.params.bidirection):
             h0 = torch.empty(self.params.num_hidden_layers * 2, 
                              self.mini_batch_size, 
@@ -286,7 +317,63 @@ class LSTM(BaseNetwork):
 
         return (h0, c0)
 
+class GRU(LSTM):
+    """Initialize this network as a GRU network."""
+        
+    # was passed to be used similar to LSTM but with small tweek for the layer as GRU.
+    
+    def __init__(self, params):
+        BaseNetwork.__init__(self, params)
 
+        self.hidden_dim = self.params.layer_sizes[1]
+        self.hidden = self.init_hidden()# check for size for validate and train
+
+        print("initialising GRU network")
+
+        # First Layer
+        self.first_layer = nn.Linear(self.params.layer_sizes[0], self.params.layer_sizes[1])
+
+        # Similar to LSTM class replaced with nn.GRU
+        if (self.params.bidirection):
+            self.lstm_gru_layer = nn.GRU(self.params.layer_sizes[1], 
+                                        int(self.hidden_dim / 2), 
+                                        self.params.num_hidden_layers, 
+                                        batch_first=True, 
+                                        bidirectional=True)
+        else:
+            
+            self.lstm_gru_layer = nn.GRU(self.params.layer_sizes[1],
+                                        self.hidden_dim, 
+                                        self.params.num_hidden_layers, 
+                                        batch_first=True)
+        self.activation = self.activation_mappings[self.params.layer_activations[0]]()
+
+    def forward(self, x):
+        return super().forward(x)
+
+       # Initialize hidden states
+    def init_hidden(self):
+        """
+        Initialises Hidden state to zero when called and assigns specific sizes.
+
+        Returns
+        -------
+        Hidden state : torch.Tensor
+            initialised to zeros.
+        """
+        print("init_hidden is called")
+
+        if (self.params.bidirection):
+            h0 = torch.empty(self.params.num_hidden_layers * 2, 
+                             self.mini_batch_size, 
+                             self.hidden_dim // 2)
+        else:
+            h0 = torch.empty(self.params.num_hidden_layers, 
+                             self.mini_batch_size, 
+                             self.hidden_dim)    
+        h0.zero_()
+
+        return h0
         
 class TransformerNet(BaseNetwork):
     """Initialize this network as the transformer net.
@@ -398,6 +485,16 @@ class PositionalEncoding(nn.Module):
 
 
 def Network(params:Parameters):
+    """
+        Assigns model to different network class: .
+
+        Parameter:
+        ---------
+        params : mala.common.parametes.Parameters
+        Parameters used to create this neural network.
+        
+    """
+
     model: BaseNetwork= None 
     if params.network.nn_type == "feed-forward":
         model= FeedForwardNet(params)

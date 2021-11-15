@@ -4,9 +4,8 @@ from data_repo_path import get_data_repo_path
 data_path = get_data_repo_path()+"Al36/"
 
 """
-ex01_run_singleshot.py: Shows how a neural network can be trained on material 
-data using this framework. It uses preprocessed data, that is read in 
-from *.npy files.
+ex13_advanced_networks.py: Shows how advanced network models such as 
+lstm, gru and transformer can be used for prediction.
 """
 
 
@@ -65,11 +64,12 @@ printout("Read data: DONE.")
 ####################
 test_parameters.network.nn_type = "transformer"
 # test_parameters.network.nn_type = "lstm"
+# test_parameters.network.nn_type = "gru"
 
 test_parameters.network.num_hidden_layers = 1
 test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),100,
                                        data_handler.get_output_dimension()]
-if test_parameters.network.nn_type == "lstm":
+if test_parameters.network.nn_type == "lstm" or test_parameters.network.nn_type == "gru":
     test_parameters.network.no_hidden_state = False
     test_parameters.network.bidirection = False
 elif test_parameters.network.nn_type == "transformer":

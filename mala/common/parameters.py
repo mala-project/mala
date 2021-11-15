@@ -112,7 +112,6 @@ class ParametersNetwork(ParametersBase):
 
 
 
-
 class ParametersDescriptors(ParametersBase):
     """
     Parameters necessary for calculating/parsing input descriptors.

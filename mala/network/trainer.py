@@ -18,7 +18,6 @@ except ModuleNotFoundError:
     pass
 import time
 
-
 class Trainer(Runner):
     """A class for training a neural network.
 
