@@ -9,6 +9,6 @@ from .version import __version__
 from .common import Parameters, printout
 from .descriptors import DescriptorInterface, SNAP, DescriptorBase
 from .datahandling import DataHandler, DataScaler, DataConverter
-from .network import Network, Tester, Trainer, HyperOptInterface, \
+from .network import Network, BaseNetwork, Tester, Trainer, HyperOptInterface, \
     HyperOptOptuna, HyperOptNoTraining, HyperOptOAT, Predictor
 from .targets import TargetInterface, LDOS, DOS, Density, fermi_function

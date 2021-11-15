@@ -1,7 +1,8 @@
 """Collection of all parameter related classes and functions."""
+import os
 import pickle
 import warnings
-from .printout import printout, set_horovod_status
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -10,6 +11,9 @@ except ModuleNotFoundError:
                   "attempting to set parameters.training.use_horovod = "
                   "True WILL cause a crash.", stacklevel=3)
 import torch
+
+from mala.common.printout import printout, set_horovod_status
+
 
 
 class ParametersBase:
@@ -109,8 +113,6 @@ class ParametersNetwork(ParametersBase):
         # for transformer net
         self.dropout = 0.0 
         self.num_heads= None
-
-
 
 class ParametersDescriptors(ParametersBase):
     """
@@ -352,7 +354,16 @@ class ParametersRunning(ParametersBase):
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
-    
+
+    visualisation : int
+        If True then Tensorboard is activated for visualisation
+        case 0: No tensorboard activated
+        case 1: tensorboard activated with Loss and learning rate
+        case 2; additonally weights and biases and gradient  
+
+    inference_data_grid : list
+        List holding the grid to be used for inference in the form of
+        [x,y,z].
     """
 
     def __init__(self):
@@ -360,7 +371,6 @@ class ParametersRunning(ParametersBase):
         self.trainingtype = "SGD"
         self.learning_rate = 0.5
         self.max_number_epochs = 100
-        # TODO: Find a better system for verbosity. Maybe a number.
         self.verbosity = True
         self.mini_batch_size = 10
         self.weight_decay = 0
@@ -370,16 +380,18 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_decay = 0.1
         self.learning_rate_patience = 0
         self.use_compression = False
-        # TODO: Give this parameter a more descriptive name.
         self.kwargs = {'num_workers': 0, 'pin_memory': False}
-        # TODO: Objects should not be parameters!
         self.sampler = {"train_sampler": None, "validate_sampler": None,
                         "test_sampler": None}
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
+        self.visualisation = 0
+        # default visualisation_dir= "~/log_dir"
+        self.visualisation_dir= os.path.join(os.path.expanduser("~"), "log_dir")
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
+        self.inference_data_grid = [0, 0, 0]
 
     def _update_horovod(self, new_horovod):
         super(ParametersRunning, self)._update_horovod(new_horovod)
@@ -431,6 +443,9 @@ class ParametersRunning(ParametersBase):
                 raise Exception("Currently, MALA can only operate with the "
                                 "\"ldos\" metric for horovod runs.")
         self._after_before_training_metric = value
+
+
+        
 
 
 class ParametersHyperparameterOptimization(ParametersBase):
@@ -514,6 +529,29 @@ class ParametersHyperparameterOptimization(ParametersBase):
         For MALA, no evidence for decreased performance using smaller
         heartbeat values could be found. So if this is used, 1s is a reasonable
         value.
+
+    number_training_per_trial : int
+        Number of network trainings performed per trial. Default is 1,
+        but it makes sense to choose a higher number, to exclude networks
+        that performed by chance (good initilization). Naturally this impedes
+        performance.
+
+    trial_ensemble_evaluation : string
+        Control how multiple trainings performed during a trial are evaluated.
+        By default, simply "mean" is used. For smaller numbers of training
+        per trial it might make sense to use "mean_std", which means that
+        the mean of all metrics plus the standard deviation is used,
+        as an estimate of the minimal accuracy to be expected. Currently,
+        "mean" and "mean_std" are allowed.
+
+    use_multivariate : bool
+        If True, the optuna multivariate sampler is used. It is experimental
+        since v2.2.0, but reported to perform very well.
+        http://proceedings.mlr.press/v80/falkner18a.html
+
+    no_training_cutoff : float
+        If the surrogate loss algorithm is used as a pruner during a study,
+        this cutoff determines which trials are neglected.
     """
 
     def __init__(self):
@@ -527,6 +565,11 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.study_name = None
         self.rdb_storage = None
         self.rdb_storage_heartbeat = None
+        self.number_training_per_trial = 1
+        self.trial_ensemble_evaluation = "mean"
+        self.use_multivariate = True
+        self.no_training_cutoff = 0
+        self.pruner = None
 
     @property
     def rdb_storage_heartbeat(self):
@@ -539,6 +582,38 @@ class ParametersHyperparameterOptimization(ParametersBase):
             self._rdb_storage_heartbeat = None
         else:
             self._rdb_storage_heartbeat = value
+
+    @property
+    def number_training_per_trial(self):
+        """Control how many trainings are run per optuna trial."""
+        return self._number_training_per_trial
+
+    @number_training_per_trial.setter
+    def number_training_per_trial(self, value):
+        if value < 1:
+            self._number_training_per_trial = 1
+        else:
+            self._number_training_per_trial = value
+
+    @property
+    def trial_ensemble_evaluation(self):
+        """
+        Control how multiple trainings performed during a trial are evaluated.
+
+        By default, simply "mean" is used. For smaller numbers of training
+        per trial it might make sense to use "mean_std", which means that
+        the mean of all metrics plus the standard deviation is used,
+        as an estimate of the minimal accuracy to be expected. Currently,
+        "mean" and "mean_std" are allowed.
+        """
+        return self._trial_ensemble_evaluation
+
+    @trial_ensemble_evaluation.setter
+    def trial_ensemble_evaluation(self, value):
+        if value != "mean" and value != "mean_std":
+            self._trial_ensemble_evaluation = "mean"
+        else:
+            self._trial_ensemble_evaluation = value
 
     def show(self, indent=""):
         """
