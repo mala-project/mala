@@ -335,22 +335,57 @@ class GRU(LSTM):
                                         batch_first=True)
         self.activation = self.activation_mappings[self.params.layer_activations[0]]()
 
+     # Apply Network
     def forward(self, x):
-        """Perform a forward pass through the network."""
-        return super().forward(x)
+        """
+        Perform a forward pass through the network.
+
+        Parameters
+        ----------
+        inputs : torch.Tensor
+            Input array for which the forward pass is to be performed.
+
+        Returns
+        -------
+        predicted_array : torch.Tensor.
+            Predicted outputs of array.
+        """
+        self.batch_size = x.shape[0]
+
+        if (self.params.no_hidden_state):
+            self.hidden = self.hidden[0].fill_(0.0)
+        
+        
+        self.hidden = self.hidden.detach()
+    
+        x = self.activation(self.first_layer(x))
+
+        if (self.params.bidirection):
+            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size, 
+                                                self.params.num_hidden_layers, 
+                                                self.params.layer_sizes[1]), 
+                                            self.hidden)
+        else:
+            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size, 
+                                                self.params.num_hidden_layers, 
+                                                self.params.layer_sizes[1]), 
+                                            self.hidden)
+
+        x = x[:, -1, :]
+        x = self.activation(x)
+
+        return (x)
 
        # Initialize hidden states
     def init_hidden(self):
         """
-        Initialize hidden state to zero when called and assigns specific sizes.
+        Initialises Hidden state to zero when called and assigns specific sizes.
 
         Returns
         -------
         Hidden state : torch.Tensor
             initialised to zeros.
         """
-        print("init_hidden is called")
-
         if (self.params.bidirection):
             h0 = torch.empty(self.params.num_hidden_layers * 2, 
                              self.mini_batch_size, 
