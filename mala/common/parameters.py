@@ -92,7 +92,6 @@ class ParametersNetwork(ParametersBase):
         self.bidirection = False
 
 
-
 class ParametersDescriptors(ParametersBase):
     """
     Parameters necessary for calculating/parsing input descriptors.
