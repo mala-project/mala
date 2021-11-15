@@ -379,7 +379,7 @@ class GRU(LSTM):
        # Initialize hidden states
     def init_hidden(self):
         """
-        Initialises Hidden state to zero when called and assigns specific sizes.
+        Initialize hidden state to zero when called and assigns specific sizes.
 
         Returns
         -------
