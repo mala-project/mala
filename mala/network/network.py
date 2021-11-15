@@ -314,7 +314,7 @@ class GRU(LSTM):
     def __init__(self, params):
         BaseNetwork.__init__(self, params)
 
-        self.hidden_dim = self.params.layer_sizes[1]
+        self.hidden_dim = self.params.layer_sizes[-1]
         self.hidden = self.init_hidden()# check for size for validate and train
 
         # First Layer
