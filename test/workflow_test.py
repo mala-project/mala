@@ -296,7 +296,7 @@ class TestFullWorkflow:
         new_parameters.targets.ldos_gridspacing_ev = 0.1
         new_parameters.targets.ldos_gridoffset_ev = -10
         new_parameters.data.use_lazy_loading = True
-        new_network = mala.Network.load_from_file(new_parameters, network_path)
+        new_network = mala.BaseNetwork.load_from_file(new_parameters, network_path)
         iscaler = mala.DataScaler.load_from_file(input_scaler_path)
         oscaler = mala.DataScaler.load_from_file(output_scaler_path)
 

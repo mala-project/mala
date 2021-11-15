@@ -521,7 +521,7 @@ def Network(params:Parameters):
         model= GRU(params)
     
     
-    if model is not None:
-        return model
-    else:
+    if model is None:
         raise Exception("Unsupported network architecture.")
+    
+    return model
