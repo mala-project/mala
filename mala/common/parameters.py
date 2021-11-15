@@ -79,17 +79,37 @@ class ParametersNetwork(ParametersBase):
     bidirection: bool
         Sets lstm network size based on bidirectional or just one direction
         Default: False
+    
+    num_hidden_layers: int
+        Number of hidden layers to be used in lstm or gru or transformer nets
+        Default: None
+
+    dropout: float 
+        Dropout rate for transformer net
+        0.0 <= dropout <=1.0
+        Default: 0.0
+    
+    num_heads: int
+        Number of heads to be used in Multi head attention network
+        This should be a divisor of input dimension
+        Default: None
     """
 
     def __init__(self):
         super(ParametersNetwork, self).__init__()
         self.nn_type = "feed-forward"
         self.layer_sizes = [10, 10, 10]
-        self.num_hidden_layers = None
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
+
+        self.num_hidden_layers = None
+        #for lstm/gru
         self.no_hidden_state = False
         self.bidirection = False
+        # for transformer net
+        self.dropout = 0.0 
+        self.num_heads= None
+
 
 
 

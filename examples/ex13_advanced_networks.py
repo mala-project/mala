@@ -63,14 +63,18 @@ printout("Read data: DONE.")
 # The layer sizes can be specified before reading data,
 # but it is safer this way.
 ####################
-# test_parameters.network.nn_type = "transformer"
-test_parameters.network.nn_type = "lstm"
+test_parameters.network.nn_type = "transformer"
+# test_parameters.network.nn_type = "lstm"
 
 test_parameters.network.num_hidden_layers = 1
 test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),100,
                                        data_handler.get_output_dimension()]
-test_parameters.network.no_hidden_state = False
-test_parameters.network.bidirection = False
+if test_parameters.network.nn_type == "lstm":
+    test_parameters.network.no_hidden_state = False
+    test_parameters.network.bidirection = False
+elif test_parameters.network.nn_type == "transformer":
+    test_parameters.network.dropout = 0.2
+    test_parameters.network.num_heads= 7 #must be a divisor of input dimension
 
 # Setup network and trainer.
 test_network = mala.Network(test_parameters)

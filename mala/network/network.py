@@ -62,6 +62,10 @@ class BaseNetwork(nn.Module):
 
     @abstractmethod
     def forward(self, inputs):
+        """
+        Abstract method. To be implemented by the derived class.
+
+        """
         pass
 
     def do_prediction(self, array):
@@ -156,7 +160,10 @@ class BaseNetwork(nn.Module):
         return loaded_network
 
 class FeedForwardNet(BaseNetwork):
-    """Initialize this network as a feed-forward network."""
+    """
+    Initialize this network as a feed-forward network.
+    
+    """
         # Check if multiple types of activations were selected or only one
         # was passed to be used in the entire network.#
         # If multiple layers have been passed, their size needs to be correct.
@@ -282,36 +289,52 @@ class LSTM(BaseNetwork):
 
         
 class TransformerNet(BaseNetwork):
+    """Initialize this network as the transformer net.
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this neural network.
+    
+    """
     def __init__(self, params):
         super(TransformerNet, self).__init__(params)
-
-        self.dropout = .2
-
-        # must be divisor of fp_length
-        self.num_heads = 7
-
-    #        input/hidden equal lengths
-    #        self.num_hidden = 91
-    #        self.num_tokens = 400
+    #    why is d_model==d_hidden?   
+#        self.num_hidden = 91
+#        self.num_tokens = 400
 
         self.src_mask = None
-        self.pos_encoder = PositionalEncoding(self.params.layer_sizes[0], self.dropout)
+        self.pos_encoder = PositionalEncoding(self.params.layer_sizes[0], self.params.dropout)
 
-        encoder_layers = nn.TransformerEncoderLayer(self.params.layer_sizes[0], self.num_heads, self.params.layer_sizes[0], self.dropout)
+        encoder_layers = nn.TransformerEncoderLayer(self.params.layer_sizes[0], self.params.num_heads, self.params.layer_sizes[1], self.params.dropout)
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, self.params.num_hidden_layers)
-    #        self.encoder = nn.Embedding(self.num_tokens, self.params.layer_sizes[0])
+    #   why is he not using embedding? because we already have every thing in numbers and do not need embeding?
+    #   self.encoder = nn.Embedding(self.num_tokens, self.params.layer_sizes[0])
 
         self.decoder = nn.Linear(self.params.layer_sizes[0], self.params.layer_sizes[-1])
 
         self.init_weights()
         
     def generate_square_subsequent_mask(self, size):
+        """
+        Generate a mask so that only the current and previous tokens are visible to the transformer
+
+        Parameters
+        ----------
+        size: int
+            size of the mask
+
+        """
         mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
 
         return mask
 
     def init_weights(self):
+        """
+        Initialise weights with a uniform random distribution in the range (-initrange, initrange)
+        
+        """
         initrange = 0.1
     #        self.encoder.weight.data.uniform_(-initrange, initrange)
         self.decoder.bias.data.zero_()
@@ -319,7 +342,10 @@ class TransformerNet(BaseNetwork):
 
 
     def forward(self, x):
+        """
+        Perform a forward pass through the network.
 
+        """
         if self.src_mask is None or self.src_mask.size(0) != x.size(0):
             device = x.device
             mask = self.generate_square_subsequent_mask(x.size(0)).to(device)
@@ -333,7 +359,19 @@ class TransformerNet(BaseNetwork):
         return output
 
 class PositionalEncoding(nn.Module):
+    """Injects some information of relative/absolute position of token in a sequence.
+    
+    Parameters
+    ----------
+    d_model : int
+        input dimension of the model
 
+    dropout : float
+        dropout rate
+
+    max_len: int    
+        maximum length of the input sequence 
+    """
     def __init__(self, d_model, dropout=0.1, max_len=400):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
@@ -351,6 +389,10 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
+        """
+        Perform a forward pass through the network.
+
+        """
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
 
