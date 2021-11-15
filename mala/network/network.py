@@ -61,10 +61,7 @@ class BaseNetwork(nn.Module):
 
     @abstractmethod
     def forward(self, inputs):
-        """
-        Abstract method. To be implemented by the derived class.
-
-        """
+        """Abstract method. To be implemented by the derived class."""
         pass
 
     def do_prediction(self, array):
@@ -159,15 +156,8 @@ class BaseNetwork(nn.Module):
         return loaded_network
 
 class FeedForwardNet(BaseNetwork):
-<<<<<<< HEAD
-    """
-    Initialize this network as a feed-forward network.
-    
-    """
-=======
     """Initialize this network as a feed-forward network."""
-
->>>>>>> 7630b95... added changed for GRU
+        
         # Check if multiple types of activations were selected or only one
         # was passed to be used in the entire network.#
         # If multiple layers have been passed, their size needs to be correct.
@@ -211,7 +201,6 @@ class FeedForwardNet(BaseNetwork):
         predicted_array : torch.Tensor
             Predicted outputs of array.
         """
-
         # Forward propagate data.
         for layer in self.layers:
             inputs = layer(inputs)
@@ -221,7 +210,6 @@ class LSTM(BaseNetwork):
     """Initialize this network as a LSTM network."""
         
     # was passed to be used in the entire network.
-
     def __init__(self, params):
         super(LSTM, self).__init__(params)
 
@@ -264,7 +252,6 @@ class LSTM(BaseNetwork):
         predicted_array : torch.Tensor
             Predicted outputs of array.
         """
-
         self.batch_size = x.shape[0]
 
         if (self.params.no_hidden_state):
@@ -294,15 +281,13 @@ class LSTM(BaseNetwork):
     # Initialize hidden and cell states
     def init_hidden(self):
         """
-        Initialises Hidden state and cell state to zero when called and assigns specific sizes.
+        Initialize hidden state and cell state to zero when called and assigns specific sizes.
 
         Returns
         -------
         Hidden state and cell state : torch.Tensor
             initialised to zeros.
         """
-        print("init_hidden is called")
-
         if (self.params.bidirection):
             h0 = torch.empty(self.params.num_hidden_layers * 2, 
                              self.mini_batch_size, 
@@ -326,14 +311,11 @@ class GRU(LSTM):
     """Initialize this network as a GRU network."""
         
     # was passed to be used similar to LSTM but with small tweek for the layer as GRU.
-    
     def __init__(self, params):
         BaseNetwork.__init__(self, params)
 
         self.hidden_dim = self.params.layer_sizes[1]
         self.hidden = self.init_hidden()# check for size for validate and train
-
-        print("initialising GRU network")
 
         # First Layer
         self.first_layer = nn.Linear(self.params.layer_sizes[0], self.params.layer_sizes[1])
@@ -354,12 +336,13 @@ class GRU(LSTM):
         self.activation = self.activation_mappings[self.params.layer_activations[0]]()
 
     def forward(self, x):
+        """Perform a forward pass through the network."""
         return super().forward(x)
 
        # Initialize hidden states
     def init_hidden(self):
         """
-        Initialises Hidden state to zero when called and assigns specific sizes.
+        Initialize hidden state to zero when called and assigns specific sizes.
 
         Returns
         -------
@@ -386,9 +369,9 @@ class TransformerNet(BaseNetwork):
     Parameters
     ----------
     params : mala.common.parametes.Parameters
-        Parameters used to create this neural network.
-    
+        Parameters used to create this neural network. 
     """
+
     def __init__(self, params):
         super(TransformerNet, self).__init__(params)
     #    why is d_model==d_hidden?   
@@ -409,13 +392,12 @@ class TransformerNet(BaseNetwork):
         
     def generate_square_subsequent_mask(self, size):
         """
-        Generate a mask so that only the current and previous tokens are visible to the transformer
+        Generate a mask so that only the current and previous tokens are visible to the transformer.
 
         Parameters
         ----------
         size: int
             size of the mask
-
         """
         mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
@@ -423,10 +405,7 @@ class TransformerNet(BaseNetwork):
         return mask
 
     def init_weights(self):
-        """
-        Initialise weights with a uniform random distribution in the range (-initrange, initrange)
-        
-        """
+        """Initialise weights with a uniform random distribution in the range (-initrange, initrange).""" 
         initrange = 0.1
     #        self.encoder.weight.data.uniform_(-initrange, initrange)
         self.decoder.bias.data.zero_()
@@ -434,10 +413,7 @@ class TransformerNet(BaseNetwork):
 
 
     def forward(self, x):
-        """
-        Perform a forward pass through the network.
-
-        """
+        """Perform a forward pass through the network."""
         if self.src_mask is None or self.src_mask.size(0) != x.size(0):
             device = x.device
             mask = self.generate_square_subsequent_mask(x.size(0)).to(device)
@@ -462,8 +438,9 @@ class PositionalEncoding(nn.Module):
         dropout rate
 
     max_len: int    
-        maximum length of the input sequence 
+        maximum length of the input sequence
     """
+
     def __init__(self, d_model, dropout=0.1, max_len=400):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
@@ -481,25 +458,20 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
-        """
-        Perform a forward pass through the network.
-
-        """
+        """Perform a forward pass through the network."""
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
 
 
 def Network(params:Parameters):
     """
-        Assigns model to different network class: .
+    Assign a model to an appropriate network class based on nn_type.
 
-        Parameter:
-        ---------
-        params : mala.common.parametes.Parameters
-        Parameters used to create this neural network.
-        
+    Parameter:
+    ---------
+    params : mala.common.parametes.Parameters
+    Parameters used to create this neural network.   
     """
-
     model: BaseNetwork= None 
     if params.network.nn_type == "feed-forward":
         model= FeedForwardNet(params)
