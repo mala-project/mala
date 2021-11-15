@@ -1,4 +1,4 @@
-# ML-DFT Networks
+# MLMM Networks
 
 ------------------------------------------------
 Description:

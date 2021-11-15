@@ -1,0 +1,35 @@
+This folder contains examples of Python interfaces to C, C++, and F90 functions.
+In all cases, the Python ctypes module is used and the functions are
+compiled as shared library objects.
+
+https://docs.python.org/3/library/ctypes.html
+
+1. Requirements:
+
+Python 3.0
+GNU gcc/g++/gfortran 6.1
+Include current working directory in LD_LIBRARY_PATH (DYLD_LIBRARY_PATH on Mac):
+  setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:.
+    or 
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+
+2. Build Libraries:
+
+To compile the shared libraries, do:
+
+gcc -shared -fPIC -o test_libraryc.so test_library.c
+g++ -shared -fPIC -o test_librarycpp.so test_library.cpp
+gfortran -shared -fPIC -o test_libraryf90.so test_library.f90
+
+3. Run test:
+
+To test the fuctions from Python, do:
+
+python test_library.py
+
+Here is a summary of the functions:
+
+1. hello_world() works for C, C++, and F90
+2. create_matrix() works for C and C++
+3. create_vector() works for F90
+4. create_matrix() works for F90
