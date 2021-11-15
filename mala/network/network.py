@@ -467,10 +467,10 @@ def Network(params:Parameters):
     """
     Assign a model to an appropriate network class based on nn_type.
 
-    Parameter:
-    ---------
+    Parameters
+    ----------
     params : mala.common.parametes.Parameters
-    Parameters used to create this neural network.   
+        Parameters used to create this neural network.   
     """
     model: BaseNetwork= None 
     if params.network.nn_type == "feed-forward":
