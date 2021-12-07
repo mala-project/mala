@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-6-ga0e1b86
+                v0.2.0-11-g791e600
               </div>
             
           
@@ -724,6 +724,11 @@ since v2.2.0, but reported to perform very well.
 </dd>
 <dt>no_training_cutoff<span class="classifier">float</span></dt><dd><p>If the surrogate loss algorithm is used as a pruner during a study,
 this cutoff determines which trials are neglected.</p>
+</dd>
+<dt>pruner: string</dt><dd><p>Pruner type to be used by optuna. Currently only “no_training” is
+supported, which will use the NASWOT algorithm as pruner.</p>
+</dd>
+<dt>naswot_pruner_batch_size<span class="classifier">int</span></dt><dd><p>Batch size for the NASWOT pruner</p>
 </dd>
 </dl>
 <dl class="py method">

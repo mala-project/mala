@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-6-ga0e1b86
+                v0.2.0-11-g791e600
               </div>
             
           
@@ -328,6 +328,12 @@ hyperparameter optimizer was created.</p>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt id="mala.network.hyper_opt_notraining.HyperOptNoTraining.get_best_trial_results">
+<code class="sig-name descname"><span class="pre">get_best_trial_results</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining.get_best_trial_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the best trial out of the list, including the value.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="mala.network.hyper_opt_notraining.HyperOptNoTraining.perform_study">
 <code class="sig-name descname"><span class="pre">perform_study</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining.perform_study" title="Permalink to this definition">¶</a></dt>
@@ -670,6 +676,43 @@ etc. as names.</p></li>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna" title="mala.network.hyperparameter_optuna.HyperparameterOptuna">HyperparameterOptuna</a> or <a class="reference internal" href="#mala.network.hyperparameter_oat.HyperparameterOAT" title="mala.network.hyperparameter_oat.HyperparameterOAT">HyperparameterOAT</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mala.network.hyperparameter_naswot">
+<span id="mala-network-hyperparameter-naswot-module"></span><h2>mala.network.hyperparameter_naswot module<a class="headerlink" href="#module-mala.network.hyperparameter_naswot" title="Permalink to this headline">¶</a></h2>
+<p>Hyperparameter to use with optuna.</p>
+<dl class="py class">
+<dt id="mala.network.hyperparameter_naswot.HyperparameterNASWOT">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyperparameter_naswot.</span></code><code class="sig-name descname"><span class="pre">HyperparameterNASWOT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyperparameter_naswot.HyperparameterNASWOT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna" title="mala.network.hyperparameter_optuna.HyperparameterOptuna"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.hyperparameter_optuna.HyperparameterOptuna</span></code></a></p>
+<p>Represents a parameter used for pure NASWOT.</p>
+<p>Based upon the hyperparameter representation for optuna.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>opttype</strong> (<em>string</em>) – <p>Datatype of the hyperparameter. Follows optunas naming convetions.
+In principle supported are:</p>
+<blockquote>
+<div><ul>
+<li><p>float</p></li>
+<li><p>int</p></li>
+<li><p>categorical (list)</p></li>
+</ul>
+</div></blockquote>
+<p>Float and int are not available for OA based approaches at the
+moment.</p>
+</p></li>
+<li><p><strong>name</strong> (<em>string</em>) – Name of the hyperparameter. Please note that these names always
+have to be distinct; if you e.g. want to investigate multiple
+layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
+etc. as names.</p></li>
+<li><p><strong>low</strong> (<em>float</em><em> or </em><em>int</em>) – Lower bound for numerical parameter.</p></li>
+<li><p><strong>high</strong> (<em>float</em><em> or </em><em>int</em>) – Higher bound for numerical parameter.</p></li>
+<li><p><strong>choices</strong> – List of possible choices (for categorical parameter).</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1065,7 +1108,7 @@ trial or simply a OAT compatible list.</p>
 <p>Objective functions for hyperparameter optimizations without training.</p>
 <dl class="py class">
 <dt id="mala.network.objective_no_training.ObjectiveNoTraining">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.objective_no_training.</span></code><code class="sig-name descname"><span class="pre">ObjectiveNoTraining</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_parameters</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_handler</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><span class="pre">mala.datahandling.data_handler.DataHandler</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.objective_no_training.ObjectiveNoTraining" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.objective_no_training.</span></code><code class="sig-name descname"><span class="pre">ObjectiveNoTraining</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_parameters</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_handler</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><span class="pre">mala.datahandling.data_handler.DataHandler</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.objective_no_training.ObjectiveNoTraining" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.objective_base.ObjectiveBase" title="mala.network.objective_base.ObjectiveBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.objective_base.ObjectiveBase</span></code></a></p>
 <p>Represents the objective function using no NN training.</p>
 <p>The objective value is calculated using the Jacobian.</p>
@@ -1083,6 +1126,9 @@ choices are:</p>
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size for the forwarding. Default (None) means that the regular
+mini batch size from ParametersRunning is used; however, for some
+applications it might make sense to specify something different.</p></li>
 </ul>
 </dd>
 </dl>

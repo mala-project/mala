@@ -52,6 +52,14 @@ mala.network.hyperparameter\_interface module
    :undoc-members:
    :show-inheritance:
 
+mala.network.hyperparameter\_naswot module
+------------------------------------------
+
+.. automodule:: mala.network.hyperparameter_naswot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mala.network.hyperparameter\_oat module
 ---------------------------------------
 
