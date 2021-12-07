@@ -58,7 +58,9 @@ class NoTrainingPruner(BasePruner):
             pruned. 
         """
         objective = ObjectiveNoTraining(self._params, self._data_handler,
-                                        self._trial_type)
+                                        self._trial_type, batch_size=
+                                        self._params.hyperparameters.
+                                        naswot_pruner_batch_size)
         surrogate_loss = objective(trial)
         if surrogate_loss < self._params.hyperparameters.no_training_cutoff:
             return True

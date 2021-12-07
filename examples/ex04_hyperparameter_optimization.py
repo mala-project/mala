@@ -40,11 +40,15 @@ def initial_setup():
     # Specify the number of trials, the hyperparameter optimizer should run
     # and the type of hyperparameter.
     test_parameters.hyperparameters.n_trials = 20
-    test_parameters.hyperparameters.hyper_opt_method = "oat"
+    test_parameters.hyperparameters.hyper_opt_method = "optuna"
     test_parameters.hyperparameters.number_training_per_trial = 1
     test_parameters.running.verbosity = False
     test_parameters.hyperparameters.checkpoint_name = "ex04"
     test_parameters.hyperparameters.checkpoints_each_trial = -1
+    test_parameters.hyperparameters.pruner = "no_training"
+    test_parameters.hyperparameters.naswot_pruner_batch_size = 60
+    test_parameters.hyperparameters.no_training_cutoff = 1000000000000
+
     ####################
     # DATA
     # Add and prepare snapshots for training.
