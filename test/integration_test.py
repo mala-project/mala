@@ -6,7 +6,7 @@ import numpy as np
 import scipy as sp
 import pytest
 
-from data_repo_path import data_repo_path
+from mala.datahandling.data_repo import data_repo_path
 
 # In order to test the integration capabilities of MALA we need a
 # QuantumEspresso

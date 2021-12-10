@@ -152,12 +152,13 @@ $ pip install -r docs/requirements.txt
 
 ## Downloading and adding example data
 
-The examples and tests need additional data to run. The MALA team provides a data repository, that can be downloaded
-from <https://github.com/mala-project/test-data>. Please be sure to check out the correct tag for the data repository,
-since the data repository itself is subject to ongoing development as well. After downloading the correct revision of
-the data repository, it needs to be linked with MALA.
+The examples and tests need additional data to run. The MALA team provides a
+data repository, that can be obtained from
+<https://github.com/mala-project/test-data>. Please be sure to check out the
+correct tag for the data repository, since the data repository itself is
+subject to ongoing development as well.
 
-1. Download data repository and check out correct tag.
+Download data repository and check out correct tag.
 
    ```sh
    $ git clone https://github.com/mala-project/test-data ~/path/to/data/repo
@@ -165,18 +166,10 @@ the data repository, it needs to be linked with MALA.
    $ git checkout v1.1.0
    ```
 
-2. Link MALA and data repository.
+Export
 
-   ```sh
-   $ cd ~/path/to/mala/root/directory
-   $ bash install/data_repo_link/link_data_repo.sh ~/path/to/data/repo
-   ```
+```sh
+$ export MALA_DATA_REPO=~/path/to/data/repo
+```
 
-   Afterwards, check that files named `data_repo_path.py` have been generated.
-
-   ```sh
-   $ find . -name data_repo_path.py
-   ./install/data_repo_link/data_repo_path.py
-   ./test/data_repo_path.py
-   ./examples/data_repo_path.py
-   ```
+pointing to that repo. This will be used by tests and examples.
