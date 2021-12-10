@@ -20,6 +20,14 @@ mala.datahandling.data\_handler module
    :undoc-members:
    :show-inheritance:
 
+mala.datahandling.data\_repo module
+-----------------------------------
+
+.. automodule:: mala.datahandling.data_repo
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mala.datahandling.data\_scaler module
 -------------------------------------
 
