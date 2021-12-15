@@ -85,7 +85,7 @@ class HyperOptOptuna(HyperOptBase):
             callback_list.append(self.__create_checkpointing)
 
         self.study.optimize(self.objective,
-                            n_trials=self.params.hyperparameters.n_trials,
+                            n_trials=None,
                             callbacks=callback_list)
 
         # Return the best lost value we could achieve.
@@ -239,6 +239,25 @@ class HyperOptOptuna(HyperOptBase):
 
         return loaded_hyperopt
 
+    def __get_number_of_completed_trials(self, study):
+        """Get the number of maximum trials."""
+        # How to calculate this depends on whether or not a heartbeat was
+        # used. If one was used, then both COMPLETE and RUNNING trials
+        # Can be taken into account, as it can be expected that RUNNING
+        # trials will actually finish. If no heartbeat is used,
+        # then RUNNING trials might be Zombie trials.
+        # See
+        if self.params.hyperparameters.rdb_storage_heartbeat is None:
+            return len([t for t in study.trials if
+                        t.state == optuna.trial.
+                        TrialState.COMPLETE])
+        else:
+            return len([t for t in study.trials if
+                        t.state == optuna.trial.
+                        TrialState.COMPLETE or
+                        t.state == optuna.trial.
+                        TrialState.RUNNING])
+
     def __check_max_number_trials(self, study, trial):
         """Check if this trial was already the maximum number of trials."""
         # How to check for this depends on whether or not a heartbeat was
@@ -250,17 +269,8 @@ class HyperOptOptuna(HyperOptBase):
         # https://github.com/optuna/optuna/issues/1883#issuecomment-841844834
         # https://github.com/optuna/optuna/issues/1883#issuecomment-842106950
 
-        if self.params.hyperparameters.rdb_storage_heartbeat is None:
-            number_of_completed_trials = len([t for t in study.trials if
-                                              t.state == optuna.trial.
-                                              TrialState.COMPLETE])
-        else:
-            number_of_completed_trials = len([t for t in study.trials if
-                                              t.state == optuna.trial.
-                                              TrialState.COMPLETE or
-                                              t.state == optuna.trial.
-                                              TrialState.RUNNING])
-        if number_of_completed_trials >= self.params.hyperparameters.n_trials:
+        if self.__get_number_of_completed_trials(study) >= \
+                self.params.hyperparameters.n_trials:
             self.study.stop()
 
     def __create_checkpointing(self, study, trial):
@@ -277,10 +287,11 @@ class HyperOptOptuna(HyperOptBase):
                                              "checkpoint for hyperparameter "
                                              "optimization.")
         if self.params.hyperparameters.checkpoints_each_trial < 0 and \
-                trial.number == study.best_trial.number:
-            need_to_checkpoint = True
-            printout("Best trial is "+str(trial.number)+", creating a "
-                     "checkpoint for it.")
+           self.__get_number_of_completed_trials(study) > 0:
+                if trial.number == study.best_trial.number:
+                    need_to_checkpoint = True
+                    printout("Best trial is "+str(trial.number)+", creating a "
+                             "checkpoint for it.")
 
         if need_to_checkpoint is True:
             # We need to create a checkpoint!

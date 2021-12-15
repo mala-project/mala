@@ -486,7 +486,7 @@ class Trainer(Runner):
 
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
-        prediction = network.forward(input_data)
+        prediction = network(input_data)
         loss = network.calculate_loss(prediction, target_data)
         loss.backward()
         self.optimizer.step()

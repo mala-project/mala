@@ -530,6 +530,13 @@ class ParametersHyperparameterOptimization(ParametersBase):
     no_training_cutoff : float
         If the surrogate loss algorithm is used as a pruner during a study,
         this cutoff determines which trials are neglected.
+
+    pruner: string
+        Pruner type to be used by optuna. Currently only "no_training" is
+        supported, which will use the NASWOT algorithm as pruner.
+
+    naswot_pruner_batch_size : int
+        Batch size for the NASWOT pruner
     """
 
     def __init__(self):
@@ -548,6 +555,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.use_multivariate = True
         self.no_training_cutoff = 0
         self.pruner = None
+        self.naswot_pruner_batch_size = 0
 
     @property
     def rdb_storage_heartbeat(self):

@@ -151,12 +151,8 @@ cython_debug/
 *.in
 *.out
 *.npy
-/examples/data_repo_path.py
 *.pkl
 *.pth
-/install/data_repo_link/data_repo_path.py
-/test/data_repo_path.py
-
 
 # JupyterNotebooks
 .ipynb_checkpoints
