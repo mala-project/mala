@@ -8,7 +8,7 @@ from ase.md import MDLogger
 from ase.calculators.espresso import Espresso
 from ase.units import fs
 
-from data_repo_path import data_repo_path
+from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 
 """
@@ -172,14 +172,14 @@ def initial_training():
 
 if __name__ == "__main__":
     # First, train a MALA network.
-    network, parameters, input_scaler, output_scaler = \
-        initial_training()
+    # network, parameters, input_scaler, output_scaler = \
+    #     initial_training()
 
     # Instead of training, these can also be loaded.
-    # parameters = mala.Parameters.load_from_file("ex13.params.pkl")
-    # input_scaler = mala.DataScaler.load_from_file("ex13.iscaler.pkl")
-    # output_scaler = mala.DataScaler.load_from_file("ex13.oscaler.pkl")
-    # network = mala.Network.load_from_file(parameters, "ex13.network.pth")
+    parameters = mala.Parameters.load_from_file("ex13.params.pkl")
+    input_scaler = mala.DataScaler.load_from_file("ex13.iscaler.pkl")
+    output_scaler = mala.DataScaler.load_from_file("ex13.oscaler.pkl")
+    network = mala.Network.load_from_file(parameters, "ex13.network.pth")
 
     # Next, use these values to run an MD simulation.
     md_mala(network, parameters, input_scaler, output_scaler)

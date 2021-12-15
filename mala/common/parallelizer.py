@@ -8,9 +8,11 @@ try:
 except ModuleNotFoundError:
     pass
 
+
 use_horovod = False
 use_mpi = False
 comm = None
+
 
 def set_horovod_status(new_value):
     """
@@ -53,6 +55,10 @@ def set_mpi_status(new_value):
     if use_mpi:
         global comm
         comm = MPI.COMM_WORLD
+
+    # else:
+    #     global comm
+    #     comm = MockCommunicator()
 
 
 def get_rank():

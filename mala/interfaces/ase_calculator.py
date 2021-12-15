@@ -80,7 +80,8 @@ class ASECalculator(Calculator):
             any combination of these six: 'positions', 'numbers', 'cell',
             'pbc', 'initial_charges' and 'initial_magmoms'.
         """
-        get_comm().Barrier()
+        if self.params.use_mpi:
+            get_comm().Barrier()
         Calculator.calculate(self, atoms, properties, system_changes)
 
         # Get the LDOS from the NN.
@@ -120,9 +121,10 @@ class ASECalculator(Calculator):
                              create_qe_file=create_file)
             forces = density_calculator.get_atomic_forces(density,
                                                           create_file=create_file)
-        get_comm().Barrier()
-        energy = get_comm().bcast(energy, root=0)
-        get_comm().Bcast([forces, MPI.DOUBLE], root=0)
+        if self.params.use_mpi:
+            get_comm().Barrier()
+            energy = get_comm().bcast(energy, root=0)
+            get_comm().Bcast([forces, MPI.DOUBLE], root=0)
         # Use the LDOS determined DOS and density to get energy and forces.
         self.results["energy"] = energy
         self.results["forces"] = forces
