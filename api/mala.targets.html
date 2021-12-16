@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-18-gaa033c2
+                v0.2.0-67-g0855a4c
               </div>
             
           
@@ -115,6 +115,7 @@
 <li class="toctree-l4"><a class="reference internal" href="mala.common.html">mala.common package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.datahandling.html">mala.datahandling package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.html">mala.descriptors package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.interfaces.html">mala.interfaces package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.html">mala.network package</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">mala.targets package</a></li>
 </ul>
@@ -207,6 +208,56 @@
 <h1>mala.targets package<a class="headerlink" href="#mala-targets-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mala.targets.atomic_force">
+<span id="mala-targets-atomic-force-module"></span><h2>mala.targets.atomic_force module<a class="headerlink" href="#module-mala.targets.atomic_force" title="Permalink to this headline">¶</a></h2>
+<p>Electronic density calculation class.</p>
+<dl class="py class">
+<dt id="mala.targets.atomic_force.AtomicForce">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.targets.atomic_force.</span></code><code class="sig-name descname"><span class="pre">AtomicForce</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.atomic_force.AtomicForce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.targets.target_base.TargetBase</span></code></a></p>
+<p>Postprocessing / parsing functions for atomic forces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this TargetBase object.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.targets.atomic_force.AtomicForce.convert_units">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">convert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eV/Ang'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.atomic_force.AtomicForce.convert_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the units of an array into the MALA units.</p>
+<p>MALA units for the LDOS means 1/eV.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>numpy.array</em>) – Data for which the units should be converted.</p></li>
+<li><p><strong>in_units</strong> (<em>string</em>) – <p>Units of array. Currently supported are:</p>
+<blockquote>
+<div><ul>
+<li><p>1/eV (no conversion, MALA unit)</p></li>
+<li><p>1/Ry</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>converted_array</strong> – Data in 1/eV.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.atomic_force.AtomicForce.get_feature_size">
+<code class="sig-name descname"><span class="pre">get_feature_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.atomic_force.AtomicForce.get_feature_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get dimension of this target if used as feature in ML.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-mala.targets.calculation_helpers">
 <span id="mala-targets-calculation-helpers-module"></span><h2>mala.targets.calculation_helpers module<a class="headerlink" href="#module-mala.targets.calculation_helpers" title="Permalink to this headline">¶</a></h2>
@@ -708,6 +759,41 @@ If only one filename given, other filename is inferred.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#mala.targets.density.Density" title="mala.targets.density.Density">Density</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.density.Density.get_atomic_forces">
+<code class="sig-name descname"><span class="pre">get_atomic_forces</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.density.Density.get_atomic_forces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the atomic forces.</p>
+<p>This function uses an interface to QE. The atomic forces are
+calculated via the Hellman-Feynman theorem, although only the local
+contributions are calculated. The non-local contributions, as well
+as the SCF correction (so anythin wavefunction dependent) is ignored.
+Therefore, this function is best used for data that was created using
+local pseudopotentials.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>density_data</strong> (<em>numpy.array</em>) – Density data on a grid.</p></li>
+<li><p><strong>create_file</strong> (<em>bool</em>) – If False, the last mala.pw.scf.in file will be used as input for
+Quantum Espresso. If True (recommended), MALA will create this
+file according to calculation parameters.</p></li>
+<li><p><strong>atoms_Angstrom</strong> (<em>ase.Atoms</em>) – ASE atoms object for the current system. If None, MALA will
+create one.</p></li>
+<li><p><strong>qe_input_data</strong> (<em>dict</em>) – Quantum Espresso parameters dictionary for the ASE&lt;-&gt;QE interface.
+If None (recommended), MALA will create one.</p></li>
+<li><p><strong>qe_pseudopotentials</strong> (<em>dict</em>) – Quantum Espresso pseudopotential dictionaty for the ASE&lt;-&gt;QE
+interface. If None (recommended), MALA will create one.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>atomic_forces</strong> – An array of the form (natoms, 3), containing the atomic forces
+in eV/Ang.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1274,6 +1360,35 @@ Currently supported:</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.targets.ldos.LDOS.get_atomic_forces">
+<code class="sig-name descname"><span class="pre">get_atomic_forces</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dE_dd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_data_handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_atomic_forces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the atomic forces (dE/dR), currently work in progress.</p>
+<p>Will only give the dd_dB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ldos_data</strong> (<em>torch.Tensor</em>) – Scaled (!) torch tensor holding the LDOS data for the snapshot
+for which the atomic force should be calculated.</p></li>
+<li><p><strong>dE_dd</strong> (<em>np.array</em>) – (WIP) Derivative of the total energy w.r.t the LDOS.
+Later on, this will be evaluated within this subroutine. For now
+it is provided from outside.</p></li>
+<li><p><strong>used_data_handler</strong> (<em>mala.data.data_handler.DataHandler</em>) – DataHandler that was used to predict the LDOS for which the
+atomic forces are supposed to be calculated.</p></li>
+<li><p><strong>snapshot_number</strong> – Snapshot number (number within the data handler) for which this
+LDOS prediction was performed. Always 0 in the inference case.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dd_dB</strong> – (WIP) Returns the scaled (!) derivative of the LDOS w.r.t to
+the SNAP descriptors.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.targets.ldos.LDOS.get_band_energy">
 <code class="sig-name descname"><span class="pre">get_band_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_band_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the band energy from given LDOS data.</p>
@@ -1493,7 +1608,7 @@ Currently supported:</p>
 
 <dl class="py method">
 <dt id="mala.targets.ldos.LDOS.get_total_energy">
-<code class="sig-name descname"><span class="pre">get_total_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_total_energy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_total_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_qe_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_total_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the total energy from LDOS or given DOS + density data.</p>
 <p>EITHER LDOS OR Density+DOS data have to be specified. Elsewise
 this function will raise an exception.</p>
@@ -1676,6 +1791,12 @@ format and performs postprocessing calculations on the quantity.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.targets.target_base.TargetBase.get_real_space_grid">
+<code class="sig-name descname"><span class="pre">get_real_space_grid</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase.get_real_space_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the real space grid.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.targets.target_base.TargetBase.get_total_energy">
 <code class="sig-name descname"><span class="pre">get_total_energy</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase.get_total_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the total energy.</p>
@@ -1727,6 +1848,29 @@ of data restriction is specified by the parameters.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.target_base.TargetBase.write_tem_input_file">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">write_tem_input_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpoints</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase.write_tem_input_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a QE-style input file for the total energy module.</p>
+<p>Usually, the used parameters should correspond to the properties of
+the object calling this function, but they don’t necessarily have
+to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms_Angstrom</strong> (<em>ase.Atoms</em>) – ASE atoms object for the current system. If None, MALA will
+create one.</p></li>
+<li><p><strong>qe_input_data</strong> (<em>dict</em>) – Quantum Espresso parameters dictionary for the ASE&lt;-&gt;QE interface.
+If None (recommended), MALA will create one.</p></li>
+<li><p><strong>qe_pseudopotentials</strong> (<em>dict</em>) – Quantum Espresso pseudopotential dictionaty for the ASE&lt;-&gt;QE
+interface. If None (recommended), MALA will create one.</p></li>
+<li><p><strong>grid_dimensions</strong> (<em>list</em>) – A list containing the x,y,z dimensions of the real space grid.</p></li>
+<li><p><strong>kpoints</strong> (<em>dict</em>) – k-grid used, usually None or (1,1,1) for TEM calculations.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

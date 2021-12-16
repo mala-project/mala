@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-18-gaa033c2
+                v0.2.0-67-g0855a4c
               </div>
             
           
@@ -196,13 +196,13 @@
 <div class="section" id="installing-lammps">
 <h2>Installing LAMMPS<a class="headerlink" href="#installing-lammps" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>checkout <a class="reference external" href="https://github.com/athomps/lammps/tree/compute-grid">https://github.com/athomps/lammps/tree/compute-grid</a></p></li>
+<li><p>checkout <a class="reference external" href="https://github.com/athomps/lammps/tree/compute-grid-new">https://github.com/athomps/lammps/tree/compute-grid-new</a></p></li>
 <li><p>Make sure the compute-grid tree is checked out!</p></li>
 <li><p>Compile the LAMMPS shared library with the SNAP package installed</p>
 <ul>
 <li><p>cd into <code class="docutils literal notranslate"><span class="pre">/path/to/lammps/src</span></code> folder of LAMMPS</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yes-snap</span></code></p></li>
-<li><p>(optional: check with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">ps</span></code> that snap was correctly added)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yes-ml-snap</span></code></p></li>
+<li><p>(optional: check with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">ps</span></code> that <code class="docutils literal notranslate"><span class="pre">ml-snap</span></code> was correctly added)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">mode=shlib</span> <span class="pre">mpi</span></code></p></li>
 </ul>
 </li>
@@ -220,7 +220,7 @@
 <div class="section" id="method-2-package-recommended">
 <h3>Method 2 (package, recommended)<a class="headerlink" href="#method-2-package-recommended" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">install.py</span> <span class="pre">-m</span> <span class="pre">lammps.py</span> <span class="pre">-l</span> <span class="pre">../src/liblammps.so</span> <span class="pre">-v</span> <span class="pre">../src/version.h</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">install.py</span> <span class="pre">-p</span> <span class="pre">lammps</span> <span class="pre">-l</span> <span class="pre">../src/liblammps.so</span> <span class="pre">-v</span> <span class="pre">../src/version.h</span></code></p></li>
 </ul>
 </div>
 </div>

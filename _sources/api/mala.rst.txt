@@ -10,6 +10,7 @@ Subpackages
    mala.common
    mala.datahandling
    mala.descriptors
+   mala.interfaces
    mala.network
    mala.targets
 

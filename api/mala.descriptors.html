@@ -40,7 +40,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="mala.network package" href="mala.network.html" />
+    <link rel="next" title="mala.interfaces package" href="mala.interfaces.html" />
     <link rel="prev" title="mala.datahandling package" href="mala.datahandling.html" /> 
 </head>
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-18-gaa033c2
+                v0.2.0-67-g0855a4c
               </div>
             
           
@@ -115,6 +115,7 @@
 <li class="toctree-l4"><a class="reference internal" href="mala.common.html">mala.common package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.datahandling.html">mala.datahandling package</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">mala.descriptors package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.interfaces.html">mala.interfaces package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.html">mala.network package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.html">mala.targets package</a></li>
 </ul>
@@ -350,7 +351,7 @@ objects, the atoms are explicitly in the unit cell.</p>
 <p>Collection of useful functions for working with LAMMPS.</p>
 <dl class="py function">
 <dt id="mala.descriptors.lammps_utils.extract_compute_np">
-<code class="sig-prename descclassname"><span class="pre">mala.descriptors.lammps_utils.</span></code><code class="sig-name descname"><span class="pre">extract_compute_np</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array_shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.lammps_utils.extract_compute_np" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">mala.descriptors.lammps_utils.</span></code><code class="sig-name descname"><span class="pre">extract_compute_np</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.lammps_utils.extract_compute_np" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a lammps compute to a numpy array.</p>
 <p>Assumes the compute returns a floating point numbers.
 Note that the result is a view into the original memory.
@@ -431,7 +432,7 @@ skipped and a python float is returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms object holding the atomic configuration.</p></li>
+<li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms object holding the atomic configuration.l</p></li>
 <li><p><strong>grid_dimensions</strong> (<em>list</em>) – Grid dimensions to be used, in the format [x,y,z].</p></li>
 <li><p><strong>working_directory</strong> (<em>string</em>) – A directory in which to perform the LAMMPS calculation.</p></li>
 </ul>
@@ -488,6 +489,28 @@ skipped and a python float is returned.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt id="mala.descriptors.snap.SNAP.gather_descriptors">
+<code class="sig-name descname"><span class="pre">gather_descriptors</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snap_descriptors_np</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pickled_comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.snap.SNAP.gather_descriptors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gathers all SNAP descriptors on rank 0 and sorts them.</p>
+<p>This is useful for e.g. parallel preprocessing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>snap_descriptors_np</strong> (<em>numpy.array</em>) – Numpy array with the SNAP descriptors of this ranks local grid.</p></li>
+<li><p><strong>use_pickled_comm</strong> (<em>bool</em>) – If True, the pickled communication route from mpi4py is used.
+If False, a Recv/Sendv combination is used. I am not entirely
+sure what is faster. Technically Recv/Sendv should be faster,
+but I doubt my implementation is all that optimal. For the pickled
+route we can use gather(), which should be fairly quick.
+However, for large grids, one CANNOT use the pickled route;
+too large python objects will break it. Therefore, I am setting
+the Recv/Sendv route as default.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -503,7 +526,7 @@ skipped and a python float is returned.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="mala.network.html" class="btn btn-neutral float-right" title="mala.network package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.interfaces.html" class="btn btn-neutral float-right" title="mala.interfaces package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="mala.datahandling.html" class="btn btn-neutral float-left" title="mala.datahandling package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

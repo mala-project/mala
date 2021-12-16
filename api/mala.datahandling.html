@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-18-gaa033c2
+                v0.2.0-67-g0855a4c
               </div>
             
           
@@ -115,6 +115,7 @@
 <li class="toctree-l4"><a class="reference internal" href="mala.common.html">mala.common package</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">mala.datahandling package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.html">mala.descriptors package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.interfaces.html">mala.interfaces package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.html">mala.network package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.html">mala.targets package</a></li>
 </ul>
@@ -423,6 +424,29 @@ list as training, validation or testing snapshot, respectively.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.datahandling.data_handler.DataHandler.get_test_input_gradient">
+<code class="sig-name descname"><span class="pre">get_test_input_gradient</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_test_input_gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the gradient of the test inputs for an entire snapshot.</p>
+<p>This gradient will be returned as scaled Tensor.
+The reason the gradient is returned (rather then returning the entire
+inputs themselves) is that by slicing a variable, pytorch no longer
+considers it a “leaf” variable and will stop tracking and evaluating
+its gradient. Thus, it is easier to obtain the gradient and then
+slice it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>snapshot_number</strong> (<em>int</em>) – Number of the snapshot for which the entire test inputs.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tensor holding the gradient.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.datahandling.data_handler.DataHandler.mix_datasets">
 <code class="sig-name descname"><span class="pre">mix_datasets</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.mix_datasets" title="Permalink to this definition">¶</a></dt>
 <dd><p>For lazily-loaded data sets, the snapshot ordering is (re-)mixed.</p>
@@ -722,6 +746,7 @@ snapshot.</p></li>
 input data file are xyz-information and can be discarded.
 Generally true, if your descriptors were calculated using MALA.</p></li>
 <li><p><strong>use_horovod</strong> (<em>bool</em>) – If true, it is assumed that horovod is used.</p></li>
+<li><p><strong>input_requires_grad</strong> (<em>bool</em>) – If True, then the gradient is stored for the inputs.</p></li>
 </ul>
 </dd>
 </dl>

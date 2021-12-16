@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-18-gaa033c2
+                v0.2.0-67-g0855a4c
               </div>
             
           
@@ -115,6 +115,7 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">mala.common package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.datahandling.html">mala.datahandling package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.html">mala.descriptors package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.interfaces.html">mala.interfaces package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.html">mala.network package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.html">mala.targets package</a></li>
 </ul>
@@ -207,6 +208,93 @@
 <h1>mala.common package<a class="headerlink" href="#mala-common-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mala.common.parallelizer">
+<span id="mala-common-parallelizer-module"></span><h2>mala.common.parallelizer module<a class="headerlink" href="#module-mala.common.parallelizer" title="Permalink to this headline">¶</a></h2>
+<p>Functions for safely printing in parallel.</p>
+<dl class="py function">
+<dt id="mala.common.parallelizer.get_comm">
+<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">get_comm</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_comm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the MPI communicator, if MPI is being used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>comm</strong> – A MPI communicator.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>MPI.COMM_WORLD</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.common.parallelizer.get_rank">
+<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">get_rank</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_rank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the rank of the current thread.</p>
+<p>Always returns 0 in the serial case.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>rank</strong> – The rank of the current thread.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.common.parallelizer.get_size">
+<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">get_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of ranks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>size</strong> – The number of ranks.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.common.parallelizer.printout">
+<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">printout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.printout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interface to built-in “print” for parallel runs. Can be used like print.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> – Values to be printed.</p></li>
+<li><p><strong>sep</strong> (<em>string</em>) – Separator between printed values.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.common.parallelizer.set_horovod_status">
+<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">set_horovod_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_horovod_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the horovod status.</p>
+<p>By setting the horovod status via this function it can be ensured that
+printing works in parallel. The Parameters class does that for the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>new_value</strong> (<em>bool</em>) – Value the horovod status has.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.common.parallelizer.set_mpi_status">
+<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">set_mpi_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_mpi_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the MPI status.</p>
+<p>By setting the horovod status via this function it can be ensured that
+printing works in parallel. The Parameters class does that for the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>new_value</strong> (<em>bool</em>) – Value the horovod status has.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-mala.common.parameters">
 <span id="mala-common-parameters-module"></span><h2>mala.common.parameters module<a class="headerlink" href="#module-mala.common.parameters" title="Permalink to this headline">¶</a></h2>
@@ -370,6 +458,12 @@ Currently only supported file format is “pickle”.</p></li>
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.use_horovod">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">use_horovod</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.use_horovod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not horovod is used for parallel training.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.use_mpi">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">use_mpi</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.use_mpi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Control whether or not horovod is used for parallel training.</p>
 </dd></dl>
 
@@ -1172,37 +1266,6 @@ Angstroms. Default value is 4.67637.</p>
 <dd><p>Control if and how targets are restricted to physical values..</p>
 </dd></dl>
 
-</dd></dl>
-
-</div>
-<div class="section" id="module-mala.common.printout">
-<span id="mala-common-printout-module"></span><h2>mala.common.printout module<a class="headerlink" href="#module-mala.common.printout" title="Permalink to this headline">¶</a></h2>
-<p>Functions for safely printing in parallel.</p>
-<dl class="py function">
-<dt id="mala.common.printout.printout">
-<code class="sig-prename descclassname"><span class="pre">mala.common.printout.</span></code><code class="sig-name descname"><span class="pre">printout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.printout.printout" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interface to built-in “print” for parallel runs. Can be used like print.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> – Values to be printed.</p></li>
-<li><p><strong>sep</strong> (<em>string</em>) – Separator between printed values.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="mala.common.printout.set_horovod_status">
-<code class="sig-prename descclassname"><span class="pre">mala.common.printout.</span></code><code class="sig-name descname"><span class="pre">set_horovod_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.printout.set_horovod_status" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the horovod status for printing.</p>
-<p>By setting the horovod status via this function it can be ensured that
-printing works in parallel. The Parameters class does that for the user.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>new_value</strong> (<em>bool</em>) – Value the horovod status has.</p>
-</dd>
-</dl>
 </dd></dl>
 
 </div>

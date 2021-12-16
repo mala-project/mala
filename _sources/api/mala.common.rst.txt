@@ -4,18 +4,18 @@ mala.common package
 Submodules
 ----------
 
-mala.common.parameters module
------------------------------
+mala.common.parallelizer module
+-------------------------------
 
-.. automodule:: mala.common.parameters
+.. automodule:: mala.common.parallelizer
    :members:
    :undoc-members:
    :show-inheritance:
 
-mala.common.printout module
----------------------------
+mala.common.parameters module
+-----------------------------
 
-.. automodule:: mala.common.printout
+.. automodule:: mala.common.parameters
    :members:
    :undoc-members:
    :show-inheritance:

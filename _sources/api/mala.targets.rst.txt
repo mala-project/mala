@@ -4,6 +4,14 @@ mala.targets package
 Submodules
 ----------
 
+mala.targets.atomic\_force module
+---------------------------------
+
+.. automodule:: mala.targets.atomic_force
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mala.targets.calculation\_helpers module
 ----------------------------------------
 
