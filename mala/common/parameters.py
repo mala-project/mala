@@ -10,9 +10,16 @@ except ModuleNotFoundError:
                   "configured correctly. You can still train networks, but "
                   "attempting to set parameters.training.use_horovod = "
                   "True WILL cause a crash.", stacklevel=3)
+try:
+    from mpi4py import MPI
+except ModuleNotFoundError:
+    warnings.warn("No MPI detected. This is not a problem unless "
+                  "you plan on parallel inference.", stacklevel=3)
+
 import torch
 
-from mala.common.printout import printout, set_horovod_status
+from mala.common.parallelizer import printout, set_horovod_status, \
+    set_mpi_status
 
 
 
@@ -20,7 +27,7 @@ class ParametersBase:
     """Base parameter class for MALA."""
 
     def __init__(self,):
-        self._configuration = {"gpu": False, "horovod": False}
+        self._configuration = {"gpu": False, "horovod": False, "mpi": False}
         pass
 
     def show(self, indent=""):
@@ -42,6 +49,9 @@ class ParametersBase:
 
     def _update_horovod(self, new_horovod):
         self._configuration["horovod"] = new_horovod
+
+    def _update_mpi(self, new_mpi):
+        self._configuration["mpi"] = new_mpi
 
 
 class ParametersNetwork(ParametersBase):
@@ -416,9 +426,6 @@ class ParametersRunning(ParametersBase):
         self._after_before_training_metric = value
 
 
-        
-
-
 class ParametersHyperparameterOptimization(ParametersBase):
     """
     Hyperparameter optimization parameters.
@@ -684,6 +691,7 @@ class Parameters:
         # Properties
         self.use_horovod = False
         self.use_gpu = False
+        self.use_mpi = False
         self.manual_seed = None
 
     @property
@@ -727,6 +735,24 @@ class Parameters:
         self.running._update_horovod(self.use_horovod)
         self.hyperparameters._update_horovod(self.use_horovod)
         self.debug._update_horovod(self.use_horovod)
+
+    @property
+    def use_mpi(self):
+        """Control whether or not horovod is used for parallel training."""
+        return self._use_mpi
+
+    @use_mpi.setter
+    def use_mpi(self, value):
+        set_mpi_status(value)
+        self._use_mpi = value
+        self.network._update_mpi(self.use_mpi)
+        self.descriptors._update_mpi(self.use_mpi)
+        self.targets._update_mpi(self.use_mpi)
+        self.data._update_mpi(self.use_mpi)
+        self.running._update_mpi(self.use_mpi)
+        self.hyperparameters._update_mpi(self.use_mpi)
+        self.debug._update_mpi(self.use_mpi)
+
 
     def show(self):
         """Print name and values of all attributes of this object."""

@@ -4,7 +4,7 @@ import itertools
 import optuna
 import numpy as np
 
-from mala.common.printout import printout
+from mala.common.parallelizer import printout
 from mala.network.hyper_opt_base import HyperOptBase
 from mala.network.objective_no_training import ObjectiveNoTraining
 

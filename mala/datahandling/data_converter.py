@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from mala.common.printout import printout
+from mala.common.parallelizer import printout
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor_interface import DescriptorInterface
 from mala.targets.target_interface import TargetInterface
