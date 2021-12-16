@@ -21,6 +21,10 @@ of HF forces in MALA relies on local PPs. Lastly, the network training is far
 from rigorous here. 
 For production runs, make sure to alleviate these issues by using an approriate 
 amount of k-points, a local PP and a properly trained and verified network.  
+
+IMPORTANT: This example will currently only run with the version of the TEM 
+that supports Hellmann-Feynman forces. If you are not sure if you have loaded
+the correct version, contact the devs for further clarification.
 """
 
 

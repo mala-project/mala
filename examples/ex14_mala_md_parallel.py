@@ -5,7 +5,6 @@ from mala import printout
 from ase.io import read
 from ase.md.nptberendsen import NVTBerendsen
 from ase.md import MDLogger
-from ase.calculators.espresso import Espresso
 from ase.units import fs
 from mala.common.parallelizer import get_rank
 
@@ -22,6 +21,10 @@ implementation of HF forces in MALA relies on local PPs and
 the network training is far from rigorous here. 
 For production runs, make sure to a local PP and a properly trained and 
 verified network to avoid problems during the MD run.
+
+IMPORTANT: This example will currently only run with the version of the TEM 
+that supports Hellmann-Feynman forces. If you are not sure if you have loaded
+the correct version, contact the devs for further clarification.
 """
 
 
@@ -63,7 +66,7 @@ def md_mala(network, new_parameters, iscaler, oscaler):
     dyn = NVTBerendsen(atoms, 1*fs, 298, 10)
     if get_rank() == 0:
         dyn.attach(MDLogger(dyn, atoms, 'mala_md.log', mode="w"), interval=1)
-    print("Starting the MD run")
+    printout("Starting the MD run")
     dyn.run(100)
 
 

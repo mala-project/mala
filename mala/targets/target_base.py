@@ -255,9 +255,6 @@ class TargetBase(ABC):
             vol = self.atoms.get_volume()
 
             # Parse the file for energy values.
-            total_energy = None
-            past_calculation_part = False
-            bands_included = True
             self.grid_dimensions[0] = data[1][0]
             self.grid_dimensions[1] = data[1][1]
             self.grid_dimensions[2] = data[1][2]
@@ -285,6 +282,58 @@ class TargetBase(ABC):
                     grid3D[i, j, k, 1] = j * self.grid_spacing_Bohr
                     grid3D[i, j, k, 2] = k * self.grid_spacing_Bohr
         return grid3D
+
+    @staticmethod
+    def write_tem_input_file(atoms_Angstrom, qe_input_data,
+                             qe_pseudopotentials,
+                             grid_dimensions, kpoints):
+        """
+        Write a QE-style input file for the total energy module.
+
+        Usually, the used parameters should correspond to the properties of
+        the object calling this function, but they don't necessarily have
+        to.
+
+        Parameters
+        ----------
+        atoms_Angstrom : ase.Atoms
+            ASE atoms object for the current system. If None, MALA will
+            create one.
+
+        qe_input_data : dict
+            Quantum Espresso parameters dictionary for the ASE<->QE interface.
+            If None (recommended), MALA will create one.
+
+        qe_pseudopotentials : dict
+            Quantum Espresso pseudopotential dictionaty for the ASE<->QE
+            interface. If None (recommended), MALA will create one.
+
+        grid_dimensions : list
+            A list containing the x,y,z dimensions of the real space grid.
+
+        kpoints : dict
+            k-grid used, usually None or (1,1,1) for TEM calculations.
+        """
+        # Specify grid dimensions, if any are given.
+        if grid_dimensions[0] != 0 and \
+                grid_dimensions[1] != 0 and \
+                grid_dimensions[2] != 0:
+            qe_input_data["nr1"] = grid_dimensions[0]
+            qe_input_data["nr2"] = grid_dimensions[1]
+            qe_input_data["nr3"] = grid_dimensions[2]
+            qe_input_data["nr1s"] = grid_dimensions[0]
+            qe_input_data["nr2s"] = grid_dimensions[1]
+            qe_input_data["nr3s"] = grid_dimensions[2]
+
+        # Might be needed for test purposes, the Be2 test data
+        # for example has symmetry, even though it was deactivated for
+        # the DFT calculation. If symmetry is then on in here, that
+        # leads to errors.
+        # qe_input_data["nosym"] = False
+        ase.io.write("mala.pw.scf.in", atoms_Angstrom, "espresso-in",
+                     input_data=qe_input_data,
+                     pseudopotentials=qe_pseudopotentials,
+                     kpts=kpoints)
 
     @staticmethod
     def convert_units(array, in_units="eV"):

@@ -93,20 +93,21 @@ class ASECalculator(Calculator):
 
         energy = 0.0
         forces = np.zeros([len(atoms), 3], dtype=np.float64)
-        if self.params.use_mpi:
-            # TODO: For whatever reason the ase.io.read command we issue
-            #  during the
-            # first initilization of the TEM causes an error when used in
-            # parallel. I have tracked the issue to this command and I think
-            # it is stemming from ASE itself. Apparently, ASE detects
-            # present MPI environmnents, and tries to use them. I am guessing
-            # this goes wrong, because we only call the TEM on rank 0.
-            # We could mitigate this by calling the file I/O on all ranks
-            # (possible, but requires some changes in the interface) or,
-            # for simplicity simply provide the file ourselves.
-            create_file = False
-        else:
-            create_file = True
+
+        # If an MPI environment is detected, ASE will use it for writing.
+        # Therefore we have to do this before forking.
+        self.data_handler.\
+            target_calculator.\
+            write_tem_input_file(atoms,
+                                 self.data_handler.
+                                 target_calculator.qe_input_data,
+                                 self.data_handler.
+                                 target_calculator.qe_pseudopotentials,
+                                 self.data_handler.
+                                 target_calculator.grid_dimensions,
+                                 self.data_handler.
+                                 target_calculator.kpoints)
+
         if get_rank() == 0:
             # Define calculator objects.
             ldos_calculator: LDOS = self.data_handler.target_calculator
@@ -122,10 +123,10 @@ class ASECalculator(Calculator):
             energy = ldos_calculator.\
             get_total_energy(dos_data=dos, density_data=density,
                              fermi_energy_eV=fermi_energy_ev,
-                             create_qe_file=create_file)
+                             create_qe_file=False)
             if "forces" in properties:
                 forces = density_calculator.get_atomic_forces(density,
-                                                              create_file=create_file)
+                                                              create_file=False)
         if self.params.use_mpi:
             get_comm().Barrier()
             energy = get_comm().bcast(energy, root=0)
