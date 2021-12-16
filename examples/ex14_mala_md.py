@@ -12,7 +12,7 @@ from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 
 """
-ex13_mala_md.py: Shows how MALA can be used to run a surrogate model based
+ex14_mala_md.py: Shows how MALA can be used to run a surrogate model based
 MD simulation, and comares that to a QE calculation.
 Please not that the resulting trajectories will NOT be correct. For one,
 the QE MD will have far too few k-points to be meaningful. Secondly, 

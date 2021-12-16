@@ -12,7 +12,7 @@ from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 
 """
-ex14_mala_md_parallel.py: Shows how MALA can be used to run a surrogate model 
+ex15_mala_md_parallel.py: Shows how MALA can be used to run a surrogate model 
 based MD simulation, using a parallel implementation of the descriptor 
 calculation in the LAMMPS code. Please run ex13 prior to this example, as 
 the network from ex13 is being loaded here.

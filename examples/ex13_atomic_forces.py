@@ -1,13 +1,16 @@
+import os
+
 import mala
-from mala import printout
-import numpy as np
-from data_repo_path import get_data_repo_path
+from mala.datahandling.data_repo import data_repo_path
 import torch
-data_path = get_data_repo_path()+"Al36/"
+
 """
 WIP: This is to show how atomic forces could be calculated in MALA. 
+This example does NOT use the Hellmann-Feynman forces. It is currently not
+functional. 
 Note: You have to run ex05 locally to use this. 
 """
+data_path = os.path.join(os.path.join(data_repo_path, "Al36"), "training_data")
 params_path = "./ex05_params.pkl"
 network_path = "./ex05_network.pth"
 input_scaler_path = "./ex05_iscaler.pkl"
