@@ -1,8 +1,11 @@
+import importlib
 import os
 
-import mala
 from ase.io import read
+import mala
 import numpy as np
+import pytest
+
 
 from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
@@ -19,6 +22,8 @@ accuracy_coarse = 1
 class TestInterfaces:
     """Tests MALA interfaces."""
 
+    @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
+                        reason="LAMMPS is currently not part of the pipeline.")
     def test_ase_calculator(self):
         """
         Test whether the ASE calculator class can still be used.
