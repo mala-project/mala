@@ -119,12 +119,16 @@ class ASECalculator(Calculator):
             get_total_energy(dos_data=dos, density_data=density,
                              fermi_energy_eV=fermi_energy_ev,
                              create_qe_file=create_file)
-            forces = density_calculator.get_atomic_forces(density,
-                                                          create_file=create_file)
+            if "forces" in properties:
+                forces = density_calculator.get_atomic_forces(density,
+                                                              create_file=create_file)
         if self.params.use_mpi:
             get_comm().Barrier()
             energy = get_comm().bcast(energy, root=0)
-            get_comm().Bcast([forces, MPI.DOUBLE], root=0)
+            if "forces" in properties:
+                get_comm().Bcast([forces, MPI.DOUBLE], root=0)
+
         # Use the LDOS determined DOS and density to get energy and forces.
         self.results["energy"] = energy
-        self.results["forces"] = forces
+        if "forces" in properties:
+            self.results["forces"] = forces
