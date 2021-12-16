@@ -62,13 +62,33 @@ def set_mpi_status(new_value):
 
 
 def get_rank():
+    """
+    Get the rank of the current thread.
+
+    Always returns 0 in the serial case.
+
+    Returns
+    -------
+    rank : int
+        The rank of the current thread.
+
+    """
     if use_horovod:
         return hvd.rank()
     if use_mpi:
         return comm.Get_rank()
     return 0
 
+
 def get_size():
+    """
+    Get the number of ranks.
+
+    Returns
+    -------
+    size : int
+        The number of ranks.
+    """
     if use_horovod:
         return hvd.size()
     if use_mpi:
@@ -76,6 +96,15 @@ def get_size():
 
 # TODO: This is hacky, improve it.
 def get_comm():
+    """
+    Return the MPI communicator, if MPI is being used.
+
+    Returns
+    -------
+    comm : MPI.COMM_WORLD
+        A MPI communicator.
+
+    """
     return comm
 
 def printout(*values, sep=' '):

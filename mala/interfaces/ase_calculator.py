@@ -2,7 +2,11 @@
 
 from ase.calculators.calculator import Calculator, all_changes
 import numpy as np
-from mpi4py import MPI
+try:
+    from mpi4py import MPI
+except:
+    # Warning thrown in parameters.py
+    pass
 from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, \
                  DOS
 from mala.common.parallelizer import get_rank, get_comm
