@@ -86,12 +86,5 @@ jobs:
           ref: v1.1.0
           lfs: false
 
-      - name: Data setup
-        shell: bash
-        run: |
-          cd mala_data
-          chmod +x ../install/data_repo_link/link_data_repo.sh
-          ../install/data_repo_link/link_data_repo.sh `pwd`
-
       - name: Test MALA
-        run: pytest --disable-warnings
+        run: MALA_DATA_REPO=$(pwd)/mala_data pytest --disable-warnings

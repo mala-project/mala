@@ -181,7 +181,8 @@ class LDOS(TargetBase):
                          grid_integration_method="summation",
                          energy_integration_method="analytical",
                          atoms_Angstrom=None,
-                         qe_input_data=None, qe_pseudopotentials=None):
+                         qe_input_data=None, qe_pseudopotentials=None,
+                         create_qe_file=True):
         """
         Calculate the total energy from LDOS or given DOS + density data.
 
@@ -305,7 +306,8 @@ class LDOS(TargetBase):
             = density_calculator.\
             get_energy_contributions(density_data, qe_input_data=qe_input_data,
                                      atoms_Angstrom=atoms_Angstrom,
-                                     qe_pseudopotentials=qe_pseudopotentials)
+                                     qe_pseudopotentials=qe_pseudopotentials,
+                                     create_file=create_qe_file)
         e_total = e_band + e_rho_times_v_hxc + e_hartree + e_xc + e_ewald +\
             e_entropy_contribution
 
@@ -682,6 +684,45 @@ class LDOS(TargetBase):
                              (grid_spacing_bohr ** 3)
 
         return dos_values
+
+    def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
+                          snapshot_number=0):
+        """
+        Get the atomic forces (dE/dR), currently work in progress.
+
+        Will only give the dd_dB.
+
+        Parameters
+        ----------
+        ldos_data: torch.Tensor
+            Scaled (!) torch tensor holding the LDOS data for the snapshot
+            for which the atomic force should be calculated.
+
+        dE_dd: np.array
+            (WIP) Derivative of the total energy w.r.t the LDOS.
+            Later on, this will be evaluated within this subroutine. For now
+            it is provided from outside.
+
+        used_data_handler: mala.data.data_handler.DataHandler
+            DataHandler that was used to predict the LDOS for which the
+            atomic forces are supposed to be calculated.
+
+        snapshot_number:
+            Snapshot number (number within the data handler) for which this
+            LDOS prediction was performed. Always 0 in the inference case.
+
+        Returns
+        -------
+        dd_dB: torch.tensor
+            (WIP) Returns the scaled (!) derivative of the LDOS w.r.t to
+            the SNAP descriptors.
+
+        """
+        # For now this only works with ML generated LDOS.
+        # Gradient of the LDOS respect to the SNAP descriptors.
+        ldos_data.backward(dE_dd)
+        dd_dB = used_data_handler.get_test_input_gradient(snapshot_number)
+        return dd_dB
 
     def get_and_cache_density_of_states(self, ldos_data,
                                         grid_spacing_bohr=None,

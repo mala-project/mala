@@ -17,7 +17,7 @@ except ModuleNotFoundError:
 from mala.network.hyper_opt_base import HyperOptBase
 from mala.network.objective_base import ObjectiveBase
 from mala.network.hyperparameter_oat import HyperparameterOAT
-from mala.common.printout import printout
+from mala.common.parallelizer import printout
 from mala.common.parameters import Parameters
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
