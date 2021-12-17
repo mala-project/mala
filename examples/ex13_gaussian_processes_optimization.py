@@ -4,10 +4,10 @@ from data_repo_path import data_repo_path
 data_path = data_repo_path+"Be2/densities_gp/"
 
 """
-ex12_gassian_processes.py: Shows how Gaussian processes can be used
-to learn the electronic density with MALA. Backend is GPytorch.
-This is a "Single Shot" Gaussian process, meaning we do not optimize the hyper-
-parameters (it is the equivalent to ex01 in that regard.)
+ex13_gaussian_processes_optimization.py: Shows how Gaussian processes can be 
+used to learn the electronic density with MALA. Backend is GPytorch.
+Here, an optimization is performed in the sense that the model (hyper-)
+parameters are optimized. It is similar to ex04 in that regard.
 """
 
 params = mala.Parameters()
@@ -50,12 +50,21 @@ printout("Read data: DONE.")
 
 ####################
 # MODEL SETUP
-# Set up the model.
-# Gaussian Processes do not have to be trained in order
-# to captue the trainint data.
+# Set up the model and trainer we want to use.
 ####################
 params.model.kernel = "linear"
 model = mala.GaussianProcesses(params, data_handler)
+trainer = mala.Trainer(params, model, data_handler)
+printout("Network setup: DONE.")
+
+####################
+# TRAINING
+# Train the network.
+####################
+
+printout("Starting training.")
+trainer.train_model()
+printout("Training: DONE.")
 
 ####################
 # TESTING

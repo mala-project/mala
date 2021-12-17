@@ -22,7 +22,6 @@ test_parameters = mala.Parameters()
 # done by providing a list containing entries of the form
 # "tr", "va" and "te".
 test_parameters.data.data_splitting_type = "by_snapshot"
-test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
 
 # Specify the data scaling.
 test_parameters.data.input_rescaling_type = "feature-wise-standard"
@@ -33,6 +32,7 @@ test_parameters.running.max_number_epochs = 20
 test_parameters.running.mini_batch_size = 40
 test_parameters.running.learning_rate = 0.00001
 test_parameters.running.trainingtype = "Adam"
+test_parameters.targets.target_type = "Density"
 
 # Specify the number of trials, the hyperparameter optimizer should run
 # and the type of hyperparameter.
@@ -45,16 +45,17 @@ test_parameters.hyperparameters.hyper_opt_method = "optuna"
 ####################
 data_handler = mala.DataHandler(test_parameters)
 
-# Add all the snapshots we want to use in to the list.
-data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                          "Al_debug_2k_nr0.out.npy", data_path,
-                          output_units="1/Ry")
-data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                          "Al_debug_2k_nr1.out.npy", data_path,
-                          output_units="1/Ry")
-data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                          "Al_debug_2k_nr2.out.npy", data_path,
-                          output_units="1/Ry")
+# Add a snapshot we want to use in to the list.
+inputs_folder = data_path+"inputs_snap/"
+outputs_folder = data_path+"outputs_density/"
+additional_folder = data_path+"additional_info_qeouts/"
+data_handler.add_snapshot("snapshot0.in.npy", inputs_folder,
+                          "snapshot0.out.npy", outputs_folder, add_snapshot_as="tr", output_units="None")
+data_handler.add_snapshot("snapshot1.in.npy", inputs_folder,
+                          "snapshot1.out.npy", outputs_folder, add_snapshot_as="va", output_units="None")
+data_handler.add_snapshot("snapshot2.in.npy", inputs_folder,
+                          "snapshot2.out.npy", outputs_folder, add_snapshot_as="te",
+                          output_units="None", calculation_output_file=additional_folder+"snapshot2.out")
 data_handler.prepare_data()
 printout("Read data: DONE.")
 

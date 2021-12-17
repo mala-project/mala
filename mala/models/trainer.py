@@ -240,9 +240,9 @@ class Trainer(Runner):
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
             if self.parameters.verbosity:
-                model: GaussianProcesses
-                model = self.model
-                printout(model.covar_module.base_kernel.lengthscale.item())
+                # model: GaussianProcesses
+                # model = self.model
+                # printout(model.covar_module.base_kernel.lengthscale.item())
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
 
             # Mix the DataSets up (this function only does something
