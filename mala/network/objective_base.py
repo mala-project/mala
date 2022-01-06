@@ -316,6 +316,14 @@ class ObjectiveBase:
                 self.params.running.early_stopping_epochs = par.\
                     get_parameter(trial, factor_idx)
 
+            elif "learning_rate_patience" in par.name:
+                self.params.running.learning_rate_patience = par.\
+                    get_parameter(trial, factor_idx)
+
+            elif "learning_rate_decay" in par.name:
+                self.params.running.learning_rate_decay = par.\
+                    get_parameter(trial,factor_idx)
+
             elif "layer_activation" in par.name:
                 pass
 
