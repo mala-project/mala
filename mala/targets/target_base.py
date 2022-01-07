@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 
 from ase.units import Rydberg, Bohr, kB
 import ase.io
+from asap3.analysis.rdf import RadialDistributionFunction
 import numpy as np
 
 from mala.common.parameters import Parameters, ParametersTargets
@@ -282,6 +283,13 @@ class TargetBase(ABC):
                     grid3D[i, j, k, 1] = j * self.grid_spacing_Bohr
                     grid3D[i, j, k, 2] = k * self.grid_spacing_Bohr
         return grid3D
+
+    def get_radial_distribution_function(self, number_of_bins=500):
+        rng = np.min(
+            np.linalg.norm(self.atoms.get_cell(), axis=0)) - 0.0001
+        rdf = RadialDistributionFunction(self.atoms, rng, number_of_bins)
+        return rdf.get_rdf(), rdf.rMax, rdf.dr
+
 
     @staticmethod
     def write_tem_input_file(atoms_Angstrom, qe_input_data,

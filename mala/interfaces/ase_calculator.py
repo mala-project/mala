@@ -137,3 +137,6 @@ class ASECalculator(Calculator):
         self.results["energy"] = energy
         if "forces" in properties:
             self.results["forces"] = forces
+        if "rdf" in properties:
+            self.results["rdf"] = self.data_handler.target_calculator.\
+                get_radial_distribution_function()
