@@ -284,10 +284,13 @@ class TargetBase(ABC):
                     grid3D[i, j, k, 2] = k * self.grid_spacing_Bohr
         return grid3D
 
-    def get_radial_distribution_function(self, number_of_bins=500):
+    def get_radial_distribution_function(self, atoms=None, number_of_bins=500):
+        if atoms is None:
+            atoms = self.atoms
+
         rng = np.min(
-            np.linalg.norm(self.atoms.get_cell(), axis=0)) - 0.0001
-        rdf = RadialDistributionFunction(self.atoms, rng, number_of_bins)
+            np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+        rdf = RadialDistributionFunction(atoms, rng, number_of_bins)
         return rdf.get_rdf(), rdf.rMax, rdf.dr
 
 
