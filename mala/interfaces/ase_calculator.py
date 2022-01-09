@@ -137,6 +137,30 @@ class ASECalculator(Calculator):
         self.results["energy"] = energy
         if "forces" in properties:
             self.results["forces"] = forces
+
+    def calculate_properties(self, atoms, properties):
+        """
+        After a calculation, calculate additional properties.
+
+        This is separate from the calculate function because of
+        MALA-MC simulations. For these energy and additional property
+        calculation need to be separate.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            Atoms object for which to perform the calculation.
+            No needed per se, we can use it for a correctness check
+            eventually.
+
+        properties: list of str
+            List of what needs to be calculated.  Can be any combination
+            of "rdf", ...
+        """
+
+        # TODO: Check atoms.
+
         if "rdf" in properties:
             self.results["rdf"] = self.data_handler.target_calculator.\
                 get_radial_distribution_function()
+
