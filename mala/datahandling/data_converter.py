@@ -119,10 +119,10 @@ class DataConverter:
         # Parse and/or calculate the input descriptors.
         if description[0] == "qe.out":
             if original_units[0] is None:
-                tmp_input = self.descriptor_calculator. \
+                tmp_input, local_size = self.descriptor_calculator. \
                     calculate_from_qe_out(snapshot[0], snapshot[1])
             else:
-                tmp_input = self.descriptor_calculator. \
+                tmp_input, local_size = self.descriptor_calculator. \
                     calculate_from_qe_out(snapshot[0], snapshot[1],
                                           units=original_units[0])
 

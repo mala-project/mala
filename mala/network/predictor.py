@@ -39,7 +39,6 @@ class Predictor(Runner):
                               self.data.grid_dimension[2]
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
-        self.__prepare_to_predict()
 
     def predict_from_qeout(self, path_to_file):
         """
@@ -73,15 +72,34 @@ class Predictor(Runner):
             Precicted LDOS for these atomic positions.
         """
         # Calculate SNAP descriptors.
-        snap_descriptors = self.data.descriptor_calculator.\
+        snap_descriptors, local_size = self.data.descriptor_calculator.\
             calculate_from_atoms(atoms, self.data.grid_dimension)
 
-        # Now reshape and scale the descriptors.
+        # Provide info from current snapshot to target calculator.
+        self.data.target_calculator.\
+            read_additional_calculation_data("atoms+grid",
+                                             [atoms, self.data.grid_dimension])
         feature_length = self.data.descriptor_calculator.fingerprint_length
+
+        # The actual calculation of the LDOS from the SNAP descriptors depends
+        # on whether we run in parallel or serial. In the former case,
+        # each batch is forwarded individually (for now), in the latter
+        # case, everything is forwarded at once.
         if self.parameters._configuration["mpi"]:
-            snap_descriptors = self.data.descriptor_calculator.\
-                               gather_descriptors(snap_descriptors)
-        if get_rank() == 0:
+            if self.parameters_full.data.descriptors_contain_xyz:
+                snap_descriptors = snap_descriptors[:, 6:]
+                feature_length -= 3
+
+            snap_descriptors = \
+                snap_descriptors.astype(np.float32)
+            snap_descriptors = \
+                torch.from_numpy(snap_descriptors).float()
+            snap_descriptors = \
+                self.data.input_data_scaler.transform(snap_descriptors)
+            return self. \
+                _forward_snap_descriptors(snap_descriptors, local_size)
+
+        else:
             if self.parameters_full.data.descriptors_contain_xyz:
                 snap_descriptors = snap_descriptors[:, :, :, 3:]
                 feature_length -= 3
@@ -95,23 +113,24 @@ class Predictor(Runner):
                 torch.from_numpy(snap_descriptors).float()
             snap_descriptors = \
                 self.data.input_data_scaler.transform(snap_descriptors)
-
-            # Provide info from current snapshot to target calculator.
-            self.data.target_calculator.\
-                read_additional_calculation_data("atoms+grid",
-                                                 [atoms, self.data.grid_dimension])
-
-            # Forward the SNAP descriptors through the network.
             return self.\
                         _forward_snap_descriptors(snap_descriptors)
-        else:
-            return None
 
-    def _forward_snap_descriptors(self, snap_descriptors):
+    def _forward_snap_descriptors(self, snap_descriptors, local_data_size=None):
         """Forward a scaled tensor of SNAP descriptors through the NN."""
-        predicted_outputs = np.zeros((self.data.grid_size,
+        if local_data_size is None:
+            local_data_size = self.data.grid_size
+        predicted_outputs = np.zeros((local_data_size,
                                       self.data.target_calculator.\
                                       get_feature_size()))
+        optimal_batch_size = self.\
+            _correct_batch_size_for_testing(local_data_size,
+                                            self.parameters.mini_batch_size)
+        if optimal_batch_size != self.parameters.mini_batch_size:
+            self.parameters.mini_batch_size = optimal_batch_size
+        self.number_of_batches_per_snapshot = int(local_data_size /
+                                                  self.parameters.
+                                                  mini_batch_size)
 
         for i in range(0, self.number_of_batches_per_snapshot):
             inputs = snap_descriptors[i * self.parameters.mini_batch_size:
@@ -129,22 +148,3 @@ class Predictor(Runner):
         predicted_outputs = self.data.target_calculator.\
             restrict_data(predicted_outputs)
         return predicted_outputs
-
-    # Currently a copy of the prepare_to_test function of the Tester class.
-    # Might change in the future.
-    def __prepare_to_predict(self):
-        """Prepare the tester class to for test run."""
-        # We will use the DataSet iterator to iterate over the test data.
-        # But since we only want the data per snapshot,
-        # we need to make sure the batch size is compatible with that.
-        optimal_batch_size = self.\
-            _correct_batch_size_for_testing(self.data.grid_size,
-                                            self.parameters.mini_batch_size)
-        if optimal_batch_size != self.parameters.mini_batch_size:
-            printout("Had to readjust batch size from",
-                     self.parameters.mini_batch_size, "to",
-                     optimal_batch_size)
-            self.parameters.mini_batch_size = optimal_batch_size
-        self.number_of_batches_per_snapshot = int(self.data.grid_size /
-                                                  self.parameters.
-                                                  mini_batch_size)

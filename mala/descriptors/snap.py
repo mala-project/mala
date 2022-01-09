@@ -16,7 +16,7 @@ except ModuleNotFoundError:
                   stacklevel=3)
 try:
     from mpi4py import MPI
-except:
+except ModuleNotFoundError:
     # Error handled in parameters.
     pass
 
@@ -226,7 +226,7 @@ class SNAP(DescriptorBase):
 
         # Dummy for the other ranks.
         # (For now, might later simply broadcast to other ranks).
-        snap_descriptors_full = np.zeros([1,1,1,1])
+        snap_descriptors_full = np.zeros([1, 1, 1, 1])
 
         # Reorder the list.
         if get_rank() == 0:
@@ -352,7 +352,7 @@ class SNAP(DescriptorBase):
             # deallocates memory too quickly. This copy is more memory
             # hungry, and we might have to tackle this later on, but
             # for now it works.
-            return snap_descriptors_np.copy()
+            return snap_descriptors_np.copy(), nrows_local
 
         else:
             # Extract data from LAMMPS calculation.
@@ -372,4 +372,4 @@ class SNAP(DescriptorBase):
             # I thought the transpose would take care of that, but apparently
             # it does not necessarily do that - so we have do go down
             # that route.
-            return snap_descriptors_np.copy()
+            return snap_descriptors_np.copy(), nx*ny*nz

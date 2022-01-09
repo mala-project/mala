@@ -4,8 +4,14 @@ from ase.units import Rydberg
 import numpy as np
 import math
 import os
+try:
+    from mpi4py import MPI
+except ModuleNotFoundError:
+    # Error handled in parameters.
+    pass
 
 from mala.common.parameters import printout
+from mala.common.parallelizer import get_comm, printout, get_rank, get_size
 from mala.targets.cube_parser import read_cube
 from mala.targets.target_base import TargetBase
 from mala.targets.calculation_helpers import *
@@ -682,8 +688,16 @@ class LDOS(TargetBase):
             if len(ldos_data_shape) == 2:
                 dos_values = np.sum(ldos_data, axis=0) * \
                              (grid_spacing_bohr ** 3)
-
-        return dos_values
+        if self.parameters._configuration["mpi"] is False:
+            return dos_values
+        else:
+            comm = get_comm()
+            comm.Barrier()
+            dos_values_full = np.zeros_like(dos_values)
+            comm.Reduce([dos_values, MPI.DOUBLE],
+                        [dos_values_full, MPI.DOUBLE],
+                        op=MPI.SUM, root=0)
+            return dos_values_full
 
     def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
                           snapshot_number=0):
