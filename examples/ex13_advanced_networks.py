@@ -31,7 +31,7 @@ test_parameters.data.output_rescaling_type = "normal"
 test_parameters.network.layer_activations = ["ReLU"]
 
 # Specify the training parameters.
-test_parameters.running.max_number_epochs = 1
+test_parameters.running.max_number_epochs = 30
 test_parameters.running.mini_batch_size = 40
 test_parameters.running.learning_rate = 0.00001
 test_parameters.running.trainingtype = "Adam"

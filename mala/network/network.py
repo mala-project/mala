@@ -105,11 +105,7 @@ class BaseNetwork(nn.Module):
             Loss value for output and target.
 
         """
-<<<<<<< HEAD
         # print(output.size(), target.size())
-=======
-        print(output.size(), target.size())
->>>>>>> 17cccfc4fa969d562250337386161da8d1bc6f4e
         return self.loss_func(output, target)
 
     # FIXME: This guarentees downwards compatibility, but it is ugly.
