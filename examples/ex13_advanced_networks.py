@@ -62,8 +62,8 @@ printout("Read data: DONE.")
 # The layer sizes can be specified before reading data,
 # but it is safer this way.
 ####################
-test_parameters.network.nn_type = "transformer"
-# test_parameters.network.nn_type = "lstm"
+# test_parameters.network.nn_type = "transformer"
+test_parameters.network.nn_type = "lstm"
 # test_parameters.network.nn_type = "gru"
 
 test_parameters.network.num_hidden_layers = 1
