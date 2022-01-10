@@ -1,12 +1,11 @@
 import mala
 from mala import printout
-from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al36/"
+# from data_repo_path import get_data_repo_path
+# data_path = get_data_repo_path()+"Al36/"
 
 """
-ex01_run_singleshot.py: Shows how a neural network can be trained on material 
-data using this framework. It uses preprocessed data, that is read in 
-from *.npy files.
+ex13_advanced_networks.py: Shows how advanced network models such as 
+lstm, gru and transformer can be used for prediction.
 """
 
 
@@ -22,7 +21,7 @@ test_parameters = mala.Parameters()
 # done by providing a list containing entries of the form
 # "tr", "va" and "te".
 test_parameters.data.data_splitting_type = "by_snapshot"
-test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
+# test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
 
 # Specify the data scaling.
 test_parameters.data.input_rescaling_type = "feature-wise-standard"
@@ -32,11 +31,11 @@ test_parameters.data.output_rescaling_type = "normal"
 test_parameters.network.layer_activations = ["ReLU"]
 
 # Specify the training parameters.
-test_parameters.running.max_number_epochs = 20
+test_parameters.running.max_number_epochs = 1
 test_parameters.running.mini_batch_size = 40
 test_parameters.running.learning_rate = 0.00001
 test_parameters.running.trainingtype = "Adam"
-
+test_parameters.use_gpu= True
 ####################
 # DATA
 # Add and prepare snapshots for training.
@@ -44,16 +43,35 @@ test_parameters.running.trainingtype = "Adam"
 
 data_handler = mala.DataHandler(test_parameters)
 
-# Add a snapshot we want to use in to the list.
-data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                          "Al_debug_2k_nr0.out.npy", data_path,
-                          output_units="1/Ry")
-data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                          "Al_debug_2k_nr1.out.npy", data_path,
-                          output_units="1/Ry")
-data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                          "Al_debug_2k_nr2.out.npy", data_path,
-                          output_units="1/Ry")
+# # Add a snapshot we want to use in to the list.
+# data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
+#                           "Al_debug_2k_nr0.out.npy", data_path,
+#                           output_units="1/Ry")
+# data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
+#                           "Al_debug_2k_nr1.out.npy", data_path,
+#                           output_units="1/Ry")
+# data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
+#                           "Al_debug_2k_nr2.out.npy", data_path,
+#                           output_units="1/Ry")
+# data_handler.prepare_data()
+# printout("Read data: DONE.")
+
+
+snap_path= "/bigdata/casus/wdm/Al/298K/N256/snap"
+ldos_path= "/bigdata/casus/wdm/Al/298K/N256/ldos"
+
+training_number = 1
+validation_number = 1
+
+for i in range(0,training_number):
+    data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot"+str(i)+".npy", snap_path,
+                              "Al_ldos_200x200x200grid_250elvls_snapshot"+str(i)+".npy", ldos_path,
+                              add_snapshot_as="tr", output_units="1/Ry") 
+
+for i in range(training_number,training_number+validation_number):
+    data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot"+str(i)+".npy", snap_path,
+                              "Al_ldos_200x200x200grid_250elvls_snapshot"+str(i)+".npy", ldos_path,
+                              add_snapshot_as="va", output_units="1/Ry")
 data_handler.prepare_data()
 printout("Read data: DONE.")
 
@@ -63,14 +81,15 @@ printout("Read data: DONE.")
 # The layer sizes can be specified before reading data,
 # but it is safer this way.
 ####################
-# test_parameters.network.nn_type = "transformer"
+test_parameters.network.nn_type = "transformer"
 # test_parameters.network.nn_type = "lstm"
-test_parameters.network.nn_type = "gru"
+# test_parameters.network.nn_type = "gru"
 
 test_parameters.network.num_hidden_layers = 1
 test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),100,
                                        data_handler.get_output_dimension()]
-if test_parameters.network.nn_type == "lstm":
+
+if test_parameters.network.nn_type == "lstm" or test_parameters.network.nn_type == "gru":
     test_parameters.network.no_hidden_state = False
     test_parameters.network.bidirection = False
 elif test_parameters.network.nn_type == "transformer":

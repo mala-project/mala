@@ -56,8 +56,7 @@ class BaseNetwork(nn.Module):
 
         # Once everything is done, we can move the Network on the target
         # device.
-        if params.use_gpu:
-            self.to('cuda')
+        
 
     @abstractmethod
     def forward(self, inputs):
@@ -106,6 +105,7 @@ class BaseNetwork(nn.Module):
             Loss value for output and target.
 
         """
+        # print(output.size(), target.size())
         return self.loss_func(output, target)
 
     # FIXME: This guarentees downwards compatibility, but it is ugly.
@@ -187,6 +187,9 @@ class FeedForwardNet(BaseNetwork):
             except KeyError:
                 raise Exception("Invalid activation type seleceted.")
 
+        if params.use_gpu:
+            self.to('cuda')
+
     def forward(self, inputs):
         """
         Perform a forward pass through the network.
@@ -237,6 +240,9 @@ class LSTM(BaseNetwork):
                                         batch_first=True)
         self.activation = self.activation_mappings[self.params.layer_activations[0]]()
 
+        if params.use_gpu:
+            self.to('cuda')
+
     # Apply Network
     def forward(self, x):
         """
@@ -259,7 +265,9 @@ class LSTM(BaseNetwork):
         
         
         self.hidden = (self.hidden[0].detach(), self.hidden[1].detach())
-    
+
+        print("input size",x.shape)
+
         x = self.activation(self.first_layer(x))
 
         if (self.params.bidirection):
@@ -275,6 +283,7 @@ class LSTM(BaseNetwork):
 
         x = x[:, -1, :]
         x = self.activation(x)
+        print("output size",x.shape)
 
         return (x)
 
@@ -335,6 +344,8 @@ class GRU(LSTM):
                                         batch_first=True)
         self.activation = self.activation_mappings[self.params.layer_activations[0]]()
 
+        if params.use_gpu:
+            self.to('cuda')
      # Apply Network
     def forward(self, x):
         """
@@ -424,6 +435,9 @@ class TransformerNet(BaseNetwork):
         self.decoder = nn.Linear(self.params.layer_sizes[0], self.params.layer_sizes[-1])
 
         self.init_weights()
+
+        if params.use_gpu:
+            self.to('cuda')
         
     def generate_square_subsequent_mask(self, size):
         """
@@ -458,7 +472,7 @@ class TransformerNet(BaseNetwork):
         x = self.pos_encoder(x)
         output = self.transformer_encoder(x, self.src_mask)
         output = self.decoder(output)
-
+        output= output.squeeze(dim=1)
         return output
 
 class PositionalEncoding(nn.Module):
@@ -488,12 +502,13 @@ class PositionalEncoding(nn.Module):
         div_term2 = torch.exp(torch.arange(0, d_model - 1 , 2).float() * (-np.log(10000.0) / d_model))
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term2)
-        
         pe = pe.unsqueeze(0).transpose(0, 1)
         self.register_buffer('pe', pe)
 
     def forward(self, x):
         """Perform a forward pass through the network."""
+        
+        x= x.unsqueeze(dim=1) #add extra dimension for batch_size
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
 
