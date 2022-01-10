@@ -106,6 +106,7 @@ class BaseNetwork(nn.Module):
             Loss value for output and target.
 
         """
+        print(output.size(), target.size())
         return self.loss_func(output, target)
 
     # FIXME: This guarentees downwards compatibility, but it is ugly.
@@ -259,7 +260,9 @@ class LSTM(BaseNetwork):
         
         
         self.hidden = (self.hidden[0].detach(), self.hidden[1].detach())
-    
+
+        print("input size",x.shape)
+
         x = self.activation(self.first_layer(x))
 
         if (self.params.bidirection):
@@ -275,6 +278,7 @@ class LSTM(BaseNetwork):
 
         x = x[:, -1, :]
         x = self.activation(x)
+        print("output size",x.shape)
 
         return (x)
 
