@@ -162,5 +162,5 @@ class ASECalculator(Calculator):
 
         if "rdf" in properties:
             self.results["rdf"] = self.data_handler.target_calculator.\
-                get_radial_distribution_function()
+                get_radial_distribution_function(atoms)
 

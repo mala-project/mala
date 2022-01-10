@@ -284,9 +284,9 @@ class TargetBase(ABC):
                     grid3D[i, j, k, 2] = k * self.grid_spacing_Bohr
         return grid3D
 
-    def get_radial_distribution_function(self, atoms=None, number_of_bins=500):
-        if atoms is None:
-            atoms = self.atoms
+    @staticmethod
+    def get_radial_distribution_function(atoms, number_of_bins=500):
+        atoms = atoms
 
         rng = np.min(
             np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
