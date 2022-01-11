@@ -1,10 +1,12 @@
 """Base class for all target calculators."""
 from abc import ABC, abstractmethod
+from copy import deepcopy
+import itertools
 
 from ase.units import Rydberg, Bohr, kB
 import ase.io
-from asap3.analysis.rdf import RadialDistributionFunction
 import numpy as np
+from scipy.spatial import distance
 
 from mala.common.parameters import Parameters, ParametersTargets
 from mala.targets.calculation_helpers import fermi_function
@@ -285,13 +287,102 @@ class TargetBase(ABC):
         return grid3D
 
     @staticmethod
-    def get_radial_distribution_function(atoms, number_of_bins=500):
-        atoms = atoms
+    def get_radial_distribution_function(atoms, number_of_bins=500, rMax=None):
+        """
+        Calculate the radial distribution function.
 
-        rng = np.min(
-            np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
-        rdf = RadialDistributionFunction(atoms, rng, number_of_bins)
-        return rdf.get_rdf(), rdf.rMax, rdf.dr
+        Reimplemented because the ASE implementation can't handle periodic
+        boundary conditions (rMax, which is the same in all three directions,
+        has to be smaller then the smallest direction in the unit cell; for
+        systems with non-cubic geometry, e.g. hexagonal systems, this makes
+        the RDF awfully small). Reference implementation is the ASAP3 code,
+        which I would like to avoid because we then have yet another
+        dependency for only one function. I do not claim this to be the
+        most performant implementation of the RDF, however.
+
+        Parameters
+        ----------
+        atoms
+        number_of_bins
+        rMax
+
+        Returns
+        -------
+
+        """
+        atoms = atoms
+        dr = float(rMax/number_of_bins)
+        rdf = np.zeros(number_of_bins + 1)
+        print(rMax)
+
+        # We will approximate periodic boundary conditions by
+        # calculating the distances over 8 adjunct cells.
+        # We need to check if this suffices.
+        cell = atoms.get_cell()
+        pbc = atoms.get_pbc()
+        for i in range(0,3):
+            if pbc[i]:
+                if rMax > cell[i,i]:
+                    raise Exception("Cannot calculate RDF with this radius. "
+                                    "Please choose a smaller value.")
+
+        # Calculate all the distances.
+        dm = distance.cdist(atoms.get_positions(), atoms.get_positions())
+        for i in range(0, len(atoms)):
+            for j in range(0, len(atoms)):
+                rij = dm[i][j]
+                index = int(np.ceil(rij / dr))
+                if index <= number_of_bins:
+                    rdf[index] += 1
+
+        cells = list(set(itertools.permutations([0,0, 1], r=3))) \
+            + list(set(itertools.permutations([0,0, -1], r=3))) \
+            + list(set(itertools.permutations([0,-1, 1], r=3))) \
+            + list(set(itertools.permutations([0, 1, 1], r=3))) \
+            + list(set(itertools.permutations([0, -1, -1], r=3))) \
+            + list(set(itertools.permutations([-1, -1, -1], r=3))) \
+            + list(set(itertools.permutations([-1, 1, 1], r=3))) \
+            + list(set(itertools.permutations([-1, -1, 1], r=3))) \
+            + list(set(itertools.permutations([1, 1, 1], r=3)))
+
+        # Calculate distances for individual cells.
+        for shift_cell in cells:
+            atoms_shifted: ase.Atoms = deepcopy(atoms)
+            atoms_shifted.translate(np.matmul(atoms.get_cell(),shift_cell))
+            (distance.cdist(atoms.get_positions(),
+                                 atoms_shifted.get_positions()))
+            for i in range(0, len(atoms)):
+                for j in range(0, len(atoms)):
+                    rij = dm[i][j]
+                    index = int(np.ceil(rij / dr))
+                    if index <= number_of_bins:
+                        rdf[index] += 1
+
+        # Normalize the RDF and calculate the distances
+        rr = []
+        phi = len(atoms)/ atoms.get_volume()
+        norm = 4.0 * np.pi * dr * phi * len(atoms)*27
+        for i in range(1, number_of_bins + 1):
+            rr.append((i - 0.5) * dr)
+            rdf[i] /= (norm * ((rr[-1] ** 2) + (dr ** 2) / 12.))
+
+        return rdf[1:], rr
+        
+    @staticmethod
+    def get_three_particle_correlation_function(atoms, number_of_bins,
+                                                rMax=None):
+        """
+        Implemented as given by:
+        doi.org/10.1063/5.0048450, equation 17.
+
+        Returns
+        -------
+
+        """
+        if rMax is None:
+            rMax = np.min(
+                    np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+
 
 
     @staticmethod
