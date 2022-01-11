@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 import itertools
 
+from ase.neighborlist import NeighborList
 from ase.units import Rydberg, Bohr, kB
 import ase.io
 import numpy as np
@@ -326,37 +327,19 @@ class TargetBase(ABC):
                                     "Please choose a smaller value.")
 
         # Calculate all the distances.
-        dm = distance.cdist(atoms.get_positions(), atoms.get_positions())
-        index = (np.ceil(dm / dr)).astype(int)
-        index = index.flatten()
-        out_of_scope = index > number_of_bins
-        index[out_of_scope] = 0
-        for i in range(0, len(atoms)*len(atoms)):
-            rdf[index[i]] += 1
-
-        cells = list(set(itertools.permutations([0,0, 1], r=3))) \
-            + list(set(itertools.permutations([0,0, -1], r=3))) \
-            + list(set(itertools.permutations([0,-1, 1], r=3))) \
-            + list(set(itertools.permutations([0, 1, 1], r=3))) \
-            + list(set(itertools.permutations([0, -1, -1], r=3))) \
-            + list(set(itertools.permutations([-1, -1, -1], r=3))) \
-            + list(set(itertools.permutations([-1, 1, 1], r=3))) \
-            + list(set(itertools.permutations([-1, -1, 1], r=3))) \
-            + list(set(itertools.permutations([1, 1, 1], r=3)))
-
-        # Calculate distances for individual cells.
-        for shift_cell in cells:
-            atoms_shifted: ase.Atoms = deepcopy(atoms)
-            atoms_shifted.set_pbc(False)
-            atoms_shifted.translate(np.matmul(np.transpose(atoms.get_cell()),shift_cell))
-            dm = distance.cdist(atoms.get_positions(),
-                                atoms_shifted.get_positions())
+        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms))+[rMax/2.0],
+                                                     bothways=True)
+        neighborlist.update(atoms)
+        for i in range(0, len(atoms)):
+            indices, offsets = neighborlist.get_neighbors(i)
+            dm = distance.cdist([atoms.get_positions()[i]],
+                                atoms.positions[indices] + offsets @ atoms.get_cell())
             index = (np.ceil(dm / dr)).astype(int)
             index = index.flatten()
             out_of_scope = index > number_of_bins
             index[out_of_scope] = 0
-            for i in range(0, len(atoms) * len(atoms)):
-                rdf[index[i]] += 1
+            for i in index:
+                rdf[i] += 1
 
         # Normalize the RDF and calculate the distances
         rr = []
