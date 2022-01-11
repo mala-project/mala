@@ -313,7 +313,6 @@ class TargetBase(ABC):
         atoms = atoms
         dr = float(rMax/number_of_bins)
         rdf = np.zeros(number_of_bins + 1)
-        print(rMax)
 
         # We will approximate periodic boundary conditions by
         # calculating the distances over 8 adjunct cells.
@@ -328,12 +327,12 @@ class TargetBase(ABC):
 
         # Calculate all the distances.
         dm = distance.cdist(atoms.get_positions(), atoms.get_positions())
-        for i in range(0, len(atoms)):
-            for j in range(0, len(atoms)):
-                rij = dm[i][j]
-                index = int(np.ceil(rij / dr))
-                if index <= number_of_bins:
-                    rdf[index] += 1
+        index = (np.ceil(dm / dr)).astype(int)
+        index = index.flatten()
+        out_of_scope = index > number_of_bins
+        index[out_of_scope] = 0
+        for i in range(0, len(atoms)*len(atoms)):
+            rdf[index[i]] += 1
 
         cells = list(set(itertools.permutations([0,0, 1], r=3))) \
             + list(set(itertools.permutations([0,0, -1], r=3))) \
@@ -352,12 +351,12 @@ class TargetBase(ABC):
             atoms_shifted.translate(np.matmul(np.transpose(atoms.get_cell()),shift_cell))
             dm = distance.cdist(atoms.get_positions(),
                                 atoms_shifted.get_positions())
-            for i in range(0, len(atoms)):
-                for j in range(0, len(atoms)):
-                    rij = dm[i][j]
-                    index = int(np.ceil(rij / dr))
-                    if index <= number_of_bins:
-                        rdf[index] += 1
+            index = (np.ceil(dm / dr)).astype(int)
+            index = index.flatten()
+            out_of_scope = index > number_of_bins
+            index[out_of_scope] = 0
+            for i in range(0, len(atoms) * len(atoms)):
+                rdf[index[i]] += 1
 
         # Normalize the RDF and calculate the distances
         rr = []
