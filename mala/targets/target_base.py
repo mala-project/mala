@@ -348,9 +348,10 @@ class TargetBase(ABC):
         # Calculate distances for individual cells.
         for shift_cell in cells:
             atoms_shifted: ase.Atoms = deepcopy(atoms)
-            atoms_shifted.translate(np.matmul(atoms.get_cell(),shift_cell))
-            (distance.cdist(atoms.get_positions(),
-                                 atoms_shifted.get_positions()))
+            atoms_shifted.set_pbc(False)
+            atoms_shifted.translate(np.matmul(np.transpose(atoms.get_cell()),shift_cell))
+            dm = distance.cdist(atoms.get_positions(),
+                                atoms_shifted.get_positions())
             for i in range(0, len(atoms)):
                 for j in range(0, len(atoms)):
                     rij = dm[i][j]
@@ -361,7 +362,7 @@ class TargetBase(ABC):
         # Normalize the RDF and calculate the distances
         rr = []
         phi = len(atoms)/ atoms.get_volume()
-        norm = 4.0 * np.pi * dr * phi * len(atoms)*27
+        norm = 4.0 * np.pi * dr * phi * len(atoms)
         for i in range(1, number_of_bins + 1):
             rr.append((i - 0.5) * dr)
             rdf[i] /= (norm * ((rr[-1] ** 2) + (dr ** 2) / 12.))
