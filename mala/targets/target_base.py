@@ -327,6 +327,9 @@ class TargetBase(ABC):
                                     "Please choose a smaller value.")
 
         # Calculate all the distances.
+        # For reasons beyond me, the cutoff radius actually used for the
+        # Neighborlist is 2*the value provided here. So by dividing by 2 we
+        # actually ensure better performance.
         neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms))+[rMax/2.0],
                                                      bothways=True)
         neighborlist.update(atoms)
