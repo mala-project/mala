@@ -325,10 +325,6 @@ class TargetBase(ABC):
         atoms = atoms
         dr = float(rMax/number_of_bins)
         rdf = np.zeros(number_of_bins + 1)
-
-        # We will approximate periodic boundary conditions by
-        # calculating the distances over 8 adjunct cells.
-        # We need to check if this suffices.
         cell = atoms.get_cell()
         pbc = atoms.get_pbc()
         for i in range(0,3):
@@ -380,7 +376,68 @@ class TargetBase(ABC):
             rMax = np.min(
                     np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
 
-        #
+        # TPCF is a function of three radii.
+        atoms = atoms
+        dr = float(rMax/number_of_bins)
+        tpcf = np.zeros([number_of_bins + 1, number_of_bins + 1,
+                        number_of_bins + 1])
+        cell = atoms.get_cell()
+        pbc = atoms.get_pbc()
+        for i in range(0,3):
+            if pbc[i]:
+                if rMax > cell[i,i]:
+                    raise Exception("Cannot calculate RDF with this radius. "
+                                    "Please choose a smaller value.")
+
+        # Construct a neighbor list for calculation of distances.
+        # With this, the PBC are satisfied.
+        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms))+[rMax/2.0],
+                                                     bothways=True)
+        neighborlist.update(atoms)
+
+        # To calculate the TPCF we calculat the three distances between
+        # three atoms. This
+        for i in range(0, len(atoms)):
+
+            # Debugging
+            if i == 1:
+                break
+
+            pos1 = atoms.get_positions()[i]
+            indices, offsets = neighborlist.get_neighbors(i)
+            # print(list(zip(indices, offsets)))
+            neighbor_pairs = itertools.combinations(list(zip(indices, offsets)), r=2)
+            for neighbor_pair in neighbor_pairs:
+                # print(neighbor_pair)
+                pos2 = atoms.positions[neighbor_pair[0][0]] + \
+                        neighbor_pair[0][1] @ atoms.get_cell()
+                pos3 =  atoms.positions[neighbor_pair[1][0]] + \
+                        neighbor_pair[1][1] @ atoms.get_cell()
+                r1 = distance.cdist([pos1], [pos2])
+                r2 = distance.cdist([pos1], [pos3])
+
+                # We don't need to do any calculation if either of the
+                # atoms are already out of range.
+                if r1 < rMax and r2 < rMax:
+                    r3 = distance.cdist([pos2], [pos3])
+                    if r3 < rMax and np.abs(r1-r2) < r2 and r3 < (r1+r2):
+                        print(r1, r2, r3)
+                        id1 = (np.ceil(r1 / dr)).astype(int)
+                        id2 = (np.ceil(r2 / dr)).astype(int)
+                        id3 = (np.ceil(r3 / dr)).astype(int)
+                        tpcf[id1, id2, id3] += 1
+
+        # Normalize the TPCF and calculate the distances.
+        rr = np.zeros([3, number_of_bins + 1])
+        phi = 1.0 / atoms.get_volume()
+        norm = 8.0 * np.pi * np.pi * dr * phi * phi
+        for i in range(1, number_of_bins + 1):
+            rr[0, k] = (i - 0.5) * dr
+            for j in range(1, number_of_bins + 1):
+                rr[1, k] = (j - 0.5) * dr
+                for k in range(1, number_of_bins + 1):
+                    rr[2, k] = (k - 0.5) * dr
+                    tpcf[i, j, k] /= (norm * ((rr[-1] ** 2) + (dr ** 2) / 12.))
 
 
     @staticmethod
