@@ -311,6 +311,12 @@ class TargetBase(ABC):
         -------
 
         """
+        # Leaving this here for potential future use - this is much faster
+        # because C++.
+        # from asap3.analysis.rdf import RadialDistributionFunction
+        # (RadialDistributionFunction(atoms, rMax, 500)).get_rdf()
+
+
         atoms = atoms
         dr = float(rMax/number_of_bins)
         rdf = np.zeros(number_of_bins + 1)
