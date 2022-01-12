@@ -316,6 +316,11 @@ class TargetBase(ABC):
         # from asap3.analysis.rdf import RadialDistributionFunction
         # (RadialDistributionFunction(atoms, rMax, 500)).get_rdf()
 
+        # This is quite a large RDF.
+        # We may want a smaller one eventually.
+        if rMax is None:
+            rMax = np.min(
+                    np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
 
         atoms = atoms
         dr = float(rMax/number_of_bins)
@@ -333,9 +338,9 @@ class TargetBase(ABC):
                                     "Please choose a smaller value.")
 
         # Calculate all the distances.
-        # For reasons beyond me, the cutoff radius actually used for the
-        # Neighborlist is 2*the value provided here. So by dividing by 2 we
-        # actually ensure better performance.
+        # rMax/2 because this is the radius around one atom, so half the
+        # distance to the next one.
+        # Using neighborlists grants us access to the PBC.
         neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms))+[rMax/2.0],
                                                      bothways=True)
         neighborlist.update(atoms)
@@ -375,6 +380,7 @@ class TargetBase(ABC):
             rMax = np.min(
                     np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
 
+        #
 
 
     @staticmethod
