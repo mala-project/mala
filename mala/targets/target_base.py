@@ -5,6 +5,7 @@ import itertools
 
 from ase.neighborlist import NeighborList
 from ase.units import Rydberg, Bohr, kB
+from ase.dft.kpoints import monkhorst_pack
 import ase.io
 import numpy as np
 from scipy.spatial import distance
@@ -288,7 +289,8 @@ class TargetBase(ABC):
         return grid3D
 
     @staticmethod
-    def get_radial_distribution_function(atoms, number_of_bins=500, rMax=None):
+    def get_radial_distribution_function(atoms: ase.Atoms,
+                                         number_of_bins=500, rMax=None):
         """
         Calculate the radial distribution function.
 
@@ -362,7 +364,8 @@ class TargetBase(ABC):
         return rdf[1:], rr
         
     @staticmethod
-    def get_three_particle_correlation_function(atoms, number_of_bins,
+    def get_three_particle_correlation_function(atoms: ase.Atoms,
+                                                number_of_bins,
                                                 rMax=None):
         """
         Implemented as given by:
@@ -439,6 +442,19 @@ class TargetBase(ABC):
                     rr[2, k] = (k - 0.5) * dr
                     tpcf[i, j, k] /= (norm * ((rr[-1] ** 2) + (dr ** 2) / 12.))
 
+    @staticmethod
+    def get_static_structure_factor(atoms: ase.Atoms, kgrid_dimensions):
+        """
+        Implemented according to arXiv 1606.03610v2, Eq. 2
+        """
+        structure_factor = np.zeros(kgrid_dimensions)
+        kpoints = monkhorst_pack(kgrid_dimensions)
+        kpoints = np.transpose(np.matmul(atoms.get_reciprocal_cell(),
+                                         np.transpose(kpoints)))
+        for kpooint in kpoints:
+            print(kpooint)
+        for i in range(0, len(atoms)):
+            cossum =
 
     @staticmethod
     def write_tem_input_file(atoms_Angstrom, qe_input_data,
