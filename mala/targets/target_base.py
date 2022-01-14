@@ -403,8 +403,8 @@ class TargetBase(ABC):
         for i in range(0, len(atoms)):
 
             # Debugging
-            if i == 1:
-                break
+            # if i == 1:
+            #     break
 
             pos1 = atoms.get_positions()[i]
             indices, offsets = neighborlist.get_neighbors(i)
@@ -423,26 +423,38 @@ class TargetBase(ABC):
                 # atoms are already out of range.
                 if r1 < rMax and r2 < rMax:
                     r3 = distance.cdist([pos2], [pos3])
-                    if r3 < rMax and np.abs(r1-r2) < r2 and r3 < (r1+r2):
-                        print(r1, r2, r3)
+                    if r3 < rMax and np.abs(r1-r2) < r3 < (r1+r2):
+                        # print(r1, r2, r3)
                         id1 = (np.ceil(r1 / dr)).astype(int)
                         id2 = (np.ceil(r2 / dr)).astype(int)
                         id3 = (np.ceil(r3 / dr)).astype(int)
                         tpcf[id1, id2, id3] += 1
 
         # Normalize the TPCF and calculate the distances.
-        rr = np.zeros([3, number_of_bins + 1])
+        rr = np.zeros([3, number_of_bins+1, number_of_bins+1, number_of_bins+1])
         phi = len(atoms) / atoms.get_volume()
         norm = 8.0 * np.pi * np.pi * dr * phi * phi * len(atoms)
         for i in range(1, number_of_bins + 1):
-            rr[0, i] = (i - 0.5) * dr
             for j in range(1, number_of_bins + 1):
-                rr[1, j] = (j - 0.5) * dr
                 for k in range(1, number_of_bins + 1):
-                    rr[2, k] = (k - 0.5) * dr
-                    tpcf[i, j, k] /= (norm * rr[0, i] * rr[1, i] * rr[2, i]
+                    r1 = (i - 0.5) * dr
+                    r2 = (j - 0.5) * dr
+                    r3 = (k - 0.5) * dr
+                    tpcf[i, j, k] /= (norm * r1 * r2 * r3
                                       * dr * dr * dr)
-        return tpcf, rr
+                    rr[0, i, j, k] = r1
+                    rr[1, i, j, k] = r2
+                    rr[2, i, j, k] = r3
+
+        # for i in range(1, number_of_bins + 1):
+        #     for j in range(1, number_of_bins + 1):
+        #         for k in range(1, number_of_bins + 1):
+        #             rr[0, i, j, k] = dr*i
+        #             rr[1, i, j, k] = dr*j
+        #             rr[2, i, j, k] = dr*k
+
+        # return tpcf[1:, 1:, 1:], rr[:, 1:]
+        return tpcf[1:, 1:, 1:], rr[:, 1:, 1:, 1:]
 
     @staticmethod
     def get_static_structure_factor(atoms: ase.Atoms, kgrid_dimensions):
