@@ -432,15 +432,17 @@ class TargetBase(ABC):
 
         # Normalize the TPCF and calculate the distances.
         rr = np.zeros([3, number_of_bins + 1])
-        phi = 1.0 / atoms.get_volume()
-        norm = 8.0 * np.pi * np.pi * dr * phi * phi
+        phi = len(atoms) / atoms.get_volume()
+        norm = 8.0 * np.pi * np.pi * dr * phi * phi * len(atoms)
         for i in range(1, number_of_bins + 1):
-            rr[0, k] = (i - 0.5) * dr
+            rr[0, i] = (i - 0.5) * dr
             for j in range(1, number_of_bins + 1):
-                rr[1, k] = (j - 0.5) * dr
+                rr[1, j] = (j - 0.5) * dr
                 for k in range(1, number_of_bins + 1):
                     rr[2, k] = (k - 0.5) * dr
-                    tpcf[i, j, k] /= (norm * ((rr[-1] ** 2) + (dr ** 2) / 12.))
+                    tpcf[i, j, k] /= (norm * rr[0, i] * rr[1, i] * rr[2, i]
+                                      * dr * dr * dr)
+        return tpcf, rr
 
     @staticmethod
     def get_static_structure_factor(atoms: ase.Atoms, kgrid_dimensions):
@@ -453,8 +455,8 @@ class TargetBase(ABC):
                                          np.transpose(kpoints)))
         for kpooint in kpoints:
             print(kpooint)
-        for i in range(0, len(atoms)):
-            cossum =
+        # for i in range(0, len(atoms)):
+        #     cossum =
 
     @staticmethod
     def write_tem_input_file(atoms_Angstrom, qe_input_data,
