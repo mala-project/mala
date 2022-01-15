@@ -375,6 +375,7 @@ class TargetBase(ABC):
         -------
 
         """
+        import time
         if rMax is None:
             rMax = np.min(
                     np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
@@ -400,6 +401,7 @@ class TargetBase(ABC):
 
         # To calculate the TPCF we calculat the three distances between
         # three atoms. This
+        start_time = time.time()
         for i in range(0, len(atoms)):
 
             # Debugging
@@ -410,19 +412,23 @@ class TargetBase(ABC):
             indices, offsets = neighborlist.get_neighbors(i)
             # print(list(zip(indices, offsets)))
             neighbor_pairs = itertools.combinations(list(zip(indices, offsets)), r=2)
-            for neighbor_pair in neighbor_pairs:
-                # print(neighbor_pair)
-                pos2 = atoms.positions[neighbor_pair[0][0]] + \
-                        neighbor_pair[0][1] @ atoms.get_cell()
-                pos3 =  atoms.positions[neighbor_pair[1][0]] + \
-                        neighbor_pair[1][1] @ atoms.get_cell()
-                r1 = distance.cdist([pos1], [pos2])
-                r2 = distance.cdist([pos1], [pos3])
+            neighbor_list = list(neighbor_pairs)
+            pair_positions = np.array([np.concatenate((atoms.positions[pair1[0]] + \
+                        pair1[1] @ atoms.get_cell(),
+                       atoms.positions[pair2[0]] + \
+                       pair2[1] @ atoms.get_cell()))
+                              for pair1, pair2 in neighbor_list])
+            pair_positions = np.reshape(pair_positions, (len(neighbor_list)*2, 3), order="C")
+            all_dists = distance.cdist([pos1], pair_positions)[0]
+
+            for idx, neighbor_pair in enumerate(neighbor_list):
+                r1 = all_dists[2*idx]
+                r2 = all_dists[2*idx+1]
 
                 # We don't need to do any calculation if either of the
                 # atoms are already out of range.
                 if r1 < rMax and r2 < rMax:
-                    r3 = distance.cdist([pos2], [pos3])
+                    r3 = distance.cdist([pair_positions[2*idx]], [pair_positions[2*idx+1]])
                     if r3 < rMax and np.abs(r1-r2) < r3 < (r1+r2):
                         # print(r1, r2, r3)
                         id1 = (np.ceil(r1 / dr)).astype(int)
@@ -430,6 +436,9 @@ class TargetBase(ABC):
                         id3 = (np.ceil(r3 / dr)).astype(int)
                         tpcf[id1, id2, id3] += 1
 
+        print("First loop", start_time-time.time())
+
+        start_time = time.time()
         # Normalize the TPCF and calculate the distances.
         rr = np.zeros([3, number_of_bins+1, number_of_bins+1, number_of_bins+1])
         phi = len(atoms) / atoms.get_volume()
@@ -445,30 +454,26 @@ class TargetBase(ABC):
                     rr[0, i, j, k] = r1
                     rr[1, i, j, k] = r2
                     rr[2, i, j, k] = r3
-
-        # for i in range(1, number_of_bins + 1):
-        #     for j in range(1, number_of_bins + 1):
-        #         for k in range(1, number_of_bins + 1):
-        #             rr[0, i, j, k] = dr*i
-        #             rr[1, i, j, k] = dr*j
-        #             rr[2, i, j, k] = dr*k
-
-        # return tpcf[1:, 1:, 1:], rr[:, 1:]
+        print("Second loop", start_time-time.time())
         return tpcf[1:, 1:, 1:], rr[:, 1:, 1:, 1:]
 
     @staticmethod
-    def get_static_structure_factor(atoms: ase.Atoms, kgrid_dimensions):
+    def get_static_structure_factor(atoms: ase.Atoms, kgrid_dimension, kmax,
+                                    radial_distribution_function=None):
         """
-        Implemented according to arXiv 1606.03610v2, Eq. 2
+        Implemented according to arXiv 1606.03610v2, Eq. 6 as Fourier
+        transformation of the radial distribution function.
         """
-        structure_factor = np.zeros(kgrid_dimensions)
-        kpoints = monkhorst_pack(kgrid_dimensions)
-        kpoints = np.transpose(np.matmul(atoms.get_reciprocal_cell(),
-                                         np.transpose(kpoints)))
-        for kpooint in kpoints:
-            print(kpooint)
-        # for i in range(0, len(atoms)):
-        #     cossum =
+        if radial_distribution_function is None:
+            radial_distribution_function = TargetBase.\
+                get_radial_distribution_function(atoms)
+        rdf = radial_distribution_function[0]
+        radii = radial_distribution_function[1]
+
+        structure_factor = np.zeros(kgrid_dimension)
+        dk = float(kmax/kgrid_dimension)
+        kpoints = (np.linspace(dk, kmax, kgrid_dimension,))
+
 
     @staticmethod
     def write_tem_input_file(atoms_Angstrom, qe_input_data,
