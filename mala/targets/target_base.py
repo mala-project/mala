@@ -463,9 +463,9 @@ class TargetBase(ABC):
         return tpcf[1:, 1:, 1:], rr[:, 1:, 1:, 1:]
 
     @staticmethod
-    def get_static_structure_factor(atoms: ase.Atoms, kgrid_dimension, kmax,
+    def get_static_structure_factor(atoms: ase.Atoms, kbins, kmax,
                                     radial_distribution_function=None,
-                                    calculation_type="fourier_transform"):
+                                    calculation_type="direct"):
         """
         Implemented according to arXiv 1606.03610v2.
         Two types of S(k) were implemented:
@@ -484,14 +484,14 @@ class TargetBase(ABC):
             rdf = radial_distribution_function[0]
             radii = radial_distribution_function[1]
 
-            structure_factor = np.zeros(kgrid_dimension+1)
-            dk = float(kmax/kgrid_dimension)
+            structure_factor = np.zeros(kbins + 1)
+            dk = float(kmax / kbins)
             kpoints = []
 
             # Fourier transform the RDF by calculating the integral at each
             # k-point we investigate.
             rho = len(atoms)/atoms.get_volume()
-            for i in range(0, kgrid_dimension+1):
+            for i in range(0, kbins + 1):
                 # Construct integrand.
                 kpoints.append(dk*i)
                 kr = np.array(radii)*kpoints[-1]
@@ -501,60 +501,67 @@ class TargetBase(ABC):
             return structure_factor[1:], np.array(kpoints)[1:]
 
         elif calculation_type == "direct":
-            import time
+            # This is the delta for the binning.
+            # The delta for the generation of the k-points themselves is
+            # fixed as delta k = 2pi/L with L being the length of a
+            # cubic cell. More generally, it can be determined via the
+            # reciprocal unit vectors.
+            # The structure factor is undefined for wave vectors smaller
+            # then this number.
+            dk = float(kmax / kbins)
+            dk_threedimensional = atoms.get_cell().reciprocal()*2*np.pi
 
-            dk = float(kmax/kgrid_dimension)
-            # The first will hold S(|k|) (i.e., what we are actually interested
-            # in, the second will hold lists of all S(k) corresponding to the
-            # same |k|.
-            structure_factor = np.zeros(kgrid_dimension+1)
-            structure_factor_kpoints = []
-            for i in range(0, kgrid_dimension+1):
-                structure_factor_kpoints.append([])
+            # From this, the necessary dimensions of the k-grid for this
+            # particular k-max can be determined as
+            kgrid_size = np.ceil(np.matmul(np.linalg.inv(dk_threedimensional),
+                                           [kmax, kmax, kmax])).astype(int)
 
+            # k-grids:
             # The first will hold the full 3D k-points, the second only
             # |k|.
             kgrid = []
-            kpoints = []
-
-            start_time = time.time()
-            # Generate k-grid.
-            for i in range(1, kgrid_dimension + 1):
-                kpoints.append(dk*i)
-                for j in range(1, kgrid_dimension + 1):
-                    for k in range(1, kgrid_dimension + 1):
-                        k_point = [i*dk, j*dk, k*dk]
+            for i in range(0, kgrid_size[0]):
+                for j in range(0, kgrid_size[1]):
+                    for k in range(0, kgrid_size[2]):
+                        k_point = np.matmul(dk_threedimensional, [i, j, k])
                         if np.linalg.norm(k_point) <= kmax:
                             kgrid.append(k_point)
-            print("Generation time", time.time()-start_time)
-            start_time = time.time()
+            kpoints = []
+            for i in range(0, kbins + 1):
+                kpoints.append(dk*i)
 
-            for k in range(0, len(kgrid)):
-                # Calculate cosine and sine sums.
-                cosine_sum = 0
-                sine_sum = 0
-                for i in range(0, len(atoms)):
-                    dot_product = np.dot(kgrid[k], atoms.get_positions()[i])
-                    cosine_sum += np.cos(dot_product)
-                    sine_sum += np.sin(dot_product)
-                s_value = (np.square(cosine_sum)+np.square(sine_sum)) / \
-                          len(atoms)
+            # The first will hold S(|k|) (i.e., what we are actually interested
+            # in, the second will hold lists of all S(k) corresponding to the
+            # same |k|.
+            structure_factor = np.zeros(kbins + 1)
+            structure_factor_kpoints = []
+            for i in range(0, kbins + 1):
+                structure_factor_kpoints.append([])
 
-                # s_value holds S(k), now we have to group this into
-                # S(|k|).
-                k_value = np.linalg.norm(kgrid[k])
-                id = (np.ceil(k_value / dk)).astype(int)
-                structure_factor_kpoints[id].append(s_value)
-            print("Calculation time", time.time()-start_time)
-            start_time = time.time()
+            # Dot product, cosine and sine calculation are done as vector
+            # operations. I am aware this is not particularly memory-friendly,
+            # but it is fast.
+            dot_product = np.dot(kgrid, np.transpose(atoms.get_positions()))
+            cosine_sum = np.sum(np.cos(dot_product), axis=1)
+            sine_sum = np.sum(np.sin(dot_product), axis=1)
+            del dot_product
+            s_values = (np.square(cosine_sum)+np.square(sine_sum)) / len(atoms)
+            del cosine_sum
+            del sine_sum
 
-            for i in range(1, kgrid_dimension+1):
+            # s_value holds S(k), now we have to group this into
+            # S(|k|).
+            k_value = np.linalg.norm(kgrid, axis=1)
+            indices = (np.ceil(k_value / dk)).astype(int)
+            indices = indices.flatten()
+            for idx, index in enumerate(indices):
+                structure_factor_kpoints[index].append(s_values[idx])
+
+            for i in range(1, kbins + 1):
                 if len(structure_factor_kpoints[i]) > 0:
                     structure_factor[i] = np.mean(structure_factor_kpoints[i])
 
-            print("Remapping time", time.time()-start_time)
-
-            return structure_factor[1:], np.array(kpoints)
+            return structure_factor[1:], np.array(kpoints)[1:]
 
         else:
             raise Exception("Static structure factor calculation method "

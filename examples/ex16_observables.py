@@ -47,18 +47,34 @@ def plot_three_particle_correlation_function():
     viridis_transparent = ListedColormap(viridis_transparent)
 
     fig = plt.figure()
-    ax =  fig.add_subplot(projection='3d')
+    ax = fig.add_subplot(projection='3d')
     X, Y = np.meshgrid(tpcf[1][0, :, 0, 0], tpcf[1][1, 0, :, 0])
 
     # Not all combinations of radii # of the TPCF are enough for a contourplot.
     minval = 8
     for i in range(minval, nbins):
-        ax.contourf(X, Y, tpcf[0][:,:,i], offset=tpcf[1][2, 0, 0, i],
+        ax.contourf(X, Y, tpcf[0][:, :, i], offset=tpcf[1][2, 0, 0, i],
                     cmap=viridis_transparent)
     ax.set_zlim3d(tpcf[1][2, 0, 0, minval]-0.01,
                   tpcf[1][2, 0, 0, nbins-1]+0.01)
     plt.show()
 
 
+def plot_static_structure_factor():
+    atoms = read(atoms_path, format="espresso-out")
+
+    # Any target can be used.
+    # Note: The function implemented here differs from the ASE implementation.
+    # It takes periodic boundary condition into account.
+    static_structure, kpoints = mala.LDOS.\
+        get_static_structure_factor(atoms, 100, 12)
+
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.plot(kpoints, static_structure)
+    plt.show()
+
+
 plot_radial_distribution_function()
 plot_three_particle_correlation_function()
+plot_static_structure_factor()
