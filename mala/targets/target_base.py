@@ -375,7 +375,6 @@ class TargetBase(ABC):
         -------
 
         """
-        import time
         if rMax is None:
             rMax = np.min(
                     np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
@@ -399,9 +398,8 @@ class TargetBase(ABC):
                                                      bothways=True)
         neighborlist.update(atoms)
 
-        # To calculate the TPCF we calculat the three distances between
-        # three atoms. This
-        start_time = time.time()
+        # To calculate the TPCF we calculate the three distances between
+        # three atoms. We use a neighbor list for this.
         for i in range(0, len(atoms)):
 
             # Debugging
@@ -409,8 +407,9 @@ class TargetBase(ABC):
             #     break
 
             pos1 = atoms.get_positions()[i]
+            # Generate all pairs of atoms, and calculate distances of
+            # reference atom to them.
             indices, offsets = neighborlist.get_neighbors(i)
-            # print(list(zip(indices, offsets)))
             neighbor_pairs = itertools.combinations(list(zip(indices, offsets)), r=2)
             neighbor_list = list(neighbor_pairs)
             pair_positions = np.array([np.concatenate((atoms.positions[pair1[0]] + \
@@ -418,6 +417,10 @@ class TargetBase(ABC):
                        atoms.positions[pair2[0]] + \
                        pair2[1] @ atoms.get_cell()))
                               for pair1, pair2 in neighbor_list])
+            dists_between_atoms = np.sqrt(
+                np.square(pair_positions[:, 0] - pair_positions[:, 3]) +
+                np.square(pair_positions[:, 1] - pair_positions[:, 4]) +
+                np.square(pair_positions[:, 2] - pair_positions[:, 5]))
             pair_positions = np.reshape(pair_positions, (len(neighbor_list)*2, 3), order="C")
             all_dists = distance.cdist([pos1], pair_positions)[0]
 
@@ -428,7 +431,7 @@ class TargetBase(ABC):
                 # We don't need to do any calculation if either of the
                 # atoms are already out of range.
                 if r1 < rMax and r2 < rMax:
-                    r3 = distance.cdist([pair_positions[2*idx]], [pair_positions[2*idx+1]])
+                    r3 = dists_between_atoms[idx]
                     if r3 < rMax and np.abs(r1-r2) < r3 < (r1+r2):
                         # print(r1, r2, r3)
                         id1 = (np.ceil(r1 / dr)).astype(int)
@@ -436,10 +439,8 @@ class TargetBase(ABC):
                         id3 = (np.ceil(r3 / dr)).astype(int)
                         tpcf[id1, id2, id3] += 1
 
-        print("First loop", start_time-time.time())
-
-        start_time = time.time()
         # Normalize the TPCF and calculate the distances.
+        # This loop takes almost no time compared to the one above.
         rr = np.zeros([3, number_of_bins+1, number_of_bins+1, number_of_bins+1])
         phi = len(atoms) / atoms.get_volume()
         norm = 8.0 * np.pi * np.pi * dr * phi * phi * len(atoms)
@@ -454,7 +455,6 @@ class TargetBase(ABC):
                     rr[0, i, j, k] = r1
                     rr[1, i, j, k] = r2
                     rr[2, i, j, k] = r3
-        print("Second loop", start_time-time.time())
         return tpcf[1:, 1:, 1:], rr[:, 1:, 1:, 1:]
 
     @staticmethod
