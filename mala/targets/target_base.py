@@ -9,9 +9,10 @@ from ase.dft.kpoints import monkhorst_pack
 import ase.io
 import numpy as np
 from scipy.spatial import distance
+from scipy.integrate import simps
 
 from mala.common.parameters import Parameters, ParametersTargets
-from mala.targets.calculation_helpers import fermi_function
+from mala.targets.calculation_helpers import fermi_function, integrate_values_on_spacing
 
 
 class TargetBase(ABC):
@@ -289,6 +290,11 @@ class TargetBase(ABC):
         return grid3D
 
     @staticmethod
+    def _get_ideal_rmax_for_rdf(atoms: ase.Atoms):
+        return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+
+
+    @staticmethod
     def get_radial_distribution_function(atoms: ase.Atoms,
                                          number_of_bins=500, rMax=None):
         """
@@ -321,19 +327,18 @@ class TargetBase(ABC):
         # This is quite a large RDF.
         # We may want a smaller one eventually.
         if rMax is None:
-            rMax = np.min(
-                    np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+            rMax = TargetBase._get_ideal_rmax_for_rdf(atoms)
 
         atoms = atoms
         dr = float(rMax/number_of_bins)
         rdf = np.zeros(number_of_bins + 1)
         cell = atoms.get_cell()
         pbc = atoms.get_pbc()
-        for i in range(0,3):
-            if pbc[i]:
-                if rMax > cell[i,i]:
-                    raise Exception("Cannot calculate RDF with this radius. "
-                                    "Please choose a smaller value.")
+        # for i in range(0,3):
+        #     if pbc[i]:
+        #         if rMax > cell[i, i]:
+        #             raise Exception("Cannot calculate RDF with this radius. "
+        #                             "Please choose a smaller value.")
 
         # Calculate all the distances.
         # rMax/2 because this is the radius around one atom, so half the
@@ -459,20 +464,101 @@ class TargetBase(ABC):
 
     @staticmethod
     def get_static_structure_factor(atoms: ase.Atoms, kgrid_dimension, kmax,
-                                    radial_distribution_function=None):
+                                    radial_distribution_function=None,
+                                    calculation_type="fourier_transform"):
         """
-        Implemented according to arXiv 1606.03610v2, Eq. 6 as Fourier
+        Implemented according to arXiv 1606.03610v2.
+        Two types of S(k) were implemented:
+            Eq. 2 as calculation_type = "direct"
+            Eq. 6 as calculation_type = "fourier_transform"
         transformation of the radial distribution function.
-        """
-        if radial_distribution_function is None:
-            radial_distribution_function = TargetBase.\
-                get_radial_distribution_function(atoms)
-        rdf = radial_distribution_function[0]
-        radii = radial_distribution_function[1]
 
-        structure_factor = np.zeros(kgrid_dimension)
-        dk = float(kmax/kgrid_dimension)
-        kpoints = (np.linspace(dk, kmax, kgrid_dimension,))
+        Calculation type can be either "direct"
+        """
+        if calculation_type == "fourier_transform":
+            if radial_distribution_function is None:
+                rMax = TargetBase._get_ideal_rmax_for_rdf(atoms)*3
+                radial_distribution_function = TargetBase.\
+                    get_radial_distribution_function(atoms, rMax=rMax,
+                                                     number_of_bins=1500)
+            rdf = radial_distribution_function[0]
+            radii = radial_distribution_function[1]
+
+            structure_factor = np.zeros(kgrid_dimension+1)
+            dk = float(kmax/kgrid_dimension)
+            kpoints = []
+
+            # Fourier transform the RDF by calculating the integral at each
+            # k-point we investigate.
+            rho = len(atoms)/atoms.get_volume()
+            for i in range(0, kgrid_dimension+1):
+                # Construct integrand.
+                kpoints.append(dk*i)
+                kr = np.array(radii)*kpoints[-1]
+                integrand = (rdf-1)*radii*np.sin(kr)/kpoints[-1]
+                structure_factor[i] = 1 + (4*np.pi*rho * simps(integrand, radii))
+
+            return structure_factor[1:], np.array(kpoints)[1:]
+
+        elif calculation_type == "direct":
+            import time
+
+            dk = float(kmax/kgrid_dimension)
+            # The first will hold S(|k|) (i.e., what we are actually interested
+            # in, the second will hold lists of all S(k) corresponding to the
+            # same |k|.
+            structure_factor = np.zeros(kgrid_dimension+1)
+            structure_factor_kpoints = []
+            for i in range(0, kgrid_dimension+1):
+                structure_factor_kpoints.append([])
+
+            # The first will hold the full 3D k-points, the second only
+            # |k|.
+            kgrid = []
+            kpoints = []
+
+            start_time = time.time()
+            # Generate k-grid.
+            for i in range(1, kgrid_dimension + 1):
+                kpoints.append(dk*i)
+                for j in range(1, kgrid_dimension + 1):
+                    for k in range(1, kgrid_dimension + 1):
+                        k_point = [i*dk, j*dk, k*dk]
+                        if np.linalg.norm(k_point) <= kmax:
+                            kgrid.append(k_point)
+            print("Generation time", time.time()-start_time)
+            start_time = time.time()
+
+            for k in range(0, len(kgrid)):
+                # Calculate cosine and sine sums.
+                cosine_sum = 0
+                sine_sum = 0
+                for i in range(0, len(atoms)):
+                    dot_product = np.dot(kgrid[k], atoms.get_positions()[i])
+                    cosine_sum += np.cos(dot_product)
+                    sine_sum += np.sin(dot_product)
+                s_value = (np.square(cosine_sum)+np.square(sine_sum)) / \
+                          len(atoms)
+
+                # s_value holds S(k), now we have to group this into
+                # S(|k|).
+                k_value = np.linalg.norm(kgrid[k])
+                id = (np.ceil(k_value / dk)).astype(int)
+                structure_factor_kpoints[id].append(s_value)
+            print("Calculation time", time.time()-start_time)
+            start_time = time.time()
+
+            for i in range(1, kgrid_dimension+1):
+                if len(structure_factor_kpoints[i]) > 0:
+                    structure_factor[i] = np.mean(structure_factor_kpoints[i])
+
+            print("Remapping time", time.time()-start_time)
+
+            return structure_factor[1:], np.array(kpoints)
+
+        else:
+            raise Exception("Static structure factor calculation method "
+                            "unsupported.")
 
 
     @staticmethod
