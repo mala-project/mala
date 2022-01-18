@@ -64,6 +64,9 @@ class ASECalculator(Calculator):
             read_additional_calculation_data(reference_data[0],
                                              reference_data[1])
 
+        # Needed for e.g. Monte Carlo.
+        self.last_energy_contributions = {}
+
     def calculate(self, atoms=None, properties=['energy'],
                   system_changes=all_changes):
         """
@@ -120,10 +123,11 @@ class ASECalculator(Calculator):
                 dos)
             density = ldos_calculator.get_density(ldos,
                                                   fermi_energy_ev=fermi_energy_ev)
-            energy = ldos_calculator.\
+            energy, self.last_energy_contributions = ldos_calculator.\
             get_total_energy(dos_data=dos, density_data=density,
                              fermi_energy_eV=fermi_energy_ev,
-                             create_qe_file=False)
+                             create_qe_file=False,
+                             return_energy_contributions=True)
             if "forces" in properties:
                 forces = density_calculator.get_atomic_forces(density,
                                                               create_file=False)
@@ -163,4 +167,6 @@ class ASECalculator(Calculator):
         if "rdf" in properties:
             self.results["rdf"] = self.data_handler.target_calculator.\
                 get_radial_distribution_function(atoms)
-
+        if "ion_ion_energy" in properties:
+            self.results["ion_ion_energy"] = self.\
+                last_energy_contributions["e_ewald"]

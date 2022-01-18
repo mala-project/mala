@@ -182,7 +182,8 @@ class LDOS(TargetBase):
                          energy_integration_method="analytical",
                          atoms_Angstrom=None,
                          qe_input_data=None, qe_pseudopotentials=None,
-                         create_qe_file=True):
+                         create_qe_file=True,
+                         return_energy_contributions=False):
         """
         Calculate the total energy from LDOS or given DOS + density data.
 
@@ -240,6 +241,16 @@ class LDOS(TargetBase):
         qe_pseudopotentials : dict
             Quantum Espresso pseudopotential dictionaty for the ASE<->QE
             interface. If None (recommended), MALA will create one.
+
+        create_qe_file : bool
+            If True, a QE input file will be created by MALA during the
+            calculation. This is the default, however there may be
+            cases in which it makes sense for the user to provide a custom
+            one.
+
+        return_energy_contributions : bool
+            If True, a dictionary of energy contributions will be provided
+            alongside the total energy. The default is False.
 
         Returns
         -------
@@ -310,8 +321,17 @@ class LDOS(TargetBase):
                                      create_file=create_qe_file)
         e_total = e_band + e_rho_times_v_hxc + e_hartree + e_xc + e_ewald +\
             e_entropy_contribution
-
-        return e_total
+        if return_energy_contributions:
+            energy_contribtuons = {"e_band": e_band,
+                                   "e_rho_times_v_hxc": e_rho_times_v_hxc,
+                                   "e_hartree": e_hartree,
+                                   "e_xc": e_xc,
+                                   "e_ewald": e_ewald,
+                                   "e_entropy_contribution":
+                                       e_entropy_contribution}
+            return e_total, energy_contribtuons
+        else:
+            return e_total
 
     def get_band_energy(self, ldos_data, fermi_energy_eV=None,
                         temperature_K=None, grid_spacing_bohr=None,
