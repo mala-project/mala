@@ -1,18 +1,17 @@
 """Base class for all target calculators."""
 from abc import ABC, abstractmethod
-from copy import deepcopy
 import itertools
+import warnings
 
 from ase.neighborlist import NeighborList
 from ase.units import Rydberg, Bohr, kB
-from ase.dft.kpoints import monkhorst_pack
 import ase.io
 import numpy as np
 from scipy.spatial import distance
 from scipy.integrate import simps
 
 from mala.common.parameters import Parameters, ParametersTargets
-from mala.targets.calculation_helpers import fermi_function, integrate_values_on_spacing
+from mala.targets.calculation_helpers import fermi_function
 
 
 class TargetBase(ABC):
@@ -32,9 +31,9 @@ class TargetBase(ABC):
 
     def __init__(self, params):
         if isinstance(params, Parameters):
-            self.parameters = params.targets
+            self.parameters: ParametersTargets = params.targets
         elif isinstance(params, ParametersTargets):
-            self.parameters = params
+            self.parameters: ParametersTargets = params
         else:
             raise Exception("Wrong type of parameters for Targets class.")
         self.fermi_energy_eV = None
@@ -145,7 +144,7 @@ class TargetBase(ABC):
             Type of data or file that is used. Currently only supports
             qe.out for Quantum Espresso outfiles.
 
-        data : string or list
+        data : string or List
             Data from which additional calculation data is inputted.
         """
         if data_type == "qe.out":
@@ -182,15 +181,7 @@ class TargetBase(ABC):
                         self.temperature_K = np.float64(line.split('=')[2]) * \
                                              Rydberg / kB
                     if "xc contribution" in line:
-                        xc_contribution = float((line.split('=')[1]).
-                                                split('Ry')[0])
                         break
-                    if "one-electron contribution" in line:
-                        one_electron_contribution = float((line.split('=')[1]).
-                                                          split('Ry')[0])
-                    if "hartree contribution" in line:
-                        hartree_contribution = float((line.split('=')[1]).
-                                                     split('Ry')[0])
                     if "FFT dimensions" in line:
                         dims = line.split("(")[1]
                         self.grid_dimensions[0] = int(dims.split(",")[0])
@@ -293,31 +284,44 @@ class TargetBase(ABC):
     def _get_ideal_rmax_for_rdf(atoms: ase.Atoms):
         return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
 
-
     @staticmethod
-    def get_radial_distribution_function(atoms: ase.Atoms,
-                                         number_of_bins=500, rMax=None):
+    def radial_distribution_function_from_atoms(atoms: ase.Atoms,
+                                                number_of_bins,
+                                                rMax=None):
         """
-        Calculate the radial distribution function.
+        Calculate the radial distribution function (RDF).
 
-        Reimplemented because the ASE implementation can't handle periodic
-        boundary conditions (rMax, which is the same in all three directions,
-        has to be smaller then the smallest direction in the unit cell; for
-        systems with non-cubic geometry, e.g. hexagonal systems, this makes
-        the RDF awfully small). Reference implementation is the ASAP3 code,
-        which I would like to avoid because we then have yet another
-        dependency for only one function. I do not claim this to be the
-        most performant implementation of the RDF, however.
+        In comparison with other python implementation, this function
+        can handle arbitrary radii by incorporating a neighbor list.
+        Loosely based on the implementation in the ASAP3 code
+        (specifically, this file:
+        https://gitlab.com/asap/asap/-/blob/master/Tools/RawRadialDistribution.cpp),
+        but without the restriction for the radii.
 
         Parameters
         ----------
-        atoms
-        number_of_bins
-        rMax
+        atoms : ase.Atoms
+            Atoms for which to construct the RDF.
+
+        number_of_bins : int
+            Number of bins used to create the histogram.
+
+        rMax : float
+            Radius up to which to calculate the RDF. None by default; this
+            is the suggested behavior, as MALA will then on its own calculate
+            the maximum radius up until which the calculation of the RDF is
+            indisputably physically meaningful. Larger radii may be specified,
+            e.g. for a Fourier transformation to calculate the static structure
+            factor.
 
         Returns
         -------
+        rdf : numpy.ndarray
+            The RDF as [rMax] array.
 
+        radii : numpy.ndarray
+            The radii  at which the RDF was calculated (for plotting),
+            as [rMax] array.
         """
         # Leaving this here for potential future use - this is much faster
         # because C++.
@@ -332,35 +336,40 @@ class TargetBase(ABC):
         atoms = atoms
         dr = float(rMax/number_of_bins)
         rdf = np.zeros(number_of_bins + 1)
+
         cell = atoms.get_cell()
         pbc = atoms.get_pbc()
-        # for i in range(0,3):
-        #     if pbc[i]:
-        #         if rMax > cell[i, i]:
-        #             raise Exception("Cannot calculate RDF with this radius. "
-        #                             "Please choose a smaller value.")
+        for i in range(0, 3):
+            if pbc[i]:
+                if rMax > cell[i, i]:
+                    warnings.warn(
+                        "Calculating RDF with a radius larger then the unit"
+                        " cell. While this will work numerically, be cautious"
+                        " about the physicality of its results", stacklevel=3)
 
         # Calculate all the distances.
         # rMax/2 because this is the radius around one atom, so half the
         # distance to the next one.
         # Using neighborlists grants us access to the PBC.
-        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms))+[rMax/2.0],
+        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms)) +
+                                                     [rMax/2.0],
                                                      bothways=True)
         neighborlist.update(atoms)
         for i in range(0, len(atoms)):
             indices, offsets = neighborlist.get_neighbors(i)
             dm = distance.cdist([atoms.get_positions()[i]],
-                                atoms.positions[indices] + offsets @ atoms.get_cell())
+                                atoms.positions[indices] + offsets @
+                                atoms.get_cell())
             index = (np.ceil(dm / dr)).astype(int)
             index = index.flatten()
             out_of_scope = index > number_of_bins
             index[out_of_scope] = 0
-            for i in index:
-                rdf[i] += 1
+            for idx in index:
+                rdf[idx] += 1
 
         # Normalize the RDF and calculate the distances
         rr = []
-        phi = len(atoms)/ atoms.get_volume()
+        phi = len(atoms) / atoms.get_volume()
         norm = 4.0 * np.pi * dr * phi * len(atoms)
         for i in range(1, number_of_bins + 1):
             rr.append((i - 0.5) * dr)
@@ -369,16 +378,39 @@ class TargetBase(ABC):
         return rdf[1:], rr
         
     @staticmethod
-    def get_three_particle_correlation_function(atoms: ase.Atoms,
-                                                number_of_bins,
-                                                rMax=None):
+    def three_particle_correlation_function_from_atoms(atoms: ase.Atoms,
+                                                       number_of_bins,
+                                                       rMax=None):
         """
-        Implemented as given by:
-        doi.org/10.1063/5.0048450, equation 17.
+        Calculate the three particle correlation function (TPCF).
+
+        The implementation was done as given by doi.org/10.1063/5.0048450,
+        equation 17, with only small modifications. Pleas be aware that,
+        while optimized, this function tends to be compuational heavy for
+        large radii or number of bins.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            Atoms for which to construct the RDF.
+
+        number_of_bins : int
+            Number of bins used to create the histogram.
+
+        rMax : float
+            Radius up to which to calculate the TPCF. If None, MALA will
+            determine the maximum radius for which the TPCF is indisputably
+            defined. Be advised - this may come at increased computational
+            cost.
 
         Returns
         -------
+        tpcf : numpy.ndarray
+            The TPCF as [rMax, rMax, rMax] array.
 
+        radii : numpy.ndarray
+            The radii at which the TPCF was calculated (for plotting),
+            [rMax, rMax, rMax].
         """
         if rMax is None:
             rMax = np.min(
@@ -391,9 +423,9 @@ class TargetBase(ABC):
                         number_of_bins + 1])
         cell = atoms.get_cell()
         pbc = atoms.get_pbc()
-        for i in range(0,3):
+        for i in range(0, 3):
             if pbc[i]:
-                if rMax > cell[i,i]:
+                if rMax > cell[i, i]:
                     raise Exception("Cannot calculate RDF with this radius. "
                                     "Please choose a smaller value.")
 
@@ -415,18 +447,20 @@ class TargetBase(ABC):
             # Generate all pairs of atoms, and calculate distances of
             # reference atom to them.
             indices, offsets = neighborlist.get_neighbors(i)
-            neighbor_pairs = itertools.combinations(list(zip(indices, offsets)), r=2)
+            neighbor_pairs = itertools.\
+                combinations(list(zip(indices, offsets)), r=2)
             neighbor_list = list(neighbor_pairs)
             pair_positions = np.array([np.concatenate((atoms.positions[pair1[0]] + \
-                        pair1[1] @ atoms.get_cell(),
-                       atoms.positions[pair2[0]] + \
-                       pair2[1] @ atoms.get_cell()))
-                              for pair1, pair2 in neighbor_list])
+                                                       pair1[1] @ atoms.get_cell(),
+                                                       atoms.positions[pair2[0]] + \
+                                                       pair2[1] @ atoms.get_cell()))
+                                       for pair1, pair2 in neighbor_list])
             dists_between_atoms = np.sqrt(
                 np.square(pair_positions[:, 0] - pair_positions[:, 3]) +
                 np.square(pair_positions[:, 1] - pair_positions[:, 4]) +
                 np.square(pair_positions[:, 2] - pair_positions[:, 5]))
-            pair_positions = np.reshape(pair_positions, (len(neighbor_list)*2, 3), order="C")
+            pair_positions = np.reshape(pair_positions, (len(neighbor_list)*2,
+                                                         3), order="C")
             all_dists = distance.cdist([pos1], pair_positions)[0]
 
             for idx, neighbor_pair in enumerate(neighbor_list):
@@ -446,7 +480,8 @@ class TargetBase(ABC):
 
         # Normalize the TPCF and calculate the distances.
         # This loop takes almost no time compared to the one above.
-        rr = np.zeros([3, number_of_bins+1, number_of_bins+1, number_of_bins+1])
+        rr = np.zeros([3, number_of_bins+1, number_of_bins+1,
+                       number_of_bins+1])
         phi = len(atoms) / atoms.get_volume()
         norm = 8.0 * np.pi * np.pi * dr * phi * phi * len(atoms)
         for i in range(1, number_of_bins + 1):
@@ -463,40 +498,75 @@ class TargetBase(ABC):
         return tpcf[1:, 1:, 1:], rr[:, 1:, 1:, 1:]
 
     @staticmethod
-    def get_static_structure_factor(atoms: ase.Atoms, kbins, kmax,
-                                    radial_distribution_function=None,
-                                    calculation_type="direct"):
+    def static_structure_factor_from_atoms(atoms: ase.Atoms, number_of_bins, kMax,
+                                           radial_distribution_function=None,
+                                           calculation_type="direct"):
         """
-        Implemented according to arXiv 1606.03610v2.
-        Two types of S(k) were implemented:
-            Eq. 2 as calculation_type = "direct"
-            Eq. 6 as calculation_type = "fourier_transform"
-        transformation of the radial distribution function.
+        Calculate the static structure factor (SSF).
 
-        Calculation type can be either "direct"
+        Implemented according to https://arxiv.org/abs/1606.03610:
+
+            - Eq. 2 as calculation_type = "direct", i.e. via summation in Fourier space
+            - Eq. 6 as calculation_type = "fourier_transform", i.e. via calculation of RDF and thereafter Fourier transformation.
+
+        The direct calculation is significantly more accurate and about
+        as efficient, at least for small systems.
+        In either case, the SSF will be given as S(k), even though
+        technically, the direct method calculates S(**k**); during binning,
+        this function averages over all **k** with the same k.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            Atoms for which to construct the RDF.
+
+        number_of_bins : int
+            Number of bins used to create the histogram.
+
+        kMax : float
+            Maximum wave vector up to which to calculate the SSF.
+
+        radial_distribution_function : List of numpy.ndarray
+            If not None, and calculation_type="fourier_transform", this RDf
+            will be used for the Fourier transformation.
+
+        calculation_type : string
+            Either "direct" or "fourier_transform". Controls how the SSF is
+            calculated.
+
+        Returns
+        -------
+        ssf : numpy.ndarray
+            The SSF as [kMax] array.
+
+        kpoints : numpy.ndarray
+            The k-points  at which the SSF was calculated (for plotting),
+            as [kMax] array.
         """
         if calculation_type == "fourier_transform":
             if radial_distribution_function is None:
                 rMax = TargetBase._get_ideal_rmax_for_rdf(atoms)*3
                 radial_distribution_function = TargetBase.\
-                    get_radial_distribution_function(atoms, rMax=rMax,
-                                                     number_of_bins=1500)
+                    radial_distribution_function_from_atoms(atoms, rMax=rMax,
+                                                            number_of_bins=
+                                                            1500)
             rdf = radial_distribution_function[0]
             radii = radial_distribution_function[1]
 
-            structure_factor = np.zeros(kbins + 1)
-            dk = float(kmax / kbins)
+            structure_factor = np.zeros(number_of_bins + 1)
+            dk = float(kMax / number_of_bins)
             kpoints = []
 
             # Fourier transform the RDF by calculating the integral at each
             # k-point we investigate.
             rho = len(atoms)/atoms.get_volume()
-            for i in range(0, kbins + 1):
+            for i in range(0, number_of_bins + 1):
                 # Construct integrand.
                 kpoints.append(dk*i)
                 kr = np.array(radii)*kpoints[-1]
                 integrand = (rdf-1)*radii*np.sin(kr)/kpoints[-1]
-                structure_factor[i] = 1 + (4*np.pi*rho * simps(integrand, radii))
+                structure_factor[i] = 1 + (4*np.pi*rho * simps(integrand,
+                                                               radii))
 
             return structure_factor[1:], np.array(kpoints)[1:]
 
@@ -508,13 +578,13 @@ class TargetBase(ABC):
             # reciprocal unit vectors.
             # The structure factor is undefined for wave vectors smaller
             # then this number.
-            dk = float(kmax / kbins)
+            dk = float(kMax / number_of_bins)
             dk_threedimensional = atoms.get_cell().reciprocal()*2*np.pi
 
             # From this, the necessary dimensions of the k-grid for this
             # particular k-max can be determined as
             kgrid_size = np.ceil(np.matmul(np.linalg.inv(dk_threedimensional),
-                                           [kmax, kmax, kmax])).astype(int)
+                                           [kMax, kMax, kMax])).astype(int)
 
             # k-grids:
             # The first will hold the full 3D k-points, the second only
@@ -524,18 +594,18 @@ class TargetBase(ABC):
                 for j in range(0, kgrid_size[1]):
                     for k in range(0, kgrid_size[2]):
                         k_point = np.matmul(dk_threedimensional, [i, j, k])
-                        if np.linalg.norm(k_point) <= kmax:
+                        if np.linalg.norm(k_point) <= kMax:
                             kgrid.append(k_point)
             kpoints = []
-            for i in range(0, kbins + 1):
+            for i in range(0, number_of_bins + 1):
                 kpoints.append(dk*i)
 
             # The first will hold S(|k|) (i.e., what we are actually interested
             # in, the second will hold lists of all S(k) corresponding to the
             # same |k|.
-            structure_factor = np.zeros(kbins + 1)
+            structure_factor = np.zeros(number_of_bins + 1)
             structure_factor_kpoints = []
-            for i in range(0, kbins + 1):
+            for i in range(0, number_of_bins + 1):
                 structure_factor_kpoints.append([])
 
             # Dot product, cosine and sine calculation are done as vector
@@ -557,7 +627,7 @@ class TargetBase(ABC):
             for idx, index in enumerate(indices):
                 structure_factor_kpoints[index].append(s_values[idx])
 
-            for i in range(1, kbins + 1):
+            for i in range(1, number_of_bins + 1):
                 if len(structure_factor_kpoints[i]) > 0:
                     structure_factor[i] = np.mean(structure_factor_kpoints[i])
 
@@ -567,6 +637,89 @@ class TargetBase(ABC):
             raise Exception("Static structure factor calculation method "
                             "unsupported.")
 
+    def get_radial_distribution_function(self, atoms: ase.Atoms):
+        """
+        Calculate the radial distribution function (RDF).
+
+        Uses the values as given in the parameters object.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            Atoms for which to construct the RDF.
+
+        Returns
+        -------
+        rdf : numpy.ndarray
+            The RDF as [rMax] array.
+
+        radii : numpy.ndarray
+            The radii  at which the RDF was calculated (for plotting),
+            as [rMax] array.
+        """
+        return TargetBase.\
+            radial_distribution_function_from_atoms(atoms,
+                                                    number_of_bins=self.
+                                                    parameters.
+                                                    rdf_parameters
+                                                    ["number_of_bins"],
+                                                    rMax=self.parameters.
+                                                    rdf_parameters["rMax"])
+
+    def get_three_particle_correlation_function(self, atoms: ase.Atoms):
+        """
+        Calculate the three particle correlation function (TPCF).
+
+        Uses the values as given in the parameters object.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            Atoms for which to construct the RDF.
+
+        Returns
+        -------
+        tpcf : numpy.ndarray
+            The TPCF as [rMax, rMax, rMax] array.
+
+        radii : numpy.ndarray
+            The radii at which the TPCF was calculated (for plotting),
+            [rMax, rMax, rMax].
+        """
+        return TargetBase.\
+            three_particle_correlation_function_from_atoms(atoms,
+                                                           number_of_bins=self.
+                                                           parameters.
+                                                           tpcf_parameters
+                                                           ["number_of_bins"],
+                                                           rMax=self.parameters.
+                                                           tpcf_parameters["rMax"])
+
+    def get_static_structure_factor(self, atoms: ase.Atoms):
+        """
+        Calculate the static structure factor (SSF).
+
+        Uses the values as given in the parameters object.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            Atoms for which to construct the RDF.
+
+        Returns
+        -------
+        ssf : numpy.ndarray
+            The SSF as [kMax] array.
+
+        kpoints : numpy.ndarray
+            The k-points  at which the SSF was calculated (for plotting),
+            as [kMax] array.
+        """
+        return TargetBase.static_structure_factor_from_atoms(atoms,
+                                                             self.parameters.
+                                                             ssf_parameters["number_of_bins"],
+                                                             self.parameters.
+                                                             ssf_parameters["number_of_bins"])
 
     @staticmethod
     def write_tem_input_file(atoms_Angstrom, qe_input_data,
@@ -593,7 +746,7 @@ class TargetBase(ABC):
             Quantum Espresso pseudopotential dictionaty for the ASE<->QE
             interface. If None (recommended), MALA will create one.
 
-        grid_dimensions : list
+        grid_dimensions : List
             A list containing the x,y,z dimensions of the real space grid.
 
         kpoints : dict

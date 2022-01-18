@@ -161,12 +161,17 @@ class ASECalculator(Calculator):
             List of what needs to be calculated.  Can be any combination
             of "rdf", ...
         """
-
         # TODO: Check atoms.
 
         if "rdf" in properties:
             self.results["rdf"] = self.data_handler.target_calculator.\
                 get_radial_distribution_function(atoms)
+        if "tpcf" in properties:
+            self.results["tpcf"] = self.data_handler.target_calculator.\
+                get_three_particle_correlation_function(atoms)
+        if "static_structure_factor" in properties:
+            self.results["static_structure_factor"] = self.data_handler.\
+                target_calculator.get_static_structure_factor(atoms)
         if "ion_ion_energy" in properties:
             self.results["ion_ion_energy"] = self.\
                 last_energy_contributions["e_ewald"]

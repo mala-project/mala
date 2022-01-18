@@ -83,7 +83,7 @@ class DescriptorBase(ABC):
 
         Parameters
         ----------
-        atoms : ase.atoms
+        atoms : ase.Atoms
             The ASE atoms object for which the PBC need to be enforced.
 
         Returns

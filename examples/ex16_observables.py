@@ -23,8 +23,7 @@ def plot_radial_distribution_function():
     # Any target can be used.
     # Note: The function implemented here differs from the ASE implementation.
     # It takes periodic boundary condition into account.
-    rdf, radii = mala.LDOS.get_radial_distribution_function(atoms,
-                                                            number_of_bins=100)
+    rdf, radii = mala.LDOS.radial_distribution_function_from_atoms(atoms, number_of_bins=100)
 
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -37,8 +36,8 @@ def plot_three_particle_correlation_function():
 
     # Any target can be used.
     nbins = 20
-    tpcf = mala.LDOS.get_three_particle_correlation_function(atoms, nbins,
-                                                             rMax=5.0)
+    tpcf = mala.LDOS.three_particle_correlation_function_from_atoms(atoms, nbins, rMax=5.0)
+
     # For the plotting of the contour plots, we define a custom color map.
     # plot contour plots.
     cmap = pl.cm.get_cmap("viridis")
@@ -66,8 +65,7 @@ def plot_static_structure_factor():
     # Any target can be used.
     # Note: The function implemented here differs from the ASE implementation.
     # It takes periodic boundary condition into account.
-    static_structure, kpoints = mala.LDOS.\
-        get_static_structure_factor(atoms, 100, 12)
+    static_structure, kpoints = mala.LDOS.static_structure_factor_from_atoms(atoms, 100, 12)
 
     fig = plt.figure()
     ax = fig.add_subplot()

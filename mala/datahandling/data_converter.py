@@ -60,7 +60,7 @@ class DataConverter:
         """
         Add a Quantum Espresso snapshot to the list of conversion list.
 
-        Please not that a Quantum Espresso snapshot consists of:
+        Please note that a Quantum Espresso snapshot consists of:
 
             - a Quantum Espresso output file for a self-consistent calculation.
             - multiple .cube files containing the LDOS
