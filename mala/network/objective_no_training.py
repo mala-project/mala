@@ -65,7 +65,7 @@ class ObjectiveNoTraining(ObjectiveBase):
         for i in range(0, self.params.hyperparameters.
                        number_training_per_trial):
             net = Network(self.params)
-            device = "cuda" if self.params.use_gpu else "cpu"
+            device = self.params.device
 
             # Load the batchesand get the jacobian.
             do_shuffle = self.params.running.use_shuffling_for_samplers

@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
-    set_mpi_status
+    set_mpi_status, get_rank
 
 
 
@@ -27,7 +27,8 @@ class ParametersBase:
     """Base parameter class for MALA."""
 
     def __init__(self,):
-        self._configuration = {"gpu": False, "horovod": False, "mpi": False}
+        self._configuration = {"gpu": False, "horovod": False, "mpi": False,
+                               "device": "cpu"}
         pass
 
     def show(self, indent=""):
@@ -52,6 +53,9 @@ class ParametersBase:
 
     def _update_mpi(self, new_mpi):
         self._configuration["mpi"] = new_mpi
+
+    def _update_device(self, new_device):
+        self._configuration["device"] = new_device
 
 
 class ParametersNetwork(ParametersBase):
@@ -693,6 +697,9 @@ class Parameters:
         self.use_gpu = False
         self.use_mpi = False
         self.manual_seed = None
+        self.device_type = "cpu"
+        self.device_id = 0
+        self.device = "cpu"
 
     @property
     def use_gpu(self):
@@ -703,9 +710,11 @@ class Parameters:
     def use_gpu(self, value):
         if value is False:
             self._use_gpu = False
-        if value is True:
+            self.device_type = "cpu"
+        else:
             if torch.cuda.is_available():
                 self._use_gpu = True
+                self.device_type = "cuda"
             else:
                 warnings.warn("GPU requested, but no GPU found. MALA will "
                               "operate with CPU only.", stacklevel=3)
@@ -726,6 +735,9 @@ class Parameters:
     def use_horovod(self, value):
         if value:
             hvd.init()
+            self.device_id = hvd.local_rank()
+        else:
+            self.device_id = 0
         set_horovod_status(value)
         self._use_horovod = value
         self.network._update_horovod(self.use_horovod)
@@ -737,6 +749,54 @@ class Parameters:
         self.debug._update_horovod(self.use_horovod)
 
     @property
+    def device_id(self):
+        """Control the device ID used for multi GPU settings."""
+        if self.device_type == "cuda":
+            return self._device_id
+        else:
+            # For cpu architectures, this should always be zero
+            # (elsewise we get a torch error).
+            # Not that this will never matter in production, but I have
+            # to run test cases on a non-GPU enabled machine occasionally.
+            return 0
+
+    @device_id.setter
+    def device_id(self, value):
+        # Will be updated in setter, we just need to trigger the setter.
+        self._device_id = value
+
+    @property
+    def device_type(self):
+        """Control the type of device to be used."""
+        return self._device_type
+
+    @device_type.setter
+    def device_type(self, value):
+        self._device_type = value
+        # Will be updated in setter, we just need to trigger the setter.
+        self.device = None
+
+    @property
+    def device(self):
+        """The device used by MALA."""
+        return self._device
+
+    @device.setter
+    def device(self, value):
+        if self.device_type == "cuda":
+            self._device = f"{self.device_type}:"\
+                           f"{self.device_id}"
+        else:
+            self._device = "cpu"
+        self.network._update_device(self._device)
+        self.descriptors._update_device(self._device)
+        self.targets._update_device(self._device)
+        self.data._update_device(self._device)
+        self.running._update_device(self._device)
+        self.hyperparameters._update_device(self._device)
+        self.debug._update_device(self._device)
+
+    @property
     def use_mpi(self):
         """Control whether or not horovod is used for parallel training."""
         return self._use_mpi
@@ -744,6 +804,10 @@ class Parameters:
     @use_mpi.setter
     def use_mpi(self, value):
         set_mpi_status(value)
+        if value:
+            self.device_id = get_rank()
+        else:
+            self.device_id = 0
         self._use_mpi = value
         self.network._update_mpi(self.use_mpi)
         self.descriptors._update_mpi(self.use_mpi)
@@ -752,7 +816,6 @@ class Parameters:
         self.running._update_mpi(self.use_mpi)
         self.hyperparameters._update_mpi(self.use_mpi)
         self.debug._update_mpi(self.use_mpi)
-
 
     def show(self):
         """Print name and values of all attributes of this object."""
