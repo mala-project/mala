@@ -585,6 +585,7 @@ class TargetBase(ABC):
             # particular k-max can be determined as
             kgrid_size = np.ceil(np.matmul(np.linalg.inv(dk_threedimensional),
                                            [kMax, kMax, kMax])).astype(int)
+            print("Calculating SSF on k-grid of size", kgrid_size)
 
             # k-grids:
             # The first will hold the full 3D k-points, the second only
