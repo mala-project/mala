@@ -1,6 +1,7 @@
 """Base class for all hyperparameter optimizers."""
 from abc import abstractmethod, ABC
 
+from mala.common.parameters import Parameters
 from mala.network.hyperparameter_interface import HyperparameterInterface
 from mala.network.objective_base import ObjectiveBase
 
@@ -17,8 +18,8 @@ class HyperOptBase(ABC):
         DataHandler holding the data for the hyperparameter optimization.
     """
 
-    def __init__(self, params, data):
-        self.params = params
+    def __init__(self, params: Parameters, data):
+        self.params: Parameters = params
         self.data_handler = data
         self.objective = ObjectiveBase(self.params, self.data_handler)
 
