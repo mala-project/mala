@@ -7,11 +7,13 @@ try:
     from mpi4py import MPI
 except ModuleNotFoundError:
     pass
-
+import platform
+from collections import defaultdict
 
 use_horovod = False
 use_mpi = False
 comm = None
+local_mpi_rank = None
 
 
 def set_horovod_status(new_value):
@@ -79,6 +81,33 @@ def get_rank():
         return comm.Get_rank()
     return 0
 
+def get_local_rank():
+    """
+    Get the local rank of the process.
+
+    This is the rank WITHIN a node. Useful when multiple GPUs are
+    used on one node.
+
+    Originally copied from:
+    https://github.com/hiwonjoon/ICML2019-TREX/blob/master/mujoco/learner/baselines/baselines/common/mpi_util.py
+    """
+    if use_horovod:
+        return hvd.local_rank()
+    if use_mpi:
+        global local_mpi_rank
+        if local_mpi_rank is None:
+            this_node = platform.node()
+            ranks_nodes = comm.allgather((comm.Get_rank(), this_node))
+            node2rankssofar = defaultdict(int)
+            local_rank = None
+            for (rank, node) in ranks_nodes:
+                if rank == comm.Get_rank():
+                    local_rank = node2rankssofar[node]
+                node2rankssofar[node] += 1
+            assert local_rank is not None
+            local_mpi_rank = local_rank
+        return local_mpi_rank
+    return 0
 
 def get_size():
     """

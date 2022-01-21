@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
-    set_mpi_status, get_rank
+    set_mpi_status, get_rank, get_local_rank
 
 
 
@@ -693,12 +693,10 @@ class Parameters:
         self.debug = ParametersDebug()
 
         # Properties
-        self.use_horovod = False
         self.use_gpu = False
+        self.use_horovod = False
         self.use_mpi = False
         self.manual_seed = None
-        self.device_type = "cpu"
-        self.device_id = 0
         self.device = "cpu"
 
     @property
@@ -710,14 +708,15 @@ class Parameters:
     def use_gpu(self, value):
         if value is False:
             self._use_gpu = False
-            self.device_type = "cpu"
         else:
             if torch.cuda.is_available():
                 self._use_gpu = True
-                self.device_type = "cuda"
             else:
                 warnings.warn("GPU requested, but no GPU found. MALA will "
                               "operate with CPU only.", stacklevel=3)
+
+        # Invalidate, will be updated in setter.
+        self.device = None
         self.network._update_gpu(self.use_gpu)
         self.descriptors._update_gpu(self.use_gpu)
         self.targets._update_gpu(self.use_gpu)
@@ -735,9 +734,9 @@ class Parameters:
     def use_horovod(self, value):
         if value:
             hvd.init()
-            self.device_id = hvd.local_rank()
-        else:
-            self.device_id = 0
+
+        # Invalidate, will be updated in setter.
+        self.device = None
         set_horovod_status(value)
         self._use_horovod = value
         self.network._update_horovod(self.use_horovod)
@@ -748,44 +747,18 @@ class Parameters:
         self.hyperparameters._update_horovod(self.use_horovod)
         self.debug._update_horovod(self.use_horovod)
 
-    @property
-    def device_id(self):
-        """Control the device ID used for multi GPU settings."""
-        if self.device_type == "cuda":
-            return self._device_id
-        else:
-            # For cpu architectures, this should always be zero
-            # (elsewise we get a torch error).
-            # Not that this will never matter in production, but I have
-            # to run test cases on a non-GPU enabled machine occasionally.
-            return 0
-
-    @device_id.setter
-    def device_id(self, value):
-        # Will be updated in setter, we just need to trigger the setter.
-        self._device_id = value
-
-    @property
-    def device_type(self):
-        """Control the type of device to be used."""
-        return self._device_type
-
-    @device_type.setter
-    def device_type(self, value):
-        self._device_type = value
-        # Will be updated in setter, we just need to trigger the setter.
-        self.device = None
 
     @property
     def device(self):
-        """The device used by MALA."""
+        """Get the device used by MALA. Read-only."""
         return self._device
 
     @device.setter
     def device(self, value):
-        if self.device_type == "cuda":
-            self._device = f"{self.device_type}:"\
-                           f"{self.device_id}"
+        id = get_local_rank()
+        if self.use_gpu:
+            self._device = "cuda:"\
+                           f"{id}"
         else:
             self._device = "cpu"
         self.network._update_device(self._device)
@@ -804,10 +777,8 @@ class Parameters:
     @use_mpi.setter
     def use_mpi(self, value):
         set_mpi_status(value)
-        if value:
-            self.device_id = get_rank()
-        else:
-            self.device_id = 0
+        # Invalidate, will be updated in setter.
+        self.device = None
         self._use_mpi = value
         self.network._update_mpi(self.use_mpi)
         self.descriptors._update_mpi(self.use_mpi)
