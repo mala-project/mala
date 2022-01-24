@@ -91,7 +91,7 @@ class DataConverter:
         self.__snapshot_description.append(["qe.out", ".cube"])
         self.__snapshot_units.append([input_units, output_units])
 
-    def convert_single_snapshot(self, snapshot_number):
+    def convert_single_snapshot(self, snapshot_number, use_memmap=None):
         """
         Convert single snapshot from the conversion lists.
 
@@ -111,6 +111,9 @@ class DataConverter:
         outputs : numpy.array
             Numpy array containing the preprocessed outputs.
 
+        use_memmap : string
+            If not None, a memory mapped file will be used to gather the LDOS.
+            If run in MPI parallel mode, such a file MUST be provided.
         """
         snapshot = self.__snapshots_to_convert[snapshot_number]
         description = self.__snapshot_description[snapshot_number]
@@ -137,22 +140,21 @@ class DataConverter:
             raise Exception("Unknown file extension, cannot convert target")
 
         # Parse and/or calculate the output descriptors.
-        if get_rank() == 0:
-            if description[1] == ".cube":
+        if description[1] == ".cube":
 
-                # If no units are provided we just assume standard units.
-                if original_units[1] is None:
-                    tmp_output = self.target_calculator.read_from_cube(snapshot[2],
-                                                                       snapshot[3])
-                else:
-                    tmp_output = self.target_calculator.\
-                        read_from_cube(snapshot[2], snapshot[3], units=
-                                       original_units[1])
+            # If no units are provided we just assume standard units.
+            if original_units[1] is None:
+                tmp_output = self.target_calculator.read_from_cube(
+                    snapshot[2],
+                    snapshot[3], use_memmap=use_memmap)
             else:
-                raise Exception("Unknown file extension, cannot convert target"
-                                "data.")
+                tmp_output = self.target_calculator. \
+                    read_from_cube(snapshot[2], snapshot[3], units=
+                original_units[1], use_memmap=use_memmap)
         else:
-            tmp_output = []
+            raise Exception(
+                "Unknown file extension, cannot convert target"
+                "data.")
 
         return tmp_input, tmp_output
 
@@ -181,12 +183,24 @@ class DataConverter:
         """
         for i in range(0, len(self.__snapshots_to_convert)):
             snapshot_number = i + starts_at
-            input_data, output_data = self.convert_single_snapshot(i)
             snapshot_name = naming_scheme
             snapshot_name = snapshot_name.replace("*", str(snapshot_number))
+
+            if self.parameters._configuration["mpi"]:
+                input_data, output_data = self.\
+                    convert_single_snapshot(i, os.path.join(save_path,
+                                                            snapshot_name +
+                                                            ".out.npy_temp"))
+            else:
+                input_data, output_data = self.convert_single_snapshot(i)
+
+            printout(output_data)
             printout("Saving snapshot", snapshot_number, "at ", save_path)
             if get_rank() == 0:
                 np.save(os.path.join(save_path, snapshot_name+".in.npy"),
                         input_data)
                 np.save(os.path.join(save_path, snapshot_name+".out.npy"),
                         output_data)
+                if self.parameters._configuration["mpi"]:
+                    os.remove(os.path.join(save_path,
+                                           snapshot_name+".out.npy_temp"))
