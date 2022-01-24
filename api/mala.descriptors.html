@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-70-g4980a7a
+                v0.2.0-72-g73141f5
               </div>
             
           
@@ -493,7 +493,12 @@ skipped and a python float is returned.</p>
 <dt id="mala.descriptors.snap.SNAP.gather_descriptors">
 <code class="sig-name descname"><span class="pre">gather_descriptors</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snap_descriptors_np</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pickled_comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.snap.SNAP.gather_descriptors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gathers all SNAP descriptors on rank 0 and sorts them.</p>
-<p>This is useful for e.g. parallel preprocessing.</p>
+<p>This is useful for e.g. parallel preprocessing.
+This function removes the extra 3 components that come from parallel
+processing.
+I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
+97 (in parallel mode), and this function returns, as to retain the
+3 x,y,z ones we by default include.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
