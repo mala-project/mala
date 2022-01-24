@@ -16,7 +16,7 @@ data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 
 # For the ASE calculator test, it's enough when the energies are roughly the
 # same.
-accuracy_coarse = 1
+accuracy_coarse = 10
 
 
 class TestInterfaces:
