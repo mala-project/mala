@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, get_rank
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor_interface import DescriptorInterface
 from mala.targets.target_interface import TargetInterface
@@ -125,28 +125,34 @@ class DataConverter:
                 tmp_input = self.descriptor_calculator. \
                     calculate_from_qe_out(snapshot[0], snapshot[1],
                                           units=original_units[0])
+            if self.parameters._configuration["mpi"]:
+                tmp_input = self.descriptor_calculator.gather_descriptors(tmp_input)
 
             # Cut the xyz information if requested by the user.
-            if self.parameters.descriptors_contain_xyz is False:
-                tmp_input = tmp_input[:, :, :, 3:]
+            if get_rank() == 0:
+                if self.parameters.descriptors_contain_xyz is False:
+                    tmp_input = tmp_input[:, :, :, 3:]
 
         else:
             raise Exception("Unknown file extension, cannot convert target")
 
         # Parse and/or calculate the output descriptors.
-        if description[1] == ".cube":
+        if get_rank() == 0:
+            if description[1] == ".cube":
 
-            # If no units are provided we just assume standard units.
-            if original_units[1] is None:
-                tmp_output = self.target_calculator.read_from_cube(snapshot[2],
-                                                                   snapshot[3])
+                # If no units are provided we just assume standard units.
+                if original_units[1] is None:
+                    tmp_output = self.target_calculator.read_from_cube(snapshot[2],
+                                                                       snapshot[3])
+                else:
+                    tmp_output = self.target_calculator.\
+                        read_from_cube(snapshot[2], snapshot[3], units=
+                                       original_units[1])
             else:
-                tmp_output = self.target_calculator.\
-                    read_from_cube(snapshot[2], snapshot[3], units=
-                                   original_units[1])
+                raise Exception("Unknown file extension, cannot convert target"
+                                "data.")
         else:
-            raise Exception("Unknown file extension, cannot convert target"
-                            "data.")
+            tmp_output = []
 
         return tmp_input, tmp_output
 
@@ -179,7 +185,8 @@ class DataConverter:
             snapshot_name = naming_scheme
             snapshot_name = snapshot_name.replace("*", str(snapshot_number))
             printout("Saving snapshot", snapshot_number, "at ", save_path)
-            np.save(os.path.join(save_path, snapshot_name+".in.npy"),
-                    input_data)
-            np.save(os.path.join(save_path, snapshot_name+".out.npy"),
-                    output_data)
+            if get_rank() == 0:
+                np.save(os.path.join(save_path, snapshot_name+".in.npy"),
+                        input_data)
+                np.save(os.path.join(save_path, snapshot_name+".out.npy"),
+                        output_data)
