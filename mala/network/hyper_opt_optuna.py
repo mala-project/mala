@@ -10,7 +10,7 @@ from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
 from mala.network.hyper_opt_base import HyperOptBase
 from mala.network.objective_base import ObjectiveBase
-from mala.network.no_training_pruner import NoTrainingPruner
+from mala.network.naswot_pruner import NASWOTPruner
 
 
 class HyperOptOptuna(HyperOptBase):
@@ -38,8 +38,8 @@ class HyperOptOptuna(HyperOptBase):
 
         # See if the user specified a pruner.
         pruner = None
-        if self.params.hyperparameters.pruner == "no_training":
-            pruner = NoTrainingPruner(self.params, data)
+        if self.params.hyperparameters.pruner == "naswot":
+            pruner = NASWOTPruner(self.params, data)
 
         # Create the study.
         if self.params.hyperparameters.rdb_storage is None:

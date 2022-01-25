@@ -10,7 +10,7 @@ from .common import Parameters, printout
 from .descriptors import DescriptorInterface, SNAP, DescriptorBase
 from .datahandling import DataHandler, DataScaler, DataConverter
 from .network import Network, Tester, Trainer, HyperOptInterface, \
-    HyperOptOptuna, HyperOptNoTraining, HyperOptOAT, Predictor
+    HyperOptOptuna, HyperOptNASWOT, HyperOptOAT, Predictor
 from .targets import TargetInterface, LDOS, DOS, Density, fermi_function, \
     AtomicForce
-from .interfaces import ASECalculator
+from .interfaces import MALA

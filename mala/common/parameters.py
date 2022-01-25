@@ -470,7 +470,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
             - "oat" : Use orthogonal array tuning (currently limited to
               categorical hyperparemeters). Range analysis is
               currently done by simply choosing the lowest loss.
-            - "notraining" : Using a NAS without training, based on jacobians.
+            - "naswot" : Using a NAS without training, based on jacobians.
 
     checkpoints_each_trial : int
         If not 0, checkpoint files will be saved after each
@@ -527,12 +527,12 @@ class ParametersHyperparameterOptimization(ParametersBase):
         since v2.2.0, but reported to perform very well.
         http://proceedings.mlr.press/v80/falkner18a.html
 
-    no_training_cutoff : float
+    naswot_pruner_cutoff : float
         If the surrogate loss algorithm is used as a pruner during a study,
         this cutoff determines which trials are neglected.
 
     pruner: string
-        Pruner type to be used by optuna. Currently only "no_training" is
+        Pruner type to be used by optuna. Currently only "naswot" is
         supported, which will use the NASWOT algorithm as pruner.
 
     naswot_pruner_batch_size : int
@@ -553,7 +553,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.number_training_per_trial = 1
         self.trial_ensemble_evaluation = "mean"
         self.use_multivariate = True
-        self.no_training_cutoff = 0
+        self.naswot_pruner_cutoff = 0
         self.pruner = None
         self.naswot_pruner_batch_size = 0
 

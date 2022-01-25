@@ -12,7 +12,7 @@ from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, \
 from mala.common.parallelizer import get_rank, get_comm
 
 
-class ASECalculator(Calculator):
+class MALA(Calculator):
     """
     Implements an ASE calculator based on MALA predictions.
 
@@ -44,7 +44,7 @@ class ASECalculator(Calculator):
 
     def __init__(self, params: Parameters, network: Network,
                  data: DataHandler, reference_data):
-        super(ASECalculator, self).__init__()
+        super(MALA, self).__init__()
 
         # Copy the MALA relevant objects.
         self.params: Parameters = params

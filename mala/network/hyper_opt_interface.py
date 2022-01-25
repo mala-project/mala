@@ -1,5 +1,5 @@
 """Interface to get correct hyperparameter optimizer."""
-from mala.network.hyper_opt_notraining import HyperOptNoTraining
+from mala.network.hyper_opt_naswot import HyperOptNASWOT
 from mala.network.hyper_opt_oat import HyperOptOAT
 from mala.network.hyper_opt_optuna import HyperOptOptuna
 
@@ -26,8 +26,8 @@ def HyperOptInterface(params, data):
         hoptimizer = HyperOptOptuna(params, data)
     if params.hyperparameters.hyper_opt_method == "oat":
         hoptimizer = HyperOptOAT(params, data)
-    if params.hyperparameters.hyper_opt_method == "notraining":
-        hoptimizer = HyperOptNoTraining(params, data)
+    if params.hyperparameters.hyper_opt_method == "naswot":
+        hoptimizer = HyperOptNASWOT(params, data)
 
     if hoptimizer is not None:
         return hoptimizer

@@ -11,7 +11,7 @@ from mala.network.network import Network
 from mala.network.objective_base import ObjectiveBase
 
 
-class ObjectiveNoTraining(ObjectiveBase):
+class ObjectiveNASWOT(ObjectiveBase):
     """
     Represents the objective function using no NN training.
 
@@ -40,8 +40,8 @@ class ObjectiveNoTraining(ObjectiveBase):
 
     def __init__(self, search_parameters: Parameters, data_handler:
                  DataHandler, trial_type, batch_size=None):
-        super(ObjectiveNoTraining, self).__init__(search_parameters,
-                                                  data_handler)
+        super(ObjectiveNASWOT, self).__init__(search_parameters,
+                                              data_handler)
         self.trial_type = trial_type
         self.batch_size = batch_size
         if self.batch_size is None:
@@ -58,7 +58,7 @@ class ObjectiveNoTraining(ObjectiveBase):
             trial or simply a OAT compatible list.
         """
         # Parse the parameters using the base class.
-        super(ObjectiveNoTraining, self).parse_trial(trial)
+        super(ObjectiveNASWOT, self).parse_trial(trial)
 
         # Build the network.
         surrogate_losses = []
@@ -77,12 +77,12 @@ class ObjectiveNoTraining(ObjectiveBase):
             loader = DataLoader(self.data_handler.training_data_set,
                                 batch_size=self.batch_size,
                                 shuffle=do_shuffle)
-            jac = ObjectiveNoTraining.__get_batch_jacobian(net, loader, device)
+            jac = ObjectiveNASWOT.__get_batch_jacobian(net, loader, device)
 
             # Loss = - score!
             surrogate_loss = float('inf')
             try:
-                surrogate_loss = - ObjectiveNoTraining.__calc_score(jac)
+                surrogate_loss = - ObjectiveNASWOT.__calc_score(jac)
                 surrogate_loss = surrogate_loss.cpu().detach().numpy().astype(
                     np.float64)
             except RuntimeError:
@@ -151,7 +151,7 @@ class ObjectiveNoTraining(ObjectiveBase):
     @staticmethod
     def __calc_score(jacobian: Tensor):
         """Calculate the score for a Jacobian."""
-        correlations = ObjectiveNoTraining.__corrcoef(jacobian)
+        correlations = ObjectiveNASWOT.__corrcoef(jacobian)
         eigen_values, _ = torch.eig(correlations)
         # Only consider the real valued part, imaginary part is rounding
         # artefact

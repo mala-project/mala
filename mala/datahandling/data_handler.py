@@ -245,13 +245,14 @@ class DataHandler:
                                 "DataScalers.")
 
         # Parametrize the scalers, if needed.
-        printout("Initializing the data scalers.")
         if reparametrize_scaler:
+            printout("Initializing the data scalers.")
             self.__parametrize_scalers()
+            printout("Data scalers initialized.")
         else:
+            printout("Data scalers already initilized, loading data to RAM.")
             if self.parameters.use_lazy_loading is False:
                 self.__load_training_data_into_ram()
-        printout("Data scalers initialized.")
 
         # Build Datasets.
         printout("Build datasets.")
