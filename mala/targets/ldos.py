@@ -152,6 +152,7 @@ class LDOS(TargetBase):
         else:
             start_index = 1
             end_index = self.parameters.ldos_gridsize + 1
+            local_size = self.parameters.ldos_gridsize
 
         for i in range(start_index, end_index):
             tmp_file_name = file_name_scheme
@@ -165,31 +166,38 @@ class LDOS(TargetBase):
             # in which we want to store the LDOS.
             if i == start_index:
                 data_shape = np.shape(data)
-                if use_memmap is None:
-                    ldos_data = np.zeros((data_shape[0], data_shape[1],
-                                          data_shape[2], self.parameters.
-                                          ldos_gridsize), dtype=np.float64)
-                else:
-                    if get_rank() == 0:
-                        ldos_data = np.memmap(use_memmap, shape=(data_shape[0], data_shape[1],
-                                              data_shape[2], self.parameters.
-                                              ldos_gridsize), mode="w+", dtype=np.float64)
-                        ldos_data[-1] = 1.0
-                    get_comm().Barrier()
-                    if get_rank() != 0:
-                        ldos_data = np.memmap(use_memmap, shape=(data_shape[0], data_shape[1],
-                                              data_shape[2], self.parameters.
-                                              ldos_gridsize), mode="r+", dtype=np.float64)
-                    get_comm().Barrier()
+                ldos_data = np.zeros((data_shape[0], data_shape[1],
+                                      data_shape[2], local_size),
+                                     dtype=np.float64)
 
             # Convert and then append the LDOS data.
             data = data*self.convert_units(1, in_units=units)
-            ldos_data[:, :, :, i-1] = data[:, :, :]
-            if use_memmap is not None:
-                ldos_data.flush()
+            ldos_data[:, :, :, i-start_index] = data[:, :, :]
 
-        get_comm().Barrier()
-        return ldos_data
+        # If a memmap is used for communication, this has to be brought into
+        # play now.
+        if self.parameters._configuration["mpi"]:
+            get_comm().Barrier()
+            data_shape = np.shape(ldos_data)
+            if get_rank() == 0:
+                ldos_data_full = np.memmap(use_memmap,
+                                           shape=(data_shape[0], data_shape[1],
+                                                 data_shape[2], self.parameters.
+                                                 ldos_gridsize), mode="w+",
+                                           dtype=np.float64)
+            get_comm().Barrier()
+            if get_rank() != 0:
+                ldos_data_full = np.memmap(use_memmap,
+                                           shape=(data_shape[0], data_shape[1],
+                                                  data_shape[2], self.parameters.
+                                                  ldos_gridsize), mode="r+",
+                                           dtype=np.float64)
+            get_comm().Barrier()
+            ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
+            return ldos_data_full
+
+        else:
+            return ldos_data
 
     def get_energy_grid(self):
         """
