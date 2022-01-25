@@ -91,7 +91,11 @@ class DataConverter:
         self.__snapshot_description.append(["qe.out", ".cube"])
         self.__snapshot_units.append([input_units, output_units])
 
-    def convert_single_snapshot(self, snapshot_number):
+    def convert_single_snapshot(self, snapshot_number,
+                                input_path=None,
+                                output_path=None,
+                                use_memmap=None,
+                                return_data=False):
         """
         Convert single snapshot from the conversion lists.
 
@@ -103,14 +107,26 @@ class DataConverter:
         snapshot_number : integer
             Position of the desired snapshot in the snapshot list.
 
+        use_memmap : string
+            If not None, a memory mapped file will be used to gather the LDOS.
+            If run in MPI parallel mode, such a file MUST be provided.
+
+        input_path : string
+            If not None, inputs will be saved in this file.
+
+        output_path : string
+            If not None, outputs will be saved in this file.
+
+        return_data : bool
+            If True, inputs and outputs will be returned directly.
+
         Returns
         -------
-        inputs : numpy.array
+        inputs : numpy.array , optional
             Numpy array containing the preprocessed inputs.
 
-        outputs : numpy.array
+        outputs : numpy.array , optional
             Numpy array containing the preprocessed outputs.
-
         """
         snapshot = self.__snapshots_to_convert[snapshot_number]
         description = self.__snapshot_description[snapshot_number]
@@ -136,25 +152,36 @@ class DataConverter:
         else:
             raise Exception("Unknown file extension, cannot convert target")
 
-        # Parse and/or calculate the output descriptors.
+        # Save data and delete, if not requested otherwise.
         if get_rank() == 0:
-            if description[1] == ".cube":
+            if input_path is not None:
+                np.save(input_path, tmp_input)
 
-                # If no units are provided we just assume standard units.
-                if original_units[1] is None:
-                    tmp_output = self.target_calculator.read_from_cube(snapshot[2],
-                                                                       snapshot[3])
-                else:
-                    tmp_output = self.target_calculator.\
-                        read_from_cube(snapshot[2], snapshot[3], units=
-                                       original_units[1])
+        if not return_data:
+            del tmp_input
+
+        # Parse and/or calculate the output descriptors.
+        if description[1] == ".cube":
+
+            # If no units are provided we just assume standard units.
+            if original_units[1] is None:
+                tmp_output = self.target_calculator.read_from_cube(
+                    snapshot[2], snapshot[3], use_memmap=use_memmap)
             else:
-                raise Exception("Unknown file extension, cannot convert target"
-                                "data.")
+                tmp_output = self.target_calculator. \
+                    read_from_cube(snapshot[2], snapshot[3], units=
+                original_units[1], use_memmap=use_memmap)
         else:
-            tmp_output = []
+            raise Exception(
+                "Unknown file extension, cannot convert target"
+                "data.")
 
-        return tmp_input, tmp_output
+        if get_rank() == 0:
+            if output_path is not None:
+                np.save(output_path, tmp_output)
+
+        if return_data:
+            return tmp_input, tmp_output
 
     def convert_snapshots(self, save_path="./",
                           naming_scheme="ELEM_snapshot*", starts_at=0):
@@ -181,12 +208,22 @@ class DataConverter:
         """
         for i in range(0, len(self.__snapshots_to_convert)):
             snapshot_number = i + starts_at
-            input_data, output_data = self.convert_single_snapshot(i)
             snapshot_name = naming_scheme
             snapshot_name = snapshot_name.replace("*", str(snapshot_number))
-            printout("Saving snapshot", snapshot_number, "at ", save_path)
+
+            # A memory mapped file is used as buffer for distributed cases.
+            memmap = None
+            if self.parameters._configuration["mpi"]:
+                memmap = os.path.join(save_path, snapshot_name +
+                                      ".out.npy_temp")
+
+            self.convert_single_snapshot(i, input_path=os.path.join(save_path,
+                                         snapshot_name+".in.npy"),
+                                         output_path=os.path.join(save_path,
+                                         snapshot_name+".out.npy"),
+                                         use_memmap=memmap)
+            printout("Saved snapshot", snapshot_number, "at ", save_path)
+
             if get_rank() == 0:
-                np.save(os.path.join(save_path, snapshot_name+".in.npy"),
-                        input_data)
-                np.save(os.path.join(save_path, snapshot_name+".out.npy"),
-                        output_data)
+                if self.parameters._configuration["mpi"]:
+                    os.remove(memmap)
