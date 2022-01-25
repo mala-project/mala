@@ -45,9 +45,9 @@ def initial_setup():
     test_parameters.running.verbosity = False
     test_parameters.hyperparameters.checkpoint_name = "ex04"
     test_parameters.hyperparameters.checkpoints_each_trial = -1
-    test_parameters.hyperparameters.pruner = "no_training"
+    test_parameters.hyperparameters.pruner = "naswot"
     test_parameters.hyperparameters.naswot_pruner_batch_size = 60
-    test_parameters.hyperparameters.no_training_cutoff = 1000000000000
+    test_parameters.hyperparameters.naswot_pruner_cutoff = 1000000000000
 
     ####################
     # DATA
