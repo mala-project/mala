@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-75-g46066d9
+                v0.2.0-77-g1e8b372
               </div>
             
           
@@ -213,8 +213,8 @@
 <span id="mala-interfaces-ase-calculator-module"></span><h2>mala.interfaces.ase_calculator module<a class="headerlink" href="#module-mala.interfaces.ase_calculator" title="Permalink to this headline">¶</a></h2>
 <p>ASE calculator for MALA predictions.</p>
 <dl class="py class">
-<dt id="mala.interfaces.ase_calculator.ASECalculator">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.interfaces.ase_calculator.</span></code><code class="sig-name descname"><span class="pre">ASECalculator</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.interfaces.ase_calculator.ASECalculator" title="Permalink to this definition">¶</a></dt>
+<dt id="mala.interfaces.ase_calculator.MALA">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.interfaces.ase_calculator.</span></code><code class="sig-name descname"><span class="pre">MALA</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ase.calculators.calculator.</span></code></p>
 <p>Implements an ASE calculator based on MALA predictions.</p>
 <p>With this, MD simulations can be performed.</p>
@@ -236,8 +236,8 @@ from the atomic positions.</p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="mala.interfaces.ase_calculator.ASECalculator.calculate">
-<code class="sig-name descname"><span class="pre">calculate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['energy']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_changes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ase.calculators.calculator.all_changes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.interfaces.ase_calculator.ASECalculator.calculate" title="Permalink to this definition">¶</a></dt>
+<dt id="mala.interfaces.ase_calculator.MALA.calculate">
+<code class="sig-name descname"><span class="pre">calculate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['energy']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_changes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ase.calculators.calculator.all_changes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.calculate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the calculations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -255,8 +255,8 @@ any combination of these six: ‘positions’, ‘numbers’, ‘cell’,
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="mala.interfaces.ase_calculator.ASECalculator.implemented_properties">
-<code class="sig-name descname"><span class="pre">implemented_properties</span></code><em class="property"> <span class="pre">=</span> <span class="pre">['energy',</span> <span class="pre">'forces']</span></em><a class="headerlink" href="#mala.interfaces.ase_calculator.ASECalculator.implemented_properties" title="Permalink to this definition">¶</a></dt>
+<dt id="mala.interfaces.ase_calculator.MALA.implemented_properties">
+<code class="sig-name descname"><span class="pre">implemented_properties</span></code><em class="property"> <span class="pre">=</span> <span class="pre">['energy',</span> <span class="pre">'forces']</span></em><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.implemented_properties" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

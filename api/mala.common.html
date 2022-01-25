@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-75-g46066d9
+                v0.2.0-77-g1e8b372
               </div>
             
           
@@ -769,7 +769,7 @@ optimizer provide interfaces for this task.</p>
 <li><p>“oat” : Use orthogonal array tuning (currently limited to
 categorical hyperparemeters). Range analysis is
 currently done by simply choosing the lowest loss.</p></li>
-<li><p>“notraining” : Using a NAS without training, based on jacobians.</p></li>
+<li><p>“naswot” : Using a NAS without training, based on jacobians.</p></li>
 </ul>
 </div></blockquote>
 </dd>
@@ -816,10 +816,10 @@ as an estimate of the minimal accuracy to be expected. Currently,
 since v2.2.0, but reported to perform very well.
 <a class="reference external" href="http://proceedings.mlr.press/v80/falkner18a.html">http://proceedings.mlr.press/v80/falkner18a.html</a></p>
 </dd>
-<dt>no_training_cutoff<span class="classifier">float</span></dt><dd><p>If the surrogate loss algorithm is used as a pruner during a study,
+<dt>naswot_pruner_cutoff<span class="classifier">float</span></dt><dd><p>If the surrogate loss algorithm is used as a pruner during a study,
 this cutoff determines which trials are neglected.</p>
 </dd>
-<dt>pruner: string</dt><dd><p>Pruner type to be used by optuna. Currently only “no_training” is
+<dt>pruner: string</dt><dd><p>Pruner type to be used by optuna. Currently only “naswot” is
 supported, which will use the NASWOT algorithm as pruner.</p>
 </dd>
 <dt>naswot_pruner_batch_size<span class="classifier">int</span></dt><dd><p>Batch size for the NASWOT pruner</p>

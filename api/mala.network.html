@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-75-g46066d9
+                v0.2.0-77-g1e8b372
               </div>
             
           
@@ -312,12 +312,12 @@ hyperparameter optimizer was created.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-mala.network.hyper_opt_notraining">
-<span id="mala-network-hyper-opt-notraining-module"></span><h2>mala.network.hyper_opt_notraining module<a class="headerlink" href="#module-mala.network.hyper_opt_notraining" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-mala.network.hyper_opt_naswot">
+<span id="mala-network-hyper-opt-naswot-module"></span><h2>mala.network.hyper_opt_naswot module<a class="headerlink" href="#module-mala.network.hyper_opt_naswot" title="Permalink to this headline">¶</a></h2>
 <p>Hyperparameter optimizer working without training.</p>
 <dl class="py class">
-<dt id="mala.network.hyper_opt_notraining.HyperOptNoTraining">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_notraining.</span></code><code class="sig-name descname"><span class="pre">HyperOptNoTraining</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining" title="Permalink to this definition">¶</a></dt>
+<dt id="mala.network.hyper_opt_naswot.HyperOptNASWOT">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_naswot.</span></code><code class="sig-name descname"><span class="pre">HyperOptNASWOT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_naswot.HyperOptNASWOT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.hyper_opt_base.HyperOptBase" title="mala.network.hyper_opt_base.HyperOptBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.hyper_opt_base.HyperOptBase</span></code></a></p>
 <p>Hyperparameter optimizer that does not require training networks.</p>
 <p>Networks are analysed using the Jacobian.</p>
@@ -330,32 +330,28 @@ hyperparameter optimizer was created.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="mala.network.hyper_opt_notraining.HyperOptNoTraining.get_best_trial_results">
-<code class="sig-name descname"><span class="pre">get_best_trial_results</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining.get_best_trial_results" title="Permalink to this definition">¶</a></dt>
+<dt id="mala.network.hyper_opt_naswot.HyperOptNASWOT.get_best_trial_results">
+<code class="sig-name descname"><span class="pre">get_best_trial_results</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_naswot.HyperOptNASWOT.get_best_trial_results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the best trial out of the list, including the value.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.network.hyper_opt_notraining.HyperOptNoTraining.perform_study">
-<code class="sig-name descname"><span class="pre">perform_study</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining.perform_study" title="Permalink to this definition">¶</a></dt>
+<dt id="mala.network.hyper_opt_naswot.HyperOptNASWOT.perform_study">
+<code class="sig-name descname"><span class="pre">perform_study</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trial_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_naswot.HyperOptNASWOT.perform_study" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the study, i.e. the optimization.</p>
 <p>This is done by sampling a certain subset of network architectures.
 Currently it is mandatory to provide a trial_list, although it
 will be optional later on.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>trial_list</strong> (<em>list</em>) – A list containing trials from either HyperOptOptuna or HyperOptOAT.
-HyperOptNoTraining does currently not have an algorithm to
-create network archtitectures of interestes by itself and insteads
-investigates those sampled by a different hyperparameter
-optimizer.</p>
+<dd class="field-odd"><p><strong>trial_list</strong> (<em>list</em>) – A list containing trials from either HyperOptOptuna or HyperOptOAT.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.network.hyper_opt_notraining.HyperOptNoTraining.set_optimal_parameters">
-<code class="sig-name descname"><span class="pre">set_optimal_parameters</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_notraining.HyperOptNoTraining.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
+<dt id="mala.network.hyper_opt_naswot.HyperOptNASWOT.set_optimal_parameters">
+<code class="sig-name descname"><span class="pre">set_optimal_parameters</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_naswot.HyperOptNASWOT.set_optimal_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the optimal parameters found in the present study.</p>
 <p>The parameters will be written to the parameter object with which the
 hyperparameter optimizer was created.</p>
@@ -901,6 +897,53 @@ extracted.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-mala.network.naswot_pruner">
+<span id="mala-network-naswot-pruner-module"></span><h2>mala.network.naswot_pruner module<a class="headerlink" href="#module-mala.network.naswot_pruner" title="Permalink to this headline">¶</a></h2>
+<p>Prunes a network when the score is above a user defined limit.</p>
+<dl class="py class">
+<dt id="mala.network.naswot_pruner.NASWOTPruner">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.naswot_pruner.</span></code><code class="sig-name descname"><span class="pre">NASWOTPruner</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.naswot_pruner.NASWOTPruner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">optuna.pruners.</span></code></p>
+<p>Implements the NASWOT method (first version of paper) as an optuna pruner.</p>
+<p>This means that before each training of a trial network the network will
+be tested against a user defined surrogate score (which has to be
+calibrated). If this score is good enough, the candidate will be trained.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>search_parameters</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this objective.</p></li>
+<li><p><strong>data_handler</strong> (<a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – datahandler to be used during the hyperparameter optimization.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.network.naswot_pruner.NASWOTPruner.prune">
+<code class="sig-name descname"><span class="pre">prune</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">optuna.study.Study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">optuna.trial.FrozenTrial</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#mala.network.naswot_pruner.NASWOTPruner.prune" title="Permalink to this definition">¶</a></dt>
+<dd><p>Judge whether the trial should be pruned based on the reported values.</p>
+<p>Note that this method is not supposed to be called by library users. Instead,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.report()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.should_prune()</span></code> provide
+user interfaces to implement pruning mechanism in an objective function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>study</strong> (<em>optuna.study.Study</em>) – Study object of the target study.</p></li>
+<li><p><strong>trial</strong> (<em>optuna.trial.FrozenTrial</em>) – FrozenTrial object of the target trial.
+Take a copy before modifying this object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>should_prune</strong> – A boolean indicating whether this particular trial should be
+pruned.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-mala.network.network">
 <span id="mala-network-network-module"></span><h2>mala.network.network module<a class="headerlink" href="#module-mala.network.network" title="Permalink to this headline">¶</a></h2>
 <p>Neural network for MALA.</p>
@@ -1011,53 +1054,6 @@ functionalities AND possibly own saving needs.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-mala.network.no_training_pruner">
-<span id="mala-network-no-training-pruner-module"></span><h2>mala.network.no_training_pruner module<a class="headerlink" href="#module-mala.network.no_training_pruner" title="Permalink to this headline">¶</a></h2>
-<p>Prunes a network when the score is above a user defined limit.</p>
-<dl class="py class">
-<dt id="mala.network.no_training_pruner.NoTrainingPruner">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.no_training_pruner.</span></code><code class="sig-name descname"><span class="pre">NoTrainingPruner</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.no_training_pruner.NoTrainingPruner" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">optuna.pruners.</span></code></p>
-<p>Implements the NASWOT method (first version of paper) as an optuna pruner.</p>
-<p>This means that before each training of a trial network the network will
-be tested against a user defined surrogate score (which has to be
-calibrated). If this score is good enough, the candidate will be trained.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>search_parameters</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this objective.</p></li>
-<li><p><strong>data_handler</strong> (<a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – datahandler to be used during the hyperparameter optimization.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt id="mala.network.no_training_pruner.NoTrainingPruner.prune">
-<code class="sig-name descname"><span class="pre">prune</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">optuna.study.Study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">optuna.trial.FrozenTrial</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#mala.network.no_training_pruner.NoTrainingPruner.prune" title="Permalink to this definition">¶</a></dt>
-<dd><p>Judge whether the trial should be pruned based on the reported values.</p>
-<p>Note that this method is not supposed to be called by library users. Instead,
-<code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.report()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.should_prune()</span></code> provide
-user interfaces to implement pruning mechanism in an objective function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>study</strong> (<em>optuna.study.Study</em>) – Study object of the target study.</p></li>
-<li><p><strong>trial</strong> (<em>optuna.trial.FrozenTrial</em>) – FrozenTrial object of the target trial.
-Take a copy before modifying this object.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>should_prune</strong> – A boolean indicating whether this particular trial should be
-pruned.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
 <div class="section" id="module-mala.network.objective_base">
 <span id="mala-network-objective-base-module"></span><h2>mala.network.objective_base module<a class="headerlink" href="#module-mala.network.objective_base" title="Permalink to this headline">¶</a></h2>
 <p>Objective function for all training based hyperparameter optimizations.</p>
@@ -1104,12 +1100,12 @@ trial or simply a OAT compatible list.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-mala.network.objective_no_training">
-<span id="mala-network-objective-no-training-module"></span><h2>mala.network.objective_no_training module<a class="headerlink" href="#module-mala.network.objective_no_training" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-mala.network.objective_naswot">
+<span id="mala-network-objective-naswot-module"></span><h2>mala.network.objective_naswot module<a class="headerlink" href="#module-mala.network.objective_naswot" title="Permalink to this headline">¶</a></h2>
 <p>Objective functions for hyperparameter optimizations without training.</p>
 <dl class="py class">
-<dt id="mala.network.objective_no_training.ObjectiveNoTraining">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.objective_no_training.</span></code><code class="sig-name descname"><span class="pre">ObjectiveNoTraining</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_parameters</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_handler</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><span class="pre">mala.datahandling.data_handler.DataHandler</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.objective_no_training.ObjectiveNoTraining" title="Permalink to this definition">¶</a></dt>
+<dt id="mala.network.objective_naswot.ObjectiveNASWOT">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.objective_naswot.</span></code><code class="sig-name descname"><span class="pre">ObjectiveNASWOT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_parameters</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_handler</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><span class="pre">mala.datahandling.data_handler.DataHandler</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.objective_naswot.ObjectiveNASWOT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.objective_base.ObjectiveBase" title="mala.network.objective_base.ObjectiveBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.objective_base.ObjectiveBase</span></code></a></p>
 <p>Represents the objective function using no NN training.</p>
 <p>The objective value is calculated using the Jacobian.</p>

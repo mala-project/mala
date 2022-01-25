@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                v0.2.0-75-g46066d9
+                v0.2.0-77-g1e8b372
               </div>
             
           
@@ -230,8 +230,6 @@
 </li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.analytical_integration">analytical_integration() (in module mala.targets.calculation_helpers)</a>
 </li>
-      <li><a href="api/mala.interfaces.html#mala.interfaces.ase_calculator.ASECalculator">ASECalculator (class in mala.interfaces.ase_calculator)</a>
-</li>
       <li><a href="api/mala.targets.html#mala.targets.atomic_force.AtomicForce">AtomicForce (class in mala.targets.atomic_force)</a>
 </li>
   </ul></td>
@@ -258,7 +256,7 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.interfaces.html#mala.interfaces.ase_calculator.ASECalculator.calculate">calculate() (mala.interfaces.ase_calculator.ASECalculator method)</a>
+      <li><a href="api/mala.interfaces.html#mala.interfaces.ase_calculator.MALA.calculate">calculate() (mala.interfaces.ase_calculator.MALA method)</a>
 </li>
       <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.calculate_from_atoms">calculate_from_atoms() (mala.descriptors.descriptor_base.DescriptorBase method)</a>
 
@@ -428,7 +426,7 @@
         <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_band_energy">(mala.targets.target_base.TargetBase method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_notraining.HyperOptNoTraining.get_best_trial_results">get_best_trial_results() (mala.network.hyper_opt_notraining.HyperOptNoTraining method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.get_best_trial_results">get_best_trial_results() (mala.network.hyper_opt_naswot.HyperOptNASWOT method)</a>
 
       <ul>
         <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.get_best_trial_results">(mala.network.hyper_opt_oat.HyperOptOAT method)</a>
@@ -566,7 +564,7 @@
 </li>
       <li><a href="api/mala.network.html#mala.network.hyper_opt_interface.HyperOptInterface">HyperOptInterface() (in module mala.network.hyper_opt_interface)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_notraining.HyperOptNoTraining">HyperOptNoTraining (class in mala.network.hyper_opt_notraining)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_naswot.HyperOptNASWOT">HyperOptNASWOT (class in mala.network.hyper_opt_naswot)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT">HyperOptOAT (class in mala.network.hyper_opt_oat)</a>
 </li>
@@ -590,7 +588,7 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.interfaces.html#mala.interfaces.ase_calculator.ASECalculator.implemented_properties">implemented_properties (mala.interfaces.ase_calculator.ASECalculator attribute)</a>
+      <li><a href="api/mala.interfaces.html#mala.interfaces.ase_calculator.MALA.implemented_properties">implemented_properties (mala.interfaces.ase_calculator.MALA attribute)</a>
 </li>
       <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.incremental_fit">incremental_fit() (mala.datahandling.data_scaler.DataScaler method)</a>
 </li>
@@ -673,6 +671,8 @@
         <li><a href="api/mala.html#module-mala">module</a>
 </li>
       </ul></li>
+      <li><a href="api/mala.interfaces.html#mala.interfaces.ase_calculator.MALA">MALA (class in mala.interfaces.ase_calculator)</a>
+</li>
       <li>
     mala.common
 
@@ -814,10 +814,10 @@
 </li>
       </ul></li>
       <li>
-    mala.network.hyper_opt_notraining
+    mala.network.hyper_opt_naswot
 
       <ul>
-        <li><a href="api/mala.network.html#module-mala.network.hyper_opt_notraining">module</a>
+        <li><a href="api/mala.network.html#module-mala.network.hyper_opt_naswot">module</a>
 </li>
       </ul></li>
       <li>
@@ -863,17 +863,17 @@
 </li>
       </ul></li>
       <li>
+    mala.network.naswot_pruner
+
+      <ul>
+        <li><a href="api/mala.network.html#module-mala.network.naswot_pruner">module</a>
+</li>
+      </ul></li>
+      <li>
     mala.network.network
 
       <ul>
         <li><a href="api/mala.network.html#module-mala.network.network">module</a>
-</li>
-      </ul></li>
-      <li>
-    mala.network.no_training_pruner
-
-      <ul>
-        <li><a href="api/mala.network.html#module-mala.network.no_training_pruner">module</a>
 </li>
       </ul></li>
       <li>
@@ -884,10 +884,10 @@
 </li>
       </ul></li>
       <li>
-    mala.network.objective_no_training
+    mala.network.objective_naswot
 
       <ul>
-        <li><a href="api/mala.network.html#module-mala.network.objective_no_training">module</a>
+        <li><a href="api/mala.network.html#module-mala.network.objective_naswot">module</a>
 </li>
       </ul></li>
       <li>
@@ -1048,7 +1048,7 @@
 </li>
         <li><a href="api/mala.network.html#module-mala.network.hyper_opt_interface">mala.network.hyper_opt_interface</a>
 </li>
-        <li><a href="api/mala.network.html#module-mala.network.hyper_opt_notraining">mala.network.hyper_opt_notraining</a>
+        <li><a href="api/mala.network.html#module-mala.network.hyper_opt_naswot">mala.network.hyper_opt_naswot</a>
 </li>
         <li><a href="api/mala.network.html#module-mala.network.hyper_opt_oat">mala.network.hyper_opt_oat</a>
 </li>
@@ -1062,13 +1062,13 @@
 </li>
         <li><a href="api/mala.network.html#module-mala.network.hyperparameter_optuna">mala.network.hyperparameter_optuna</a>
 </li>
-        <li><a href="api/mala.network.html#module-mala.network.network">mala.network.network</a>
+        <li><a href="api/mala.network.html#module-mala.network.naswot_pruner">mala.network.naswot_pruner</a>
 </li>
-        <li><a href="api/mala.network.html#module-mala.network.no_training_pruner">mala.network.no_training_pruner</a>
+        <li><a href="api/mala.network.html#module-mala.network.network">mala.network.network</a>
 </li>
         <li><a href="api/mala.network.html#module-mala.network.objective_base">mala.network.objective_base</a>
 </li>
-        <li><a href="api/mala.network.html#module-mala.network.objective_no_training">mala.network.objective_no_training</a>
+        <li><a href="api/mala.network.html#module-mala.network.objective_naswot">mala.network.objective_naswot</a>
 </li>
         <li><a href="api/mala.network.html#module-mala.network.predictor">mala.network.predictor</a>
 </li>
@@ -1107,15 +1107,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.n_trials">n_trials (mala.common.parameters.ParametersHyperparameterOptimization attribute)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.network.Network">Network (class in mala.network.network)</a>
+      <li><a href="api/mala.network.html#mala.network.naswot_pruner.NASWOTPruner">NASWOTPruner (class in mala.network.naswot_pruner)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.network">network (mala.common.parameters.Parameters attribute)</a>
+      <li><a href="api/mala.network.html#mala.network.network.Network">Network (class in mala.network.network)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersNetwork.nn_type">nn_type (mala.common.parameters.ParametersNetwork attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.network">network (mala.common.parameters.Parameters attribute)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.no_training_pruner.NoTrainingPruner">NoTrainingPruner (class in mala.network.no_training_pruner)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersNetwork.nn_type">nn_type (mala.common.parameters.ParametersNetwork attribute)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs">number_of_runs() (mala.network.hyper_opt_oat.HyperOptOAT method)</a>
 </li>
@@ -1131,7 +1131,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.network.html#mala.network.objective_no_training.ObjectiveNoTraining">ObjectiveNoTraining (class in mala.network.objective_no_training)</a>
+      <li><a href="api/mala.network.html#mala.network.objective_naswot.ObjectiveNASWOT">ObjectiveNASWOT (class in mala.network.objective_naswot)</a>
 </li>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.output_rescaling_type">output_rescaling_type (mala.common.parameters.ParametersData attribute)</a>
 </li>
@@ -1170,7 +1170,7 @@
       <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.perform_study">perform_study() (mala.network.hyper_opt_base.HyperOptBase method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_notraining.HyperOptNoTraining.perform_study">(mala.network.hyper_opt_notraining.HyperOptNoTraining method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.perform_study">(mala.network.hyper_opt_naswot.HyperOptNASWOT method)</a>
 </li>
         <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.perform_study">(mala.network.hyper_opt_oat.HyperOptOAT method)</a>
 </li>
@@ -1189,7 +1189,7 @@
 </li>
       <li><a href="api/mala.common.html#mala.common.parallelizer.printout">printout() (in module mala.common.parallelizer)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.no_training_pruner.NoTrainingPruner.prune">prune() (mala.network.no_training_pruner.NoTrainingPruner method)</a>
+      <li><a href="api/mala.network.html#mala.network.naswot_pruner.NASWOTPruner.prune">prune() (mala.network.naswot_pruner.NASWOTPruner method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1282,7 +1282,7 @@
       <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.set_optimal_parameters">set_optimal_parameters() (mala.network.hyper_opt_base.HyperOptBase method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_notraining.HyperOptNoTraining.set_optimal_parameters">(mala.network.hyper_opt_notraining.HyperOptNoTraining method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.set_optimal_parameters">(mala.network.hyper_opt_naswot.HyperOptNASWOT method)</a>
 </li>
         <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.set_optimal_parameters">(mala.network.hyper_opt_oat.HyperOptOAT method)</a>
 </li>

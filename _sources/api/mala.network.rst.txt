@@ -20,10 +20,10 @@ mala.network.hyper\_opt\_interface module
    :undoc-members:
    :show-inheritance:
 
-mala.network.hyper\_opt\_notraining module
-------------------------------------------
+mala.network.hyper\_opt\_naswot module
+--------------------------------------
 
-.. automodule:: mala.network.hyper_opt_notraining
+.. automodule:: mala.network.hyper_opt_naswot
    :members:
    :undoc-members:
    :show-inheritance:
@@ -76,18 +76,18 @@ mala.network.hyperparameter\_optuna module
    :undoc-members:
    :show-inheritance:
 
-mala.network.network module
----------------------------
+mala.network.naswot\_pruner module
+----------------------------------
 
-.. automodule:: mala.network.network
+.. automodule:: mala.network.naswot_pruner
    :members:
    :undoc-members:
    :show-inheritance:
 
-mala.network.no\_training\_pruner module
-----------------------------------------
+mala.network.network module
+---------------------------
 
-.. automodule:: mala.network.no_training_pruner
+.. automodule:: mala.network.network
    :members:
    :undoc-members:
    :show-inheritance:
@@ -100,10 +100,10 @@ mala.network.objective\_base module
    :undoc-members:
    :show-inheritance:
 
-mala.network.objective\_no\_training module
--------------------------------------------
+mala.network.objective\_naswot module
+-------------------------------------
 
-.. automodule:: mala.network.objective_no_training
+.. automodule:: mala.network.objective_naswot
    :members:
    :undoc-members:
    :show-inheritance:
