@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-72-g73141f5
+                v0.2.0-75-g46066d9
               </div>
             
           
@@ -1660,7 +1660,7 @@ interface. If None (recommended), MALA will create one.</p></li>
 
 <dl class="py method">
 <dt id="mala.targets.ldos.LDOS.read_from_cube">
-<code class="sig-name descname"><span class="pre">read_from_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.read_from_cube" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">read_from_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.read_from_cube" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the LDOS data from multiple cube files.</p>
 <p>The files have to be located in the same directory.</p>
 <dl class="field-list simple">
@@ -1669,6 +1669,8 @@ interface. If None (recommended), MALA will create one.</p></li>
 <li><p><strong>file_name_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files.</p></li>
 <li><p><strong>directory</strong> (<em>string</em>) – Directory containing the LDOS .cube files.</p></li>
 <li><p><strong>units</strong> (<em>string</em>) – Units the LDOS is saved in.</p></li>
+<li><p><strong>use_memmap</strong> (<em>string</em>) – If not None, a memory mapped file will be used to gather the LDOS.
+If run in MPI parallel mode, such a file MUST be provided.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

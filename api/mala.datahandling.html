@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-72-g73141f5
+                v0.2.0-75-g46066d9
               </div>
             
           
@@ -280,18 +280,25 @@ parameters provided.</p></li>
 
 <dl class="py method">
 <dt id="mala.datahandling.data_converter.DataConverter.convert_single_snapshot">
-<code class="sig-name descname"><span class="pre">convert_single_snapshot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_single_snapshot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">convert_single_snapshot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_single_snapshot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert single snapshot from the conversion lists.</p>
 <p>Returns the preprocessed data as numpy array, which might be
 beneficial during testing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>snapshot_number</strong> (<em>integer</em>) – Position of the desired snapshot in the snapshot list.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>snapshot_number</strong> (<em>integer</em>) – Position of the desired snapshot in the snapshot list.</p></li>
+<li><p><strong>use_memmap</strong> (<em>string</em>) – If not None, a memory mapped file will be used to gather the LDOS.
+If run in MPI parallel mode, such a file MUST be provided.</p></li>
+<li><p><strong>input_path</strong> (<em>string</em>) – If not None, inputs will be saved in this file.</p></li>
+<li><p><strong>output_path</strong> (<em>string</em>) – If not None, outputs will be saved in this file.</p></li>
+<li><p><strong>return_data</strong> (<em>bool</em>) – If True, inputs and outputs will be returned directly.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>inputs</strong> (<em>numpy.array</em>) – Numpy array containing the preprocessed inputs.</p></li>
-<li><p><strong>outputs</strong> (<em>numpy.array</em>) – Numpy array containing the preprocessed outputs.</p></li>
+<li><p><strong>inputs</strong> (<em>numpy.array , optional</em>) – Numpy array containing the preprocessed inputs.</p></li>
+<li><p><strong>outputs</strong> (<em>numpy.array , optional</em>) – Numpy array containing the preprocessed outputs.</p></li>
 </ul>
 </p>
 </dd>
