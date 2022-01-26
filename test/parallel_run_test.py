@@ -32,7 +32,7 @@ class TestParallel:
         test_parameters.descriptors.descriptor_type = "SNAP"
         test_parameters.descriptors.twojmax = 6
         test_parameters.descriptors.rcutfac = 4.67637
-        test_parameters.data.descriptors_contain_xyz = True
+        test_parameters.descriptors.descriptors_contain_xyz = True
 
         atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
 
@@ -44,7 +44,7 @@ class TestParallel:
         test_parameters.descriptors.descriptor_type = "SNAP"
         test_parameters.descriptors.twojmax = 6
         test_parameters.descriptors.rcutfac = 4.67637
-        test_parameters.data.descriptors_contain_xyz = True
+        test_parameters.descriptors.descriptors_contain_xyz = True
         test_parameters.use_mpi = True
         snap_calculator = mala.SNAP(test_parameters)
         snaps_parallel = snap_calculator.calculate_from_atoms(atoms,

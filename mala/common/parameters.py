@@ -119,6 +119,16 @@ class ParametersDescriptors(ParametersBase):
         SNAP descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
 
+    acsd_points : int
+        Number of points used to calculate the ACSD.
+        The actual number of distances will be acsd_points x acsd_points,
+        since the cosine similarity is only defined for pairs.
+
+    descriptors_contain_xyz : bool
+        Legacy option. If True, it is assumed that the first three entries of
+        the descriptor vector are the xyz coordinates and they are cut from the
+        descriptor vector. If False, no such cutting is peformed.
+
     """
 
     def __init__(self):
@@ -127,6 +137,8 @@ class ParametersDescriptors(ParametersBase):
         self.twojmax = 10
         self.rcutfac = 4.67637
         self.lammps_compute_file = ""
+        self.acsd_points = 100
+        self.descriptors_contain_xyz = True
 
 
 class ParametersTargets(ParametersBase):
@@ -180,11 +192,6 @@ class ParametersData(ParametersBase):
 
     Attributes
     ----------
-    descriptors_contain_xyz : bool
-        Legacy option. If True, it is assumed that the first three entries of
-        the descriptor vector are the xyz coordinates and they are cut from the
-        descriptor vector. If False, no such cutting is peformed.
-
     snapshot_directories_list : list
         A list of all added snapshots.
 
@@ -239,7 +246,6 @@ class ParametersData(ParametersBase):
 
     def __init__(self):
         super(ParametersData, self).__init__()
-        self.descriptors_contain_xyz = True
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
         # self.data_splitting_percent = [0,0,0]
@@ -369,7 +375,7 @@ class ParametersRunning(ParametersBase):
         self.checkpoint_name = "checkpoint_mala"
         self.visualisation = 0
         # default visualisation_dir= "~/log_dir"
-        self.visualisation_dir= os.path.join(os.path.expanduser("~"), "log_dir")
+        self.visualisation_dir = os.path.join(os.path.expanduser("~"), "log_dir")
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
         self.inference_data_grid = [0, 0, 0]
