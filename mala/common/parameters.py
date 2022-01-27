@@ -1,5 +1,7 @@
 """Collection of all parameter related classes and functions."""
 import os
+import inspect
+import json
 import pickle
 import warnings
 
@@ -19,8 +21,7 @@ except ModuleNotFoundError:
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
-    set_mpi_status
-
+    set_mpi_status, get_rank
 
 
 class ParametersBase:
@@ -52,6 +53,56 @@ class ParametersBase:
 
     def _update_mpi(self, new_mpi):
         self._configuration["mpi"] = new_mpi
+
+    @staticmethod
+    def _member_to_json(member):
+        if isinstance(member, (int, float, type(None), str)):
+            return member
+        else:
+            return member.to_json()
+
+    def to_json(self):
+        """
+        Write all values of subclass into a dictionary that can be saved
+        in JSON format.
+
+        Returns
+        -------
+        json_dict : dict
+            A dictionary which can be saved in JSON format.
+
+        """
+        json_dict = {}
+        members = inspect.getmembers(self,
+                                     lambda a: not (inspect.isroutine(a)))
+        for member in members:
+            # Filter out all private members, builtins, etc.
+            if member[0][0] != "_":
+
+                # If we deal with a list or a dict,
+                # we have to sanitize treat all members of that list
+                # or dict separately.
+                if isinstance(member[1], list):
+                    if len(member[1]) > 0:
+                        _member = []
+                        for m in member[1]:
+                            _member.append(self._member_to_json(m))
+                        json_dict[member[0]] = _member
+                    else:
+                        json_dict[member[0]] = member[1]
+
+                elif isinstance(member[1], dict):
+                    if len(member[1]) > 0:
+                        _member = {}
+                        for m in member[1].keys():
+                            _member[m] = self._member_to_json(member[1][m])
+                        json_dict[member[0]] = _member
+                    else:
+                        json_dict[member[0]] = member[1]
+
+                else:
+                    json_dict[member[0]] = self._member_to_json(member[1])
+        return json_dict
 
 
 class ParametersNetwork(ParametersBase):
@@ -753,7 +804,6 @@ class Parameters:
         self.hyperparameters._update_mpi(self.use_mpi)
         self.debug._update_mpi(self.use_mpi)
 
-
     def show(self):
         """Print name and values of all attributes of this object."""
         printout("--- " + self.__doc__.split("\n")[1] + " ---")
@@ -779,12 +829,28 @@ class Parameters:
             Currently only supported file format is "pickle".
 
         """
-        if self.use_horovod:
-            if hvd.rank() != 0:
-                return
+        if get_rank() != 0:
+            return
+
         if save_format == "pickle":
             with open(filename, 'wb') as handle:
                 pickle.dump(self, handle, protocol=4)
+        elif save_format == "json":
+            json_dict = {}
+            members = inspect.getmembers(self,
+                                         lambda a: not (inspect.isroutine(a)))
+            for member in members:
+                # Filter out all private members, builtins, etc.
+                if member[0][0] != "_":
+                    if isinstance(member[1], ParametersBase):
+                        # All the subclasses have to provide this function.
+                        member[1]: ParametersBase
+                        json_dict[member[0]] = member[1].to_json()
+                    else:
+                        json_dict[member[0]] = member[1]
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(json_dict, f, ensure_ascii=False, indent=4)
+
         else:
             raise Exception("Unsupported parameter save format.")
 
@@ -818,6 +884,23 @@ class Parameters:
                 loaded_parameters = pickle.load(handle)
                 if no_snapshots is True:
                     loaded_parameters.data.snapshot_directories_list = []
+        elif save_format == "json":
+            pass
+            # json_dict = {}
+            # members = inspect.getmembers(self,
+            #                              lambda a: not (inspect.isroutine(a)))
+            # for member in members:
+            #     # Filter out all private members, builtins, etc.
+            #     if member[0][0] != "_":
+            #         print(member)
+            #         if isinstance(member[1], ParametersBase):
+            #             # All the subclasses have to provide this function.
+            #             member[1]: ParametersBase
+            #             json_dict[member[0]] = member[1].to_json()
+            #         else:
+            #             json_dict[member[0]] = member[1]
+            # with open(filename, "w", encoding="utf-8") as f:
+            #     json.dump(json_dict, f, ensure_ascii=False, indent=4)
         else:
             raise Exception("Unsupported parameter save format.")
 

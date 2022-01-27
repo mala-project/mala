@@ -1,7 +1,9 @@
 """Hyperparameter to use with OAT."""
 
+from mala.common.json_serializable import JSONSerializable
 
-class HyperparameterOAT:
+
+class HyperparameterOAT(JSONSerializable):
     """Represents a hyperparameter for OAT.
 
     Parameters
@@ -76,3 +78,6 @@ class HyperparameterOAT:
             Return value is based on type of hyperparameter.
         """
         return self.choices[trial[idx]]
+
+    def to_json(self):
+        return self._standard_serializer()
