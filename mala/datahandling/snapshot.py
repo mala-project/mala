@@ -55,6 +55,3 @@ class Snapshot(JSONSerializable):
 
         # Calculation output.
         self.calculation_output = calculation_output
-
-    def to_json(self):
-        return self._standard_serializer()

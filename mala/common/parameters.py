@@ -1,5 +1,6 @@
 """Collection of all parameter related classes and functions."""
 import os
+import importlib
 import inspect
 import json
 import pickle
@@ -102,7 +103,62 @@ class ParametersBase:
 
                 else:
                     json_dict[member[0]] = self._member_to_json(member[1])
+        json_dict["_parameters_type"] = type(self).__name__
         return json_dict
+
+    @staticmethod
+    def _json_to_member(json_value):
+        if isinstance(json_value, (int, float, type(None), str)):
+            return json_value
+        else:
+            if isinstance(json_value, dict) and "object" in json_value.keys():
+                # We have found ourselves an object!
+                # We create it and give it the JSON dict, hoping it can handle
+                # it. If not, then the implementation of that class has to
+                # be adjusted.
+                module = importlib.import_module("mala")
+                class_ = getattr(module, json_value["object"])
+                new_object = class_.from_json(json_value["data"])
+                return new_object
+            else:
+                # If it is not an elementary builtin type AND not an object
+                # dictionary, something is definitely off.
+                raise Exception("Could not decode JSON file, error in",
+                                json_value)
+
+    @classmethod
+    def from_json(cls, json_dict):
+
+        deserialized_object = cls()
+        for key in json_dict:
+            # Filter out all private members, builtins, etc.
+            if key != "_parameters_type":
+
+                # If we deal with a list or a dict,
+                # we have to sanitize treat all members of that list
+                # or dict separately.
+                if isinstance(json_dict[key], list):
+                    if len(json_dict[key]) > 0:
+                        _member = []
+                        for m in json_dict[key]:
+                            _member.append(deserialized_object._json_to_member(m))
+                        setattr(deserialized_object, key, _member)
+                    else:
+                        setattr(deserialized_object, key, json_dict[key])
+
+                elif isinstance(json_dict[key], dict):
+                    if len(json_dict[key]) > 0:
+                        _member = {}
+                        for m in json_dict[key].keys():
+                            _member[m] = deserialized_object._json_to_member(json_dict[key][m])
+                        setattr(deserialized_object, key, _member)
+
+                    else:
+                        setattr(deserialized_object, key, json_dict[key])
+
+                else:
+                    setattr(deserialized_object, key, deserialized_object._json_to_member(json_dict[key]))
+        return deserialized_object
 
 
 class ParametersNetwork(ParametersBase):
@@ -885,22 +941,21 @@ class Parameters:
                 if no_snapshots is True:
                     loaded_parameters.data.snapshot_directories_list = []
         elif save_format == "json":
-            pass
-            # json_dict = {}
-            # members = inspect.getmembers(self,
-            #                              lambda a: not (inspect.isroutine(a)))
-            # for member in members:
-            #     # Filter out all private members, builtins, etc.
-            #     if member[0][0] != "_":
-            #         print(member)
-            #         if isinstance(member[1], ParametersBase):
-            #             # All the subclasses have to provide this function.
-            #             member[1]: ParametersBase
-            #             json_dict[member[0]] = member[1].to_json()
-            #         else:
-            #             json_dict[member[0]] = member[1]
-            # with open(filename, "w", encoding="utf-8") as f:
-            #     json.dump(json_dict, f, ensure_ascii=False, indent=4)
+            with open(filename, encoding="utf-8") as json_file:
+                json_dict = json.load(json_file)
+            loaded_parameters = cls()
+            for key in json_dict:
+                if isinstance(json_dict[key], dict):
+                    # These are the other parameter classes.
+                    sub_parameters = globals()[json_dict[key]["_parameters_type"]].from_json(json_dict[key])
+                    # setattr(loaded_parameters, key, sub_parameters)
+
+            # We iterate a second time, to set global values, so that they
+            # are properly forwarded.
+            for key in json_dict:
+                if not isinstance(json_dict[key], dict):
+                    setattr(loaded_parameters, key, json_dict[key])
+
         else:
             raise Exception("Unsupported parameter save format.")
 

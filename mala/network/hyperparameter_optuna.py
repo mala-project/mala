@@ -135,6 +135,3 @@ class HyperparameterOptuna(JSONSerializable):
                 return self.choices[0]
         else:
             raise Exception("Wrong hyperparameter type.")
-
-    def to_json(self):
-        return self._standard_serializer()

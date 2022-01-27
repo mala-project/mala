@@ -1,14 +1,16 @@
-from abc import ABC, abstractmethod
 import inspect
 
 
-class JSONSerializable(ABC):
+class JSONSerializable:
     def __init__(self):
         pass
 
-    @abstractmethod
     def to_json(self):
-        pass
+        return self._standard_serializer()
+
+    @classmethod
+    def from_json(cls, json_dict):
+        return cls._standard_deserializer(json_dict)
 
     def _standard_serializer(self):
         data = {}
@@ -21,3 +23,10 @@ class JSONSerializable(ABC):
         json_dict = {"object": type(self).__name__,
                      "data": data}
         return json_dict
+
+    @classmethod
+    def _standard_deserializer(cls, json_dict):
+        deserialized_object = cls()
+        for key in json_dict:
+            setattr(deserialized_object, key, json_dict[key])
+        return deserialized_object

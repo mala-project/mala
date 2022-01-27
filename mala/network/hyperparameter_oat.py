@@ -30,6 +30,7 @@ class HyperparameterOAT(JSONSerializable):
     """
 
     def __init__(self, opttype="categorical", name="", choices=None):
+        super(HyperparameterOAT, self).__init__()
         self.name = name
         self.opttype = opttype
         self.choices = choices
@@ -78,6 +79,3 @@ class HyperparameterOAT(JSONSerializable):
             Return value is based on type of hyperparameter.
         """
         return self.choices[trial[idx]]
-
-    def to_json(self):
-        return self._standard_serializer()
