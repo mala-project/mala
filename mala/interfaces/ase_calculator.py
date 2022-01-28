@@ -175,3 +175,17 @@ class ASECalculator(Calculator):
         if "ion_ion_energy" in properties:
             self.results["ion_ion_energy"] = self.\
                 last_energy_contributions["e_ewald"]
+
+    def save_calculator(self, filename):
+        """
+        Saves enough information about the calculator to be reconstructed
+        at a later time.
+
+        Parameters
+        ----------
+        filename : string
+            Path to file in which to store the Calculator.
+
+        """
+        self.params.save(filename)
+
