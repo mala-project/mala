@@ -1,7 +1,9 @@
 """Hyperparameter to use with OAT."""
 
+from mala.common.json_serializable import JSONSerializable
 
-class HyperparameterOAT:
+
+class HyperparameterOAT(JSONSerializable):
     """Represents a hyperparameter for OAT.
 
     Parameters
@@ -28,6 +30,7 @@ class HyperparameterOAT:
     """
 
     def __init__(self, opttype="categorical", name="", choices=None):
+        super(HyperparameterOAT, self).__init__()
         self.name = name
         self.opttype = opttype
         self.choices = choices
