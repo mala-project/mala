@@ -36,7 +36,8 @@ class Trainer(Runner):
         DataHandler holding the training data.
     """
 
-    def __init__(self, params, network, data, optimizer_dict=None):
+    def __init__(self, params, network, data, optimizer_dict=None,
+                 use_pkl_checkpoints=False):
         # copy the parameters into the class.
         super(Trainer, self).__init__(params, network, data)
         self.final_test_loss = float("inf")
@@ -51,6 +52,7 @@ class Trainer(Runner):
         self.training_data_loader = None
         self.validation_data_loader = None
         self.test_data_loader = None
+        self.use_pkl_checkpoints = use_pkl_checkpoints
         self.__prepare_to_train(optimizer_dict)
         self.tensor_board = None
         if self.parameters.visualisation:
@@ -58,10 +60,9 @@ class Trainer(Runner):
                 os.makedirs(self.parameters.visualisation_dir)
             # Set the path to log files
             self.tensor_board = SummaryWriter(self.parameters.visualisation_dir)
-                
 
     @classmethod
-    def checkpoint_exists(cls, checkpoint_name):
+    def checkpoint_exists(cls, checkpoint_name, use_pkl_checkpoints=False):
         """
         Check if a hyperparameter optimization checkpoint exists.
 
@@ -81,14 +82,17 @@ class Trainer(Runner):
         network_name = checkpoint_name + "_network.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
+        if use_pkl_checkpoints:
+            param_name = checkpoint_name + "_params.pkl"
+        else:
+            param_name = checkpoint_name + "_params.json"
         optimizer_name = checkpoint_name + "_optimizer.pth"
 
         return all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
                                         network_name, optimizer_name]))
 
     @classmethod
-    def resume_checkpoint(cls, checkpoint_name):
+    def resume_checkpoint(cls, checkpoint_name, use_pkl_checkpoints=False):
         """
         Prepare resumption of training from a checkpoint.
 
@@ -119,7 +123,10 @@ class Trainer(Runner):
         network_name = checkpoint_name + "_network.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
+        if use_pkl_checkpoints:
+            param_name = checkpoint_name + "_params.pkl"
+        else:
+            param_name = checkpoint_name + "_params.json"
         optimizer_name = checkpoint_name + "_optimizer.pth"
 
         # First load the all the regular objects.
@@ -629,8 +636,10 @@ class Trainer(Runner):
             + "_iscaler.pkl"
         oscaler_name = self.parameters.checkpoint_name \
             + "_oscaler.pkl"
-        param_name = self.parameters.checkpoint_name \
-            + "_params.pkl"
+        if self.use_pkl_checkpoints:
+            param_name = self.parameters.checkpoint_name + "_params.pkl"
+        else:
+            param_name = self.parameters.checkpoint_name + "_params.json"
         optimizer_name = self.parameters.checkpoint_name \
             + "_optimizer.pth"
 
