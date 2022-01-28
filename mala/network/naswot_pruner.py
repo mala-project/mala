@@ -4,10 +4,10 @@ from optuna.pruners import BasePruner
 from optuna.trial._state import TrialState
 
 from mala import Parameters, DataHandler
-from mala.network.objective_no_training import ObjectiveNoTraining
+from mala.network.objective_naswot import ObjectiveNASWOT
 
 
-class NoTrainingPruner(BasePruner):
+class NASWOTPruner(BasePruner):
     """
     Implements the NASWOT method (first version of paper) as an optuna pruner.
 
@@ -57,12 +57,12 @@ class NoTrainingPruner(BasePruner):
             A boolean indicating whether this particular trial should be 
             pruned. 
         """
-        objective = ObjectiveNoTraining(self._params, self._data_handler,
-                                        self._trial_type, batch_size=
+        objective = ObjectiveNASWOT(self._params, self._data_handler,
+                                    self._trial_type, batch_size=
                                         self._params.hyperparameters.
-                                        naswot_pruner_batch_size)
+                                    naswot_pruner_batch_size)
         surrogate_loss = objective(trial)
-        if surrogate_loss < self._params.hyperparameters.no_training_cutoff:
+        if surrogate_loss < self._params.hyperparameters.naswot_pruner_cutoff:
             return True
         else:
             return False

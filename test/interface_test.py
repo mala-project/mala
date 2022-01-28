@@ -115,9 +115,9 @@ class TestInterfaces:
 
         # Set up the ASE objects.
         atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
-        calculator = mala.ASECalculator(test_parameters, test_network,
-                                        data_handler,
-                                        reference_data=
+        calculator = mala.MALA(test_parameters, test_network,
+                               data_handler,
+                               reference_data=
                                         ["qe.out",
                                          os.path.join(data_path,
                                                       "Be_snapshot1.out")])

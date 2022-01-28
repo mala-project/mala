@@ -14,4 +14,4 @@ from .network import Network, Tester, Trainer, HyperOptInterface, \
     HyperparameterOAT, HyperparameterNASWOT, HyperparameterOptuna
 from .targets import TargetInterface, LDOS, DOS, Density, fermi_function, \
     AtomicForce
-from .interfaces import ASECalculator
+from .interfaces import MALA

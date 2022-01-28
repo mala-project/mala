@@ -77,9 +77,9 @@ def md_mala(network, new_parameters, iscaler, oscaler):
 
     # Set up the ASE objects.
     atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
-    calculator = mala.ASECalculator(new_parameters, network,
-                                    inference_data_handler,
-                                    reference_data=
+    calculator = mala.MALA(new_parameters, network,
+                           inference_data_handler,
+                           reference_data=
                                     ["qe.out",
                                      os.path.join(data_path,
                                                   "Be_snapshot1.out")])

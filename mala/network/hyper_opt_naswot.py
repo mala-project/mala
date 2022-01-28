@@ -6,10 +6,10 @@ import numpy as np
 
 from mala.common.parallelizer import printout
 from mala.network.hyper_opt_base import HyperOptBase
-from mala.network.objective_no_training import ObjectiveNoTraining
+from mala.network.objective_naswot import ObjectiveNASWOT
 
 
-class HyperOptNoTraining(HyperOptBase):
+class HyperOptNASWOT(HyperOptBase):
     """
     Hyperparameter optimizer that does not require training networks.
 
@@ -25,7 +25,7 @@ class HyperOptNoTraining(HyperOptBase):
     """
 
     def __init__(self, params, data):
-        super(HyperOptNoTraining, self).__init__(params, data)
+        super(HyperOptNASWOT, self).__init__(params, data)
         self.objective = None
         self.trial_losses = None
         self.best_trial = None
@@ -48,10 +48,6 @@ class HyperOptNoTraining(HyperOptBase):
         ----------
         trial_list : list
             A list containing trials from either HyperOptOptuna or HyperOptOAT.
-            HyperOptNoTraining does currently not have an algorithm to
-            create network archtitectures of interestes by itself and insteads
-            investigates those sampled by a different hyperparameter
-            optimizer.
         """
         # The minibatch size can not vary in the analysis.
         # This check ensures that e.g. optuna results can be used.
@@ -77,8 +73,8 @@ class HyperOptNoTraining(HyperOptBase):
             trial_type = "optuna"
         else:
             trial_type = "oat"
-        self.objective = ObjectiveNoTraining(self.params, self.data_handler,
-                                             trial_type)
+        self.objective = ObjectiveNASWOT(self.params, self.data_handler,
+                                         trial_type)
         printout("Starting NASWOT hyperparameter optimization,",
                  len(self.trial_list), "trials will be performed.")
 
