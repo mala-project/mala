@@ -44,7 +44,11 @@ class ParametersBase:
 
         """
         for v in vars(self):
-            printout(indent + '%-15s: %s' % (v, getattr(self, v)))
+            if v != "_configuration":
+                if v[0] == "_":
+                    printout(indent + '%-15s: %s' % (v[1:], getattr(self, v)))
+                else:
+                    printout(indent + '%-15s: %s' % (v, getattr(self, v)))
 
     def _update_gpu(self, new_gpu):
         self._configuration["gpu"] = new_gpu
@@ -720,14 +724,20 @@ class ParametersHyperparameterOptimization(ParametersBase):
 
         """
         for v in vars(self):
-            if v != "hlist":
-                printout(indent + '%-15s: %s' % (v, getattr(self, v)))
-            if v == "hlist":
-                i = 0
-                for hyp in self.hlist:
-                    printout(indent + '%-15s: %s' %
-                             ("hyperparameter #"+str(i), hyp.name))
-                    i += 1
+            if v != "_configuration":
+                if v != "hlist":
+                    if v[0] == "_":
+                        printout(indent + '%-15s: %s' % (
+                        v[1:], getattr(self, v)))
+                    else:
+                        printout(
+                            indent + '%-15s: %s' % (v, getattr(self, v)))
+                if v == "hlist":
+                    i = 0
+                    for hyp in self.hlist:
+                        printout(indent + '%-15s: %s' %
+                                 ("hyperparameter #"+str(i), hyp.name))
+                        i += 1
 
 
 class ParametersDebug(ParametersBase):
@@ -863,13 +873,21 @@ class Parameters:
     def show(self):
         """Print name and values of all attributes of this object."""
         printout("--- " + self.__doc__.split("\n")[1] + " ---")
+
+        # Two for-statements so that global parameters are shown on top.
+        for v in vars(self):
+            if isinstance(getattr(self, v), ParametersBase):
+                pass
+            else:
+                if v[0] == "_":
+                    printout('%-15s: %s' % (v[1:], getattr(self, v)))
+                else:
+                    printout('%-15s: %s' % (v, getattr(self, v)))
         for v in vars(self):
             if isinstance(getattr(self, v), ParametersBase):
                 parobject = getattr(self, v)
                 printout("--- " + parobject.__doc__.split("\n")[1] + " ---")
                 parobject.show("\t")
-            else:
-                printout('%-15s: %s' % (v, getattr(self, v)))
 
     def save(self, filename, save_format="pickle"):
         """
@@ -895,6 +913,15 @@ class Parameters:
             json_dict = {}
             members = inspect.getmembers(self,
                                          lambda a: not (inspect.isroutine(a)))
+
+            # Two for loops so global properties enter the dict first.
+            for member in members:
+                # Filter out all private members, builtins, etc.
+                if member[0][0] != "_":
+                    if isinstance(member[1], ParametersBase):
+                        pass
+                    else:
+                        json_dict[member[0]] = member[1]
             for member in members:
                 # Filter out all private members, builtins, etc.
                 if member[0][0] != "_":
@@ -902,8 +929,6 @@ class Parameters:
                         # All the subclasses have to provide this function.
                         member[1]: ParametersBase
                         json_dict[member[0]] = member[1].to_json()
-                    else:
-                        json_dict[member[0]] = member[1]
             with open(filename, "w", encoding="utf-8") as f:
                 json.dump(json_dict, f, ensure_ascii=False, indent=4)
 
@@ -948,7 +973,7 @@ class Parameters:
                 if isinstance(json_dict[key], dict):
                     # These are the other parameter classes.
                     sub_parameters = globals()[json_dict[key]["_parameters_type"]].from_json(json_dict[key])
-                    # setattr(loaded_parameters, key, sub_parameters)
+                    setattr(loaded_parameters, key, sub_parameters)
 
             # We iterate a second time, to set global values, so that they
             # are properly forwarded.
