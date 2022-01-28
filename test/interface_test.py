@@ -3,6 +3,7 @@ import os
 
 from ase.io import read
 import mala
+from mala.common.parameters import ParametersBase
 import numpy as np
 import pytest
 
@@ -16,11 +17,37 @@ data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 
 # For the ASE calculator test, it's enough when the energies are roughly the
 # same.
-accuracy_coarse = 1
+accuracy_coarse = 10
 
 
 class TestInterfaces:
     """Tests MALA interfaces."""
+
+    def test_json(self):
+        """
+        Test whether MALA JSON interface is still working.
+
+        Please note that this does not test whether all parameters are
+        correctly serializable, only the interface itself.
+        """
+        params = mala.Parameters()
+        # Change a few parameter to see if anything is actually happening.
+        params.manual_seed = 2022
+        params.network.layer_sizes = [100, 100, 100]
+        params.network.layer_activations = ['test', 'test']
+        params.descriptors.rcutfac = 4.67637
+
+        # Save, load, compare.
+        params.save("interface_test.json")
+        new_params = params.load_from_file("interface_test.json")
+        for v in vars(params):
+            if isinstance(getattr(params, v), ParametersBase):
+                v_old = getattr(params, v)
+                v_new = getattr(new_params, v)
+                for subv in vars(v_old):
+                    assert (getattr(v_new, subv) == getattr(v_old, subv))
+            else:
+                assert (getattr(new_params, v) == getattr(params, v))
 
     @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
                         reason="LAMMPS is currently not part of the pipeline.")
@@ -88,9 +115,9 @@ class TestInterfaces:
 
         # Set up the ASE objects.
         atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
-        calculator = mala.ASECalculator(test_parameters, test_network,
-                                        data_handler,
-                                        reference_data=
+        calculator = mala.MALA(test_parameters, test_network,
+                               data_handler,
+                               reference_data=
                                         ["qe.out",
                                          os.path.join(data_path,
                                                       "Be_snapshot1.out")])

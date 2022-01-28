@@ -166,6 +166,11 @@ class SNAP(DescriptorBase):
         Gathers all SNAP descriptors on rank 0 and sorts them.
 
         This is useful for e.g. parallel preprocessing.
+        This function removes the extra 3 components that come from parallel
+        processing.
+        I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
+        97 (in parallel mode), and this function returns, as to retain the
+        3 x,y,z ones we by default include.
 
         Parameters
         ----------

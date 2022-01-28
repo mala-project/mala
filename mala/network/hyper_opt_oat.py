@@ -33,10 +33,14 @@ class HyperOptOAT(HyperOptBase):
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the data for the hyperparameter optimization.
+
+    use_pkl_checkpoints : bool
+        If true, .pkl checkpoints will be created.
     """
 
-    def __init__(self, params, data):
-        super(HyperOptOAT, self).__init__(params, data)
+    def __init__(self, params, data, use_pkl_checkpoints=False):
+        super(HyperOptOAT, self).__init__(params, data,
+                                          use_pkl_checkpoints=use_pkl_checkpoints)
         self.objective = None
         self.optimal_params = None
         self.checkpoint_counter = 0
@@ -235,33 +239,8 @@ class HyperOptOAT(HyperOptBase):
                             "decreasing order of number of choices")
 
     @classmethod
-    def checkpoint_exists(cls, checkpoint_name):
-        """
-        Check if a hyperparameter optimization checkpoint exists.
-
-        Returns True if it does.
-
-        Parameters
-        ----------
-        checkpoint_name : string
-            Name of the checkpoint.
-
-        Returns
-        -------
-        checkpoint_exists : bool
-            True if the checkpoint exists, False otherwise.
-
-        """
-        iscaler_name = checkpoint_name + "_iscaler.pkl"
-        oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
-
-        return all(map(os.path.isfile, [iscaler_name, oscaler_name,
-                                        param_name]))
-
-    @classmethod
-    def resume_checkpoint(cls, checkpoint_name,
-                          no_data=False):
+    def resume_checkpoint(cls, checkpoint_name, no_data=False,
+                          use_pkl_checkpoints=False):
         """
         Prepare resumption of hyperparameter optimization from a checkpoint.
 
@@ -278,6 +257,9 @@ class HyperOptOAT(HyperOptBase):
             This can be useful for cases where a checkpoint is loaded
             for analysis purposes.
 
+        use_pkl_checkpoints : bool
+            If true, .pkl checkpoints will be loaded.
+
         Returns
         -------
         loaded_params : mala.common.parameters.Parameters
@@ -289,29 +271,12 @@ class HyperOptOAT(HyperOptBase):
         new_hyperopt : HyperOptOAT
             The hyperparameter optimizer reconstructed from the checkpoint.
         """
-        printout("Loading hyperparameter optimization from checkpoint.")
-        # The names are based upon the checkpoint name.
-        iscaler_name = checkpoint_name + "_iscaler.pkl"
-        oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
-        optimizer_name = checkpoint_name + "_hyperopt.pth"
-
-        # First load the all the regular objects.
-        loaded_params = Parameters.load_from_file(param_name)
-        loaded_iscaler = DataScaler.load_from_file(iscaler_name)
-        loaded_oscaler = DataScaler.load_from_file(oscaler_name)
-
-        printout("Preparing data used for last checkpoint.")
-        # Create a new data handler and prepare the data.
-        if no_data is True:
-            loaded_params.data.use_lazy_loading = True
-        new_datahandler = DataHandler(loaded_params,
-                                      input_data_scaler=loaded_iscaler,
-                                      output_data_scaler=loaded_oscaler)
-        new_datahandler.prepare_data(reparametrize_scaler=False)
+        loaded_params, new_datahandler, optimizer_name = \
+            cls._resume_checkpoint(checkpoint_name, no_data=no_data,
+                                   use_pkl_checkpoints=use_pkl_checkpoints)
         new_hyperopt = HyperOptOAT.load_from_file(loaded_params,
-                                                     optimizer_name,
-                                                     new_datahandler)
+                                                  optimizer_name,
+                                                  new_datahandler)
 
         return loaded_params, new_datahandler, new_hyperopt
 
@@ -377,18 +342,7 @@ class HyperOptOAT(HyperOptBase):
             # We need to create a checkpoint!
             self.checkpoint_counter = 0
 
-            # Get the filenames.
-            iscaler_name = self.params.hyperparameters.checkpoint_name \
-                           + "_iscaler.pkl"
-            oscaler_name = self.params.hyperparameters.checkpoint_name \
-                           + "_oscaler.pkl"
-            param_name = self.params.hyperparameters.checkpoint_name \
-                           + "_params.pkl"
-
-            # First we save the objects we would also save for inference.
-            self.data_handler.input_data_scaler.save(iscaler_name)
-            self.data_handler.output_data_scaler.save(oscaler_name)
-            self.params.save(param_name)
+            self._save_params_and_scaler()
 
             # Next, we save all the other objects.
             # Here some horovod stuff would have to go.
