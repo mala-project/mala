@@ -33,10 +33,14 @@ class HyperOptOAT(HyperOptBase):
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the data for the hyperparameter optimization.
+
+    use_pkl_checkpoints : bool
+        If true, .pkl checkpoints will be created.
     """
 
-    def __init__(self, params, data):
-        super(HyperOptOAT, self).__init__(params, data)
+    def __init__(self, params, data, use_pkl_checkpoints=False):
+        super(HyperOptOAT, self).__init__(params, data,
+                                          use_pkl_checkpoints=use_pkl_checkpoints)
         self.objective = None
         self.optimal_params = None
         self.checkpoint_counter = 0
@@ -252,6 +256,9 @@ class HyperOptOAT(HyperOptBase):
             If True, the data won't actually be loaded into RAM or scaled.
             This can be useful for cases where a checkpoint is loaded
             for analysis purposes.
+
+        use_pkl_checkpoints : bool
+            If true, .pkl checkpoints will be loaded.
 
         Returns
         -------

@@ -34,6 +34,9 @@ class Trainer(Runner):
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the training data.
+
+    use_pkl_checkpoints : bool
+        If true, .pkl checkpoints will be created.
     """
 
     def __init__(self, params, network, data, optimizer_dict=None,
@@ -73,6 +76,9 @@ class Trainer(Runner):
         checkpoint_name : string
             Name of the checkpoint.
 
+        use_pkl_checkpoints : bool
+            If true, .pkl checkpoints will be loaded.
+
         Returns
         -------
         checkpoint_exists : bool
@@ -103,6 +109,9 @@ class Trainer(Runner):
         ----------
         checkpoint_name : string
             Name of the checkpoint from which
+
+        use_pkl_checkpoints : bool
+            If true, .pkl checkpoints will be loaded.
 
         Returns
         -------
@@ -166,6 +175,7 @@ class Trainer(Runner):
 
         data : mala.datahandling.data_handler.DataHandler
             DataHandler holding the training data.
+
 
         Returns
         -------
