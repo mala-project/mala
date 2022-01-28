@@ -22,6 +22,15 @@ accuracy_coarse = 10
 class TestInterfaces:
     """Tests MALA interfaces."""
 
+    def test_json(self):
+        """
+        Test whether MALA JSON interface is still working.
+
+        Returns
+        -------
+
+        """
+
     @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
                         reason="LAMMPS is currently not part of the pipeline.")
     def test_ase_calculator(self):

@@ -23,12 +23,14 @@ import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
     set_mpi_status, get_rank
+from mala.common.json_serializable import JSONSerializable
 
 
-class ParametersBase:
+class ParametersBase(JSONSerializable):
     """Base parameter class for MALA."""
 
     def __init__(self,):
+        super(ParametersBase, self).__init__()
         self._configuration = {"gpu": False, "horovod": False, "mpi": False}
         pass
 
@@ -68,13 +70,12 @@ class ParametersBase:
 
     def to_json(self):
         """
-        Write all values of subclass into a dictionary that can be saved
-        in JSON format.
+        Convert this object to a dictionary that can be saved in a JSON file.
 
         Returns
         -------
         json_dict : dict
-            A dictionary which can be saved in JSON format.
+            The object as dictionary for export to JSON.
 
         """
         json_dict = {}
@@ -132,7 +133,21 @@ class ParametersBase:
 
     @classmethod
     def from_json(cls, json_dict):
+        """
+        Read this object from a dictionary saved in a JSON file.
 
+        Parameters
+        ----------
+        json_dict : dict
+            A dictionary containing all attributes, properties, etc. as saved
+            in the json file.
+
+        Returns
+        -------
+        deserialized_object : JSONSerializable
+            The object as read from the JSON file.
+
+        """
         deserialized_object = cls()
         for key in json_dict:
             # Filter out all private members, builtins, etc.
@@ -889,7 +904,7 @@ class Parameters:
                 printout("--- " + parobject.__doc__.split("\n")[1] + " ---")
                 parobject.show("\t")
 
-    def save(self, filename, save_format="pickle"):
+    def save(self, filename, save_format="json"):
         """
         Save the Parameters object to a file.
 
@@ -907,9 +922,13 @@ class Parameters:
             return
 
         if save_format == "pickle":
+            if filename[-3:] != "pkl":
+                filename += ".pkl"
             with open(filename, 'wb') as handle:
                 pickle.dump(self, handle, protocol=4)
         elif save_format == "json":
+            if filename[-3:] != "json":
+                filename += ".json"
             json_dict = {}
             members = inspect.getmembers(self,
                                          lambda a: not (inspect.isroutine(a)))
@@ -935,8 +954,32 @@ class Parameters:
         else:
             raise Exception("Unsupported parameter save format.")
 
+    def save_as_pickle(self, filename):
+        """
+        Save the Parameters object to a pickle file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        """
+        self.save(filename, save_format="pickle")
+
+    def save_as_json(self, filename):
+        """
+        Save the Parameters object to a json file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        """
+        self.save(filename, save_format="json")
+
     @classmethod
-    def load_from_file(cls, filename, save_format="pickle",
+    def load_from_file(cls, filename, save_format="json",
                        no_snapshots=False):
         """
         Load a Parameters object from a file.
@@ -985,3 +1028,49 @@ class Parameters:
             raise Exception("Unsupported parameter save format.")
 
         return loaded_parameters
+
+    @classmethod
+    def load_from_pickle(cls, filename, no_snapshots=False):
+        """
+        Load a Parameters object from a pickle file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        no_snapshots : bool
+            If True, than the snapshot list will be emptied. Useful when
+            performing inference/testing after training a network.
+
+        Returns
+        -------
+        loaded_parameters : Parameters
+            The loaded Parameters object.
+
+        """
+        return Parameters.load_from_file(filename, save_format="pickle",
+                                  no_snapshots=no_snapshots)
+
+    @classmethod
+    def load_from_json(cls, filename, no_snapshots=False):
+        """
+        Load a Parameters object from a json file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        no_snapshots : bool
+            If True, than the snapshot list will be emptied. Useful when
+            performing inference/testing after training a network.
+
+        Returns
+        -------
+        loaded_parameters : Parameters
+            The loaded Parameters object.
+
+        """
+        return Parameters.load_from_file(filename, save_format="json",
+                                  no_snapshots=no_snapshots)
