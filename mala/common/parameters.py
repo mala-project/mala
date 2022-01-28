@@ -927,7 +927,7 @@ class Parameters:
             with open(filename, 'wb') as handle:
                 pickle.dump(self, handle, protocol=4)
         elif save_format == "json":
-            if filename[-3:] != "json":
+            if filename[-4:] != "json":
                 filename += ".json"
             json_dict = {}
             members = inspect.getmembers(self,
