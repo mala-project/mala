@@ -4,6 +4,14 @@ mala.common package
 Submodules
 ----------
 
+mala.common.json\_serializable module
+-------------------------------------
+
+.. automodule:: mala.common.json_serializable
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mala.common.parallelizer module
 -------------------------------
 

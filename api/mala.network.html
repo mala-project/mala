@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-77-g1e8b372
+                v0.2.0-88-g56bc5aa
               </div>
             
           
@@ -214,7 +214,7 @@
 <p>Base class for all hyperparameter optimizers.</p>
 <dl class="py class">
 <dt id="mala.network.hyper_opt_base.HyperOptBase">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_base.</span></code><code class="sig-name descname"><span class="pre">HyperOptBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_base.</span></code><code class="sig-name descname"><span class="pre">HyperOptBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Base class for hyperparameter optimizater.</p>
 <dl class="field-list simple">
@@ -222,6 +222,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this hyperparameter optimizer.</p></li>
 <li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the data for the hyperparameter optimization.</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be created.</p></li>
 </ul>
 </dd>
 </dl>
@@ -252,6 +253,27 @@ ff_neurons_layer_002, etc. as names.</p></li>
 <li><p><strong>high</strong> (<em>float</em><em> or </em><em>int</em>) – Higher bound for numerical parameter.</p></li>
 <li><p><strong>choices</strong> – List of possible choices (for categorical parameter).</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.hyper_opt_base.HyperOptBase.checkpoint_exists">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">checkpoint_exists</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_base.HyperOptBase.checkpoint_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a hyperparameter optimization checkpoint exists.</p>
+<p>Returns True if it does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint.</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be loaded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>checkpoint_exists</strong> – True if the checkpoint exists, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -365,7 +387,7 @@ hyperparameter optimizer was created.</p>
 <p>Hyperparameter optimizer using orthogonal array tuning.</p>
 <dl class="py class">
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_oat.</span></code><code class="sig-name descname"><span class="pre">HyperOptOAT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_oat.</span></code><code class="sig-name descname"><span class="pre">HyperOptOAT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.hyper_opt_base.HyperOptBase" title="mala.network.hyper_opt_base.HyperOptBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.hyper_opt_base.HyperOptBase</span></code></a></p>
 <p>Hyperparameter optimizer using Orthogonal Array Tuning.</p>
 <dl class="field-list simple">
@@ -373,6 +395,7 @@ hyperparameter optimizer was created.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this hyperparameter optimizer.</p></li>
 <li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the data for the hyperparameter optimization.</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be created.</p></li>
 </ul>
 </dd>
 </dl>
@@ -384,24 +407,6 @@ hyperparameter optimizer was created.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>opttype</strong> (<em>string</em>) – Datatype of the hyperparameter. Follows optunas naming convetions.
 Default value - categorical (list)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mala.network.hyper_opt_oat.HyperOptOAT.checkpoint_exists">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">checkpoint_exists</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.checkpoint_exists" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if a hyperparameter optimization checkpoint exists.</p>
-<p>Returns True if it does.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>checkpoint_exists</strong> – True if the checkpoint exists, False otherwise.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -468,7 +473,7 @@ In this case, these are choosen based on an orthogonal array.</p>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_oat.HyperOptOAT.resume_checkpoint">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_oat.HyperOptOAT.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare resumption of hyperparameter optimization from a checkpoint.</p>
 <p>Please note that to actually resume the optimization,
 HyperOptOptuna.perform_study() still has to be called.</p>
@@ -479,6 +484,7 @@ HyperOptOptuna.perform_study() still has to be called.</p>
 <li><p><strong>no_data</strong> (<em>bool</em>) – If True, the data won’t actually be loaded into RAM or scaled.
 This can be useful for cases where a checkpoint is loaded
 for analysis purposes.</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be loaded.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -514,7 +520,7 @@ hyperparameter optimizer was created.</p>
 <p>Hyperparameter optimizer using optuna.</p>
 <dl class="py class">
 <dt id="mala.network.hyper_opt_optuna.HyperOptOptuna">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_optuna.</span></code><code class="sig-name descname"><span class="pre">HyperOptOptuna</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyper_opt_optuna.</span></code><code class="sig-name descname"><span class="pre">HyperOptOptuna</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.hyper_opt_base.HyperOptBase" title="mala.network.hyper_opt_base.HyperOptBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.hyper_opt_base.HyperOptBase</span></code></a></p>
 <p>Hyperparameter optimizer using Optuna.</p>
 <dl class="field-list simple">
@@ -522,27 +528,10 @@ hyperparameter optimizer was created.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>params</strong> (<a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this hyperparameter optimizer.</p></li>
 <li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the data for the hyperparameter optimization.</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be created.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt id="mala.network.hyper_opt_optuna.HyperOptOptuna.checkpoint_exists">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">checkpoint_exists</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.checkpoint_exists" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if a hyperparameter optimization checkpoint exists.</p>
-<p>Returns True if it does.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>checkpoint_exists</strong> – True if the checkpoint exists, False otherwise.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt id="mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study">
 <code class="sig-name descname"><span class="pre">get_trials_from_study</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study" title="Permalink to this definition">¶</a></dt>
@@ -590,7 +579,7 @@ In this case, optuna is used.</p>
 
 <dl class="py method">
 <dt id="mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative_storage_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative_storage_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare resumption of hyperparameter optimization from a checkpoint.</p>
 <p>Please note that to actually resume the optimization,
 HyperOptOptuna.perform_study() still has to be called.</p>
@@ -605,6 +594,7 @@ server might be running on different nodes each time.</p></li>
 <li><p><strong>no_data</strong> (<em>bool</em>) – If True, the data won’t actually be loaded into RAM or scaled.
 This can be useful for cases where a checkpoint is loaded
 for analysis purposes.</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be loaded.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -721,7 +711,7 @@ etc. as names.</p></li>
 <dl class="py class">
 <dt id="mala.network.hyperparameter_oat.HyperparameterOAT">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyperparameter_oat.</span></code><code class="sig-name descname"><span class="pre">HyperparameterOAT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'categorical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyperparameter_oat.HyperparameterOAT" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="mala.common.html#mala.common.json_serializable.JSONSerializable" title="mala.common.json_serializable.JSONSerializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.json_serializable.JSONSerializable</span></code></a></p>
 <p>Represents a hyperparameter for OAT.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -795,7 +785,7 @@ etc. as names.</p></li>
 <dl class="py class">
 <dt id="mala.network.hyperparameter_optuna.HyperparameterOptuna">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyperparameter_optuna.</span></code><code class="sig-name descname"><span class="pre">HyperparameterOptuna</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="mala.common.html#mala.common.json_serializable.JSONSerializable" title="mala.common.json_serializable.JSONSerializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.json_serializable.JSONSerializable</span></code></a></p>
 <p>Represents an optuna parameter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1252,7 +1242,7 @@ applications it might make sense to specify something different.</p></li>
 <p>Trainer class for training a network.</p>
 <dl class="py class">
 <dt id="mala.network.trainer.Trainer">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.trainer.</span></code><code class="sig-name descname"><span class="pre">Trainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.trainer.Trainer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.trainer.</span></code><code class="sig-name descname"><span class="pre">Trainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.trainer.Trainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.runner.Runner" title="mala.network.runner.Runner"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.runner.Runner</span></code></a></p>
 <p>A class for training a neural network.</p>
 <dl class="field-list simple">
@@ -1261,17 +1251,21 @@ applications it might make sense to specify something different.</p></li>
 <li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this Trainer object.</p></li>
 <li><p><strong>network</strong> (<a class="reference internal" href="#mala.network.network.Network" title="mala.network.network.Network"><em>mala.network.network.Network</em></a>) – Network which is being trained.</p></li>
 <li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the training data.</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be created.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt id="mala.network.trainer.Trainer.checkpoint_exists">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">checkpoint_exists</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.trainer.Trainer.checkpoint_exists" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">checkpoint_exists</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.trainer.Trainer.checkpoint_exists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if a hyperparameter optimization checkpoint exists.</p>
 <p>Returns True if it does.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint.</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be loaded.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>checkpoint_exists</strong> – True if the checkpoint exists, False otherwise.</p>
@@ -1307,13 +1301,16 @@ Has to be compatible with network and data.</p></li>
 
 <dl class="py method">
 <dt id="mala.network.trainer.Trainer.resume_checkpoint">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.trainer.Trainer.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.trainer.Trainer.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare resumption of training from a checkpoint.</p>
 <p>Please note that to actually resume the training,
 Trainer.train_network() still has to be called.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint from which</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint from which</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be loaded.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">

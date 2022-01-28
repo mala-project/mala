@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                v0.2.0-77-g1e8b372
+                v0.2.0-88-g56bc5aa
               </div>
             
           
@@ -194,6 +194,7 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
  | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
@@ -272,11 +273,9 @@
       </ul></li>
       <li><a href="api/mala.network.html#mala.network.network.Network.calculate_loss">calculate_loss() (mala.network.network.Network method)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.checkpoint_exists">checkpoint_exists() (mala.network.hyper_opt_oat.HyperOptOAT class method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.checkpoint_exists">checkpoint_exists() (mala.network.hyper_opt_base.HyperOptBase class method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.checkpoint_exists">(mala.network.hyper_opt_optuna.HyperOptOptuna class method)</a>
-</li>
         <li><a href="api/mala.network.html#mala.network.trainer.Trainer.checkpoint_exists">(mala.network.trainer.Trainer class method)</a>
 </li>
       </ul></li>
@@ -284,10 +283,10 @@
 </li>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.checkpoints_each_epoch">checkpoints_each_epoch (mala.common.parameters.ParametersRunning attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.clear_data">clear_data() (mala.datahandling.data_handler.DataHandler method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.clear_hyperparameters">clear_hyperparameters() (mala.network.hyper_opt_base.HyperOptBase method)</a>
 </li>
       <li><a href="api/mala.common.html#mala.common.parameters.Parameters.comment">comment (mala.common.parameters.Parameters attribute)</a>
@@ -386,12 +385,18 @@
 </li>
       <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting">finish_incremental_fitting() (mala.datahandling.data_scaler.DataScaler method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.fit">fit() (mala.datahandling.data_scaler.DataScaler method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.html#mala.network.network.Network.forward">forward() (mala.network.network.Network method)</a>
 </li>
+      <li><a href="api/mala.common.html#mala.common.json_serializable.JSONSerializable.from_json">from_json() (mala.common.json_serializable.JSONSerializable class method)</a>
+
+      <ul>
+        <li><a href="api/mala.common.html#mala.common.parameters.ParametersBase.from_json">(mala.common.parameters.ParametersBase class method)</a>
+</li>
+      </ul></li>
       <li><a href="api/mala.targets.html#mala.targets.density.Density.from_ldos">from_ldos() (mala.targets.density.Density class method)</a>
 
       <ul>
@@ -605,6 +610,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mala.common.html#mala.common.json_serializable.JSONSerializable">JSONSerializable (class in mala.common.json_serializable)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -634,10 +647,10 @@
 </li>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate">learning_rate (mala.common.parameters.ParametersRunning attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate_decay">learning_rate_decay (mala.common.parameters.ParametersRunning attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate_patience">learning_rate_patience (mala.common.parameters.ParametersRunning attribute)</a>
 </li>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate_scheduler">learning_rate_scheduler (mala.common.parameters.ParametersRunning attribute)</a>
@@ -656,6 +669,10 @@
         <li><a href="api/mala.network.html#mala.network.trainer.Trainer.load_from_file">(mala.network.trainer.Trainer class method)</a>
 </li>
       </ul></li>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.load_from_json">load_from_json() (mala.common.parameters.Parameters class method)</a>
+</li>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.load_from_pickle">load_from_pickle() (mala.common.parameters.Parameters class method)</a>
+</li>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersNetwork.loss_function_type">loss_function_type (mala.common.parameters.ParametersNetwork attribute)</a>
 </li>
   </ul></td>
@@ -678,6 +695,13 @@
 
       <ul>
         <li><a href="api/mala.common.html#module-mala.common">module</a>
+</li>
+      </ul></li>
+      <li>
+    mala.common.json_serializable
+
+      <ul>
+        <li><a href="api/mala.common.html#module-mala.common.json_serializable">module</a>
 </li>
       </ul></li>
       <li>
@@ -1010,6 +1034,8 @@
 </li>
         <li><a href="api/mala.common.html#module-mala.common">mala.common</a>
 </li>
+        <li><a href="api/mala.common.html#module-mala.common.json_serializable">mala.common.json_serializable</a>
+</li>
         <li><a href="api/mala.common.html#module-mala.common.parallelizer">mala.common.parallelizer</a>
 </li>
         <li><a href="api/mala.common.html#module-mala.common.parameters">mala.common.parameters</a>
@@ -1271,6 +1297,10 @@
         <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.save">(mala.datahandling.data_scaler.DataScaler method)</a>
 </li>
       </ul></li>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.save_as_json">save_as_json() (mala.common.parameters.Parameters method)</a>
+</li>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.save_as_pickle">save_as_pickle() (mala.common.parameters.Parameters method)</a>
+</li>
       <li><a href="api/mala.network.html#mala.network.network.Network.save_network">save_network() (mala.network.network.Network method)</a>
 </li>
       <li><a href="api/mala.descriptors.html#mala.descriptors.lammps_utils.set_cmdlinevars">set_cmdlinevars() (in module mala.descriptors.lammps_utils)</a>
@@ -1335,10 +1365,16 @@
 </li>
       <li><a href="api/mala.network.html#mala.network.tester.Tester.test_snapshot">test_snapshot() (mala.network.tester.Tester method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.html#mala.network.tester.Tester">Tester (class in mala.network.tester)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mala.common.html#mala.common.json_serializable.JSONSerializable.to_json">to_json() (mala.common.json_serializable.JSONSerializable method)</a>
+
+      <ul>
+        <li><a href="api/mala.common.html#mala.common.parameters.ParametersBase.to_json">(mala.common.parameters.ParametersBase method)</a>
+</li>
+      </ul></li>
       <li><a href="api/mala.network.html#mala.network.trainer.Trainer.train_network">train_network() (mala.network.trainer.Trainer method)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.trainer.Trainer">Trainer (class in mala.network.trainer)</a>
