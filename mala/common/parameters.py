@@ -1023,7 +1023,8 @@ class Parameters:
             for key in json_dict:
                 if not isinstance(json_dict[key], dict):
                     setattr(loaded_parameters, key, json_dict[key])
-
+            if no_snapshots is True:
+                loaded_parameters.data.snapshot_directories_list = []
         else:
             raise Exception("Unsupported parameter save format.")
 
