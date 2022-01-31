@@ -1,7 +1,8 @@
 import mala
 from mala import printout
-# from data_repo_path import get_data_repo_path
-# data_path = get_data_repo_path()+"Al36/"
+import os
+from data_repo_path import get_data_repo_path
+data_path = os.pth.join(get_data_repo_path(), "Al36/")
 
 """
 ex13_advanced_networks.py: Shows how advanced network models such as 
@@ -21,7 +22,6 @@ test_parameters = mala.Parameters()
 # done by providing a list containing entries of the form
 # "tr", "va" and "te".
 test_parameters.data.data_splitting_type = "by_snapshot"
-# test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
 
 # Specify the data scaling.
 test_parameters.data.input_rescaling_type = "feature-wise-standard"
@@ -43,37 +43,19 @@ test_parameters.use_gpu= True
 
 data_handler = mala.DataHandler(test_parameters)
 
-# # Add a snapshot we want to use in to the list.
-# data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-#                           "Al_debug_2k_nr0.out.npy", data_path,
-#                           output_units="1/Ry")
-# data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-#                           "Al_debug_2k_nr1.out.npy", data_path,
-#                           output_units="1/Ry")
-# data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-#                           "Al_debug_2k_nr2.out.npy", data_path,
-#                           output_units="1/Ry")
-# data_handler.prepare_data()
-# printout("Read data: DONE.")
-
-
-snap_path= "/bigdata/casus/wdm/Al/298K/N256/snap"
-ldos_path= "/bigdata/casus/wdm/Al/298K/N256/ldos"
-
-training_number = 1
-validation_number = 1
-
-for i in range(0,training_number):
-    data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot"+str(i)+".npy", snap_path,
-                              "Al_ldos_200x200x200grid_250elvls_snapshot"+str(i)+".npy", ldos_path,
-                              add_snapshot_as="tr", output_units="1/Ry") 
-
-for i in range(training_number,training_number+validation_number):
-    data_handler.add_snapshot("Al_fp_200x200x200grid_94comps_snapshot"+str(i)+".npy", snap_path,
-                              "Al_ldos_200x200x200grid_250elvls_snapshot"+str(i)+".npy", ldos_path,
-                              add_snapshot_as="va", output_units="1/Ry")
+# Add a snapshot we want to use in to the list.
+data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
+                          "Al_debug_2k_nr0.out.npy", data_path,
+                          output_units="1/Ry",
+                          add_snapshot_as="tr")
+data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
+                          "Al_debug_2k_nr1.out.npy", data_path,
+                          output_units="1/Ry",
+                          add_snapshot_as="va")
 data_handler.prepare_data()
 printout("Read data: DONE.")
+
+
 
 ####################
 # NETWORK SETUP
@@ -89,7 +71,8 @@ test_parameters.network.num_hidden_layers = 1
 test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),100,
                                        data_handler.get_output_dimension()]
 
-if test_parameters.network.nn_type == "lstm" or test_parameters.network.nn_type == "gru":
+if test_parameters.network.nn_type == "lstm" or \
+        test_parameters.network.nn_type == "gru":
     test_parameters.network.no_hidden_state = False
     test_parameters.network.bidirection = False
 elif test_parameters.network.nn_type == "transformer":

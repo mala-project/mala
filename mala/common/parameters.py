@@ -51,8 +51,12 @@ class ParametersNetwork(ParametersBase):
     Attributes
     ----------
     nn_type : string
-        Type of the neural network that will be used. Currently supported is
-        only feed-forward, which is also the default
+        Type of the neural network that will be used. Currently supported are
+            - "feed_forward" (default)
+            - "transformer"
+            - "lstm"
+            - "gru"
+
 
     layer_sizes : list
         A list of integers detailing the sizes of the layer of the neural
