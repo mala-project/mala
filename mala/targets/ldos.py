@@ -6,6 +6,7 @@ import math
 import os
 
 from mala.common.parameters import printout
+from mala.common.parallelizer import get_comm, get_rank, get_size
 from mala.targets.cube_parser import read_cube
 from mala.targets.target_base import TargetBase
 from mala.targets.calculation_helpers import *
@@ -93,7 +94,8 @@ class LDOS(TargetBase):
             printout(out_units)
             raise Exception("Unsupported unit for LDOS.")
 
-    def read_from_cube(self, file_name_scheme, directory, units="1/eV"):
+    def read_from_cube(self, file_name_scheme, directory, units="1/eV",
+                       use_memmap=None):
         """
         Read the LDOS data from multiple cube files.
 
@@ -109,6 +111,10 @@ class LDOS(TargetBase):
 
         units : string
             Units the LDOS is saved in.
+
+        use_memmap : string
+            If not None, a memory mapped file will be used to gather the LDOS.
+            If run in MPI parallel mode, such a file MUST be provided.
 
         Returns
         -------
@@ -135,7 +141,20 @@ class LDOS(TargetBase):
         printout("Reading "+str(self.parameters.ldos_gridsize) +
                  " LDOS files from"+directory+".")
         ldos_data = None
-        for i in range(1, self.parameters.ldos_gridsize + 1):
+        if self.parameters._configuration["mpi"]:
+            local_size = int(np.floor(self.parameters.ldos_gridsize /
+                                     get_size()))
+            start_index = get_rank()*local_size + 1
+            if get_rank()+1 == get_size():
+                local_size += self.parameters.ldos_gridsize % \
+                                     get_size()
+            end_index = start_index+local_size
+        else:
+            start_index = 1
+            end_index = self.parameters.ldos_gridsize + 1
+            local_size = self.parameters.ldos_gridsize
+
+        for i in range(start_index, end_index):
             tmp_file_name = file_name_scheme
             tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
 
@@ -145,16 +164,40 @@ class LDOS(TargetBase):
             # Once we have read the first cube file, we know the dimensions
             # of the LDOS and can prepare the array
             # in which we want to store the LDOS.
-            if i == 1:
+            if i == start_index:
                 data_shape = np.shape(data)
                 ldos_data = np.zeros((data_shape[0], data_shape[1],
-                                      data_shape[2], self.parameters.
-                                      ldos_gridsize), dtype=np.float64)
+                                      data_shape[2], local_size),
+                                     dtype=np.float64)
 
             # Convert and then append the LDOS data.
             data = data*self.convert_units(1, in_units=units)
-            ldos_data[:, :, :, i-1] = data[:, :, :]
-        return ldos_data
+            ldos_data[:, :, :, i-start_index] = data[:, :, :]
+
+        # If a memmap is used for communication, this has to be brought into
+        # play now.
+        if self.parameters._configuration["mpi"]:
+            get_comm().Barrier()
+            data_shape = np.shape(ldos_data)
+            if get_rank() == 0:
+                ldos_data_full = np.memmap(use_memmap,
+                                           shape=(data_shape[0], data_shape[1],
+                                                 data_shape[2], self.parameters.
+                                                 ldos_gridsize), mode="w+",
+                                           dtype=np.float64)
+            get_comm().Barrier()
+            if get_rank() != 0:
+                ldos_data_full = np.memmap(use_memmap,
+                                           shape=(data_shape[0], data_shape[1],
+                                                  data_shape[2], self.parameters.
+                                                  ldos_gridsize), mode="r+",
+                                           dtype=np.float64)
+            get_comm().Barrier()
+            ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
+            return ldos_data_full
+
+        else:
+            return ldos_data
 
     def get_energy_grid(self):
         """
@@ -181,7 +224,8 @@ class LDOS(TargetBase):
                          grid_integration_method="summation",
                          energy_integration_method="analytical",
                          atoms_Angstrom=None,
-                         qe_input_data=None, qe_pseudopotentials=None):
+                         qe_input_data=None, qe_pseudopotentials=None,
+                         create_qe_file=True):
         """
         Calculate the total energy from LDOS or given DOS + density data.
 
@@ -305,7 +349,8 @@ class LDOS(TargetBase):
             = density_calculator.\
             get_energy_contributions(density_data, qe_input_data=qe_input_data,
                                      atoms_Angstrom=atoms_Angstrom,
-                                     qe_pseudopotentials=qe_pseudopotentials)
+                                     qe_pseudopotentials=qe_pseudopotentials,
+                                     create_file=create_qe_file)
         e_total = e_band + e_rho_times_v_hxc + e_hartree + e_xc + e_ewald +\
             e_entropy_contribution
 
@@ -682,6 +727,45 @@ class LDOS(TargetBase):
                              (grid_spacing_bohr ** 3)
 
         return dos_values
+
+    def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
+                          snapshot_number=0):
+        """
+        Get the atomic forces (dE/dR), currently work in progress.
+
+        Will only give the dd_dB.
+
+        Parameters
+        ----------
+        ldos_data: torch.Tensor
+            Scaled (!) torch tensor holding the LDOS data for the snapshot
+            for which the atomic force should be calculated.
+
+        dE_dd: np.array
+            (WIP) Derivative of the total energy w.r.t the LDOS.
+            Later on, this will be evaluated within this subroutine. For now
+            it is provided from outside.
+
+        used_data_handler: mala.data.data_handler.DataHandler
+            DataHandler that was used to predict the LDOS for which the
+            atomic forces are supposed to be calculated.
+
+        snapshot_number:
+            Snapshot number (number within the data handler) for which this
+            LDOS prediction was performed. Always 0 in the inference case.
+
+        Returns
+        -------
+        dd_dB: torch.tensor
+            (WIP) Returns the scaled (!) derivative of the LDOS w.r.t to
+            the SNAP descriptors.
+
+        """
+        # For now this only works with ML generated LDOS.
+        # Gradient of the LDOS respect to the SNAP descriptors.
+        ldos_data.backward(dE_dd)
+        dd_dB = used_data_handler.get_test_input_gradient(snapshot_number)
+        return dd_dB
 
     def get_and_cache_density_of_states(self, ldos_data,
                                         grid_spacing_bohr=None,

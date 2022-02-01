@@ -149,7 +149,12 @@ class BaseNetwork(nn.Module):
             The network that was loaded from the file.
         """
         loaded_network = Network(params)
-        loaded_network.load_state_dict(torch.load(path_to_file))
+        if params.use_gpu:
+            loaded_network.load_state_dict(torch.load(path_to_file,
+                                                      map_location="cuda"))
+        else:
+            loaded_network.load_state_dict(torch.load(path_to_file,
+                                                      map_location="cpu"))
         loaded_network.eval()
         return loaded_network
 

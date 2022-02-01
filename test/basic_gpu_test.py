@@ -19,7 +19,7 @@ import numpy as np
 import pytest
 import torch
 
-from data_repo_path import data_repo_path
+from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Al36")
 
 test_checkpoint_name = "test"

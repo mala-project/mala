@@ -6,8 +6,7 @@ import numpy as np
 from mala import Parameters, DataHandler, DataScaler, Network, Tester, \
                  Trainer, Predictor
 
-from data_repo_path import data_repo_path
-from mala.network.network import BaseNetwork
+from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Al36")
 param_path = os.path.join(data_repo_path, "workflow_test/")
 beryllium_path = os.path.join(os.path.join(data_repo_path, "Be2"),
@@ -31,7 +30,7 @@ class TestInference:
         new_parameters.data.use_lazy_loading = False
         new_parameters.running.mini_batch_size = 50
 
-        new_network = BaseNetwork.load_from_file(new_parameters, network_path)
+        new_network = Network.load_from_file(new_parameters, network_path)
 
         # We use a data handler object to read the data we want to investigate.
         # We need to make sure that the same scaling is used.
@@ -214,7 +213,7 @@ class TestInference:
         new_parameters.data.use_lazy_loading = use_lazy_loading
         new_parameters.running.mini_batch_size = batchsize
 
-        new_network = BaseNetwork.load_from_file(new_parameters, network_path)
+        new_network = Network.load_from_file(new_parameters, network_path)
 
         # We use a data handler object to read the data we want to investigate.
         # We need to make sure that the same scaling is used.

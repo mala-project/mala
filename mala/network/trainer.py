@@ -1,22 +1,25 @@
 """Trainer class for training a network."""
-from mala.network.network import Network
-from mala.datahandling.data_handler import DataHandler
-from mala.datahandling.data_scaler import DataScaler
-from mala.common.parameters import Parameters
-
 import os
-import numpy as np
-import torch
-from torch import optim
-from torch.utils.data import DataLoader
-from mala.common.parameters import printout
-from .runner import Runner
+import time
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
-import time
+import numpy as np
+import torch
+from torch import optim
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
+
+from mala.common.parameters import Parameters
+from mala.common.parameters import printout
+from mala.datahandling.data_handler import DataHandler
+from mala.datahandling.data_scaler import DataScaler
+from mala.network.network import Network
+from mala.network.runner import Runner
+
 
 class Trainer(Runner):
     """A class for training a neural network.
@@ -31,9 +34,13 @@ class Trainer(Runner):
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the training data.
+
+    use_pkl_checkpoints : bool
+        If true, .pkl checkpoints will be created.
     """
 
-    def __init__(self, params, network, data, optimizer_dict=None):
+    def __init__(self, params, network, data, optimizer_dict=None,
+                 use_pkl_checkpoints=False):
         # copy the parameters into the class.
         super(Trainer, self).__init__(params, network, data)
         self.final_test_loss = float("inf")
@@ -48,7 +55,14 @@ class Trainer(Runner):
         self.training_data_loader = None
         self.validation_data_loader = None
         self.test_data_loader = None
+        self.use_pkl_checkpoints = use_pkl_checkpoints
         self.__prepare_to_train(optimizer_dict)
+        self.tensor_board = None
+        if self.parameters.visualisation:
+            if not os.path.exists(self.parameters.visualisation_dir):
+                os.makedirs(self.parameters.visualisation_dir)
+            # Set the path to log files
+            self.tensor_board = SummaryWriter(self.parameters.visualisation_dir)
 
     @classmethod
     def checkpoint_exists(cls, checkpoint_name):
@@ -62,6 +76,9 @@ class Trainer(Runner):
         checkpoint_name : string
             Name of the checkpoint.
 
+        use_pkl_checkpoints : bool
+            If true, .pkl checkpoints will be loaded.
+
         Returns
         -------
         checkpoint_exists : bool
@@ -71,14 +88,17 @@ class Trainer(Runner):
         network_name = checkpoint_name + "_network.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
+        if use_pkl_checkpoints:
+            param_name = checkpoint_name + "_params.pkl"
+        else:
+            param_name = checkpoint_name + "_params.json"
         optimizer_name = checkpoint_name + "_optimizer.pth"
 
         return all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
                                         network_name, optimizer_name]))
 
     @classmethod
-    def resume_checkpoint(cls, checkpoint_name):
+    def resume_checkpoint(cls, checkpoint_name, use_pkl_checkpoints=False):
         """
         Prepare resumption of training from a checkpoint.
 
@@ -89,6 +109,9 @@ class Trainer(Runner):
         ----------
         checkpoint_name : string
             Name of the checkpoint from which
+
+        use_pkl_checkpoints : bool
+            If true, .pkl checkpoints will be loaded.
 
         Returns
         -------
@@ -109,7 +132,10 @@ class Trainer(Runner):
         network_name = checkpoint_name + "_network.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
+        if use_pkl_checkpoints:
+            param_name = checkpoint_name + "_params.pkl"
+        else:
+            param_name = checkpoint_name + "_params.json"
         optimizer_name = checkpoint_name + "_optimizer.pth"
 
         # First load the all the regular objects.
@@ -149,6 +175,7 @@ class Trainer(Runner):
 
         data : mala.datahandling.data_handler.DataHandler
             DataHandler holding the training data.
+
 
         Returns
         -------
@@ -242,6 +269,23 @@ class Trainer(Runner):
             if self.parameters.verbosity:
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
 
+            #summary_writer tensor board
+            if self.parameters.visualisation:
+                self.tensor_board.add_scalar("Loss", vloss, epoch)
+                self.tensor_board.add_scalar("Learning rate", self.parameters.learning_rate, epoch)
+                if self.parameters.visualisation == 2:
+                    print("visualisation = 2")
+                    for name, param in self.network.named_parameters():
+                        self.tensor_board.add_histogram(name,param,epoch)
+                        self.tensor_board.add_histogram(f'{name}.grad',param.grad,epoch)
+
+                self.tensor_board.close() #method to make sure that all pending events have been written to disk
+
+
+
+                
+                 
+
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
             if self.parameters.use_shuffling_for_samplers:
@@ -301,6 +345,9 @@ class Trainer(Runner):
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
 
+
+
+        # Calculate final loss.
         self.final_validation_loss = vloss
         printout("Final validation data loss: ", vloss)
 
@@ -314,6 +361,8 @@ class Trainer(Runner):
                 tloss = self.__average_validation(tloss, 'average_loss')
             printout("Final test data loss: ", tloss)
         self.final_test_loss = tloss
+
+        
 
     def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""
@@ -638,3 +687,4 @@ class Trainer(Runner):
         tensor = torch.tensor(val)
         avg_loss = hvd.allreduce(tensor, name=name, op=hvd.Average)
         return avg_loss.item()
+

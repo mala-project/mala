@@ -6,7 +6,6 @@ import mala
 import numpy as np
 import torch
 
-from data_repo_path import data_repo_path
 
 """
 Show how to run a single feature vector out of a snapshot through a network.
@@ -17,6 +16,7 @@ First run ex05_training_with_postprocessing.py to create the
 ex05_* files used below.
 """
 
+data_repo_path = os.environ["MALA_DATA_REPO"]
 
 data_path = pj(data_repo_path, "Al36")
 params_path = "ex05_params.pkl"

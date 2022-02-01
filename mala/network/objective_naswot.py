@@ -4,14 +4,14 @@ import torch
 from torch import Tensor
 from torch.utils.data import DataLoader
 
-from mala.common.printout import printout
+from mala.common.parallelizer import printout
 from mala.common.parameters import Parameters
 from mala.datahandling.data_handler import DataHandler
 from mala.network.network import Network
 from mala.network.objective_base import ObjectiveBase
 
 
-class ObjectiveNoTraining(ObjectiveBase):
+class ObjectiveNASWOT(ObjectiveBase):
     """
     Represents the objective function using no NN training.
 
@@ -31,13 +31,21 @@ class ObjectiveNoTraining(ObjectiveBase):
 
             - optuna
             - oat
+
+    batch_size : int
+        Batch size for the forwarding. Default (None) means that the regular
+        mini batch size from ParametersRunning is used; however, for some
+        applications it might make sense to specify something different.
     """
 
     def __init__(self, search_parameters: Parameters, data_handler:
-                 DataHandler, trial_type):
-        super(ObjectiveNoTraining, self).__init__(search_parameters,
-                                                  data_handler)
+                 DataHandler, trial_type, batch_size=None):
+        super(ObjectiveNASWOT, self).__init__(search_parameters,
+                                              data_handler)
         self.trial_type = trial_type
+        self.batch_size = batch_size
+        if self.batch_size is None:
+            self.batch_size = search_parameters.running.mini_batch_size
 
     def __call__(self, trial):
         """
@@ -50,7 +58,7 @@ class ObjectiveNoTraining(ObjectiveBase):
             trial or simply a OAT compatible list.
         """
         # Parse the parameters using the base class.
-        super(ObjectiveNoTraining, self).parse_trial(trial)
+        super(ObjectiveNASWOT, self).parse_trial(trial)
 
         # Build the network.
         surrogate_losses = []
@@ -67,14 +75,14 @@ class ObjectiveNoTraining(ObjectiveBase):
             if self.params.running.use_shuffling_for_samplers:
                 self.data_handler.mix_datasets()
             loader = DataLoader(self.data_handler.training_data_set,
-                                batch_size=self.params.running.mini_batch_size,
+                                batch_size=self.batch_size,
                                 shuffle=do_shuffle)
-            jac = ObjectiveNoTraining.__get_batch_jacobian(net, loader, device)
+            jac = ObjectiveNASWOT.__get_batch_jacobian(net, loader, device)
 
             # Loss = - score!
             surrogate_loss = float('inf')
             try:
-                surrogate_loss = - ObjectiveNoTraining.__calc_score(jac)
+                surrogate_loss = - ObjectiveNASWOT.__calc_score(jac)
                 surrogate_loss = surrogate_loss.cpu().detach().numpy().astype(
                     np.float64)
             except RuntimeError:
@@ -143,7 +151,7 @@ class ObjectiveNoTraining(ObjectiveBase):
     @staticmethod
     def __calc_score(jacobian: Tensor):
         """Calculate the score for a Jacobian."""
-        correlations = ObjectiveNoTraining.__corrcoef(jacobian)
+        correlations = ObjectiveNASWOT.__corrcoef(jacobian)
         eigen_values, _ = torch.eig(correlations)
         # Only consider the real valued part, imaginary part is rounding
         # artefact

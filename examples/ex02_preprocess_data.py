@@ -3,7 +3,7 @@ import os
 import mala
 from mala import printout
 
-from data_repo_path import data_repo_path
+from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
@@ -30,7 +30,7 @@ test_parameters = mala.Parameters()
 test_parameters.descriptors.descriptor_type = "SNAP"
 test_parameters.descriptors.twojmax = 6
 test_parameters.descriptors.rcutfac = 4.67637
-test_parameters.data.descriptors_contain_xyz = True
+test_parameters.descriptors.descriptors_contain_xyz = True
 
 # Specify output data options, i.e. how the LDOS is parsed.
 # The Be system used as an example here actually was calculated with

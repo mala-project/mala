@@ -10,7 +10,7 @@ import numpy as np
 import torch
 from torch.utils.data import TensorDataset
 
-from mala.common.printout import printout
+from mala.common.parallelizer import printout
 from mala.common.parameters import Parameters, ParametersData
 from mala.datahandling.data_scaler import DataScaler
 from mala.datahandling.snapshot import Snapshot
@@ -245,13 +245,14 @@ class DataHandler:
                                 "DataScalers.")
 
         # Parametrize the scalers, if needed.
-        printout("Initializing the data scalers.")
         if reparametrize_scaler:
+            printout("Initializing the data scalers.")
             self.__parametrize_scalers()
+            printout("Data scalers initialized.")
         else:
+            printout("Data scalers already initilized, loading data to RAM.")
             if self.parameters.use_lazy_loading is False:
                 self.__load_training_data_into_ram()
-        printout("Data scalers initialized.")
 
         # Build Datasets.
         printout("Build datasets.")
@@ -387,6 +388,39 @@ class DataHandler:
         if self.parameters.use_lazy_loading:
             self.test_data_set.return_outputs_directly = True
 
+    def get_test_input_gradient(self, snapshot_number):
+        """
+        Get the gradient of the test inputs for an entire snapshot.
+
+        This gradient will be returned as scaled Tensor.
+        The reason the gradient is returned (rather then returning the entire
+        inputs themselves) is that by slicing a variable, pytorch no longer
+        considers it a "leaf" variable and will stop tracking and evaluating
+        its gradient. Thus, it is easier to obtain the gradient and then
+        slice it.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            Number of the snapshot for which the entire test inputs.
+
+        Returns
+        -------
+        torch.Tensor
+            Tensor holding the gradient.
+
+        """
+        if self.parameters.use_lazy_loading:
+            # This fails if an incorrect snapshot was loaded.
+            if self.test_data_set.currently_loaded_file != snapshot_number:
+                raise Exception("Cannot calculate gradients, wrong file "
+                                "was lazily loaded.")
+            return self.test_data_set.input_data.grad
+        else:
+            return self.test_data_inputs.\
+                       grad[self.grid_size*snapshot_number:
+                            self.grid_size*(snapshot_number+1)]
+
     def __check_snapshots(self):
         """Check the snapshots for consistency."""
         self.nr_snapshots = len(self.parameters.snapshot_directories_list)
@@ -406,7 +440,7 @@ class DataHandler:
 
             # We have to cut xyz information, if we have xyz information in
             # the descriptors.
-            if self.parameters.descriptors_contain_xyz:
+            if self.descriptor_calculator.descriptors_contain_xyz:
                 # Remove first 3 elements of descriptors, as they correspond
                 # to the x,y and z information.
                 tmp = tmp[:, :, :, 3:]
@@ -553,7 +587,7 @@ class DataHandler:
                                                     input_npy_directory,
                                                     snapshot.input_npy_file),
                                                     mmapmode='r')
-                    if self.parameters.descriptors_contain_xyz:
+                    if self.descriptor_calculator.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
 
                     # The scalers will later operate on torch Tensors so we
@@ -639,7 +673,7 @@ class DataHandler:
                                                 input_npy_directory,
                                                 snapshot.input_npy_file),
                                                 mmapmode='r')
-                if self.parameters.descriptors_contain_xyz:
+                if self.descriptor_calculator.descriptors_contain_xyz:
                     tmp = tmp[:, :, :, 3:]
                 tmp = np.array(tmp)
                 tmp *= self.descriptor_calculator. \
@@ -704,13 +738,13 @@ class DataHandler:
                 self.input_data_scaler, self.output_data_scaler,
                 self.descriptor_calculator, self.target_calculator,
                 self.grid_dimension, self.grid_size,
-                self.parameters.descriptors_contain_xyz, self.use_horovod)
+                self.use_horovod)
             self.validation_data_set = LazyLoadDataset(
                 self.get_input_dimension(), self.get_output_dimension(),
                 self.input_data_scaler, self.output_data_scaler,
                 self.descriptor_calculator, self.target_calculator,
                 self.grid_dimension, self.grid_size,
-                self.parameters.descriptors_contain_xyz, self.use_horovod)
+                self.use_horovod)
 
             if self.nr_test_data != 0:
                 self.test_data_set = LazyLoadDataset(
@@ -718,7 +752,8 @@ class DataHandler:
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
                     self.grid_dimension, self.grid_size,
-                    self.parameters.descriptors_contain_xyz, self.use_horovod)
+                    self.use_horovod,
+                    input_requires_grad=True)
 
             # Add snapshots to the lazy loading data sets.
             i = 0
@@ -758,7 +793,7 @@ class DataHandler:
                         __load_from_npy_file(os.path.join(snapshot.input_npy_directory,
                                                           snapshot.input_npy_file),
                                              mmapmode='r')
-                    if self.parameters.descriptors_contain_xyz:
+                    if self.descriptor_calculator.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
                     tmp = np.array(tmp)
                     tmp *= self.descriptor_calculator.\
@@ -797,6 +832,7 @@ class DataHandler:
                     torch.from_numpy(self.test_data_inputs).float()
                 self.test_data_inputs = \
                     self.input_data_scaler.transform(self.test_data_inputs)
+                self.test_data_inputs.requires_grad = True
 
             self.validation_data_inputs = np.array(self.validation_data_inputs)
             self.validation_data_inputs = \
@@ -854,7 +890,8 @@ class DataHandler:
                                        units=None):
         """Convert a raw numpy array containing into the correct units."""
         if data_type == "in":
-            if data_type == "in" and self.parameters.descriptors_contain_xyz:
+            if data_type == "in" and self.descriptor_calculator.\
+                    descriptors_contain_xyz:
                 numpy_array = numpy_array[:, :, :, 3:]
             if units is not None:
                 numpy_array *= self.descriptor_calculator.convert_units(1,

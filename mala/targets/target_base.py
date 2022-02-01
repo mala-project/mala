@@ -31,7 +31,6 @@ class TargetBase(ABC):
             self.parameters = params
         else:
             raise Exception("Wrong type of parameters for Targets class.")
-        self.target_length = 0
         self.fermi_energy_eV = None
         self.temperature_K = None
         self.grid_spacing_Bohr = None
@@ -245,11 +244,8 @@ class TargetBase(ABC):
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
         elif data_type == "atoms+grid":
-            # Reset everything.
-            self.fermi_energy_eV = None
-            self.temperature_K = None
+            # Reset everything that we can get this way.
             self.grid_spacing_Bohr = None
-            self.number_of_electrons = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
@@ -259,9 +255,6 @@ class TargetBase(ABC):
             vol = self.atoms.get_volume()
 
             # Parse the file for energy values.
-            total_energy = None
-            past_calculation_part = False
-            bands_included = True
             self.grid_dimensions[0] = data[1][0]
             self.grid_dimensions[1] = data[1][1]
             self.grid_dimensions[2] = data[1][2]
@@ -277,6 +270,70 @@ class TargetBase(ABC):
     def get_energy_grid(self):
         """Get energy grid."""
         raise Exception("No method implement to calculate an energy grid.")
+
+    def get_real_space_grid(self):
+        """Get the real space grid."""
+        grid3D = np.zeros((self.grid_dimensions[0], self.grid_dimensions[1],
+                           self.grid_dimensions[2], 3), dtype=np.float64)
+        for i in range(0, self.grid_dimensions[0]):
+            for j in range(0, self.grid_dimensions[1]):
+                for k in range(0, self.grid_dimensions[2]):
+                    grid3D[i, j, k, 0] = i * self.grid_spacing_Bohr
+                    grid3D[i, j, k, 1] = j * self.grid_spacing_Bohr
+                    grid3D[i, j, k, 2] = k * self.grid_spacing_Bohr
+        return grid3D
+
+    @staticmethod
+    def write_tem_input_file(atoms_Angstrom, qe_input_data,
+                             qe_pseudopotentials,
+                             grid_dimensions, kpoints):
+        """
+        Write a QE-style input file for the total energy module.
+
+        Usually, the used parameters should correspond to the properties of
+        the object calling this function, but they don't necessarily have
+        to.
+
+        Parameters
+        ----------
+        atoms_Angstrom : ase.Atoms
+            ASE atoms object for the current system. If None, MALA will
+            create one.
+
+        qe_input_data : dict
+            Quantum Espresso parameters dictionary for the ASE<->QE interface.
+            If None (recommended), MALA will create one.
+
+        qe_pseudopotentials : dict
+            Quantum Espresso pseudopotential dictionaty for the ASE<->QE
+            interface. If None (recommended), MALA will create one.
+
+        grid_dimensions : list
+            A list containing the x,y,z dimensions of the real space grid.
+
+        kpoints : dict
+            k-grid used, usually None or (1,1,1) for TEM calculations.
+        """
+        # Specify grid dimensions, if any are given.
+        if grid_dimensions[0] != 0 and \
+                grid_dimensions[1] != 0 and \
+                grid_dimensions[2] != 0:
+            qe_input_data["nr1"] = grid_dimensions[0]
+            qe_input_data["nr2"] = grid_dimensions[1]
+            qe_input_data["nr3"] = grid_dimensions[2]
+            qe_input_data["nr1s"] = grid_dimensions[0]
+            qe_input_data["nr2s"] = grid_dimensions[1]
+            qe_input_data["nr3s"] = grid_dimensions[2]
+
+        # Might be needed for test purposes, the Be2 test data
+        # for example has symmetry, even though it was deactivated for
+        # the DFT calculation. If symmetry is then on in here, that
+        # leads to errors.
+        # qe_input_data["nosym"] = False
+        ase.io.write("mala.pw.scf.in", atoms_Angstrom, "espresso-in",
+                     input_data=qe_input_data,
+                     pseudopotentials=qe_pseudopotentials,
+                     kpts=kpoints)
 
     @staticmethod
     def convert_units(array, in_units="eV"):

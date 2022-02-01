@@ -1,5 +1,8 @@
 """Collection of all parameter related classes and functions."""
 import os
+import importlib
+import inspect
+import json
 import pickle
 import warnings
 
@@ -10,17 +13,25 @@ except ModuleNotFoundError:
                   "configured correctly. You can still train networks, but "
                   "attempting to set parameters.training.use_horovod = "
                   "True WILL cause a crash.", stacklevel=3)
+try:
+    from mpi4py import MPI
+except ModuleNotFoundError:
+    warnings.warn("No MPI detected. This is not a problem unless "
+                  "you plan on parallel inference.", stacklevel=3)
+
 import torch
 
-from mala.common.printout import printout, set_horovod_status
+from mala.common.parallelizer import printout, set_horovod_status, \
+    set_mpi_status, get_rank
+from mala.common.json_serializable import JSONSerializable
 
 
-
-class ParametersBase:
+class ParametersBase(JSONSerializable):
     """Base parameter class for MALA."""
 
     def __init__(self,):
-        self._configuration = {"gpu": False, "horovod": False}
+        super(ParametersBase, self).__init__()
+        self._configuration = {"gpu": False, "horovod": False, "mpi": False}
         pass
 
     def show(self, indent=""):
@@ -35,13 +46,138 @@ class ParametersBase:
 
         """
         for v in vars(self):
-            printout(indent + '%-15s: %s' % (v, getattr(self, v)))
+            if v != "_configuration":
+                if v[0] == "_":
+                    printout(indent + '%-15s: %s' % (v[1:], getattr(self, v)))
+                else:
+                    printout(indent + '%-15s: %s' % (v, getattr(self, v)))
 
     def _update_gpu(self, new_gpu):
         self._configuration["gpu"] = new_gpu
 
     def _update_horovod(self, new_horovod):
         self._configuration["horovod"] = new_horovod
+
+    def _update_mpi(self, new_mpi):
+        self._configuration["mpi"] = new_mpi
+
+    @staticmethod
+    def _member_to_json(member):
+        if isinstance(member, (int, float, type(None), str)):
+            return member
+        else:
+            return member.to_json()
+
+    def to_json(self):
+        """
+        Convert this object to a dictionary that can be saved in a JSON file.
+
+        Returns
+        -------
+        json_dict : dict
+            The object as dictionary for export to JSON.
+
+        """
+        json_dict = {}
+        members = inspect.getmembers(self,
+                                     lambda a: not (inspect.isroutine(a)))
+        for member in members:
+            # Filter out all private members, builtins, etc.
+            if member[0][0] != "_":
+
+                # If we deal with a list or a dict,
+                # we have to sanitize treat all members of that list
+                # or dict separately.
+                if isinstance(member[1], list):
+                    if len(member[1]) > 0:
+                        _member = []
+                        for m in member[1]:
+                            _member.append(self._member_to_json(m))
+                        json_dict[member[0]] = _member
+                    else:
+                        json_dict[member[0]] = member[1]
+
+                elif isinstance(member[1], dict):
+                    if len(member[1]) > 0:
+                        _member = {}
+                        for m in member[1].keys():
+                            _member[m] = self._member_to_json(member[1][m])
+                        json_dict[member[0]] = _member
+                    else:
+                        json_dict[member[0]] = member[1]
+
+                else:
+                    json_dict[member[0]] = self._member_to_json(member[1])
+        json_dict["_parameters_type"] = type(self).__name__
+        return json_dict
+
+    @staticmethod
+    def _json_to_member(json_value):
+        if isinstance(json_value, (int, float, type(None), str)):
+            return json_value
+        else:
+            if isinstance(json_value, dict) and "object" in json_value.keys():
+                # We have found ourselves an object!
+                # We create it and give it the JSON dict, hoping it can handle
+                # it. If not, then the implementation of that class has to
+                # be adjusted.
+                module = importlib.import_module("mala")
+                class_ = getattr(module, json_value["object"])
+                new_object = class_.from_json(json_value["data"])
+                return new_object
+            else:
+                # If it is not an elementary builtin type AND not an object
+                # dictionary, something is definitely off.
+                raise Exception("Could not decode JSON file, error in",
+                                json_value)
+
+    @classmethod
+    def from_json(cls, json_dict):
+        """
+        Read this object from a dictionary saved in a JSON file.
+
+        Parameters
+        ----------
+        json_dict : dict
+            A dictionary containing all attributes, properties, etc. as saved
+            in the json file.
+
+        Returns
+        -------
+        deserialized_object : JSONSerializable
+            The object as read from the JSON file.
+
+        """
+        deserialized_object = cls()
+        for key in json_dict:
+            # Filter out all private members, builtins, etc.
+            if key != "_parameters_type":
+
+                # If we deal with a list or a dict,
+                # we have to sanitize treat all members of that list
+                # or dict separately.
+                if isinstance(json_dict[key], list):
+                    if len(json_dict[key]) > 0:
+                        _member = []
+                        for m in json_dict[key]:
+                            _member.append(deserialized_object._json_to_member(m))
+                        setattr(deserialized_object, key, _member)
+                    else:
+                        setattr(deserialized_object, key, json_dict[key])
+
+                elif isinstance(json_dict[key], dict):
+                    if len(json_dict[key]) > 0:
+                        _member = {}
+                        for m in json_dict[key].keys():
+                            _member[m] = deserialized_object._json_to_member(json_dict[key][m])
+                        setattr(deserialized_object, key, _member)
+
+                    else:
+                        setattr(deserialized_object, key, json_dict[key])
+
+                else:
+                    setattr(deserialized_object, key, deserialized_object._json_to_member(json_dict[key]))
+        return deserialized_object
 
 
 class ParametersNetwork(ParametersBase):
@@ -142,6 +278,16 @@ class ParametersDescriptors(ParametersBase):
         SNAP descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
 
+    acsd_points : int
+        Number of points used to calculate the ACSD.
+        The actual number of distances will be acsd_points x acsd_points,
+        since the cosine similarity is only defined for pairs.
+
+    descriptors_contain_xyz : bool
+        Legacy option. If True, it is assumed that the first three entries of
+        the descriptor vector are the xyz coordinates and they are cut from the
+        descriptor vector. If False, no such cutting is peformed.
+
     """
 
     def __init__(self):
@@ -150,6 +296,8 @@ class ParametersDescriptors(ParametersBase):
         self.twojmax = 10
         self.rcutfac = 4.67637
         self.lammps_compute_file = ""
+        self.acsd_points = 100
+        self.descriptors_contain_xyz = True
 
 
 class ParametersTargets(ParametersBase):
@@ -203,11 +351,6 @@ class ParametersData(ParametersBase):
 
     Attributes
     ----------
-    descriptors_contain_xyz : bool
-        Legacy option. If True, it is assumed that the first three entries of
-        the descriptor vector are the xyz coordinates and they are cut from the
-        descriptor vector. If False, no such cutting is peformed.
-
     snapshot_directories_list : list
         A list of all added snapshots.
 
@@ -262,7 +405,6 @@ class ParametersData(ParametersBase):
 
     def __init__(self):
         super(ParametersData, self).__init__()
-        self.descriptors_contain_xyz = True
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
         # self.data_splitting_percent = [0,0,0]
@@ -392,7 +534,7 @@ class ParametersRunning(ParametersBase):
         self.checkpoint_name = "checkpoint_mala"
         self.visualisation = 0
         # default visualisation_dir= "~/log_dir"
-        self.visualisation_dir= os.path.join(os.path.expanduser("~"), "log_dir")
+        self.visualisation_dir = os.path.join(os.path.expanduser("~"), "log_dir")
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
         self.inference_data_grid = [0, 0, 0]
@@ -449,9 +591,6 @@ class ParametersRunning(ParametersBase):
         self._after_before_training_metric = value
 
 
-        
-
-
 class ParametersHyperparameterOptimization(ParametersBase):
     """
     Hyperparameter optimization parameters.
@@ -496,7 +635,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
             - "oat" : Use orthogonal array tuning (currently limited to
               categorical hyperparemeters). Range analysis is
               currently done by simply choosing the lowest loss.
-            - "notraining" : Using a NAS without training, based on jacobians.
+            - "naswot" : Using a NAS without training, based on jacobians.
 
     checkpoints_each_trial : int
         If not 0, checkpoint files will be saved after each
@@ -553,9 +692,16 @@ class ParametersHyperparameterOptimization(ParametersBase):
         since v2.2.0, but reported to perform very well.
         http://proceedings.mlr.press/v80/falkner18a.html
 
-    no_training_cutoff : float
+    naswot_pruner_cutoff : float
         If the surrogate loss algorithm is used as a pruner during a study,
         this cutoff determines which trials are neglected.
+
+    pruner: string
+        Pruner type to be used by optuna. Currently only "naswot" is
+        supported, which will use the NASWOT algorithm as pruner.
+
+    naswot_pruner_batch_size : int
+        Batch size for the NASWOT pruner
     """
 
     def __init__(self):
@@ -572,8 +718,9 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.number_training_per_trial = 1
         self.trial_ensemble_evaluation = "mean"
         self.use_multivariate = True
-        self.no_training_cutoff = 0
+        self.naswot_pruner_cutoff = 0
         self.pruner = None
+        self.naswot_pruner_batch_size = 0
 
     @property
     def rdb_storage_heartbeat(self):
@@ -631,14 +778,20 @@ class ParametersHyperparameterOptimization(ParametersBase):
 
         """
         for v in vars(self):
-            if v != "hlist":
-                printout(indent + '%-15s: %s' % (v, getattr(self, v)))
-            if v == "hlist":
-                i = 0
-                for hyp in self.hlist:
-                    printout(indent + '%-15s: %s' %
-                             ("hyperparameter #"+str(i), hyp.name))
-                    i += 1
+            if v != "_configuration":
+                if v != "hlist":
+                    if v[0] == "_":
+                        printout(indent + '%-15s: %s' % (
+                        v[1:], getattr(self, v)))
+                    else:
+                        printout(
+                            indent + '%-15s: %s' % (v, getattr(self, v)))
+                if v == "hlist":
+                    i = 0
+                    for hyp in self.hlist:
+                        printout(indent + '%-15s: %s' %
+                                 ("hyperparameter #"+str(i), hyp.name))
+                        i += 1
 
 
 class ParametersDebug(ParametersBase):
@@ -709,6 +862,7 @@ class Parameters:
         # Properties
         self.use_horovod = False
         self.use_gpu = False
+        self.use_mpi = False
         self.manual_seed = None
 
     @property
@@ -753,18 +907,43 @@ class Parameters:
         self.hyperparameters._update_horovod(self.use_horovod)
         self.debug._update_horovod(self.use_horovod)
 
+    @property
+    def use_mpi(self):
+        """Control whether or not horovod is used for parallel training."""
+        return self._use_mpi
+
+    @use_mpi.setter
+    def use_mpi(self, value):
+        set_mpi_status(value)
+        self._use_mpi = value
+        self.network._update_mpi(self.use_mpi)
+        self.descriptors._update_mpi(self.use_mpi)
+        self.targets._update_mpi(self.use_mpi)
+        self.data._update_mpi(self.use_mpi)
+        self.running._update_mpi(self.use_mpi)
+        self.hyperparameters._update_mpi(self.use_mpi)
+        self.debug._update_mpi(self.use_mpi)
+
     def show(self):
         """Print name and values of all attributes of this object."""
         printout("--- " + self.__doc__.split("\n")[1] + " ---")
+
+        # Two for-statements so that global parameters are shown on top.
+        for v in vars(self):
+            if isinstance(getattr(self, v), ParametersBase):
+                pass
+            else:
+                if v[0] == "_":
+                    printout('%-15s: %s' % (v[1:], getattr(self, v)))
+                else:
+                    printout('%-15s: %s' % (v, getattr(self, v)))
         for v in vars(self):
             if isinstance(getattr(self, v), ParametersBase):
                 parobject = getattr(self, v)
                 printout("--- " + parobject.__doc__.split("\n")[1] + " ---")
                 parobject.show("\t")
-            else:
-                printout('%-15s: %s' % (v, getattr(self, v)))
 
-    def save(self, filename, save_format="pickle"):
+    def save(self, filename, save_format="json"):
         """
         Save the Parameters object to a file.
 
@@ -778,17 +957,68 @@ class Parameters:
             Currently only supported file format is "pickle".
 
         """
-        if self.use_horovod:
-            if hvd.rank() != 0:
-                return
+        if get_rank() != 0:
+            return
+
         if save_format == "pickle":
+            if filename[-3:] != "pkl":
+                filename += ".pkl"
             with open(filename, 'wb') as handle:
                 pickle.dump(self, handle, protocol=4)
+        elif save_format == "json":
+            if filename[-4:] != "json":
+                filename += ".json"
+            json_dict = {}
+            members = inspect.getmembers(self,
+                                         lambda a: not (inspect.isroutine(a)))
+
+            # Two for loops so global properties enter the dict first.
+            for member in members:
+                # Filter out all private members, builtins, etc.
+                if member[0][0] != "_":
+                    if isinstance(member[1], ParametersBase):
+                        pass
+                    else:
+                        json_dict[member[0]] = member[1]
+            for member in members:
+                # Filter out all private members, builtins, etc.
+                if member[0][0] != "_":
+                    if isinstance(member[1], ParametersBase):
+                        # All the subclasses have to provide this function.
+                        member[1]: ParametersBase
+                        json_dict[member[0]] = member[1].to_json()
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(json_dict, f, ensure_ascii=False, indent=4)
+
         else:
             raise Exception("Unsupported parameter save format.")
 
+    def save_as_pickle(self, filename):
+        """
+        Save the Parameters object to a pickle file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        """
+        self.save(filename, save_format="pickle")
+
+    def save_as_json(self, filename):
+        """
+        Save the Parameters object to a json file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        """
+        self.save(filename, save_format="json")
+
     @classmethod
-    def load_from_file(cls, filename, save_format="pickle",
+    def load_from_file(cls, filename, save_format="json",
                        no_snapshots=False):
         """
         Load a Parameters object from a file.
@@ -817,7 +1047,70 @@ class Parameters:
                 loaded_parameters = pickle.load(handle)
                 if no_snapshots is True:
                     loaded_parameters.data.snapshot_directories_list = []
+        elif save_format == "json":
+            with open(filename, encoding="utf-8") as json_file:
+                json_dict = json.load(json_file)
+            loaded_parameters = cls()
+            for key in json_dict:
+                if isinstance(json_dict[key], dict):
+                    # These are the other parameter classes.
+                    sub_parameters = globals()[json_dict[key]["_parameters_type"]].from_json(json_dict[key])
+                    setattr(loaded_parameters, key, sub_parameters)
+
+            # We iterate a second time, to set global values, so that they
+            # are properly forwarded.
+            for key in json_dict:
+                if not isinstance(json_dict[key], dict):
+                    setattr(loaded_parameters, key, json_dict[key])
+            if no_snapshots is True:
+                loaded_parameters.data.snapshot_directories_list = []
         else:
             raise Exception("Unsupported parameter save format.")
 
         return loaded_parameters
+
+    @classmethod
+    def load_from_pickle(cls, filename, no_snapshots=False):
+        """
+        Load a Parameters object from a pickle file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        no_snapshots : bool
+            If True, than the snapshot list will be emptied. Useful when
+            performing inference/testing after training a network.
+
+        Returns
+        -------
+        loaded_parameters : Parameters
+            The loaded Parameters object.
+
+        """
+        return Parameters.load_from_file(filename, save_format="pickle",
+                                  no_snapshots=no_snapshots)
+
+    @classmethod
+    def load_from_json(cls, filename, no_snapshots=False):
+        """
+        Load a Parameters object from a json file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        no_snapshots : bool
+            If True, than the snapshot list will be emptied. Useful when
+            performing inference/testing after training a network.
+
+        Returns
+        -------
+        loaded_parameters : Parameters
+            The loaded Parameters object.
+
+        """
+        return Parameters.load_from_file(filename, save_format="json",
+                                  no_snapshots=no_snapshots)
