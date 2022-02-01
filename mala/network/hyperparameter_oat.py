@@ -29,15 +29,22 @@ class HyperparameterOAT(JSONSerializable):
         List of possible choices (for categorical parameter).
     """
 
-    def __init__(self, opttype="categorical", name="", choices=None):
+    def __init__(self, opttype="categorical", name="", choices=[]):
         super(HyperparameterOAT, self).__init__()
         self.name = name
         self.opttype = opttype
         self.choices = choices
-        self.num_choices = len(self.choices)
 
         if self.opttype != "categorical":
             raise Exception("Unsupported Hyperparameter type.")
+
+    @property
+    def num_choices(self):
+        return len(self.choices)
+
+    @num_choices.setter
+    def num_choices(self, value):
+        pass
 
     def get_parameter(self, trial, idx):
         """
