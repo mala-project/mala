@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as functional
 
 from mala.common.parameters import Parameters
-from mala.common.printout import printout
+from mala.common.parallelizer import printout
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -14,7 +14,7 @@ except ModuleNotFoundError:
     pass
 
 
-class BaseNetwork(nn.Module):
+class Network(nn.Module):
     """Central network class for this framework, based on pytorch.nn.Module.
 
     Parameters
@@ -23,7 +23,39 @@ class BaseNetwork(nn.Module):
         Parameters used to create this neural network.
     """
 
-    def __init__(self, params):
+    def __new__(cls, params: Parameters):
+        """
+        Create a neural network instance.
+
+        The correct type of neural network will automatically be instantiated
+        by this class if possible. You can also instantiate the desired
+        network directly by calling upon the subclass.
+
+        Parameters
+        ----------
+        params : mala.common.parametes.Parameters
+            Parameters used to create this neural network.
+        """
+        # The correct type of model is instantiated automatically.
+        model = None
+        if params.network.nn_type == "feed-forward":
+            model = super(Network, FeedForwardNet).__new__(FeedForwardNet)
+
+        elif params.network.nn_type == "transformer":
+            model = super(Network, TransformerNet).__new__(TransformerNet)
+
+        elif params.network.nn_type == "lstm":
+            model = super(Network, LSTM).__new__(LSTM)
+
+        elif params.network.nn_type == "gru":
+            model = super(Network, GRU).__new__(GRU)
+
+        if model is None:
+            raise Exception("Unsupported network architecture.")
+
+        return model
+
+    def __init__(self, params: Parameters):
         # copy the network params from the input parameter object
         self.use_horovod = params.use_horovod
         self.mini_batch_size = params.running.mini_batch_size
@@ -36,7 +68,7 @@ class BaseNetwork(nn.Module):
             torch.cuda.manual_seed(params.manual_seed)
 
         # initialize the parent class
-        super(BaseNetwork, self).__init__()
+        super(Network, self).__init__()
 
         # Mappings for parsing of the activation layers.
         self.activation_mappings = {
@@ -158,7 +190,7 @@ class BaseNetwork(nn.Module):
         loaded_network.eval()
         return loaded_network
 
-class FeedForwardNet(BaseNetwork):
+class FeedForwardNet(Network):
     """Initialize this network as a feed-forward network."""
         
         # Check if multiple types of activations were selected or only one
@@ -212,7 +244,7 @@ class FeedForwardNet(BaseNetwork):
             inputs = layer(inputs)
         return inputs
 
-class LSTM(BaseNetwork):
+class LSTM(Network):
     """Initialize this network as a LSTM network."""
         
     # was passed to be used in the entire network.
@@ -321,7 +353,7 @@ class GRU(LSTM):
         
     # was passed to be used similar to LSTM but with small tweek for the layer as GRU.
     def __init__(self, params):
-        BaseNetwork.__init__(self, params)
+        Network.__init__(self, params)
 
         self.hidden_dim = self.params.layer_sizes[-1]
         self.hidden = self.init_hidden()# check for size for validate and train
@@ -409,7 +441,7 @@ class GRU(LSTM):
 
         return h0
         
-class TransformerNet(BaseNetwork):
+class TransformerNet(Network):
     """Initialize this network as the transformer net.
 
     Parameters
@@ -512,36 +544,6 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         """Perform a forward pass through the network."""
-        
         x= x.unsqueeze(dim=1) #add extra dimension for batch_size
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
-
-
-def Network(params:Parameters):
-    """
-    Assign a model to an appropriate network class based on nn_type.
-
-    Parameters
-    ----------
-    params : mala.common.parametes.Parameters
-        Parameters used to create this neural network.   
-    """
-    model: BaseNetwork= None 
-    if params.network.nn_type == "feed-forward":
-        model = FeedForwardNet(params)
-    
-    elif params.network.nn_type == "transformer":
-        model = TransformerNet(params)
-    
-    elif params.network.nn_type == "lstm":
-        model = LSTM(params)
-
-    elif params.network.nn_type == "gru":
-        model = GRU(params)
-    
-    
-    if model is None:
-        raise Exception("Unsupported network architecture.")
-    
-    return model

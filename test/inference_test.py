@@ -11,7 +11,7 @@ data_path = os.path.join(data_repo_path, "Al36")
 param_path = os.path.join(data_repo_path, "workflow_test/")
 beryllium_path = os.path.join(os.path.join(data_repo_path, "Be2"),
                                "training_data")
-params_path = param_path+"workflow_test_params.pkl"
+params_path = param_path+"workflow_test_params.json"
 network_path = param_path+"workflow_test_network.pth"
 input_scaler_path = param_path+"workflow_test_iscaler.pkl"
 output_scaler_path = param_path+"workflow_test_oscaler.pkl"
