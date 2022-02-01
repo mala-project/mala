@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-90-gcb2fa73
+                v0.2.0-92-g4481038
               </div>
             
           
@@ -673,7 +673,7 @@ etc. as names.</p></li>
 <p>Hyperparameter to use with optuna.</p>
 <dl class="py class">
 <dt id="mala.network.hyperparameter_naswot.HyperparameterNASWOT">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyperparameter_naswot.</span></code><code class="sig-name descname"><span class="pre">HyperparameterNASWOT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyperparameter_naswot.HyperparameterNASWOT" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyperparameter_naswot.</span></code><code class="sig-name descname"><span class="pre">HyperparameterNASWOT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'categorical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyperparameter_naswot.HyperparameterNASWOT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.network.hyperparameter_optuna.HyperparameterOptuna" title="mala.network.hyperparameter_optuna.HyperparameterOptuna"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.hyperparameter_optuna.HyperparameterOptuna</span></code></a></p>
 <p>Represents a parameter used for pure NASWOT.</p>
 <p>Based upon the hyperparameter representation for optuna.</p>
@@ -710,7 +710,7 @@ etc. as names.</p></li>
 <p>Hyperparameter to use with OAT.</p>
 <dl class="py class">
 <dt id="mala.network.hyperparameter_oat.HyperparameterOAT">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyperparameter_oat.</span></code><code class="sig-name descname"><span class="pre">HyperparameterOAT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'categorical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyperparameter_oat.HyperparameterOAT" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.hyperparameter_oat.</span></code><code class="sig-name descname"><span class="pre">HyperparameterOAT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'categorical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.hyperparameter_oat.HyperparameterOAT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="mala.common.html#mala.common.json_serializable.JSONSerializable" title="mala.common.json_serializable.JSONSerializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.json_serializable.JSONSerializable</span></code></a></p>
 <p>Represents a hyperparameter for OAT.</p>
 <dl class="field-list simple">
@@ -774,6 +774,12 @@ etc. as names.</p></li>
 <dd class="field-odd"><p>float, int or string</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.hyperparameter_oat.HyperparameterOAT.num_choices">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">num_choices</span></code><a class="headerlink" href="#mala.network.hyperparameter_oat.HyperparameterOAT.num_choices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of choices for this hyperparameter.</p>
 </dd></dl>
 
 </dd></dl>
