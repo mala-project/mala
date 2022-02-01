@@ -2,7 +2,7 @@ import mala
 from mala import printout
 import os
 from data_repo_path import get_data_repo_path
-data_path = os.pth.join(get_data_repo_path(), "Al36/")
+data_path = os.path.join(get_data_repo_path(), "Al36/")
 
 """
 ex13_advanced_networks.py: Shows how advanced network models such as 
@@ -77,7 +77,11 @@ if test_parameters.network.nn_type == "lstm" or \
     test_parameters.network.bidirection = False
 elif test_parameters.network.nn_type == "transformer":
     test_parameters.network.dropout = 0.2
-    test_parameters.network.num_heads= 7 #must be a divisor of input dimension
+
+    # This value has to be a divisor of the input dimension. If this is
+    # for some reason incorrectly provided by the user, MALA will determine
+    # the next highest divisor.
+    test_parameters.network.num_heads = 7
 
 # Setup network and trainer.
 test_network = mala.Network(test_parameters)

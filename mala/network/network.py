@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as functional
 
 from mala.common.parameters import Parameters
+from mala.common.printout import printout
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -54,9 +55,6 @@ class BaseNetwork(nn.Module):
         else:
             raise Exception("Unsupported loss function.")
 
-        # Once everything is done, we can move the Network on the target
-        # device.
-        
 
     @abstractmethod
     def forward(self, inputs):
@@ -266,8 +264,6 @@ class LSTM(BaseNetwork):
         
         self.hidden = (self.hidden[0].detach(), self.hidden[1].detach())
 
-        print("input size",x.shape)
-
         x = self.activation(self.first_layer(x))
 
         if (self.params.bidirection):
@@ -283,7 +279,6 @@ class LSTM(BaseNetwork):
 
         x = x[:, -1, :]
         x = self.activation(x)
-        print("output size",x.shape)
 
         return (x)
 
@@ -420,17 +415,21 @@ class TransformerNet(BaseNetwork):
 
     def __init__(self, params):
         super(TransformerNet, self).__init__(params)
-    #    why is d_model==d_hidden?   
-#        self.num_hidden = 91
-#        self.num_tokens = 400
+
+        # Adjust number of heads.
+        if self.params.layer_sizes[0] % self.params.num_heads != 0:
+            old_num_heads = self.params.num_heads
+            while self.params.layer_sizes[0] % self.params.num_heads != 0:
+                self.params.num_heads += 1
+
+            printout("Adjusting number of heads from", old_num_heads,
+            "to", self.params.num_heads)
 
         self.src_mask = None
         self.pos_encoder = PositionalEncoding(self.params.layer_sizes[0], self.params.dropout)
 
         encoder_layers = nn.TransformerEncoderLayer(self.params.layer_sizes[0], self.params.num_heads, self.params.layer_sizes[1], self.params.dropout)
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, self.params.num_hidden_layers)
-    #   why is he not using embedding? because we already have every thing in numbers and do not need embeding?
-    #   self.encoder = nn.Embedding(self.num_tokens, self.params.layer_sizes[0])
 
         self.decoder = nn.Linear(self.params.layer_sizes[0], self.params.layer_sizes[-1])
 
@@ -438,7 +437,8 @@ class TransformerNet(BaseNetwork):
 
         if params.use_gpu:
             self.to('cuda')
-        
+
+
     def generate_square_subsequent_mask(self, size):
         """
         Generate a mask so that only the current and previous tokens are visible to the transformer.
@@ -524,16 +524,16 @@ def Network(params:Parameters):
     """
     model: BaseNetwork= None 
     if params.network.nn_type == "feed-forward":
-        model= FeedForwardNet(params)
+        model = FeedForwardNet(params)
     
     elif params.network.nn_type == "transformer":
-        model= TransformerNet(params)
+        model = TransformerNet(params)
     
     elif params.network.nn_type == "lstm":
-        model= LSTM(params)
+        model = LSTM(params)
 
     elif params.network.nn_type == "gru":
-        model= GRU(params)
+        model = GRU(params)
     
     
     if model is None:
