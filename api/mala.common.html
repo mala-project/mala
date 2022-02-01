@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-92-g4481038
+                v0.2.0-131-geb225ee
               </div>
             
           
@@ -1025,8 +1025,15 @@ as an estimate of the minimal accuracy to be expected. Currently,
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersNetwork.nn_type">
 <code class="sig-name descname"><span class="pre">nn_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.nn_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Type of the neural network that will be used. Currently supported is
-only feed-forward, which is also the default</p>
+<dd><dl class="simple">
+<dt>Type of the neural network that will be used. Currently supported are</dt><dd><ul class="simple">
+<li><p>“feed_forward” (default)</p></li>
+<li><p>“transformer”</p></li>
+<li><p>“lstm”</p></li>
+<li><p>“gru”</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>string</p>
@@ -1034,23 +1041,12 @@ only feed-forward, which is also the default</p>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt id="mala.common.parameters.ParametersNetwork.layer_sizes">
-<code class="sig-name descname"><span class="pre">layer_sizes</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.layer_sizes" title="Permalink to this definition">¶</a></dt>
-<dd><p>A list of integers detailing the sizes of the layer of the neural
+<dl>
+<dt>layer_sizes<span class="classifier">list</span></dt><dd><p>A list of integers detailing the sizes of the layer of the neural
 network. Please note that the input layer is included therein.
 Default: [10,10,0]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>list</p>
 </dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="mala.common.parameters.ParametersNetwork.layer_activations">
-<code class="sig-name descname"><span class="pre">layer_activations</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.layer_activations" title="Permalink to this definition">¶</a></dt>
-<dd><p>A list of strings detailing the activation functions to be used
+<dt>layer_activations: list</dt><dd><p>A list of strings detailing the activation functions to be used
 by the neural network. If the dimension of layer_activations is
 smaller than the dimension of layer_sizes-1, than the first entry
 is used for all layers.
@@ -1062,30 +1058,34 @@ Currently supported activation functions are:</p>
 <li><p>LeakyReLU</p></li>
 </ul>
 </div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>list</p>
 </dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="mala.common.parameters.ParametersNetwork.loss_function_type">
-<code class="sig-name descname"><span class="pre">loss_function_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.loss_function_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loss function for the neural network
+<dt>loss_function_type: string</dt><dd><p>Loss function for the neural network
 Currently supported loss functions include:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>mse (Mean squared error; default)</p></li>
 </ul>
 </div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>string</p>
+</dd>
+<dt>no_hidden_state<span class="classifier">bool</span></dt><dd><p>If True hidden and cell state is assigned to zeros for LSTM Network.
+false will keep the hidden state active
+Default: False</p>
+</dd>
+<dt>bidirection: bool</dt><dd><p>Sets lstm network size based on bidirectional or just one direction
+Default: False</p>
+</dd>
+<dt>num_hidden_layers: int</dt><dd><p>Number of hidden layers to be used in lstm or gru or transformer nets
+Default: None</p>
+</dd>
+<dt>dropout: float</dt><dd><p>Dropout rate for transformer net
+0.0 &lt;= dropout &lt;=1.0
+Default: 0.0</p>
+</dd>
+<dt>num_heads: int</dt><dd><p>Number of heads to be used in Multi head attention network
+This should be a divisor of input dimension
+Default: None</p>
 </dd>
 </dl>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">

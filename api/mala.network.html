@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-92-g4481038
+                v0.2.0-131-geb225ee
               </div>
             
           
@@ -944,8 +944,108 @@ pruned.</p>
 <span id="mala-network-network-module"></span><h2>mala.network.network module<a class="headerlink" href="#module-mala.network.network" title="Permalink to this headline">¶</a></h2>
 <p>Neural network for MALA.</p>
 <dl class="py class">
+<dt id="mala.network.network.FeedForwardNet">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.network.</span></code><code class="sig-name descname"><span class="pre">FeedForwardNet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.FeedForwardNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.</span></code></p>
+<p>Initialize this network as a feed-forward network.</p>
+<dl class="py method">
+<dt id="mala.network.network.FeedForwardNet.forward">
+<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.FeedForwardNet.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a forward pass through the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<em>torch.Tensor</em>) – Input array for which the forward pass is to be performed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>predicted_array</strong> – Predicted outputs of array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.network.network.GRU">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.network.</span></code><code class="sig-name descname"><span class="pre">GRU</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.GRU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.</span></code></p>
+<p>Initialize this network as a GRU network.</p>
+<dl class="py method">
+<dt id="mala.network.network.GRU.forward">
+<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.GRU.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a forward pass through the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<em>torch.Tensor</em>) – Input array for which the forward pass is to be performed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>predicted_array</strong> – Predicted outputs of array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.network.GRU.init_hidden">
+<code class="sig-name descname"><span class="pre">init_hidden</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.GRU.init_hidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize hidden state to zero when called and assigns specific sizes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>Hidden state</strong> – initialised to zeros.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.network.network.LSTM">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.network.</span></code><code class="sig-name descname"><span class="pre">LSTM</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.LSTM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.</span></code></p>
+<p>Initialize this network as a LSTM network.</p>
+<dl class="py method">
+<dt id="mala.network.network.LSTM.forward">
+<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.LSTM.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a forward pass through the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<em>torch.Tensor</em>) – Input array for which the forward pass is to be performed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>predicted_array</strong> – Predicted outputs of array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.network.LSTM.init_hidden">
+<code class="sig-name descname"><span class="pre">init_hidden</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.LSTM.init_hidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize hidden state and cell state to zero when called and assigns specific sizes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>Hidden state and cell state</strong> – initialised to zeros.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="mala.network.network.Network">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.network.</span></code><code class="sig-name descname"><span class="pre">Network</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.Network" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.network.</span></code><code class="sig-name descname"><span class="pre">Network</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.Network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.</span></code></p>
 <p>Central network class for this framework, based on pytorch.nn.Module.</p>
 <dl class="field-list simple">
@@ -996,19 +1096,8 @@ demanding in terms of RAM.</p>
 
 <dl class="py method">
 <dt id="mala.network.network.Network.forward">
-<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.Network.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perform a forward pass through the network.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>inputs</strong> (<em>torch.Tensor</em>) – Input array for which the forward pass is to be performed.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>predicted_array</strong> – Predicted outputs of array.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>torch.Tensor</p>
-</dd>
-</dl>
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.Network.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract method. To be implemented by the derived class.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1045,6 +1134,63 @@ functionalities AND possibly own saving needs.</p>
 <dd class="field-odd"><p><strong>path_to_file</strong> (<em>string</em>) – Path to the file in which the network should be saved.</p>
 </dd>
 </dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.network.network.PositionalEncoding">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.network.</span></code><code class="sig-name descname"><span class="pre">PositionalEncoding</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.PositionalEncoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.</span></code></p>
+<p>Injects some information of relative/absolute position of token in a sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_model</strong> (<em>int</em>) – input dimension of the model</p></li>
+<li><p><strong>dropout</strong> (<em>float</em>) – dropout rate</p></li>
+<li><p><strong>max_len</strong> (<em>int</em>) – maximum length of the input sequence</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.network.network.PositionalEncoding.forward">
+<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.PositionalEncoding.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a forward pass through the network.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.network.network.TransformerNet">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.network.network.</span></code><code class="sig-name descname"><span class="pre">TransformerNet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.TransformerNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.</span></code></p>
+<p>Initialize this network as the transformer net.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this neural network.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.network.network.TransformerNet.forward">
+<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.TransformerNet.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a forward pass through the network.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.network.TransformerNet.generate_square_subsequent_mask">
+<code class="sig-name descname"><span class="pre">generate_square_subsequent_mask</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.TransformerNet.generate_square_subsequent_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a mask so that only the current and previous tokens are visible to the transformer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>size</strong> (<em>int</em>) – size of the mask</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.network.TransformerNet.init_weights">
+<code class="sig-name descname"><span class="pre">init_weights</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.network.TransformerNet.init_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialise weights with a uniform random distribution in the range (-initrange, initrange).</p>
 </dd></dl>
 
 </dd></dl>
@@ -1263,7 +1409,7 @@ applications it might make sense to specify something different.</p></li>
 </dl>
 <dl class="py method">
 <dt id="mala.network.trainer.Trainer.checkpoint_exists">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">checkpoint_exists</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.trainer.Trainer.checkpoint_exists" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">checkpoint_exists</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.trainer.Trainer.checkpoint_exists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if a hyperparameter optimization checkpoint exists.</p>
 <p>Returns True if it does.</p>
 <dl class="field-list simple">
