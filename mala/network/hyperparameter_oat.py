@@ -40,6 +40,7 @@ class HyperparameterOAT(JSONSerializable):
 
     @property
     def num_choices(self):
+        """Get the number of choices for this hyperparameter."""
         return len(self.choices)
 
     @num_choices.setter
