@@ -440,7 +440,7 @@ class DataHandler:
 
             # We have to cut xyz information, if we have xyz information in
             # the descriptors.
-            if self.parameters.descriptors_contain_xyz:
+            if self.descriptor_calculator.descriptors_contain_xyz:
                 # Remove first 3 elements of descriptors, as they correspond
                 # to the x,y and z information.
                 tmp = tmp[:, :, :, 3:]
@@ -587,7 +587,7 @@ class DataHandler:
                                                     input_npy_directory,
                                                     snapshot.input_npy_file),
                                                     mmapmode='r')
-                    if self.parameters.descriptors_contain_xyz:
+                    if self.descriptor_calculator.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
 
                     # The scalers will later operate on torch Tensors so we
@@ -673,7 +673,7 @@ class DataHandler:
                                                 input_npy_directory,
                                                 snapshot.input_npy_file),
                                                 mmapmode='r')
-                if self.parameters.descriptors_contain_xyz:
+                if self.descriptor_calculator.descriptors_contain_xyz:
                     tmp = tmp[:, :, :, 3:]
                 tmp = np.array(tmp)
                 tmp *= self.descriptor_calculator. \
@@ -738,13 +738,13 @@ class DataHandler:
                 self.input_data_scaler, self.output_data_scaler,
                 self.descriptor_calculator, self.target_calculator,
                 self.grid_dimension, self.grid_size,
-                self.parameters.descriptors_contain_xyz, self.use_horovod)
+                self.use_horovod)
             self.validation_data_set = LazyLoadDataset(
                 self.get_input_dimension(), self.get_output_dimension(),
                 self.input_data_scaler, self.output_data_scaler,
                 self.descriptor_calculator, self.target_calculator,
                 self.grid_dimension, self.grid_size,
-                self.parameters.descriptors_contain_xyz, self.use_horovod)
+                self.use_horovod)
 
             if self.nr_test_data != 0:
                 self.test_data_set = LazyLoadDataset(
@@ -752,7 +752,7 @@ class DataHandler:
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
                     self.grid_dimension, self.grid_size,
-                    self.parameters.descriptors_contain_xyz, self.use_horovod,
+                    self.use_horovod,
                     input_requires_grad=True)
 
             # Add snapshots to the lazy loading data sets.
@@ -793,7 +793,7 @@ class DataHandler:
                         __load_from_npy_file(os.path.join(snapshot.input_npy_directory,
                                                           snapshot.input_npy_file),
                                              mmapmode='r')
-                    if self.parameters.descriptors_contain_xyz:
+                    if self.descriptor_calculator.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
                     tmp = np.array(tmp)
                     tmp *= self.descriptor_calculator.\
@@ -890,7 +890,8 @@ class DataHandler:
                                        units=None):
         """Convert a raw numpy array containing into the correct units."""
         if data_type == "in":
-            if data_type == "in" and self.parameters.descriptors_contain_xyz:
+            if data_type == "in" and self.descriptor_calculator.\
+                    descriptors_contain_xyz:
                 numpy_array = numpy_array[:, :, :, 3:]
             if units is not None:
                 numpy_array *= self.descriptor_calculator.convert_units(1,

@@ -146,7 +146,7 @@ class DataConverter:
 
             # Cut the xyz information if requested by the user.
             if get_rank() == 0:
-                if self.parameters.descriptors_contain_xyz is False:
+                if self.descriptor_calculator.descriptors_contain_xyz is False:
                     tmp_input = tmp_input[:, :, :, 3:]
 
         else:

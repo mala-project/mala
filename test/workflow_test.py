@@ -46,7 +46,7 @@ class TestFullWorkflow:
         test_parameters.descriptors.descriptor_type = "SNAP"
         test_parameters.descriptors.twojmax = 6
         test_parameters.descriptors.rcutfac = 4.67637
-        test_parameters.data.descriptors_contain_xyz = True
+        test_parameters.descriptors.descriptors_contain_xyz = True
         test_parameters.targets.target_type = "LDOS"
         test_parameters.targets.ldos_gridsize = 11
         test_parameters.targets.ldos_gridspacing_ev = 2.5
