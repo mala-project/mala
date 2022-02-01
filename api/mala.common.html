@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-88-g56bc5aa
+                v0.2.0-90-gcb2fa73
               </div>
             
           
@@ -636,19 +636,6 @@ shows itself.</p>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for loading and preprocessing data.</p>
 <dl class="py attribute">
-<dt id="mala.common.parameters.ParametersData.descriptors_contain_xyz">
-<code class="sig-name descname"><span class="pre">descriptors_contain_xyz</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.descriptors_contain_xyz" title="Permalink to this definition">¶</a></dt>
-<dd><p>Legacy option. If True, it is assumed that the first three entries of
-the descriptor vector are the xyz coordinates and they are cut from the
-descriptor vector. If False, no such cutting is peformed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt id="mala.common.parameters.ParametersData.snapshot_directories_list">
 <code class="sig-name descname"><span class="pre">snapshot_directories_list</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.snapshot_directories_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of all added snapshots.</p>
@@ -836,6 +823,32 @@ file found in this repository will be used (recommended).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersDescriptors.acsd_points">
+<code class="sig-name descname"><span class="pre">acsd_points</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.acsd_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of points used to calculate the ACSD.
+The actual number of distances will be acsd_points x acsd_points,
+since the cosine similarity is only defined for pairs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersDescriptors.descriptors_contain_xyz">
+<code class="sig-name descname"><span class="pre">descriptors_contain_xyz</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.descriptors_contain_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Legacy option. If True, it is assumed that the first three entries of
+the descriptor vector are the xyz coordinates and they are cut from the
+descriptor vector. If False, no such cutting is peformed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>

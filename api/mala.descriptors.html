@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-88-g56bc5aa
+                v0.2.0-90-gcb2fa73
               </div>
             
           
@@ -326,6 +326,35 @@ objects, the atoms are explicitly in the unit cell.</p>
 <dd class="field-odd"><p>ase.atoms</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.descriptors.descriptor_base.DescriptorBase.get_acsd">
+<code class="sig-name descname"><span class="pre">get_acsd</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptor_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.get_acsd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the ACSD for given descriptors and LDOS data.</p>
+<p>ACSD stands for average cosine similarity distance and is a metric
+of how well the descriptors capture the local environment to a
+degree where similar vectors result in simlar LDOS vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>descriptor_data</strong> (<em>numpy.ndarray</em>) – Array containing the descriptors.</p></li>
+<li><p><strong>ldos_data</strong> (<em>numpy.ndarray</em>) – Array containing the LDOS.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>acsd</strong> – The average cosine similarity distance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.descriptors.descriptor_base.DescriptorBase.descriptors_contain_xyz">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">descriptors_contain_xyz</span></code><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.descriptors_contain_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether descriptor vectors will contain xyz coordinates.</p>
 </dd></dl>
 
 </dd></dl>
