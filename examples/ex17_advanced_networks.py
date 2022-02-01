@@ -5,7 +5,7 @@ from data_repo_path import get_data_repo_path
 data_path = os.path.join(get_data_repo_path(), "Al36/")
 
 """
-ex13_advanced_networks.py: Shows how advanced network models such as 
+ex17_advanced_networks.py: Shows how advanced network models such as 
 lstm, gru and transformer can be used for prediction.
 """
 
