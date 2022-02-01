@@ -65,7 +65,7 @@ class Trainer(Runner):
             self.tensor_board = SummaryWriter(self.parameters.visualisation_dir)
 
     @classmethod
-    def checkpoint_exists(cls, checkpoint_name, use_pkl_checkpoints=False):
+    def checkpoint_exists(cls, checkpoint_name):
         """
         Check if a hyperparameter optimization checkpoint exists.
 
@@ -503,7 +503,7 @@ class Trainer(Runner):
 
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
-        prediction = network(input_data)
+        prediction = network.forward(input_data)
         loss = network.calculate_loss(prediction, target_data)
         loss.backward()
         self.optimizer.step()
@@ -646,10 +646,8 @@ class Trainer(Runner):
             + "_iscaler.pkl"
         oscaler_name = self.parameters.checkpoint_name \
             + "_oscaler.pkl"
-        if self.use_pkl_checkpoints:
-            param_name = self.parameters.checkpoint_name + "_params.pkl"
-        else:
-            param_name = self.parameters.checkpoint_name + "_params.json"
+        param_name = self.parameters.checkpoint_name \
+            + "_params.pkl"
         optimizer_name = self.parameters.checkpoint_name \
             + "_optimizer.pth"
 

@@ -257,7 +257,7 @@ class DataHandler:
         # Build Datasets.
         printout("Build datasets.")
         self.__build_datasets()
-        printout("Build dataset done.")
+        printout("Build dataset: Done.")
 
         # Wait until all ranks are finished with data preparation.
         if self.use_horovod:
