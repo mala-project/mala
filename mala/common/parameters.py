@@ -420,6 +420,7 @@ class ParametersData(ParametersBase):
         If use_clustering is True, this is the ratio of training data used
         for sampling per snapshot (according to clustering then, of course).
     """
+
     def __init__(self):
         super(ParametersData, self).__init__()
         self.snapshot_directories_list = []

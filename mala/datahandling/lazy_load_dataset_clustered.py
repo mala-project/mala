@@ -136,7 +136,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         self.total_size = int(self.number_of_snapshots*self.grid_size *
                               self.sample_ratio)
 
-    def cluster_snapshot(self, snapshot_idx):
+    def __cluster_snapshot(self, snapshot_idx):
 
         # Load the data into memory, and transform it as necessary.
         # I know, the here-and-there transform via torch is ugly, but
@@ -200,12 +200,9 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
 
     def cluster_dataset(self):
         """
-        Only call this function AFTER all the snapshots have been added and
-        scaled.
+        Calculate clusters for dataset (individually per snapshot.
 
-        Returns
-        -------
-
+        IMPORTANT: Only call this function AFTER all snapshots were added.
         """
         # Clustered inputs holds the cluster a snapshot belongs to for every
         # input of that snapshot.
@@ -218,7 +215,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
             # grid point would belong to.
             printout("Clustering file %d" % idx)
             self.clustered_inputs[idx, :] = \
-                self.cluster_snapshot(idx)
+                self.__cluster_snapshot(idx)
 
             # Count how many samples we have per cluster, per snapshot.
             for i in range(0, self.number_of_clusters):
@@ -311,7 +308,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
             self.sampling_idxs[i] = np.random.permutation(np.arange(self.samples_per_cluster[self.currently_loaded_file, i], dtype=np.int64))
             self.current_sampling_idx[i] = 0
 
-    def get_clustered_idx(self, idx, file_idx):
+    def __get_clustered_idx(self, idx, file_idx):
         cluster = int(idx % self.number_of_clusters)
         num_cluster_samples = \
             self.samples_per_cluster[self.currently_loaded_file, cluster]
@@ -362,7 +359,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         if file_index != self.currently_loaded_file:
             self.get_new_data(file_index)
 
-        sample_idx = self.get_clustered_idx(idx, file_index)
+        sample_idx = self.__get_clustered_idx(idx, file_index)
         return self.input_data[sample_idx], \
             self.output_data[sample_idx]
 
