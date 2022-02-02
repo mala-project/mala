@@ -271,10 +271,10 @@ class TestLazyLoading:
         # Time:  3.2193074226379395
 
         for r in results:
-            printout("Test: ", r[0], ", ", r[1])
-            printout("Initial loss: ", r[2])
-            printout("Final loss: ", r[3])
-            printout("Time: ", r[4])
+            printout("Test: ", r[0], ", ", r[1], min_verbosity=0)
+            printout("Initial loss: ", r[2], min_verbosity=0)
+            printout("Final loss: ", r[3], min_verbosity=0)
+            printout("Time: ", r[4], min_verbosity=0)
             diff.append(r[3] - r[2])
             
         diff = np.array(diff)

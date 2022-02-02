@@ -55,7 +55,7 @@ class Density(TargetBase):
         units : string
             Units the density is saved in. Usually none.
         """
-        printout("Reading density from .cube file in ", directory)
+        printout("Reading density from .cube file in ", directory, min_verbosity=0)
         data, meta = read_cube(os.path.join(directory, file_name))
         return data
 
@@ -321,13 +321,14 @@ class Density(TargetBase):
 
         if Density.te_mutex is False:
             printout("MALA: Starting QuantumEspresso to get density-based"
-                     " energy contributions.")
+                     " energy contributions.", min_verbosity=0)
             te.initialize()
             Density.te_mutex = True
-            printout("MALA: QuantumEspresso setup done.")
+            printout("MALA: QuantumEspresso setup done.", min_verbosity=0)
         else:
             printout("MALA: QuantumEspresso is already running. Except for"
-                     " the atomic positions, no new parameters will be used.")
+                     " the atomic positions, no new parameters will be used.",
+                     min_verbosity=0)
 
         # Before we proceed, some sanity checks are necessary.
         # Is the calculation spinpolarized?

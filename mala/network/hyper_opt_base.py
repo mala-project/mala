@@ -187,7 +187,8 @@ class HyperOptBase(ABC):
         new_hyperopt : HyperOptOptuna
             The hyperparameter optimizer reconstructed from the checkpoint.
         """
-        printout("Loading hyperparameter optimization from checkpoint.")
+        printout("Loading hyperparameter optimization from checkpoint.",
+                 min_verbosity=0)
         # The names are based upon the checkpoint name.
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
@@ -202,7 +203,7 @@ class HyperOptBase(ABC):
         loaded_iscaler = DataScaler.load_from_file(iscaler_name)
         loaded_oscaler = DataScaler.load_from_file(oscaler_name)
 
-        printout("Preparing data used for last checkpoint.")
+        printout("Preparing data used for last checkpoint.", min_verbosity=1)
         # Create a new data handler and prepare the data.
         if no_data is True:
             loaded_params.data.use_lazy_loading = True

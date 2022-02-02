@@ -460,7 +460,7 @@ class TransformerNet(Network):
                 self.params.num_heads += 1
 
             printout("Adjusting number of heads from", old_num_heads,
-            "to", self.params.num_heads)
+            "to", self.params.num_heads, min_verbosity=1)
 
         self.src_mask = None
         self.pos_encoder = PositionalEncoding(self.params.layer_sizes[0], self.params.dropout)

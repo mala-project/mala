@@ -127,7 +127,7 @@ class Trainer(Runner):
         new_trainer : Trainer
             The trainer reconstructed from the checkpoint.
         """
-        printout("Loading training run from checkpoint.")
+        printout("Loading training run from checkpoint.", min_verbosity=0)
         # The names are based upon the checkpoint name.
         network_name = checkpoint_name + "_network.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
@@ -145,7 +145,7 @@ class Trainer(Runner):
         loaded_network = Network.load_from_file(loaded_params,
                                                 network_name)
 
-        printout("Preparing data used for last checkpoint.")
+        printout("Preparing data used for last checkpoint.", min_verbosity=0)
         # Create a new data handler and prepare the data.
         new_datahandler = DataHandler(loaded_params,
                                       input_data_scaler=loaded_iscaler,
@@ -214,10 +214,11 @@ class Trainer(Runner):
             if self.data.test_data_set is not None:
                 tloss = self.__average_validation(tloss, 'average_loss')
 
-        if self.parameters.verbosity:
-            printout("Initial Guess - validation data loss: ", vloss)
-            if self.data.test_data_set is not None:
-                printout("Initial Guess - test data loss: ", tloss)
+        printout("Initial Guess - validation data loss: ", vloss,
+                 min_verbosity=1)
+        if self.data.test_data_set is not None:
+            printout("Initial Guess - test data loss: ", tloss,
+                     min_verbosity=1)
 
         # Save losses for later use.
         self.initial_validation_loss = vloss
@@ -266,8 +267,9 @@ class Trainer(Runner):
                                             during_training_metric)
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
-            if self.parameters.verbosity:
-                printout("Epoch: ", epoch, "validation data loss: ", vloss)
+            printout("Epoch: ", epoch, "validation data loss: ", vloss,
+                     min_verbosity=1)
+
 
             #summary_writer tensor board
             if self.parameters.visualisation:
@@ -305,16 +307,14 @@ class Trainer(Runner):
                     vloss_old = vloss
                 else:
                     self.patience_counter += 1
-                    if self.parameters.verbosity:
-                        printout("Validation accuracy has not improved "
-                                 "enough.")
+                    printout("Validation accuracy has not improved "
+                             "enough.", min_verbosity=1)
                     if self.patience_counter >= self.parameters.\
                             early_stopping_epochs:
-                        if self.parameters.verbosity:
-                            printout("Stopping the training, validation "
-                                     "accuracy has not improved for",
-                                     self.patience_counter,
-                                     "epochs.")
+                        printout("Stopping the training, validation "
+                                 "accuracy has not improved for",
+                                 self.patience_counter,
+                                 "epochs.", min_verbosity=1)
                         self.last_epoch = epoch
                         break
 
@@ -323,14 +323,14 @@ class Trainer(Runner):
                 checkpoint_counter += 1
                 if checkpoint_counter >= \
                         self.parameters.checkpoints_each_epoch:
-                    printout("Checkpointing training.")
+                    printout("Checkpointing training.", min_verbosity=0)
                     self.last_epoch = epoch
                     self.last_loss = vloss_old
                     self.__create_training_checkpoint()
                     checkpoint_counter = 0
 
-            if self.parameters.verbosity:
-                printout("Time for epoch[s]:", time.time() - start_time)
+            printout("Time for epoch[s]:", time.time() - start_time,
+                     min_verbosity=2)
 
         ############################
         # CALCULATE FINAL METRICS
@@ -349,7 +349,7 @@ class Trainer(Runner):
 
         # Calculate final loss.
         self.final_validation_loss = vloss
-        printout("Final validation data loss: ", vloss)
+        printout("Final validation data loss: ", vloss, min_verbosity=0)
 
         tloss = float("inf")
         if self.data.test_data_set is not None:
@@ -359,10 +359,8 @@ class Trainer(Runner):
                                             after_before_training_metric)
             if self.parameters_full.use_horovod:
                 tloss = self.__average_validation(tloss, 'average_loss')
-            printout("Final test data loss: ", tloss)
+            printout("Final test data loss: ", tloss, min_verbosity=0)
         self.final_test_loss = tloss
-
-        
 
     def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""
@@ -374,7 +372,7 @@ class Trainer(Runner):
         if self.parameters_full.use_horovod:
             if hvd.size() > 1:
                 printout("Rescaling learning rate because multiple workers are"
-                         " used for training.")
+                         " used for training.", min_verbosity=1)
                 self.parameters.learning_rate = self.parameters.learning_rate \
                     * hvd.size()
 

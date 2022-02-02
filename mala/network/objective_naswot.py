@@ -86,12 +86,12 @@ class ObjectiveNASWOT(ObjectiveBase):
                 surrogate_loss = surrogate_loss.cpu().detach().numpy().astype(
                     np.float64)
             except RuntimeError:
-                printout("Got a NaN, ignoring sample.")
+                printout("Got a NaN, ignoring sample.", min_verbosity=1)
             surrogate_losses.append(surrogate_loss)
 
         if self.params.hyperparameters.number_training_per_trial > 1:
-            printout("Losses from multiple runs are: ")
-            printout(surrogate_losses)
+            printout("Losses from multiple runs are: ", min_verbosity=2)
+            printout(surrogate_losses, min_verbosity=2)
 
         if self.params.hyperparameters.trial_ensemble_evaluation == "mean":
             return np.mean(surrogate_losses)

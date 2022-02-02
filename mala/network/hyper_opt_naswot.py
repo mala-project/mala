@@ -54,7 +54,7 @@ class HyperOptNASWOT(HyperOptBase):
         for idx, par in enumerate(self.params.hyperparameters.hlist):
             if par.name == "mini_batch_size":
                 printout("Removing mini batch size from hyperparameter list, "
-                         "because NASWOT is used.")
+                         "because NASWOT is used.", min_verbosity=0)
                 self.params.hyperparameters.hlist.pop(idx)
 
         # Ideally, this type of HO is called with a list of trials for which
@@ -63,7 +63,8 @@ class HyperOptNASWOT(HyperOptBase):
         if self.trial_list is None:
             printout("No trial list provided, one will be created using all "
                      "possible permutations of hyperparameters. "
-                     "The following hyperparameters will be ignored:")
+                     "The following hyperparameters will be ignored:",
+                     min_verbosity=0)
             printout(self.ignored_hyperparameters)
             self.trial_list = self.__all_combinations()
 
@@ -76,7 +77,8 @@ class HyperOptNASWOT(HyperOptBase):
         self.objective = ObjectiveNASWOT(self.params, self.data_handler,
                                          trial_type)
         printout("Starting NASWOT hyperparameter optimization,",
-                 len(self.trial_list), "trials will be performed.")
+                 len(self.trial_list), "trials will be performed.",
+                 min_verbosity=0)
 
         self.trial_losses = []
         for idx, row in enumerate(self.trial_list):
@@ -88,7 +90,7 @@ class HyperOptNASWOT(HyperOptBase):
             printout("Trial number", idx,
                      "finished with:", self.trial_losses[idx],
                      ", best is trial", best_trial[0],
-                     "with", best_trial[1])
+                     "with", best_trial[1], min_verbosity=0)
 
         # Return the best loss value we could achieve.
         return self.get_best_trial_results()[1]

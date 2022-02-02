@@ -63,7 +63,6 @@ class LDOS(TargetBase):
         elif in_units == "1/Ry":
             return array * (1/Rydberg)
         else:
-            printout(in_units)
             raise Exception("Unsupported unit for LDOS.")
 
     @staticmethod
@@ -91,7 +90,6 @@ class LDOS(TargetBase):
         elif out_units == "1/Ry":
             return array * Rydberg
         else:
-            printout(out_units)
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_cube(self, file_name_scheme, directory, units="1/eV",
@@ -139,7 +137,7 @@ class LDOS(TargetBase):
         # Iterate over the amount of specified LDOS input files.
         # QE is a Fortran code, so everything is 1 based.
         printout("Reading "+str(self.parameters.ldos_gridsize) +
-                 " LDOS files from"+directory+".")
+                 " LDOS files from"+directory+".", min_verbosity=0)
         ldos_data = None
         if self.parameters._configuration["mpi"]:
             local_size = int(np.floor(self.parameters.ldos_gridsize /

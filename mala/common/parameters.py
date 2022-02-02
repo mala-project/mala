@@ -22,7 +22,7 @@ except ModuleNotFoundError:
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
-    set_mpi_status, get_rank
+    set_mpi_status, get_rank, set_current_verbosity
 from mala.common.json_serializable import JSONSerializable
 
 
@@ -48,9 +48,11 @@ class ParametersBase(JSONSerializable):
         for v in vars(self):
             if v != "_configuration":
                 if v[0] == "_":
-                    printout(indent + '%-15s: %s' % (v[1:], getattr(self, v)))
+                    printout(indent + '%-15s: %s' % (v[1:], getattr(self, v)),
+                             min_verbosity=0)
                 else:
-                    printout(indent + '%-15s: %s' % (v, getattr(self, v)))
+                    printout(indent + '%-15s: %s' % (v, getattr(self, v)),
+                             min_verbosity=0)
 
     def _update_gpu(self, new_gpu):
         self._configuration["gpu"] = new_gpu
@@ -435,9 +437,6 @@ class ParametersRunning(ParametersBase):
     max_number_epochs : int
         Maximum number of epochs to train for. Default: 100.
 
-    verbosity : bool
-        If True, training output is shown during training. Default: True.
-
     mini_batch_size : int
         Size of the mini batch for the optimization algorihm. Default: 10.
 
@@ -517,7 +516,6 @@ class ParametersRunning(ParametersBase):
         self.trainingtype = "SGD"
         self.learning_rate = 0.5
         self.max_number_epochs = 100
-        self.verbosity = True
         self.mini_batch_size = 10
         self.weight_decay = 0
         self.early_stopping_epochs = 0
@@ -782,15 +780,17 @@ class ParametersHyperparameterOptimization(ParametersBase):
                 if v != "hlist":
                     if v[0] == "_":
                         printout(indent + '%-15s: %s' % (
-                        v[1:], getattr(self, v)))
+                        v[1:], getattr(self, v)), min_verbosity=0)
                     else:
                         printout(
-                            indent + '%-15s: %s' % (v, getattr(self, v)))
+                            indent + '%-15s: %s' % (v, getattr(self, v)),
+                            min_verbosity=0)
                 if v == "hlist":
                     i = 0
                     for hyp in self.hlist:
                         printout(indent + '%-15s: %s' %
-                                 ("hyperparameter #"+str(i), hyp.name))
+                                 ("hyperparameter #"+str(i), hyp.name),
+                                 min_verbosity=0)
                         i += 1
 
 
@@ -859,11 +859,35 @@ class Parameters:
         self.hyperparameters = ParametersHyperparameterOptimization()
         self.debug = ParametersDebug()
 
+        # Attributes.
+        self.manual_seed = None
+
         # Properties
         self.use_horovod = False
         self.use_gpu = False
         self.use_mpi = False
-        self.manual_seed = None
+        self.verbosity = 1
+
+    @property
+    def verbosity(self):
+        """
+        Control the level of output for MALA.
+
+        The following options are available:
+        0: "low" - only essential output is given. Optimal for e.g.
+           hyperparameter optimization, training runs that you are confident
+           will work, etc.
+        1: "medium" - most diagnostic output will be given, but especially
+           debug information will be surpressed. Default option.
+        2: "high" - all information will be printed.
+        """
+        return self._verbosity
+
+    @verbosity.setter
+    def verbosity(self, value):
+        self._verbosity = value
+        set_current_verbosity(value)
+
 
     @property
     def use_gpu(self):
@@ -926,7 +950,7 @@ class Parameters:
 
     def show(self):
         """Print name and values of all attributes of this object."""
-        printout("--- " + self.__doc__.split("\n")[1] + " ---")
+        printout("--- " + self.__doc__.split("\n")[1] + " ---", min_verbosity=0)
 
         # Two for-statements so that global parameters are shown on top.
         for v in vars(self):
@@ -934,13 +958,16 @@ class Parameters:
                 pass
             else:
                 if v[0] == "_":
-                    printout('%-15s: %s' % (v[1:], getattr(self, v)))
+                    printout('%-15s: %s' % (v[1:], getattr(self, v)),
+                             min_verbosity=0)
                 else:
-                    printout('%-15s: %s' % (v, getattr(self, v)))
+                    printout('%-15s: %s' % (v, getattr(self, v)),
+                             min_verbosity=0)
         for v in vars(self):
             if isinstance(getattr(self, v), ParametersBase):
                 parobject = getattr(self, v)
-                printout("--- " + parobject.__doc__.split("\n")[1] + " ---")
+                printout("--- " + parobject.__doc__.split("\n")[1] + " ---",
+                         min_verbosity=0)
                 parobject.show("\t")
 
     def save(self, filename, save_format="json"):
