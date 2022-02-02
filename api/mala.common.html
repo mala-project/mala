@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-132-g421fd9d
+                v0.2.0-135-g4e4ca94
               </div>
             
           
@@ -303,14 +303,29 @@ in the json file.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.printout">
-<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">printout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.printout" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">printout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.printout" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interface to built-in “print” for parallel runs. Can be used like print.</p>
+<p>Linked to the verbosity option in parameters. By default, all messages are
+treated as high level messages and will be printed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>values</strong> – Values to be printed.</p></li>
 <li><p><strong>sep</strong> (<em>string</em>) – Separator between printed values.</p></li>
+<li><p><strong>min_verbosity</strong> (<em>int</em>) – Minimum number of verbosity for this output to still be printed.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.common.parallelizer.set_current_verbosity">
+<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">set_current_verbosity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_current_verbosity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the verbosity used for the printout statements.</p>
+<p>Should only be called by the parameters file, not by the user directly!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>new_value</strong> (<em>int</em>) – New verbosity.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -575,6 +590,20 @@ Currently only supported file format is “pickle”.</p></li>
 <dt id="mala.common.parameters.Parameters.use_mpi">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">use_mpi</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.use_mpi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Control whether or not horovod is used for parallel training.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.verbosity">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">verbosity</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.verbosity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control the level of output for MALA.</p>
+<p>The following options are available:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>1: “low”, only essential output will be printed</p></li>
+<li><p>1: “medium”, most diagnostic output will be printed. (Default)</p></li>
+<li><p>2: “high”, all information will be printed.</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 </dd></dl>
@@ -1130,17 +1159,6 @@ inference case.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="mala.common.parameters.ParametersRunning.verbosity">
-<code class="sig-name descname"><span class="pre">verbosity</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.verbosity" title="Permalink to this definition">¶</a></dt>
-<dd><p>If True, training output is shown during training. Default: True.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
