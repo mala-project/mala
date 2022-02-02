@@ -401,8 +401,25 @@ class ParametersData(ParametersBase):
         If True, data is lazily loaded, i.e. only the snapshots that are
         currently needed will be kept in memory. This greatly reduces memory
         demands, but adds additional computational time.
-    """
 
+    use_clustering : bool
+        If True, and use_lazy_loading is True as well, the data is clustered,
+        i.e. not the entire training data is used by rather only a subset
+        which is determined by a clustering algorithm.
+
+    numbers_of_cluster : int
+        If use_clustering is True, this is the number of clusters used per
+        snapshot.
+
+    train_ratio : float
+        If use_clustering is True, this is the ratio of training data used
+        to train the encoder for the clustering.
+
+
+    sample_ration : float
+        If use_clustering is True, this is the ratio of training data used
+        for sampling per snapshot (according to clustering then, of course).
+    """
     def __init__(self):
         super(ParametersData, self).__init__()
         self.snapshot_directories_list = []
@@ -412,6 +429,10 @@ class ParametersData(ParametersBase):
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
+        self.use_clustering = False
+        self.numbers_of_cluster = 0
+        self.train_ratio = 0.0
+        self.sample_ration = 0.0
 
 
 class ParametersRunning(ParametersBase):
