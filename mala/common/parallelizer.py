@@ -17,14 +17,14 @@ current_verbosity = 0
 
 def set_current_verbosity(new_value):
     """
+    Set the verbosity used for the printout statements.
+
+    Should only be called by the parameters file, not by the user directly!
 
     Parameters
     ----------
-    new_value
-
-    Returns
-    -------
-
+    new_value : int
+        New verbosity.
     """
     global current_verbosity
     current_verbosity = new_value

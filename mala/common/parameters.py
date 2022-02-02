@@ -874,12 +874,12 @@ class Parameters:
         Control the level of output for MALA.
 
         The following options are available:
-        0: "low" - only essential output is given. Optimal for e.g.
-           hyperparameter optimization, training runs that you are confident
-           will work, etc.
-        1: "medium" - most diagnostic output will be given, but especially
-           debug information will be surpressed. Default option.
-        2: "high" - all information will be printed.
+
+            - 1: "low", only essential output will be printed
+            - 1: "medium", most diagnostic output will be printed. (Default)
+            - 2: "high", all information will be printed.
+
+
         """
         return self._verbosity
 
