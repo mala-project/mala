@@ -110,7 +110,7 @@ class SNAP(DescriptorBase):
         """
         self.in_format_ase = "espresso-out"
         printout("Calculating SNAP descriptors from", qe_out_file, "at",
-                  qe_out_directory)
+                 qe_out_directory, min_verbosity=0)
         # We get the atomic information by using ASE.
         infile = os.path.join(qe_out_directory, qe_out_file)
         atoms = ase.io.read(infile, format=self.in_format_ase)

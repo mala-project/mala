@@ -222,7 +222,8 @@ class DataConverter:
                                          output_path=os.path.join(save_path,
                                          snapshot_name+".out.npy"),
                                          use_memmap=memmap)
-            printout("Saved snapshot", snapshot_number, "at ", save_path)
+            printout("Saved snapshot", snapshot_number, "at ", save_path,
+                     min_verbosity=0)
 
             if get_rank() == 0:
                 if self.parameters._configuration["mpi"]:

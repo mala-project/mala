@@ -158,7 +158,7 @@ class TestTrainingCheckpoint:
                                   "Al_debug_2k_nr2.out.npy", data_path,
                                   output_units="1/Ry")
         data_handler.prepare_data()
-        printout("Read data: DONE.")
+        printout("Read data: DONE.", min_verbosity=0)
 
         ####################
         # NETWORK SETUP

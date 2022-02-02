@@ -71,7 +71,7 @@ class DataScaler:
         if "feature-wise" in self.typestring:
             self.feature_wise = True
         if self.scale_standard is False and self.scale_normal is False:
-            printout("No data rescaling will be performed.")
+            printout("No data rescaling will be performed.", min_verbosity=1)
             return
         if self.scale_standard is True and self.scale_normal is True:
             raise Exception("Invalid input data rescaling.")

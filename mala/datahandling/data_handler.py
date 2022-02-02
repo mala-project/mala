@@ -228,9 +228,10 @@ class DataHandler:
         # Do a consistency check of the snapshots so that we don't run into
         # an error later. If there is an error, check_snapshots() will raise
         # an exception.
-        printout("Checking the snapshots and your inputs for consistency.")
+        printout("Checking the snapshots and your inputs for consistency.",
+                 min_verbosity=1)
         self.__check_snapshots()
-        printout("Consistency check successful.")
+        printout("Consistency check successful.", min_verbosity=0)
 
         # If the DataHandler is used for inference, i.e. no training or
         # validation snapshots have been provided,
@@ -246,18 +247,19 @@ class DataHandler:
 
         # Parametrize the scalers, if needed.
         if reparametrize_scaler:
-            printout("Initializing the data scalers.")
+            printout("Initializing the data scalers.", min_verbosity=1)
             self.__parametrize_scalers()
-            printout("Data scalers initialized.")
+            printout("Data scalers initialized.", min_verbosity=0)
         else:
-            printout("Data scalers already initilized, loading data to RAM.")
+            printout("Data scalers already initilized, loading data to RAM.",
+                     min_verbosity=0)
             if self.parameters.use_lazy_loading is False:
                 self.__load_training_data_into_ram()
 
         # Build Datasets.
-        printout("Build datasets.")
+        printout("Build datasets.", min_verbosity=1)
         self.__build_datasets()
-        printout("Build dataset: Done.")
+        printout("Build dataset: Done.", min_verbosity=0)
 
         # Wait until all ranks are finished with data preparation.
         if self.use_horovod:
@@ -433,7 +435,7 @@ class DataHandler:
             ####################
 
             printout("Checking descriptor file ", snapshot.input_npy_file,
-                     "at", snapshot.input_npy_directory)
+                     "at", snapshot.input_npy_directory, min_verbosity=1)
             tmp = self.__load_from_npy_file(os.path.join(snapshot.input_npy_directory,
                                                          snapshot.input_npy_file),
                                             mmapmode='r')
@@ -465,7 +467,7 @@ class DataHandler:
             ####################
 
             printout("Checking targets file ", snapshot.output_npy_file, "at",
-                     snapshot.output_npy_directory)
+                     snapshot.output_npy_directory, min_verbosity=1)
             tmp_out = self.__load_from_npy_file(os.path.join(snapshot.output_npy_directory,
                                                              snapshot.output_npy_file),
                                                 mmapmode='r')
@@ -523,15 +525,15 @@ class DataHandler:
                 printout("DataHandler prepared for inference. No training "
                          "possible with this setup. "
                          "If this is not what you wanted, please revise the "
-                         "input script.")
+                         "input script.", min_verbosity=0)
                 if self.nr_validation_snapshots != 0:
                     printout("As this DataHandler can only be used for "
                              "inference, the validation data you have "
-                             "provided will be ignored.")
+                             "provided will be ignored.", min_verbosity=1)
             if self.nr_test_snapshots == 0:
                 printout("Running MALA without test data. If this is not "
                          "what you wanted, "
-                         "please revise the input script.")
+                         "please revise the input script.", min_verbosity=0)
 
         else:
             raise Exception("Wrong parameter for data splitting provided.")
@@ -610,7 +612,7 @@ class DataHandler:
             self.__load_training_data_into_ram()
             self.input_data_scaler.fit(self.training_data_inputs)
 
-        printout("Input scaler parametrized.")
+        printout("Input scaler parametrized.", min_verbosity=1)
 
         ##################
         # Output.
@@ -655,7 +657,7 @@ class DataHandler:
             # Already loaded into RAM above.
             self.output_data_scaler.fit(self.training_data_outputs)
 
-        printout("Output scaler parametrized.")
+        printout("Output scaler parametrized.", min_verbosity=1)
 
     def __load_training_data_into_ram(self):
         """Load the training data into RAM."""

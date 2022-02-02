@@ -111,7 +111,8 @@ class DescriptorBase(ABC):
                           atoms[i].position, atol=0.001)):
                 rescaled_atoms += 1
         printout("Descriptor calculation: had to enforce periodic boundary "
-                 "conditions on", rescaled_atoms, "atoms before calculation.")
+                 "conditions on", rescaled_atoms, "atoms before calculation.",
+                 min_verbosity=2)
         return new_atoms
 
     @abstractmethod

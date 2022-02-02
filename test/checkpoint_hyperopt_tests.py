@@ -97,7 +97,7 @@ class TestHyperoptCheckpointing:
                                   "Al_debug_2k_nr2.out.npy", data_path,
                                   output_units="1/Ry")
         data_handler.prepare_data()
-        printout("Read data: DONE.")
+        printout("Read data: DONE.", min_verbosity=0)
 
         ####################
         # HYPERPARAMETER OPTIMIZATION
@@ -128,7 +128,7 @@ class TestHyperoptCheckpointing:
                                              choices=["ReLU", "Sigmoid"])
 
         # Perform hyperparameter optimization.
-        printout("Starting Hyperparameter optimization.")
+        printout("Starting Hyperparameter optimization.", min_verbosity=0)
 
         return test_hp_optimizer
 

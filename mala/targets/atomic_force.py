@@ -59,5 +59,4 @@ class AtomicForce(TargetBase):
         elif in_units == "Ry/Bohr":
             return array * (Rydberg/Bohr)
         else:
-            printout(in_units)
-            raise Exception("Unsupported unit for LDOS.")
+            raise Exception("Unsupported unit for atomic forces.")
