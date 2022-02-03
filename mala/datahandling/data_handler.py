@@ -15,6 +15,7 @@ from mala.common.parameters import Parameters, ParametersData
 from mala.datahandling.data_scaler import DataScaler
 from mala.datahandling.snapshot import Snapshot
 from mala.datahandling.lazy_load_dataset import LazyLoadDataset
+from mala.datahandling.lazy_load_dataset_clustered import LazyLoadDatasetClustered
 from mala.descriptors.descriptor_interface import DescriptorInterface
 from mala.targets.target_interface import TargetInterface
 
@@ -735,27 +736,54 @@ class DataHandler:
         if self.parameters.use_lazy_loading:
 
             # Create the lazy loading data sets.
-            self.training_data_set = LazyLoadDataset(
-                self.get_input_dimension(), self.get_output_dimension(),
-                self.input_data_scaler, self.output_data_scaler,
-                self.descriptor_calculator, self.target_calculator,
-                self.grid_dimension, self.grid_size,
-                self.use_horovod)
-            self.validation_data_set = LazyLoadDataset(
-                self.get_input_dimension(), self.get_output_dimension(),
-                self.input_data_scaler, self.output_data_scaler,
-                self.descriptor_calculator, self.target_calculator,
-                self.grid_dimension, self.grid_size,
-                self.use_horovod)
-
-            if self.nr_test_data != 0:
-                self.test_data_set = LazyLoadDataset(
+            if self.parameters.use_clustering:
+                self.training_data_set = LazyLoadDatasetClustered(
                     self.get_input_dimension(), self.get_output_dimension(),
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
                     self.grid_dimension, self.grid_size,
-                    self.use_horovod,
-                    input_requires_grad=True)
+                    self.use_horovod, self.parameters.number_of_clusters,
+                    self.parameters.train_ratio,
+                    self.parameters.sample_ratio)
+                self.validation_data_set = LazyLoadDataset(
+                    self.get_input_dimension(), self.get_output_dimension(),
+                    self.input_data_scaler, self.output_data_scaler,
+                    self.descriptor_calculator, self.target_calculator,
+                    self.grid_dimension, self.grid_size,
+                    self.use_horovod)
+
+                if self.nr_test_data != 0:
+                    self.test_data_set = LazyLoadDataset(
+                        self.get_input_dimension(),
+                        self.get_output_dimension(),
+                        self.input_data_scaler, self.output_data_scaler,
+                        self.descriptor_calculator, self.target_calculator,
+                        self.grid_dimension, self.grid_size,
+                        self.use_horovod,
+                        input_requires_grad=True)
+
+            else:
+                self.training_data_set = LazyLoadDataset(
+                    self.get_input_dimension(), self.get_output_dimension(),
+                    self.input_data_scaler, self.output_data_scaler,
+                    self.descriptor_calculator, self.target_calculator,
+                    self.grid_dimension, self.grid_size,
+                    self.use_horovod)
+                self.validation_data_set = LazyLoadDataset(
+                    self.get_input_dimension(), self.get_output_dimension(),
+                    self.input_data_scaler, self.output_data_scaler,
+                    self.descriptor_calculator, self.target_calculator,
+                    self.grid_dimension, self.grid_size,
+                    self.use_horovod)
+
+                if self.nr_test_data != 0:
+                    self.test_data_set = LazyLoadDataset(
+                        self.get_input_dimension(), self.get_output_dimension(),
+                        self.input_data_scaler, self.output_data_scaler,
+                        self.descriptor_calculator, self.target_calculator,
+                        self.grid_dimension, self.grid_size,
+                        self.use_horovod,
+                        input_requires_grad=True)
 
             # Add snapshots to the lazy loading data sets.
             i = 0
@@ -767,7 +795,8 @@ class DataHandler:
                 if self.parameters.data_splitting_snapshots[i] == "te":
                     self.test_data_set.add_snapshot_to_dataset(snapshot)
                 i += 1
-
+            if self.parameters.use_clustering:
+                self.training_data_set.cluster_dataset()
             # I don't think we need to mix them here. We can use the standard
             # ordering for the first epoch
             # and mix it up after.

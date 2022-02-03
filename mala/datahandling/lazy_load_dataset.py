@@ -51,11 +51,6 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         Size of the grid (x*y*z), i.e. the number of datapoints per
         snapshot.
 
-    descriptors_contain_xyz : bool
-        If true, then it is assumed that the first three entries of any
-        input data file are xyz-information and can be discarded.
-        Generally true, if your descriptors were calculated using MALA.
-
     use_horovod : bool
         If true, it is assumed that horovod is used.
 
