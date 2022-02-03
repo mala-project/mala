@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-135-g4e4ca94
+                v0.2.0-139-g40b69df
               </div>
             
           
@@ -780,6 +780,48 @@ demands, but adds additional computational time.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.use_clustering">
+<code class="sig-name descname"><span class="pre">use_clustering</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.use_clustering" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True, and use_lazy_loading is True as well, the data is clustered,
+i.e. not the entire training data is used by rather only a subset
+which is determined by a clustering algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.number_of_clusters">
+<code class="sig-name descname"><span class="pre">number_of_clusters</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.number_of_clusters" title="Permalink to this definition">¶</a></dt>
+<dd><p>If use_clustering is True, this is the number of clusters used per
+snapshot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.train_ratio">
+<code class="sig-name descname"><span class="pre">train_ratio</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.train_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>If use_clustering is True, this is the ratio of training data used
+to train the encoder for the clustering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="simple">
+<dt>sample_ratio<span class="classifier">float</span></dt><dd><p>If use_clustering is True, this is the ratio of training data used
+for sampling per snapshot (according to clustering then, of course).</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">

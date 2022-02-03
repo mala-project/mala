@@ -44,6 +44,14 @@ mala.datahandling.lazy\_load\_dataset module
    :undoc-members:
    :show-inheritance:
 
+mala.datahandling.lazy\_load\_dataset\_clustered module
+-------------------------------------------------------
+
+.. automodule:: mala.datahandling.lazy_load_dataset_clustered
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mala.datahandling.snapshot module
 ---------------------------------
 
