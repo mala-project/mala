@@ -740,7 +740,9 @@ class DataHandler:
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
                     self.grid_dimension, self.grid_size,
-                    self.use_horovod, 10, 0.2, 0.2)
+                    self.use_horovod, self.parameters.number_of_clusters,
+                    self.parameters.train_ratio,
+                    self.parameters.sample_ratio)
                 self.validation_data_set = LazyLoadDataset(
                     self.get_input_dimension(), self.get_output_dimension(),
                     self.input_data_scaler, self.output_data_scaler,

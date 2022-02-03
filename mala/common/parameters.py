@@ -407,7 +407,7 @@ class ParametersData(ParametersBase):
         i.e. not the entire training data is used by rather only a subset
         which is determined by a clustering algorithm.
 
-    numbers_of_cluster : int
+    number_of_clusters : int
         If use_clustering is True, this is the number of clusters used per
         snapshot.
 
@@ -416,7 +416,7 @@ class ParametersData(ParametersBase):
         to train the encoder for the clustering.
 
 
-    sample_ration : float
+    sample_ratio : float
         If use_clustering is True, this is the ratio of training data used
         for sampling per snapshot (according to clustering then, of course).
     """
@@ -431,9 +431,9 @@ class ParametersData(ParametersBase):
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
         self.use_clustering = False
-        self.numbers_of_cluster = 0
-        self.train_ratio = 0.0
-        self.sample_ration = 0.0
+        self.number_of_clusters = 40
+        self.train_ratio = 0.1
+        self.sample_ratio = 0.5
 
 
 class ParametersRunning(ParametersBase):
