@@ -1,3 +1,4 @@
+"""Function to check module availability in MALA."""
 import importlib
 
 
