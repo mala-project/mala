@@ -9,15 +9,11 @@ import warnings
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
-    warnings.warn("You either don't have Horovod installed or it is not "
-                  "configured correctly. You can still train networks, but "
-                  "attempting to set parameters.training.use_horovod = "
-                  "True WILL cause a crash.", stacklevel=3)
+    pass
 try:
     from mpi4py import MPI
 except ModuleNotFoundError:
-    warnings.warn("No MPI detected. This is not a problem unless "
-                  "you plan on parallel inference.", stacklevel=3)
+    pass
 
 import torch
 

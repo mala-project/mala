@@ -1,6 +1,5 @@
 """DataSet for lazy-loading."""
 import os
-import warnings
 
 try:
     import horovod.torch as hvd
@@ -11,10 +10,8 @@ except ModuleNotFoundError:
 try:
     import pqkmeans
 except ModuleNotFoundError:
-    warnings.warn("You do not have pqkmeans installed. This will not "
-                  "affect MALA performance except for when attempting to use "
-                  "clustered big data snapshots. ",
-                  stacklevel=2)
+    pass
+
 import numpy as np
 import torch
 from torch.utils.data import Dataset
