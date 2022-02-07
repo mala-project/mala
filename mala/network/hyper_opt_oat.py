@@ -1,7 +1,6 @@
 """Hyperparameter optimizer using orthogonal array tuning."""
 from bisect import bisect
 import itertools
-import warnings
 import os
 import pickle
 
@@ -9,10 +8,7 @@ import numpy as np
 try:
     import oapackage as oa
 except ModuleNotFoundError:
-    warnings.warn("You do not have the OApackage installed. This will not "
-                  "affect MALA performance except for when attempting to use "
-                  "orthogonal array tuning. ",
-                  stacklevel=2)
+    pass
 
 from mala.network.hyper_opt_base import HyperOptBase
 from mala.network.objective_base import ObjectiveBase

@@ -7,12 +7,7 @@ from ase.units import Rydberg, Bohr
 try:
     import total_energy as te
 except ModuleNotFoundError:
-    warnings.warn("You either don't have the QuantumEspresso total_energy "
-                  "python module installed or it is not "
-                  "configured correctly. Using a density calculator will "
-                  "still mostly work, but trying to "
-                  "access the total energy of a system WILL fail.",
-                  stacklevel=2)
+    pass
 
 from mala.common.parameters import printout
 from mala.targets.target_base import TargetBase
