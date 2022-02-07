@@ -4,6 +4,14 @@ mala.common package
 Submodules
 ----------
 
+mala.common.check\_modules module
+---------------------------------
+
+.. automodule:: mala.common.check_modules
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mala.common.json\_serializable module
 -------------------------------------
 
