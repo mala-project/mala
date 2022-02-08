@@ -14,6 +14,22 @@ use_horovod = False
 use_mpi = False
 comm = None
 local_mpi_rank = None
+current_verbosity = 0
+
+
+def set_current_verbosity(new_value):
+    """
+    Set the verbosity used for the printout statements.
+
+    Should only be called by the parameters file, not by the user directly!
+
+    Parameters
+    ----------
+    new_value : int
+        New verbosity.
+    """
+    global current_verbosity
+    current_verbosity = new_value
 
 
 def set_horovod_status(new_value):
@@ -163,9 +179,12 @@ def get_comm():
     return comm
 
 
-def printout(*values, sep=' '):
+def printout(*values, sep=' ', min_verbosity=0):
     """
     Interface to built-in "print" for parallel runs. Can be used like print.
+
+    Linked to the verbosity option in parameters. By default, all messages are
+    treated as high level messages and will be printed.
 
     Parameters
     ----------
@@ -174,8 +193,11 @@ def printout(*values, sep=' '):
 
     sep : string
         Separator between printed values.
-    """
-    outstring = sep.join([str(v) for v in values])
 
-    if get_rank() == 0:
-        print(outstring)
+    min_verbosity : int
+        Minimum number of verbosity for this output to still be printed.
+    """
+    if current_verbosity >= min_verbosity:
+        outstring = sep.join([str(v) for v in values])
+        if get_rank() == 0:
+            print(outstring)

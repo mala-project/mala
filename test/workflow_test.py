@@ -46,7 +46,7 @@ class TestFullWorkflow:
         test_parameters.descriptors.descriptor_type = "SNAP"
         test_parameters.descriptors.twojmax = 6
         test_parameters.descriptors.rcutfac = 4.67637
-        test_parameters.data.descriptors_contain_xyz = True
+        test_parameters.descriptors.descriptors_contain_xyz = True
         test_parameters.targets.target_type = "LDOS"
         test_parameters.targets.ldos_gridsize = 11
         test_parameters.targets.ldos_gridspacing_ev = 2.5
@@ -268,7 +268,7 @@ class TestFullWorkflow:
 
         # Save, if necessary.
         if save_network:
-            params_path = "workflow_test_params.pkl"
+            params_path = "workflow_test_params.json"
             network_path = "workflow_test_network.pth"
             input_scaler_path = "workflow_test_iscaler.pkl"
             output_scaler_path = "workflow_test_oscaler.pkl"
@@ -283,7 +283,7 @@ class TestFullWorkflow:
     def __use_trained_network(save_path="./"):
         """Use a trained network to make a prediction."""
 
-        params_path = os.path.join(save_path, "workflow_test_params.pkl")
+        params_path = os.path.join(save_path, "workflow_test_params.json")
         network_path = os.path.join(save_path, "workflow_test_network.pth")
         input_scaler_path = os.path.join(save_path, "workflow_test_iscaler.pkl")
         output_scaler_path = os.path.join(save_path, "workflow_test_oscaler.pkl")
@@ -332,4 +332,3 @@ class TestFullWorkflow:
                           atol=accuracy_predictions)
         assert np.isclose(nr_electrons_predicted, nr_electrons_actual,
                           atol=accuracy_predictions)
-

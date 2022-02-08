@@ -82,7 +82,7 @@ class Predictor(Runner):
             snap_descriptors = self.data.descriptor_calculator.\
                                gather_descriptors(snap_descriptors)
         if get_rank() == 0:
-            if self.parameters_full.data.descriptors_contain_xyz:
+            if self.data.descriptor_calculator.descriptors_contain_xyz:
                 snap_descriptors = snap_descriptors[:, :, :, 3:]
                 feature_length -= 3
 
@@ -142,7 +142,7 @@ class Predictor(Runner):
         if optimal_batch_size != self.parameters.mini_batch_size:
             printout("Had to readjust batch size from",
                      self.parameters.mini_batch_size, "to",
-                     optimal_batch_size)
+                     optimal_batch_size, min_verbosity=0)
             self.parameters.mini_batch_size = optimal_batch_size
         self.number_of_batches_per_snapshot = int(self.data.grid_size /
                                                   self.parameters.

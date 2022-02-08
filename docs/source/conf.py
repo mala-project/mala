@@ -68,6 +68,7 @@ autodoc_mock_imports = [
     'horovod',
     'lammps',
     'total_energy',
+    'pqkmeans'
 ]
 
 autodoc_member_order = 'groupwise'

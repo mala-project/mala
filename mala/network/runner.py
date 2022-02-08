@@ -48,7 +48,8 @@ class Runner:
             if self.parameters_full.use_gpu:
                 printout("size=", hvd.size(), "global_rank=", hvd.rank(),
                          "local_rank=", hvd.local_rank(), "device=",
-                         torch.cuda.get_device_name(hvd.local_rank()))
+                         torch.cuda.get_device_name(hvd.local_rank()),
+                         min_verbosity=2)
                 # pin GPU to local rank
                 torch.cuda.set_device(hvd.local_rank())
 

@@ -85,8 +85,8 @@ class ObjectiveBase:
             final_validation_loss.append(test_trainer.final_validation_loss)
 
         if self.params.hyperparameters.number_training_per_trial > 1:
-            printout("Losses from multiple runs are: ")
-            printout(final_validation_loss)
+            printout("Losses from multiple runs are: ", min_verbosity=2)
+            printout(final_validation_loss, min_verbosity=2)
 
         if self.params.hyperparameters.trial_ensemble_evaluation == "mean":
             return np.mean(final_validation_loss)

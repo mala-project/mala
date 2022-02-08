@@ -52,7 +52,7 @@ def HyperparameterInterface(hotype, opttype="float", name="", low=0, high=0,
     if hotype == "optuna":
         hparam = HyperparameterOptuna(opttype=opttype, name=name, low=low,
                                       high=high, choices=choices)
-    if hotype == "notraining":
+    if hotype == "naswot":
         hparam = HyperparameterNASWOT(opttype=opttype, name=name, low=low,
                                       high=high, choices=choices)
     elif hotype == "oat":

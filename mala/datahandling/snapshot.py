@@ -1,7 +1,9 @@
 """Snapshot class."""
 
+from mala.common.json_serializable import JSONSerializable
 
-class Snapshot:
+
+class Snapshot(JSONSerializable):
     """
     Represents a snapshot on a hard drive.
 
@@ -39,6 +41,8 @@ class Snapshot:
                  input_units="",  output_npy_file="",
                  output_npy_directory="", output_units="",
                  calculation_output=""):
+        super(Snapshot, self).__init__()
+
         # Inputs.
         self.input_npy_file = input_npy_file
         self.input_npy_directory = input_npy_directory
