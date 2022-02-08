@@ -8,7 +8,7 @@ import ase.io
 import numpy as np
 import torch
 
-from mala.common.parallelizer import printout, get_rank
+from mala.common.parallelizer import printout, get_rank, get_comm
 from mala.network.runner import Runner
 
 
@@ -147,4 +147,5 @@ class Predictor(Runner):
         # i.e. restricting the (L)DOS to positive values.
         predicted_outputs = self.data.target_calculator.\
             restrict_data(predicted_outputs)
+        get_comm().Barrier()
         return predicted_outputs
