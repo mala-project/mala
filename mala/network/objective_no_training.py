@@ -90,8 +90,8 @@ class ObjectiveNoTraining(ObjectiveBase):
             surrogate_losses.append(surrogate_loss)
 
         if self.params.hyperparameters.number_training_per_trial > 1:
-            printout("Losses from multiple runs are: ")
-            printout(surrogate_losses)
+            print("Losses from multiple runs are: ")
+            print(surrogate_losses)
 
         if self.params.hyperparameters.trial_ensemble_evaluation == "mean":
             return np.mean(surrogate_losses)
