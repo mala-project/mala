@@ -99,6 +99,7 @@ class TestHyperparameterOptimization:
                                                   "optuna",
                                                   last_optuna_study=
                                                   last_study))
+        print(results)
         assert np.std(results) < desired_std_ho
 
     def test_distributed_hyperopt(self):
