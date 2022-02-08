@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.2.0-144-g42eaa6f
+                v0.2.0-162-gde0ba4a
               </div>
             
           
@@ -280,6 +280,34 @@ in the json file.</p>
 <dd class="field-even"><p>MPI.COMM_WORLD</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.common.parallelizer.get_local_rank">
+<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">get_local_rank</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_local_rank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the local rank of the process.</p>
+<p>This is the rank WITHIN a node. Useful when multiple GPUs are
+used on one node.</p>
+<p>Originally obtained from:
+<a class="reference external" href="https://github.com/hiwonjoon/ICML2019-TREX/blob/master/mujoco/learner/baselines/baselines/common/mpi_util.py">https://github.com/hiwonjoon/ICML2019-TREX/blob/master/mujoco/learner/baselines/baselines/common/mpi_util.py</a></p>
+<p>License:
+MIT License</p>
+<p>Copyright (c) 2019 Daniel Brown and Wonjoon Goo</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the “Software”),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -585,6 +613,12 @@ Currently only supported file format is “pickle”.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.common.parameters.Parameters.device">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">device</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the device used by MALA. Read-only.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.common.parameters.Parameters.use_gpu">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">use_gpu</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.use_gpu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Control whether or not a GPU is used (provided there is one).</p>
@@ -674,6 +708,19 @@ shows itself.</p>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersData</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for loading and preprocessing data.</p>
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.descriptors_contain_xyz">
+<code class="sig-name descname"><span class="pre">descriptors_contain_xyz</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.descriptors_contain_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Legacy option. If True, it is assumed that the first three entries of
+the descriptor vector are the xyz coordinates and they are cut from the
+descriptor vector. If False, no such cutting is peformed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt id="mala.common.parameters.ParametersData.snapshot_directories_list">
 <code class="sig-name descname"><span class="pre">snapshot_directories_list</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.snapshot_directories_list" title="Permalink to this definition">¶</a></dt>
