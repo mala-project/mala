@@ -25,8 +25,8 @@ class HyperOptBase(ABC):
         If true, .pkl checkpoints will be created.
     """
 
-    def __init__(self, params, data, use_pkl_checkpoints=False):
-        self.params = params
+    def __init__(self, params: Parameters, data, use_pkl_checkpoints=False):
+        self.params: Parameters = params
         self.data_handler = data
         self.objective = ObjectiveBase(self.params, self.data_handler)
         self.use_pkl_checkpoints = use_pkl_checkpoints

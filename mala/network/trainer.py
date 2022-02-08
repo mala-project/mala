@@ -253,10 +253,8 @@ class Trainer(Runner):
 
             for batchid, (inputs, outputs) in \
                     enumerate(self.training_data_loader):
-                if self.parameters_full.use_gpu:
-
-                    inputs = inputs.to('cuda')
-                    outputs = outputs.to('cuda')
+                inputs = inputs.to(self.parameters._configuration["device"])
+                outputs = outputs.to(self.parameters._configuration["device"])
                 training_loss += self.__process_mini_batch(self.network,
                                                            inputs, outputs)
 
@@ -531,9 +529,8 @@ class Trainer(Runner):
             validation_loss = []
             with torch.no_grad():
                 for x, y in data_loader:
-                    if self.parameters_full.use_gpu:
-                        x = x.to('cuda')
-                        y = y.to('cuda')
+                    x = x.to(self.parameters._configuration["device"])
+                    y = y.to(self.parameters._configuration["device"])
                     prediction = network(x)
                     validation_loss.append(network.calculate_loss(prediction, y)
                                            .item())

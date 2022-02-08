@@ -1,6 +1,6 @@
 """Neural network for MALA."""
 from abc import abstractmethod
-import numpy as np 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as functional
@@ -12,6 +12,9 @@ try:
 except ModuleNotFoundError:
     # Warning is thrown by parameters class
     pass
+import torch
+import torch.nn as nn
+import torch.nn.functional as functional
 
 
 class Network(nn.Module):
@@ -135,7 +138,6 @@ class Network(nn.Module):
             Loss value for output and target.
 
         """
-        # print(output.size(), target.size())
         return self.loss_func(output, target)
 
     # FIXME: This guarentees downwards compatibility, but it is ugly.
@@ -190,9 +192,10 @@ class Network(nn.Module):
         loaded_network.eval()
         return loaded_network
 
+
 class FeedForwardNet(Network):
     """Initialize this network as a feed-forward network."""
-        
+
         # Check if multiple types of activations were selected or only one
         # was passed to be used in the entire network.#
         # If multiple layers have been passed, their size needs to be correct.
@@ -202,10 +205,14 @@ class FeedForwardNet(Network):
 
         self.layers = nn.ModuleList()
 
+        # If we have only one entry in the activation list,
+        # we use it for the entire list.
+        # We should NOT modify the list itself. This would break the
+        # hyperparameter algorithms.
+        use_only_one_activation_type = False
         if len(self.params.layer_activations) == 1:
-            self.params.layer_activations *= self.number_of_layers
-
-        if len(self.params.layer_activations) < self.number_of_layers:
+            use_only_one_activation_type = True
+        elif len(self.params.layer_activations) < self.number_of_layers:
             raise Exception("Not enough activation layers provided.")
         elif len(self.params.layer_activations) > self.number_of_layers:
             raise Exception("Too many activation layers provided.")
@@ -217,13 +224,18 @@ class FeedForwardNet(Network):
             self.layers.append((nn.Linear(self.params.layer_sizes[i],
                                           self.params.layer_sizes[i + 1])))
             try:
-                self.layers.append(self.activation_mappings[self.params.
+                if use_only_one_activation_type:
+                    self.layers.append(self.activation_mappings[self.params.
+                                       layer_activations[0]]())
+                else:
+                    self.layers.append(self.activation_mappings[self.params.
                                        layer_activations[i]]())
             except KeyError:
                 raise Exception("Invalid activation type seleceted.")
 
-        if params.use_gpu:
-            self.to('cuda')
+        # Once everything is done, we can move the Network on the target
+        # device.
+        self.to(self.params._configuration["device"])
 
     def forward(self, inputs):
         """
@@ -246,7 +258,7 @@ class FeedForwardNet(Network):
 
 class LSTM(Network):
     """Initialize this network as a LSTM network."""
-        
+
     # was passed to be used in the entire network.
     def __init__(self, params):
         super(LSTM, self).__init__(params)
@@ -259,24 +271,25 @@ class LSTM(Network):
         # First Layer
         self.first_layer = nn.Linear(self.params.layer_sizes[0], self.params.layer_sizes[1])
 
-        # size of lstm based on bidirectional or not: 
+        # size of lstm based on bidirectional or not:
         # https://en.wikipedia.org/wiki/Bidirectional_recurrent_neural_networks
         if (self.params.bidirection):
-            self.lstm_gru_layer = nn.LSTM(self.params.layer_sizes[1], 
-                                        int(self.hidden_dim / 2), 
-                                        self.params.num_hidden_layers, 
-                                        batch_first=True, 
+            self.lstm_gru_layer = nn.LSTM(self.params.layer_sizes[1],
+                                        int(self.hidden_dim / 2),
+                                        self.params.num_hidden_layers,
+                                        batch_first=True,
                                         bidirectional=True)
         else:
-            
+
             self.lstm_gru_layer = nn.LSTM(self.params.layer_sizes[1],
-                                        self.hidden_dim, 
-                                        self.params.num_hidden_layers, 
+                                        self.hidden_dim,
+                                        self.params.num_hidden_layers,
                                         batch_first=True)
         self.activation = self.activation_mappings[self.params.layer_activations[0]]()
 
-        if params.use_gpu:
-            self.to('cuda')
+        # Once everything is done, we can move the Network on the target
+        # device.
+        self.to(self.params._configuration["device"])
 
     # Apply Network
     def forward(self, x):
@@ -297,21 +310,21 @@ class LSTM(Network):
 
         if (self.params.no_hidden_state):
             self.hidden = (self.hidden[0].fill_(0.0), self.hidden[1].fill_(0.0))
-        
-        
+
+
         self.hidden = (self.hidden[0].detach(), self.hidden[1].detach())
 
         x = self.activation(self.first_layer(x))
 
         if (self.params.bidirection):
-            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size, 
-                                                self.params.num_hidden_layers, 
-                                                self.params.layer_sizes[1]), 
+            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size,
+                                                self.params.num_hidden_layers,
+                                                self.params.layer_sizes[1]),
                                             self.hidden)
         else:
-            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size, 
-                                                self.params.num_hidden_layers, 
-                                                self.params.layer_sizes[1]), 
+            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size,
+                                                self.params.num_hidden_layers,
+                                                self.params.layer_sizes[1]),
                                             self.hidden)
 
         x = x[:, -1, :]
@@ -330,19 +343,19 @@ class LSTM(Network):
             initialised to zeros.
         """
         if (self.params.bidirection):
-            h0 = torch.empty(self.params.num_hidden_layers * 2, 
-                             self.mini_batch_size, 
+            h0 = torch.empty(self.params.num_hidden_layers * 2,
+                             self.mini_batch_size,
                              self.hidden_dim // 2)
-            c0 = torch.empty(self.params.num_hidden_layers * 2, 
-                             self.mini_batch_size, 
+            c0 = torch.empty(self.params.num_hidden_layers * 2,
+                             self.mini_batch_size,
                              self.hidden_dim // 2)
         else:
-            h0 = torch.empty(self.params.num_hidden_layers, 
-                             self.mini_batch_size, 
+            h0 = torch.empty(self.params.num_hidden_layers,
+                             self.mini_batch_size,
                              self.hidden_dim)
-            c0 = torch.empty(self.params.num_hidden_layers, 
-                             self.mini_batch_size, 
-                             self.hidden_dim)       
+            c0 = torch.empty(self.params.num_hidden_layers,
+                             self.mini_batch_size,
+                             self.hidden_dim)
         h0.zero_()
         c0.zero_()
 
@@ -350,7 +363,7 @@ class LSTM(Network):
 
 class GRU(LSTM):
     """Initialize this network as a GRU network."""
-        
+
     # was passed to be used similar to LSTM but with small tweek for the layer as GRU.
     def __init__(self, params):
         Network.__init__(self, params)
@@ -363,16 +376,16 @@ class GRU(LSTM):
 
         # Similar to LSTM class replaced with nn.GRU
         if (self.params.bidirection):
-            self.lstm_gru_layer = nn.GRU(self.params.layer_sizes[1], 
-                                        int(self.hidden_dim / 2), 
-                                        self.params.num_hidden_layers, 
-                                        batch_first=True, 
+            self.lstm_gru_layer = nn.GRU(self.params.layer_sizes[1],
+                                        int(self.hidden_dim / 2),
+                                        self.params.num_hidden_layers,
+                                        batch_first=True,
                                         bidirectional=True)
         else:
-            
+
             self.lstm_gru_layer = nn.GRU(self.params.layer_sizes[1],
-                                        self.hidden_dim, 
-                                        self.params.num_hidden_layers, 
+                                        self.hidden_dim,
+                                        self.params.num_hidden_layers,
                                         batch_first=True)
         self.activation = self.activation_mappings[self.params.layer_activations[0]]()
 
@@ -397,21 +410,21 @@ class GRU(LSTM):
 
         if (self.params.no_hidden_state):
             self.hidden = self.hidden[0].fill_(0.0)
-        
-        
+
+
         self.hidden = self.hidden.detach()
-    
+
         x = self.activation(self.first_layer(x))
 
         if (self.params.bidirection):
-            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size, 
-                                                self.params.num_hidden_layers, 
-                                                self.params.layer_sizes[1]), 
+            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size,
+                                                self.params.num_hidden_layers,
+                                                self.params.layer_sizes[1]),
                                             self.hidden)
         else:
-            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size, 
-                                                self.params.num_hidden_layers, 
-                                                self.params.layer_sizes[1]), 
+            x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size,
+                                                self.params.num_hidden_layers,
+                                                self.params.layer_sizes[1]),
                                             self.hidden)
 
         x = x[:, -1, :]
@@ -430,24 +443,24 @@ class GRU(LSTM):
             initialised to zeros.
         """
         if (self.params.bidirection):
-            h0 = torch.empty(self.params.num_hidden_layers * 2, 
-                             self.mini_batch_size, 
+            h0 = torch.empty(self.params.num_hidden_layers * 2,
+                             self.mini_batch_size,
                              self.hidden_dim // 2)
         else:
-            h0 = torch.empty(self.params.num_hidden_layers, 
-                             self.mini_batch_size, 
-                             self.hidden_dim)    
+            h0 = torch.empty(self.params.num_hidden_layers,
+                             self.mini_batch_size,
+                             self.hidden_dim)
         h0.zero_()
 
         return h0
-        
+
 class TransformerNet(Network):
     """Initialize this network as the transformer net.
 
     Parameters
     ----------
     params : mala.common.parametes.Parameters
-        Parameters used to create this neural network. 
+        Parameters used to create this neural network.
     """
 
     def __init__(self, params):
@@ -472,8 +485,9 @@ class TransformerNet(Network):
 
         self.init_weights()
 
-        if params.use_gpu:
-            self.to('cuda')
+        # Once everything is done, we can move the Network on the target
+        # device.
+        self.to(self.params._configuration["device"])
 
 
     def generate_square_subsequent_mask(self, size):
@@ -491,7 +505,7 @@ class TransformerNet(Network):
         return mask
 
     def init_weights(self):
-        """Initialise weights with a uniform random distribution in the range (-initrange, initrange).""" 
+        """Initialise weights with a uniform random distribution in the range (-initrange, initrange)."""
         initrange = 0.1
     #        self.encoder.weight.data.uniform_(-initrange, initrange)
         self.decoder.bias.data.zero_()
@@ -514,7 +528,7 @@ class TransformerNet(Network):
 
 class PositionalEncoding(nn.Module):
     """Injects some information of relative/absolute position of token in a sequence.
-    
+
     Parameters
     ----------
     d_model : int
@@ -523,7 +537,7 @@ class PositionalEncoding(nn.Module):
     dropout : float
         dropout rate
 
-    max_len: int    
+    max_len: int
         maximum length of the input sequence
     """
 
@@ -533,7 +547,7 @@ class PositionalEncoding(nn.Module):
 
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        
+
         # Need to develop better form here.
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-np.log(10000.0) / d_model))
         div_term2 = torch.exp(torch.arange(0, d_model - 1 , 2).float() * (-np.log(10000.0) / d_model))

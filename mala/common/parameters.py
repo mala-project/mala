@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
-    set_mpi_status, get_rank, set_current_verbosity
+    set_mpi_status, get_rank, get_local_rank, set_current_verbosity
 from mala.common.json_serializable import JSONSerializable
 
 
@@ -27,7 +27,8 @@ class ParametersBase(JSONSerializable):
 
     def __init__(self,):
         super(ParametersBase, self).__init__()
-        self._configuration = {"gpu": False, "horovod": False, "mpi": False}
+        self._configuration = {"gpu": False, "horovod": False, "mpi": False,
+                               "device": "cpu"}
         pass
 
     def show(self, indent=""):
@@ -58,6 +59,9 @@ class ParametersBase(JSONSerializable):
 
     def _update_mpi(self, new_mpi):
         self._configuration["mpi"] = new_mpi
+
+    def _update_device(self, new_device):
+        self._configuration["device"] = new_device
 
     @staticmethod
     def _member_to_json(member):
@@ -221,16 +225,16 @@ class ParametersNetwork(ParametersBase):
     bidirection: bool
         Sets lstm network size based on bidirectional or just one direction
         Default: False
-    
+
     num_hidden_layers: int
         Number of hidden layers to be used in lstm or gru or transformer nets
         Default: None
 
-    dropout: float 
+    dropout: float
         Dropout rate for transformer net
         0.0 <= dropout <=1.0
         Default: 0.0
-    
+
     num_heads: int
         Number of heads to be used in Multi head attention network
         This should be a divisor of input dimension
@@ -249,7 +253,7 @@ class ParametersNetwork(ParametersBase):
         self.no_hidden_state = False
         self.bidirection = False
         # for transformer net
-        self.dropout = 0.0 
+        self.dropout = 0.0
         self.num_heads= None
 
 class ParametersDescriptors(ParametersBase):
@@ -349,6 +353,11 @@ class ParametersData(ParametersBase):
 
     Attributes
     ----------
+    descriptors_contain_xyz : bool
+        Legacy option. If True, it is assumed that the first three entries of
+        the descriptor vector are the xyz coordinates and they are cut from the
+        descriptor vector. If False, no such cutting is peformed.
+
     snapshot_directories_list : list
         A list of all added snapshots.
 
@@ -421,6 +430,7 @@ class ParametersData(ParametersBase):
 
     def __init__(self):
         super(ParametersData, self).__init__()
+        self.descriptors_contain_xyz = True
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
         # self.data_splitting_percent = [0,0,0]
@@ -534,6 +544,7 @@ class ParametersRunning(ParametersBase):
         self.trainingtype = "SGD"
         self.learning_rate = 0.5
         self.max_number_epochs = 100
+        self.verbosity = True
         self.mini_batch_size = 10
         self.weight_decay = 0
         self.early_stopping_epochs = 0
@@ -881,10 +892,11 @@ class Parameters:
         self.manual_seed = None
 
         # Properties
-        self.use_horovod = False
         self.use_gpu = False
+        self.use_horovod = False
         self.use_mpi = False
         self.verbosity = 1
+        self.device = "cpu"
 
     @property
     def verbosity(self):
@@ -906,7 +918,6 @@ class Parameters:
         self._verbosity = value
         set_current_verbosity(value)
 
-
     @property
     def use_gpu(self):
         """Control whether or not a GPU is used (provided there is one)."""
@@ -916,12 +927,15 @@ class Parameters:
     def use_gpu(self, value):
         if value is False:
             self._use_gpu = False
-        if value is True:
+        else:
             if torch.cuda.is_available():
                 self._use_gpu = True
             else:
                 warnings.warn("GPU requested, but no GPU found. MALA will "
                               "operate with CPU only.", stacklevel=3)
+
+        # Invalidate, will be updated in setter.
+        self.device = None
         self.network._update_gpu(self.use_gpu)
         self.descriptors._update_gpu(self.use_gpu)
         self.targets._update_gpu(self.use_gpu)
@@ -939,6 +953,9 @@ class Parameters:
     def use_horovod(self, value):
         if value:
             hvd.init()
+
+        # Invalidate, will be updated in setter.
+        self.device = None
         set_horovod_status(value)
         self._use_horovod = value
         self.network._update_horovod(self.use_horovod)
@@ -950,6 +967,27 @@ class Parameters:
         self.debug._update_horovod(self.use_horovod)
 
     @property
+    def device(self):
+        """Get the device used by MALA. Read-only."""
+        return self._device
+
+    @device.setter
+    def device(self, value):
+        id = get_local_rank()
+        if self.use_gpu:
+            self._device = "cuda:"\
+                           f"{id}"
+        else:
+            self._device = "cpu"
+        self.network._update_device(self._device)
+        self.descriptors._update_device(self._device)
+        self.targets._update_device(self._device)
+        self.data._update_device(self._device)
+        self.running._update_device(self._device)
+        self.hyperparameters._update_device(self._device)
+        self.debug._update_device(self._device)
+
+    @property
     def use_mpi(self):
         """Control whether or not horovod is used for parallel training."""
         return self._use_mpi
@@ -957,6 +995,8 @@ class Parameters:
     @use_mpi.setter
     def use_mpi(self, value):
         set_mpi_status(value)
+        # Invalidate, will be updated in setter.
+        self.device = None
         self._use_mpi = value
         self.network._update_mpi(self.use_mpi)
         self.descriptors._update_mpi(self.use_mpi)
@@ -1020,7 +1060,7 @@ class Parameters:
             # Two for loops so global properties enter the dict first.
             for member in members:
                 # Filter out all private members, builtins, etc.
-                if member[0][0] != "_":
+                if member[0][0] != "_" and member[0] != "device":
                     if isinstance(member[1], ParametersBase):
                         pass
                     else:

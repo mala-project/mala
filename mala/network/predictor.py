@@ -116,8 +116,7 @@ class Predictor(Runner):
         for i in range(0, self.number_of_batches_per_snapshot):
             inputs = snap_descriptors[i * self.parameters.mini_batch_size:
                                       (i+1)*self.parameters.mini_batch_size]
-            if self.parameters_full.use_gpu:
-                inputs = inputs.to('cuda')
+            inputs = inputs.to(self.parameters._configuration["device"])
             predicted_outputs[i * self.parameters.mini_batch_size:
                                       (i+1)*self.parameters.mini_batch_size] \
                 = self.data.output_data_scaler.\

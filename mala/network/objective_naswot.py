@@ -65,7 +65,7 @@ class ObjectiveNASWOT(ObjectiveBase):
         for i in range(0, self.params.hyperparameters.
                        number_training_per_trial):
             net = Network(self.params)
-            device = "cuda" if self.params.use_gpu else "cpu"
+            device = self.params.device
 
             # Load the batchesand get the jacobian.
             do_shuffle = self.params.running.use_shuffling_for_samplers
@@ -86,12 +86,12 @@ class ObjectiveNASWOT(ObjectiveBase):
                 surrogate_loss = surrogate_loss.cpu().detach().numpy().astype(
                     np.float64)
             except RuntimeError:
-                printout("Got a NaN, ignoring sample.", min_verbosity=1)
+                print("Got a NaN, ignoring sample.")
             surrogate_losses.append(surrogate_loss)
 
         if self.params.hyperparameters.number_training_per_trial > 1:
-            printout("Losses from multiple runs are: ", min_verbosity=2)
-            printout(surrogate_losses, min_verbosity=2)
+            print("Losses from multiple runs are: ")
+            print(surrogate_losses)
 
         if self.params.hyperparameters.trial_ensemble_evaluation == "mean":
             return np.mean(surrogate_losses)
@@ -152,10 +152,10 @@ class ObjectiveNASWOT(ObjectiveBase):
     def __calc_score(jacobian: Tensor):
         """Calculate the score for a Jacobian."""
         correlations = ObjectiveNASWOT.__corrcoef(jacobian)
-        eigen_values, _ = torch.eig(correlations)
+        eigen_values, _ = torch.linalg.eig(correlations)
         # Only consider the real valued part, imaginary part is rounding
         # artefact
-        eigen_values = eigen_values.type(torch.float32)
+        eigen_values = eigen_values.real
         # Needed for numerical stability. 1e-4 instead of 1e-5 in reference
         # as the torchs eigenvalue solver on GPU
         # seems to have bigger rounding errors than numpy, resulting in
