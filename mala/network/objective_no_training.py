@@ -66,7 +66,7 @@ class ObjectiveNoTraining(ObjectiveBase):
                        number_training_per_trial):
             net = Network(self.params)
             device = self.params.device
-
+ 
             # Load the batchesand get the jacobian.
             do_shuffle = self.params.running.use_shuffling_for_samplers
             if self.data_handler.parameters.use_lazy_loading or \
@@ -152,10 +152,10 @@ class ObjectiveNoTraining(ObjectiveBase):
     def __calc_score(jacobian: Tensor):
         """Calculate the score for a Jacobian."""
         correlations = ObjectiveNoTraining.__corrcoef(jacobian)
-        eigen_values, _ = torch.eig(correlations)
+        eigen_values, _ = torch.linalg.eig(correlations)
         # Only consider the real valued part, imaginary part is rounding
         # artefact
-        eigen_values = eigen_values.type(torch.float32)
+        eigen_values = eigen_values.real
         # Needed for numerical stability. 1e-4 instead of 1e-5 in reference
         # as the torchs eigenvalue solver on GPU
         # seems to have bigger rounding errors than numpy, resulting in
