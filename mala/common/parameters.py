@@ -662,7 +662,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
             - "oat" : Use orthogonal array tuning (currently limited to
               categorical hyperparemeters). Range analysis is
               currently done by simply choosing the lowest loss.
-            - "notraining" : Using a NAS without training, based on jacobians.
+            - "naswot" : Using a NAS without training, based on jacobians.
 
     checkpoints_each_trial : int
         If not 0, checkpoint files will be saved after each
@@ -892,8 +892,8 @@ class Parameters:
         self.manual_seed = None
 
         # Properties
-        self.use_horovod = False
         self.use_gpu = False
+        self.use_horovod = False
         self.use_mpi = False
         self.verbosity = 1
         self.device = "cpu"
@@ -965,7 +965,6 @@ class Parameters:
         self.running._update_horovod(self.use_horovod)
         self.hyperparameters._update_horovod(self.use_horovod)
         self.debug._update_horovod(self.use_horovod)
-
 
     @property
     def device(self):
@@ -1061,7 +1060,7 @@ class Parameters:
             # Two for loops so global properties enter the dict first.
             for member in members:
                 # Filter out all private members, builtins, etc.
-                if member[0][0] != "_":
+                if member[0][0] != "_" and member[0] != "device":
                     if isinstance(member[1], ParametersBase):
                         pass
                     else:

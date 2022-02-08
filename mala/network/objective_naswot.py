@@ -58,7 +58,7 @@ class ObjectiveNASWOT(ObjectiveBase):
             trial or simply a OAT compatible list.
         """
         # Parse the parameters using the base class.
-        super(ObjectiveNoTraining, self).parse_trial(trial)
+        super(ObjectiveNASWOT, self).parse_trial(trial)
 
         # Build the network.
         surrogate_losses = []
