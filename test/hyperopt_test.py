@@ -85,6 +85,8 @@ class TestHyperparameterOptimization:
                max(performed_trials_values)
 
     def test_different_ho_methods(self):
+        import torch
+        print(torch.__version__)
         results = [self.__optimize_hyperparameters("optuna"),
                    self.__optimize_hyperparameters("oat"),
                    self.__optimize_hyperparameters("naswot")]
