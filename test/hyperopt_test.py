@@ -85,21 +85,10 @@ class TestHyperparameterOptimization:
                max(performed_trials_values)
 
     def test_different_ho_methods(self):
-        results = []
-        result, last_study = self.__optimize_hyperparameters("optuna")
-        results.append(result)
-        results.append(self.__optimize_hyperparameters("oat"))
-        results.append(self.
-                       __optimize_hyperparameters("naswot",
-                                                  input_creator_naswot=
-                                                  "oat"))
-        results.append(self.
-                       __optimize_hyperparameters("naswot",
-                                                  input_creator_naswot=
-                                                  "optuna",
-                                                  last_optuna_study=
-                                                  last_study))
-        print(results)
+        results = [self.__optimize_hyperparameters("optuna"),
+                   self.__optimize_hyperparameters("oat"),
+                   self.__optimize_hyperparameters("naswot")]
+
         assert np.std(results) < desired_std_ho
 
     def test_distributed_hyperopt(self):
@@ -175,9 +164,7 @@ class TestHyperparameterOptimization:
         assert descriptors.get_acsd(snap_data, ldos_data) < targeted_acsd_value
 
     @staticmethod
-    def __optimize_hyperparameters(hyper_optimizer,
-                                   input_creator_naswot="oat",
-                                   last_optuna_study=None):
+    def __optimize_hyperparameters(hyper_optimizer):
         """Perform a hyperparameter optimization with the specified method."""
 
         # Set up parameters.
@@ -217,50 +204,20 @@ class TestHyperparameterOptimization:
         # Add hyperparameters we want to have optimized to the list.
         # If we do a NASWOT run currently we can provide an input
         # array of trials.
-        tmp_hp_optimizer = None
-        if hyper_optimizer == "oat" or hyper_optimizer == "optuna":
-            test_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
-                                                 choices=["Adam", "SGD"])
-            test_hp_optimizer.add_hyperparameter("categorical",
-                                                 "layer_activation_00",
-                                                 choices=["ReLU", "Sigmoid"])
-            test_hp_optimizer.add_hyperparameter("categorical",
-                                                 "layer_activation_01",
-                                                 choices=["ReLU", "Sigmoid"])
-            test_hp_optimizer.add_hyperparameter("categorical",
-                                                 "layer_activation_02",
-                                                 choices=["ReLU", "Sigmoid"])
-        elif hyper_optimizer == "naswot":
-            tmp_parameters = test_parameters
-            if input_creator_naswot == "optuna" and last_optuna_study is None:
-                input_creator_naswot = "oat"
-            tmp_parameters.hyperparameters.hyper_opt_method = \
-                input_creator_naswot
-            tmp_hp_optimizer = mala.HyperOptInterface(tmp_parameters,
-                                                      data_handler)
-            tmp_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
-                                                choices=["Adam", "SGD"])
-            tmp_hp_optimizer.add_hyperparameter("categorical",
-                                                "layer_activation_00",
-                                                choices=["ReLU", "Sigmoid"])
-            tmp_hp_optimizer.add_hyperparameter("categorical",
-                                                "layer_activation_01",
-                                                choices=["ReLU", "Sigmoid"])
-            tmp_hp_optimizer.add_hyperparameter("categorical",
-                                                "layer_activation_02",
-                                                choices=["ReLU", "Sigmoid"])
+        test_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
+                                             choices=["Adam", "SGD"])
+        test_hp_optimizer.add_hyperparameter("categorical",
+                                             "layer_activation_00",
+                                             choices=["ReLU", "Sigmoid"])
+        test_hp_optimizer.add_hyperparameter("categorical",
+                                             "layer_activation_01",
+                                             choices=["ReLU", "Sigmoid"])
+        test_hp_optimizer.add_hyperparameter("categorical",
+                                             "layer_activation_02",
+                                             choices=["ReLU", "Sigmoid"])
 
         # Perform hyperparameter optimization.
-        if hyper_optimizer == "oat" or hyper_optimizer == "optuna":
-            test_hp_optimizer.perform_study()
-            if hyper_optimizer == "optuna":
-                last_optuna_study = test_hp_optimizer.get_trials_from_study()
-        elif hyper_optimizer == "naswot":
-            if input_creator_naswot == "optuna":
-                test_hp_optimizer.perform_study(trial_list=last_optuna_study)
-            else:
-                test_hp_optimizer.perform_study(trial_list=
-                                                tmp_hp_optimizer.get_orthogonal_array())
+        test_hp_optimizer.perform_study()
         test_hp_optimizer.set_optimal_parameters()
 
         # Train the final network.
@@ -269,7 +226,4 @@ class TestHyperparameterOptimization:
                                     data_handler)
         test_trainer.train_network()
         test_parameters.show()
-        if hyper_optimizer == "optuna":
-            return test_trainer.final_test_loss, last_optuna_study
-        else:
-            return test_trainer.final_test_loss
+        return test_trainer.final_test_loss
