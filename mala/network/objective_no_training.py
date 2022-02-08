@@ -86,7 +86,7 @@ class ObjectiveNoTraining(ObjectiveBase):
                 surrogate_loss = surrogate_loss.cpu().detach().numpy().astype(
                     np.float64)
             except RuntimeError:
-                printout("Got a NaN, ignoring sample.")
+                print("Got a NaN, ignoring sample.")
             surrogate_losses.append(surrogate_loss)
 
         if self.params.hyperparameters.number_training_per_trial > 1:

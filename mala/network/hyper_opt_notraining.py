@@ -85,7 +85,6 @@ class HyperOptNoTraining(HyperOptBase):
             if get_size() == get_rank()+1:
                 trials_per_rank += len(self.trial_list) % get_size()
                 self.last_trial += len(self.trial_list) % get_size()
-            print(get_rank(), self.first_trial, self.last_trial, trials_per_rank)
 
             # We currently do not support checkpointing in parallel mode
             # for performance reasons.
@@ -126,7 +125,6 @@ class HyperOptNoTraining(HyperOptBase):
                          "with", best_trial[1])
 
         if self.params.use_mpi:
-            print("LAST index", get_rank(), idx+self.first_trial)
             get_comm().Barrier()
 
         # Return the best loss value we could achieve.
