@@ -192,6 +192,7 @@ class Network(nn.Module):
         loaded_network.eval()
         return loaded_network
 
+
 class FeedForwardNet(Network):
     """Initialize this network as a feed-forward network."""
 
@@ -204,10 +205,14 @@ class FeedForwardNet(Network):
 
         self.layers = nn.ModuleList()
 
+        # If we have only one entry in the activation list,
+        # we use it for the entire list.
+        # We should NOT modify the list itself. This would break the
+        # hyperparameter algorithms.
+        use_only_one_activation_type = False
         if len(self.params.layer_activations) == 1:
-            self.params.layer_activations *= self.number_of_layers
-
-        if len(self.params.layer_activations) < self.number_of_layers:
+            use_only_one_activation_type = True
+        elif len(self.params.layer_activations) < self.number_of_layers:
             raise Exception("Not enough activation layers provided.")
         elif len(self.params.layer_activations) > self.number_of_layers:
             raise Exception("Too many activation layers provided.")
@@ -219,7 +224,11 @@ class FeedForwardNet(Network):
             self.layers.append((nn.Linear(self.params.layer_sizes[i],
                                           self.params.layer_sizes[i + 1])))
             try:
-                self.layers.append(self.activation_mappings[self.params.
+                if use_only_one_activation_type:
+                    self.layers.append(self.activation_mappings[self.params.
+                                       layer_activations[0]]())
+                else:
+                    self.layers.append(self.activation_mappings[self.params.
                                        layer_activations[i]]())
             except KeyError:
                 raise Exception("Invalid activation type seleceted.")
