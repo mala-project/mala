@@ -262,7 +262,10 @@ class SNAP(DescriptorBase):
                 #     y = int(entry[1])
                 #     z = int(entry[2])
                 #     snap_descriptors_full[x, y, z] = entry[3:]
-        return snap_descriptors_full
+        if self.parameters.descriptors_contain_xyz:
+            return snap_descriptors_full
+        else:
+            return snap_descriptors_full[:, :, :, 3:]
 
     def __calculate_snap(self, atoms, outdir, grid_dimensions):
         """Perform actual SNAP calculation."""
@@ -374,4 +377,7 @@ class SNAP(DescriptorBase):
             # I thought the transpose would take care of that, but apparently
             # it does not necessarily do that - so we have do go down
             # that route.
-            return snap_descriptors_np.copy()
+            if self.parameters.descriptors_contain_xyz:
+                return snap_descriptors_np.copy()
+            else:
+                return snap_descriptors_np[:, :, :, 3:].copy()
