@@ -81,6 +81,7 @@ def get_rank():
         return comm.Get_rank()
     return 0
 
+
 def get_local_rank():
     """
     Get the local rank of the process.
@@ -88,8 +89,31 @@ def get_local_rank():
     This is the rank WITHIN a node. Useful when multiple GPUs are
     used on one node.
 
-    Originally copied from:
+    Originally obtained from:
     https://github.com/hiwonjoon/ICML2019-TREX/blob/master/mujoco/learner/baselines/baselines/common/mpi_util.py
+
+    License:
+    MIT License
+
+    Copyright (c) 2019 Daniel Brown and Wonjoon Goo
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
     """
     if use_horovod:
         return hvd.local_rank()
@@ -109,6 +133,7 @@ def get_local_rank():
         return local_mpi_rank
     return 0
 
+
 def get_size():
     """
     Get the number of ranks.
@@ -123,6 +148,7 @@ def get_size():
     if use_mpi:
         return comm.Get_size()
 
+
 # TODO: This is hacky, improve it.
 def get_comm():
     """
@@ -135,6 +161,7 @@ def get_comm():
 
     """
     return comm
+
 
 def printout(*values, sep=' '):
     """
