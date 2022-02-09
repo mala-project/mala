@@ -25,8 +25,7 @@ maxdepth: 2
 ---
 
 install/README
-install/INSTALL_LAMMPS
-install/INSTALL_TE_QE
+install/external_modules
 install/tested_systems
 install/sql_on_hpc
 install/tensorboard_setup
