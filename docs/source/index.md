@@ -26,9 +26,8 @@ maxdepth: 2
 
 install/README
 install/external_modules
+install/on_cluster
 install/tested_systems
-install/sql_on_hpc
-install/tensorboard_setup
 ```
 
 ```{toctree}
