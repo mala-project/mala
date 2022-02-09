@@ -32,7 +32,7 @@ install/tested_systems
 
 ```{toctree}
 ---
-caption: API Reference
+caption: Usage
 maxdepth: 1
 ---
 
