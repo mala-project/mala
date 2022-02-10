@@ -92,7 +92,6 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
 html_logo = "./img/logos/mala_horizontal_white.png"
 
 html_context = {
@@ -103,9 +102,12 @@ html_context = {
 }
 
 html_theme_options = {
-    'style_nav_header_background': '#45c2c8',
+    'logo_only': True,
+    'display_version': False,
 }
-
+html_static_path = ['_static']
+# html_static_path = []
+html_css_files = ["css/custom.css"]
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 #html_logo = "./img/logos/mala_vertical.png"
@@ -123,3 +125,6 @@ source_suffix = {
 }
 
 add_module_names = False
+
+
+
