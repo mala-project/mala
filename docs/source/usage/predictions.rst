@@ -34,5 +34,4 @@ Using Calculators
 The ``Predictor`` class can also be accessed through an ``ase`` calculator.
 For this, use the ``mala.MALA`` class. See e.g. ``ex14_mala_md``.
 
-.. warning:: The current implementation of atomic forces is highly experimental.
-It only works with a specific QE version, and only with local pseudopotentials.
+.. warning:: The current implementation of atomic forces is highly experimental. It only works with a specific QE version, and only with local pseudopotentials.

@@ -69,6 +69,22 @@ default.
 
 For other ways to install PyTorch you might also refer to <https://pytorch.org/>.
 
+### Optional python packages
+
+MALA uses some optional packages that have to be installed manually:
+
+* `lammps`: Enables the calculation of descriptors, see [the instructions on external modules](external_modules.rst).
+* `total_energy`: Enables the calculation of the total energy, see [the instructions on external modules](external_modules.rst).
+* `mpi4py`: Enables inference parallelization
+* `horovod`: Enables training parallelization
+* `oapackage`: Enables usage of OAT method for hyperparameter optimization
+* `pqkmeans`:  Enables clustering of training data
+
+MALA can be used without these packages, an error will only occure when attempting
+perform an operation these packages are crucial for. With the exception
+of `lammps` and `total_energy`, these packages can be installed using
+`pip`.
+
 #### Conda environment (optional)
 
 Alternatively to pip, you can install the required packages within a
@@ -108,19 +124,6 @@ environment by replacing `3.6` with your desired version in `environment.yml`:
     ```sh
     $ conda env update --name mala  --file environment.yml
     ```
-###  LAMMPS (optional)
-
-This workflow uses the Large-scale Atomic/Molecular Massively Parallel
-Simulator [LAMMPS](https://lammps.sandia.gov/) for input data preprocessing. It
-is not necessary to install LAMMPS if you are you using this workflow with
-preprocessed data. If you need/want to install LAMMPS, please refer to
-[the instructions on external modules](external_modules.rst).
-
-### Total energy module (optional)
-
-It is possible to utilize Quantum Espresso to calculate the total energy of a given system using python bindings.
-This provides an additional post-processing capability, but is not necessarily needed for using this workflow.
-If you want to use this module, please refer to [the instructions on external modules](external_modules.rst).
 
 
 ## Installing the MALA package
