@@ -2,26 +2,25 @@ Postprocessing the LDOS
 =======================
 
 MALA provides routines to calculate quantities of interests from the physical
-data such as the LDOS, DOS and electronic density.
+data such as the LDOS, DOS and electronic density. The latter are not directly
+predicted by MALA. In practice, they are either obtained via the LDOS, or
+come directly from a DFT calculation. Basic postprocessing can be done via
 
-LDOS
-*****
+      .. code-block:: python
 
-The LDOS can be used to calculate the number of electrons and band energy
-(both via the DOS) and the total energy (via the DOS and the electronic
-density) of a system. In order to do that, the LDOS is usually integrated
-either on the spatial or the energy grid, yielding the DOS or density
-respectively.
+            import mala
 
-DOS
-***
+            parameters = mala.Parameters()
+            parameters.targets.descriptor_type = 'LDOS'
 
-The DOS can be used to calculate the number of electrons and band energy
-as well as the entropy contribution to the total energy.
+            # Creates a LDOS object via interface
+            ldos = mala.TargetInterface(parameters)
 
+            # Creates a LDOS object directly
+            ldos = mala.LDOS(parameters)
 
-Density
-*******
+            # Use the LDOS object to calculate the band energy from LDOS data.
+            band_energy = ldos.get_band_energy(...)
 
-The Density can be used to calculate the number of electrons and density
-based contributions to the total energy.
+But a wider range of properties is available, see e.g. ``ex03_postprocess_data``.
+For a full list, consult the API reference.
