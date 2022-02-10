@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -38,6 +39,7 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
+    <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="mala.interfaces package" href="mala.interfaces.html" />
@@ -55,19 +57,15 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Materials Learning Algorithms (MALA)
+            <a href="../index.html">
           
 
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v0.2.0-165-gcb6bf90
-              </div>
-            
           
 
           
@@ -90,25 +88,10 @@
               
             
             
-              <p class="caption"><span class="caption-text">Features</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../features/overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/background.html">Theoretical Background</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/preprocessing.html">Preprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/neuralnetworks.html">Neural Networks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/postprocessing.html">Postprocessing</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Installation</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../install/README.html">Installation of MALA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/tested_systems.html">Successfully tested on</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/sql_on_hpc.html">Using postgres on HPC infrastructure (for optuna)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/tensorboard_setup.html">Set up tensorboard to visualize data from HPC cluster</a></li>
-</ul>
-<p class="caption"><span class="caption-text">API Reference</span></p>
-<ul class="current">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">mala</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="mala.html#subpackages">Subpackages</a><ul class="current">
@@ -127,9 +110,6 @@
 </li>
 </ul>
 </li>
-</ul>
-<p class="caption"><span class="caption-text">Contributing</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -214,7 +194,7 @@
 <p>Base class for all descriptor calculators.</p>
 <dl class="py class">
 <dt id="mala.descriptors.descriptor_base.DescriptorBase">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.descriptors.descriptor_base.</span></code><code class="sig-name descname"><span class="pre">DescriptorBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">DescriptorBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Base class for all descriptors available in MALA.</p>
 <p>Descriptors encode the atomic fingerprint of a DFT calculation.</p>
@@ -365,7 +345,7 @@ degree where similar vectors result in simlar LDOS vectors.</p>
 <p>Interface functions to automatically get descriptors.</p>
 <dl class="py function">
 <dt id="mala.descriptors.descriptor_interface.DescriptorInterface">
-<code class="sig-prename descclassname"><span class="pre">mala.descriptors.descriptor_interface.</span></code><code class="sig-name descname"><span class="pre">DescriptorInterface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_interface.DescriptorInterface" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">DescriptorInterface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_interface.DescriptorInterface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a DescriptorBase object that adheres to the parameters provided.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -380,7 +360,7 @@ degree where similar vectors result in simlar LDOS vectors.</p>
 <p>Collection of useful functions for working with LAMMPS.</p>
 <dl class="py function">
 <dt id="mala.descriptors.lammps_utils.extract_compute_np">
-<code class="sig-prename descclassname"><span class="pre">mala.descriptors.lammps_utils.</span></code><code class="sig-name descname"><span class="pre">extract_compute_np</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.lammps_utils.extract_compute_np" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">extract_compute_np</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.lammps_utils.extract_compute_np" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a lammps compute to a numpy array.</p>
 <p>Assumes the compute returns a floating point numbers.
 Note that the result is a view into the original memory.
@@ -401,7 +381,7 @@ skipped and a python float is returned.</p>
 
 <dl class="py function">
 <dt id="mala.descriptors.lammps_utils.set_cmdlinevars">
-<code class="sig-prename descclassname"><span class="pre">mala.descriptors.lammps_utils.</span></code><code class="sig-name descname"><span class="pre">set_cmdlinevars</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmdargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argdict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.lammps_utils.set_cmdlinevars" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set_cmdlinevars</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmdargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argdict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.lammps_utils.set_cmdlinevars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a dicitionary of LAMMPS arguments in a command line argument string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -425,7 +405,7 @@ skipped and a python float is returned.</p>
 <p>SNAP descriptor class.</p>
 <dl class="py class">
 <dt id="mala.descriptors.snap.SNAP">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.descriptors.snap.</span></code><code class="sig-name descname"><span class="pre">SNAP</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.snap.SNAP" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">SNAP</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.snap.SNAP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.descriptors.descriptor_base.DescriptorBase</span></code></a></p>
 <p>Class for calculation and parsing of SNAP descriptors.</p>
 <dl class="field-list simple">

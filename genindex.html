@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
 
   
   
@@ -38,6 +39,7 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+    <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
 </head>
@@ -53,19 +55,15 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Materials Learning Algorithms (MALA)
+            <a href="index.html">
           
 
+          
+            
+            <img src="_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v0.2.0-165-gcb6bf90
-              </div>
-            
           
 
           
@@ -88,29 +86,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Features</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="features/overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features/background.html">Theoretical Background</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features/preprocessing.html">Preprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features/neuralnetworks.html">Neural Networks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features/postprocessing.html">Postprocessing</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Installation</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="install/README.html">Installation of MALA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/tested_systems.html">Successfully tested on</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/sql_on_hpc.html">Using postgres on HPC infrastructure (for optuna)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/tensorboard_setup.html">Set up tensorboard to visualize data from HPC cluster</a></li>
-</ul>
-<p class="caption"><span class="caption-text">API Reference</span></p>
-<ul>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">mala</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Contributing</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -213,27 +193,27 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.acsd_points">acsd_points (mala.common.parameters.ParametersDescriptors attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.acsd_points">acsd_points (ParametersDescriptors attribute)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.add_hyperparameter">add_hyperparameter() (mala.network.hyper_opt_base.HyperOptBase method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.add_hyperparameter">add_hyperparameter() (HyperOptBase method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter">(mala.network.hyper_opt_oat.HyperOptOAT method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter">(HyperOptOAT method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.add_snapshot">add_snapshot() (mala.datahandling.data_handler.DataHandler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.add_snapshot">add_snapshot() (DataHandler method)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube">add_snapshot_qeout_cube() (mala.datahandling.data_converter.DataConverter method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube">add_snapshot_qeout_cube() (DataConverter method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">add_snapshot_to_dataset() (mala.datahandling.lazy_load_dataset.LazyLoadDataset method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">add_snapshot_to_dataset() (LazyLoadDataset method)</a>
 
       <ul>
-        <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.add_snapshot_to_dataset">(mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered method)</a>
+        <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.add_snapshot_to_dataset">(LazyLoadDatasetClustered method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.after_before_training_metric">after_before_training_metric() (mala.common.parameters.ParametersRunning property)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.after_before_training_metric">after_before_training_metric() (ParametersRunning property)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.analytical_integration">analytical_integration() (in module mala.targets.calculation_helpers)</a>
 </li>
@@ -245,16 +225,16 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.backconvert_units">backconvert_units() (mala.descriptors.descriptor_base.DescriptorBase static method)</a>
+      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.backconvert_units">backconvert_units() (DescriptorBase static method)</a>
 
       <ul>
-        <li><a href="api/mala.descriptors.html#mala.descriptors.snap.SNAP.backconvert_units">(mala.descriptors.snap.SNAP static method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.dos.DOS.backconvert_units">(DOS static method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.dos.DOS.backconvert_units">(mala.targets.dos.DOS static method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.backconvert_units">(LDOS static method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.backconvert_units">(mala.targets.ldos.LDOS static method)</a>
+        <li><a href="api/mala.descriptors.html#mala.descriptors.snap.SNAP.backconvert_units">(SNAP static method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.backconvert_units">(mala.targets.target_base.TargetBase static method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.backconvert_units">(TargetBase static method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -263,60 +243,60 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.interfaces.html#mala.interfaces.ase_calculator.MALA.calculate">calculate() (mala.interfaces.ase_calculator.MALA method)</a>
+      <li><a href="api/mala.interfaces.html#mala.interfaces.ase_calculator.MALA.calculate">calculate() (MALA method)</a>
 </li>
-      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.calculate_from_atoms">calculate_from_atoms() (mala.descriptors.descriptor_base.DescriptorBase method)</a>
+      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.calculate_from_atoms">calculate_from_atoms() (DescriptorBase method)</a>
 
       <ul>
-        <li><a href="api/mala.descriptors.html#mala.descriptors.snap.SNAP.calculate_from_atoms">(mala.descriptors.snap.SNAP method)</a>
+        <li><a href="api/mala.descriptors.html#mala.descriptors.snap.SNAP.calculate_from_atoms">(SNAP method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.calculate_from_qe_out">calculate_from_qe_out() (mala.descriptors.descriptor_base.DescriptorBase method)</a>
+      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.calculate_from_qe_out">calculate_from_qe_out() (DescriptorBase method)</a>
 
       <ul>
-        <li><a href="api/mala.descriptors.html#mala.descriptors.snap.SNAP.calculate_from_qe_out">(mala.descriptors.snap.SNAP method)</a>
+        <li><a href="api/mala.descriptors.html#mala.descriptors.snap.SNAP.calculate_from_qe_out">(SNAP method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.network.html#mala.network.network.Network.calculate_loss">calculate_loss() (mala.network.network.Network method)</a>
+      <li><a href="api/mala.network.html#mala.network.network.Network.calculate_loss">calculate_loss() (Network method)</a>
 </li>
       <li><a href="api/mala.common.html#mala.common.check_modules.check_modules">check_modules() (in module mala.common.check_modules)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.checkpoint_exists">checkpoint_exists() (mala.network.hyper_opt_base.HyperOptBase class method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.checkpoint_exists">checkpoint_exists() (HyperOptBase class method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.trainer.Trainer.checkpoint_exists">(mala.network.trainer.Trainer class method)</a>
+        <li><a href="api/mala.network.html#mala.network.trainer.Trainer.checkpoint_exists">(Trainer class method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.checkpoint_name">checkpoint_name (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.checkpoint_name">checkpoint_name (ParametersRunning attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.checkpoints_each_epoch">checkpoints_each_epoch (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.checkpoints_each_epoch">checkpoints_each_epoch (ParametersRunning attribute)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.clear_data">clear_data() (mala.datahandling.data_handler.DataHandler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.clear_data">clear_data() (DataHandler method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.clear_hyperparameters">clear_hyperparameters() (mala.network.hyper_opt_base.HyperOptBase method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.clear_hyperparameters">clear_hyperparameters() (HyperOptBase method)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.cluster_dataset">cluster_dataset() (mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.cluster_dataset">cluster_dataset() (LazyLoadDatasetClustered method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.comment">comment (mala.common.parameters.Parameters attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.comment">comment (Parameters attribute)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.convert_single_snapshot">convert_single_snapshot() (mala.datahandling.data_converter.DataConverter method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.convert_single_snapshot">convert_single_snapshot() (DataConverter method)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">convert_snapshots() (mala.datahandling.data_converter.DataConverter method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">convert_snapshots() (DataConverter method)</a>
 </li>
-      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.convert_units">convert_units() (mala.descriptors.descriptor_base.DescriptorBase static method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.atomic_force.AtomicForce.convert_units">convert_units() (AtomicForce static method)</a>
 
       <ul>
-        <li><a href="api/mala.descriptors.html#mala.descriptors.snap.SNAP.convert_units">(mala.descriptors.snap.SNAP static method)</a>
+        <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.convert_units">(DescriptorBase static method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.atomic_force.AtomicForce.convert_units">(mala.targets.atomic_force.AtomicForce static method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.dos.DOS.convert_units">(DOS static method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.dos.DOS.convert_units">(mala.targets.dos.DOS static method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.convert_units">(LDOS static method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.convert_units">(mala.targets.ldos.LDOS static method)</a>
+        <li><a href="api/mala.descriptors.html#mala.descriptors.snap.SNAP.convert_units">(SNAP static method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.convert_units">(mala.targets.target_base.TargetBase static method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.convert_units">(TargetBase static method)</a>
 </li>
       </ul></li>
       <li><a href="api/mala.targets.html#mala.targets.cube_parser.CubeFile">CubeFile (class in mala.targets.cube_parser)</a>
@@ -327,11 +307,11 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.data">data (mala.common.parameters.Parameters attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.data">data (Parameters attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.data_splitting_snapshots">data_splitting_snapshots (mala.common.parameters.ParametersData attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.data_splitting_snapshots">data_splitting_snapshots (ParametersData attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.data_splitting_type">data_splitting_type (mala.common.parameters.ParametersData attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.data_splitting_type">data_splitting_type (ParametersData attribute)</a>
 </li>
       <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter">DataConverter (class in mala.datahandling.data_converter)</a>
 </li>
@@ -339,13 +319,13 @@
 </li>
       <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler">DataScaler (class in mala.datahandling.data_scaler)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.debug">debug (mala.common.parameters.Parameters attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.debug">debug (Parameters attribute)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.density.Density">Density (class in mala.targets.density)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.descriptor_calculator">descriptor_calculator (mala.datahandling.data_converter.DataConverter attribute)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.descriptor_calculator">descriptor_calculator (DataConverter attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.descriptor_type">descriptor_type (mala.common.parameters.ParametersDescriptors attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.descriptor_type">descriptor_type (ParametersDescriptors attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -353,25 +333,25 @@
 </li>
       <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_interface.DescriptorInterface">DescriptorInterface() (in module mala.descriptors.descriptor_interface)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.descriptors">descriptors (mala.common.parameters.Parameters attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.descriptors">descriptors (Parameters attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.descriptors_contain_xyz">descriptors_contain_xyz (mala.common.parameters.ParametersData attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.descriptors_contain_xyz">descriptors_contain_xyz (ParametersData attribute)</a>
 
       <ul>
-        <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.descriptors_contain_xyz">(mala.common.parameters.ParametersDescriptors attribute)</a>
+        <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.descriptors_contain_xyz">(ParametersDescriptors attribute)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.descriptors_contain_xyz">descriptors_contain_xyz() (mala.descriptors.descriptor_base.DescriptorBase property)</a>
+      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.descriptors_contain_xyz">descriptors_contain_xyz() (DescriptorBase property)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.device">device() (mala.common.parameters.Parameters property)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.device">device() (Parameters property)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.direction">direction (mala.common.parameters.ParametersHyperparameterOptimization attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.direction">direction (ParametersHyperparameterOptimization attribute)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.network.Network.do_prediction">do_prediction() (mala.network.network.Network method)</a>
+      <li><a href="api/mala.network.html#mala.network.network.Network.do_prediction">do_prediction() (Network method)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.dos.DOS">DOS (class in mala.targets.dos)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.during_training_metric">during_training_metric() (mala.common.parameters.ParametersRunning property)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.during_training_metric">during_training_metric() (ParametersRunning property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -379,13 +359,13 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.early_stopping_epochs">early_stopping_epochs (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.early_stopping_epochs">early_stopping_epochs (ParametersRunning attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.early_stopping_threshold">early_stopping_threshold (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.early_stopping_threshold">early_stopping_threshold (ParametersRunning attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.enforce_pbc">enforce_pbc() (mala.descriptors.descriptor_base.DescriptorBase static method)</a>
+      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.enforce_pbc">enforce_pbc() (DescriptorBase static method)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.entropy_multiplicator">entropy_multiplicator() (in module mala.targets.calculation_helpers)</a>
 </li>
@@ -403,36 +383,36 @@
 </li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.fermi_function_eV">fermi_function_eV() (in module mala.targets.calculation_helpers)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting">finish_incremental_fitting() (mala.datahandling.data_scaler.DataScaler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting">finish_incremental_fitting() (DataScaler method)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.fit">fit() (mala.datahandling.data_scaler.DataScaler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.fit">fit() (DataScaler method)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.network.FeedForwardNet.forward">forward() (mala.network.network.FeedForwardNet method)</a>
+      <li><a href="api/mala.network.html#mala.network.network.FeedForwardNet.forward">forward() (FeedForwardNet method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.network.GRU.forward">(mala.network.network.GRU method)</a>
+        <li><a href="api/mala.network.html#mala.network.network.GRU.forward">(GRU method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.network.LSTM.forward">(mala.network.network.LSTM method)</a>
+        <li><a href="api/mala.network.html#mala.network.network.LSTM.forward">(LSTM method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.network.Network.forward">(mala.network.network.Network method)</a>
+        <li><a href="api/mala.network.html#mala.network.network.Network.forward">(Network method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.network.PositionalEncoding.forward">(mala.network.network.PositionalEncoding method)</a>
+        <li><a href="api/mala.network.html#mala.network.network.PositionalEncoding.forward">(PositionalEncoding method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.network.TransformerNet.forward">(mala.network.network.TransformerNet method)</a>
+        <li><a href="api/mala.network.html#mala.network.network.TransformerNet.forward">(TransformerNet method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.json_serializable.JSONSerializable.from_json">from_json() (mala.common.json_serializable.JSONSerializable class method)</a>
+      <li><a href="api/mala.common.html#mala.common.json_serializable.JSONSerializable.from_json">from_json() (JSONSerializable class method)</a>
 
       <ul>
-        <li><a href="api/mala.common.html#mala.common.parameters.ParametersBase.from_json">(mala.common.parameters.ParametersBase class method)</a>
+        <li><a href="api/mala.common.html#mala.common.parameters.ParametersBase.from_json">(ParametersBase class method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.targets.html#mala.targets.density.Density.from_ldos">from_ldos() (mala.targets.density.Density class method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.density.Density.from_ldos">from_ldos() (Density class method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.dos.DOS.from_ldos">(mala.targets.dos.DOS class method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.dos.DOS.from_ldos">(DOS class method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -441,75 +421,75 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.descriptors.html#mala.descriptors.snap.SNAP.gather_descriptors">gather_descriptors() (mala.descriptors.snap.SNAP method)</a>
+      <li><a href="api/mala.descriptors.html#mala.descriptors.snap.SNAP.gather_descriptors">gather_descriptors() (SNAP method)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.gaussians">gaussians() (in module mala.targets.calculation_helpers)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.network.TransformerNet.generate_square_subsequent_mask">generate_square_subsequent_mask() (mala.network.network.TransformerNet method)</a>
+      <li><a href="api/mala.network.html#mala.network.network.TransformerNet.generate_square_subsequent_mask">generate_square_subsequent_mask() (TransformerNet method)</a>
 </li>
-      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.get_acsd">get_acsd() (mala.descriptors.descriptor_base.DescriptorBase method)</a>
+      <li><a href="api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.get_acsd">get_acsd() (DescriptorBase method)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_and_cache_density_cached">get_and_cache_density_cached() (mala.targets.ldos.LDOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_and_cache_density_cached">get_and_cache_density_cached() (LDOS method)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_and_cache_density_of_states">get_and_cache_density_of_states() (mala.targets.ldos.LDOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_and_cache_density_of_states">get_and_cache_density_of_states() (LDOS method)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.density.Density.get_atomic_forces">get_atomic_forces() (mala.targets.density.Density method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.density.Density.get_atomic_forces">get_atomic_forces() (Density method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_atomic_forces">(mala.targets.ldos.LDOS method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_atomic_forces">(LDOS method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_band_energy">get_band_energy() (mala.targets.dos.DOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_band_energy">get_band_energy() (DOS method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_band_energy">(mala.targets.ldos.LDOS method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_band_energy">(LDOS method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_band_energy">(mala.targets.target_base.TargetBase method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_band_energy">(TargetBase method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.get_best_trial_results">get_best_trial_results() (mala.network.hyper_opt_naswot.HyperOptNASWOT method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.get_best_trial_results">get_best_trial_results() (HyperOptNASWOT method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.get_best_trial_results">(mala.network.hyper_opt_oat.HyperOptOAT method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.get_best_trial_results">(HyperOptOAT method)</a>
 </li>
       </ul></li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.get_beta">get_beta() (in module mala.targets.calculation_helpers)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_categorical">get_categorical() (mala.network.hyperparameter_oat.HyperparameterOAT method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_categorical">get_categorical() (HyperparameterOAT method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_categorical">(mala.network.hyperparameter_optuna.HyperparameterOptuna method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_categorical">(HyperparameterOptuna method)</a>
 </li>
       </ul></li>
       <li><a href="api/mala.common.html#mala.common.parallelizer.get_comm">get_comm() (in module mala.common.parallelizer)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.density.Density.get_density">get_density() (mala.targets.density.Density method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.density.Density.get_density">get_density() (Density method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_density">(mala.targets.ldos.LDOS method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_density">(LDOS method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_density">(mala.targets.target_base.TargetBase method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_density">(TargetBase method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_density_of_states">get_density_of_states() (mala.targets.dos.DOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_density_of_states">get_density_of_states() (DOS method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_density_of_states">(mala.targets.ldos.LDOS method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_density_of_states">(LDOS method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_density_of_states">(mala.targets.target_base.TargetBase method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_density_of_states">(TargetBase method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.targets.html#mala.targets.density.Density.get_energy_contributions">get_energy_contributions() (mala.targets.density.Density method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.density.Density.get_energy_contributions">get_energy_contributions() (Density method)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_energy_grid">get_energy_grid() (mala.targets.dos.DOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_energy_grid">get_energy_grid() (DOS method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_energy_grid">(mala.targets.ldos.LDOS method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_energy_grid">(LDOS method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_energy_grid">(mala.targets.target_base.TargetBase method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_energy_grid">(TargetBase method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_entropy_contribution">get_entropy_contribution() (mala.targets.dos.DOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_entropy_contribution">get_entropy_contribution() (DOS method)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.get_f0_value">get_f0_value() (in module mala.targets.calculation_helpers)</a>
 </li>
@@ -517,87 +497,87 @@
 </li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.get_f2_value">get_f2_value() (in module mala.targets.calculation_helpers)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.atomic_force.AtomicForce.get_feature_size">get_feature_size() (mala.targets.atomic_force.AtomicForce method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.atomic_force.AtomicForce.get_feature_size">get_feature_size() (AtomicForce method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.density.Density.get_feature_size">(mala.targets.density.Density method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.density.Density.get_feature_size">(Density method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_feature_size">(mala.targets.dos.DOS method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_feature_size">(DOS method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_feature_size">(mala.targets.ldos.LDOS method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_feature_size">(LDOS method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_feature_size">(mala.targets.target_base.TargetBase method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_feature_size">(TargetBase method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.network.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_float">get_float() (mala.network.hyperparameter_optuna.HyperparameterOptuna method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_float">get_float() (HyperparameterOptuna method)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.get_input_dimension">get_input_dimension() (mala.datahandling.data_handler.DataHandler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.get_input_dimension">get_input_dimension() (DataHandler method)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_int">get_int() (mala.network.hyperparameter_optuna.HyperparameterOptuna method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_int">get_int() (HyperparameterOptuna method)</a>
 </li>
       <li><a href="api/mala.common.html#mala.common.parallelizer.get_local_rank">get_local_rank() (in module mala.common.parallelizer)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data">get_new_data() (mala.datahandling.lazy_load_dataset.LazyLoadDataset method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data">get_new_data() (LazyLoadDataset method)</a>
 
       <ul>
-        <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.get_new_data">(mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered method)</a>
+        <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.get_new_data">(LazyLoadDatasetClustered method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.targets.html#mala.targets.density.Density.get_number_of_electrons">get_number_of_electrons() (mala.targets.density.Density method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.density.Density.get_number_of_electrons">get_number_of_electrons() (Density method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_number_of_electrons">(mala.targets.dos.DOS method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_number_of_electrons">(DOS method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_number_of_electrons">(mala.targets.ldos.LDOS method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_number_of_electrons">(LDOS method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_number_of_electrons">(mala.targets.target_base.TargetBase method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_number_of_electrons">(TargetBase method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters">get_optimal_parameters() (mala.network.hyper_opt_oat.HyperOptOAT method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters">get_optimal_parameters() (HyperOptOAT method)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array">get_orthogonal_array() (mala.network.hyper_opt_oat.HyperOptOAT method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array">get_orthogonal_array() (HyperOptOAT method)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.get_output_dimension">get_output_dimension() (mala.datahandling.data_handler.DataHandler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.get_output_dimension">get_output_dimension() (DataHandler method)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_parameter">get_parameter() (mala.network.hyperparameter_oat.HyperparameterOAT method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_parameter">get_parameter() (HyperparameterOAT method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_parameter">(mala.network.hyperparameter_optuna.HyperparameterOptuna method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_parameter">(HyperparameterOptuna method)</a>
 </li>
       </ul></li>
       <li><a href="api/mala.common.html#mala.common.parallelizer.get_rank">get_rank() (in module mala.common.parallelizer)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_real_space_grid">get_real_space_grid() (mala.targets.target_base.TargetBase method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_real_space_grid">get_real_space_grid() (TargetBase method)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.get_s0_value">get_s0_value() (in module mala.targets.calculation_helpers)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.get_s1_value">get_s1_value() (in module mala.targets.calculation_helpers)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.density.Density.get_scaled_positions_for_qe">get_scaled_positions_for_qe() (mala.targets.density.Density static method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.density.Density.get_scaled_positions_for_qe">get_scaled_positions_for_qe() (Density static method)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev">get_self_consistent_fermi_energy_ev() (mala.targets.dos.DOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev">get_self_consistent_fermi_energy_ev() (DOS method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy_ev">(mala.targets.ldos.LDOS method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy_ev">(LDOS method)</a>
 </li>
       </ul></li>
       <li><a href="api/mala.common.html#mala.common.parallelizer.get_size">get_size() (in module mala.common.parallelizer)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output">get_snapshot_calculation_output() (mala.datahandling.data_handler.DataHandler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output">get_snapshot_calculation_output() (DataHandler method)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.get_test_input_gradient">get_test_input_gradient() (mala.datahandling.data_handler.DataHandler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.get_test_input_gradient">get_test_input_gradient() (DataHandler method)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_total_energy">get_total_energy() (mala.targets.ldos.LDOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.get_total_energy">get_total_energy() (LDOS method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_total_energy">(mala.targets.target_base.TargetBase method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.get_total_energy">(TargetBase method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study">get_trials_from_study() (mala.network.hyper_opt_optuna.HyperOptOptuna method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study">get_trials_from_study() (HyperOptOptuna method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDebug.grid_dimensions">grid_dimensions (mala.common.parameters.ParametersDebug attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDebug.grid_dimensions">grid_dimensions (ParametersDebug attribute)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.network.GRU">GRU (class in mala.network.network)</a>
 </li>
@@ -607,7 +587,7 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.hlist">hlist (mala.common.parameters.ParametersHyperparameterOptimization attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.hlist">hlist (ParametersHyperparameterOptimization attribute)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase">HyperOptBase (class in mala.network.hyper_opt_base)</a>
 </li>
@@ -629,7 +609,7 @@
 </li>
       <li><a href="api/mala.network.html#mala.network.hyperparameter_optuna.HyperparameterOptuna">HyperparameterOptuna (class in mala.network.hyperparameter_optuna)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.hyperparameters">hyperparameters (mala.common.parameters.Parameters attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.hyperparameters">hyperparameters (Parameters attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -637,27 +617,27 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.interfaces.html#mala.interfaces.ase_calculator.MALA.implemented_properties">implemented_properties (mala.interfaces.ase_calculator.MALA attribute)</a>
+      <li><a href="api/mala.interfaces.html#mala.interfaces.ase_calculator.MALA.implemented_properties">implemented_properties (MALA attribute)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.incremental_fit">incremental_fit() (mala.datahandling.data_scaler.DataScaler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.incremental_fit">incremental_fit() (DataScaler method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.inference_data_grid">inference_data_grid (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.inference_data_grid">inference_data_grid (ParametersRunning attribute)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.network.GRU.init_hidden">init_hidden() (mala.network.network.GRU method)</a>
+      <li><a href="api/mala.network.html#mala.network.network.GRU.init_hidden">init_hidden() (GRU method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.network.LSTM.init_hidden">(mala.network.network.LSTM method)</a>
+        <li><a href="api/mala.network.html#mala.network.network.LSTM.init_hidden">(LSTM method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.network.html#mala.network.network.TransformerNet.init_weights">init_weights() (mala.network.network.TransformerNet method)</a>
+      <li><a href="api/mala.network.html#mala.network.network.TransformerNet.init_weights">init_weights() (TransformerNet method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.input_rescaling_type">input_rescaling_type (mala.common.parameters.ParametersData attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.input_rescaling_type">input_rescaling_type (ParametersData attribute)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.calculation_helpers.integrate_values_on_spacing">integrate_values_on_spacing() (in module mala.targets.calculation_helpers)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.inverse_transform">inverse_transform() (mala.datahandling.data_scaler.DataScaler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.inverse_transform">inverse_transform() (DataScaler method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -673,7 +653,7 @@
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.kwargs">kwargs (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.kwargs">kwargs (ParametersRunning attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -681,7 +661,7 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.lammps_compute_file">lammps_compute_file (mala.common.parameters.ParametersDescriptors attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.lammps_compute_file">lammps_compute_file (ParametersDescriptors attribute)</a>
 </li>
       <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset">LazyLoadDataset (class in mala.datahandling.lazy_load_dataset)</a>
 </li>
@@ -689,39 +669,39 @@
 </li>
       <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS">LDOS (class in mala.targets.ldos)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets.ldos_gridoffset_ev">ldos_gridoffset_ev (mala.common.parameters.ParametersTargets attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets.ldos_gridoffset_ev">ldos_gridoffset_ev (ParametersTargets attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets.ldos_gridsize">ldos_gridsize (mala.common.parameters.ParametersTargets attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets.ldos_gridsize">ldos_gridsize (ParametersTargets attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets.ldos_gridspacing_ev">ldos_gridspacing_ev (mala.common.parameters.ParametersTargets attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets.ldos_gridspacing_ev">ldos_gridspacing_ev (ParametersTargets attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate">learning_rate (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate">learning_rate (ParametersRunning attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate_decay">learning_rate_decay (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate_decay">learning_rate_decay (ParametersRunning attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate_patience">learning_rate_patience (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate_patience">learning_rate_patience (ParametersRunning attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate_scheduler">learning_rate_scheduler (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.learning_rate_scheduler">learning_rate_scheduler (ParametersRunning attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.load_from_file">load_from_file() (mala.common.parameters.Parameters class method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.load_from_file">load_from_file() (DataScaler class method)</a>
 
       <ul>
-        <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.load_from_file">(mala.datahandling.data_scaler.DataScaler class method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.load_from_file">(HyperOptOAT class method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.load_from_file">(mala.network.hyper_opt_oat.HyperOptOAT class method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.load_from_file">(HyperOptOptuna class method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.load_from_file">(mala.network.hyper_opt_optuna.HyperOptOptuna class method)</a>
+        <li><a href="api/mala.network.html#mala.network.network.Network.load_from_file">(Network class method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.network.Network.load_from_file">(mala.network.network.Network class method)</a>
+        <li><a href="api/mala.common.html#mala.common.parameters.Parameters.load_from_file">(Parameters class method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.trainer.Trainer.load_from_file">(mala.network.trainer.Trainer class method)</a>
+        <li><a href="api/mala.network.html#mala.network.trainer.Trainer.load_from_file">(Trainer class method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.load_from_json">load_from_json() (mala.common.parameters.Parameters class method)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.load_from_json">load_from_json() (Parameters class method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.load_from_pickle">load_from_pickle() (mala.common.parameters.Parameters class method)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.load_from_pickle">load_from_pickle() (Parameters class method)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.network.LSTM">LSTM (class in mala.network.network)</a>
 </li>
@@ -1078,18 +1058,18 @@
         <li><a href="api/mala.html#module-mala.version">module</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.manual_seed">manual_seed (mala.common.parameters.Parameters attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.manual_seed">manual_seed (Parameters attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.max_number_epochs">max_number_epochs (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.max_number_epochs">max_number_epochs (ParametersRunning attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.mini_batch_size">mini_batch_size (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.mini_batch_size">mini_batch_size (ParametersRunning attribute)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.mix_datasets">mix_datasets() (mala.datahandling.data_handler.DataHandler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.mix_datasets">mix_datasets() (DataHandler method)</a>
 
       <ul>
-        <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets">(mala.datahandling.lazy_load_dataset.LazyLoadDataset method)</a>
+        <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets">(LazyLoadDataset method)</a>
 </li>
-        <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.mix_datasets">(mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered method)</a>
+        <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.mix_datasets">(LazyLoadDatasetClustered method)</a>
 </li>
       </ul></li>
       <li>
@@ -1201,25 +1181,25 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.n_trials">n_trials (mala.common.parameters.ParametersHyperparameterOptimization attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.n_trials">n_trials (ParametersHyperparameterOptimization attribute)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.naswot_pruner.NASWOTPruner">NASWOTPruner (class in mala.network.naswot_pruner)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.network.Network">Network (class in mala.network.network)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.network">network (mala.common.parameters.Parameters attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.network">network (Parameters attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersNetwork.nn_type">nn_type (mala.common.parameters.ParametersNetwork attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersNetwork.nn_type">nn_type (ParametersNetwork attribute)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyperparameter_oat.HyperparameterOAT.num_choices">num_choices() (mala.network.hyperparameter_oat.HyperparameterOAT property)</a>
+      <li><a href="api/mala.network.html#mala.network.hyperparameter_oat.HyperparameterOAT.num_choices">num_choices() (HyperparameterOAT property)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.number_of_clusters">number_of_clusters (mala.common.parameters.ParametersData attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.number_of_clusters">number_of_clusters (ParametersData attribute)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs">number_of_runs() (mala.network.hyper_opt_oat.HyperOptOAT method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.number_of_runs">number_of_runs() (HyperOptOAT method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.number_training_per_trial">number_training_per_trial() (mala.common.parameters.ParametersHyperparameterOptimization property)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.number_training_per_trial">number_training_per_trial() (ParametersHyperparameterOptimization property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1233,7 +1213,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.html#mala.network.objective_naswot.ObjectiveNASWOT">ObjectiveNASWOT (class in mala.network.objective_naswot)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.output_rescaling_type">output_rescaling_type (mala.common.parameters.ParametersData attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.output_rescaling_type">output_rescaling_type (ParametersData attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1259,39 +1239,39 @@
 </li>
       <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets">ParametersTargets (class in mala.common.parameters)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.objective_base.ObjectiveBase.parse_trial">parse_trial() (mala.network.objective_base.ObjectiveBase method)</a>
+      <li><a href="api/mala.network.html#mala.network.objective_base.ObjectiveBase.parse_trial">parse_trial() (ObjectiveBase method)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.objective_base.ObjectiveBase.parse_trial_oat">parse_trial_oat() (mala.network.objective_base.ObjectiveBase method)</a>
+      <li><a href="api/mala.network.html#mala.network.objective_base.ObjectiveBase.parse_trial_oat">parse_trial_oat() (ObjectiveBase method)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.objective_base.ObjectiveBase.parse_trial_optuna">parse_trial_optuna() (mala.network.objective_base.ObjectiveBase method)</a>
+      <li><a href="api/mala.network.html#mala.network.objective_base.ObjectiveBase.parse_trial_optuna">parse_trial_optuna() (ObjectiveBase method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.perform_study">perform_study() (mala.network.hyper_opt_base.HyperOptBase method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.perform_study">perform_study() (HyperOptBase method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.perform_study">(mala.network.hyper_opt_naswot.HyperOptNASWOT method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.perform_study">(HyperOptNASWOT method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.perform_study">(mala.network.hyper_opt_oat.HyperOptOAT method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.perform_study">(HyperOptOAT method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.perform_study">(mala.network.hyper_opt_optuna.HyperOptOptuna method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.perform_study">(HyperOptOptuna method)</a>
 </li>
       </ul></li>
       <li><a href="api/mala.network.html#mala.network.network.PositionalEncoding">PositionalEncoding (class in mala.network.network)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.predictor.Predictor.predict_for_atoms">predict_for_atoms() (mala.network.predictor.Predictor method)</a>
+      <li><a href="api/mala.network.html#mala.network.predictor.Predictor.predict_for_atoms">predict_for_atoms() (Predictor method)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.predictor.Predictor.predict_from_qeout">predict_from_qeout() (mala.network.predictor.Predictor method)</a>
+      <li><a href="api/mala.network.html#mala.network.predictor.Predictor.predict_from_qeout">predict_from_qeout() (Predictor method)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.predictor.Predictor">Predictor (class in mala.network.predictor)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.prepare_data">prepare_data() (mala.datahandling.data_handler.DataHandler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.prepare_data">prepare_data() (DataHandler method)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.prepare_for_testing">prepare_for_testing() (mala.datahandling.data_handler.DataHandler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.prepare_for_testing">prepare_for_testing() (DataHandler method)</a>
 </li>
       <li><a href="api/mala.common.html#mala.common.parallelizer.printout">printout() (in module mala.common.parallelizer)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.naswot_pruner.NASWOTPruner.prune">prune() (mala.network.naswot_pruner.NASWOTPruner method)</a>
+      <li><a href="api/mala.network.html#mala.network.naswot_pruner.NASWOTPruner.prune">prune() (NASWOTPruner method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1299,7 +1279,7 @@
 <h2 id="Q">Q</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.qe_input_data">qe_input_data() (mala.targets.target_base.TargetBase property)</a>
+      <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.qe_input_data">qe_input_data() (TargetBase property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1307,61 +1287,61 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor">raw_numpy_to_converted_scaled_tensor() (mala.datahandling.data_handler.DataHandler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor">raw_numpy_to_converted_scaled_tensor() (DataHandler method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.rcutfac">rcutfac (mala.common.parameters.ParametersDescriptors attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.rcutfac">rcutfac (ParametersDescriptors attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.rdb_storage_heartbeat">rdb_storage_heartbeat() (mala.common.parameters.ParametersHyperparameterOptimization property)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.rdb_storage_heartbeat">rdb_storage_heartbeat() (ParametersHyperparameterOptimization property)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.read_additional_calculation_data">read_additional_calculation_data() (mala.targets.target_base.TargetBase method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.read_additional_calculation_data">read_additional_calculation_data() (TargetBase method)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.cube_parser.read_cube">read_cube() (in module mala.targets.cube_parser)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.density.Density.read_from_cube">read_from_cube() (mala.targets.density.Density method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.density.Density.read_from_cube">read_from_cube() (Density method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.read_from_cube">(mala.targets.ldos.LDOS method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.read_from_cube">(LDOS method)</a>
 </li>
-        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.read_from_cube">(mala.targets.target_base.TargetBase method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.read_from_cube">(TargetBase method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.read_from_qe_dos_txt">read_from_qe_dos_txt() (mala.targets.dos.DOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.read_from_qe_dos_txt">read_from_qe_dos_txt() (DOS method)</a>
 
       <ul>
-        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.read_from_qe_dos_txt">(mala.targets.target_base.TargetBase method)</a>
+        <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.read_from_qe_dos_txt">(TargetBase method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.read_from_qe_out">read_from_qe_out() (mala.targets.dos.DOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.dos.DOS.read_from_qe_out">read_from_qe_out() (DOS method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.targets.html#mala.targets.cube_parser.read_imcube">read_imcube() (in module mala.targets.cube_parser)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.cube_parser.CubeFile.readline">readline() (mala.targets.cube_parser.CubeFile method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.cube_parser.CubeFile.readline">readline() (CubeFile method)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging">resize_snapshots_for_debugging() (mala.datahandling.data_handler.DataHandler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging">resize_snapshots_for_debugging() (DataHandler method)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.restrict_data">restrict_data() (mala.targets.target_base.TargetBase method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.restrict_data">restrict_data() (TargetBase method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets.restrict_targets">restrict_targets() (mala.common.parameters.ParametersTargets property)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets.restrict_targets">restrict_targets() (ParametersTargets property)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.resume_checkpoint">resume_checkpoint() (mala.network.hyper_opt_oat.HyperOptOAT class method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.resume_checkpoint">resume_checkpoint() (HyperOptOAT class method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint">(mala.network.hyper_opt_optuna.HyperOptOptuna class method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint">(HyperOptOptuna class method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.trainer.Trainer.resume_checkpoint">(mala.network.trainer.Trainer class method)</a>
+        <li><a href="api/mala.network.html#mala.network.trainer.Trainer.resume_checkpoint">(Trainer class method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.return_outputs_directly">return_outputs_directly() (mala.datahandling.lazy_load_dataset.LazyLoadDataset property)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.return_outputs_directly">return_outputs_directly() (LazyLoadDataset property)</a>
 
       <ul>
-        <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.return_outputs_directly">(mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered property)</a>
+        <li><a href="api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.return_outputs_directly">(LazyLoadDatasetClustered property)</a>
 </li>
       </ul></li>
       <li><a href="api/mala.network.html#mala.network.runner.Runner">Runner (class in mala.network.runner)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.running">running (mala.common.parameters.Parameters attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.running">running (Parameters attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1369,19 +1349,19 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.sampler">sampler (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.sampler">sampler (ParametersRunning attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.save">save() (mala.common.parameters.Parameters method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.save">save() (DataScaler method)</a>
 
       <ul>
-        <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.save">(mala.datahandling.data_scaler.DataScaler method)</a>
+        <li><a href="api/mala.common.html#mala.common.parameters.Parameters.save">(Parameters method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.save_as_json">save_as_json() (mala.common.parameters.Parameters method)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.save_as_json">save_as_json() (Parameters method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.save_as_pickle">save_as_pickle() (mala.common.parameters.Parameters method)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.save_as_pickle">save_as_pickle() (Parameters method)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.network.Network.save_network">save_network() (mala.network.network.Network method)</a>
+      <li><a href="api/mala.network.html#mala.network.network.Network.save_network">save_network() (Network method)</a>
 </li>
       <li><a href="api/mala.descriptors.html#mala.descriptors.lammps_utils.set_cmdlinevars">set_cmdlinevars() (in module mala.descriptors.lammps_utils)</a>
 </li>
@@ -1391,37 +1371,37 @@
 </li>
       <li><a href="api/mala.common.html#mala.common.parallelizer.set_mpi_status">set_mpi_status() (in module mala.common.parallelizer)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.set_optimal_parameters">set_optimal_parameters() (mala.network.hyper_opt_base.HyperOptBase method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.set_optimal_parameters">set_optimal_parameters() (HyperOptBase method)</a>
 
       <ul>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.set_optimal_parameters">(mala.network.hyper_opt_naswot.HyperOptNASWOT method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.set_optimal_parameters">(HyperOptNASWOT method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.set_optimal_parameters">(mala.network.hyper_opt_oat.HyperOptOAT method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.set_optimal_parameters">(HyperOptOAT method)</a>
 </li>
-        <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.set_optimal_parameters">(mala.network.hyper_opt_optuna.HyperOptOptuna method)</a>
+        <li><a href="api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.set_optimal_parameters">(HyperOptOptuna method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.set_parameters">set_parameters() (mala.network.hyper_opt_base.HyperOptBase method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.set_parameters">set_parameters() (HyperOptBase method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.show">show() (mala.common.parameters.Parameters method)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.show">show() (Parameters method)</a>
 
       <ul>
-        <li><a href="api/mala.common.html#mala.common.parameters.ParametersBase.show">(mala.common.parameters.ParametersBase method)</a>
+        <li><a href="api/mala.common.html#mala.common.parameters.ParametersBase.show">(ParametersBase method)</a>
 </li>
-        <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.show">(mala.common.parameters.ParametersHyperparameterOptimization method)</a>
+        <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.show">(ParametersHyperparameterOptimization method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance">show_order_of_importance() (mala.network.hyper_opt_oat.HyperOptOAT method)</a>
+      <li><a href="api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance">show_order_of_importance() (HyperOptOAT method)</a>
 </li>
       <li><a href="api/mala.descriptors.html#mala.descriptors.snap.SNAP">SNAP (class in mala.descriptors.snap)</a>
 </li>
       <li><a href="api/mala.datahandling.html#mala.datahandling.snapshot.Snapshot">Snapshot (class in mala.datahandling.snapshot)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.snapshot_directories_list">snapshot_directories_list (mala.common.parameters.ParametersData attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.snapshot_directories_list">snapshot_directories_list (ParametersData attribute)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.start_incremental_fitting">start_incremental_fitting() (mala.datahandling.data_scaler.DataScaler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.start_incremental_fitting">start_incremental_fitting() (DataScaler method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1429,53 +1409,53 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.target_calculator">target_calculator (mala.datahandling.data_converter.DataConverter attribute)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.target_calculator">target_calculator (DataConverter attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets.target_type">target_type (mala.common.parameters.ParametersTargets attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersTargets.target_type">target_type (ParametersTargets attribute)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase">TargetBase (class in mala.targets.target_base)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.target_interface.TargetInterface">TargetInterface() (in module mala.targets.target_interface)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.targets">targets (mala.common.parameters.Parameters attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.targets">targets (Parameters attribute)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.density.Density.te_mutex">te_mutex (mala.targets.density.Density attribute)</a>
+      <li><a href="api/mala.targets.html#mala.targets.density.Density.te_mutex">te_mutex (Density attribute)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.test_data_inputs">test_data_inputs (mala.datahandling.data_handler.DataHandler attribute)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.test_data_inputs">test_data_inputs (DataHandler attribute)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.test_data_outputs">test_data_outputs (mala.datahandling.data_handler.DataHandler attribute)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.test_data_outputs">test_data_outputs (DataHandler attribute)</a>
 </li>
-      <li><a href="api/mala.network.html#mala.network.tester.Tester.test_snapshot">test_snapshot() (mala.network.tester.Tester method)</a>
+      <li><a href="api/mala.network.html#mala.network.tester.Tester.test_snapshot">test_snapshot() (Tester method)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.tester.Tester">Tester (class in mala.network.tester)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.json_serializable.JSONSerializable.to_json">to_json() (mala.common.json_serializable.JSONSerializable method)</a>
+      <li><a href="api/mala.common.html#mala.common.json_serializable.JSONSerializable.to_json">to_json() (JSONSerializable method)</a>
 
       <ul>
-        <li><a href="api/mala.common.html#mala.common.parameters.ParametersBase.to_json">(mala.common.parameters.ParametersBase method)</a>
+        <li><a href="api/mala.common.html#mala.common.parameters.ParametersBase.to_json">(ParametersBase method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.network.html#mala.network.trainer.Trainer.train_network">train_network() (mala.network.trainer.Trainer method)</a>
+      <li><a href="api/mala.network.html#mala.network.trainer.Trainer.train_network">train_network() (Trainer method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.train_ratio">train_ratio (mala.common.parameters.ParametersData attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.train_ratio">train_ratio (ParametersData attribute)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.trainer.Trainer">Trainer (class in mala.network.trainer)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.training_data_inputs">training_data_inputs (mala.datahandling.data_handler.DataHandler attribute)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.training_data_inputs">training_data_inputs (DataHandler attribute)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.training_data_outputs">training_data_outputs (mala.datahandling.data_handler.DataHandler attribute)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.training_data_outputs">training_data_outputs (DataHandler attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.trainingtype">trainingtype (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.trainingtype">trainingtype (ParametersRunning attribute)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.transform">transform() (mala.datahandling.data_scaler.DataScaler method)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_scaler.DataScaler.transform">transform() (DataScaler method)</a>
 </li>
       <li><a href="api/mala.network.html#mala.network.network.TransformerNet">TransformerNet (class in mala.network.network)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.trial_ensemble_evaluation">trial_ensemble_evaluation() (mala.common.parameters.ParametersHyperparameterOptimization property)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.trial_ensemble_evaluation">trial_ensemble_evaluation() (ParametersHyperparameterOptimization property)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.twojmax">twojmax (mala.common.parameters.ParametersDescriptors attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersDescriptors.twojmax">twojmax (ParametersDescriptors attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1483,25 +1463,25 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.uncache_density">uncache_density() (mala.targets.ldos.LDOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.uncache_density">uncache_density() (LDOS method)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.uncache_density_of_states">uncache_density_of_states() (mala.targets.ldos.LDOS method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.ldos.LDOS.uncache_density_of_states">uncache_density_of_states() (LDOS method)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.use_clustering">use_clustering (mala.common.parameters.ParametersData attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.use_clustering">use_clustering (ParametersData attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.use_compression">use_compression (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.use_compression">use_compression (ParametersRunning attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.use_gpu">use_gpu() (mala.common.parameters.Parameters property)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.use_gpu">use_gpu() (Parameters property)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.use_horovod">use_horovod() (mala.common.parameters.Parameters property)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.use_horovod">use_horovod() (Parameters property)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.use_lazy_loading">use_lazy_loading (mala.common.parameters.ParametersData attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersData.use_lazy_loading">use_lazy_loading (ParametersData attribute)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.use_mpi">use_mpi() (mala.common.parameters.Parameters property)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.use_mpi">use_mpi() (Parameters property)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.use_shuffling_for_samplers">use_shuffling_for_samplers (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.use_shuffling_for_samplers">use_shuffling_for_samplers (ParametersRunning attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1509,15 +1489,15 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.validation_data_inputs">validation_data_inputs (mala.datahandling.data_handler.DataHandler attribute)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.validation_data_inputs">validation_data_inputs (DataHandler attribute)</a>
 </li>
-      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.validation_data_outputs">validation_data_outputs (mala.datahandling.data_handler.DataHandler attribute)</a>
+      <li><a href="api/mala.datahandling.html#mala.datahandling.data_handler.DataHandler.validation_data_outputs">validation_data_outputs (DataHandler attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.verbosity">verbosity() (mala.common.parameters.Parameters property)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.Parameters.verbosity">verbosity() (Parameters property)</a>
 </li>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.visualisation">visualisation (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.visualisation">visualisation (ParametersRunning attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1525,7 +1505,7 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.weight_decay">weight_decay (mala.common.parameters.ParametersRunning attribute)</a>
+      <li><a href="api/mala.common.html#mala.common.parameters.ParametersRunning.weight_decay">weight_decay (ParametersRunning attribute)</a>
 </li>
       <li><a href="api/mala.targets.html#mala.targets.cube_parser.write_cube">write_cube() (in module mala.targets.cube_parser)</a>
 </li>
@@ -1533,7 +1513,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.targets.html#mala.targets.cube_parser.write_imcube">write_imcube() (in module mala.targets.cube_parser)</a>
 </li>
-      <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.write_tem_input_file">write_tem_input_file() (mala.targets.target_base.TargetBase static method)</a>
+      <li><a href="api/mala.targets.html#mala.targets.target_base.TargetBase.write_tem_input_file">write_tem_input_file() (TargetBase static method)</a>
 </li>
   </ul></td>
 </tr></table>

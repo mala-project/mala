@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Python bindings to Quantum Espresso &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>Training a model &mdash; Materials Learning Algorithms (MALA)  documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -38,10 +39,11 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
+    <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Successfully tested on" href="tested_systems.html" />
-    <link rel="prev" title="Setting up LAMMPS" href="INSTALL_LAMMPS.html" /> 
+    <link rel="next" title="Postprocessing the LDOS" href="postprocessing.html" />
+    <link rel="prev" title="Data generation and preprocessing" href="preprocessing.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -55,19 +57,15 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Materials Learning Algorithms (MALA)
+            <a href="../index.html">
           
 
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v0.2.0-165-gcb6bf90
-              </div>
-            
           
 
           
@@ -90,29 +88,19 @@
               
             
             
-              <p class="caption"><span class="caption-text">Features</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../features/overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/background.html">Theoretical Background</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/preprocessing.html">Preprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/neuralnetworks.html">Neural Networks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/postprocessing.html">Postprocessing</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../usage.html">Usage</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="basicconcepts.html">Basic concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Data generation and preprocessing</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Training a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Postprocessing the LDOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hyperparameters.html">Tuning the hyperparameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictions.html">Predict electronic structures</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Installation</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="README.html">Installation of MALA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Python bindings to Quantum Espresso</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tested_systems.html">Successfully tested on</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sql_on_hpc.html">Using postgres on HPC infrastructure (for optuna)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tensorboard_setup.html">Set up tensorboard to visualize data from HPC cluster</a></li>
-</ul>
-<p class="caption"><span class="caption-text">API Reference</span></p>
-<ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../api/modules.html">mala</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Contributing</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -162,14 +150,16 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Python bindings to Quantum Espresso</li>
+          <li><a href="../usage.html">Usage</a> &raquo;</li>
+        
+      <li>Training a model</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
             
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/install/INSTALL_TE_QE.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/usage/trainingmodel.rst" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -183,14 +173,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="python-bindings-to-quantum-espresso">
-<h1>Python bindings to Quantum Espresso<a class="headerlink" href="#python-bindings-to-quantum-espresso" title="Permalink to this headline">¶</a></h1>
-<p>The total energy module has been moved to its own fork of QE.
-You can find it at
-<a class="reference external" href="https://gitlab.com/casus/q-e/-/tree/tem_original_development">https://gitlab.com/casus/q-e/-/tree/tem_original_development</a> after
-gaining access from the MALA development team. After checking out this
-fork and branch, go to <code class="docutils literal notranslate"><span class="pre">total_energy_module/</span></code> amd follow the installation
-instructions described therein.</p>
+  <div class="section" id="training-a-model">
+<h1>Training a model<a class="headerlink" href="#training-a-model" title="Permalink to this headline">¶</a></h1>
+<p>Neural networks are powerful machine learning tools in principle capable of
+approximating any function. In MALA, neural networks are built using PyTorch.
+Hyperparameter optimization can be done using optuna and custom routines.
+To see how a model is trained, refer to e.g. <code class="docutils literal notranslate"><span class="pre">ex01_singleshot</span></code>.</p>
 </div>
 
 
@@ -199,8 +187,8 @@ instructions described therein.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="tested_systems.html" class="btn btn-neutral float-right" title="Successfully tested on" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="INSTALL_LAMMPS.html" class="btn btn-neutral float-left" title="Setting up LAMMPS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="postprocessing.html" class="btn btn-neutral float-right" title="Postprocessing the LDOS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="preprocessing.html" class="btn btn-neutral float-left" title="Data generation and preprocessing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

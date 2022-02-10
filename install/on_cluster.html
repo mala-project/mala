@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Using postgres on HPC infrastructure (for optuna) &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>Using MALA on HPC systems &mdash; Materials Learning Algorithms (MALA)  documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -38,10 +39,11 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
+    <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Set up tensorboard to visualize data from HPC cluster" href="tensorboard_setup.html" />
-    <link rel="prev" title="Successfully tested on" href="tested_systems.html" /> 
+    <link rel="next" title="Successfully tested on" href="tested_systems.html" />
+    <link rel="prev" title="External modules" href="external_modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -55,19 +57,15 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Materials Learning Algorithms (MALA)
+            <a href="../index.html">
           
 
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v0.2.0-165-gcb6bf90
-              </div>
-            
           
 
           
@@ -90,32 +88,24 @@
               
             
             
-              <p class="caption"><span class="caption-text">Features</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../features/overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/background.html">Theoretical Background</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/preprocessing.html">Preprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/neuralnetworks.html">Neural Networks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/postprocessing.html">Postprocessing</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Installation</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="README.html">Installation of MALA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
-<li class="toctree-l1"><a class="reference internal" href="INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tested_systems.html">Successfully tested on</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Using postgres on HPC infrastructure (for optuna)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#hemera5-hzdr">Hemera5 (HZDR)</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../installation.html">Installation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="README.html">Installation of MALA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="external_modules.html">External modules</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Using MALA on HPC systems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sql">SQL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tensorboard">Tensorboard</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hemera5-hzdr">Hemera5 (HZDR)</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tensorboard_setup.html">Set up tensorboard to visualize data from HPC cluster</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API Reference</span></p>
-<ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tested_systems.html">Successfully tested on</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/modules.html">mala</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Contributing</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -165,14 +155,16 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Using postgres on HPC infrastructure (for optuna)</li>
+          <li><a href="../installation.html">Installation</a> &raquo;</li>
+        
+      <li>Using MALA on HPC systems</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
             
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/install/sql_on_hpc.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/install/on_cluster.rst" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -186,10 +178,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="using-postgres-on-hpc-infrastructure-for-optuna">
-<h1>Using postgres on HPC infrastructure (for optuna)<a class="headerlink" href="#using-postgres-on-hpc-infrastructure-for-optuna" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="hemera5-hzdr">
-<h2>Hemera5 (HZDR)<a class="headerlink" href="#hemera5-hzdr" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="using-mala-on-hpc-systems">
+<h1>Using MALA on HPC systems<a class="headerlink" href="#using-mala-on-hpc-systems" title="Permalink to this headline">¶</a></h1>
+<p>Generally, MALA can be used on an HPC system like any other regular python
+module, with one exception being the setup of
+<a class="reference internal" href="external_modules.html"><span class="doc">external modules</span></a>. Detailed here are some other
+aspects of the MALA workflow for which the setup on HPC systems is not
+immediately clear.</p>
+<div class="section" id="sql">
+<h2>SQL<a class="headerlink" href="#sql" title="Permalink to this headline">¶</a></h2>
+<p>To run extended hyperparameter studies using Optuna, an SQL server is
+needed that coordinates trials between different jobs. The MALA developers
+recommend using PostgreSQL. Once PostgreSQL is set up, the server has to be
+started via a separate job in order for the hyperparameter study to run.
+To set up PostgreSQL, use the following steps.</p>
 <ol class="arabic">
 <li><p>Install postgres (e.g. in a conda environment)</p></li>
 <li><p>Initialize a postgres server configuration somewhere in your home directory:</p>
@@ -249,6 +251,33 @@ createdb YOUR_SERVER_NAME
 <li><p>[optional] To increase the maximum number of connections to PostgreSQL (default is 100), go to <code class="docutils literal notranslate"><span class="pre">a/suitable/location/postgres_local/postgresql.conf</span></code> and change the value of <code class="docutils literal notranslate"><span class="pre">max_connections</span></code>. In addition, the value of <code class="docutils literal notranslate"><span class="pre">shared_buffers</span></code> is recommended to be set to about 10% of RAM available on a compute node. Note that the actual number of connections exceeds the number of workers, likely because the workers establish new connections every time they communicate with DB and idle connections not dying out by default.</p></li>
 </ol>
 </div>
+<div class="section" id="tensorboard">
+<h2>Tensorboard<a class="headerlink" href="#tensorboard" title="Permalink to this headline">¶</a></h2>
+<p>MALA visualization via tensorboard works by simply saving the logs into a
+user specified directory. There are two ways to use visualization while working
+on an HPC cluster:</p>
+<ol class="arabic simple">
+<li><p>Copy the visualization directory onto your local machine</p></li>
+<li><p>Mount the folder on your HPC cluster to your local machine (cluster specific)</p></li>
+</ol>
+<div class="section" id="hemera5-hzdr">
+<h3>Hemera5 (HZDR)<a class="headerlink" href="#hemera5-hzdr" title="Permalink to this headline">¶</a></h3>
+<p>If you are using the Hemera5 cluster of the
+Helmholtz-Zentrum Dresden-Rossendorf (one of the founding institutions of the
+MALA project), you can use the following informatiomn to mount the folders
+to your local machine.</p>
+<ul>
+<li><p>You can find information on how to mount Hemera onto a local device here:</p>
+<p>&lt;<a class="reference external" href="https://fwcc.pages.hzdr.de/infohub/hpc/storage.html">https://fwcc.pages.hzdr.de/infohub/hpc/storage.html</a>&gt;</p>
+</li>
+<li><p>Alternatively, simply use the following command</p>
+<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
+<span class="pre">$</span> <span class="pre">sshfs</span> <span class="pre">username&#64;hemera5.fz-rossendorf.de:folder/file/location</span> <span class="pre">folder/location/in/local</span>
+<span class="pre">`</span></code></p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 
 
@@ -257,8 +286,8 @@ createdb YOUR_SERVER_NAME
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="tensorboard_setup.html" class="btn btn-neutral float-right" title="Set up tensorboard to visualize data from HPC cluster" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="tested_systems.html" class="btn btn-neutral float-left" title="Successfully tested on" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tested_systems.html" class="btn btn-neutral float-right" title="Successfully tested on" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="external_modules.html" class="btn btn-neutral float-left" title="External modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

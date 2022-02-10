@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -38,6 +39,7 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
+    <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Contributing to MALA" href="../CONTRIBUTE.html" />
@@ -55,19 +57,15 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Materials Learning Algorithms (MALA)
+            <a href="../index.html">
           
 
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v0.2.0-165-gcb6bf90
-              </div>
-            
           
 
           
@@ -90,25 +88,10 @@
               
             
             
-              <p class="caption"><span class="caption-text">Features</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../features/overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/background.html">Theoretical Background</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/preprocessing.html">Preprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/neuralnetworks.html">Neural Networks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/postprocessing.html">Postprocessing</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Installation</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../install/README.html">Installation of MALA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/tested_systems.html">Successfully tested on</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/sql_on_hpc.html">Using postgres on HPC infrastructure (for optuna)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/tensorboard_setup.html">Set up tensorboard to visualize data from HPC cluster</a></li>
-</ul>
-<p class="caption"><span class="caption-text">API Reference</span></p>
-<ul class="current">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">mala</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="mala.html#subpackages">Subpackages</a><ul class="current">
@@ -127,9 +110,6 @@
 </li>
 </ul>
 </li>
-</ul>
-<p class="caption"><span class="caption-text">Contributing</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -214,7 +194,7 @@
 <p>Electronic density calculation class.</p>
 <dl class="py class">
 <dt id="mala.targets.atomic_force.AtomicForce">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.targets.atomic_force.</span></code><code class="sig-name descname"><span class="pre">AtomicForce</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.atomic_force.AtomicForce" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">AtomicForce</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.atomic_force.AtomicForce" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.targets.target_base.TargetBase</span></code></a></p>
 <p>Postprocessing / parsing functions for atomic forces.</p>
 <dl class="field-list simple">
@@ -264,7 +244,7 @@
 <p>Helper functions for several calculation tasks (such as integration).</p>
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.analytical_integration">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">analytical_integration</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_k</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.analytical_integration" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">analytical_integration</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_k</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.analytical_integration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform analytical integration following the outline given by [1].</p>
 <p>More specifically, this function solves Eq. 32, by constructing the
 weights itself.</p>
@@ -312,7 +292,7 @@ be used. Arguments are:</p>
 
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.entropy_multiplicator">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">entropy_multiplicator</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eV'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.entropy_multiplicator" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">entropy_multiplicator</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eV'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.entropy_multiplicator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the multiplicator function for the entropy integral.</p>
 <p>Entropy integral is f(E)*log(f(E))+(1-f(E)*log(1-f(E))</p>
 <dl class="field-list simple">
@@ -342,7 +322,7 @@ energy_units.</p></li>
 
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.fermi_function">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">fermi_function</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eV'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.fermi_function" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">fermi_function</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eV'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.fermi_function" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the Fermi function f(E) = 1 / (1 + e^((E-E_F)/(k_B*T))).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -371,7 +351,7 @@ energy_units.</p></li>
 
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.fermi_function_eV">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">fermi_function_eV</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_ev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.fermi_function_eV" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">fermi_function_eV</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_ev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.fermi_function_eV" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the Fermi function f(E) = 1 / (1 + e^((E-E_F)/(k_B*T))).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -392,7 +372,7 @@ energy_units.</p></li>
 
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.gaussians">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">gaussians</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.gaussians" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">gaussians</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.gaussians" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate multiple gaussians on the same grid, but with different centers.</p>
 <p>Gaussian functions are used as approximations to the delta in the
 Brillouin zone integration. Note that this defines Gaussians without the
@@ -415,7 +395,7 @@ factor of 1/sqrt(2). All the Gaussians will have the same sigmas
 
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.get_beta">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">get_beta</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_beta" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_beta</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_beta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate beta = 1 / (k_B * T).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -432,7 +412,7 @@ factor of 1/sqrt(2). All the Gaussians will have the same sigmas
 
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.get_f0_value">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">get_f0_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_f0_value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_f0_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_f0_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the F0 value for the analytic integration formula.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -452,7 +432,7 @@ factor of 1/sqrt(2). All the Gaussians will have the same sigmas
 
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.get_f1_value">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">get_f1_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_f1_value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_f1_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_f1_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the F1 value for the analytic integration formula.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -472,7 +452,7 @@ factor of 1/sqrt(2). All the Gaussians will have the same sigmas
 
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.get_f2_value">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">get_f2_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_f2_value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_f2_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_f2_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the F2 value for the analytic integration formula.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -492,7 +472,7 @@ factor of 1/sqrt(2). All the Gaussians will have the same sigmas
 
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.get_s0_value">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">get_s0_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_s0_value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_s0_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_s0_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the S0 value for the analytic integration formula.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -512,7 +492,7 @@ factor of 1/sqrt(2). All the Gaussians will have the same sigmas
 
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.get_s1_value">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">get_s1_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_s1_value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_s1_value</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.get_s1_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the S1 value for the analytic integration formula.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -532,7 +512,7 @@ factor of 1/sqrt(2). All the Gaussians will have the same sigmas
 
 <dl class="py function">
 <dt id="mala.targets.calculation_helpers.integrate_values_on_spacing">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.calculation_helpers.</span></code><code class="sig-name descname"><span class="pre">integrate_values_on_spacing</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.integrate_values_on_spacing" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">integrate_values_on_spacing</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.calculation_helpers.integrate_values_on_spacing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Integrate values assuming a uniform grid with a provided spacing.</p>
 <p>Different integration methods are available.</p>
 <dl class="field-list simple">
@@ -605,7 +585,7 @@ SOFTWARE.</p>
 <hr class="docutils" />
 <dl class="py class">
 <dt id="mala.targets.cube_parser.CubeFile">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.targets.cube_parser.</span></code><code class="sig-name descname"><span class="pre">CubeFile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">srcname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.cube_parser.CubeFile" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">CubeFile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">srcname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.cube_parser.CubeFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Object which mimics a cube file opened as a file object.</p>
 <p>Done by returning output in the correct format, matching the
@@ -641,7 +621,7 @@ Mimics file object’s readline method.</p>
 
 <dl class="py function">
 <dt id="mala.targets.cube_parser.read_cube">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.cube_parser.</span></code><code class="sig-name descname"><span class="pre">read_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.cube_parser.read_cube" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">read_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.cube_parser.read_cube" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read cube file into numpy array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -659,7 +639,7 @@ Mimics file object’s readline method.</p>
 
 <dl class="py function">
 <dt id="mala.targets.cube_parser.read_imcube">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.cube_parser.</span></code><code class="sig-name descname"><span class="pre">read_imcube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rfname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.cube_parser.read_imcube" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">read_imcube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rfname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.cube_parser.read_imcube" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read in two cube files at once.</p>
 <p>One contains the real part and the other contains the
 imag part. If only one filename given, other filename is inferred.</p>
@@ -684,7 +664,7 @@ imag part. If only one filename given, other filename is inferred.</p>
 
 <dl class="py function">
 <dt id="mala.targets.cube_parser.write_cube">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.cube_parser.</span></code><code class="sig-name descname"><span class="pre">write_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.cube_parser.write_cube" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">write_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.cube_parser.write_cube" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write volumetric data to cube file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -707,7 +687,7 @@ imag part. If only one filename given, other filename is inferred.</p>
 
 <dl class="py function">
 <dt id="mala.targets.cube_parser.write_imcube">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.cube_parser.</span></code><code class="sig-name descname"><span class="pre">write_imcube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.cube_parser.write_imcube" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">write_imcube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.cube_parser.write_imcube" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write two cube files from compley valued volumetric data.</p>
 <p>One for the real part and one for the imaginary part.
 Data about atoms, origin and lattice vectors are kept same for both.
@@ -738,7 +718,7 @@ If only one filename given, other filename is inferred.</p>
 <p>Electronic density calculation class.</p>
 <dl class="py class">
 <dt id="mala.targets.density.Density">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.targets.density.</span></code><code class="sig-name descname"><span class="pre">Density</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.density.Density" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Density</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.density.Density" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.targets.target_base.TargetBase</span></code></a></p>
 <p>Postprocessing / parsing functions for the electronic density.</p>
 <dl class="field-list simple">
@@ -945,7 +925,7 @@ calculated.</p>
 <p>DOS calculation class.</p>
 <dl class="py class">
 <dt id="mala.targets.dos.DOS">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.targets.dos.</span></code><code class="sig-name descname"><span class="pre">DOS</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">DOS</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.dos.DOS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.targets.target_base.TargetBase</span></code></a></p>
 <p>Postprocessing / parsing functions for the density of states (DOS).</p>
 <dl class="field-list simple">
@@ -1221,7 +1201,7 @@ via read_additional_calculation_data will be used.</p></li>
 <p>LDOS calculation class.</p>
 <dl class="py class">
 <dt id="mala.targets.ldos.LDOS">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.targets.ldos.</span></code><code class="sig-name descname"><span class="pre">LDOS</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">LDOS</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.targets.target_base.TargetBase</span></code></a></p>
 <p>Postprocessing / parsing functions for the local density of states.</p>
 <dl class="field-list simple">
@@ -1702,7 +1682,7 @@ If run in MPI parallel mode, such a file MUST be provided.</p></li>
 <p>Base class for all target calculators.</p>
 <dl class="py class">
 <dt id="mala.targets.target_base.TargetBase">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.targets.target_base.</span></code><code class="sig-name descname"><span class="pre">TargetBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">TargetBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_base.TargetBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Base class for all target quantity parser.</p>
 <p>Target parsers read the target quantity
@@ -1891,7 +1871,7 @@ interface. If None (recommended), MALA will create one.</p></li>
 <p>Interface function for getting Targets.</p>
 <dl class="py function">
 <dt id="mala.targets.target_interface.TargetInterface">
-<code class="sig-prename descclassname"><span class="pre">mala.targets.target_interface.</span></code><code class="sig-name descname"><span class="pre">TargetInterface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_interface.TargetInterface" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">TargetInterface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.target_interface.TargetInterface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return correct target calculator/parser, based on parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

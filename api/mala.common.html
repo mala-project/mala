@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -38,6 +39,7 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
+    <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="mala.datahandling package" href="mala.datahandling.html" />
@@ -55,19 +57,15 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Materials Learning Algorithms (MALA)
+            <a href="../index.html">
           
 
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v0.2.0-165-gcb6bf90
-              </div>
-            
           
 
           
@@ -90,25 +88,10 @@
               
             
             
-              <p class="caption"><span class="caption-text">Features</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../features/overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/background.html">Theoretical Background</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/preprocessing.html">Preprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/neuralnetworks.html">Neural Networks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/postprocessing.html">Postprocessing</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Installation</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../install/README.html">Installation of MALA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/tested_systems.html">Successfully tested on</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/sql_on_hpc.html">Using postgres on HPC infrastructure (for optuna)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/tensorboard_setup.html">Set up tensorboard to visualize data from HPC cluster</a></li>
-</ul>
-<p class="caption"><span class="caption-text">API Reference</span></p>
-<ul class="current">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">mala</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="mala.html#subpackages">Subpackages</a><ul class="current">
@@ -127,9 +110,6 @@
 </li>
 </ul>
 </li>
-</ul>
-<p class="caption"><span class="caption-text">Contributing</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -214,7 +194,7 @@
 <p>Function to check module availability in MALA.</p>
 <dl class="py function">
 <dt id="mala.common.check_modules.check_modules">
-<code class="sig-prename descclassname"><span class="pre">mala.common.check_modules.</span></code><code class="sig-name descname"><span class="pre">check_modules</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.check_modules.check_modules" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">check_modules</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.check_modules.check_modules" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether/which optional modules MALA can access.</p>
 </dd></dl>
 
@@ -224,7 +204,7 @@
 <p>Base class for all objects that need to be JSON serializable.</p>
 <dl class="py class">
 <dt id="mala.common.json_serializable.JSONSerializable">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.json_serializable.</span></code><code class="sig-name descname"><span class="pre">JSONSerializable</span></code><a class="headerlink" href="#mala.common.json_serializable.JSONSerializable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">JSONSerializable</span></code><a class="headerlink" href="#mala.common.json_serializable.JSONSerializable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Base class for all objects that need to be JSON serializable.</p>
 <p>Implements “to_json” and “from_json” for serialization and deserialization,
@@ -270,7 +250,7 @@ in the json file.</p>
 <p>Functions for safely printing in parallel.</p>
 <dl class="py function">
 <dt id="mala.common.parallelizer.get_comm">
-<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">get_comm</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_comm" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_comm</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_comm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the MPI communicator, if MPI is being used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -284,7 +264,7 @@ in the json file.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.get_local_rank">
-<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">get_local_rank</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_local_rank" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_local_rank</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_local_rank" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the local rank of the process.</p>
 <p>This is the rank WITHIN a node. Useful when multiple GPUs are
 used on one node.</p>
@@ -312,7 +292,7 @@ DEALINGS IN THE SOFTWARE.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.get_rank">
-<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">get_rank</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_rank" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_rank</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_rank" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the rank of the current thread.</p>
 <p>Always returns 0 in the serial case.</p>
 <dl class="field-list simple">
@@ -327,7 +307,7 @@ DEALINGS IN THE SOFTWARE.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.get_size">
-<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">get_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_size" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the number of ranks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -341,7 +321,7 @@ DEALINGS IN THE SOFTWARE.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.printout">
-<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">printout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.printout" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">printout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.printout" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interface to built-in “print” for parallel runs. Can be used like print.</p>
 <p>Linked to the verbosity option in parameters. By default, all messages are
 treated as high level messages and will be printed.</p>
@@ -358,7 +338,7 @@ treated as high level messages and will be printed.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.set_current_verbosity">
-<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">set_current_verbosity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_current_verbosity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set_current_verbosity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_current_verbosity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the verbosity used for the printout statements.</p>
 <p>Should only be called by the parameters file, not by the user directly!</p>
 <dl class="field-list simple">
@@ -370,7 +350,7 @@ treated as high level messages and will be printed.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.set_horovod_status">
-<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">set_horovod_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_horovod_status" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set_horovod_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_horovod_status" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the horovod status.</p>
 <p>By setting the horovod status via this function it can be ensured that
 printing works in parallel. The Parameters class does that for the user.</p>
@@ -383,7 +363,7 @@ printing works in parallel. The Parameters class does that for the user.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.set_mpi_status">
-<code class="sig-prename descclassname"><span class="pre">mala.common.parallelizer.</span></code><code class="sig-name descname"><span class="pre">set_mpi_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_mpi_status" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set_mpi_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_mpi_status" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the MPI status.</p>
 <p>By setting the horovod status via this function it can be ensured that
 printing works in parallel. The Parameters class does that for the user.</p>
@@ -400,7 +380,7 @@ printing works in parallel. The Parameters class does that for the user.</p>
 <p>Collection of all parameter related classes and functions.</p>
 <dl class="py class">
 <dt id="mala.common.parameters.Parameters">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">Parameters</span></code><a class="headerlink" href="#mala.common.parameters.Parameters" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Parameters</span></code><a class="headerlink" href="#mala.common.parameters.Parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>All parameter MALA needs to perform its various tasks.</p>
 <dl class="py attribute">
@@ -654,7 +634,7 @@ Currently only supported file format is “pickle”.</p></li>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersBase">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersBase</span></code><a class="headerlink" href="#mala.common.parameters.ParametersBase" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersBase</span></code><a class="headerlink" href="#mala.common.parameters.ParametersBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.json_serializable.JSONSerializable" title="mala.common.json_serializable.JSONSerializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.json_serializable.JSONSerializable</span></code></a></p>
 <p>Base parameter class for MALA.</p>
 <dl class="py method">
@@ -705,7 +685,7 @@ shows itself.</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersData">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersData</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersData</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for loading and preprocessing data.</p>
 <dl class="py attribute">
@@ -883,7 +863,7 @@ for sampling per snapshot (according to clustering then, of course).</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersDebug">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersDebug</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDebug" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersDebug</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDebug" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>All debugging parameters.</p>
 <dl class="py attribute">
@@ -902,7 +882,7 @@ globally when it is not empty.. Default : []</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersDescriptors">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersDescriptors</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersDescriptors</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for calculating/parsing input descriptors.</p>
 <dl class="py attribute">
@@ -985,7 +965,7 @@ descriptor vector. If False, no such cutting is peformed.</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersHyperparameterOptimization">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersHyperparameterOptimization</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersHyperparameterOptimization</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Hyperparameter optimization parameters.</p>
 <dl class="py attribute">
@@ -1147,7 +1127,7 @@ as an estimate of the minimal accuracy to be expected. Currently,
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersNetwork">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersNetwork</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersNetwork</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for constructing a neural network.</p>
 <dl class="py attribute">
@@ -1218,7 +1198,7 @@ Default: None</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersRunning">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersRunning</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersRunning</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters needed for network runs (train, test or inference).</p>
 <p>Some of these parameters only apply to either the train or test or
@@ -1483,7 +1463,7 @@ calculated.</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersTargets">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mala.common.parameters.</span></code><code class="sig-name descname"><span class="pre">ParametersTargets</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersTargets</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for calculating/parsing output quantites.</p>
 <dl class="py attribute">

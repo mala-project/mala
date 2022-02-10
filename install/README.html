@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
 
   
   
@@ -38,10 +39,11 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
+    <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Setting up LAMMPS" href="INSTALL_LAMMPS.html" />
-    <link rel="prev" title="Postprocessing" href="../features/postprocessing.html" /> 
+    <link rel="next" title="External modules" href="external_modules.html" />
+    <link rel="prev" title="Installation" href="../installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -55,19 +57,15 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Materials Learning Algorithms (MALA)
+            <a href="../index.html">
           
 
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v0.2.0-165-gcb6bf90
-              </div>
-            
           
 
           
@@ -90,46 +88,30 @@
               
             
             
-              <p class="caption"><span class="caption-text">Features</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../features/overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/background.html">Theoretical Background</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/preprocessing.html">Preprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/neuralnetworks.html">Neural Networks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../features/postprocessing.html">Postprocessing</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Installation</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation of MALA</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#python-version">Python version</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#python-packages">Python packages</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#conda-environment-optional">Conda environment (optional)</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../installation.html">Installation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Installation of MALA</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#python-version">Python version</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#python-packages">Python packages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#optional-python-packages">Optional python packages</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#lammps-optional">LAMMPS (optional)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#total-energy-module-optional">Total energy module (optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-the-mala-package">Installing the MALA package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#build-documentation-locally-optional">Build documentation locally (optional)</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#installing-the-mala-package">Installing the MALA package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#build-documentation-locally-optional">Build documentation locally (optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#downloading-and-adding-example-data">Downloading and adding example data</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#downloading-and-adding-example-data">Downloading and adding example data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="external_modules.html">External modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="on_cluster.html">Using MALA on HPC systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tested_systems.html">Successfully tested on</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
-<li class="toctree-l1"><a class="reference internal" href="INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tested_systems.html">Successfully tested on</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sql_on_hpc.html">Using postgres on HPC infrastructure (for optuna)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tensorboard_setup.html">Set up tensorboard to visualize data from HPC cluster</a></li>
-</ul>
-<p class="caption"><span class="caption-text">API Reference</span></p>
-<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/modules.html">mala</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Contributing</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -178,6 +160,8 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../installation.html">Installation</a> &raquo;</li>
         
       <li>Installation of MALA</li>
     
@@ -257,6 +241,22 @@ might want to install the CPU-only version using something like</p>
 <p>while a plain <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">torch</span></code> will pull the much larger GPU version by
 default.</p>
 <p>For other ways to install PyTorch you might also refer to <a class="reference external" href="https://pytorch.org/">https://pytorch.org/</a>.</p>
+</div>
+<div class="section" id="optional-python-packages">
+<h3>Optional python packages<a class="headerlink" href="#optional-python-packages" title="Permalink to this headline">¶</a></h3>
+<p>MALA uses some optional packages that have to be installed manually:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">lammps</span></code>: Enables the calculation of descriptors, see <a class="reference internal" href="external_modules.html"><span class="doc std std-doc">the instructions on external modules</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_energy</span></code>: Enables the calculation of the total energy, see <a class="reference internal" href="external_modules.html"><span class="doc std std-doc">the instructions on external modules</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mpi4py</span></code>: Enables inference parallelization</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">horovod</span></code>: Enables training parallelization</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oapackage</span></code>: Enables usage of OAT method for hyperparameter optimization</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pqkmeans</span></code>:  Enables clustering of training data</p></li>
+</ul>
+<p>MALA can be used without these packages, an error will only occure when attempting
+perform an operation these packages are crucial for. With the exception
+of <code class="docutils literal notranslate"><span class="pre">lammps</span></code> and <code class="docutils literal notranslate"><span class="pre">total_energy</span></code>, these packages can be installed using
+<code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
 <div class="section" id="conda-environment-optional">
 <h4>Conda environment (optional)<a class="headerlink" href="#conda-environment-optional" title="Permalink to this headline">¶</a></h4>
 <p>Alternatively to pip, you can install the required packages within a
@@ -319,20 +319,6 @@ environment by replacing <code class="docutils literal notranslate"><span class=
 </ol>
 </div>
 </div>
-<div class="section" id="lammps-optional">
-<h3>LAMMPS (optional)<a class="headerlink" href="#lammps-optional" title="Permalink to this headline">¶</a></h3>
-<p>This workflow uses the Large-scale Atomic/Molecular Massively Parallel
-Simulator <a class="reference external" href="https://lammps.sandia.gov/">LAMMPS</a> for input data preprocessing. It
-is not necessary to install LAMMPS if you are you using this workflow with
-preprocessed data. If you need/want to install LAMMPS, please refer to
-<a class="reference internal" href="INSTALL_LAMMPS.html"><span class="doc std std-doc">Setting up LAMMPS</span></a>.</p>
-</div>
-<div class="section" id="total-energy-module-optional">
-<h3>Total energy module (optional)<a class="headerlink" href="#total-energy-module-optional" title="Permalink to this headline">¶</a></h3>
-<p>It is possible to utilize Quantum Espresso to calculate the total energy of a given system using python bindings.
-This provides an additional post-processing capability, but is not necessarily needed for using this workflow.
-If you want to use this module, please refer to <a class="reference internal" href="INSTALL_TE_QE.html"><span class="doc std std-doc">Python bindings to Quantum Espresso</span></a>.</p>
-</div>
 </div>
 <div class="section" id="installing-the-mala-package">
 <h2>Installing the MALA package<a class="headerlink" href="#installing-the-mala-package" title="Permalink to this headline">¶</a></h2>
@@ -390,8 +376,8 @@ $ git checkout v1.1.0
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="INSTALL_LAMMPS.html" class="btn btn-neutral float-right" title="Setting up LAMMPS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="../features/postprocessing.html" class="btn btn-neutral float-left" title="Postprocessing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="external_modules.html" class="btn btn-neutral float-right" title="External modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

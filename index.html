@@ -13,6 +13,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
 
   
   
@@ -38,9 +39,10 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+    <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Overview" href="features/overview.html" /> 
+    <link rel="next" title="About" href="about.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -54,19 +56,15 @@
           
 
           
-            <a href="#" class="icon icon-home"> Materials Learning Algorithms (MALA)
+            <a href="#">
           
 
+          
+            
+            <img src="_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
-              <div class="version">
-                v0.2.0-165-gcb6bf90
-              </div>
-            
           
 
           
@@ -89,29 +87,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Features</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="features/overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features/background.html">Theoretical Background</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features/preprocessing.html">Preprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features/neuralnetworks.html">Neural Networks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features/postprocessing.html">Postprocessing</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Installation</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="install/README.html">Installation of MALA</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/INSTALL_LAMMPS.html">Setting up LAMMPS</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/tested_systems.html">Successfully tested on</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/sql_on_hpc.html">Using postgres on HPC infrastructure (for optuna)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/tensorboard_setup.html">Set up tensorboard to visualize data from HPC cluster</a></li>
-</ul>
-<p class="caption"><span class="caption-text">API Reference</span></p>
-<ul>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">mala</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Contributing</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -269,77 +249,45 @@ A. Cangi, S. Rajamanickam (2021). Accelerating Finite-temperature
 Kohn-Sham Density Functional Theory with Deep Neural Networks.
 <a class="reference external" href="https://doi.org/10.1103/PhysRevB.104.035120">Phys. Rev. B 104, 035120 (2021)</a></p>
 <p>alongside this repository.</p>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Features</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="features/overview.html">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="features/overview.html#list-of-features">List of features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/overview.html#workflow">Workflow</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="features/background.html">Theoretical Background</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="features/background.html#density-functional-theory">Density Functional Theory</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="features/preprocessing.html">Preprocessing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="features/preprocessing.html#data-conversion">Data Conversion</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/preprocessing.html#data-scaling">Data Scaling</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="features/neuralnetworks.html">Neural Networks</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="features/neuralnetworks.html#data-handling">Data Handling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/neuralnetworks.html#training-and-inference">Training and inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/neuralnetworks.html#hyperparameter-optimization">Hyperparameter optimization</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="features/postprocessing.html">Postprocessing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="features/postprocessing.html#ldos">LDOS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/postprocessing.html#dos">DOS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="features/postprocessing.html#density">Density</a></li>
-</ul>
-</li>
-</ul>
 </div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Installation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="install/README.html">Installation of MALA</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install/README.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install/README.html#installing-the-mala-package">Installing the MALA package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install/README.html#downloading-and-adding-example-data">Downloading and adding example data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="about/overview.html">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="about/background.html">Theoretical Background</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="install/INSTALL_LAMMPS.html">Setting up LAMMPS</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install/INSTALL_LAMMPS.html#installing-lammps">Installing LAMMPS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install/INSTALL_LAMMPS.html#make-the-lammps-libray-visible">Make the LAMMPS libray visible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install/README.html">Installation of MALA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/external_modules.html">External modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/on_cluster.html">Using MALA on HPC systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/tested_systems.html">Successfully tested on</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="install/INSTALL_TE_QE.html">Python bindings to Quantum Espresso</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install/tested_systems.html">Successfully tested on</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install/tested_systems.html#personal-machines">Personal machines</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install/tested_systems.html#hpc-clusters">HPC clusters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/basicconcepts.html">Basic concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/preprocessing.html">Data generation and preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/trainingmodel.html">Training a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/postprocessing.html">Postprocessing the LDOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/hyperparameters.html">Tuning the hyperparameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/predictions.html">Predict electronic structures</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="install/sql_on_hpc.html">Using postgres on HPC infrastructure (for optuna)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install/sql_on_hpc.html#hemera5-hzdr">Hemera5 (HZDR)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">mala</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/mala.html">mala package</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="install/tensorboard_setup.html">Set up tensorboard to visualize data from HPC cluster</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install/tensorboard_setup.html#hemera5-hzdr">Hemera5 (HZDR)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTE.html">Contributing to MALA</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#branching-strategy">Branching strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#developing-code">Developing code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#pull-requests">Pull Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#issues">Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTE.html#license">License</a></li>
 </ul>
 </li>
-</ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api/modules.html">mala</a></li>
-</ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Contributing</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 </div>
 </div>
@@ -359,7 +307,7 @@ Kohn-Sham Density Functional Theory with Deep Neural Networks.
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="features/overview.html" class="btn btn-neutral float-right" title="Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="about.html" class="btn btn-neutral float-right" title="About" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
