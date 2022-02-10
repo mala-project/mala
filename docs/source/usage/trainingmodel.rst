@@ -1,4 +1,4 @@
-Neural Networks
+Training a model
 =================
 
 Neural networks are powerful machine learning tools in principle capable of

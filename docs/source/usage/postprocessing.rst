@@ -1,5 +1,5 @@
-Postprocessing
-==============
+Postprocessing the LDOS
+=======================
 
 MALA provides routines to calculate quantities of interests from the physical
 data such as the LDOS, DOS and electronic density.

@@ -93,12 +93,17 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
+html_logo = "./img/logos/mala_horizontal_white.png"
 
 html_context = {
   'display_github': True,
   'github_repo': 'mala-project/mala',
   'github_version': 'develop',
   'conf_py_path': '/docs/source/',
+}
+
+html_theme_options = {
+    'style_nav_header_background': '#45c2c8',
 }
 
 # The name of an image file (relative to this directory) to place at the top
