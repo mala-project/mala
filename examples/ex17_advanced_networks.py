@@ -18,9 +18,7 @@ lstm, gru and transformer can be used for prediction.
 
 test_parameters = mala.Parameters()
 # Currently, the splitting in training, validation and test set are
-# done on a "by snapshot" basis. Specify how this is
-# done by providing a list containing entries of the form
-# "tr", "va" and "te".
+# done on a "by snapshot" basis.
 test_parameters.data.data_splitting_type = "by_snapshot"
 
 # Specify the data scaling.
@@ -46,12 +44,10 @@ data_handler = mala.DataHandler(test_parameters)
 # Add a snapshot we want to use in to the list.
 data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                           "Al_debug_2k_nr0.out.npy", data_path,
-                          output_units="1/Ry",
-                          add_snapshot_as="tr")
+                          add_snapshot_as="tr", output_units="1/Ry")
 data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                           "Al_debug_2k_nr1.out.npy", data_path,
-                          output_units="1/Ry",
-                          add_snapshot_as="va")
+                          add_snapshot_as="va", output_units="1/Ry")
 data_handler.prepare_data()
 printout("Read data: DONE.")
 

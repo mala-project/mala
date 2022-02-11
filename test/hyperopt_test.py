@@ -30,7 +30,6 @@ class TestHyperparameterOptimization:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.running.max_number_epochs = 20
@@ -43,13 +42,13 @@ class TestHyperparameterOptimization:
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path,
+                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path,
+                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path,
+                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
                                   output_units="1/Ry")
         data_handler.prepare_data()
 
@@ -103,7 +102,6 @@ class TestHyperparameterOptimization:
         # Set up parameters
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.running.max_number_epochs = 5
@@ -120,13 +118,13 @@ class TestHyperparameterOptimization:
 
         # Add all the snapshots we want to use in to the list.
         data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path,
+                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path,
+                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path,
+                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
                                   output_units="1/Ry")
         data_handler.prepare_data()
 
@@ -172,7 +170,6 @@ class TestHyperparameterOptimization:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.running.max_number_epochs = 20
@@ -185,13 +182,13 @@ class TestHyperparameterOptimization:
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path,
+                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path,
+                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path,
+                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
                                   output_units="1/Ry")
         data_handler.prepare_data()
 
