@@ -16,8 +16,7 @@ printout("Welcome to MALA.")
 printout("Running ex06_advanced_hyperparameter_optimization.py")
 
 
-def optimize_hyperparameters(hyper_optimizer, input_creator_naswot="oat",
-                             last_optuna_study=None):
+def optimize_hyperparameters(hyper_optimizer):
     ####################
     # PARAMETERS
     # All parameters are handled from a central parameters class that
@@ -83,50 +82,21 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_naswot="oat",
     # Add hyperparameters we want to have optimized to the list.
     # If we do a NASWOT run currently we need to create an input array
     # using one of the other two possible hyperparameter optimizers.
-    tmp_hp_optimizer = None
-    if hyper_optimizer == "oat" or hyper_optimizer == "optuna":
-        test_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
-                                             choices=["Adam", "SGD"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_00",
-                                             choices=["ReLU", "Sigmoid"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_01",
-                                             choices=["ReLU", "Sigmoid"])
-        test_hp_optimizer.add_hyperparameter("categorical",
-                                             "layer_activation_02",
-                                             choices=["ReLU", "Sigmoid"])
-    elif hyper_optimizer == "naswot":
-        tmp_parameters = test_parameters
-        if input_creator_naswot == "optuna" and last_optuna_study is None:
-            input_creator_naswot = "oat"
-        tmp_parameters.hyperparameters.hyper_opt_method = \
-            input_creator_naswot
-        tmp_hp_optimizer = mala.HyperOptInterface(tmp_parameters, data_handler)
-        tmp_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
-                                            choices=["Adam", "SGD"])
-        tmp_hp_optimizer.add_hyperparameter("categorical",
-                                            "layer_activation_00",
-                                            choices=["ReLU", "Sigmoid"])
-        tmp_hp_optimizer.add_hyperparameter("categorical",
-                                            "layer_activation_01",
-                                            choices=["ReLU", "Sigmoid"])
-        tmp_hp_optimizer.add_hyperparameter("categorical",
-                                            "layer_activation_02",
-                                            choices=["ReLU", "Sigmoid"])
+    test_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
+                                         choices=["Adam", "SGD"])
+    test_hp_optimizer.add_hyperparameter("categorical",
+                                         "layer_activation_00",
+                                         choices=["ReLU", "Sigmoid"])
+    test_hp_optimizer.add_hyperparameter("categorical",
+                                         "layer_activation_01",
+                                         choices=["ReLU", "Sigmoid"])
+    test_hp_optimizer.add_hyperparameter("categorical",
+                                         "layer_activation_02",
+                                         choices=["ReLU", "Sigmoid"])
 
     # Perform hyperparameter optimization.
     printout("Starting Hyperparameter optimization.")
-    if hyper_optimizer == "oat" or hyper_optimizer == "optuna":
-        test_hp_optimizer.perform_study()
-        if hyper_optimizer == "optuna":
-            last_optuna_study = test_hp_optimizer.get_trials_from_study()
-    elif hyper_optimizer == "naswot":
-        if input_creator_naswot == "optuna":
-            test_hp_optimizer.perform_study(trial_list=last_optuna_study)
-        else:
-            test_hp_optimizer.perform_study(trial_list=
-                                            tmp_hp_optimizer.get_orthogonal_array())
+    test_hp_optimizer.perform_study()
     test_hp_optimizer.set_optimal_parameters()
     printout("Hyperparameter optimization: DONE.")
 
@@ -138,19 +108,9 @@ def optimize_hyperparameters(hyper_optimizer, input_creator_naswot="oat",
 
     printout("Parameters used for this experiment:")
     test_parameters.show()
-    if hyper_optimizer == "optuna":
-        return test_trainer.final_test_loss, last_optuna_study
-    else:
-        return test_trainer.final_test_loss
+    return test_trainer.final_test_loss
 
 
-results = []
-result, last_study = optimize_hyperparameters("optuna")
-results.append(result)
-results.append(optimize_hyperparameters("oat"))
-results.append(optimize_hyperparameters("naswot",
-                                        input_creator_naswot="oat"))
-results.append(optimize_hyperparameters("naswot",
-                                        input_creator_naswot="optuna",
-                                        last_optuna_study=last_study))
+results = [optimize_hyperparameters("optuna"), optimize_hyperparameters("oat"),
+           optimize_hyperparameters("naswot")]
 print(results)

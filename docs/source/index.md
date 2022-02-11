@@ -4,49 +4,17 @@
 :relative-docs: docs/source/
 :relative-images:
 ```
+## Contents
 
 ```{toctree}
 ---
-caption: Features
 maxdepth: 2
 ---
 
-features/overview
-features/background
-features/preprocessing
-features/neuralnetworks
-features/postprocessing
-```
-
-```{toctree}
----
-caption: Installation
-maxdepth: 2
----
-
-install/README
-install/INSTALL_LAMMPS
-install/INSTALL_TE_QE
-install/tested_systems
-install/sql_on_hpc
-install/tensorboard_setup
-```
-
-```{toctree}
----
-caption: API Reference
-maxdepth: 1
----
-
+about
+installation
+usage
 api/modules
-```
-
-```{toctree}
----
-caption: Contributing
-maxdepth: 1
----
-
 CONTRIBUTE
 ```
 
