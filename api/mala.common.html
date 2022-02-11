@@ -726,28 +726,6 @@ which splits the data by snapshot boundaries. It is also the default.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="mala.common.parameters.ParametersData.data_splitting_snapshots">
-<code class="sig-name descname"><span class="pre">data_splitting_snapshots</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.data_splitting_snapshots" title="Permalink to this definition">¶</a></dt>
-<dd><p>Details how (and which!) snapshots are used for what:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>te: This snapshot will be a testing snapshot.</p></li>
-<li><p>tr: This snapshot will be a training snapshot.</p></li>
-<li><p>va: This snapshot will be a validation snapshot.</p></li>
-</ul>
-</div></blockquote>
-<p>Please note that the length of this list and the number of snapshots
-must be identical. The first element of this list will be used
-to characterize the first snapshot, the second element for the second
-snapshot etc.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt id="mala.common.parameters.ParametersData.input_rescaling_type">
 <code class="sig-name descname"><span class="pre">input_rescaling_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.input_rescaling_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Specifies how input quantities are normalized.
