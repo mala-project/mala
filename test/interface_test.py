@@ -65,7 +65,6 @@ class TestInterfaces:
 
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.data.data_splitting_snapshots = ["tr", "va"]
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.network.layer_activations = ["ReLU"]
@@ -91,9 +90,9 @@ class TestInterfaces:
 
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path)
+                                  "Be_snapshot1.out.npy", data_path, "tr")
         data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path)
+                                  "Be_snapshot2.out.npy", data_path, "va")
         data_handler.prepare_data()
 
         ####################

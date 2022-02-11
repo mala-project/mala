@@ -366,18 +366,6 @@ class ParametersData(ParametersBase):
         Currently the only supported option is by_snapshot,
         which splits the data by snapshot boundaries. It is also the default.
 
-    data_splitting_snapshots : list
-        Details how (and which!) snapshots are used for what:
-
-          - te: This snapshot will be a testing snapshot.
-          - tr: This snapshot will be a training snapshot.
-          - va: This snapshot will be a validation snapshot.
-
-        Please note that the length of this list and the number of snapshots
-        must be identical. The first element of this list will be used
-        to characterize the first snapshot, the second element for the second
-        snapshot etc.
-
     input_rescaling_type : string
         Specifies how input quantities are normalized.
         Options:
@@ -433,8 +421,6 @@ class ParametersData(ParametersBase):
         self.descriptors_contain_xyz = True
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
-        # self.data_splitting_percent = [0,0,0]
-        self.data_splitting_snapshots = []
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False

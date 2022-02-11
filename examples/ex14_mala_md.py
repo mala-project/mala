@@ -101,11 +101,8 @@ def initial_training():
 
     test_parameters = mala.Parameters()
     # Currently, the splitting in training, validation and test set are
-    # done on a "by snapshot" basis. Specify how this is
-    # done by providing a list containing entries of the form
-    # "tr", "va" and "te".
+    # done on a "by snapshot" basis.
     test_parameters.data.data_splitting_type = "by_snapshot"
-    test_parameters.data.data_splitting_snapshots = ["tr", "va"]
 
     # Specify the data scaling.
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
@@ -129,9 +126,9 @@ def initial_training():
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                              "Be_snapshot1.out.npy", data_path)
+                              "Be_snapshot1.out.npy", data_path, "tr")
     data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                              "Be_snapshot2.out.npy", data_path)
+                              "Be_snapshot2.out.npy", data_path, "va")
     data_handler.prepare_data()
     printout("Read data: DONE.")
 
