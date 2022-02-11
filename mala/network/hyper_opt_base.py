@@ -194,12 +194,13 @@ class HyperOptBase(ABC):
         oscaler_name = checkpoint_name + "_oscaler.pkl"
         if use_pkl_checkpoints:
             param_name = checkpoint_name + "_params.pkl"
+            loaded_params = Parameters.load_from_pickle(param_name)
         else:
             param_name = checkpoint_name + "_params.json"
+            loaded_params = Parameters.load_from_json(param_name)
         optimizer_name = checkpoint_name + "_hyperopt.pth"
 
         # First load the all the regular objects.
-        loaded_params = Parameters.load_from_file(param_name)
         loaded_iscaler = DataScaler.load_from_file(iscaler_name)
         loaded_oscaler = DataScaler.load_from_file(oscaler_name)
 
