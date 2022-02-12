@@ -43,22 +43,22 @@ jobs:
         run: docker build . --file Dockerfile --tag $IMAGE_NAME --cache-from=$IMAGE_ID --build-arg DEVICE=cpu --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Push image
-        if: ${{ github.event.review.state == 'approved' || github.event_name == 'push' }}
         run: |
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # print github.ref contexts (for debugging)
+          echo github.ref = "${{ github.ref }}"
+          echo github.ref_name = "${{ github.ref_name }}"
 
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # use Docker `x.x.x` tag for push tag events (set Docker tag to git version tag and strip "v" prefix from tag)
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && TAG=$(echo "${{ github.ref_name }}" | sed -e 's/^v//')
 
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "develop" ] && VERSION=latest
+          # use Docker `latest` tag for pull requests
+          [[ "${{ github.ref }}" == "refs/pull/"*"/merge" ]] && TAG=latest
 
           echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
+          echo TAG=$TAG
 
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$TAG
+          docker push $IMAGE_ID:$TAG
 
   cpu-tests:
     needs: build-docker-image-cpu
