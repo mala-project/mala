@@ -1,14 +1,12 @@
 name: CPU
 
 on:
-  pull_request_review:
-    types: [submitted,edited]
   pull_request:
+    # triggered on pull requests to main or develop
     branches:
       - master
       - develop
-
-    # Publish `v1.2.3` tags as releases.
+  push:
     tags:
       - v*
 
