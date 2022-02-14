@@ -6,7 +6,9 @@ import ase.io
 import numpy as np
 
 from mala.common.parameters import Parameters, ParametersTargets
+from mala.common.parallelizer import printout
 from mala.targets.calculation_helpers import fermi_function
+
 
 
 class TargetBase(ABC):
@@ -40,6 +42,7 @@ class TargetBase(ABC):
         self.total_energy_dft_calculation = None
         self.grid_dimensions = [0, 0, 0]
         self.atoms = None
+        self.electrons_per_atom = None
         self.qe_input_data = {
                 "occupations": 'smearing',
                 "calculation": 'scf',
@@ -136,8 +139,14 @@ class TargetBase(ABC):
         Parameters
         ----------
         data_type : string
-            Type of data or file that is used. Currently only supports
-            qe.out for Quantum Espresso outfiles.
+            Type of data or file that is used. Currently supporte are:
+            - "qe.out" : Read the additional information from a QuantumESPRESSO
+                         output file.
+
+            - "atoms+grid" : Provide a grid and an atoms object from which to
+                             predict. Except for the number of electrons,
+                             this mode will not change any member variables;
+                             values have to be adjusted BEFORE.
 
         data : string or list
             Data from which additional calculation data is inputted.
@@ -223,6 +232,9 @@ class TargetBase(ABC):
                                  self.grid_dimensions[2] * Bohr ** 3)
             self.grid_spacing_Bohr = cell_volume ** (1 / 3)
 
+            # This is especially important for size extrapolation.
+            self.electrons_per_atom = self.number_of_electrons/len(self.atoms)
+
             # Unit conversion
             self.total_energy_dft_calculation = total_energy*Rydberg
 
@@ -243,6 +255,7 @@ class TargetBase(ABC):
                                                self.temperature_K)
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
+
         elif data_type == "atoms+grid":
             # Reset everything that we can get this way.
             self.grid_spacing_Bohr = None
@@ -264,6 +277,17 @@ class TargetBase(ABC):
                                  self.grid_dimensions[1] *
                                  self.grid_dimensions[2] * Bohr ** 3)
             self.grid_spacing_Bohr = cell_volume ** (1 / 3)
+
+            if self.electrons_per_atom is None:
+                printout("No number of electrons per atom provided, "
+                         "MALA cannot guess the number of electrons "
+                         "in the cell with this. Energy calculations may be"
+                         "wrong.")
+
+            else:
+                self.number_of_electrons = self.electrons_per_atom *\
+                                           len(self.atoms)
+
         else:
             raise Exception("Unsupported auxiliary file type.")
 
