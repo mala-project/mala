@@ -78,7 +78,7 @@ jobs:
       - name: Install mala package
         run: |
           pip --no-cache-dir install -e .
-          pip install oapackage
+          pip install oapackage==2.6.8
           pip install pytest
       - name: Check out repository (data)
         uses: actions/checkout@v2
