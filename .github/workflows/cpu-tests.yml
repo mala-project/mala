@@ -77,7 +77,7 @@ jobs:
 
       - name: Install mala package
         run: |
-          pip --no-cache-dir install -e .[opt]
+          pip --no-cache-dir install -e .['opt']
           pip install pytest
       - name: Check out repository (data)
         uses: actions/checkout@v2
