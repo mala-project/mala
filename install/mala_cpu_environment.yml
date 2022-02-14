@@ -94,7 +94,7 @@ dependencies:
   - pyyaml=6.0=py38h497a2fe_3
   - readline=8.1=h46c0cb4_0
   - scipy=1.8.0=py38h56a6a73_0
-  - setuptools=60.8.1=py38h578d9bd_0
+  - setuptools=59.5.0=py38h578d9bd_0
   - six=1.16.0=pyh6c4a22f_0
   - sleef=3.5.1=h9b69904_2
   - sqlalchemy=1.4.31=py38h497a2fe_0
