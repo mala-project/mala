@@ -113,7 +113,8 @@ class TestMALAIntegration:
 
         # Calculate relative error.
         rel_error = np.abs(nr_mala-nr_dft) / nr_dft
-        printout("Relative error number of electrons: ", rel_error)
+        printout("Relative error number of electrons: ", rel_error,
+                 min_verbosity=0)
 
         # Check against the constraints we put upon ourselves.
         assert np.isclose(rel_error, 0, atol=accuracy)
@@ -144,7 +145,8 @@ class TestMALAIntegration:
 
         # Calculate relative error.
         rel_error = np.abs(density_mala_sum-density_dft_sum) / density_dft_sum
-        printout("Relative error for sum of density: ", rel_error)
+        printout("Relative error for sum of density: ", rel_error,
+                 min_verbosity=0)
 
         # Check against the constraints we put upon ourselves.
         assert np.isclose(rel_error, 0, atol=accuracy)
@@ -171,7 +173,8 @@ class TestMALAIntegration:
         dos_mala_sum = dos_mala.sum()
         dos_dft_sum = dos_dft.sum()
         rel_error = np.abs(dos_mala_sum-dos_dft_sum) / dos_dft_sum
-        printout("Relative error for sum of DOS: ", rel_error)
+        printout("Relative error for sum of DOS: ", rel_error,
+                 min_verbosity=0)
 
         # Check against the constraints we put upon ourselves.
         assert np.isclose(rel_error, 0, atol=accuracy_ldos)

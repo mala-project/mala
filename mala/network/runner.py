@@ -48,7 +48,8 @@ class Runner:
             if self.parameters_full.use_gpu:
                 printout("size=", hvd.size(), "global_rank=", hvd.rank(),
                          "local_rank=", hvd.local_rank(), "device=",
-                         torch.cuda.get_device_name(hvd.local_rank()))
+                         torch.cuda.get_device_name(hvd.local_rank()),
+                         min_verbosity=2)
                 # pin GPU to local rank
                 torch.cuda.set_device(hvd.local_rank())
 
@@ -100,8 +101,7 @@ class Runner:
         for i in range(0, number_of_batches_per_snapshot):
             inputs, outputs = \
                 data_set[offset+(i * batch_size):offset+((i + 1) * batch_size)]
-            if self.parameters_full.use_gpu:
-                inputs = inputs.to('cuda')
+            inputs = inputs.to(self.parameters._configuration["device"])
             predicted_outputs[i * batch_size:(i + 1) * batch_size, :] = \
                 self.data.output_data_scaler.\
                 inverse_transform(self.network(inputs).

@@ -34,9 +34,13 @@ class Trainer(Runner):
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the training data.
+
+    use_pkl_checkpoints : bool
+        If true, .pkl checkpoints will be created.
     """
 
-    def __init__(self, params, network, data, optimizer_dict=None):
+    def __init__(self, params, network, data, optimizer_dict=None,
+                 use_pkl_checkpoints=False):
         # copy the parameters into the class.
         super(Trainer, self).__init__(params, network, data)
         self.final_test_loss = float("inf")
@@ -51,6 +55,7 @@ class Trainer(Runner):
         self.training_data_loader = None
         self.validation_data_loader = None
         self.test_data_loader = None
+        self.use_pkl_checkpoints = use_pkl_checkpoints
         self.__prepare_to_train(optimizer_dict)
         self.tensor_board = None
         if self.parameters.visualisation:
@@ -58,7 +63,6 @@ class Trainer(Runner):
                 os.makedirs(self.parameters.visualisation_dir)
             # Set the path to log files
             self.tensor_board = SummaryWriter(self.parameters.visualisation_dir)
-                
 
     @classmethod
     def checkpoint_exists(cls, checkpoint_name):
@@ -72,6 +76,9 @@ class Trainer(Runner):
         checkpoint_name : string
             Name of the checkpoint.
 
+        use_pkl_checkpoints : bool
+            If true, .pkl checkpoints will be loaded.
+
         Returns
         -------
         checkpoint_exists : bool
@@ -81,14 +88,17 @@ class Trainer(Runner):
         network_name = checkpoint_name + "_network.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
+        if use_pkl_checkpoints:
+            param_name = checkpoint_name + "_params.pkl"
+        else:
+            param_name = checkpoint_name + "_params.json"
         optimizer_name = checkpoint_name + "_optimizer.pth"
 
         return all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
                                         network_name, optimizer_name]))
 
     @classmethod
-    def resume_checkpoint(cls, checkpoint_name):
+    def resume_checkpoint(cls, checkpoint_name, use_pkl_checkpoints=False):
         """
         Prepare resumption of training from a checkpoint.
 
@@ -99,6 +109,9 @@ class Trainer(Runner):
         ----------
         checkpoint_name : string
             Name of the checkpoint from which
+
+        use_pkl_checkpoints : bool
+            If true, .pkl checkpoints will be loaded.
 
         Returns
         -------
@@ -114,12 +127,15 @@ class Trainer(Runner):
         new_trainer : Trainer
             The trainer reconstructed from the checkpoint.
         """
-        printout("Loading training run from checkpoint.")
+        printout("Loading training run from checkpoint.", min_verbosity=0)
         # The names are based upon the checkpoint name.
         network_name = checkpoint_name + "_network.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
+        if use_pkl_checkpoints:
+            param_name = checkpoint_name + "_params.pkl"
+        else:
+            param_name = checkpoint_name + "_params.json"
         optimizer_name = checkpoint_name + "_optimizer.pth"
 
         # First load the all the regular objects.
@@ -129,7 +145,7 @@ class Trainer(Runner):
         loaded_network = Network.load_from_file(loaded_params,
                                                 network_name)
 
-        printout("Preparing data used for last checkpoint.")
+        printout("Preparing data used for last checkpoint.", min_verbosity=0)
         # Create a new data handler and prepare the data.
         new_datahandler = DataHandler(loaded_params,
                                       input_data_scaler=loaded_iscaler,
@@ -159,6 +175,7 @@ class Trainer(Runner):
 
         data : mala.datahandling.data_handler.DataHandler
             DataHandler holding the training data.
+
 
         Returns
         -------
@@ -197,10 +214,11 @@ class Trainer(Runner):
             if self.data.test_data_set is not None:
                 tloss = self.__average_validation(tloss, 'average_loss')
 
-        if self.parameters.verbosity:
-            printout("Initial Guess - validation data loss: ", vloss)
-            if self.data.test_data_set is not None:
-                printout("Initial Guess - test data loss: ", tloss)
+        printout("Initial Guess - validation data loss: ", vloss,
+                 min_verbosity=1)
+        if self.data.test_data_set is not None:
+            printout("Initial Guess - test data loss: ", tloss,
+                     min_verbosity=1)
 
         # Save losses for later use.
         self.initial_validation_loss = vloss
@@ -235,10 +253,8 @@ class Trainer(Runner):
 
             for batchid, (inputs, outputs) in \
                     enumerate(self.training_data_loader):
-                if self.parameters_full.use_gpu:
-
-                    inputs = inputs.to('cuda')
-                    outputs = outputs.to('cuda')
+                inputs = inputs.to(self.parameters._configuration["device"])
+                outputs = outputs.to(self.parameters._configuration["device"])
                 training_loss += self.__process_mini_batch(self.network,
                                                            inputs, outputs)
 
@@ -249,8 +265,9 @@ class Trainer(Runner):
                                             during_training_metric)
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
-            if self.parameters.verbosity:
-                printout("Epoch: ", epoch, "validation data loss: ", vloss)
+            printout("Epoch: ", epoch, "validation data loss: ", vloss,
+                     min_verbosity=1)
+
 
             #summary_writer tensor board
             if self.parameters.visualisation:
@@ -288,16 +305,14 @@ class Trainer(Runner):
                     vloss_old = vloss
                 else:
                     self.patience_counter += 1
-                    if self.parameters.verbosity:
-                        printout("Validation accuracy has not improved "
-                                 "enough.")
+                    printout("Validation accuracy has not improved "
+                             "enough.", min_verbosity=1)
                     if self.patience_counter >= self.parameters.\
                             early_stopping_epochs:
-                        if self.parameters.verbosity:
-                            printout("Stopping the training, validation "
-                                     "accuracy has not improved for",
-                                     self.patience_counter,
-                                     "epochs.")
+                        printout("Stopping the training, validation "
+                                 "accuracy has not improved for",
+                                 self.patience_counter,
+                                 "epochs.", min_verbosity=1)
                         self.last_epoch = epoch
                         break
 
@@ -306,14 +321,14 @@ class Trainer(Runner):
                 checkpoint_counter += 1
                 if checkpoint_counter >= \
                         self.parameters.checkpoints_each_epoch:
-                    printout("Checkpointing training.")
+                    printout("Checkpointing training.", min_verbosity=0)
                     self.last_epoch = epoch
                     self.last_loss = vloss_old
                     self.__create_training_checkpoint()
                     checkpoint_counter = 0
 
-            if self.parameters.verbosity:
-                printout("Time for epoch[s]:", time.time() - start_time)
+            printout("Time for epoch[s]:", time.time() - start_time,
+                     min_verbosity=2)
 
         ############################
         # CALCULATE FINAL METRICS
@@ -332,7 +347,7 @@ class Trainer(Runner):
 
         # Calculate final loss.
         self.final_validation_loss = vloss
-        printout("Final validation data loss: ", vloss)
+        printout("Final validation data loss: ", vloss, min_verbosity=0)
 
         tloss = float("inf")
         if self.data.test_data_set is not None:
@@ -342,10 +357,8 @@ class Trainer(Runner):
                                             after_before_training_metric)
             if self.parameters_full.use_horovod:
                 tloss = self.__average_validation(tloss, 'average_loss')
-            printout("Final test data loss: ", tloss)
+            printout("Final test data loss: ", tloss, min_verbosity=0)
         self.final_test_loss = tloss
-
-        
 
     def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""
@@ -357,7 +370,7 @@ class Trainer(Runner):
         if self.parameters_full.use_horovod:
             if hvd.size() > 1:
                 printout("Rescaling learning rate because multiple workers are"
-                         " used for training.")
+                         " used for training.", min_verbosity=1)
                 self.parameters.learning_rate = self.parameters.learning_rate \
                     * hvd.size()
 
@@ -486,7 +499,7 @@ class Trainer(Runner):
 
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
-        prediction = network(input_data)
+        prediction = network.forward(input_data)
         loss = network.calculate_loss(prediction, target_data)
         loss.backward()
         self.optimizer.step()
@@ -516,9 +529,8 @@ class Trainer(Runner):
             validation_loss = []
             with torch.no_grad():
                 for x, y in data_loader:
-                    if self.parameters_full.use_gpu:
-                        x = x.to('cuda')
-                        y = y.to('cuda')
+                    x = x.to(self.parameters._configuration["device"])
+                    y = y.to(self.parameters._configuration["device"])
                     prediction = network(x)
                     validation_loss.append(network.calculate_loss(prediction, y)
                                            .item())

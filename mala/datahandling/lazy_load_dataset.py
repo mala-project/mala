@@ -51,11 +51,6 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         Size of the grid (x*y*z), i.e. the number of datapoints per
         snapshot.
 
-    descriptors_contain_xyz : bool
-        If true, then it is assumed that the first three entries of any
-        input data file are xyz-information and can be discarded.
-        Generally true, if your descriptors were calculated using MALA.
-
     use_horovod : bool
         If true, it is assumed that horovod is used.
 
@@ -65,8 +60,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
 
     def __init__(self, input_dimension, output_dimension, input_data_scaler,
                  output_data_scaler, descriptor_calculator,
-                 target_calculator, grid_dimensions, grid_size,
-                 descriptors_contain_xyz, use_horovod,
+                 target_calculator, grid_dimensions, grid_size, use_horovod,
                  input_requires_grad=False):
         self.snapshot_list = []
         self.input_dimension = input_dimension
@@ -79,7 +73,8 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.grid_size = grid_size
         self.number_of_snapshots = 0
         self.total_size = 0
-        self.descriptors_contain_xyz = descriptors_contain_xyz
+        self.descriptors_contain_xyz = self.descriptor_calculator.\
+            descriptors_contain_xyz
         self.currently_loaded_file = None
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)

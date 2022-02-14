@@ -1,14 +1,15 @@
 name: CPU
 
 on:
-  pull_request_review:
-    types: [submitted,edited]
   pull_request:
+    # triggered on pull requests to master or develop
     branches:
       - master
       - develop
-
-    # Publish `v1.2.3` tags as releases.
+  push:
+    branches:
+      - master
+      - develop
     tags:
       - v*
 
@@ -44,23 +45,23 @@ jobs:
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME --cache-from=$IMAGE_ID --build-arg DEVICE=cpu --label "runnumber=${GITHUB_RUN_ID}"
 
-      - name: Push image
-        if: ${{ github.event.review.state == 'approved' || github.event_name == 'push' }}
+      - name: Tag and push image
         run: |
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # print github.ref contexts (for debugging)
+          echo github.ref = "${{ github.ref }}"
+          echo github.ref_name = "${{ github.ref_name }}"
 
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # use Docker `latest` tag for pull requests and pushes without a git tag (default)
+          TAG=latest
 
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "develop" ] && VERSION=latest
+          # use Docker `x.x.x` tag for push tag events (set Docker tag to git version tag and strip "v" prefix from tag)
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && TAG=$(echo "${{ github.ref_name }}" | sed -e 's/^v//')
 
           echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
+          echo TAG=$TAG
 
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$TAG
+          docker push $IMAGE_ID:$TAG
 
   cpu-tests:
     needs: build-docker-image-cpu
@@ -77,13 +78,14 @@ jobs:
       - name: Install mala package
         run: |
           pip --no-cache-dir install -e .
+          pip install oapackage==2.6.8
           pip install pytest
       - name: Check out repository (data)
         uses: actions/checkout@v2
         with:
           repository: mala-project/test-data
           path: mala_data
-          ref: v1.1.0
+          ref: v1.3.0
           lfs: false
 
       - name: Test MALA

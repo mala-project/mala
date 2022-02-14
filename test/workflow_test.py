@@ -46,7 +46,7 @@ class TestFullWorkflow:
         test_parameters.descriptors.descriptor_type = "SNAP"
         test_parameters.descriptors.twojmax = 6
         test_parameters.descriptors.rcutfac = 4.67637
-        test_parameters.data.descriptors_contain_xyz = True
+        test_parameters.descriptors.descriptors_contain_xyz = True
         test_parameters.targets.target_type = "LDOS"
         test_parameters.targets.ldos_gridsize = 11
         test_parameters.targets.ldos_gridspacing_ev = 2.5
@@ -232,7 +232,6 @@ class TestFullWorkflow:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.network.layer_activations = ["ReLU"]
@@ -244,13 +243,13 @@ class TestFullWorkflow:
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path,
+                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path,
+                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path,
+                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
                                   output_units="1/Ry")
         data_handler.prepare_data()
 
@@ -268,7 +267,7 @@ class TestFullWorkflow:
 
         # Save, if necessary.
         if save_network:
-            params_path = "workflow_test_params.pkl"
+            params_path = "workflow_test_params.json"
             network_path = "workflow_test_network.pth"
             input_scaler_path = "workflow_test_iscaler.pkl"
             output_scaler_path = "workflow_test_oscaler.pkl"
@@ -283,7 +282,7 @@ class TestFullWorkflow:
     def __use_trained_network(save_path="./"):
         """Use a trained network to make a prediction."""
 
-        params_path = os.path.join(save_path, "workflow_test_params.pkl")
+        params_path = os.path.join(save_path, "workflow_test_params.json")
         network_path = os.path.join(save_path, "workflow_test_network.pth")
         input_scaler_path = os.path.join(save_path, "workflow_test_iscaler.pkl")
         output_scaler_path = os.path.join(save_path, "workflow_test_oscaler.pkl")
@@ -304,11 +303,10 @@ class TestFullWorkflow:
         inference_data_handler = mala.DataHandler(new_parameters,
                                                   input_data_scaler=iscaler,
                                                   output_data_scaler=oscaler)
-        new_parameters.data.data_splitting_snapshots = ["te"]
         inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy",
                                             data_path,
                                             "Al_debug_2k_nr2.out.npy",
-                                            data_path,
+                                            data_path, "te",
                                             output_units="1/Ry")
         inference_data_handler.prepare_data(reparametrize_scaler=False)
 
@@ -332,4 +330,3 @@ class TestFullWorkflow:
                           atol=accuracy_predictions)
         assert np.isclose(nr_electrons_predicted, nr_electrons_actual,
                           atol=accuracy_predictions)
-

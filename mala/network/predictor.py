@@ -57,7 +57,7 @@ class Predictor(Runner):
         atoms = ase.io.read(path_to_file, format="espresso-out")
         return self.predict_for_atoms(atoms)
 
-    def predict_for_atoms(self, atoms):
+    def predict_for_atoms(self, atoms, gather_ldos=False):
         """
         Get predicted LDOS for an atomic configuration.
 
@@ -65,6 +65,12 @@ class Predictor(Runner):
         ----------
         atoms : ase.Atoms
             ASE atoms for which the prediction should be done.
+
+        gather_ldos : bool
+            Only important if MPI is used. If True, all SNAP descriptors
+            are gathered on rank 0, and the pass is performed there.
+            Helpful for using multiple CPUs for descriptor calculations
+            and only one for network pass.
 
         Returns
         -------
@@ -86,21 +92,25 @@ class Predictor(Runner):
         # each batch is forwarded individually (for now), in the latter
         # case, everything is forwarded at once.
         if self.parameters._configuration["mpi"]:
-            if self.parameters_full.data.descriptors_contain_xyz:
-                snap_descriptors = snap_descriptors[:, 6:]
-                feature_length -= 3
+            if gather_ldos is True:
+                snap_descriptors = self.data.descriptor_calculator. \
+                    gather_descriptors(snap_descriptors)
+            else:
+                if self.data.descriptor_calculator.descriptors_contain_xyz:
+                    snap_descriptors = snap_descriptors[:, 6:]
+                    feature_length -= 3
 
-            snap_descriptors = \
-                snap_descriptors.astype(np.float32)
-            snap_descriptors = \
-                torch.from_numpy(snap_descriptors).float()
-            snap_descriptors = \
-                self.data.input_data_scaler.transform(snap_descriptors)
-            return self. \
-                _forward_snap_descriptors(snap_descriptors, local_size)
+                snap_descriptors = \
+                    snap_descriptors.astype(np.float32)
+                snap_descriptors = \
+                    torch.from_numpy(snap_descriptors).float()
+                snap_descriptors = \
+                    self.data.input_data_scaler.transform(snap_descriptors)
+                return self. \
+                    _forward_snap_descriptors(snap_descriptors, local_size)
 
-        else:
-            if self.parameters_full.data.descriptors_contain_xyz:
+        if get_rank() == 0:
+            if self.data.descriptor_calculator.descriptors_contain_xyz:
                 snap_descriptors = snap_descriptors[:, :, :, 3:]
                 feature_length -= 3
 
@@ -115,6 +125,8 @@ class Predictor(Runner):
                 self.data.input_data_scaler.transform(snap_descriptors)
             return self.\
                         _forward_snap_descriptors(snap_descriptors)
+        else:
+            return None
 
     def _forward_snap_descriptors(self, snap_descriptors, local_data_size=None):
         """Forward a scaled tensor of SNAP descriptors through the NN."""
@@ -128,6 +140,9 @@ class Predictor(Runner):
                                             self.parameters.mini_batch_size)
         if optimal_batch_size != self.parameters.mini_batch_size:
             self.parameters.mini_batch_size = optimal_batch_size
+            printout("Had to readjust batch size from",
+                     self.parameters.mini_batch_size, "to",
+                     optimal_batch_size, min_verbosity=0)
         self.number_of_batches_per_snapshot = int(local_data_size /
                                                   self.parameters.
                                                   mini_batch_size)
@@ -135,8 +150,7 @@ class Predictor(Runner):
         for i in range(0, self.number_of_batches_per_snapshot):
             inputs = snap_descriptors[i * self.parameters.mini_batch_size:
                                       (i+1)*self.parameters.mini_batch_size]
-            if self.parameters_full.use_gpu:
-                inputs = inputs.to('cuda')
+            inputs = inputs.to(self.parameters._configuration["device"])
             predicted_outputs[i * self.parameters.mini_batch_size:
                                       (i+1)*self.parameters.mini_batch_size] \
                 = self.data.output_data_scaler.\
@@ -147,5 +161,6 @@ class Predictor(Runner):
         # i.e. restricting the (L)DOS to positive values.
         predicted_outputs = self.data.target_calculator.\
             restrict_data(predicted_outputs)
-        get_comm().Barrier()
+        if self.parameters._configuration["mpi"]:
+            get_comm().Barrier()
         return predicted_outputs
