@@ -2,11 +2,14 @@ name: CPU
 
 on:
   pull_request:
-    # triggered on pull requests to main or develop
+    # triggered on pull requests to master or develop
     branches:
       - master
       - develop
   push:
+    branches:
+      - master
+      - develop
     tags:
       - v*
 
@@ -42,17 +45,17 @@ jobs:
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME --cache-from=$IMAGE_ID --build-arg DEVICE=cpu --label "runnumber=${GITHUB_RUN_ID}"
 
-      - name: Push image
+      - name: Tag and push image
         run: |
           # print github.ref contexts (for debugging)
           echo github.ref = "${{ github.ref }}"
           echo github.ref_name = "${{ github.ref_name }}"
 
+          # use Docker `latest` tag for pull requests and pushes without a git tag (default)
+          TAG=latest
+
           # use Docker `x.x.x` tag for push tag events (set Docker tag to git version tag and strip "v" prefix from tag)
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && TAG=$(echo "${{ github.ref_name }}" | sed -e 's/^v//')
-
-          # use Docker `latest` tag for pull requests
-          [[ "${{ github.ref }}" == "refs/pull/"*"/merge" ]] && TAG=latest
 
           echo IMAGE_ID=$IMAGE_ID
           echo TAG=$TAG
