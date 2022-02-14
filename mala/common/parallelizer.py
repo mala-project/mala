@@ -9,6 +9,7 @@ except ModuleNotFoundError:
     pass
 import platform
 from collections import defaultdict
+import torch
 
 use_horovod = False
 use_mpi = False
@@ -177,6 +178,17 @@ def get_comm():
 
     """
     return comm
+
+
+def barrier():
+    """
+    General interface for a barrier.
+    """
+    if use_horovod:
+        hvd.allreduce(torch.tensor(0), name='barrier')
+    if use_mpi:
+        comm.Barrier()
+    return
 
 
 def printout(*values, sep=' ', min_verbosity=0):

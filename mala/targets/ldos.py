@@ -9,8 +9,8 @@ try:
 except ModuleNotFoundError:
     pass
 
-from mala.common.parameters import printout
-from mala.common.parallelizer import get_comm, printout, get_rank, get_size
+from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
+    barrier
 from mala.targets.cube_parser import read_cube
 from mala.targets.target_base import TargetBase
 from mala.targets.calculation_helpers import *
@@ -179,7 +179,7 @@ class LDOS(TargetBase):
         # If a memmap is used for communication, this has to be brought into
         # play now.
         if self.parameters._configuration["mpi"]:
-            get_comm().Barrier()
+            barrier()
             data_shape = np.shape(ldos_data)
             if get_rank() == 0:
                 ldos_data_full = np.memmap(use_memmap,
@@ -187,14 +187,14 @@ class LDOS(TargetBase):
                                                  data_shape[2], self.parameters.
                                                  ldos_gridsize), mode="w+",
                                            dtype=np.float64)
-            get_comm().Barrier()
+            barrier()
             if get_rank() != 0:
                 ldos_data_full = np.memmap(use_memmap,
                                            shape=(data_shape[0], data_shape[1],
                                                   data_shape[2], self.parameters.
                                                   ldos_gridsize), mode="r+",
                                            dtype=np.float64)
-            get_comm().Barrier()
+            barrier()
             ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
             return ldos_data_full
 

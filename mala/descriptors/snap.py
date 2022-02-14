@@ -22,7 +22,8 @@ except ModuleNotFoundError:
 
 from mala.descriptors.lammps_utils import *
 from mala.descriptors.descriptor_base import DescriptorBase
-from mala.common.parallelizer import get_comm, printout, get_rank, get_size
+from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
+    barrier
 
 
 class SNAP(DescriptorBase):
@@ -190,7 +191,7 @@ class SNAP(DescriptorBase):
         """
         # Barrier to make sure all ranks have descriptors..
         comm = get_comm()
-        comm.Barrier()
+        barrier()
 
         # Gather the SNAP descriptors into a list.
         if use_pickled_comm:
@@ -222,7 +223,7 @@ class SNAP(DescriptorBase):
                                    (sendcounts[i], raw_feature_length))
             else:
                 comm.Send(snap_descriptors_np, dest=0, tag=get_rank()+100)
-            comm.Barrier()
+            barrier()
 
         # if get_rank() == 0:
         #     printout(np.shape(all_snap_descriptors_list[0]))
