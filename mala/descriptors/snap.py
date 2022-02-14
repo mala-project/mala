@@ -6,7 +6,12 @@ import ase
 import ase.io
 try:
     from lammps import lammps
-    from lammps import constants as lammps_constants
+    # For version compatibility; older lammps versions (the serial version
+    # we still use on some machines) do not have this constants.
+    try:
+        from lammps import constants as lammps_constants
+    except ImportError:
+        pass
 except ModuleNotFoundError:
     pass
 
