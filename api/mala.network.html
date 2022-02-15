@@ -1274,11 +1274,17 @@ applications it might make sense to specify something different.</p></li>
 </dl>
 <dl class="py method">
 <dt id="mala.network.predictor.Predictor.predict_for_atoms">
-<code class="sig-name descname"><span class="pre">predict_for_atoms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.predictor.Predictor.predict_for_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">predict_for_atoms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_ldos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.predictor.Predictor.predict_for_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get predicted LDOS for an atomic configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>atoms</strong> (<em>ase.Atoms</em>) – ASE atoms for which the prediction should be done.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – ASE atoms for which the prediction should be done.</p></li>
+<li><p><strong>gather_ldos</strong> (<em>bool</em>) – Only important if MPI is used. If True, all SNAP descriptors
+are gathered on rank 0, and the pass is performed there.
+Helpful for using multiple CPUs for descriptor calculations
+and only one for network pass.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>predicted_ldos</strong> – Precicted LDOS for these atomic positions.</p>
@@ -1291,11 +1297,17 @@ applications it might make sense to specify something different.</p></li>
 
 <dl class="py method">
 <dt id="mala.network.predictor.Predictor.predict_from_qeout">
-<code class="sig-name descname"><span class="pre">predict_from_qeout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_to_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.predictor.Predictor.predict_from_qeout" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">predict_from_qeout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_to_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_ldos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.network.predictor.Predictor.predict_from_qeout" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get predicted LDOS for the atomic configuration of a QE.out file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path_to_file</strong> (<em>string</em>) – Path from which to read the atomic configuration.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_to_file</strong> (<em>string</em>) – Path from which to read the atomic configuration.</p></li>
+<li><p><strong>gather_ldos</strong> (<em>bool</em>) – Only important if MPI is used. If True, all SNAP descriptors
+are gathered on rank 0, and the pass is performed there.
+Helpful for using multiple CPUs for descriptor calculations
+and only one for network pass.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>predicted_ldos</strong> – Precicted LDOS for these atomic positions.</p>

@@ -1795,8 +1795,16 @@ temperature) for post processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data_type</strong> (<em>string</em>) – Type of data or file that is used. Currently only supports
-qe.out for Quantum Espresso outfiles.</p></li>
+<li><p><strong>data_type</strong> (<em>string</em>) – <p>Type of data or file that is used. Currently supporte are:</p>
+<ul>
+<li><p>”qe.out” : Read the additional information from a QuantumESPRESSO
+output file.</p></li>
+<li><p>”atoms+grid” : Provide a grid and an atoms object from which to
+predict. Except for the number of electrons,
+this mode will not change any member variables;
+values have to be adjusted BEFORE.</p></li>
+</ul>
+</p></li>
 <li><p><strong>data</strong> (<em>string</em><em> or </em><em>list</em>) – Data from which additional calculation data is inputted.</p></li>
 </ul>
 </dd>
