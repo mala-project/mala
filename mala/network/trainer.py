@@ -4,18 +4,25 @@ from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
 from mala.common.parameters import Parameters
 import os
-import numpy as np
-import torch
-from torch import optim
-from torch.utils.data import DataLoader
-from mala.common.parameters import printout
-from .runner import Runner
+import time
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
-import time
+import numpy as np
+import torch
+from torch import optim
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
+
+from mala.common.parameters import Parameters
+from mala.common.parameters import printout
+from mala.datahandling.data_handler import DataHandler
+from mala.datahandling.data_scaler import DataScaler
+from mala.network.network import Network
+from mala.network.runner import Runner
 
 
 class Trainer(Runner):
@@ -31,9 +38,13 @@ class Trainer(Runner):
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the training data.
+
+    use_pkl_checkpoints : bool
+        If true, .pkl checkpoints will be created.
     """
 
-    def __init__(self, params, network, data, optimizer_dict=None):
+    def __init__(self, params, network, data, optimizer_dict=None,
+                 use_pkl_checkpoints=False):
         # copy the parameters into the class.
         super(Trainer, self).__init__(params, network, data)
         self.final_test_loss = float("inf")
@@ -49,6 +60,13 @@ class Trainer(Runner):
         self.validation_data_loader = None
         self.test_data_loader = None
         self.__prepare_to_train(optimizer_dict)
+        self.tensor_board = None
+        if self.parameters.visualisation:
+            if not os.path.exists(self.parameters.visualisation_dir):
+                os.makedirs(self.parameters.visualisation_dir)
+            # Set the path to log files
+            self.tensor_board = SummaryWriter(self.parameters.visualisation_dir)
+
 
     @classmethod
     def checkpoint_exists(cls, checkpoint_name):
@@ -62,6 +80,9 @@ class Trainer(Runner):
         checkpoint_name : string
             Name of the checkpoint.
 
+        use_pkl_checkpoints : bool
+            If true, .pkl checkpoints will be loaded.
+
         Returns
         -------
         checkpoint_exists : bool
@@ -71,14 +92,17 @@ class Trainer(Runner):
         network_name = checkpoint_name + "_network.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
+        if use_pkl_checkpoints:
+            param_name = checkpoint_name + "_params.pkl"
+        else:
+            param_name = checkpoint_name + "_params.json"
         optimizer_name = checkpoint_name + "_optimizer.pth"
 
         return all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
                                         network_name, optimizer_name]))
 
     @classmethod
-    def resume_checkpoint(cls, checkpoint_name):
+    def resume_checkpoint(cls, checkpoint_name, use_pkl_checkpoints=False):
         """
         Prepare resumption of training from a checkpoint.
 
@@ -89,6 +113,9 @@ class Trainer(Runner):
         ----------
         checkpoint_name : string
             Name of the checkpoint from which
+
+        use_pkl_checkpoints : bool
+            If true, .pkl checkpoints will be loaded.
 
         Returns
         -------
@@ -104,12 +131,15 @@ class Trainer(Runner):
         new_trainer : Trainer
             The trainer reconstructed from the checkpoint.
         """
-        printout("Loading training run from checkpoint.")
+        printout("Loading training run from checkpoint.", min_verbosity=0)
         # The names are based upon the checkpoint name.
         network_name = checkpoint_name + "_network.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
         oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
+        if use_pkl_checkpoints:
+            param_name = checkpoint_name + "_params.pkl"
+        else:
+            param_name = checkpoint_name + "_params.json"
         optimizer_name = checkpoint_name + "_optimizer.pth"
 
         # First load the all the regular objects.
@@ -119,7 +149,7 @@ class Trainer(Runner):
         loaded_network = Network.load_from_file(loaded_params,
                                                 network_name)
 
-        printout("Preparing data used for last checkpoint.")
+        printout("Preparing data used for last checkpoint.", min_verbosity=0)
         # Create a new data handler and prepare the data.
         new_datahandler = DataHandler(loaded_params,
                                       input_data_scaler=loaded_iscaler,
@@ -150,6 +180,7 @@ class Trainer(Runner):
         data : mala.datahandling.data_handler.DataHandler
             DataHandler holding the training data.
 
+
         Returns
         -------
         loaded_trainer : Network
@@ -165,14 +196,21 @@ class Trainer(Runner):
 
     def train_network(self):
         """Train a network using data given by a DataHandler."""
-        # Create reference to data and network and setup training.
-        # Calculate initial loss.
+        ############################
+        # CALCULATE INITIAL METRICS
+        ############################
+
         tloss = float("inf")
         vloss = self.__validate_network(self.network,
-                                        self.validation_data_loader)
+                                        "validation",
+                                        self.parameters.
+                                        after_before_training_metric)
+
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
-                                            self.test_data_loader)
+                                            "test",
+                                            self.parameters.
+                                            after_before_training_metric)
 
         # Collect and average all the losses from all the devices
         if self.parameters_full.use_horovod:
@@ -182,15 +220,21 @@ class Trainer(Runner):
                 tloss = self.__average_validation(tloss, 'average_loss')
                 self.initial_test_loss = tloss
 
-        if self.parameters.verbosity:
-            printout("Initial Guess - validation data loss: ", vloss)
-            if self.data.test_data_set is not None:
-                printout("Initial Guess - test data loss: ", tloss)
+        printout("Initial Guess - validation data loss: ", vloss,
+                 min_verbosity=1)
+        if self.data.test_data_set is not None:
+            printout("Initial Guess - test data loss: ", tloss,
+                     min_verbosity=1)
+
+        # Save losses for later use.
+        self.initial_validation_loss = vloss
+        self.initial_test_loss = tloss
 
         # Initialize all the counters.
         checkpoint_counter = 0
 
-        # If we restarted from a checkpoint, we
+        # If we restarted from a checkpoint, we have to differently initialize
+        # the loss.
         if self.last_loss is None:
             vloss_old = vloss
         else:
@@ -199,6 +243,11 @@ class Trainer(Runner):
         if self.parameters_full.use_horovod:
             rank = hvd.local_rank()
         # Perform and log training.
+
+        ############################
+        # PERFORM TRAINING
+        ############################
+
         for epoch in range(self.last_epoch, self.parameters.max_number_epochs):
             start_time = time.time()
 
@@ -215,11 +264,8 @@ class Trainer(Runner):
             processed_on_this_process = 0
             for batchid, (inputs, outputs) in \
                     enumerate(self.training_data_loader):
-                processed_on_this_process += inputs.size()[0]
-                inputs = inputs.to(f"{self.parameters_full.device_type}:"
-                                   f"{self.parameters_full.device_id}")
-                outputs = outputs.to(f"{self.parameters_full.device_type}:"
-                                     f"{self.parameters_full.device_id}")
+                inputs = inputs.to(self.parameters._configuration["device"])
+                outputs = outputs.to(self.parameters._configuration["device"])
                 training_loss += self.__process_mini_batch(self.network,
                                                            inputs, outputs)
             print("training: ", rank, processed_on_this_process, start_time-time.time())
@@ -234,6 +280,32 @@ class Trainer(Runner):
             if self.parameters.verbosity:
                 printout("Epoch: ", epoch, "validation data loss: ", vloss)
             print("average val", val_time-time.time())
+                                            "validation",
+                                            self.parameters.
+                                            during_training_metric)
+            if self.parameters_full.use_horovod:
+                vloss = self.__average_validation(vloss, 'average_loss')
+            printout("Epoch: ", epoch, "validation data loss: ", vloss,
+                     min_verbosity=1)
+
+
+            #summary_writer tensor board
+            if self.parameters.visualisation:
+                self.tensor_board.add_scalar("Loss", vloss, epoch)
+                self.tensor_board.add_scalar("Learning rate", self.parameters.learning_rate, epoch)
+                if self.parameters.visualisation == 2:
+                    print("visualisation = 2")
+                    for name, param in self.network.named_parameters():
+                        self.tensor_board.add_histogram(name,param,epoch)
+                        self.tensor_board.add_histogram(f'{name}.grad',param.grad,epoch)
+
+                self.tensor_board.close() #method to make sure that all pending events have been written to disk
+
+
+
+
+
+
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
             if self.parameters.use_shuffling_for_samplers:
@@ -253,16 +325,14 @@ class Trainer(Runner):
                     vloss_old = vloss
                 else:
                     self.patience_counter += 1
-                    if self.parameters.verbosity:
-                        printout("Validation accuracy has not improved "
-                                 "enough.")
+                    printout("Validation accuracy has not improved "
+                             "enough.", min_verbosity=1)
                     if self.patience_counter >= self.parameters.\
                             early_stopping_epochs:
-                        if self.parameters.verbosity:
-                            printout("Stopping the training, validation "
-                                     "accuracy has not improved for",
-                                     self.patience_counter,
-                                     "epochs.")
+                        printout("Stopping the training, validation "
+                                 "accuracy has not improved for",
+                                 self.patience_counter,
+                                 "epochs.", min_verbosity=1)
                         self.last_epoch = epoch
                         break
 
@@ -271,24 +341,43 @@ class Trainer(Runner):
                 checkpoint_counter += 1
                 if checkpoint_counter >= \
                         self.parameters.checkpoints_each_epoch:
-                    printout("Checkpointing training.")
+                    printout("Checkpointing training.", min_verbosity=0)
                     self.last_epoch = epoch
                     self.last_loss = vloss_old
                     self.__create_training_checkpoint()
                     checkpoint_counter = 0
 
-            if self.parameters.verbosity:
-                printout("Time for epoch[s]:", time.time() - start_time)
+            printout("Time for epoch[s]:", time.time() - start_time,
+                     min_verbosity=2)
+
+        ############################
+        # CALCULATE FINAL METRICS
+        ############################
+
+        if self.parameters.after_before_training_metric != \
+                self.parameters.during_training_metric:
+            vloss = self.__validate_network(self.network,
+                                            "validation",
+                                            self.parameters.
+                                            after_before_training_metric)
+            if self.parameters_full.use_horovod:
+                vloss = self.__average_validation(vloss, 'average_loss')
+
+
 
         # Calculate final loss.
         self.final_validation_loss = vloss
+        printout("Final validation data loss: ", vloss, min_verbosity=0)
+
         tloss = float("inf")
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
-                                            self.test_data_loader)
+                                            "test",
+                                            self.parameters.
+                                            after_before_training_metric)
             if self.parameters_full.use_horovod:
                 tloss = self.__average_validation(tloss, 'average_loss')
-            printout("Final test data loss: ", tloss)
+            printout("Final test data loss: ", tloss, min_verbosity=0)
         self.final_test_loss = tloss
 
     def __prepare_to_train(self, optimizer_dict):
@@ -301,7 +390,7 @@ class Trainer(Runner):
         if self.parameters_full.use_horovod:
             if hvd.size() > 1:
                 printout("Rescaling learning rate because multiple workers are"
-                         " used for training.")
+                         " used for training.", min_verbosity=1)
                 self.parameters.learning_rate = self.parameters.learning_rate \
                     * hvd.size()
 
@@ -328,16 +417,8 @@ class Trainer(Runner):
             self.last_loss = optimizer_dict['early_stopping_last_loss']
 
         if self.parameters_full.use_horovod:
-            # At some point, we had the scaling of the batch size here.
-            # The scaling of learning rate and batch size in horovod can
-            # be confusing, so I'm embedding this link here:
-            # https://github.com/horovod/horovod/issues/1617#issuecomment-569094205
-            # Essentially, horovod runs an epoch on each process independently.
-            # If we assume a batch size of 128 and 4 GPUs, that means each
-            # mini batch effectively consists of 4*128 data points. That's
-            # why we have to scale the learning rate. We could also scale the
-            # batch size, but I think that would cost us performance for
-            # no good reason.
+            # scaling the batch size for multiGPU per node
+            # self.batch_size= self.batch_size*hvd.local_size()
 
             compression = hvd.Compression.fp16 if self.parameters_full.\
                 running.use_compression else hvd.Compression.none
@@ -438,28 +519,134 @@ class Trainer(Runner):
 
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
-        prediction = network.forward(input_data)
+        prediction = network(input_data)
         loss = network.calculate_loss(prediction, target_data)
         loss.backward()
         self.optimizer.step()
         self.optimizer.zero_grad()
         return loss.item()
 
-    def __validate_network(self, network, vdl):
+    def __validate_network(self, network, data_set_type, validation_type):
         """Validate a network, using test or validation data."""
-        network.eval()
-        validation_loss = []
-        with torch.no_grad():
-            for x, y in vdl:
-                x = x.to(f"{self.parameters_full.device_type}:"
-                         f"{self.parameters_full.device_id}")
-                y = y.to(f"{self.parameters_full.device_type}:"
-                         f"{self.parameters_full.device_id}")
-                prediction = network(x)
-                validation_loss.append(network.calculate_loss(prediction, y)
-                                       .item())
+        if data_set_type == "test":
+            data_loader = self.test_data_loader
+            data_set = self.data.test_data_set
+            number_of_snapshots = self.data.nr_test_snapshots
+            offset_snapshots = self.data.nr_validation_snapshots + \
+                               self.data.nr_training_snapshots
 
-        return np.mean(validation_loss)
+        elif data_set_type == "validation":
+            data_loader = self.validation_data_loader
+            data_set = self.data.validation_data_set
+            number_of_snapshots = self.data.nr_validation_snapshots
+            offset_snapshots = self.data.nr_training_snapshots
+
+        else:
+            raise Exception("Please select test or validation"
+                            "when using this function.")
+        network.eval()
+        if validation_type == "ldos":
+            validation_loss = []
+            with torch.no_grad():
+                for x, y in data_loader:
+                    x = x.to(self.parameters._configuration["device"])
+                    y = y.to(self.parameters._configuration["device"])
+                    prediction = network(x)
+                    validation_loss.append(network.calculate_loss(prediction, y)
+                                           .item())
+
+            return np.mean(validation_loss)
+        elif validation_type == "band_energy":
+            # Get optimal batch size and number of batches per snapshots.
+            optimal_batch_size = self. \
+                _correct_batch_size_for_testing(self.data.grid_size,
+                                                self.parameters.
+                                                mini_batch_size)
+            number_of_batches_per_snapshot = int(self.data.grid_size /
+                                                 optimal_batch_size)
+            errors = []
+            for snapshot_number in range(offset_snapshots,
+                                         number_of_snapshots+offset_snapshots):
+                actual_outputs, \
+                predicted_outputs = self.\
+                    _forward_entire_snapshot(snapshot_number-offset_snapshots,
+                                             data_set,
+                                             number_of_batches_per_snapshot,
+                                             optimal_batch_size)
+                calculator = self.data.target_calculator
+
+                # This works because the list is always guaranteed to be
+                # ordered.
+                calculator.\
+                    read_additional_calculation_data("qe.out",
+                                         self.data.
+                                         get_snapshot_calculation_output(snapshot_number))
+                fe_actual = calculator.\
+                    get_self_consistent_fermi_energy_ev(actual_outputs)
+                be_actual = calculator.\
+                    get_band_energy(actual_outputs, fermi_energy_eV=fe_actual)
+
+                try:
+                    fe_predicted = calculator.\
+                        get_self_consistent_fermi_energy_ev(predicted_outputs)
+                    be_predicted = calculator.\
+                        get_band_energy(predicted_outputs, fermi_energy_eV=fe_predicted)
+                except ValueError:
+                    # If the training went badly, it might be that the above
+                    # code results in an error, due to the LDOS being so wrong
+                    # that the estimation of the self consistent Fermi energy
+                    # fails.
+                    be_predicted = float("inf")
+                errors.append(np.abs(be_predicted-be_actual)*(1000/len(calculator.atoms)))
+            return np.mean(errors)
+        elif validation_type == "total_energy":
+            # Get optimal batch size and number of batches per snapshots.
+            optimal_batch_size = self. \
+                _correct_batch_size_for_testing(self.data.grid_size,
+                                                self.parameters.
+                                                mini_batch_size)
+            number_of_batches_per_snapshot = int(self.data.grid_size /
+                                                 optimal_batch_size)
+            errors = []
+            for snapshot_number in range(offset_snapshots,
+                                         number_of_snapshots+offset_snapshots):
+                actual_outputs, \
+                predicted_outputs = self.\
+                    _forward_entire_snapshot(snapshot_number-offset_snapshots,
+                                             data_set,
+                                             number_of_batches_per_snapshot,
+                                             optimal_batch_size)
+                calculator = self.data.target_calculator
+
+                # This works because the list is always guaranteed to be
+                # ordered.
+                calculator.\
+                    read_additional_calculation_data("qe.out",
+                                         self.data.
+                                         get_snapshot_calculation_output(snapshot_number))
+                fe_actual = calculator.\
+                    get_self_consistent_fermi_energy_ev(actual_outputs)
+                te_actual = calculator.\
+                    get_total_energy(ldos_data=actual_outputs,
+                                     fermi_energy_eV=fe_actual)
+
+                try:
+                    fe_predicted = calculator.\
+                        get_self_consistent_fermi_energy_ev(predicted_outputs)
+                    te_predicted = calculator.\
+                        get_total_energy(ldos_data=actual_outputs,
+                                         fermi_energy_eV=fe_predicted)
+                except ValueError:
+                    # If the training went badly, it might be that the above
+                    # code results in an error, due to the LDOS being so wrong
+                    # that the estimation of the self consistent Fermi energy
+                    # fails.
+                    te_predicted = float("inf")
+                errors.append(np.abs(te_predicted-te_actual)*(1000/len(calculator.atoms)))
+            return np.mean(errors)
+
+        else:
+            raise Exception("Selected validation method not supported.")
 
     def __create_training_checkpoint(self):
         """
@@ -515,3 +702,4 @@ class Trainer(Runner):
         tensor = torch.tensor(val)
         avg_loss = hvd.allreduce(tensor, name=name, op=hvd.Average)
         return avg_loss.item()
+

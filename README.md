@@ -5,6 +5,7 @@
 [![CPU](https://github.com/mala-project/mala/actions/workflows/cpu-tests.yml/badge.svg)](https://github.com/mala-project/mala/actions/workflows/cpu-tests.yml)
 [![image](https://github.com/mala-project/mala/actions/workflows/gh-pages.yml/badge.svg)](https://mala-project.github.io/mala/)
 [![image](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5557255.svg)](https://doi.org/10.5281/zenodo.5557255)
 
 
 MALA (Materials Learning Algorithms) is a data-driven framework to generate surrogate models of density functional theory calculations based on machine learning. Its purpose is to enable multiscale modeling by bypassing computationally expensive steps in state-of-the-art density functional simulations.
@@ -35,29 +36,42 @@ the examples in the `example/` folder.
 - [Sandia National Laboratories](https://www.sandia.gov/) (SNL), USA.
 - [Center for Advanced Systems Understanding](https://www.casus.science/) (CASUS), Germany.
 
+### Contributing Institutions
+
+- [Oak Ridge National Laboratory](https://www.ornl.gov/) (ORNL), USA
+
 ## Developers
 ### Scientific Supervision
 - Attila Cangi (CASUS)
 - Siva Rajamanickam (SNL)
 
 ### Core Developers
+
+- Austin Ellis (ORNL)
 - Lenz Fiedler (CASUS)
-- Austin Ellis (ORNL*)
-- Normand Modine (SNL)
-- Steve Schmerler (HZDR)
 - Daniel Kotik (CASUS)
+- Normand Modine (SNL)
+- Vladyslav Oles (ORNL)
 - Gabriel Popoola (SNL)
 - Aidan Thompson (SNL)
+- Steve Schmerler (HZDR)
 - Adam Stephens (SNL)
 
-\* Work done as part of postdoctoral research at Sandia National Laboratories
+### Contributors
 
+- Sneha Verma (CASUS)
+- Parvez Mohammed (CASUS)
+- Nils Hoffmann (CASUS)
+- Omar Faruk (CASUS)
+- Somashekhar Kulkarni (CASUS)
 
 ## Citing MALA
 
 If you publish work which uses or mentions MALA, please cite the following paper:
 
 J. A. Ellis, L. Fiedler, G. A. Popoola, N. A. Modine, J. A. Stephens, A. P. Thompson,
-A. Cangi, S. Rajamanickam (2020). Accelerating Finite-temperature
+A. Cangi, S. Rajamanickam (2021). Accelerating Finite-temperature
 Kohn-Sham Density Functional Theory with Deep Neural Networks.
-[arXiv:2010.04905](https://arxiv.org/abs/2010.04905).
+[Phys. Rev. B 104, 035120 (2021)](https://doi.org/10.1103/PhysRevB.104.035120)
+
+alongside this repository.

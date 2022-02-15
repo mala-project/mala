@@ -1,9 +1,10 @@
 """Helper functions for several calculation tasks (such as integration)."""
-import numpy as np
 from ase.units import kB
-from scipy import integrate
 import mpmath as mp
+import numpy as np
+from scipy import integrate
 
+import itertools
 
 def integrate_values_on_spacing(values, spacing, method, axis=0):
     """
@@ -377,3 +378,35 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
 
     integral_value = np.dot(D, weights_vector)
     return integral_value
+
+
+# Define Gaussian
+def gaussians(grid, centers, sigma):
+    """
+    Calculate multiple gaussians on the same grid, but with different centers.
+
+    Gaussian functions are used as approximations to the delta in the
+    Brillouin zone integration. Note that this defines Gaussians without the
+    factor of 1/sqrt(2). All the Gaussians will have the same sigmas
+    Parameters
+    ----------
+    grid : np.array
+        Grid on which this Gaussian is defined.
+
+    centers : np.array
+        Array of centers for the Gaussians
+
+    sigma : float
+        Sigma value for the Gaussian.
+
+    Returns
+    -------
+    multiple_gaussians : np.array
+        multiple gaussians on the same grid, but with different centers.
+
+
+    """
+    multiple_gaussians = 1.0/np.sqrt(np.pi*sigma**2) * \
+        np.exp(-1.0*((grid[np.newaxis] - centers[..., np.newaxis])/sigma)**2)
+
+    return multiple_gaussians

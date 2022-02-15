@@ -1,20 +1,20 @@
 """Electronic density calculation class."""
-from .target_base import TargetBase
-from .calculation_helpers import *
-from .cube_parser import read_cube
+import os
 import warnings
+
 import ase.io
-from ase.units import Rydberg
-from mala.common.parameters import printout
+from ase.units import Rydberg, Bohr
 try:
     import total_energy as te
 except ModuleNotFoundError:
-    warnings.warn("You either don't have the QuantumEspresso total_energy "
-                  "python module installed or it is not "
-                  "configured correctly. Using a density calculator will "
-                  "still mostly work, but trying to "
-                  "access the total energy of a system WILL fail.",
-                  stacklevel=2)
+    pass
+
+from mala.common.parameters import printout
+from mala.targets.target_base import TargetBase
+from mala.targets.calculation_helpers import *
+from mala.targets.cube_parser import read_cube
+from mala.targets.atomic_force import AtomicForce
+from mala.common.parallelizer import get_rank
 
 
 class Density(TargetBase):
@@ -30,9 +30,10 @@ class Density(TargetBase):
 
     def __init__(self, params):
         super(Density, self).__init__(params)
-        # We operate on a per gridpoint basis. Per gridpoint,
-        # there is one value for the density (spin-unpolarized calculations).
-        self.target_length = 1
+
+    def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return 1
 
     def read_from_cube(self, file_name, directory, units=None):
         """
@@ -49,8 +50,8 @@ class Density(TargetBase):
         units : string
             Units the density is saved in. Usually none.
         """
-        printout("Reading density from .cube file in ", directory)
-        data, meta = read_cube(directory + file_name)
+        printout("Reading density from .cube file in ", directory, min_verbosity=0)
+        data, meta = read_cube(os.path.join(directory, file_name))
         return data
 
     def get_number_of_electrons(self, density_data, grid_spacing_bohr=None,
@@ -80,7 +81,7 @@ class Density(TargetBase):
             grid_spacing_bohr = self.grid_spacing_Bohr
 
         # Check input data for correctness.
-        data_shape = np.shape(density_data)
+        data_shape = np.shape(np.squeeze(density_data))
         if len(data_shape) != 3:
             if len(data_shape) != 1:
                 raise Exception("Unknown Density shape, cannot calculate "
@@ -219,32 +220,91 @@ class Density(TargetBase):
                 - E_xc
                 - e_Ewald
         """
-        # noinspection PyShadowingNames
-        import total_energy as te
+        if atoms_Angstrom is None:
+            atoms_Angstrom = self.atoms
+        self.__setup_total_energy_module(density_data, atoms_Angstrom,
+                                         create_file=create_file,
+                                         qe_input_data=qe_input_data,
+                                         qe_pseudopotentials=
+                                         qe_pseudopotentials)
+
+        # Get and return the energies.
+        energies = np.array(te.get_energies())*Rydberg
+        return energies
+
+    def get_atomic_forces(self, density_data, create_file=True,
+                          atoms_Angstrom=None, qe_input_data=None,
+                          qe_pseudopotentials=None):
+        """
+        Calculate the atomic forces.
+
+        This function uses an interface to QE. The atomic forces are
+        calculated via the Hellman-Feynman theorem, although only the local
+        contributions are calculated. The non-local contributions, as well
+        as the SCF correction (so anythin wavefunction dependent) is ignored.
+        Therefore, this function is best used for data that was created using
+        local pseudopotentials.
+
+        Parameters
+        ----------
+        density_data : numpy.array
+            Density data on a grid.
+
+        create_file : bool
+            If False, the last mala.pw.scf.in file will be used as input for
+            Quantum Espresso. If True (recommended), MALA will create this
+            file according to calculation parameters.
+
+        atoms_Angstrom : ase.Atoms
+            ASE atoms object for the current system. If None, MALA will
+            create one.
+
+        qe_input_data : dict
+            Quantum Espresso parameters dictionary for the ASE<->QE interface.
+            If None (recommended), MALA will create one.
+
+        qe_pseudopotentials : dict
+            Quantum Espresso pseudopotential dictionaty for the ASE<->QE
+            interface. If None (recommended), MALA will create one.
+
+        Returns
+        -------
+        atomic_forces : numpy.ndarray
+            An array of the form (natoms, 3), containing the atomic forces
+            in eV/Ang.
+
+        """
+        # First, set up the total energy module for calculation.
+        if atoms_Angstrom is None:
+            atoms_Angstrom = self.atoms
+        self.__setup_total_energy_module(density_data, atoms_Angstrom,
+                                         create_file=create_file,
+                                         qe_input_data=qe_input_data,
+                                         qe_pseudopotentials=
+                                         qe_pseudopotentials)
+
+        # Now calculate the forces.
+        atomic_forces = np.array(te.calc_forces(len(atoms_Angstrom))).transpose()
+
+        # QE returns the forces in Ry/Bohr.
+        atomic_forces = AtomicForce.convert_units(atomic_forces,
+                                                  in_units="Ry/Bohr")
+        return atomic_forces
+
+    def __setup_total_energy_module(self, density_data, atoms_Angstrom,
+                                    create_file=True, qe_input_data=None,
+                                    qe_pseudopotentials=None):
         if create_file:
             # If not otherwise specified, use values as read in.
             if qe_input_data is None:
                 qe_input_data = self.qe_input_data
             if qe_pseudopotentials is None:
                 qe_pseudopotentials = self.qe_pseudopotentials
-            if atoms_Angstrom is None:
-                atoms_Angstrom = self.atoms
 
-            # Specify grid dimensions, if any are given.
-            if self.grid_dimensions[0] != 0 and \
-               self.grid_dimensions[1] != 0 and \
-               self.grid_dimensions[2] != 0:
-                qe_input_data["nr1"] = self.grid_dimensions[0]
-                qe_input_data["nr2"] = self.grid_dimensions[1]
-                qe_input_data["nr3"] = self.grid_dimensions[2]
-                qe_input_data["nr1s"] = self.grid_dimensions[0]
-                qe_input_data["nr2s"] = self.grid_dimensions[1]
-                qe_input_data["nr3s"] = self.grid_dimensions[2]
-
-            ase.io.write("mala.pw.scf.in", atoms_Angstrom, "espresso-in",
-                         input_data=qe_input_data,
-                         pseudopotentials=qe_pseudopotentials,
-                         kpts=self.kpoints)
+            self.write_tem_input_file(atoms_Angstrom, qe_input_data,
+                                      qe_pseudopotentials,
+                                      self.grid_dimensions,
+                                      self.kpoints)
 
         # initialize the total energy module.
         # FIXME: So far, the total energy module can only be initialized once.
@@ -256,13 +316,14 @@ class Density(TargetBase):
 
         if Density.te_mutex is False:
             printout("MALA: Starting QuantumEspresso to get density-based"
-                     " energy contributions.")
+                     " energy contributions.", min_verbosity=0)
             te.initialize()
             Density.te_mutex = True
-            printout("MALA: QuantumEspresso setup done.")
+            printout("MALA: QuantumEspresso setup done.", min_verbosity=0)
         else:
             printout("MALA: QuantumEspresso is already running. Except for"
-                     " the atomic positions, no new parameters will be used.")
+                     " the atomic positions, no new parameters will be used.",
+                     min_verbosity=0)
 
         # Before we proceed, some sanity checks are necessary.
         # Is the calculation spinpolarized?
@@ -311,13 +372,9 @@ class Density(TargetBase):
         # instantiate the process with the file.
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
         te.set_positions(np.transpose(positions_for_qe), number_of_atoms)
-
         # Now we can set the new density.
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
-
-        # Get and return the energies.
-        energies = np.array(te.get_energies())*Rydberg
-        return energies
+        return atoms_Angstrom
 
     @staticmethod
     def get_scaled_positions_for_qe(atoms):
@@ -377,5 +434,6 @@ class Density(TargetBase):
         return_density_object.total_energy_dft_calculation = \
             ldos_object.total_energy_dft_calculation
         return_density_object.kpoints = ldos_object.kpoints
-
+        return_density_object.number_of_electrons_from_eigenvals = \
+            ldos_object.number_of_electrons_from_eigenvals
         return return_density_object

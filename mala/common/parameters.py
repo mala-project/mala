@@ -1,21 +1,34 @@
 """Collection of all parameter related classes and functions."""
+import os
+import importlib
+import inspect
+import json
 import pickle
 import warnings
-from .printout import printout, set_horovod_status
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
-    warnings.warn("You either don't have Horovod installed or it is not "
-                  "configured correctly. You can still train networks, but "
-                  "attempting to set parameters.training.use_horovod = "
-                  "True WILL cause a crash.", stacklevel=3)
+    pass
+try:
+    from mpi4py import MPI
+except ModuleNotFoundError:
+    pass
+
 import torch
 
+from mala.common.parallelizer import printout, set_horovod_status, \
+    set_mpi_status, get_rank, get_local_rank, set_current_verbosity
+from mala.common.json_serializable import JSONSerializable
 
-class ParametersBase:
+
+class ParametersBase(JSONSerializable):
     """Base parameter class for MALA."""
 
-    def __init__(self):
+    def __init__(self,):
+        super(ParametersBase, self).__init__()
+        self._configuration = {"gpu": False, "horovod": False, "mpi": False,
+                               "device": "cpu"}
         pass
 
     def show(self, indent=""):
@@ -30,7 +43,143 @@ class ParametersBase:
 
         """
         for v in vars(self):
-            printout(indent + '%-15s: %s' % (v, getattr(self, v)))
+            if v != "_configuration":
+                if v[0] == "_":
+                    printout(indent + '%-15s: %s' % (v[1:], getattr(self, v)),
+                             min_verbosity=0)
+                else:
+                    printout(indent + '%-15s: %s' % (v, getattr(self, v)),
+                             min_verbosity=0)
+
+    def _update_gpu(self, new_gpu):
+        self._configuration["gpu"] = new_gpu
+
+    def _update_horovod(self, new_horovod):
+        self._configuration["horovod"] = new_horovod
+
+    def _update_mpi(self, new_mpi):
+        self._configuration["mpi"] = new_mpi
+
+    def _update_device(self, new_device):
+        self._configuration["device"] = new_device
+
+    @staticmethod
+    def _member_to_json(member):
+        if isinstance(member, (int, float, type(None), str)):
+            return member
+        else:
+            return member.to_json()
+
+    def to_json(self):
+        """
+        Convert this object to a dictionary that can be saved in a JSON file.
+
+        Returns
+        -------
+        json_dict : dict
+            The object as dictionary for export to JSON.
+
+        """
+        json_dict = {}
+        members = inspect.getmembers(self,
+                                     lambda a: not (inspect.isroutine(a)))
+        for member in members:
+            # Filter out all private members, builtins, etc.
+            if member[0][0] != "_":
+
+                # If we deal with a list or a dict,
+                # we have to sanitize treat all members of that list
+                # or dict separately.
+                if isinstance(member[1], list):
+                    if len(member[1]) > 0:
+                        _member = []
+                        for m in member[1]:
+                            _member.append(self._member_to_json(m))
+                        json_dict[member[0]] = _member
+                    else:
+                        json_dict[member[0]] = member[1]
+
+                elif isinstance(member[1], dict):
+                    if len(member[1]) > 0:
+                        _member = {}
+                        for m in member[1].keys():
+                            _member[m] = self._member_to_json(member[1][m])
+                        json_dict[member[0]] = _member
+                    else:
+                        json_dict[member[0]] = member[1]
+
+                else:
+                    json_dict[member[0]] = self._member_to_json(member[1])
+        json_dict["_parameters_type"] = type(self).__name__
+        return json_dict
+
+    @staticmethod
+    def _json_to_member(json_value):
+        if isinstance(json_value, (int, float, type(None), str)):
+            return json_value
+        else:
+            if isinstance(json_value, dict) and "object" in json_value.keys():
+                # We have found ourselves an object!
+                # We create it and give it the JSON dict, hoping it can handle
+                # it. If not, then the implementation of that class has to
+                # be adjusted.
+                module = importlib.import_module("mala")
+                class_ = getattr(module, json_value["object"])
+                new_object = class_.from_json(json_value["data"])
+                return new_object
+            else:
+                # If it is not an elementary builtin type AND not an object
+                # dictionary, something is definitely off.
+                raise Exception("Could not decode JSON file, error in",
+                                json_value)
+
+    @classmethod
+    def from_json(cls, json_dict):
+        """
+        Read this object from a dictionary saved in a JSON file.
+
+        Parameters
+        ----------
+        json_dict : dict
+            A dictionary containing all attributes, properties, etc. as saved
+            in the json file.
+
+        Returns
+        -------
+        deserialized_object : JSONSerializable
+            The object as read from the JSON file.
+
+        """
+        deserialized_object = cls()
+        for key in json_dict:
+            # Filter out all private members, builtins, etc.
+            if key != "_parameters_type":
+
+                # If we deal with a list or a dict,
+                # we have to sanitize treat all members of that list
+                # or dict separately.
+                if isinstance(json_dict[key], list):
+                    if len(json_dict[key]) > 0:
+                        _member = []
+                        for m in json_dict[key]:
+                            _member.append(deserialized_object._json_to_member(m))
+                        setattr(deserialized_object, key, _member)
+                    else:
+                        setattr(deserialized_object, key, json_dict[key])
+
+                elif isinstance(json_dict[key], dict):
+                    if len(json_dict[key]) > 0:
+                        _member = {}
+                        for m in json_dict[key].keys():
+                            _member[m] = deserialized_object._json_to_member(json_dict[key][m])
+                        setattr(deserialized_object, key, _member)
+
+                    else:
+                        setattr(deserialized_object, key, json_dict[key])
+
+                else:
+                    setattr(deserialized_object, key, deserialized_object._json_to_member(json_dict[key]))
+        return deserialized_object
 
 
 class ParametersNetwork(ParametersBase):
@@ -40,8 +189,12 @@ class ParametersNetwork(ParametersBase):
     Attributes
     ----------
     nn_type : string
-        Type of the neural network that will be used. Currently supported is
-        only feed-forward, which is also the default
+        Type of the neural network that will be used. Currently supported are
+            - "feed_forward" (default)
+            - "transformer"
+            - "lstm"
+            - "gru"
+
 
     layer_sizes : list
         A list of integers detailing the sizes of the layer of the neural
@@ -64,6 +217,28 @@ class ParametersNetwork(ParametersBase):
         Currently supported loss functions include:
 
             - mse (Mean squared error; default)
+    no_hidden_state : bool
+        If True hidden and cell state is assigned to zeros for LSTM Network.
+        false will keep the hidden state active
+        Default: False
+
+    bidirection: bool
+        Sets lstm network size based on bidirectional or just one direction
+        Default: False
+
+    num_hidden_layers: int
+        Number of hidden layers to be used in lstm or gru or transformer nets
+        Default: None
+
+    dropout: float
+        Dropout rate for transformer net
+        0.0 <= dropout <=1.0
+        Default: 0.0
+
+    num_heads: int
+        Number of heads to be used in Multi head attention network
+        This should be a divisor of input dimension
+        Default: None
     """
 
     def __init__(self):
@@ -73,6 +248,13 @@ class ParametersNetwork(ParametersBase):
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
 
+        self.num_hidden_layers = None
+        #for lstm/gru
+        self.no_hidden_state = False
+        self.bidirection = False
+        # for transformer net
+        self.dropout = 0.0
+        self.num_heads= None
 
 class ParametersDescriptors(ParametersBase):
     """
@@ -98,6 +280,16 @@ class ParametersDescriptors(ParametersBase):
         SNAP descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
 
+    acsd_points : int
+        Number of points used to calculate the ACSD.
+        The actual number of distances will be acsd_points x acsd_points,
+        since the cosine similarity is only defined for pairs.
+
+    descriptors_contain_xyz : bool
+        Legacy option. If True, it is assumed that the first three entries of
+        the descriptor vector are the xyz coordinates and they are cut from the
+        descriptor vector. If False, no such cutting is peformed.
+
     """
 
     def __init__(self):
@@ -106,6 +298,8 @@ class ParametersDescriptors(ParametersBase):
         self.twojmax = 10
         self.rcutfac = 4.67637
         self.lammps_compute_file = ""
+        self.acsd_points = 100
+        self.descriptors_contain_xyz = True
 
 
 class ParametersTargets(ParametersBase):
@@ -127,6 +321,8 @@ class ParametersTargets(ParametersBase):
 
     ldos_gridoffset_ev: float
         Lowest energy value on the (L)DOS energy grid [eV].
+
+
     """
 
     def __init__(self):
@@ -136,6 +332,7 @@ class ParametersTargets(ParametersBase):
         self.ldos_gridspacing_ev = 0
         self.ldos_gridoffset_ev = 0
         self.restrict_targets = "zero_out_negative"
+        self.pseudopotential_path = None
 
     @property
     def restrict_targets(self):
@@ -169,18 +366,6 @@ class ParametersData(ParametersBase):
         Currently the only supported option is by_snapshot,
         which splits the data by snapshot boundaries. It is also the default.
 
-    data_splitting_snapshots : list
-        Details how (and which!) snapshots are used for what:
-
-          - te: This snapshot will be a testing snapshot.
-          - tr: This snapshot will be a training snapshot.
-          - va: This snapshot will be a validation snapshot.
-
-        Please note that the length of this list and the number of snapshots
-        must be identical. The first element of this list will be used
-        to characterize the first snapshot, the second element for the second
-        snapshot etc.
-
     input_rescaling_type : string
         Specifies how input quantities are normalized.
         Options:
@@ -211,6 +396,24 @@ class ParametersData(ParametersBase):
         If True, data is lazily loaded, i.e. only the snapshots that are
         currently needed will be kept in memory. This greatly reduces memory
         demands, but adds additional computational time.
+
+    use_clustering : bool
+        If True, and use_lazy_loading is True as well, the data is clustered,
+        i.e. not the entire training data is used by rather only a subset
+        which is determined by a clustering algorithm.
+
+    number_of_clusters : int
+        If use_clustering is True, this is the number of clusters used per
+        snapshot.
+
+    train_ratio : float
+        If use_clustering is True, this is the ratio of training data used
+        to train the encoder for the clustering.
+
+
+    sample_ratio : float
+        If use_clustering is True, this is the ratio of training data used
+        for sampling per snapshot (according to clustering then, of course).
     """
 
     def __init__(self):
@@ -223,6 +426,10 @@ class ParametersData(ParametersBase):
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
+        self.use_clustering = False
+        self.number_of_clusters = 40
+        self.train_ratio = 0.1
+        self.sample_ratio = 0.5
 
 
 class ParametersRunning(ParametersBase):
@@ -245,9 +452,6 @@ class ParametersRunning(ParametersBase):
 
     max_number_epochs : int
         Maximum number of epochs to train for. Default: 100.
-
-    verbosity : bool
-        If True, training output is shown during training. Default: True.
 
     mini_batch_size : int
         Size of the mini batch for the optimization algorihm. Default: 10.
@@ -311,6 +515,16 @@ class ParametersRunning(ParametersBase):
     checkpoint_name : string
         Name used for the checkpoints. Using this, multiple runs
         can be performed in the same directory.
+
+    visualisation : int
+        If True then Tensorboard is activated for visualisation
+        case 0: No tensorboard activated
+        case 1: tensorboard activated with Loss and learning rate
+        case 2; additonally weights and biases and gradient
+
+    inference_data_grid : list
+        List holding the grid to be used for inference in the form of
+        [x,y,z].
     """
 
     def __init__(self):
@@ -318,7 +532,6 @@ class ParametersRunning(ParametersBase):
         self.trainingtype = "SGD"
         self.learning_rate = 0.5
         self.max_number_epochs = 100
-        # TODO: Find a better system for verbosity. Maybe a number.
         self.verbosity = True
         self.mini_batch_size = 10
         self.weight_decay = 0
@@ -328,14 +541,69 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_decay = 0.1
         self.learning_rate_patience = 0
         self.use_compression = False
-        # TODO: Give this parameter a more descriptive name.
         self.kwargs = {'num_workers': 0, 'pin_memory': False}
-        # TODO: Objects should not be parameters!
         self.sampler = {"train_sampler": None, "validate_sampler": None,
                         "test_sampler": None}
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
+        self.visualisation = 0
+        # default visualisation_dir= "~/log_dir"
+        self.visualisation_dir= os.path.join(os.path.expanduser("~"), "log_dir")
+        self.during_training_metric = "ldos"
+        self.after_before_training_metric = "ldos"
+        self.inference_data_grid = [0, 0, 0]
+
+    def _update_horovod(self, new_horovod):
+        super(ParametersRunning, self)._update_horovod(new_horovod)
+        self.during_training_metric = self.during_training_metric
+        self.after_before_training_metric = self.after_before_training_metric
+
+    @property
+    def during_training_metric(self):
+        """
+        Control the metric used during training.
+
+        Metric for evaluated on the validation set during training.
+        Default is "ldos", meaning that the regular loss on the LDOS will be
+        used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
+        """
+        return self._during_training_metric
+
+    @during_training_metric.setter
+    def during_training_metric(self, value):
+        if value != "ldos":
+            if self._configuration["horovod"]:
+                raise Exception("Currently, MALA can only operate with the "
+                                "\"ldos\" metric for horovod runs.")
+        self._during_training_metric = value
+
+    @property
+    def after_before_training_metric(self):
+        """
+        Get the metric used during training.
+
+        Metric for evaluated on the validation and test set before and after
+        training. Default is "LDOS", meaning that the regular loss on the LDOS
+        will be used as a metric. Possible options are "band_energy" and
+        "total_energy". For these, the band resp. total energy of the
+        validation snapshots will be calculated and compared to the provided
+        DFT results. Of these, the mean average error in eV/atom will be
+        calculated.
+        """
+        return self._after_before_training_metric
+
+    @after_before_training_metric.setter
+    def after_before_training_metric(self, value):
+        if value != "ldos":
+            if self._configuration["horovod"]:
+                raise Exception("Currently, MALA can only operate with the "
+                                "\"ldos\" metric for horovod runs.")
+        self._after_before_training_metric = value
 
 
 class ParametersHyperparameterOptimization(ParametersBase):
@@ -381,7 +649,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
             - "optuna" : Use optuna for the hyperparameter optimization.
             - "oat" : Use orthogonal array tuning (currently limited to
               categorical hyperparemeters). Range analysis is
-              currently done by simply choosing the lowesr loss.
+              currently done by simply choosing the lowest loss.
             - "notraining" : Using a NAS without training, based on jacobians.
 
     checkpoints_each_trial : int
@@ -419,6 +687,36 @@ class ParametersHyperparameterOptimization(ParametersBase):
         For MALA, no evidence for decreased performance using smaller
         heartbeat values could be found. So if this is used, 1s is a reasonable
         value.
+
+    number_training_per_trial : int
+        Number of network trainings performed per trial. Default is 1,
+        but it makes sense to choose a higher number, to exclude networks
+        that performed by chance (good initilization). Naturally this impedes
+        performance.
+
+    trial_ensemble_evaluation : string
+        Control how multiple trainings performed during a trial are evaluated.
+        By default, simply "mean" is used. For smaller numbers of training
+        per trial it might make sense to use "mean_std", which means that
+        the mean of all metrics plus the standard deviation is used,
+        as an estimate of the minimal accuracy to be expected. Currently,
+        "mean" and "mean_std" are allowed.
+
+    use_multivariate : bool
+        If True, the optuna multivariate sampler is used. It is experimental
+        since v2.2.0, but reported to perform very well.
+        http://proceedings.mlr.press/v80/falkner18a.html
+
+    no_training_cutoff : float
+        If the surrogate loss algorithm is used as a pruner during a study,
+        this cutoff determines which trials are neglected.
+
+    pruner: string
+        Pruner type to be used by optuna. Currently only "no_training" is
+        supported, which will use the NASWOT algorithm as pruner.
+
+    naswot_pruner_batch_size : int
+        Batch size for the NASWOT pruner
     """
 
     def __init__(self):
@@ -432,6 +730,12 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.study_name = None
         self.rdb_storage = None
         self.rdb_storage_heartbeat = None
+        self.number_training_per_trial = 1
+        self.trial_ensemble_evaluation = "mean"
+        self.use_multivariate = True
+        self.no_training_cutoff = 0
+        self.pruner = None
+        self.naswot_pruner_batch_size = 0
 
     @property
     def rdb_storage_heartbeat(self):
@@ -444,6 +748,38 @@ class ParametersHyperparameterOptimization(ParametersBase):
             self._rdb_storage_heartbeat = None
         else:
             self._rdb_storage_heartbeat = value
+
+    @property
+    def number_training_per_trial(self):
+        """Control how many trainings are run per optuna trial."""
+        return self._number_training_per_trial
+
+    @number_training_per_trial.setter
+    def number_training_per_trial(self, value):
+        if value < 1:
+            self._number_training_per_trial = 1
+        else:
+            self._number_training_per_trial = value
+
+    @property
+    def trial_ensemble_evaluation(self):
+        """
+        Control how multiple trainings performed during a trial are evaluated.
+
+        By default, simply "mean" is used. For smaller numbers of training
+        per trial it might make sense to use "mean_std", which means that
+        the mean of all metrics plus the standard deviation is used,
+        as an estimate of the minimal accuracy to be expected. Currently,
+        "mean" and "mean_std" are allowed.
+        """
+        return self._trial_ensemble_evaluation
+
+    @trial_ensemble_evaluation.setter
+    def trial_ensemble_evaluation(self, value):
+        if value != "mean" and value != "mean_std":
+            self._trial_ensemble_evaluation = "mean"
+        else:
+            self._trial_ensemble_evaluation = value
 
     def show(self, indent=""):
         """
@@ -518,22 +854,12 @@ class Parameters:
     manual_seed: int
         If not none, this value is used as manual seed for the neural networks.
         Can be used to make experiments comparable. Default: None.
-
-    use_horovod: bool
-        Determines if the data-parallel Horovod package is being used. Default: False.
-
-    use_gpu: bool
-        Determines if Nvidia GPUs are being used. Default: False.
-
-    device_type: String
-        Which device type to train on. Default: "cpu".
-
-    device_id: Int
-        Which node-local device id to train on. Default: 0.
     """
 
     def __init__(self):
         self.comment = ""
+
+        # Parameters subobjects.
         self.network = ParametersNetwork()
         self.descriptors = ParametersDescriptors()
         self.targets = ParametersTargets()
@@ -541,13 +867,36 @@ class Parameters:
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
         self.debug = ParametersDebug()
+
+        # Attributes.
         self.manual_seed = None
 
         # Properties
-        self.use_horovod = False
         self.use_gpu = False
-        self.device_type = "cpu"
-        self.device_id = 0
+        self.use_horovod = False
+        self.use_mpi = False
+        self.verbosity = 1
+        self.device = "cpu"
+
+    @property
+    def verbosity(self):
+        """
+        Control the level of output for MALA.
+
+        The following options are available:
+
+            - 1: "low", only essential output will be printed
+            - 1: "medium", most diagnostic output will be printed. (Default)
+            - 2: "high", all information will be printed.
+
+
+        """
+        return self._verbosity
+
+    @verbosity.setter
+    def verbosity(self, value):
+        self._verbosity = value
+        set_current_verbosity(value)
 
     @property
     def use_gpu(self):
@@ -558,14 +907,22 @@ class Parameters:
     def use_gpu(self, value):
         if value is False:
             self._use_gpu = False
-            self.device_type = "cpu"
         else:
             if torch.cuda.is_available():
                 self._use_gpu = True
-                self.device_type = "cuda"
             else:
                 warnings.warn("GPU requested, but no GPU found. MALA will "
                               "operate with CPU only.", stacklevel=3)
+
+        # Invalidate, will be updated in setter.
+        self.device = None
+        self.network._update_gpu(self.use_gpu)
+        self.descriptors._update_gpu(self.use_gpu)
+        self.targets._update_gpu(self.use_gpu)
+        self.data._update_gpu(self.use_gpu)
+        self.running._update_gpu(self.use_gpu)
+        self.hyperparameters._update_gpu(self.use_gpu)
+        self.debug._update_gpu(self.use_gpu)
 
     @property
     def use_horovod(self):
@@ -576,41 +933,82 @@ class Parameters:
     def use_horovod(self, value):
         if value:
             hvd.init()
-            self.device_id = hvd.local_rank()
-        else:
-            self.device_id = 0
 
+        # Invalidate, will be updated in setter.
+        self.device = None
         set_horovod_status(value)
         self._use_horovod = value
+        self.network._update_horovod(self.use_horovod)
+        self.descriptors._update_horovod(self.use_horovod)
+        self.targets._update_horovod(self.use_horovod)
+        self.data._update_horovod(self.use_horovod)
+        self.running._update_horovod(self.use_horovod)
+        self.hyperparameters._update_horovod(self.use_horovod)
+        self.debug._update_horovod(self.use_horovod)
 
     @property
-    def device_id(self):
-        """Control the device ID used for multi GPU settings."""
-        if self.device_type == "cuda":
-            return self._device_id
-        else:
-            # For cpu architectures, this should always be zero
-            # (elsewise we get a torch error).
-            # Not that this will eevr matter in production, but I have
-            # to run test cases on a non-GPU enabled machine occasionally.
-            return 0
+    def device(self):
+        """Get the device used by MALA. Read-only."""
+        return self._device
 
-    @device_id.setter
-    def device_id(self, value):
-        self._device_id = value
+    @device.setter
+    def device(self, value):
+        id = get_local_rank()
+        if self.use_gpu:
+            self._device = "cuda:"\
+                           f"{id}"
+        else:
+            self._device = "cpu"
+        self.network._update_device(self._device)
+        self.descriptors._update_device(self._device)
+        self.targets._update_device(self._device)
+        self.data._update_device(self._device)
+        self.running._update_device(self._device)
+        self.hyperparameters._update_device(self._device)
+        self.debug._update_device(self._device)
+
+    @property
+    def use_mpi(self):
+        """Control whether or not horovod is used for parallel training."""
+        return self._use_mpi
+
+    @use_mpi.setter
+    def use_mpi(self, value):
+        set_mpi_status(value)
+        # Invalidate, will be updated in setter.
+        self.device = None
+        self._use_mpi = value
+        self.network._update_mpi(self.use_mpi)
+        self.descriptors._update_mpi(self.use_mpi)
+        self.targets._update_mpi(self.use_mpi)
+        self.data._update_mpi(self.use_mpi)
+        self.running._update_mpi(self.use_mpi)
+        self.hyperparameters._update_mpi(self.use_mpi)
+        self.debug._update_mpi(self.use_mpi)
 
     def show(self):
         """Print name and values of all attributes of this object."""
-        printout("--- " + self.__doc__.split("\n")[1] + " ---")
+        printout("--- " + self.__doc__.split("\n")[1] + " ---", min_verbosity=0)
+
+        # Two for-statements so that global parameters are shown on top.
+        for v in vars(self):
+            if isinstance(getattr(self, v), ParametersBase):
+                pass
+            else:
+                if v[0] == "_":
+                    printout('%-15s: %s' % (v[1:], getattr(self, v)),
+                             min_verbosity=0)
+                else:
+                    printout('%-15s: %s' % (v, getattr(self, v)),
+                             min_verbosity=0)
         for v in vars(self):
             if isinstance(getattr(self, v), ParametersBase):
                 parobject = getattr(self, v)
-                printout("--- " + parobject.__doc__.split("\n")[1] + " ---")
+                printout("--- " + parobject.__doc__.split("\n")[1] + " ---",
+                         min_verbosity=0)
                 parobject.show("\t")
-            else:
-                printout('%-15s: %s' % (v, getattr(self, v)))
 
-    def save(self, filename, save_format="pickle"):
+    def save(self, filename, save_format="json"):
         """
         Save the Parameters object to a file.
 
@@ -624,17 +1022,68 @@ class Parameters:
             Currently only supported file format is "pickle".
 
         """
-        if self.use_horovod:
-            if hvd.rank() != 0:
-                return
+        if get_rank() != 0:
+            return
+
         if save_format == "pickle":
+            if filename[-3:] != "pkl":
+                filename += ".pkl"
             with open(filename, 'wb') as handle:
                 pickle.dump(self, handle, protocol=4)
+        elif save_format == "json":
+            if filename[-4:] != "json":
+                filename += ".json"
+            json_dict = {}
+            members = inspect.getmembers(self,
+                                         lambda a: not (inspect.isroutine(a)))
+
+            # Two for loops so global properties enter the dict first.
+            for member in members:
+                # Filter out all private members, builtins, etc.
+                if member[0][0] != "_" and member[0] != "device":
+                    if isinstance(member[1], ParametersBase):
+                        pass
+                    else:
+                        json_dict[member[0]] = member[1]
+            for member in members:
+                # Filter out all private members, builtins, etc.
+                if member[0][0] != "_":
+                    if isinstance(member[1], ParametersBase):
+                        # All the subclasses have to provide this function.
+                        member[1]: ParametersBase
+                        json_dict[member[0]] = member[1].to_json()
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(json_dict, f, ensure_ascii=False, indent=4)
+
         else:
             raise Exception("Unsupported parameter save format.")
 
+    def save_as_pickle(self, filename):
+        """
+        Save the Parameters object to a pickle file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        """
+        self.save(filename, save_format="pickle")
+
+    def save_as_json(self, filename):
+        """
+        Save the Parameters object to a json file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        """
+        self.save(filename, save_format="json")
+
     @classmethod
-    def load_from_file(cls, filename, save_format="pickle",
+    def load_from_file(cls, filename, save_format="json",
                        no_snapshots=False):
         """
         Load a Parameters object from a file.
@@ -663,7 +1112,70 @@ class Parameters:
                 loaded_parameters = pickle.load(handle)
                 if no_snapshots is True:
                     loaded_parameters.data.snapshot_directories_list = []
+        elif save_format == "json":
+            with open(filename, encoding="utf-8") as json_file:
+                json_dict = json.load(json_file)
+            loaded_parameters = cls()
+            for key in json_dict:
+                if isinstance(json_dict[key], dict):
+                    # These are the other parameter classes.
+                    sub_parameters = globals()[json_dict[key]["_parameters_type"]].from_json(json_dict[key])
+                    setattr(loaded_parameters, key, sub_parameters)
+
+            # We iterate a second time, to set global values, so that they
+            # are properly forwarded.
+            for key in json_dict:
+                if not isinstance(json_dict[key], dict):
+                    setattr(loaded_parameters, key, json_dict[key])
+            if no_snapshots is True:
+                loaded_parameters.data.snapshot_directories_list = []
         else:
             raise Exception("Unsupported parameter save format.")
 
         return loaded_parameters
+
+    @classmethod
+    def load_from_pickle(cls, filename, no_snapshots=False):
+        """
+        Load a Parameters object from a pickle file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        no_snapshots : bool
+            If True, than the snapshot list will be emptied. Useful when
+            performing inference/testing after training a network.
+
+        Returns
+        -------
+        loaded_parameters : Parameters
+            The loaded Parameters object.
+
+        """
+        return Parameters.load_from_file(filename, save_format="pickle",
+                                  no_snapshots=no_snapshots)
+
+    @classmethod
+    def load_from_json(cls, filename, no_snapshots=False):
+        """
+        Load a Parameters object from a json file.
+
+        Parameters
+        ----------
+        filename : string
+            File to which the parameters will be saved to.
+
+        no_snapshots : bool
+            If True, than the snapshot list will be emptied. Useful when
+            performing inference/testing after training a network.
+
+        Returns
+        -------
+        loaded_parameters : Parameters
+            The loaded Parameters object.
+
+        """
+        return Parameters.load_from_file(filename, save_format="json",
+                                  no_snapshots=no_snapshots)

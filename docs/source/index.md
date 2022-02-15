@@ -4,57 +4,17 @@
 :relative-docs: docs/source/
 :relative-images:
 ```
+## Contents
 
 ```{toctree}
 ---
-caption: Features
 maxdepth: 2
 ---
 
-features/background
-features/preprocessing
-features/neuralnetworks
-features/postprocessing
-```
-
-```{toctree}
----
-caption: Installation
-maxdepth: 2
----
-
-install/README
-install/INSTALL_LAMMPS
-install/INSTALL_TE_QE
-install/tested_systems
-install/install_on_cluster
-```
-
-```{toctree}
----
-caption: Running MALA
-maxdepth: 2
----
-usage/horovod_slurm
-usage/sql_on_hpc
-```
-
-
-```{toctree}
----
-caption: API Reference
-maxdepth: 1
----
-
+about
+installation
+usage
 api/modules
-```
-
-```{toctree}
----
-caption: Contributing
-maxdepth: 1
----
-
 CONTRIBUTE
 ```
 

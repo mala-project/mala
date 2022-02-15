@@ -1,9 +1,12 @@
 """DOS calculation class."""
-from .target_base import TargetBase
-from .calculation_helpers import *
+import os
+
+from mala.targets.target_base import TargetBase
+from mala.targets.calculation_helpers import *
 from scipy import integrate, interpolate
 from scipy.optimize import toms748
 from ase.units import Rydberg
+import ase.io
 from mala.common.parameters import printout
 
 
@@ -19,6 +22,10 @@ class DOS(TargetBase):
     def __init__(self, params):
         super(DOS, self).__init__(params)
         self.target_length = self.parameters.ldos_gridsize
+
+    def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return self.parameters.ldos_gridsize
 
     @staticmethod
     def convert_units(array, in_units="1/eV"):
@@ -48,7 +55,6 @@ class DOS(TargetBase):
         elif in_units == "1/Ry":
             return array * (1/Rydberg)
         else:
-            printout(in_units)
             raise Exception("Unsupported unit for LDOS.")
 
     @staticmethod
@@ -76,7 +82,6 @@ class DOS(TargetBase):
         elif out_units == "1/Ry":
             return array * Rydberg
         else:
-            printout(out_units)
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_qe_dos_txt(self, file_name, directory):
@@ -106,7 +111,7 @@ class DOS(TargetBase):
         return_dos_values = []
 
         # Open the file, then iterate through its contents.
-        with open(directory+file_name, 'r') as infile:
+        with open(os.path.join(directory, file_name), 'r') as infile:
             lines = infile.readlines()
             i = 0
 
@@ -121,6 +126,51 @@ class DOS(TargetBase):
                         i += 1
 
         return np.array(return_dos_values)
+
+    def read_from_qe_out(self, path_to_file=None, smearing_factor=2):
+        """
+        Calculate the DOS from a Quantum Espresso DFT output file.
+
+        The DOS will be read calculated via the eigenvalues and the equation
+
+        D(E) = sum_i sum_k w_k delta(E-epsilon_{ik})
+
+        Parameters
+        ----------
+        path_to_file : string
+            Path to the QE out file. If None, the QE output that was loaded
+            via read_additional_calculation_data will be used.
+
+        smearing_factor : int
+            Smearing factor relative to the energy grid spacing. Default is 2.
+
+        Returns
+        -------
+        dos_data:
+            DOS data in 1/eV.
+        """
+        # dos_per_band = delta_f(e_grid,dft.eigs)
+        if path_to_file is None:
+            atoms_object = self.atoms
+        else:
+            atoms_object = ase.io.read(path_to_file, format="espresso-out")
+        kweights = atoms_object.get_calculator().get_k_point_weights()
+        if kweights is None:
+            raise Exception("QE output file does not contain band information."
+                            "Rerun calculation with verbosity set to 'high'.")
+
+        # Get the gaussians for all energy values and calculate the DOS per
+        # band.
+        dos_per_band = gaussians(self.get_energy_grid(),
+                                 atoms_object.get_calculator().
+                                 band_structure().energies[0, :, :],
+                                 smearing_factor*self.parameters.
+                                 ldos_gridspacing_ev)
+        dos_per_band = kweights[:, np.newaxis, np.newaxis]*dos_per_band
+
+        # QE gives the band energies in eV, so no conversion necessary here.
+        dos_data = np.sum(dos_per_band, axis=(0, 1))
+        return dos_data
 
     def get_energy_grid(self):
         """
@@ -339,6 +389,8 @@ class DOS(TargetBase):
         return_dos_object.total_energy_dft_calculation = \
             ldos_object.total_energy_dft_calculation
         return_dos_object.kpoints = ldos_object.kpoints
+        return_dos_object.number_of_electrons_from_eigenvals = \
+            ldos_object.number_of_electrons_from_eigenvals
 
         return return_dos_object
 

@@ -1,7 +1,7 @@
 """Interface function for getting Targets."""
-from .ldos import LDOS
-from .dos import DOS
-from .density import Density
+from mala.targets.ldos import LDOS
+from mala.targets.dos import DOS
+from mala.targets.density import Density
 
 
 def TargetInterface(params):

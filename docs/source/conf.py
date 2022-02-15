@@ -68,12 +68,13 @@ autodoc_mock_imports = [
     'horovod',
     'lammps',
     'total_energy',
+    'pqkmeans'
 ]
 
 autodoc_member_order = 'groupwise'
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -91,8 +92,22 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+html_logo = "./img/logos/mala_horizontal_white.png"
 
+html_context = {
+  'display_github': True,
+  'github_repo': 'mala-project/mala',
+  'github_version': 'develop',
+  'conf_py_path': '/docs/source/',
+}
+
+html_theme_options = {
+    'logo_only': True,
+    'display_version': False,
+}
+html_static_path = ['_static']
+# html_static_path = []
+html_css_files = ["css/custom.css"]
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 #html_logo = "./img/logos/mala_vertical.png"
@@ -100,7 +115,6 @@ html_static_path = []
 # The name of an image file (relative to this directory) to use as a favicon of
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = "../resources/theme/favicon.ico"
 html_favicon = "./img/logos/mala_favicon.png"
 
 # The suffix of source file names.
@@ -109,3 +123,8 @@ source_suffix = {
     '.txt': 'markdown',
     '.md': 'markdown',
 }
+
+add_module_names = False
+
+
+

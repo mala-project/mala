@@ -1,8 +1,10 @@
 """Hyperparameter to use with optuna."""
 from optuna.trial import Trial
 
+from mala.common.json_serializable import JSONSerializable
 
-class HyperparameterOptuna:
+
+class HyperparameterOptuna(JSONSerializable):
     """Represents an optuna parameter.
 
     Parameters
@@ -35,6 +37,7 @@ class HyperparameterOptuna:
     """
 
     def __init__(self, opttype="float", name="", low=0, high=0, choices=None):
+        super(HyperparameterOptuna, self).__init__()
         self.name = name
         self.high = high
         self.low = low
@@ -126,6 +129,9 @@ class HyperparameterOptuna:
             Return value is based on type of hyperparameter.
         """
         if self.opttype == "categorical":
-            return trial.suggest_categorical(self.name, self.choices)
+            if len(self.choices) > 1:
+                return trial.suggest_categorical(self.name, self.choices)
+            else:
+                return self.choices[0]
         else:
             raise Exception("Wrong hyperparameter type.")

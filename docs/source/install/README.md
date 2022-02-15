@@ -22,6 +22,7 @@ In order to run MALA you have to have the following packages installed:
 * numpy
 * scipy
 * oapackage
+* tensorboard
 * optuna
 * ase
 * mpmath
@@ -39,11 +40,18 @@ or all with
 $ pip install -r requirements.txt
 ```
 
-or just install the package along with dependencies
+or just install the package along with its basic dependencies
 
 ```sh
 $ pip install -e .
 ```
+
+In order to install additional dependencies (enabling optional features, building documentaion locally, testing etc.) do
+
+```sh
+$ pip install -e .[opt,test,doc]
+```
+
 
 See below for what the `-e` option does.
 
@@ -60,6 +68,22 @@ while a plain `pip install torch` will pull the much larger GPU version by
 default.
 
 For other ways to install PyTorch you might also refer to <https://pytorch.org/>.
+
+### Optional python packages
+
+MALA uses some optional packages that have to be installed manually:
+
+* `lammps`: Enables the calculation of descriptors, see [the instructions on external modules](external_modules.rst).
+* `total_energy`: Enables the calculation of the total energy, see [the instructions on external modules](external_modules.rst).
+* `mpi4py`: Enables inference parallelization
+* `horovod`: Enables training parallelization
+* `oapackage`: Enables usage of OAT method for hyperparameter optimization
+* `pqkmeans`:  Enables clustering of training data
+
+MALA can be used without these packages, an error will only occure when attempting
+perform an operation these packages are crucial for. With the exception
+of `lammps` and `total_energy`, these packages can be installed using
+`pip`.
 
 #### Conda environment (optional)
 
@@ -100,19 +124,6 @@ environment by replacing `3.6` with your desired version in `environment.yml`:
     ```sh
     $ conda env update --name mala  --file environment.yml
     ```
-###  LAMMPS (optional)
-
-This workflow uses the Large-scale Atomic/Molecular Massively Parallel
-Simulator [LAMMPS](https://lammps.sandia.gov/) for input data preprocessing. It
-is not necessary to install LAMMPS if you are you using this workflow with
-preprocessed data. If you need/want to install LAMMPS, please refer to
-[Setting up LAMMPS](INSTALL_LAMMPS.md).
-
-### Total energy module (optional)
-
-It is possible to utilize Quantum Espresso to calculate the total energy of a given system using python bindings.
-This provides an additional post-processing capability, but is not necessarily needed for using this workflow.
-If you want to use this module, please refer to [Python bindings to Quantum Espresso](INSTALL_TE_QE.md).
 
 
 ## Installing the MALA package
@@ -126,10 +137,7 @@ If you want to use this module, please refer to [Python bindings to Quantum Espr
     ```
     (note: the `-e` is absolutely crucial, so that changes in the code will be
     reflected system wide)
-3. Go to the `examples` folder and run `ex0_verify_installation.py` to make
-sure the setup was successful.
-4. Enjoy!
-
+3. (Optional): Download example data (see below) to run the examples.
 
 ### Build documentation locally (optional)
 
@@ -147,11 +155,24 @@ $ pip install -r docs/requirements.txt
 
 ## Downloading and adding example data
 
-The examples and tests need additional data to run. The MALA team provides a data repository, that can be downloaded
-from <https://github.com/mala-project/data>. After downloading it, the data repository
-needs to be linked to the MALA repository by using
+The examples and tests need additional data to run. The MALA team provides a
+data repository, that can be obtained from
+<https://github.com/mala-project/test-data>. Please be sure to check out the
+correct tag for the data repository, since the data repository itself is
+subject to ongoing development as well.
+
+Download data repository and check out correct tag.
+
+   ```sh
+   $ git clone https://github.com/mala-project/test-data ~/path/to/data/repo
+   $ cd ~/path/to/data/repo
+   $ git checkout v1.1.0
+   ```
+
+Export
+
 ```sh
-$ cd ~/path/to/this/git/root/directory
-$ bash install/data_repo_link/link_data_repo.sh ~/path/to/data/repo
+$ export MALA_DATA_REPO=~/path/to/data/repo
 ```
-Afterwards, all the examples and tests will run out-of-the.box.
+
+pointing to that repo. This will be used by tests and examples.
