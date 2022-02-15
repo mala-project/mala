@@ -935,8 +935,8 @@ class Parameters:
             hvd.init()
 
         # Invalidate, will be updated in setter.
-        self.device = None
         set_horovod_status(value)
+        self.device = None
         self._use_horovod = value
         self.network._update_horovod(self.use_horovod)
         self.descriptors._update_horovod(self.use_horovod)
