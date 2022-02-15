@@ -17,13 +17,13 @@ except ModuleNotFoundError:
 
 try:
     from mpi4py import MPI
-except:
-    # Error handled in parameters.
+except ModuleNotFoundError:
     pass
 
 from mala.descriptors.lammps_utils import *
 from mala.descriptors.descriptor_base import DescriptorBase
-from mala.common.parallelizer import get_comm, printout, get_rank, get_size
+from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
+    barrier
 
 
 class SNAP(DescriptorBase):
@@ -191,7 +191,7 @@ class SNAP(DescriptorBase):
         """
         # Barrier to make sure all ranks have descriptors..
         comm = get_comm()
-        comm.Barrier()
+        barrier()
 
         # Gather the SNAP descriptors into a list.
         if use_pickled_comm:
@@ -223,7 +223,7 @@ class SNAP(DescriptorBase):
                                    (sendcounts[i], raw_feature_length))
             else:
                 comm.Send(snap_descriptors_np, dest=0, tag=get_rank()+100)
-            comm.Barrier()
+            barrier()
 
         # if get_rank() == 0:
         #     printout(np.shape(all_snap_descriptors_list[0]))
@@ -233,7 +233,7 @@ class SNAP(DescriptorBase):
 
         # Dummy for the other ranks.
         # (For now, might later simply broadcast to other ranks).
-        snap_descriptors_full = np.zeros([1,1,1,1])
+        snap_descriptors_full = np.zeros([1, 1, 1, 1])
 
         # Reorder the list.
         if get_rank() == 0:
@@ -362,7 +362,7 @@ class SNAP(DescriptorBase):
             # deallocates memory too quickly. This copy is more memory
             # hungry, and we might have to tackle this later on, but
             # for now it works.
-            return snap_descriptors_np.copy()
+            return snap_descriptors_np.copy(), nrows_local
 
         else:
             # Extract data from LAMMPS calculation.
@@ -383,6 +383,6 @@ class SNAP(DescriptorBase):
             # it does not necessarily do that - so we have do go down
             # that route.
             if self.parameters.descriptors_contain_xyz:
-                return snap_descriptors_np.copy()
+                return snap_descriptors_np.copy(), nx*ny*nz
             else:
-                return snap_descriptors_np[:, :, :, 3:].copy()
+                return snap_descriptors_np[:, :, :, 3:].copy(), nx*ny*nz

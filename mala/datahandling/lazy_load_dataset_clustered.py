@@ -17,7 +17,7 @@ import torch
 from torch.utils.data import Dataset
 
 from mala.datahandling.snapshot import Snapshot
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, barrier
 
 
 class LazyLoadDatasetClustered(torch.utils.data.Dataset):
@@ -223,8 +223,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
                 raise ValueError("Sum of clustered inputs is different from"
                                  " number of inputs itself.")
 
-        if self.use_horovod:
-            hvd.allreduce(torch.tensor(0), name='barrier')
+        barrier()
 
         # In the original code there is a mixing at this point. I omit this
         # here because we do it later in the training routine.
@@ -237,8 +236,8 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         """
         if self.number_of_snapshots > 1:
             used_perm = torch.randperm(self.number_of_snapshots)
+            barrier()
             if self.use_horovod:
-                hvd.allreduce(torch.tensor(0), name='barrier')
                 used_perm = hvd.broadcast(used_perm, 0)
 
             # Not only the snapshots, but also the clustered inputs and samples
