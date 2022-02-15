@@ -33,12 +33,17 @@ class Descriptor(ABC):
             Parameters used to create this descriptor calculator.
         """
         descriptors = None
-        if params.descriptors.descriptor_type == 'SNAP':
-            from mala.descriptors.snap import SNAP
-            descriptors = super(Descriptor, SNAP).__new__(SNAP)
+        # Check if we're accessing through base class.
+        # If not, we need to return the correct object directly.
+        if cls == Descriptor:
+            if params.descriptors.descriptor_type == 'SNAP':
+                from mala.descriptors.snap import SNAP
+                descriptors = super(Descriptor, SNAP).__new__(SNAP)
 
-        if descriptors is None:
-            raise Exception("Unsupported descriptor calculator.")
+            if descriptors is None:
+                raise Exception("Unsupported descriptor calculator.")
+        else:
+            descriptors = super(Descriptor, cls).__new__(cls)
 
         return descriptors
 

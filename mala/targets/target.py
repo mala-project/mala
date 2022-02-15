@@ -37,26 +37,31 @@ class Target(ABC):
             Parameters used to create this target calculator.
         """
         target = None
-        targettype = None
-        if isinstance(params, Parameters):
-            targettype = params.targets.target_type
-        elif isinstance(params, ParametersTargets):
-            targettype = params.target_type
+
+        # Check if we're accessing through base class.
+        # If not, we need to return the correct object directly.
+        if cls == Target:
+            if isinstance(params, Parameters):
+                targettype = params.targets.target_type
+            elif isinstance(params, ParametersTargets):
+                targettype = params.target_type
+            else:
+                raise Exception("Wrong type of parameters for Targets class.")
+
+            if targettype == 'LDOS':
+                from mala.targets.ldos import LDOS
+                target = super(Target, LDOS).__new__(LDOS)
+            if targettype == 'DOS':
+                from mala.targets.dos import DOS
+                target = super(Target, DOS).__new__(DOS)
+            if targettype == 'Density':
+                from mala.targets.density import Density
+                target = super(Target, Density).__new__(Density)
+
+            if target is None:
+                raise Exception("Unsupported target parser/calculator.")
         else:
-            raise Exception("Wrong type of parameters for Targets class.")
-
-        if targettype == 'LDOS':
-            from mala.targets.ldos import LDOS
-            target = super(Target, LDOS).__new__(LDOS)
-        if targettype == 'DOS':
-            from mala.targets.dos import DOS
-            target = super(Target, DOS).__new__(DOS)
-        if targettype == 'Density':
-            from mala.targets.density import Density
-            target = super(Target, Density).__new__(Density)
-
-        if target is None:
-            raise Exception("Unsupported target parser/calculator.")
+            target = super(Target, cls).__new__(cls)
 
         return target
 
