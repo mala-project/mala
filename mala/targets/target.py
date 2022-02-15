@@ -23,6 +23,7 @@ class Target(ABC):
     mala.common.parameters.ParametersTargets
         Parameters used to create this Target object.
     """
+
     def __new__(cls, params: Parameters):
         """
         Create a Target instance.

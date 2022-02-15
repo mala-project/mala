@@ -19,6 +19,7 @@ class Descriptor(ABC):
         Parameters object used to create this object.
 
     """
+
     def __new__(cls, params: Parameters):
         """
         Create a Descriptor instance.

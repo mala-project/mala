@@ -24,6 +24,7 @@ class HyperOpt(ABC):
     use_pkl_checkpoints : bool
         If true, .pkl checkpoints will be created.
     """
+
     def __new__(cls, params: Parameters, data, use_pkl_checkpoints=False):
         """
         Create a HyperOpt instance.
