@@ -40,7 +40,7 @@ class Predictor(Runner):
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
 
-    def predict_from_qeout(self, path_to_file):
+    def predict_from_qeout(self, path_to_file, gather_ldos=False):
         """
         Get predicted LDOS for the atomic configuration of a QE.out file.
 
@@ -49,13 +49,19 @@ class Predictor(Runner):
         path_to_file : string
             Path from which to read the atomic configuration.
 
+        gather_ldos : bool
+            Only important if MPI is used. If True, all SNAP descriptors
+            are gathered on rank 0, and the pass is performed there.
+            Helpful for using multiple CPUs for descriptor calculations
+            and only one for network pass.
+
         Returns
         -------
         predicted_ldos : numpy.array
             Precicted LDOS for these atomic positions.
         """
         atoms = ase.io.read(path_to_file, format="espresso-out")
-        return self.predict_for_atoms(atoms)
+        return self.predict_for_atoms(atoms, gather_ldos=gather_ldos)
 
     def predict_for_atoms(self, atoms, gather_ldos=False):
         """

@@ -140,13 +140,14 @@ class TargetBase(ABC):
         ----------
         data_type : string
             Type of data or file that is used. Currently supporte are:
+
             - "qe.out" : Read the additional information from a QuantumESPRESSO
-                         output file.
+              output file.
 
             - "atoms+grid" : Provide a grid and an atoms object from which to
-                             predict. Except for the number of electrons,
-                             this mode will not change any member variables;
-                             values have to be adjusted BEFORE.
+              predict. Except for the number of electrons,
+              this mode will not change any member variables;
+              values have to be adjusted BEFORE.
 
         data : string or list
             Data from which additional calculation data is inputted.

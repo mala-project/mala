@@ -88,7 +88,7 @@ class MALA(Calculator):
         Calculator.calculate(self, atoms, properties, system_changes)
 
         # Get the LDOS from the NN.
-        ldos = self.predictor.predict_for_atoms(atoms)
+        ldos = self.predictor.predict_for_atoms(atoms, gather_ldos=True)
 
         energy = 0.0
         forces = np.zeros([len(atoms), 3], dtype=np.float64)
