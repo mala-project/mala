@@ -181,9 +181,7 @@ def get_comm():
 
 
 def barrier():
-    """
-    General interface for a barrier.
-    """
+    """General interface for a barrier."""
     if use_horovod:
         hvd.allreduce(torch.tensor(0), name='barrier')
     if use_mpi:
