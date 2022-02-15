@@ -32,22 +32,22 @@ class TestParallel:
         test_parameters.descriptors.descriptor_type = "SNAP"
         test_parameters.descriptors.twojmax = 6
         test_parameters.descriptors.rcutfac = 4.67637
-        test_parameters.data.descriptors_contain_xyz = True
+        test_parameters.descriptors.descriptors_contain_xyz = True
 
         atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
 
         snap_calculator = mala.SNAP(test_parameters)
-        snaps_serial = snap_calculator.calculate_from_atoms(atoms,
+        snaps_serial, snapsize = snap_calculator.calculate_from_atoms(atoms,
                                                             [18, 18, 27])
 
         test_parameters = mala.Parameters()
         test_parameters.descriptors.descriptor_type = "SNAP"
         test_parameters.descriptors.twojmax = 6
         test_parameters.descriptors.rcutfac = 4.67637
-        test_parameters.data.descriptors_contain_xyz = True
+        test_parameters.descriptors.descriptors_contain_xyz = True
         test_parameters.use_mpi = True
         snap_calculator = mala.SNAP(test_parameters)
-        snaps_parallel = snap_calculator.calculate_from_atoms(atoms,
+        snaps_parallel, snapsize = snap_calculator.calculate_from_atoms(atoms,
                                                               [18, 18, 27])
         snaps_parallel = snap_calculator.gather_descriptors(snaps_parallel)
         serial_shape = np.shape(snaps_serial)

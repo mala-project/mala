@@ -40,13 +40,12 @@ def with_lazy_loading():
 
     # Add snapshots that are to be tested and make sure that the
     # data_splitting_snapshots list is correct.
-    new_parameters.data.data_splitting_snapshots = ["te", "te"]
     inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                         "Al_debug_2k_nr2.out.npy", data_path,
-                                        output_units="1/Ry")
+                                        "te", output_units="1/Ry")
     inference_data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                         "Al_debug_2k_nr0.out.npy", data_path,
-                                        output_units="1/Ry")
+                                        "te", output_units="1/Ry")
 
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 
@@ -89,13 +88,12 @@ def without_lazy_loading():
 
     # Add snapshots that are to be tested and make sure that the
     # data_splitting_snapshots list is correct.
-    new_parameters.data.data_splitting_snapshots = ["te", "te"]
     inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                         "Al_debug_2k_nr2.out.npy", data_path,
-                                        output_units="1/Ry")
+                                        "te", output_units="1/Ry")
     inference_data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                         "Al_debug_2k_nr0.out.npy", data_path,
-                                        output_units="1/Ry")
+                                        "te", output_units="1/Ry")
 
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 
@@ -139,13 +137,12 @@ def bypassing_mala():
 
     # Add snapshots that are to be tested and make sure that the
     # data_splitting_snapshots list is correct.
-    new_parameters.data.data_splitting_snapshots = ["te", "te"]
     inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                         "Al_debug_2k_nr2.out.npy", data_path,
-                                        output_units="1/Ry")
+                                        "te", output_units="1/Ry")
     inference_data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                         "Al_debug_2k_nr0.out.npy", data_path,
-                                        output_units="1/Ry")
+                                        "te", output_units="1/Ry")
 
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 

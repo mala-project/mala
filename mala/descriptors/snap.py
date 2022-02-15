@@ -1,28 +1,30 @@
 """SNAP descriptor class."""
 import os
-import warnings
 import time
 
 import ase
 import ase.io
 try:
     from lammps import lammps
-    from lammps import constants as lammps_constants
+    # For version compatibility; older lammps versions (the serial version
+    # we still use on some machines) do not have this constants.
+    try:
+        from lammps import constants as lammps_constants
+    except ImportError:
+        pass
 except ModuleNotFoundError:
-    warnings.warn("You either don't have LAMMPS installed or it is not "
-                  "configured correctly. Using SNAP descriptors "
-                  "might still work, but trying to calculate SNAP "
-                  "descriptors from atomic positions will crash.",
-                  stacklevel=3)
+    pass
+
 try:
     from mpi4py import MPI
-except:
-    # Error handled in parameters.
+except ModuleNotFoundError:
     pass
 
 from mala.descriptors.lammps_utils import *
 from mala.descriptors.descriptor_base import DescriptorBase
-from mala.common.parallelizer import get_comm, printout, get_rank, get_size
+from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
+    barrier
+
 
 class SNAP(DescriptorBase):
     """Class for calculation and parsing of SNAP descriptors.
@@ -109,7 +111,7 @@ class SNAP(DescriptorBase):
         """
         self.in_format_ase = "espresso-out"
         printout("Calculating SNAP descriptors from", qe_out_file, "at",
-                  qe_out_directory)
+                 qe_out_directory, min_verbosity=0)
         # We get the atomic information by using ASE.
         infile = os.path.join(qe_out_directory, qe_out_file)
         atoms = ase.io.read(infile, format=self.in_format_ase)
@@ -166,6 +168,11 @@ class SNAP(DescriptorBase):
         Gathers all SNAP descriptors on rank 0 and sorts them.
 
         This is useful for e.g. parallel preprocessing.
+        This function removes the extra 3 components that come from parallel
+        processing.
+        I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
+        97 (in parallel mode), and this function returns, as to retain the
+        3 x,y,z ones we by default include.
 
         Parameters
         ----------
@@ -184,7 +191,7 @@ class SNAP(DescriptorBase):
         """
         # Barrier to make sure all ranks have descriptors..
         comm = get_comm()
-        comm.Barrier()
+        barrier()
 
         # Gather the SNAP descriptors into a list.
         if use_pickled_comm:
@@ -216,7 +223,7 @@ class SNAP(DescriptorBase):
                                    (sendcounts[i], raw_feature_length))
             else:
                 comm.Send(snap_descriptors_np, dest=0, tag=get_rank()+100)
-            comm.Barrier()
+            barrier()
 
         # if get_rank() == 0:
         #     printout(np.shape(all_snap_descriptors_list[0]))
@@ -226,7 +233,7 @@ class SNAP(DescriptorBase):
 
         # Dummy for the other ranks.
         # (For now, might later simply broadcast to other ranks).
-        snap_descriptors_full = np.zeros([1,1,1,1])
+        snap_descriptors_full = np.zeros([1, 1, 1, 1])
 
         # Reorder the list.
         if get_rank() == 0:
@@ -260,7 +267,10 @@ class SNAP(DescriptorBase):
                 #     y = int(entry[1])
                 #     z = int(entry[2])
                 #     snap_descriptors_full[x, y, z] = entry[3:]
-        return snap_descriptors_full
+        if self.parameters.descriptors_contain_xyz:
+            return snap_descriptors_full
+        else:
+            return snap_descriptors_full[:, :, :, 3:]
 
     def __calculate_snap(self, atoms, outdir, grid_dimensions):
         """Perform actual SNAP calculation."""
@@ -352,7 +362,7 @@ class SNAP(DescriptorBase):
             # deallocates memory too quickly. This copy is more memory
             # hungry, and we might have to tackle this later on, but
             # for now it works.
-            return snap_descriptors_np.copy()
+            return snap_descriptors_np.copy(), nrows_local
 
         else:
             # Extract data from LAMMPS calculation.
@@ -372,4 +382,7 @@ class SNAP(DescriptorBase):
             # I thought the transpose would take care of that, but apparently
             # it does not necessarily do that - so we have do go down
             # that route.
-            return snap_descriptors_np.copy()
+            if self.parameters.descriptors_contain_xyz:
+                return snap_descriptors_np.copy(), nx*ny*nz
+            else:
+                return snap_descriptors_np[:, :, :, 3:].copy(), nx*ny*nz

@@ -51,10 +51,9 @@ def use_trained_network(network_path, params_path, input_scaler_path,
 
     # Add snapshots that are to be tested and make sure that the
     # data_splitting_snapshots list is correct.
-    new_parameters.data.data_splitting_snapshots = ["te"]
     inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                         "Al_debug_2k_nr2.out.npy", data_path,
-                                        output_units="1/Ry")
+                                        "te", output_units="1/Ry")
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 
     # The Tester class is the testing analogon to the training class.
@@ -95,11 +94,8 @@ def initial_training(network_path, params_path, input_scaler_path,
 
     test_parameters = mala.Parameters()
     # Currently, the splitting in training, validation and test set are
-    # done on a "by snapshot" basis. Specify how this is
-    # done by providing a list containing entries of the form
-    # "tr", "va" and "te".
+    # done on a "by snapshot" basis.
     test_parameters.data.data_splitting_type = "by_snapshot"
-    test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
 
     # Specify the data scaling.
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
@@ -123,13 +119,13 @@ def initial_training(network_path, params_path, input_scaler_path,
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                              "Al_debug_2k_nr0.out.npy", data_path,
+                              "Al_debug_2k_nr0.out.npy", data_path, "tr",
                               output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                              "Al_debug_2k_nr1.out.npy", data_path,
+                              "Al_debug_2k_nr1.out.npy", data_path, "va",
                               output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                              "Al_debug_2k_nr2.out.npy", data_path,
+                              "Al_debug_2k_nr2.out.npy", data_path, "te",
                               output_units="1/Ry")
     data_handler.prepare_data()
     printout("Read data: DONE.")

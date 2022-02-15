@@ -5,12 +5,9 @@ import pickle
 import optuna
 
 from mala.common.parameters import printout
-from mala.common.parameters import Parameters
-from mala.datahandling.data_handler import DataHandler
-from mala.datahandling.data_scaler import DataScaler
 from mala.network.hyper_opt_base import HyperOptBase
 from mala.network.objective_base import ObjectiveBase
-from mala.network.no_training_pruner import NoTrainingPruner
+from mala.network.naswot_pruner import NASWOTPruner
 
 
 class HyperOptOptuna(HyperOptBase):
@@ -24,10 +21,13 @@ class HyperOptOptuna(HyperOptBase):
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the data for the hyperparameter optimization.
 
+    use_pkl_checkpoints : bool
+        If true, .pkl checkpoints will be created.
     """
 
-    def __init__(self, params, data):
-        super(HyperOptOptuna, self).__init__(params, data)
+    def __init__(self, params, data, use_pkl_checkpoints=False):
+        super(HyperOptOptuna, self).__init__(params, data,
+                                             use_pkl_checkpoints=use_pkl_checkpoints)
         self.params = params
 
         # Make the sample behave in a reproducible way, if so specified by
@@ -38,8 +38,8 @@ class HyperOptOptuna(HyperOptBase):
 
         # See if the user specified a pruner.
         pruner = None
-        if self.params.hyperparameters.pruner == "no_training":
-            pruner = NoTrainingPruner(self.params, data)
+        if self.params.hyperparameters.pruner == "naswot":
+            pruner = NASWOTPruner(self.params, data)
 
         # Create the study.
         if self.params.hyperparameters.rdb_storage is None:
@@ -67,7 +67,6 @@ class HyperOptOptuna(HyperOptBase):
                              load_if_exists=True,
                              pruner=pruner)
         self.checkpoint_counter = 0
-
 
     def perform_study(self):
         """
@@ -114,33 +113,8 @@ class HyperOptOptuna(HyperOptBase):
                                               TrialState.COMPLETE, ))
 
     @classmethod
-    def checkpoint_exists(cls, checkpoint_name):
-        """
-        Check if a hyperparameter optimization checkpoint exists.
-
-        Returns True if it does.
-
-        Parameters
-        ----------
-        checkpoint_name : string
-            Name of the checkpoint.
-
-        Returns
-        -------
-        checkpoint_exists : bool
-            True if the checkpoint exists, False otherwise.
-
-        """
-        iscaler_name = checkpoint_name + "_iscaler.pkl"
-        oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
-
-        return all(map(os.path.isfile, [iscaler_name, oscaler_name,
-                                        param_name]))
-
-    @classmethod
     def resume_checkpoint(cls, checkpoint_name, alternative_storage_path=None,
-                          no_data=False):
+                          no_data=False, use_pkl_checkpoints=False):
         """
         Prepare resumption of hyperparameter optimization from a checkpoint.
 
@@ -163,6 +137,9 @@ class HyperOptOptuna(HyperOptBase):
             This can be useful for cases where a checkpoint is loaded
             for analysis purposes.
 
+        use_pkl_checkpoints : bool
+            If true, .pkl checkpoints will be loaded.
+
         Returns
         -------
         loaded_params : mala.common.parameters.Parameters
@@ -174,29 +151,12 @@ class HyperOptOptuna(HyperOptBase):
         new_hyperopt : HyperOptOptuna
             The hyperparameter optimizer reconstructed from the checkpoint.
         """
-        printout("Loading hyperparameter optimization from checkpoint.")
-        # The names are based upon the checkpoint name.
-        iscaler_name = checkpoint_name + "_iscaler.pkl"
-        oscaler_name = checkpoint_name + "_oscaler.pkl"
-        param_name = checkpoint_name + "_params.pkl"
-        optimizer_name = checkpoint_name + "_hyperopt.pth"
-
-        # First load the all the regular objects.
-        loaded_params = Parameters.load_from_file(param_name)
-        loaded_iscaler = DataScaler.load_from_file(iscaler_name)
-        loaded_oscaler = DataScaler.load_from_file(oscaler_name)
+        loaded_params, new_datahandler, optimizer_name = \
+            cls._resume_checkpoint(checkpoint_name, no_data=no_data,
+                                   use_pkl_checkpoints=use_pkl_checkpoints)
         if alternative_storage_path is not None:
             loaded_params.hyperparameters.rdb_storage = \
                 alternative_storage_path
-
-        printout("Preparing data used for last checkpoint.")
-        # Create a new data handler and prepare the data.
-        if no_data is True:
-            loaded_params.data.use_lazy_loading = True
-        new_datahandler = DataHandler(loaded_params,
-                                      input_data_scaler=loaded_iscaler,
-                                      output_data_scaler=loaded_oscaler)
-        new_datahandler.prepare_data(reparametrize_scaler=False)
         new_hyperopt = HyperOptOptuna.load_from_file(loaded_params,
                                                      optimizer_name,
                                                      new_datahandler)
@@ -285,30 +245,19 @@ class HyperOptOptuna(HyperOptBase):
             printout(str(self.params.hyperparameters.
                      checkpoints_each_trial)+" trials have passed, creating a "
                                              "checkpoint for hyperparameter "
-                                             "optimization.")
+                                             "optimization.", min_verbosity=0)
         if self.params.hyperparameters.checkpoints_each_trial < 0 and \
            self.__get_number_of_completed_trials(study) > 0:
                 if trial.number == study.best_trial.number:
                     need_to_checkpoint = True
                     printout("Best trial is "+str(trial.number)+", creating a "
-                             "checkpoint for it.")
+                             "checkpoint for it.", min_verbosity=0)
 
         if need_to_checkpoint is True:
             # We need to create a checkpoint!
             self.checkpoint_counter = 0
 
-            # Get the filenames.
-            iscaler_name = self.params.hyperparameters.checkpoint_name \
-                           + "_iscaler.pkl"
-            oscaler_name = self.params.hyperparameters.checkpoint_name \
-                           + "_oscaler.pkl"
-            param_name = self.params.hyperparameters.checkpoint_name \
-                           + "_params.pkl"
-
-            # First we save the objects we would also save for inference.
-            self.data_handler.input_data_scaler.save(iscaler_name)
-            self.data_handler.output_data_scaler.save(oscaler_name)
-            self.params.save(param_name)
+            self._save_params_and_scaler()
 
             # Next, we save all the other objects.
             # Here some horovod stuff would have to go.

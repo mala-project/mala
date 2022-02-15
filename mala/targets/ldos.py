@@ -4,8 +4,13 @@ from ase.units import Rydberg
 import numpy as np
 import math
 import os
+try:
+    from mpi4py import MPI
+except ModuleNotFoundError:
+    pass
 
-from mala.common.parameters import printout
+from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
+    barrier
 from mala.targets.cube_parser import read_cube
 from mala.targets.target_base import TargetBase
 from mala.targets.calculation_helpers import *
@@ -62,7 +67,6 @@ class LDOS(TargetBase):
         elif in_units == "1/Ry":
             return array * (1/Rydberg)
         else:
-            printout(in_units)
             raise Exception("Unsupported unit for LDOS.")
 
     @staticmethod
@@ -90,10 +94,10 @@ class LDOS(TargetBase):
         elif out_units == "1/Ry":
             return array * Rydberg
         else:
-            printout(out_units)
             raise Exception("Unsupported unit for LDOS.")
 
-    def read_from_cube(self, file_name_scheme, directory, units="1/eV"):
+    def read_from_cube(self, file_name_scheme, directory, units="1/eV",
+                       use_memmap=None):
         """
         Read the LDOS data from multiple cube files.
 
@@ -109,6 +113,10 @@ class LDOS(TargetBase):
 
         units : string
             Units the LDOS is saved in.
+
+        use_memmap : string
+            If not None, a memory mapped file will be used to gather the LDOS.
+            If run in MPI parallel mode, such a file MUST be provided.
 
         Returns
         -------
@@ -133,9 +141,22 @@ class LDOS(TargetBase):
         # Iterate over the amount of specified LDOS input files.
         # QE is a Fortran code, so everything is 1 based.
         printout("Reading "+str(self.parameters.ldos_gridsize) +
-                 " LDOS files from"+directory+".")
+                 " LDOS files from"+directory+".", min_verbosity=0)
         ldos_data = None
-        for i in range(1, self.parameters.ldos_gridsize + 1):
+        if self.parameters._configuration["mpi"]:
+            local_size = int(np.floor(self.parameters.ldos_gridsize /
+                                     get_size()))
+            start_index = get_rank()*local_size + 1
+            if get_rank()+1 == get_size():
+                local_size += self.parameters.ldos_gridsize % \
+                                     get_size()
+            end_index = start_index+local_size
+        else:
+            start_index = 1
+            end_index = self.parameters.ldos_gridsize + 1
+            local_size = self.parameters.ldos_gridsize
+
+        for i in range(start_index, end_index):
             tmp_file_name = file_name_scheme
             tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
 
@@ -145,16 +166,40 @@ class LDOS(TargetBase):
             # Once we have read the first cube file, we know the dimensions
             # of the LDOS and can prepare the array
             # in which we want to store the LDOS.
-            if i == 1:
+            if i == start_index:
                 data_shape = np.shape(data)
                 ldos_data = np.zeros((data_shape[0], data_shape[1],
-                                      data_shape[2], self.parameters.
-                                      ldos_gridsize), dtype=np.float64)
+                                      data_shape[2], local_size),
+                                     dtype=np.float64)
 
             # Convert and then append the LDOS data.
             data = data*self.convert_units(1, in_units=units)
-            ldos_data[:, :, :, i-1] = data[:, :, :]
-        return ldos_data
+            ldos_data[:, :, :, i-start_index] = data[:, :, :]
+
+        # If a memmap is used for communication, this has to be brought into
+        # play now.
+        if self.parameters._configuration["mpi"]:
+            barrier()
+            data_shape = np.shape(ldos_data)
+            if get_rank() == 0:
+                ldos_data_full = np.memmap(use_memmap,
+                                           shape=(data_shape[0], data_shape[1],
+                                                 data_shape[2], self.parameters.
+                                                 ldos_gridsize), mode="w+",
+                                           dtype=np.float64)
+            barrier()
+            if get_rank() != 0:
+                ldos_data_full = np.memmap(use_memmap,
+                                           shape=(data_shape[0], data_shape[1],
+                                                  data_shape[2], self.parameters.
+                                                  ldos_gridsize), mode="r+",
+                                           dtype=np.float64)
+            barrier()
+            ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
+            return ldos_data_full
+
+        else:
+            return ldos_data
 
     def get_energy_grid(self):
         """
@@ -683,7 +728,16 @@ class LDOS(TargetBase):
                 dos_values = np.sum(ldos_data, axis=0) * \
                              (grid_spacing_bohr ** 3)
 
-        return dos_values
+        if self.parameters._configuration["mpi"] is False:
+            return dos_values
+        else:
+            comm = get_comm()
+            comm.Barrier()
+            dos_values_full = np.zeros_like(dos_values)
+            comm.Reduce([dos_values, MPI.DOUBLE],
+                        [dos_values_full, MPI.DOUBLE],
+                        op=MPI.SUM, root=0)
+            return dos_values_full
 
     def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
                           snapshot_number=0):
