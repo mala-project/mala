@@ -728,7 +728,16 @@ class LDOS(TargetBase):
                 dos_values = np.sum(ldos_data, axis=0) * \
                              (grid_spacing_bohr ** 3)
 
-        return dos_values
+        if self.parameters._configuration["mpi"] is False:
+            return dos_values
+        else:
+            comm = get_comm()
+            comm.Barrier()
+            dos_values_full = np.zeros_like(dos_values)
+            comm.Reduce([dos_values, MPI.DOUBLE],
+                        [dos_values_full, MPI.DOUBLE],
+                        op=MPI.SUM, root=0)
+            return dos_values_full
 
     def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
                           snapshot_number=0):
