@@ -69,7 +69,7 @@ class Trainer(Runner):
 
 
     @classmethod
-    def checkpoint_exists(cls, checkpoint_name):
+    def checkpoint_exists(cls, checkpoint_name, use_pkl_checkpoints=False):
         """
         Check if a hyperparameter optimization checkpoint exists.
 
@@ -272,17 +272,17 @@ class Trainer(Runner):
             val_time = time.time()
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(self.network,
-                                            self.validation_data_loader)
+                                            "validation",
+                                            self.parameters.
+                                            during_training_metric)
             print("calc val: ", rank, val_time-time.time())
             val_time = time.time()
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
-            if self.parameters.verbosity:
-                printout("Epoch: ", epoch, "validation data loss: ", vloss)
+            printout("Epoch: ", epoch, "validation data loss: ", vloss,
+                     min_verbosity=1)
             print("average val", val_time-time.time())
-                                            "validation",
-                                            self.parameters.
-                                            during_training_metric)
+
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
             printout("Epoch: ", epoch, "validation data loss: ", vloss,
