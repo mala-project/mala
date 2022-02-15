@@ -53,7 +53,7 @@ class TestHyperparameterOptimization:
         data_handler.prepare_data()
 
         # Perform the hyperparameter optimization.
-        test_hp_optimizer = mala.HyperOptInterface(test_parameters,
+        test_hp_optimizer = mala.HyperOpt(test_parameters,
                                                    data_handler)
         test_hp_optimizer.add_hyperparameter("float", "learning_rate",
                                              0.0000001, 0.01)
@@ -127,7 +127,7 @@ class TestHyperparameterOptimization:
         data_handler.prepare_data()
 
         # Create and perform hyperparameter optimization.
-        test_hp_optimizer = mala.HyperOptInterface(test_parameters,
+        test_hp_optimizer = mala.HyperOpt(test_parameters,
                                                    data_handler)
         test_hp_optimizer.add_hyperparameter("float", "learning_rate",
                                              0.0000001, 0.01)
@@ -156,7 +156,7 @@ class TestHyperparameterOptimization:
         """Test that the ACSD routine is still working."""
         test_parameters = mala.Parameters()
         test_parameters.descriptors.acsd_points = 100
-        descriptors = mala.DescriptorInterface(test_parameters)
+        descriptors = mala.Descriptor(test_parameters)
         snap_data = np.load(os.path.join(data_path_be, "Be_snapshot1.in.npy"))
         ldos_data = np.load(os.path.join(data_path_be, "Be_snapshot1.out.npy"))
         assert descriptors.get_acsd(snap_data, ldos_data) < targeted_acsd_value
@@ -191,7 +191,7 @@ class TestHyperparameterOptimization:
         data_handler.prepare_data()
 
         # Perform the actual hyperparameter optimization.
-        test_hp_optimizer = mala.HyperOptInterface(test_parameters,
+        test_hp_optimizer = mala.HyperOpt(test_parameters,
                                                    data_handler)
         test_parameters.network.layer_sizes = [
             data_handler.get_input_dimension(),

@@ -9,7 +9,7 @@ from mala.common.parameters import Parameters, ParametersTargets
 from mala.targets.calculation_helpers import fermi_function
 
 
-class TargetBase(ABC):
+class Target(ABC):
     """
     Base class for all target quantity parser.
 
@@ -21,8 +21,44 @@ class TargetBase(ABC):
     ----------
     params : mala.common.parameters.Parameters or
     mala.common.parameters.ParametersTargets
-        Parameters used to create this TargetBase object.
+        Parameters used to create this Target object.
     """
+    def __new__(cls, params: Parameters):
+        """
+        Create a Target instance.
+
+        The correct type of target calculator will automatically be
+        instantiated by this class if possible. You can also instantiate
+        the desired target directly by calling upon the subclass.
+
+        Parameters
+        ----------
+        params : mala.common.parametes.Parameters
+            Parameters used to create this target calculator.
+        """
+        target = None
+        targettype = None
+        if isinstance(params, Parameters):
+            targettype = params.targets.target_type
+        elif isinstance(params, ParametersTargets):
+            targettype = params.target_type
+        else:
+            raise Exception("Wrong type of parameters for Targets class.")
+
+        if targettype == 'LDOS':
+            from mala.targets.ldos import LDOS
+            target = super(Target, LDOS).__new__(LDOS)
+        if targettype == 'DOS':
+            from mala.targets.dos import DOS
+            target = super(Target, DOS).__new__(DOS)
+        if targettype == 'Density':
+            from mala.targets.density import Density
+            target = super(Target, Density).__new__(Density)
+
+        if target is None:
+            raise Exception("Unsupported target parser/calculator.")
+
+        return target
 
     def __init__(self, params):
         if isinstance(params, Parameters):

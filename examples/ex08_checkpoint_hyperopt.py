@@ -77,7 +77,7 @@ def initial_setup():
     # and run the remaining trials.
     ####################
 
-    test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
+    test_hp_optimizer = mala.HyperOpt(test_parameters, data_handler)
 
     # Learning rate will be optimized.
     test_hp_optimizer.add_hyperparameter("float", "learning_rate",

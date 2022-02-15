@@ -22,11 +22,11 @@ except:
     pass
 
 from mala.descriptors.lammps_utils import *
-from mala.descriptors.descriptor_base import DescriptorBase
+from mala.descriptors.descriptor import Descriptor
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size
 
 
-class SNAP(DescriptorBase):
+class SNAP(Descriptor):
     """Class for calculation and parsing of SNAP descriptors.
 
     Parameters

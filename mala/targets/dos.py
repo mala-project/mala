@@ -1,7 +1,7 @@
 """DOS calculation class."""
 import os
 
-from mala.targets.target_base import TargetBase
+from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from scipy import integrate, interpolate
 from scipy.optimize import toms748
@@ -10,7 +10,7 @@ import ase.io
 from mala.common.parameters import printout
 
 
-class DOS(TargetBase):
+class DOS(Target):
     """Postprocessing / parsing functions for the density of states (DOS).
 
     Parameters

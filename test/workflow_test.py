@@ -87,7 +87,7 @@ class TestFullWorkflow:
         test_parameters.targets.ldos_gridoffset_ev = -10
 
         # Create a target calculator to perform postprocessing.
-        dos = mala.TargetInterface(test_parameters)
+        dos = mala.Target(test_parameters)
         dos.read_additional_calculation_data("qe.out", os.path.join(
                                              data_path, "Al.pw.scf.out"))
         dos_data = np.load(os.path.join(data_path, "Al_dos.npy"))
@@ -122,7 +122,7 @@ class TestFullWorkflow:
         test_parameters.targets.ldos_gridoffset_ev = -5
 
         # Create a target calculator to perform postprocessing.
-        ldos = mala.TargetInterface(test_parameters)
+        ldos = mala.Target(test_parameters)
         ldos.read_additional_calculation_data("qe.out", os.path.join(
                                               data_path_ldos,
                                                "Be.pw.scf.out"))
@@ -159,7 +159,7 @@ class TestFullWorkflow:
         test_parameters.targets.ldos_gridoffset_ev = -5
         test_parameters.targets.pseudopotential_path = data_path_ldos
         # Create a target calculator to perform postprocessing.
-        ldos = mala.TargetInterface(test_parameters)
+        ldos = mala.Target(test_parameters)
         ldos.read_additional_calculation_data("qe.out", os.path.join(
                                               data_path_ldos, "Be.pw.scf.out"))
         dos_data = np.load(os.path.join(data_path_ldos, "Be_dos.npy"))
@@ -194,7 +194,7 @@ class TestFullWorkflow:
         test_parameters.targets.pseudopotential_path = data_path_ldos
 
         # Create a target calculator to perform postprocessing.
-        ldos = mala.TargetInterface(test_parameters)
+        ldos = mala.Target(test_parameters)
         ldos.read_additional_calculation_data("qe.out", os.path.join(
                                               data_path_ldos,
                                               "Be.pw.scf.out"))

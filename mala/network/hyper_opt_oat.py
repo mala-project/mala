@@ -10,7 +10,7 @@ try:
 except ModuleNotFoundError:
     pass
 
-from mala.network.hyper_opt_base import HyperOptBase
+from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_base import ObjectiveBase
 from mala.network.hyperparameter_oat import HyperparameterOAT
 from mala.common.parallelizer import printout
@@ -19,7 +19,7 @@ from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
 
 
-class HyperOptOAT(HyperOptBase):
+class HyperOptOAT(HyperOpt):
     """Hyperparameter optimizer using Orthogonal Array Tuning.
 
     Parameters
