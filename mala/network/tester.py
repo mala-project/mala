@@ -58,46 +58,6 @@ class Tester(Runner):
                                      self.data.test_data_set,
                                      self.number_of_batches_per_snapshot,
                                      self.parameters.mini_batch_size)
-        self.data.prepare_for_testing()
-        if self.data.parameters.use_lazy_loading:
-            actual_outputs = \
-                (self.data.test_data_set
-                 [snapshot_number * self.data.
-                     grid_size:(snapshot_number + 1) * self.data.grid_size])[1]
-        else:
-            actual_outputs = \
-                self.data.output_data_scaler.\
-                inverse_transform(
-                    (self.data.test_data_set[snapshot_number *
-                                             self.data.grid_size:
-                                             (snapshot_number + 1) *
-                                             self.data.grid_size])[1],
-                    as_numpy=True)
-
-        predicted_outputs = np.zeros((self.data.grid_size,
-                                      self.data.get_output_dimension()))
-
-        offset = snapshot_number * self.data.grid_size
-        for i in range(0, self.number_of_batches_per_snapshot):
-            inputs, outputs = \
-                self.data.test_data_set[offset+(i * self.parameters.
-                                        mini_batch_size):
-                                        offset+((i + 1) * self.parameters.
-                                        mini_batch_size)]
-            inputs = inputs.to(f"{self.parameters_full.device_type}:"
-                               f"{self.parameters_full.device_id}")
-            predicted_outputs[i * self.parameters.
-                              mini_batch_size:(i + 1) * self.parameters.
-                              mini_batch_size, :] = \
-                self.data.output_data_scaler.\
-                inverse_transform(self.network(inputs).
-                                  to('cpu'), as_numpy=True)
-
-        # Restricting the actual quantities to physical meaningful values,
-        # i.e. restricting the (L)DOS to positive values.
-        predicted_outputs = self.data.target_calculator.\
-            restrict_data(predicted_outputs)
-        return actual_outputs, predicted_outputs
 
     def __prepare_to_test(self):
         """Prepare the tester class to for test run."""
