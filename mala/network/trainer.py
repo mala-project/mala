@@ -56,14 +56,15 @@ class Trainer(Runner):
         self.validation_data_loader = None
         self.test_data_loader = None
         self.use_pkl_checkpoints = use_pkl_checkpoints
-        self.__prepare_to_train(optimizer_dict)
-        self.tensor_board = None
 
         # Samplers for the horovod case.
         self.train_sampler = None
         self.test_sampler = None
         self.validation_sampler = None
 
+        self.__prepare_to_train(optimizer_dict)
+
+        self.tensor_board = None
         if self.parameters.visualisation:
             if not os.path.exists(self.parameters.visualisation_dir):
                 os.makedirs(self.parameters.visualisation_dir)
