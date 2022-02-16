@@ -239,9 +239,7 @@ class Trainer(Runner):
             vloss_old = vloss
         else:
             vloss_old = self.last_loss
-        rank = 0
-        if self.parameters_full.use_horovod:
-            rank = hvd.local_rank()
+
         # Perform and log training.
 
         ############################
@@ -261,44 +259,39 @@ class Trainer(Runner):
             if self.parameters_full.use_horovod:
                 self.parameters.sampler["train_sampler"].set_epoch(epoch)
 
-            processed_on_this_process = 0
             for batchid, (inputs, outputs) in \
                     enumerate(self.training_data_loader):
                 inputs = inputs.to(self.parameters._configuration["device"])
                 outputs = outputs.to(self.parameters._configuration["device"])
                 training_loss += self.__process_mini_batch(self.network,
                                                            inputs, outputs)
-            #print("training: ", rank, processed_on_this_process, start_time-time.time())
-            val_time = time.time()
+
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(self.network,
                                             "validation",
                                             self.parameters.
                                             during_training_metric)
-            #print("calc val: ", rank, val_time-time.time())
-            val_time = time.time()
+
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
             printout("Epoch: ", epoch, "validation data loss: ", vloss,
                      min_verbosity=1)
-            #print("average val", val_time-time.time())
 
-            #summary_writer tensor board
+            # summary_writer tensor board
             if self.parameters.visualisation:
                 self.tensor_board.add_scalar("Loss", vloss, epoch)
-                self.tensor_board.add_scalar("Learning rate", self.parameters.learning_rate, epoch)
+                self.tensor_board.add_scalar("Learning rate",
+                                             self.parameters.learning_rate,
+                                             epoch)
                 if self.parameters.visualisation == 2:
-                    print("visualisation = 2")
                     for name, param in self.network.named_parameters():
-                        self.tensor_board.add_histogram(name,param,epoch)
-                        self.tensor_board.add_histogram(f'{name}.grad',param.grad,epoch)
+                        self.tensor_board.add_histogram(name, param, epoch)
+                        self.tensor_board.add_histogram(f'{name}.grad',
+                                                        param.grad, epoch)
 
-                self.tensor_board.close() #method to make sure that all pending events have been written to disk
-
-
-
-
-
+                # method to make sure that all pending events have been written
+                # to disk
+                self.tensor_board.close()
 
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
@@ -356,8 +349,6 @@ class Trainer(Runner):
                                             after_before_training_metric)
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
-
-
 
         # Calculate final loss.
         self.final_validation_loss = vloss
