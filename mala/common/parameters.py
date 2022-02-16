@@ -421,8 +421,6 @@ class ParametersData(ParametersBase):
         self.descriptors_contain_xyz = True
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
-        # self.data_splitting_percent = [0,0,0]
-        self.data_splitting_snapshots = []
         self.input_rescaling_type = "None"
         self.output_rescaling_type = "None"
         self.use_lazy_loading = False
@@ -549,7 +547,7 @@ class ParametersRunning(ParametersBase):
         self.checkpoint_name = "checkpoint_mala"
         self.visualisation = 0
         # default visualisation_dir= "~/log_dir"
-        self.visualisation_dir= os.path.join(os.path.expanduser("~"), "log_dir")
+        self.visualisation_dir = os.path.join(os.path.expanduser("~"), "log_dir")
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
         self.inference_data_grid = [0, 0, 0]
@@ -650,7 +648,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
             - "oat" : Use orthogonal array tuning (currently limited to
               categorical hyperparemeters). Range analysis is
               currently done by simply choosing the lowest loss.
-            - "notraining" : Using a NAS without training, based on jacobians.
+            - "naswot" : Using a NAS without training, based on jacobians.
 
     checkpoints_each_trial : int
         If not 0, checkpoint files will be saved after each
@@ -707,12 +705,12 @@ class ParametersHyperparameterOptimization(ParametersBase):
         since v2.2.0, but reported to perform very well.
         http://proceedings.mlr.press/v80/falkner18a.html
 
-    no_training_cutoff : float
+    naswot_pruner_cutoff : float
         If the surrogate loss algorithm is used as a pruner during a study,
         this cutoff determines which trials are neglected.
 
     pruner: string
-        Pruner type to be used by optuna. Currently only "no_training" is
+        Pruner type to be used by optuna. Currently only "naswot" is
         supported, which will use the NASWOT algorithm as pruner.
 
     naswot_pruner_batch_size : int
@@ -733,7 +731,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.number_training_per_trial = 1
         self.trial_ensemble_evaluation = "mean"
         self.use_multivariate = True
-        self.no_training_cutoff = 0
+        self.naswot_pruner_cutoff = 0
         self.pruner = None
         self.naswot_pruner_batch_size = 0
 
@@ -793,14 +791,22 @@ class ParametersHyperparameterOptimization(ParametersBase):
 
         """
         for v in vars(self):
-            if v != "hlist":
-                printout(indent + '%-15s: %s' % (v, getattr(self, v)))
-            if v == "hlist":
-                i = 0
-                for hyp in self.hlist:
-                    printout(indent + '%-15s: %s' %
-                             ("hyperparameter #"+str(i), hyp.name))
-                    i += 1
+            if v != "_configuration":
+                if v != "hlist":
+                    if v[0] == "_":
+                        printout(indent + '%-15s: %s' % (
+                        v[1:], getattr(self, v)), min_verbosity=0)
+                    else:
+                        printout(
+                            indent + '%-15s: %s' % (v, getattr(self, v)),
+                            min_verbosity=0)
+                if v == "hlist":
+                    i = 0
+                    for hyp in self.hlist:
+                        printout(indent + '%-15s: %s' %
+                                 ("hyperparameter #"+str(i), hyp.name),
+                                 min_verbosity=0)
+                        i += 1
 
 
 class ParametersDebug(ParametersBase):

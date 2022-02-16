@@ -1,8 +1,4 @@
 """Trainer class for training a network."""
-from mala.network.network import Network
-from mala.datahandling.data_handler import DataHandler
-from mala.datahandling.data_scaler import DataScaler
-from mala.common.parameters import Parameters
 import os
 import time
 
@@ -59,6 +55,7 @@ class Trainer(Runner):
         self.training_data_loader = None
         self.validation_data_loader = None
         self.test_data_loader = None
+        self.use_pkl_checkpoints = use_pkl_checkpoints
         self.__prepare_to_train(optimizer_dict)
         self.tensor_board = None
         if self.parameters.visualisation:
@@ -66,7 +63,6 @@ class Trainer(Runner):
                 os.makedirs(self.parameters.visualisation_dir)
             # Set the path to log files
             self.tensor_board = SummaryWriter(self.parameters.visualisation_dir)
-
 
     @classmethod
     def checkpoint_exists(cls, checkpoint_name, use_pkl_checkpoints=False):
@@ -239,8 +235,6 @@ class Trainer(Runner):
             vloss_old = vloss
         else:
             vloss_old = self.last_loss
-
-        # Perform and log training.
 
         ############################
         # PERFORM TRAINING

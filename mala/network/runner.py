@@ -7,7 +7,6 @@ except ModuleNotFoundError:
 import numpy as np
 import torch
 
-from mala.common.parallelizer import printout
 from mala.common.parameters import ParametersRunning
 from mala import Parameters
 
@@ -46,9 +45,12 @@ class Runner:
         # See if we want to use horovod.
         if self.parameters_full.use_horovod:
             if self.parameters_full.use_gpu:
-                print("size=", hvd.size(), "global_rank=", hvd.rank(),
-                         "local_rank=", hvd.local_rank(), "device=",
-                         torch.cuda.get_device_name(hvd.local_rank()))
+                # We cannot use "printout" here because this is supposed
+                # to happen on every rank.
+                if self.parameters_full.verbosity >= 2:
+                    print("size=", hvd.size(), "global_rank=", hvd.rank(),
+                             "local_rank=", hvd.local_rank(), "device=",
+                             torch.cuda.get_device_name(hvd.local_rank()))
                 # pin GPU to local rank
                 torch.cuda.set_device(hvd.local_rank())
 
