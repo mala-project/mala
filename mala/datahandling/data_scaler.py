@@ -1,13 +1,15 @@
 """DataScaler class for scaling DFT data."""
-import torch
 import pickle
-import numpy as np
-from mala.common.parameters import printout
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by parameters class
     pass
+import numpy as np
+import torch
+
+from mala.common.parameters import printout
 
 
 class DataScaler:
@@ -15,31 +17,28 @@ class DataScaler:
 
     Sort of emulates the functionality of the scikit-learn library, but by
     implementing the class by ourselves we have more freedom.
+
+    Parameters
+    ----------
+    typestring :  string
+        Specifies how scaling should be performed.
+        Options:
+
+        - "None": No normalization is applied.
+        - "standard": Standardization (Scale to mean 0,
+          standard deviation 1)
+        - "normal": Min-Max scaling (Scale to be in range 0...1)
+        - "feature-wise-standard": Row Standardization (Scale to mean 0,
+          standard deviation 1)
+        - "feature-wise-normal": Row Min-Max scaling (Scale to be in range
+          0...1)
+
+    use_horovod : bool
+        If True, the DataScaler will use horovod to check that data is
+        only saved on the root process in parallel execution.
     """
 
     def __init__(self, typestring, use_horovod=False):
-        """
-        Create a DataScaler object.
-
-        Parameters
-        ----------
-        typestring :  string
-            Specifies how scaling should be performed.
-            Options:
-
-            - "None": No normalization is applied.
-            - "standard": Standardization (Scale to mean 0,
-            standard deviation 1)
-            - "normal": Min-Max scaling (Scale to be in range 0...1)
-            - "feature-wise-standard": Row Standardization (Scale to mean 0,
-            standard deviation 1)
-            - "feature-wise-normal": Row Min-Max scaling (Scale to be in range
-             0...1)
-
-        use_horovod : bool
-            If True, the DataScaler will use horovod to check that data is
-            only saved on the root process in parallel execution.
-        """
         self.use_horovod = use_horovod
         self.typestring = typestring
         self.scale_standard = False
@@ -72,7 +71,7 @@ class DataScaler:
         if "feature-wise" in self.typestring:
             self.feature_wise = True
         if self.scale_standard is False and self.scale_normal is False:
-            printout("No data rescaling will be performed.")
+            printout("No data rescaling will be performed.", min_verbosity=1)
             return
         if self.scale_standard is True and self.scale_normal is True:
             raise Exception("Invalid input data rescaling.")

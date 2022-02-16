@@ -1,9 +1,11 @@
+import os
+
 import mala
 from mala import printout
-import numpy as np
-from data_repo_path import get_data_repo_path
-data_path = get_data_repo_path()+"Al36/"
-param_path = get_data_repo_path()+"example05_data/"
+
+from mala.datahandling.data_repo import data_repo_path
+data_path = os.path.join(data_repo_path, "Al36")
+
 """
 ex05_training_with_postprocessing.py: Train a network, then use this network 
 to predict the LDOS and then analyze the results of this prediction. This 
@@ -20,7 +22,7 @@ DFT simulation cell for this example.
 
 # Uses a trained network to make a prediction.
 def use_trained_network(network_path, params_path, input_scaler_path,
-                        output_scaler_path, accuracy=0.05):
+                        output_scaler_path):
 
     # First load Parameters and network.
     # Parameters may have to
@@ -49,10 +51,9 @@ def use_trained_network(network_path, params_path, input_scaler_path,
 
     # Add snapshots that are to be tested and make sure that the
     # data_splitting_snapshots list is correct.
-    new_parameters.data.data_splitting_snapshots = ["te"]
     inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                         "Al_debug_2k_nr2.out.npy", data_path,
-                                        output_units="1/Ry")
+                                        "te", output_units="1/Ry")
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 
     # The Tester class is the testing analogon to the training class.
@@ -63,17 +64,15 @@ def use_trained_network(network_path, params_path, input_scaler_path,
 
     # We will use the LDOS calculator to do some preprocessing.
     ldos_calculator = inference_data_handler.target_calculator
-    ldos_calculator.read_additional_calculation_data("qe.out",
-                                                     data_path +
-                                                     "Al.pw.scf.out")
+    ldos_calculator.read_additional_calculation_data("qe.out", os.path.join(
+                                                     data_path,
+                                                     "Al.pw.scf.out"))
 
     # Calculate the Band energy.
     band_energy_predicted = ldos_calculator.get_band_energy(predicted_ldos)
     band_energy_actual = ldos_calculator.get_band_energy(actual_ldos)
     printout("Band energy (actual, predicted, error)[eV]", band_energy_actual,
              band_energy_predicted, band_energy_predicted-band_energy_actual)
-    if np.abs(band_energy_predicted-band_energy_actual) > accuracy:
-        return False
 
     # Calculate the number of electrons.
     nr_electrons_predicted = ldos_calculator.\
@@ -82,9 +81,6 @@ def use_trained_network(network_path, params_path, input_scaler_path,
     printout("Number of electrons (actual, predicted, error)[eV]",
              nr_electrons_actual, nr_electrons_predicted,
              nr_electrons_predicted-nr_electrons_actual)
-    if np.abs(band_energy_predicted-band_energy_actual) > accuracy:
-        return False
-    return True
 
 
 # Trains a network.
@@ -98,11 +94,8 @@ def initial_training(network_path, params_path, input_scaler_path,
 
     test_parameters = mala.Parameters()
     # Currently, the splitting in training, validation and test set are
-    # done on a "by snapshot" basis. Specify how this is
-    # done by providing a list containing entries of the form
-    # "tr", "va" and "te".
+    # done on a "by snapshot" basis.
     test_parameters.data.data_splitting_type = "by_snapshot"
-    test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
 
     # Specify the data scaling.
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
@@ -126,13 +119,13 @@ def initial_training(network_path, params_path, input_scaler_path,
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                              "Al_debug_2k_nr0.out.npy", data_path,
+                              "Al_debug_2k_nr0.out.npy", data_path, "tr",
                               output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                              "Al_debug_2k_nr1.out.npy", data_path,
+                              "Al_debug_2k_nr1.out.npy", data_path, "va",
                               output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                              "Al_debug_2k_nr2.out.npy", data_path,
+                              "Al_debug_2k_nr2.out.npy", data_path, "te",
                               output_units="1/Ry")
     data_handler.prepare_data()
     printout("Read data: DONE.")
@@ -173,55 +166,13 @@ def initial_training(network_path, params_path, input_scaler_path,
     data_handler.input_data_scaler.save(input_scaler_path)
     data_handler.output_data_scaler.save(output_scaler_path)
 
-    ####################
-    # RESULTS.
-    # Check whether the loss decreased enough.
-    ####################
 
-    if desired_loss_improvement_factor*test_trainer.initial_test_loss \
-            < test_trainer.final_test_loss:
-        return False
-    else:
-        return True
-
-
-def run_example05(dotraining, doinference):
-    printout("Welcome to MALA.")
-    printout("Running ex05_training_with_postprocessing.py")
-
-    # Choose the paths where the network and the parameters for it should
-    # be saved.
-    if dotraining is False:
-        params_path = param_path+"ex05_params.pkl"
-        network_path = param_path+"ex05_network.pth"
-        input_scaler_path = param_path+"ex05_iscaler.pkl"
-        output_scaler_path = param_path+"ex05_oscaler.pkl"
-    else:
-        params_path = "./ex05_params.pkl"
-        network_path = "./ex05_network.pth"
-        input_scaler_path = "./ex05_iscaler.pkl"
-        output_scaler_path = "./ex05_oscaler.pkl"
-
-    training_return = True
-    inference_return = True
-    if dotraining:
-        training_return = initial_training(network_path, params_path,
-                                           input_scaler_path,
-                                           output_scaler_path)
-    if doinference:
-        inference_return = use_trained_network(network_path, params_path,
-                                               input_scaler_path,
-                                               output_scaler_path)
-
-    return training_return and inference_return
-
-
-if __name__ == "__main__":
-    if run_example05(True, True):
-        printout("Successfully ran ex05_training_with_postprocessing.py.")
-    else:
-        raise Exception("Ran ex05_training_with_postprocessing but something "
-                        "was off. If you haven't changed any parameters in "
-                        "the example, there might be a problem with your "
-                        "installation.")
+params_path = "./ex05_params.pkl"
+network_path = "./ex05_network.pth"
+input_scaler_path = "./ex05_iscaler.pkl"
+output_scaler_path = "./ex05_oscaler.pkl"
+initial_training(network_path, params_path, input_scaler_path,
+                 output_scaler_path)
+use_trained_network(network_path, params_path, input_scaler_path,
+                    output_scaler_path)
 

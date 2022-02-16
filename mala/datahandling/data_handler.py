@@ -1,15 +1,23 @@
 """DataHandler class that loads and scales data."""
-from torch.utils.data import TensorDataset
+import os
 
-from .data_scaler import DataScaler
-from .snapshot import Snapshot
-from .lazy_load_dataset import LazyLoadDataset
-from mala.common.parameters import Parameters
-from mala.targets.target_interface import TargetInterface
-from mala.descriptors.descriptor_interface import DescriptorInterface
-from mala.common.printout import printout
+try:
+    import horovod.torch as hvd
+except ModuleNotFoundError:
+    # Warning is thrown by Parameters class
+    pass
 import numpy as np
 import torch
+from torch.utils.data import TensorDataset
+
+from mala.common.parallelizer import printout, barrier
+from mala.common.parameters import Parameters, ParametersData
+from mala.datahandling.data_scaler import DataScaler
+from mala.datahandling.snapshot import Snapshot
+from mala.datahandling.lazy_load_dataset import LazyLoadDataset
+from mala.datahandling.lazy_load_dataset_clustered import LazyLoadDatasetClustered
+from mala.descriptors.descriptor_interface import DescriptorInterface
+from mala.targets.target_interface import TargetInterface
 
 
 class DataHandler:
@@ -18,34 +26,31 @@ class DataHandler:
 
     Data that is not in a numpy array can be converted using the DataConverter
     class.
+
+    Parameters
+    ----------
+    parameters : mala.common.parameters.Parameters
+    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
+        Used to do unit conversion on input data. If None, then one will
+        be created by this class.
+
+    target_calculator : mala.targets.target_base.TargetBase
+        Used to do unit conversion on output data. If None, then one will
+        be created by this class.
+
+    input_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the input data. If None, then one will be created by
+        this class.
+
+    output_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the output data. If None, then one will be created by
+        this class.
     """
 
     def __init__(self, parameters: Parameters, target_calculator=None,
                  descriptor_calculator=None, input_data_scaler=None,
                  output_data_scaler=None):
-        """
-        Create an instance of DataHandler.
-
-        Parameters
-        ----------
-        parameters : mala.common.parameters.Parameters
-        descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
-            Used to do unit conversion on input data. If None, then one will
-            be created by this class.
-
-        target_calculator : mala.targets.target_base.TargetBase
-            Used to do unit conversion on output data. If None, then one will
-            be created by this class.
-
-        input_data_scaler : mala.datahandling.data_scaler.DataScaler
-            Used to scale the input data. If None, then one will be created by
-            this class.
-
-        output_data_scaler : mala.datahandling.data_scaler.DataScaler
-            Used to scale the output data. If None, then one will be created by
-            this class.
-        """
-        self.parameters = parameters.data
+        self.parameters: ParametersData = parameters.data
         self.dbg_grid_dimensions = parameters.debug.grid_dimensions
         self.use_horovod = parameters.use_horovod
         self.training_data_set = None
@@ -77,9 +82,17 @@ class DataHandler:
         self.nr_snapshots = 0
         self.grid_dimension = [0, 0, 0]
         self.grid_size = 0
+
+        # Actual data points in the different categories.
         self.nr_training_data = 0
         self.nr_test_data = 0
         self.nr_validation_data = 0
+
+        # Number of snapshots in these categories.
+        self.nr_training_snapshots = 0
+        self.nr_test_snapshots = 0
+        self.nr_validation_snapshots = 0
+
 
         self.training_data_inputs = torch.empty(0)
         """
@@ -134,9 +147,9 @@ class DataHandler:
         return self.output_dimension
 
     def add_snapshot(self, input_npy_file, input_npy_directory,
-                     output_npy_file=None, output_npy_directory=None,
-                     input_units="None", output_units="1/eV",
-                     calculation_output_file="", add_snapshot_as=None):
+                     output_npy_file, output_npy_directory, add_snapshot_as,
+                     output_units="1/eV", input_units="None",
+                     calculation_output_file=""):
         """
         Add a snapshot to the data pipeline.
 
@@ -170,12 +183,12 @@ class DataHandler:
             If "tr", "va" or "te", the snapshot will be added to the snapshot
             list as training, validation or testing snapshot, respectively.
         """
-        snapshot = Snapshot(input_npy_file, input_npy_directory, input_units,
+        snapshot = Snapshot(input_npy_file, input_npy_directory,
                             output_npy_file, output_npy_directory,
-                            output_units, calculation_output_file)
-        if add_snapshot_as == "tr" or add_snapshot_as == "te" \
-           or add_snapshot_as == "va":
-            self.parameters.data_splitting_snapshots.append(add_snapshot_as)
+                            add_snapshot_as,
+                            input_units=input_units,
+                            output_units=output_units,
+                            calculation_output=calculation_output_file)
         self.parameters.snapshot_directories_list.append(snapshot)
 
     def clear_data(self):
@@ -190,7 +203,9 @@ class DataHandler:
         self.nr_training_data = 0
         self.nr_test_data = 0
         self.nr_validation_data = 0
-        self.parameters.data_splitting_snapshots = []
+        self.nr_training_snapshots = 0
+        self.nr_test_snapshots = 0
+        self.nr_validation_snapshots = 0
         self.parameters.snapshot_directories_list = []
 
     def prepare_data(self, reparametrize_scaler=True):
@@ -213,9 +228,10 @@ class DataHandler:
         # Do a consistency check of the snapshots so that we don't run into
         # an error later. If there is an error, check_snapshots() will raise
         # an exception.
-        printout("Checking the snapshots and your inputs for consistency.")
+        printout("Checking the snapshots and your inputs for consistency.",
+                 min_verbosity=1)
         self.__check_snapshots()
-        printout("Consistency check successful.")
+        printout("Consistency check successful.", min_verbosity=0)
 
         # If the DataHandler is used for inference, i.e. no training or
         # validation snapshots have been provided,
@@ -230,26 +246,37 @@ class DataHandler:
                                 "DataScalers.")
 
         # Parametrize the scalers, if needed.
-        printout("Initializing the data scalers.")
         if reparametrize_scaler:
+            printout("Initializing the data scalers.", min_verbosity=1)
             self.__parametrize_scalers()
+            printout("Data scalers initialized.", min_verbosity=0)
         else:
+            printout("Data scalers already initilized, loading data to RAM.",
+                     min_verbosity=0)
             if self.parameters.use_lazy_loading is False:
                 self.__load_training_data_into_ram()
-        printout("Data scalers initialized.")
 
         # Build Datasets.
-        printout("Build datasets.")
+        printout("Build datasets.", min_verbosity=1)
         self.__build_datasets()
-        printout("Build dataset done.")
+        printout("Build dataset: Done.", min_verbosity=0)
+
+        # Wait until all ranks are finished with data preparation.
+        # It is not uncommon that ranks might be asynchronous in their
+        # data preparation by a small amount of minutes. If you notice
+        # an elongated wait time at this barrier, check that your file system
+        # allows for parallel I/O.
+        barrier()
 
     def mix_datasets(self):
-        """For lazily-loaded data sets, the snapshot ordering is (re-)mixed."""
+        """
+        For lazily-loaded data sets, the snapshot ordering is (re-)mixed.
+
+        This applies only to the training data set. For the validation and
+        test set it does not matter.
+        """
         if self.parameters.use_lazy_loading:
-            self.validation_data_set.mix_datasets()
             self.training_data_set.mix_datasets()
-            if self.test_data_set is not None:
-                self.test_data_set.mix_datasets()
 
     def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type,
                                              units, convert3Dto1D=False):
@@ -325,17 +352,17 @@ class DataHandler:
         i = 0
         snapshot: Snapshot
         for snapshot in self.parameters.snapshot_directories_list:
-            tmp_array = self.__load_from_npy_file(snapshot.input_npy_directory
-                                                  + snapshot.input_npy_file)
+            tmp_array = self.__load_from_npy_file(os.path.join(snapshot.input_npy_directory,
+                                                               snapshot.input_npy_file))
             tmp_file_name = naming_scheme_input
             tmp_file_name = tmp_file_name.replace("*", str(i))
-            np.save(directory+tmp_file_name+".npy", tmp_array)
+            np.save(os.path.join(directory, tmp_file_name) +".npy", tmp_array)
 
-            tmp_array = self.__load_from_npy_file(snapshot.output_npy_directory
-                                                  + snapshot.output_npy_file)
+            tmp_array = self.__load_from_npy_file(os.path.join(snapshot.output_npy_directory,
+                                                               snapshot.output_npy_file))
             tmp_file_name = naming_scheme_output
             tmp_file_name = tmp_file_name.replace("*", str(i))
-            np.save(directory+tmp_file_name+".npy", tmp_array)
+            np.save(os.path.join(directory, tmp_file_name + ".npy"), tmp_array)
             i += 1
 
     def get_snapshot_calculation_output(self, snapshot_number):
@@ -366,6 +393,39 @@ class DataHandler:
         if self.parameters.use_lazy_loading:
             self.test_data_set.return_outputs_directly = True
 
+    def get_test_input_gradient(self, snapshot_number):
+        """
+        Get the gradient of the test inputs for an entire snapshot.
+
+        This gradient will be returned as scaled Tensor.
+        The reason the gradient is returned (rather then returning the entire
+        inputs themselves) is that by slicing a variable, pytorch no longer
+        considers it a "leaf" variable and will stop tracking and evaluating
+        its gradient. Thus, it is easier to obtain the gradient and then
+        slice it.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            Number of the snapshot for which the entire test inputs.
+
+        Returns
+        -------
+        torch.Tensor
+            Tensor holding the gradient.
+
+        """
+        if self.parameters.use_lazy_loading:
+            # This fails if an incorrect snapshot was loaded.
+            if self.test_data_set.currently_loaded_file != snapshot_number:
+                raise Exception("Cannot calculate gradients, wrong file "
+                                "was lazily loaded.")
+            return self.test_data_set.input_data.grad
+        else:
+            return self.test_data_inputs.\
+                       grad[self.grid_size*snapshot_number:
+                            self.grid_size*(snapshot_number+1)]
+
     def __check_snapshots(self):
         """Check the snapshots for consistency."""
         self.nr_snapshots = len(self.parameters.snapshot_directories_list)
@@ -378,14 +438,14 @@ class DataHandler:
             ####################
 
             printout("Checking descriptor file ", snapshot.input_npy_file,
-                     "at", snapshot.input_npy_directory)
-            tmp = self.__load_from_npy_file(snapshot.input_npy_directory +
-                                            snapshot.input_npy_file,
+                     "at", snapshot.input_npy_directory, min_verbosity=1)
+            tmp = self.__load_from_npy_file(os.path.join(snapshot.input_npy_directory,
+                                                         snapshot.input_npy_file),
                                             mmapmode='r')
 
             # We have to cut xyz information, if we have xyz information in
             # the descriptors.
-            if self.parameters.descriptors_contain_xyz:
+            if self.descriptor_calculator.descriptors_contain_xyz:
                 # Remove first 3 elements of descriptors, as they correspond
                 # to the x,y and z information.
                 tmp = tmp[:, :, :, 3:]
@@ -410,9 +470,9 @@ class DataHandler:
             ####################
 
             printout("Checking targets file ", snapshot.output_npy_file, "at",
-                     snapshot.output_npy_directory)
-            tmp_out = self.__load_from_npy_file(snapshot.output_npy_directory +
-                                                snapshot.output_npy_file,
+                     snapshot.output_npy_directory, min_verbosity=1)
+            tmp_out = self.__load_from_npy_file(os.path.join(snapshot.output_npy_directory,
+                                                             snapshot.output_npy_file),
                                                 mmapmode='r')
 
             # The first snapshot determines the data size to be used.
@@ -441,51 +501,58 @@ class DataHandler:
         # Now we need to confirm that the snapshot list has some inner
         # consistency.
         if self.parameters.data_splitting_type == "by_snapshot":
-            for snapshot_function in self.parameters.data_splitting_snapshots:
-                if snapshot_function == "tr":
-                    self.nr_training_data += 1
-                elif snapshot_function == "te":
-                    self.nr_test_data += 1
-                elif snapshot_function == "va":
-                    self.nr_validation_data += 1
+            snapshot: Snapshot
+            for snapshot in self.parameters.snapshot_directories_list:
+                if snapshot.snapshot_function == "tr":
+                    self.nr_training_snapshots += 1
+                elif snapshot.snapshot_function == "te":
+                    self.nr_test_snapshots += 1
+                elif snapshot.snapshot_function == "va":
+                    self.nr_validation_snapshots += 1
                 else:
                     raise Exception("Unknown option for snapshot splitting "
                                     "selected.")
 
             # Now we need to check whether or not this input is believable.
             nr_of_snapshots = len(self.parameters.snapshot_directories_list)
-            if nr_of_snapshots != (self.nr_training_data +
-                                   self.nr_validation_data +
-                                   self.nr_test_data):
+            if nr_of_snapshots != (self.nr_training_snapshots +
+                                   self.nr_test_snapshots +
+                                   self.nr_validation_snapshots):
                 raise Exception("Cannot split snapshots with specified "
                                 "splitting scheme, "
                                 "too few or too many options selected")
-            if self.nr_training_data == 0 and self.nr_test_data == 0:
+            if self.nr_training_snapshots == 0 and self.nr_test_snapshots == 0:
                 raise Exception("No training snapshots provided.")
-            if self.nr_validation_data == 0 and self.nr_test_data == 0:
+            if self.nr_validation_snapshots == 0 and self.nr_test_snapshots == 0:
                 raise Exception("No validation snapshots provided.")
-            if self.nr_training_data == 0 and self.nr_test_data != 0:
+            if self.nr_training_snapshots == 0 and self.nr_test_snapshots != 0:
                 printout("DataHandler prepared for inference. No training "
                          "possible with this setup. "
                          "If this is not what you wanted, please revise the "
-                         "input script.")
-                if self.nr_validation_data != 0:
+                         "input script.", min_verbosity=0)
+                if self.nr_validation_snapshots != 0:
                     printout("As this DataHandler can only be used for "
                              "inference, the validation data you have "
-                             "provided will be ignored.")
-            if self.nr_test_data == 0:
+                             "provided will be ignored.", min_verbosity=1)
+            if self.nr_test_snapshots == 0:
                 printout("Running MALA without test data. If this is not "
                          "what you wanted, "
-                         "please revise the input script.")
+                         "please revise the input script.", min_verbosity=0)
 
         else:
             raise Exception("Wrong parameter for data splitting provided.")
 
         # As we are not actually interested in the number of snapshots, but in
         # the number of datasets,we need to multiply by that.
-        self.nr_training_data *= self.grid_size
-        self.nr_validation_data *= self.grid_size
-        self.nr_test_data *= self.grid_size
+        self.nr_training_data = self.nr_training_snapshots*self.grid_size
+        self.nr_validation_data = self.nr_validation_snapshots*self.grid_size
+        self.nr_test_data = self.nr_test_snapshots*self.grid_size
+
+        # Reordering the lists.
+        snapshot_order = {'tr': 0, 'va': 1, 'te': 2}
+        self.parameters.snapshot_directories_list.sort(key=lambda d:
+                                                       snapshot_order
+                                                       [d.snapshot_function])
 
     def __load_from_npy_file(self, file, mmapmode=None):
         """Load a numpy array from a file."""
@@ -511,18 +578,17 @@ class DataHandler:
         # scaling. This should save some performance.
 
         if self.parameters.use_lazy_loading:
-            i = 0
             self.input_data_scaler.start_incremental_fitting()
             # We need to perform the data scaling over the entirety of the
             # training data.
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
-                if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.__load_from_npy_file(snapshot.
-                                                    input_npy_directory +
-                                                    snapshot.input_npy_file,
+                if snapshot.snapshot_function == "tr":
+                    tmp = self.__load_from_npy_file(os.path.join(snapshot.
+                                                    input_npy_directory,
+                                                    snapshot.input_npy_file),
                                                     mmapmode='r')
-                    if self.parameters.descriptors_contain_xyz:
+                    if self.descriptor_calculator.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
 
                     # The scalers will later operate on torch Tensors so we
@@ -538,14 +604,14 @@ class DataHandler:
                                        self.get_input_dimension()])
                     tmp = torch.from_numpy(tmp).float()
                     self.input_data_scaler.incremental_fit(tmp)
-                i += 1
+
             self.input_data_scaler.finish_incremental_fitting()
 
         else:
             self.__load_training_data_into_ram()
             self.input_data_scaler.fit(self.training_data_inputs)
 
-        printout("Input scaler parametrized.")
+        printout("Input scaler parametrized.", min_verbosity=1)
 
         ##################
         # Output.
@@ -565,10 +631,10 @@ class DataHandler:
             # training data.
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
-                if self.parameters.data_splitting_snapshots[i] == "tr":
-                    tmp = self.__load_from_npy_file(snapshot.
-                                                    output_npy_directory +
-                                                    snapshot.output_npy_file,
+                if snapshot.snapshot_function == "tr":
+                    tmp = self.__load_from_npy_file(os.path.join(snapshot.
+                                                    output_npy_directory,
+                                                    snapshot.output_npy_file),
                                                     mmapmode='r')
                     # The scalers will later operate on torch Tensors so we
                     # have to make sure they are fitted on
@@ -590,31 +656,29 @@ class DataHandler:
             # Already loaded into RAM above.
             self.output_data_scaler.fit(self.training_data_outputs)
 
-        printout("Output scaler parametrized.")
+        printout("Output scaler parametrized.", min_verbosity=1)
 
     def __load_training_data_into_ram(self):
         """Load the training data into RAM."""
         # INPUTS.
 
         self.training_data_inputs = []
-        i = 0
         # We need to perform the data scaling over the entirety of
         # the training data.
         for snapshot in self.parameters.snapshot_directories_list:
 
             # Data scaling is only performed on the training data sets.
-            if self.parameters.data_splitting_snapshots[i] == "tr":
-                tmp = self.__load_from_npy_file(snapshot.
-                                                input_npy_directory +
-                                                snapshot.input_npy_file,
+            if snapshot.snapshot_function == "tr":
+                tmp = self.__load_from_npy_file(os.path.join(snapshot.
+                                                input_npy_directory,
+                                                snapshot.input_npy_file),
                                                 mmapmode='r')
-                if self.parameters.descriptors_contain_xyz:
+                if self.descriptor_calculator.descriptors_contain_xyz:
                     tmp = tmp[:, :, :, 3:]
                 tmp = np.array(tmp)
                 tmp *= self.descriptor_calculator. \
                     convert_units(1, snapshot.input_units)
                 self.training_data_inputs.append(tmp)
-            i += 1
 
         # The scalers will later operate on torch Tensors so we have to
         # make sure they are fitted on
@@ -632,22 +696,21 @@ class DataHandler:
 
         # Outputs.
         self.training_data_outputs = []
-        i = 0
         # We need to perform the data scaling over the entirety of
         # the training data.
         for snapshot in self.parameters.snapshot_directories_list:
 
             # Data scaling is only performed on the training data sets.
-            if self.parameters.data_splitting_snapshots[i] == "tr":
+            if snapshot.snapshot_function == "tr":
                 tmp = self. \
-                    __load_from_npy_file(snapshot.output_npy_directory +
-                                         snapshot.output_npy_file,
+                    __load_from_npy_file(os.path.join(
+                                         snapshot.output_npy_directory,
+                                         snapshot.output_npy_file),
                                          mmapmode='r')
                 tmp = np.array(tmp)
                 tmp *= self.target_calculator. \
                     convert_units(1, snapshot.output_units)
                 self.training_data_outputs.append(tmp)
-            i += 1
 
         # The scalers will later operate on torch Tensors so we have to
         # make sure they are fitted on
@@ -667,38 +730,66 @@ class DataHandler:
         if self.parameters.use_lazy_loading:
 
             # Create the lazy loading data sets.
-            self.training_data_set = LazyLoadDataset(
-                self.get_input_dimension(), self.get_output_dimension(),
-                self.input_data_scaler, self.output_data_scaler,
-                self.descriptor_calculator, self.target_calculator,
-                self.grid_dimension, self.grid_size,
-                self.parameters.descriptors_contain_xyz, self.use_horovod)
-            self.validation_data_set = LazyLoadDataset(
-                self.get_input_dimension(), self.get_output_dimension(),
-                self.input_data_scaler, self.output_data_scaler,
-                self.descriptor_calculator, self.target_calculator,
-                self.grid_dimension, self.grid_size,
-                self.parameters.descriptors_contain_xyz, self.use_horovod)
-
-            if self.nr_test_data != 0:
-                self.test_data_set = LazyLoadDataset(
+            if self.parameters.use_clustering:
+                self.training_data_set = LazyLoadDatasetClustered(
                     self.get_input_dimension(), self.get_output_dimension(),
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
                     self.grid_dimension, self.grid_size,
-                    self.parameters.descriptors_contain_xyz, self.use_horovod)
+                    self.use_horovod, self.parameters.number_of_clusters,
+                    self.parameters.train_ratio,
+                    self.parameters.sample_ratio)
+                self.validation_data_set = LazyLoadDataset(
+                    self.get_input_dimension(), self.get_output_dimension(),
+                    self.input_data_scaler, self.output_data_scaler,
+                    self.descriptor_calculator, self.target_calculator,
+                    self.grid_dimension, self.grid_size,
+                    self.use_horovod)
+
+                if self.nr_test_data != 0:
+                    self.test_data_set = LazyLoadDataset(
+                        self.get_input_dimension(),
+                        self.get_output_dimension(),
+                        self.input_data_scaler, self.output_data_scaler,
+                        self.descriptor_calculator, self.target_calculator,
+                        self.grid_dimension, self.grid_size,
+                        self.use_horovod,
+                        input_requires_grad=True)
+
+            else:
+                self.training_data_set = LazyLoadDataset(
+                    self.get_input_dimension(), self.get_output_dimension(),
+                    self.input_data_scaler, self.output_data_scaler,
+                    self.descriptor_calculator, self.target_calculator,
+                    self.grid_dimension, self.grid_size,
+                    self.use_horovod)
+                self.validation_data_set = LazyLoadDataset(
+                    self.get_input_dimension(), self.get_output_dimension(),
+                    self.input_data_scaler, self.output_data_scaler,
+                    self.descriptor_calculator, self.target_calculator,
+                    self.grid_dimension, self.grid_size,
+                    self.use_horovod)
+
+                if self.nr_test_data != 0:
+                    self.test_data_set = LazyLoadDataset(
+                        self.get_input_dimension(), self.get_output_dimension(),
+                        self.input_data_scaler, self.output_data_scaler,
+                        self.descriptor_calculator, self.target_calculator,
+                        self.grid_dimension, self.grid_size,
+                        self.use_horovod,
+                        input_requires_grad=True)
 
             # Add snapshots to the lazy loading data sets.
-            i = 0
             for snapshot in self.parameters.snapshot_directories_list:
-                if self.parameters.data_splitting_snapshots[i] == "tr":
+                if snapshot.snapshot_function == "tr":
                     self.training_data_set.add_snapshot_to_dataset(snapshot)
-                if self.parameters.data_splitting_snapshots[i] == "va":
+                if snapshot.snapshot_function == "va":
                     self.validation_data_set.add_snapshot_to_dataset(snapshot)
-                if self.parameters.data_splitting_snapshots[i] == "te":
+                if snapshot.snapshot_function == "te":
                     self.test_data_set.add_snapshot_to_dataset(snapshot)
-                i += 1
 
+            if self.parameters.use_clustering:
+                self.training_data_set.cluster_dataset()
             # I don't think we need to mix them here. We can use the standard
             # ordering for the first epoch
             # and mix it up after.
@@ -714,40 +805,37 @@ class DataHandler:
                 self.test_data_inputs = []
                 self.test_data_outputs = []
 
-            i = 0
             # We need to perform the data scaling over the entirety of the
             # training data.
             for snapshot in self.parameters.snapshot_directories_list:
 
                 # Data scaling is only performed on the training data sets.
-                if self.parameters.data_splitting_snapshots[i] == "va" \
-                        or self.parameters.data_splitting_snapshots[i] == "te":
+                if snapshot.snapshot_function == "va" \
+                        or snapshot.snapshot_function == "te":
                     tmp = self.\
-                        __load_from_npy_file(snapshot.input_npy_directory +
-                                             snapshot.input_npy_file,
+                        __load_from_npy_file(os.path.join(snapshot.input_npy_directory,
+                                                          snapshot.input_npy_file),
                                              mmapmode='r')
-                    if self.parameters.descriptors_contain_xyz:
+                    if self.descriptor_calculator.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
                     tmp = np.array(tmp)
                     tmp *= self.descriptor_calculator.\
                         convert_units(1, snapshot.input_units)
-                    if self.parameters.data_splitting_snapshots[i] == "va":
+                    if snapshot.snapshot_function == "va":
                         self.validation_data_inputs.append(tmp)
-                    if self.parameters.data_splitting_snapshots[i] == "te":
+                    if snapshot.snapshot_function == "te":
                         self.test_data_inputs.append(tmp)
                     tmp = self.\
-                        __load_from_npy_file(snapshot.output_npy_directory +
-                                             snapshot.output_npy_file,
+                        __load_from_npy_file(os.path.join(snapshot.output_npy_directory,
+                                                          snapshot.output_npy_file),
                                              mmapmode='r')
                     tmp = np.array(tmp)
                     tmp *= self.target_calculator.\
                         convert_units(1, snapshot.output_units)
-                    if self.parameters.data_splitting_snapshots[i] == "va":
+                    if snapshot.snapshot_function == "va":
                         self.validation_data_outputs.append(tmp)
-                    if self.parameters.data_splitting_snapshots[i] == "te":
+                    if snapshot.snapshot_function == "te":
                         self.test_data_outputs.append(tmp)
-
-                i += 1
 
             # I know this would be more elegant with the member functions typed
             # below. But I am pretty sure
@@ -765,6 +853,7 @@ class DataHandler:
                     torch.from_numpy(self.test_data_inputs).float()
                 self.test_data_inputs = \
                     self.input_data_scaler.transform(self.test_data_inputs)
+                self.test_data_inputs.requires_grad = True
 
             self.validation_data_inputs = np.array(self.validation_data_inputs)
             self.validation_data_inputs = \
@@ -822,7 +911,8 @@ class DataHandler:
                                        units=None):
         """Convert a raw numpy array containing into the correct units."""
         if data_type == "in":
-            if data_type == "in" and self.parameters.descriptors_contain_xyz:
+            if data_type == "in" and self.descriptor_calculator.\
+                    descriptors_contain_xyz:
                 numpy_array = numpy_array[:, :, :, 3:]
             if units is not None:
                 numpy_array *= self.descriptor_calculator.convert_units(1,

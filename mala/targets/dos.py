@@ -1,27 +1,31 @@
 """DOS calculation class."""
-from .target_base import TargetBase
-from .calculation_helpers import *
+import os
+
+from mala.targets.target_base import TargetBase
+from mala.targets.calculation_helpers import *
 from scipy import integrate, interpolate
 from scipy.optimize import toms748
 from ase.units import Rydberg
+import ase.io
 from mala.common.parameters import printout
 
 
 class DOS(TargetBase):
-    """Postprocessing / parsing functions for the density of states (DOS)."""
+    """Postprocessing / parsing functions for the density of states (DOS).
+
+    Parameters
+    ----------
+    params : mala.common.parameters.Parameters
+        Parameters used to create this TargetBase object.
+    """
 
     def __init__(self, params):
-        """
-        Create a DOS object.
-
-        Parameters
-        ----------
-        params : mala.common.parameters.Parameters
-            Parameters used to create this TargetBase object.
-
-        """
         super(DOS, self).__init__(params)
         self.target_length = self.parameters.ldos_gridsize
+
+    def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return self.parameters.ldos_gridsize
 
     @staticmethod
     def convert_units(array, in_units="1/eV"):
@@ -51,7 +55,6 @@ class DOS(TargetBase):
         elif in_units == "1/Ry":
             return array * (1/Rydberg)
         else:
-            printout(in_units)
             raise Exception("Unsupported unit for LDOS.")
 
     @staticmethod
@@ -79,7 +82,6 @@ class DOS(TargetBase):
         elif out_units == "1/Ry":
             return array * Rydberg
         else:
-            printout(out_units)
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_qe_dos_txt(self, file_name, directory):
@@ -109,7 +111,7 @@ class DOS(TargetBase):
         return_dos_values = []
 
         # Open the file, then iterate through its contents.
-        with open(directory+file_name, 'r') as infile:
+        with open(os.path.join(directory, file_name), 'r') as infile:
             lines = infile.readlines()
             i = 0
 
@@ -125,15 +127,54 @@ class DOS(TargetBase):
 
         return np.array(return_dos_values)
 
-    def get_energy_grid(self, shift_energy_grid=False):
+    def read_from_qe_out(self, path_to_file=None, smearing_factor=2):
         """
-        Get energy grid.
+        Calculate the DOS from a Quantum Espresso DFT output file.
+
+        The DOS will be read calculated via the eigenvalues and the equation
+
+        D(E) = sum_i sum_k w_k delta(E-epsilon_{ik})
 
         Parameters
         ----------
-        shift_energy_grid : bool
-            If True, the entire energy grid will be shifted by
-            ldos_gridoffset_ev from the parameters.
+        path_to_file : string
+            Path to the QE out file. If None, the QE output that was loaded
+            via read_additional_calculation_data will be used.
+
+        smearing_factor : int
+            Smearing factor relative to the energy grid spacing. Default is 2.
+
+        Returns
+        -------
+        dos_data:
+            DOS data in 1/eV.
+        """
+        # dos_per_band = delta_f(e_grid,dft.eigs)
+        if path_to_file is None:
+            atoms_object = self.atoms
+        else:
+            atoms_object = ase.io.read(path_to_file, format="espresso-out")
+        kweights = atoms_object.get_calculator().get_k_point_weights()
+        if kweights is None:
+            raise Exception("QE output file does not contain band information."
+                            "Rerun calculation with verbosity set to 'high'.")
+
+        # Get the gaussians for all energy values and calculate the DOS per
+        # band.
+        dos_per_band = gaussians(self.get_energy_grid(),
+                                 atoms_object.get_calculator().
+                                 band_structure().energies[0, :, :],
+                                 smearing_factor*self.parameters.
+                                 ldos_gridspacing_ev)
+        dos_per_band = kweights[:, np.newaxis, np.newaxis]*dos_per_band
+
+        # QE gives the band energies in eV, so no conversion necessary here.
+        dos_data = np.sum(dos_per_band, axis=(0, 1))
+        return dos_data
+
+    def get_energy_grid(self):
+        """
+        Get energy grid.
 
         Returns
         -------
@@ -146,15 +187,11 @@ class DOS(TargetBase):
             self.parameters.ldos_gridsize * \
             self.parameters.ldos_gridspacing_ev
         grid_size = self.parameters.ldos_gridsize
-        if shift_energy_grid is True:
-            emin += self.parameters.ldos_gridspacing_ev
-            emax += self.parameters.ldos_gridspacing_ev
         linspace_array = (np.linspace(emin, emax, grid_size, endpoint=False))
         return linspace_array
 
     def get_band_energy(self, dos_data, fermi_energy_eV=None,
-                        temperature_K=None, integration_method="analytical",
-                        shift_energy_grid=True):
+                        temperature_K=None, integration_method="analytical"):
         """
         Calculate the band energy from given DOS data.
 
@@ -176,10 +213,6 @@ class DOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
-
         Returns
         -------
         band_energy : float
@@ -191,18 +224,14 @@ class DOS(TargetBase):
         if temperature_K is None:
             temperature_K = self.temperature_K
 
-        if shift_energy_grid and integration_method == "analytical":
-            energy_grid = self.get_energy_grid(shift_energy_grid=True)
-        else:
-            energy_grid = self.get_energy_grid()
+        energy_grid = self.get_energy_grid()
         return self.__band_energy_from_dos(dos_data, energy_grid,
                                            fermi_energy_eV, temperature_K,
                                            integration_method)
 
     def get_number_of_electrons(self, dos_data, fermi_energy_eV=None,
                                 temperature_K=None,
-                                integration_method="analytical",
-                                shift_energy_grid=True):
+                                integration_method="analytical"):
         """
         Calculate the number of electrons from given DOS data.
 
@@ -224,10 +253,6 @@ class DOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
-
         Returns
         -------
         number_of_electrons : float
@@ -238,10 +263,7 @@ class DOS(TargetBase):
             fermi_energy_eV = self.fermi_energy_eV
         if temperature_K is None:
             temperature_K = self.temperature_K
-        if shift_energy_grid and integration_method == "analytical":
-            energy_grid = self.get_energy_grid(shift_energy_grid=True)
-        else:
-            energy_grid = self.get_energy_grid()
+        energy_grid = self.get_energy_grid()
         return self.__number_of_electrons_from_dos(dos_data, energy_grid,
                                                    fermi_energy_eV,
                                                    temperature_K,
@@ -249,8 +271,7 @@ class DOS(TargetBase):
 
     def get_entropy_contribution(self, dos_data, fermi_energy_eV=None,
                                  temperature_K=None,
-                                 integration_method="analytical",
-                                 shift_energy_grid=True):
+                                 integration_method="analytical"):
         """
         Calculate the entropy contribution to the total energy.
 
@@ -272,10 +293,6 @@ class DOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
-
         Returns
         -------
         entropy_contribution : float
@@ -286,10 +303,7 @@ class DOS(TargetBase):
         if temperature_K is None:
             temperature_K = self.temperature_K
 
-        if shift_energy_grid and integration_method == "analytical":
-            energy_grid = self.get_energy_grid(shift_energy_grid=True)
-        else:
-            energy_grid = self.get_energy_grid()
+        energy_grid = self.get_energy_grid()
         return self.\
             __entropy_contribution_from_dos(dos_data, energy_grid,
                                             fermi_energy_eV, temperature_K,
@@ -297,8 +311,7 @@ class DOS(TargetBase):
 
     def get_self_consistent_fermi_energy_ev(self, dos_data,
                                             temperature_K=None,
-                                            integration_method="analytical",
-                                            shift_energy_grid=True):
+                                            integration_method="analytical"):
         """
         Calculate the self-consistent Fermi energy.
 
@@ -322,10 +335,6 @@ class DOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
-        shift_energy_grid : bool
-            When using the analytical integration, one has to shift the energy
-            grid by setting this parameter to True. Elsewise keep on False.
-
         Returns
         -------
         fermi_energy_self_consistent : float
@@ -334,10 +343,7 @@ class DOS(TargetBase):
         # Parse the parameters.
         if temperature_K is None:
             temperature_K = self.temperature_K
-        if shift_energy_grid and integration_method == "analytical":
-            energy_grid = self.get_energy_grid(shift_energy_grid=True)
-        else:
-            energy_grid = self.get_energy_grid()
+        energy_grid = self.get_energy_grid()
         fermi_energy_sc = toms748(lambda fermi_sc:
                                   (self.
                                    __number_of_electrons_from_dos
@@ -383,6 +389,8 @@ class DOS(TargetBase):
         return_dos_object.total_energy_dft_calculation = \
             ldos_object.total_energy_dft_calculation
         return_dos_object.kpoints = ldos_object.kpoints
+        return_dos_object.number_of_electrons_from_eigenvals = \
+            ldos_object.number_of_electrons_from_eigenvals
 
         return return_dos_object
 

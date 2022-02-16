@@ -1,9 +1,0 @@
-&dos
- outdir='temp',
- prefix='Al',
- Emin=-10.0,
- Emax=15.0,
- DeltaE=0.1,
- degauss=0.2,
- fildos='Al.dos'
-/

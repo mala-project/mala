@@ -1,42 +1,43 @@
 """Hyperparameter to use with optuna."""
 from optuna.trial import Trial
 
+from mala.common.json_serializable import JSONSerializable
 
-class HyperparameterOptuna:
-    """Represents an optuna parameter."""
+
+class HyperparameterOptuna(JSONSerializable):
+    """Represents an optuna parameter.
+
+    Parameters
+    ----------
+    opttype : string
+        Datatype of the hyperparameter. Follows optunas naming convetions.
+        In principle supported are:
+
+            - float
+            - int
+            - categorical (list)
+
+        Float and int are not available for OA based approaches at the
+        moment.
+
+    name : string
+        Name of the hyperparameter. Please note that these names always
+        have to be distinct; if you e.g. want to investigate multiple
+        layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
+        etc. as names.
+
+    low : float or int
+        Lower bound for numerical parameter.
+
+    high : float or int
+        Higher bound for numerical parameter.
+
+    choices :
+        List of possible choices (for categorical parameter).
+    """
 
     def __init__(self, opttype="float", name="", low=0, high=0, choices=None):
-        """
-        Create an optuna compatible hyperparameter.
-
-        Parameters
-        ----------
-        opttype : string
-            Datatype of the hyperparameter. Follows optunas naming convetions.
-            In principle supported are:
-
-                - float
-                - int
-                - categorical (list)
-
-            Float and int are not available for OA based approaches at the
-            moment.
-
-        name : string
-            Name of the hyperparameter. Please note that these names always
-            have to be distinct; if you e.g. want to investigate multiple
-            layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
-             etc. as names.
-
-        low : float or int
-            Lower bound for numerical parameter.
-
-        high : float or int
-            Higher bound for numerical parameter.
-
-        choices :
-            List of possible choices (for categorical parameter).
-        """
+        super(HyperparameterOptuna, self).__init__()
         self.name = name
         self.high = high
         self.low = low
@@ -128,6 +129,9 @@ class HyperparameterOptuna:
             Return value is based on type of hyperparameter.
         """
         if self.opttype == "categorical":
-            return trial.suggest_categorical(self.name, self.choices)
+            if len(self.choices) > 1:
+                return trial.suggest_categorical(self.name, self.choices)
+            else:
+                return self.choices[0]
         else:
             raise Exception("Wrong hyperparameter type.")

@@ -20,4 +20,4 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 apidocs:
-	sphinx-apidoc -f -o source/api ../mala
+	sphinx-apidoc --templatedir=source/templates -e -d 6 -f -o source/api ../mala

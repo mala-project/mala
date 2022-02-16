@@ -1,6 +1,7 @@
 """Interface function to get the correct type of hyperparameter."""
-from .hyperparameter_oat import HyperparameterOAT
-from .hyperparameter_optuna import HyperparameterOptuna
+from mala.network.hyperparameter_oat import HyperparameterOAT
+from mala.network.hyperparameter_optuna import HyperparameterOptuna
+from mala.network.hyperparameter_naswot import HyperparameterNASWOT
 
 
 def HyperparameterInterface(hotype, opttype="float", name="", low=0, high=0,
@@ -50,6 +51,9 @@ def HyperparameterInterface(hotype, opttype="float", name="", low=0, high=0,
     hparam = None
     if hotype == "optuna":
         hparam = HyperparameterOptuna(opttype=opttype, name=name, low=low,
+                                      high=high, choices=choices)
+    if hotype == "naswot":
+        hparam = HyperparameterNASWOT(opttype=opttype, name=name, low=low,
                                       high=high, choices=choices)
     elif hotype == "oat":
         hparam = HyperparameterOAT(opttype=opttype, name=name, choices=choices)

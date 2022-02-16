@@ -12,5 +12,4 @@ dependencies:
   - pytorch-cpu
   - mpmath
   - pandas
-  - pip:
-    - oapackage
+  - tensorboard

@@ -1,13 +1,17 @@
 """DataSet for lazy-loading."""
-import torch
-from torch.utils.data import Dataset
-from mala.datahandling.snapshot import Snapshot
-import numpy as np
+import os
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class.
     pass
+import numpy as np
+import torch
+from torch.utils.data import Dataset
+
+from mala.common.parallelizer import barrier
+from mala.datahandling.snapshot import Snapshot
 
 
 class LazyLoadDataset(torch.utils.data.Dataset):
@@ -20,50 +24,45 @@ class LazyLoadDataset(torch.utils.data.Dataset):
     / DataLoader level is discouraged to the point that it was disabled.
     Instead, we mix the snapshot load order here ot have some sort of mixing
     at all.
+
+    Parameters
+    ----------
+    input_dimension : int
+        Dimension of an input vector.
+
+    output_dimension : int
+        Dimension of an output vector.
+
+    input_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the input data.
+
+    output_data_scaler : mala.datahandling.data_scaler.DataScaler
+        Used to scale the output data.
+
+    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
+        Used to do unit conversion on input data.
+
+    target_calculator : mala.targets.target_base.TargetBase or derivative
+        Used to do unit conversion on output data.
+
+    grid_dimensions : list
+        Dimensions of the grid (x,y,z).
+
+    grid_size : int
+        Size of the grid (x*y*z), i.e. the number of datapoints per
+        snapshot.
+
+    use_horovod : bool
+        If true, it is assumed that horovod is used.
+
+    input_requires_grad : bool
+        If True, then the gradient is stored for the inputs.
     """
 
     def __init__(self, input_dimension, output_dimension, input_data_scaler,
                  output_data_scaler, descriptor_calculator,
-                 target_calculator, grid_dimensions, grid_size,
-                 descriptors_contain_xyz, use_horovod):
-        """
-        Create a lazily loaded DataSet.
-
-        Parameters
-        ----------
-        input_dimension : int
-            Dimension of an input vector.
-
-        output_dimension : int
-            Dimension of an output vector.
-
-        input_data_scaler : mala.datahandling.data_scaler.DataScaler
-            Used to scale the input data.
-
-        output_data_scaler : mala.datahandling.data_scaler.DataScaler
-            Used to scale the output data.
-
-        descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
-            Used to do unit conversion on input data.
-
-        target_calculator : mala.targets.target_base.TargetBase or derivative
-            Used to do unit conversion on output data.
-
-        grid_dimensions : list
-            Dimensions of the grid (x,y,z).
-
-        grid_size : int
-            Size of the grid (x*y*z), i.e. the number of datapoints per
-            snapshot.
-
-        descriptors_contain_xyz : bool
-            If true, then it is assumed that the first three entries of any
-            input data file are xyz-information and can be discarded.
-            Generally true, if your descriptors were calculated using MALA.
-
-        use_horovod : bool
-            If true, it is assumed that horovod is used.
-        """
+                 target_calculator, grid_dimensions, grid_size, use_horovod,
+                 input_requires_grad=False):
         self.snapshot_list = []
         self.input_dimension = input_dimension
         self.output_dimension = output_dimension
@@ -75,12 +74,14 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.grid_size = grid_size
         self.number_of_snapshots = 0
         self.total_size = 0
-        self.descriptors_contain_xyz = descriptors_contain_xyz
+        self.descriptors_contain_xyz = self.descriptor_calculator.\
+            descriptors_contain_xyz
         self.currently_loaded_file = None
         self.input_data = np.empty(0)
         self.output_data = np.empty(0)
         self.use_horovod = use_horovod
         self.return_outputs_directly = False
+        self.input_requires_grad = input_requires_grad
 
     @property
     def return_outputs_directly(self):
@@ -119,8 +120,8 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         With this, there can be some variance between runs.
         """
         used_perm = torch.randperm(self.number_of_snapshots)
+        barrier()
         if self.use_horovod:
-            hvd.allreduce(torch.tensor(0), name='barrier')
             used_perm = hvd.broadcast(used_perm, 0)
         self.snapshot_list = [self.snapshot_list[i] for i in used_perm]
         self.get_new_data(0)
@@ -136,11 +137,13 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         """
         # Load the data into RAM.
         self.input_data = \
-            np.load(self.snapshot_list[file_index].input_npy_directory +
-                    self.snapshot_list[file_index].input_npy_file)
+            np.load(os.path.join(
+                    self.snapshot_list[file_index].input_npy_directory,
+                    self.snapshot_list[file_index].input_npy_file))
         self.output_data = \
-            np.load(self.snapshot_list[file_index].output_npy_directory +
-                    self.snapshot_list[file_index].output_npy_file)
+            np.load(os.path.join(
+                    self.snapshot_list[file_index].output_npy_directory,
+                    self.snapshot_list[file_index].output_npy_file))
 
         # Transform the data.
         if self.descriptors_contain_xyz:
@@ -153,6 +156,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.input_data = self.input_data.astype(np.float32)
         self.input_data = torch.from_numpy(self.input_data).float()
         self.input_data = self.input_data_scaler.transform(self.input_data)
+        self.input_data.requires_grad = self.input_requires_grad
 
         self.output_data = \
             self.output_data.reshape([self.grid_size, self.output_dimension])
