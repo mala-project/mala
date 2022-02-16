@@ -94,9 +94,18 @@
 <li class="toctree-l2"><a class="reference internal" href="README.html">Installation of MALA</a></li>
 <li class="toctree-l2"><a class="reference internal" href="external_modules.html">External modules</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Using MALA on HPC systems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation-tips-tricks">Installation: tips &amp; tricks</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hemera5-hzdr">Hemera5  (HZDR)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#summit-cluster-ornl">Summit cluster (ORNL)</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#sql">SQL</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tensorboard">Tensorboard</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#hemera5-hzdr">Hemera5 (HZDR)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Hemera5 (HZDR)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#horovod">Horovod</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Hemera5 (HZDR)</a></li>
 </ul>
 </li>
 </ul>
@@ -184,7 +193,112 @@
 module, with one exception being the setup of
 <a class="reference internal" href="external_modules.html"><span class="doc">external modules</span></a>. Detailed here are some other
 aspects of the MALA workflow for which the setup on HPC systems is not
-immediately clear.</p>
+immediately clear.
+Some of the following information targets user of Hemera5, the main cluster
+of the
+Helmholtz-Zentrum Dresden-Rossendorf and Summit, one of the clusters at Oak
+Ridge national laboratories.</p>
+<div class="section" id="installation-tips-tricks">
+<h2>Installation: tips &amp; tricks<a class="headerlink" href="#installation-tips-tricks" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="hemera5-hzdr">
+<h3>Hemera5  (HZDR)<a class="headerlink" href="#hemera5-hzdr" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>Tested by: Lenz Fiedler, 16.04.2021</p></li>
+<li><p>Scope of test: mala, torch, horovod; I ommited LAMMPS and QE for this test</p></li>
+<li><dl>
+<dt>Test log:</dt><dd><ol class="arabic">
+<li><p>Create a conda environment:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">--name</span> <span class="pre">mala_train</span> <span class="pre">python=3.8.5</span></code></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Installing requirements:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code></dt><dd><ul>
+<li><p>I got “Requirement already satisfied: oapackage in /home/fiedle09/.local/lib/python3.8/site-packages (from -r requirements.txt (line 9)) (2.6.8)” - I don’t know how I got to this point, but the experience might differ for other people</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Install Pytorch. I load CUDA for this.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">cuda/10.2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">torch</span></code></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Horovod needs CMAKE to work, so we need to load it along with the other dependencies required for it:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">gcc/7.3.0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">cmake</span></code></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Then I install horovod as</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">horovod[pytorch]</span></code></p>
+</div></blockquote>
+</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="summit-cluster-ornl">
+<h3>Summit cluster (ORNL)<a class="headerlink" href="#summit-cluster-ornl" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p>Tested by: Vladyslav Oles, 16.04.2021</p></li>
+<li><p>Scope of test: mala, torch, horovod; I ommited LAMMPS and QE for this test</p></li>
+<li><dl>
+<dt>Test log:</dt><dd><ol class="arabic">
+<li><p>Install a current version of SWIG (instead of Summit’s 2.0.10) as per <a class="reference external" href="http://www.swig.org/svn.html">http://www.swig.org/svn.html</a>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/swig/swig.git</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">swig</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">./autogen.sh</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">./configure</span> <span class="pre">--prefix=/.../swig</span></code> (replace <code class="docutils literal notranslate"><span class="pre">...</span></code> with absolute path to <code class="docutils literal notranslate"><span class="pre">swig</span></code> directory)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PATH=/.../swig/bin:$PATH</span></code> (replace <code class="docutils literal notranslate"><span class="pre">...</span></code> with actual absolute path to <code class="docutils literal notranslate"><span class="pre">swig</span></code> directory)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Clone conda environment with pytorch and horovod, and add oapackage to it:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">open-ce/1.1.3-py38-0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">--name</span> <span class="pre">mala-opence</span> <span class="pre">--clone</span> <span class="pre">open-ce-1.1.3-py38-0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">mala-opence</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">gxx_linux-ppc64le</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">oapackage</span></code></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Install MALA (from the directory with cloned MALA repository):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> (note that it will install required packages for MALA listed in <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>)</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ol>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</div>
 <div class="section" id="sql">
 <h2>SQL<a class="headerlink" href="#sql" title="Permalink to this headline">¶</a></h2>
 <p>To run extended hyperparameter studies using Optuna, an SQL server is
@@ -203,9 +317,9 @@ $ initdb -D YOUR_SERVER_NAME
 <li><p>Edit the configuration files of this server:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>In <code class="file docutils literal notranslate"><span class="pre">postgres_local/postgresql.conf</span></code> add/change the line containing listen_adresses so that it reads:
+<li><p>In <code class="docutils literal notranslate"><span class="pre">postgres_local/postgresql.conf</span></code> add/change the line containing listen_adresses so that it reads:
 <code class="docutils literal notranslate"><span class="pre">listen_addresses</span> <span class="pre">=</span> <span class="pre">'*'</span></code></p></li>
-<li><p>In <code class="file docutils literal notranslate"><span class="pre">pg_hba.conf</span></code>, under <code class="docutils literal notranslate"><span class="pre">IPv$</span></code> local connections add the line:
+<li><p>In <code class="docutils literal notranslate"><span class="pre">pg_hba.conf</span></code>, under <code class="docutils literal notranslate"><span class="pre">IPv$</span></code> local connections add the line:
 <code class="docutils literal notranslate"><span class="pre">host</span>&#160;&#160;&#160; <span class="pre">all</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">all</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">0.0.0.0/0</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">trust</span></code></p></li>
 </ul>
 </div></blockquote>
@@ -260,22 +374,46 @@ on an HPC cluster:</p>
 <li><p>Copy the visualization directory onto your local machine</p></li>
 <li><p>Mount the folder on your HPC cluster to your local machine (cluster specific)</p></li>
 </ol>
-<div class="section" id="hemera5-hzdr">
-<h3>Hemera5 (HZDR)<a class="headerlink" href="#hemera5-hzdr" title="Permalink to this headline">¶</a></h3>
-<p>If you are using the Hemera5 cluster of the
-Helmholtz-Zentrum Dresden-Rossendorf (one of the founding institutions of the
-MALA project), you can use the following informatiomn to mount the folders
-to your local machine.</p>
+<div class="section" id="id1">
+<h3>Hemera5 (HZDR)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>If you are using the Hemera5 cluster, you can use the following informatiomn
+to mount the folders to your local machine.</p>
 <ul>
 <li><p>You can find information on how to mount Hemera onto a local device here:</p>
 <p>&lt;<a class="reference external" href="https://fwcc.pages.hzdr.de/infohub/hpc/storage.html">https://fwcc.pages.hzdr.de/infohub/hpc/storage.html</a>&gt;</p>
 </li>
 <li><p>Alternatively, simply use the following command</p>
-<p><code class="docutils literal notranslate"><span class="pre">`sh</span>
-<span class="pre">$</span> <span class="pre">sshfs</span> <span class="pre">username&#64;hemera5.fz-rossendorf.de:folder/file/location</span> <span class="pre">folder/location/in/local</span>
-<span class="pre">`</span></code></p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ sshfs username@hemera5.fz-rossendorf.de:folder/file/location folder/location/in/local
+</pre></div>
+</div>
+</div></blockquote>
 </li>
 </ul>
+</div>
+</div>
+<div class="section" id="horovod">
+<h2>Horovod<a class="headerlink" href="#horovod" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h3>Hemera5 (HZDR)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>The following suggestions are derived from tests on the slurm based cluster
+Hemera5. They should be applicable to other slurm based clusters as well.
+You should always use all GPUs per node in a multinode setup.</p>
+<p>If you want to run a MALA job on a slurm based machine, follow this outline as submit script:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH -N NUMBER_OF_NODES</span>
+<span class="c1">#SBATCH --ntasks-per-node=MAX_NUMBER_OF_GPUS_PER_NODE</span>
+<span class="c1">#SBATCH --gres=gpu:MAX_NUMBER_OF_GPUS_PER_NODE</span>
+
+<span class="c1">#.... other #SBATCH options ...</span>
+
+<span class="c1">#... module loading and such ...</span>
+
+mpirun -np NUMBER_OF_NODES*MAX_NUMBER_OF_GPUS_PER_NODE -npernode MAX_NUMBER_OF_GPUS_PER_NODE -bind-to none -x <span class="nv">NCCL_DEBUG</span><span class="o">=</span>INFO -x LD_LIBRARY_PATH -x PATH -mca pml ob1 -mca btl ^openib python3 your_mala_script.py
+</pre></div>
+</div>
+</div></blockquote>
 </div>
 </div>
 </div>
