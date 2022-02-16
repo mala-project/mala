@@ -56,7 +56,14 @@ class Trainer(Runner):
         self.validation_data_loader = None
         self.test_data_loader = None
         self.use_pkl_checkpoints = use_pkl_checkpoints
+
+        # Samplers for the horovod case.
+        self.train_sampler = None
+        self.test_sampler = None
+        self.validation_sampler = None
+
         self.__prepare_to_train(optimizer_dict)
+
         self.tensor_board = None
         if self.parameters.visualisation:
             if not os.path.exists(self.parameters.visualisation_dir):
@@ -65,7 +72,7 @@ class Trainer(Runner):
             self.tensor_board = SummaryWriter(self.parameters.visualisation_dir)
 
     @classmethod
-    def checkpoint_exists(cls, checkpoint_name):
+    def checkpoint_exists(cls, checkpoint_name, use_pkl_checkpoints=False):
         """
         Check if a hyperparameter optimization checkpoint exists.
 
@@ -211,8 +218,10 @@ class Trainer(Runner):
         # Collect and average all the losses from all the devices
         if self.parameters_full.use_horovod:
             vloss = self.__average_validation(vloss, 'average_loss')
+            self.initial_validation_loss = vloss
             if self.data.test_data_set is not None:
                 tloss = self.__average_validation(tloss, 'average_loss')
+                self.initial_test_loss = tloss
 
         printout("Initial Guess - validation data loss: ", vloss,
                  min_verbosity=1)
@@ -249,7 +258,7 @@ class Trainer(Runner):
 
             # train sampler
             if self.parameters_full.use_horovod:
-                self.parameters.sampler["train_sampler"].set_epoch(epoch)
+                self.train_sampler.set_epoch(epoch)
 
             for batchid, (inputs, outputs) in \
                     enumerate(self.training_data_loader):
@@ -263,28 +272,27 @@ class Trainer(Runner):
                                             "validation",
                                             self.parameters.
                                             during_training_metric)
+
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
             printout("Epoch: ", epoch, "validation data loss: ", vloss,
                      min_verbosity=1)
 
-
-            #summary_writer tensor board
+            # summary_writer tensor board
             if self.parameters.visualisation:
                 self.tensor_board.add_scalar("Loss", vloss, epoch)
-                self.tensor_board.add_scalar("Learning rate", self.parameters.learning_rate, epoch)
+                self.tensor_board.add_scalar("Learning rate",
+                                             self.parameters.learning_rate,
+                                             epoch)
                 if self.parameters.visualisation == 2:
-                    print("visualisation = 2")
                     for name, param in self.network.named_parameters():
-                        self.tensor_board.add_histogram(name,param,epoch)
-                        self.tensor_board.add_histogram(f'{name}.grad',param.grad,epoch)
+                        self.tensor_board.add_histogram(name, param, epoch)
+                        self.tensor_board.add_histogram(f'{name}.grad',
+                                                        param.grad, epoch)
 
-                self.tensor_board.close() #method to make sure that all pending events have been written to disk
-
-
-
-                
-                 
+                # method to make sure that all pending events have been written
+                # to disk
+                self.tensor_board.close()
 
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
@@ -343,8 +351,6 @@ class Trainer(Runner):
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
 
-
-
         # Calculate final loss.
         self.final_validation_loss = vloss
         printout("Final validation data loss: ", vloss, min_verbosity=0)
@@ -363,8 +369,10 @@ class Trainer(Runner):
     def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""
         # Configure keyword arguments for DataSampler.
+        kwargs = {'num_workers': self.parameters.num_workers,
+                  'pin_memory': False}
         if self.parameters_full.use_gpu:
-            self.parameters.kwargs['pin_memory'] = True
+            kwargs['pin_memory'] = True
 
         # Scale the learning rate according to horovod.
         if self.parameters_full.use_horovod:
@@ -412,21 +420,20 @@ class Trainer(Runner):
             if self.data.parameters.use_lazy_loading:
                 do_shuffle = False
 
-            # Set the data sampler for multiGPU
-            self.parameters.sampler["train_sampler"] = torch.utils.data.\
+            self.train_sampler = torch.utils.data.\
                 distributed.DistributedSampler(self.data.training_data_set,
                                                num_replicas=hvd.size(),
                                                rank=hvd.rank(),
                                                shuffle=do_shuffle)
 
-            self.parameters.sampler["validate_sampler"] = torch.utils.data.\
+            self.validation_sampler = torch.utils.data.\
                 distributed.DistributedSampler(self.data.validation_data_set,
                                                num_replicas=hvd.size(),
                                                rank=hvd.rank(),
                                                shuffle=False)
 
             if self.data.test_data_set is not None:
-                self.parameters.sampler["test_sampler"] = torch.utils.data.\
+                self.test_sampler = torch.utils.data.\
                     distributed.DistributedSampler(self.data.test_data_set,
                                                    num_replicas=hvd.size(),
                                                    rank=hvd.rank(),
@@ -477,29 +484,26 @@ class Trainer(Runner):
         self.training_data_loader = DataLoader(self.data.training_data_set,
                                                batch_size=self.parameters.
                                                mini_batch_size,
-                                               sampler=self.parameters.
-                                               sampler["train_sampler"],
-                                               **self.parameters.kwargs,
+                                               sampler=self.train_sampler,
+                                               **kwargs,
                                                shuffle=do_shuffle)
 
         self.validation_data_loader = DataLoader(self.data.validation_data_set,
                                                  batch_size=self.parameters.
                                                  mini_batch_size * 1,
-                                                 sampler=self.parameters.
-                                                 sampler["validate_sampler"],
-                                                 **self.parameters.kwargs)
+                                                 sampler=self.validation_sampler,
+                                                 **kwargs)
 
         if self.data.test_data_set is not None:
             self.test_data_loader = DataLoader(self.data.test_data_set,
                                                batch_size=self.parameters.
                                                mini_batch_size * 1,
-                                               sampler=self.parameters.
-                                               sampler["test_sampler"],
-                                               **self.parameters.kwargs)
+                                               sampler=self.test_sampler,
+                                               **kwargs)
 
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
-        prediction = network.forward(input_data)
+        prediction = network(input_data)
         loss = network.calculate_loss(prediction, target_data)
         loss.backward()
         self.optimizer.step()

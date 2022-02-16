@@ -262,6 +262,10 @@ class DataHandler:
         printout("Build dataset: Done.", min_verbosity=0)
 
         # Wait until all ranks are finished with data preparation.
+        # It is not uncommon that ranks might be asynchronous in their
+        # data preparation by a small amount of minutes. If you notice
+        # an elongated wait time at this barrier, check that your file system
+        # allows for parallel I/O.
         barrier()
 
     def mix_datasets(self):

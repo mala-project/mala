@@ -495,8 +495,8 @@ class ParametersRunning(ParametersBase):
         If True and horovod is used, horovod compression will be used for
         allreduce communication. This can improve performance.
 
-    kwargs : dict
-        Dictionary for keyword arguments for horovod.
+    num_workers : int
+        Number of workers to be used for data loading.
 
     sampler : dict
         Dictionary with samplers.
@@ -518,7 +518,7 @@ class ParametersRunning(ParametersBase):
         If True then Tensorboard is activated for visualisation
         case 0: No tensorboard activated
         case 1: tensorboard activated with Loss and learning rate
-        case 2; additonally weights and biases and gradient  
+        case 2; additonally weights and biases and gradient
 
     inference_data_grid : list
         List holding the grid to be used for inference in the form of
@@ -539,9 +539,7 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_decay = 0.1
         self.learning_rate_patience = 0
         self.use_compression = False
-        self.kwargs = {'num_workers': 0, 'pin_memory': False}
-        self.sampler = {"train_sampler": None, "validate_sampler": None,
-                        "test_sampler": None}
+        self.num_workers = 0
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
@@ -941,8 +939,8 @@ class Parameters:
             hvd.init()
 
         # Invalidate, will be updated in setter.
-        self.device = None
         set_horovod_status(value)
+        self.device = None
         self._use_horovod = value
         self.network._update_horovod(self.use_horovod)
         self.descriptors._update_horovod(self.use_horovod)
