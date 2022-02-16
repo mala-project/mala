@@ -58,6 +58,12 @@ class Trainer(Runner):
         self.use_pkl_checkpoints = use_pkl_checkpoints
         self.__prepare_to_train(optimizer_dict)
         self.tensor_board = None
+
+        # Samplers for the horovod case.
+        self.train_sampler = None
+        self.test_sampler = None
+        self.validation_sampler = None
+
         if self.parameters.visualisation:
             if not os.path.exists(self.parameters.visualisation_dir):
                 os.makedirs(self.parameters.visualisation_dir)
@@ -251,7 +257,7 @@ class Trainer(Runner):
 
             # train sampler
             if self.parameters_full.use_horovod:
-                self.parameters.sampler["train_sampler"].set_epoch(epoch)
+                self.train_sampler.set_epoch(epoch)
 
             for batchid, (inputs, outputs) in \
                     enumerate(self.training_data_loader):
@@ -362,8 +368,10 @@ class Trainer(Runner):
     def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""
         # Configure keyword arguments for DataSampler.
+        kwargs = {'num_workers': self.parameters.num_workers,
+                  'pin_memory': False}
         if self.parameters_full.use_gpu:
-            self.parameters.kwargs['pin_memory'] = True
+            kwargs['pin_memory'] = True
 
         # Scale the learning rate according to horovod.
         if self.parameters_full.use_horovod:
@@ -411,21 +419,20 @@ class Trainer(Runner):
             if self.data.parameters.use_lazy_loading:
                 do_shuffle = False
 
-            # Set the data sampler for multiGPU
-            self.parameters.sampler["train_sampler"] = torch.utils.data.\
+            self.train_sampler = torch.utils.data.\
                 distributed.DistributedSampler(self.data.training_data_set,
                                                num_replicas=hvd.size(),
                                                rank=hvd.rank(),
                                                shuffle=do_shuffle)
 
-            self.parameters.sampler["validate_sampler"] = torch.utils.data.\
+            self.validation_sampler = torch.utils.data.\
                 distributed.DistributedSampler(self.data.validation_data_set,
                                                num_replicas=hvd.size(),
                                                rank=hvd.rank(),
                                                shuffle=False)
 
             if self.data.test_data_set is not None:
-                self.parameters.sampler["test_sampler"] = torch.utils.data.\
+                self.test_sampler = torch.utils.data.\
                     distributed.DistributedSampler(self.data.test_data_set,
                                                    num_replicas=hvd.size(),
                                                    rank=hvd.rank(),
@@ -476,25 +483,22 @@ class Trainer(Runner):
         self.training_data_loader = DataLoader(self.data.training_data_set,
                                                batch_size=self.parameters.
                                                mini_batch_size,
-                                               sampler=self.parameters.
-                                               sampler["train_sampler"],
-                                               **self.parameters.kwargs,
+                                               sampler=self.train_sampler,
+                                               **kwargs,
                                                shuffle=do_shuffle)
 
         self.validation_data_loader = DataLoader(self.data.validation_data_set,
                                                  batch_size=self.parameters.
                                                  mini_batch_size * 1,
-                                                 sampler=self.parameters.
-                                                 sampler["validate_sampler"],
-                                                 **self.parameters.kwargs)
+                                                 sampler=self.validation_sampler,
+                                                 **kwargs)
 
         if self.data.test_data_set is not None:
             self.test_data_loader = DataLoader(self.data.test_data_set,
                                                batch_size=self.parameters.
                                                mini_batch_size * 1,
-                                               sampler=self.parameters.
-                                               sampler["test_sampler"],
-                                               **self.parameters.kwargs)
+                                               sampler=self.test_sampler,
+                                               **kwargs)
 
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""

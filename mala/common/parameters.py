@@ -495,8 +495,8 @@ class ParametersRunning(ParametersBase):
         If True and horovod is used, horovod compression will be used for
         allreduce communication. This can improve performance.
 
-    kwargs : dict
-        Dictionary for keyword arguments for horovod.
+    num_workers : int
+        Number of workers to be used for data loading.
 
     sampler : dict
         Dictionary with samplers.
@@ -539,9 +539,7 @@ class ParametersRunning(ParametersBase):
         self.learning_rate_decay = 0.1
         self.learning_rate_patience = 0
         self.use_compression = False
-        self.kwargs = {'num_workers': 0, 'pin_memory': False}
-        self.sampler = {"train_sampler": None, "validate_sampler": None,
-                        "test_sampler": None}
+        self.num_workers = 0
         self.use_shuffling_for_samplers = True
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
