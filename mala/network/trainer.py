@@ -268,26 +268,20 @@ class Trainer(Runner):
                 outputs = outputs.to(self.parameters._configuration["device"])
                 training_loss += self.__process_mini_batch(self.network,
                                                            inputs, outputs)
-            print("training: ", rank, processed_on_this_process, start_time-time.time())
+            #print("training: ", rank, processed_on_this_process, start_time-time.time())
             val_time = time.time()
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(self.network,
                                             "validation",
                                             self.parameters.
                                             during_training_metric)
-            print("calc val: ", rank, val_time-time.time())
+            #print("calc val: ", rank, val_time-time.time())
             val_time = time.time()
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
             printout("Epoch: ", epoch, "validation data loss: ", vloss,
                      min_verbosity=1)
-            print("average val", val_time-time.time())
-
-            if self.parameters_full.use_horovod:
-                vloss = self.__average_validation(vloss, 'average_loss')
-            printout("Epoch: ", epoch, "validation data loss: ", vloss,
-                     min_verbosity=1)
-
+            #print("average val", val_time-time.time())
 
             #summary_writer tensor board
             if self.parameters.visualisation:
