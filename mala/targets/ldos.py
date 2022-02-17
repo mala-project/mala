@@ -631,7 +631,13 @@ class LDOS(TargetBase):
             ldos_data_shape[-1] = 1
             density_values = density_values.reshape(ldos_data_shape)
 
-        return density_values
+        # Now we have the full density; We now need to collect it, in the
+        # MPI case.
+        if self.parameters._configuration["mpi"]:
+            full_density = self._gather_density(density_values)
+
+        else:
+            return density_values
 
     def get_density_of_states(self, ldos_data, grid_spacing_bohr=None,
                               integration_method="summation"):
