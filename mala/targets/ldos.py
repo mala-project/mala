@@ -635,7 +635,7 @@ class LDOS(TargetBase):
 
     def get_density_of_states(self, ldos_data, grid_spacing_bohr=None,
                               integration_method="summation",
-                              gather_dos=False):
+                              gather_dos=True):
         """
         Calculate the density of states from given LDOS data.
 
