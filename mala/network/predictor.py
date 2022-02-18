@@ -108,7 +108,7 @@ class Predictor(Runner):
                 # main rank further down.
                 if get_rank() != 0:
                     self._forward_snap_descriptors(snap_descriptors, 0)
-                return None
+                    return None
 
             else:
                 if self.data.descriptor_calculator.descriptors_contain_xyz:
