@@ -634,7 +634,8 @@ class LDOS(TargetBase):
         return density_values
 
     def get_density_of_states(self, ldos_data, grid_spacing_bohr=None,
-                              integration_method="summation"):
+                              integration_method="summation",
+                              gather_dos=False):
         """
         Calculate the density of states from given LDOS data.
 
@@ -655,6 +656,12 @@ class LDOS(TargetBase):
             - "trapz" for trapezoid method
             - "simps" for Simpson method.
             - "summation" for summation and scaling of the values (recommended)
+
+        gather_dos : bool
+            Only important if MPI is used. If True, the DOS will be
+            are gathered on rank 0.
+            Helpful when using multiple CPUs for descriptor calculations
+            and only one for network pass.
 
         Returns
         -------
@@ -728,9 +735,7 @@ class LDOS(TargetBase):
                 dos_values = np.sum(ldos_data, axis=0) * \
                              (grid_spacing_bohr ** 3)
 
-        if self.parameters._configuration["mpi"] is False:
-            return dos_values
-        else:
+        if self.parameters._configuration["mpi"] and gather_dos:
             comm = get_comm()
             comm.Barrier()
             dos_values_full = np.zeros_like(dos_values)
@@ -738,6 +743,8 @@ class LDOS(TargetBase):
                         [dos_values_full, MPI.DOUBLE],
                         op=MPI.SUM, root=0)
             return dos_values_full
+        else:
+            return dos_values
 
     def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
                           snapshot_number=0):
