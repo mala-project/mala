@@ -60,8 +60,10 @@ class Predictor(Runner):
         predicted_ldos : numpy.array
             Precicted LDOS for these atomic positions.
         """
-        atoms = ase.io.read(path_to_file, format="espresso-out")
-        return self.predict_for_atoms(atoms, gather_ldos=gather_ldos)
+        self.data.target_calculator.\
+            read_additional_calculation_data("qe.out", path_to_file)
+        return self.predict_for_atoms(self.data.target_calculator.atoms,
+                                      gather_ldos=gather_ldos)
 
     def predict_for_atoms(self, atoms, gather_ldos=False):
         """
