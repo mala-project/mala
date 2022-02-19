@@ -1455,7 +1455,7 @@ dimensions.</p>
 
 <dl class="py method">
 <dt id="mala.targets.ldos.LDOS.get_density_of_states">
-<code class="sig-name descname"><span class="pre">get_density_of_states</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_density_of_states" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_density_of_states</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_dos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.targets.ldos.LDOS.get_density_of_states" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the density of states from given LDOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1472,6 +1472,10 @@ Currently supported:</p>
 <li><p>”summation” for summation and scaling of the values (recommended)</p></li>
 </ul>
 </p></li>
+<li><p><strong>gather_dos</strong> (<em>bool</em>) – Only important if MPI is used. If True, the DOS will be
+are gathered on rank 0.
+Helpful when using multiple CPUs for descriptor calculations
+and only one for network pass.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
