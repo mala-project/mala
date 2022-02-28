@@ -118,6 +118,13 @@ class Predictor(Runner):
             if gather_ldos is True:
                 snap_descriptors = self.data.descriptor_calculator. \
                     gather_descriptors(snap_descriptors)
+
+                # Just entering the forwarding function to wait for the
+                # main rank further down.
+                if get_rank() != 0:
+                    self._forward_snap_descriptors(snap_descriptors, 0)
+                    return None
+
             else:
                 if save_local_grid and \
                     not self.data.descriptor_calculator.\
@@ -159,8 +166,6 @@ class Predictor(Runner):
                 self.data.input_data_scaler.transform(snap_descriptors)
             return self.\
                         _forward_snap_descriptors(snap_descriptors)
-        else:
-            return None
 
     def _forward_snap_descriptors(self, snap_descriptors,
                                   local_data_size=None):
@@ -170,31 +175,35 @@ class Predictor(Runner):
         predicted_outputs = np.zeros((local_data_size,
                                       self.data.target_calculator.\
                                       get_feature_size()))
-        optimal_batch_size = self.\
-            _correct_batch_size_for_testing(local_data_size,
-                                            self.parameters.mini_batch_size)
-        if optimal_batch_size != self.parameters.mini_batch_size:
-            self.parameters.mini_batch_size = optimal_batch_size
-            printout("Had to readjust batch size from",
-                     self.parameters.mini_batch_size, "to",
-                     optimal_batch_size, min_verbosity=0)
-        self.number_of_batches_per_snapshot = int(local_data_size /
-                                                  self.parameters.
-                                                  mini_batch_size)
 
-        for i in range(0, self.number_of_batches_per_snapshot):
-            inputs = snap_descriptors[i * self.parameters.mini_batch_size:
-                                      (i+1)*self.parameters.mini_batch_size]
-            inputs = inputs.to(self.parameters._configuration["device"])
-            predicted_outputs[i * self.parameters.mini_batch_size:
-                                      (i+1)*self.parameters.mini_batch_size] \
-                = self.data.output_data_scaler.\
-                inverse_transform(self.network(inputs).
-                                  to('cpu'), as_numpy=True)
+        # Only predict if there is something to predict.
+        # Elsewise, we just wait at the barrier down below.
+        if local_data_size > 0:
+            optimal_batch_size = self.\
+                _correct_batch_size_for_testing(local_data_size,
+                                                self.parameters.mini_batch_size)
+            if optimal_batch_size != self.parameters.mini_batch_size:
+                self.parameters.mini_batch_size = optimal_batch_size
+                printout("Had to readjust batch size from",
+                         self.parameters.mini_batch_size, "to",
+                         optimal_batch_size, min_verbosity=0)
+            self.number_of_batches_per_snapshot = int(local_data_size /
+                                                      self.parameters.
+                                                      mini_batch_size)
 
-        # Restricting the actual quantities to physical meaningful values,
-        # i.e. restricting the (L)DOS to positive values.
-        predicted_outputs = self.data.target_calculator.\
-            restrict_data(predicted_outputs)
+            for i in range(0, self.number_of_batches_per_snapshot):
+                inputs = snap_descriptors[i * self.parameters.mini_batch_size:
+                                          (i+1)*self.parameters.mini_batch_size]
+                inputs = inputs.to(self.parameters._configuration["device"])
+                predicted_outputs[i * self.parameters.mini_batch_size:
+                                          (i+1)*self.parameters.mini_batch_size] \
+                    = self.data.output_data_scaler.\
+                    inverse_transform(self.network(inputs).
+                                      to('cpu'), as_numpy=True)
+
+            # Restricting the actual quantities to physical meaningful values,
+            # i.e. restricting the (L)DOS to positive values.
+            predicted_outputs = self.data.target_calculator.\
+                restrict_data(predicted_outputs)
         barrier()
         return predicted_outputs
