@@ -538,7 +538,8 @@ class LDOS(TargetBase):
 
     def get_density(self, ldos_data, fermi_energy_ev=None, temperature_K=None,
                     conserve_dimensions=False,
-                    integration_method="analytical"):
+                    integration_method="analytical",
+                    gather_density=True):
         """
         Calculate the density from given LDOS data.
 
@@ -573,6 +574,12 @@ class LDOS(TargetBase):
                 - "trapz" for trapezoid method
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
+
+        gather_density : bool
+            Only important if MPI is used. If True, the density will be
+            gathered on rank 0.
+            Helpful when using multiple CPUs for descriptor calculations
+            and only one for network pass.
 
         Returns
         -------
@@ -633,8 +640,17 @@ class LDOS(TargetBase):
 
         # Now we have the full density; We now need to collect it, in the
         # MPI case.
-        if self.parameters._configuration["mpi"]:
+        if self.parameters._configuration["mpi"] and gather_density:
+            density_values = np.reshape(density_values,
+                                        [np.shape(density_values)[0], 1])
+            density_values = np.concatenate((self.local_grid, density_values),
+                                          axis=1)
             full_density = self._gather_density(density_values)
+            if len(ldos_data_shape) == 2:
+                ldos_shape = np.shape(full_density)
+                full_density = np.reshape(full_density, [ldos_shape[0] *
+                                                         ldos_shape[1] *
+                                                         ldos_shape[2], 1])
             return full_density
         else:
             return density_values
@@ -938,7 +954,6 @@ class LDOS(TargetBase):
         else:
             sendcounts = np.array(comm.gather(np.shape(density_values)[0],
                                               root=0))
-
             if get_rank() == 0:
                 # print("sendcounts: {}, total: {}".format(sendcounts,
                 #                                          sum(sendcounts)))
@@ -946,9 +961,8 @@ class LDOS(TargetBase):
                 # Preparing the list of buffers.
                 density_list = []
                 for i in range(0, get_size()):
-                    density_list.append(np.empty(sendcounts[i],
+                    density_list.append(np.empty(sendcounts[i]*4,
                                                  dtype=np.float64))
-
                 # No MPI necessary for first rank. For all the others,
                 # collect the buffers.
                 density_list[0] = density_values
@@ -957,11 +971,10 @@ class LDOS(TargetBase):
                               tag=100+i)
                     density_list[i] = \
                         np.reshape(density_list[i],
-                                   (sendcounts[i], 1))
+                                   (sendcounts[i], 4))
             else:
                 comm.Send(density_values, dest=0, tag=get_rank()+100)
             barrier()
-
         # if get_rank() == 0:
         #     printout(np.shape(all_snap_descriptors_list[0]))
         #     printout(np.shape(all_snap_descriptors_list[1]))
@@ -978,34 +991,23 @@ class LDOS(TargetBase):
             nx = self.grid_dimensions[0]
             ny = self.grid_dimensions[1]
             nz = self.grid_dimensions[2]
-            snap_descriptors_full = np.zeros(
-                [nx, ny, nz, self.fingerprint_length])
+            full_density = np.zeros(
+                [nx, ny, nz, 1])
             # Fill the full SNAP descriptors array.
-            for idx, local_snap_grid in enumerate(all_snap_descriptors_list):
+            for idx, local_density in enumerate(density_list):
                 # We glue the individual cells back together, and transpose.
-                first_x = int(local_snap_grid[0][0])
-                first_y = int(local_snap_grid[0][1])
-                first_z = int(local_snap_grid[0][2])
-                last_x = int(local_snap_grid[-1][0])+1
-                last_y = int(local_snap_grid[-1][1])+1
-                last_z = int(local_snap_grid[-1][2])+1
-                snap_descriptors_full[first_x:last_x,
-                                      first_y:last_y,
-                                      first_z:last_z] = \
-                    np.reshape(local_snap_grid[:,3:],[last_z-first_z,
-                                                      last_y-first_y,
-                                                      last_x-first_x,
-                                                      self.fingerprint_length]).transpose([2, 1, 0, 3])
+                first_x = int(local_density[0][0])
+                first_y = int(local_density[0][1])
+                first_z = int(local_density[0][2])
+                last_x = int(local_density[-1][0])+1
+                last_y = int(local_density[-1][1])+1
+                last_z = int(local_density[-1][2])+1
+                full_density[first_x:last_x,
+                             first_y:last_y,
+                             first_z:last_z] = \
+                    np.reshape(local_density[:,3],[last_z-first_z,
+                                                    last_y-first_y,
+                                                    last_x-first_x,1]).transpose([2, 1, 0, 3])
 
-                # Leaving this in here for debugging purposes.
-                # This is the slow way to reshape the descriptors.
-                # for entry in local_snap_grid:
-                #     x = int(entry[0])
-                #     y = int(entry[1])
-                #     z = int(entry[2])
-                #     snap_descriptors_full[x, y, z] = entry[3:]
-        if self.parameters.descriptors_contain_xyz:
-            return snap_descriptors_full
-        else:
-            return snap_descriptors_full[:, :, :, 3:]
+        return full_density
 
