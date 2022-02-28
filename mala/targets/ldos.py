@@ -635,7 +635,7 @@ class LDOS(TargetBase):
         # MPI case.
         if self.parameters._configuration["mpi"]:
             full_density = self._gather_density(density_values)
-
+            return full_density
         else:
             return density_values
 
@@ -894,4 +894,111 @@ class LDOS(TargetBase):
     def uncache_density(self):
         """Uncache a density, to calculate a new one in following steps."""
         self.cached_density_exists = False
+
+    def _gather_density(self, density_values, use_pickled_comm=False):
+        """
+        Gathers all SNAP descriptors on rank 0 and sorts them.
+
+        This is useful for e.g. parallel preprocessing.
+        This function removes the extra 3 components that come from parallel
+        processing.
+        I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
+        97 (in parallel mode), and this function returns, as to retain the
+        3 x,y,z ones we by default include.
+
+        Parameters
+        ----------
+        density_values : numpy.array
+            Numpy array with the SNAP descriptors of this ranks local grid.
+
+        use_pickled_comm : bool
+            If True, the pickled communication route from mpi4py is used.
+            If False, a Recv/Sendv combination is used. I am not entirely
+            sure what is faster. Technically Recv/Sendv should be faster,
+            but I doubt my implementation is all that optimal. For the pickled
+            route we can use gather(), which should be fairly quick.
+            However, for large grids, one CANNOT use the pickled route;
+            too large python objects will break it. Therefore, I am setting
+            the Recv/Sendv route as default.
+        """
+        # Barrier to make sure all ranks have descriptors..
+        comm = get_comm()
+        barrier()
+
+        # Gather the SNAP descriptors into a list.
+        if use_pickled_comm:
+            density_list = comm.gather(density_values, root=0)
+        else:
+            sendcounts = np.array(comm.gather(np.shape(density_values)[0],
+                                              root=0))
+
+            if get_rank() == 0:
+                # print("sendcounts: {}, total: {}".format(sendcounts,
+                #                                          sum(sendcounts)))
+
+                # Preparing the list of buffers.
+                density_list = []
+                for i in range(0, get_size()):
+                    density_list.append(np.empty(sendcounts[i],
+                                                 dtype=np.float64))
+
+                # No MPI necessary for first rank. For all the others,
+                # collect the buffers.
+                density_list[0] = density_values
+                for i in range(1, get_size()):
+                    comm.Recv(density_list[i], source=i,
+                              tag=100+i)
+                    density_list[i] = \
+                        np.reshape(density_list[i],
+                                   (sendcounts[i], 1))
+            else:
+                comm.Send(density_values, dest=0, tag=get_rank()+100)
+            barrier()
+
+        # if get_rank() == 0:
+        #     printout(np.shape(all_snap_descriptors_list[0]))
+        #     printout(np.shape(all_snap_descriptors_list[1]))
+        #     printout(np.shape(all_snap_descriptors_list[2]))
+        #     printout(np.shape(all_snap_descriptors_list[3]))
+
+        # Dummy for the other ranks.
+        # (For now, might later simply broadcast to other ranks).
+        full_density = np.zeros([1, 1, 1, 1])
+
+        # Reorder the list.
+        if get_rank() == 0:
+            # Prepare the SNAP descriptor array.
+            nx = self.grid_dimensions[0]
+            ny = self.grid_dimensions[1]
+            nz = self.grid_dimensions[2]
+            snap_descriptors_full = np.zeros(
+                [nx, ny, nz, self.fingerprint_length])
+            # Fill the full SNAP descriptors array.
+            for idx, local_snap_grid in enumerate(all_snap_descriptors_list):
+                # We glue the individual cells back together, and transpose.
+                first_x = int(local_snap_grid[0][0])
+                first_y = int(local_snap_grid[0][1])
+                first_z = int(local_snap_grid[0][2])
+                last_x = int(local_snap_grid[-1][0])+1
+                last_y = int(local_snap_grid[-1][1])+1
+                last_z = int(local_snap_grid[-1][2])+1
+                snap_descriptors_full[first_x:last_x,
+                                      first_y:last_y,
+                                      first_z:last_z] = \
+                    np.reshape(local_snap_grid[:,3:],[last_z-first_z,
+                                                      last_y-first_y,
+                                                      last_x-first_x,
+                                                      self.fingerprint_length]).transpose([2, 1, 0, 3])
+
+                # Leaving this in here for debugging purposes.
+                # This is the slow way to reshape the descriptors.
+                # for entry in local_snap_grid:
+                #     x = int(entry[0])
+                #     y = int(entry[1])
+                #     z = int(entry[2])
+                #     snap_descriptors_full[x, y, z] = entry[3:]
+        if self.parameters.descriptors_contain_xyz:
+            return snap_descriptors_full
+        else:
+            return snap_descriptors_full[:, :, :, 3:]
 
