@@ -5,7 +5,7 @@ This library contains a PyTorch implementation of atom-decomposed neural modelin
 Atomic environment descriptors are learned during training using Concentrical Spherical GNN (CSGNN) model.
 It was originally run using Python 3.8, PyTorch 1.9, and CUDA Toolkit 11.1 on NVIDIA V100 GPU.
 
-Authors: James Fox (jfox43@gatech.edu), Normand A. Modine (namodin@sandia.gov)
+Authors: James Fox (jfox43@gatech.edu), Normand A. Modine (namodin@sandia.gov), Siva Rajamanickam (srajama@sandia.gov)
 
 ## Dependencies
 The following installs dependencies to Anaconda virtual environment. 
@@ -40,3 +40,15 @@ To train the model from scratch with default settings:
 ```bash
 python -m dos.train -d [data_dir]
 ```
+
+# Hyperparameters
+
+### ADOS data generation
+| Name | Description | Default | File |
+| --- | --- | --- | --- |
+| gauss_width | Controls local sensitivity of partition of unity | 1.3 | calculate_ADOS.py |
+
+### Model and training
+| Name | Description | Default | File |
+| --- | --- | --- | --- |
+| rcut | Radial cutoff of atom-centered environment | 7.0 angstrom | train.py |
