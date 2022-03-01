@@ -138,6 +138,12 @@ jobs:
           # Wait for Docker container to come online
           wait
 
+          # Check running docker container
+          docker ps
+
+          # Check if docker container is running
+          [[ $(docker inspect --format '{{json .State.Running}}' mala-cpu) == 'true' ]]
+
       - name: Check out repository (mala)
         uses: actions/checkout@v2
 
