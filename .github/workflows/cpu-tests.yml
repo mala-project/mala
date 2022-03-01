@@ -98,7 +98,7 @@ jobs:
 
           # Save Docker image locally
           docker save $IMAGE_NAME:$GITHUB_RUN_ID -o $DOCKER_ARTIFACT_PATH/docker-image.tar
-          pigz --fast $DOCKER_ARTIFACT_PATH/docker-image.tar
+          pigz -f -v --fast $DOCKER_ARTIFACT_PATH/docker-image.tar
 
     outputs:
       # Make variables available to all downstream jobs that depend on this job
