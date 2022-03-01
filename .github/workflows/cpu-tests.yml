@@ -65,14 +65,14 @@ jobs:
             CACHE=$IMAGE_REPO/$IMAGE_NAME:latest
           fi
 
-          docker build . --file Dockerfile --tag $IMAGE_NAME:latest --cache-from=$CACHE --build-arg DEVICE=cpu
+          docker build . --file Dockerfile --tag $IMAGE_NAME:local --cache-from=$CACHE --build-arg DEVICE=cpu
 
           # Show images
           docker images --filter=reference=$IMAGE_NAME --filter=reference=$IMAGE_REPO/$IMAGE_NAME
 
           # Get image IDs (hash of the local image JSON configuration) and check if images are equal
           IMAGE_ID_OLD=$(docker images --format "{{.ID}}" --no-trunc --filter=reference=$IMAGE_REPO/$IMAGE_NAME:latest)
-          IMAGE_ID_NEW=$(docker images --format "{{.ID}}" --no-trunc --filter=reference=$IMAGE_NAME:latest)
+          IMAGE_ID_NEW=$(docker images --format "{{.ID}}" --no-trunc --filter=reference=$IMAGE_NAME:local)
 
           echo "IMAGE_ID_OLD=$IMAGE_ID_OLD" >> $GITHUB_ENV
           echo "IMAGE_ID_NEW=$IMAGE_ID_NEW" >> $GITHUB_ENV
