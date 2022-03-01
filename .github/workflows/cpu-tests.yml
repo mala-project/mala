@@ -133,18 +133,7 @@ jobs:
       - name: "Prepare environment: Run Docker container"
         run: |
           # Make the github workspace (i.e. checked out mala repository) available inside Docker container
-          #docker images
-          #docker run -i -d --rm --name mala-cpu -v ${{ github.workspace }}:/home -w /home $IMAGE_NAME:$DOCKER_TAG
-          #sleep 5
-          #docker ps --all --last 10
-          docker pull ghcr.io/testdockerorga/mala_conda_cpu:latest
-          docker images
-          #docker -D run -i -d --rm --name mala-cpu -v ${{ github.workspace }}:/home -w /home ghcr.io/testdockerorga/mala_conda_cpu
-          for i in `seq 10`; do docker -D run -d -i --rm -v ${{ github.workspace }}:/home -w /home $IMAGE_NAME:$DOCKER_TAG "/bin/bash" & done; wait
-          echo "Exit code: $?"
-          docker ps --all
-          sleep 3
-          docker ps --all
+          docker run -i -d --rm --name mala-cpu -v ${{ github.workspace }}:/home -w /home $IMAGE_NAME:$DOCKER_TAG /bin/bash
 
       - name: Check out repository (mala)
         uses: actions/checkout@v2
