@@ -94,7 +94,7 @@ jobs:
           mkdir -p $DOCKER_ARTIFACT_PATH
 
           # Use GITHUB_RUN_ID, a unique number for each workflow run within a repository as a temporary Docker tag
-          docker tag $IMAGE_NAME:latest $IMAGE_NAME:$GITHUB_RUN_ID
+          docker tag $IMAGE_NAME:local $IMAGE_NAME:$GITHUB_RUN_ID
 
           # Save Docker image locally
           docker save $IMAGE_NAME:$GITHUB_RUN_ID -o $DOCKER_ARTIFACT_PATH/docker-image.tar
