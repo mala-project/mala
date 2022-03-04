@@ -5,6 +5,7 @@ authors:
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Cangi
     given-names: Attila
+    orcid: https://orcid.org/0000-0001-9162-262X
   - affiliation: "Oak Ridge National Laboratory (ORNL)"
     family-names: Ellis
     given-names: J. Austin
@@ -45,6 +46,6 @@ keywords:
   - "dft"
 license: "BSD-3-Clause"
 repository-code: "https://github.com/mala-project/mala"
-title: mala
+title: MALA
 doi: 10.5281/zenodo.5557254 # This DOI represents all versions, and will always resolve to the latest one.
 version: 0.2.0
