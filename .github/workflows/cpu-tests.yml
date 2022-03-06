@@ -22,7 +22,7 @@ env:
 jobs:
   build-docker-image-cpu:
     # Build and push temporary Docker image to GitHub's container registry
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -107,7 +107,7 @@ jobs:
 
   cpu-tests:
     needs: build-docker-image-cpu
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     env:
       IMAGE_REPO: ${{ needs.build-docker-image-cpu.outputs.image-repo }}
       DOCKER_TAG: ${{ needs.build-docker-image-cpu.outputs.docker-tag }}
@@ -185,7 +185,7 @@ jobs:
 
   retag-docker-image-cpu:
     needs: [cpu-tests, build-docker-image-cpu]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     permissions:
       packages: write
     env:
