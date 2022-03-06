@@ -17,7 +17,7 @@ on:
 env:
   IMAGE_NAME: mala_conda_cpu
   IMAGE_REGISTRY: ghcr.io
-  DOCKER_ARTIFACT_PATH: artifacts/docker
+  DOCKER_CACHE_PATH: cache/docker
 
 jobs:
   build-docker-image-cpu:
@@ -40,13 +40,13 @@ jobs:
         uses: actions/cache@v2
         id: cache-docker
         with:
-          path: ${{ env.DOCKER_ARTIFACT_PATH }}
+          path: ${{ env.DOCKER_CACHE_PATH }}
           key: ${{ github.run_id }}
 
       - name: Check existence of Docker tar archive
         id: check_file
         run: |
-          if [[ -f "$DOCKER_ARTIFACT_PATH/docker-image.tar.gz" ]]; then
+          if [[ -f "$DOCKER_CACHE_PATH/docker-image.tar.gz" ]]; then
             echo '::set-output name=file_exists::true'
           else
             echo '::set-output name=file_exists::false'
@@ -59,7 +59,7 @@ jobs:
         run: |
           if [[ "${{ steps.check_file.outputs.file_exists }}" == 'true' ]]
           then
-            docker load -i $DOCKER_ARTIFACT_PATH/docker-image.tar.gz
+            docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz
             CACHE=$IMAGE_NAME:$GITHUB_RUN_ID
           else
             CACHE=$IMAGE_REPO/$IMAGE_NAME:latest
@@ -91,14 +91,14 @@ jobs:
         # If temporary image is different from latest on ghcr.io
         if: env.IMAGE_ID_OLD != env.IMAGE_ID_NEW
         run: |
-          mkdir -p $DOCKER_ARTIFACT_PATH
+          mkdir -p $DOCKER_CACHE_PATH
 
           # Use GITHUB_RUN_ID, a unique number for each workflow run within a repository as a temporary Docker tag
           docker tag $IMAGE_NAME:local $IMAGE_NAME:$GITHUB_RUN_ID
 
           # Save Docker image locally
-          docker save $IMAGE_NAME:$GITHUB_RUN_ID -o $DOCKER_ARTIFACT_PATH/docker-image.tar
-          pigz -f -v --fast $DOCKER_ARTIFACT_PATH/docker-image.tar
+          docker save $IMAGE_NAME:$GITHUB_RUN_ID -o $DOCKER_CACHE_PATH/docker-image.tar
+          pigz -f -v --fast $DOCKER_CACHE_PATH/docker-image.tar
 
     outputs:
       # Make variables available to all downstream jobs that depend on this job
@@ -117,12 +117,12 @@ jobs:
         uses: actions/cache@v2
         id: cache-docker
         with:
-          path: ${{ env.DOCKER_ARTIFACT_PATH }}
+          path: ${{ env.DOCKER_CACHE_PATH }}
           key: ${{ github.run_id }}
 
       - name: "Prepare environment: Load Docker image from cache"
         if: env.DOCKER_TAG != 'latest'
-        run: docker load -i $DOCKER_ARTIFACT_PATH/docker-image.tar.gz
+        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz
 
       - name: "Prepare environment: Pull latest image from container registry"
         if: env.DOCKER_TAG == 'latest'
@@ -205,12 +205,12 @@ jobs:
         uses: actions/cache@v2
         id: cache-docker
         with:
-          path: ${{ env.DOCKER_ARTIFACT_PATH }}
+          path: ${{ env.DOCKER_CACHE_PATH }}
           key: ${{ github.run_id }}
 
       - name: "Prepare environment: Load Docker image from cache"
         if: env.DOCKER_TAG != 'latest'
-        run: docker load -i $DOCKER_ARTIFACT_PATH/docker-image.tar.gz
+        run: docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz
 
       - name: "Prepare environment: Pull latest image from container registry"
         if: env.DOCKER_TAG == 'latest'
