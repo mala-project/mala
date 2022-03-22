@@ -380,7 +380,12 @@
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Not enough activation layers provided.&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Too many activation layers provided.&quot;</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Too many activation layers provided. &quot;</span>
+                     <span class="s2">&quot;The last&quot;</span><span class="p">,</span>
+                     <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">layer_activations</span><span class="p">)</span> <span class="o">-</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_layers</span><span class="p">),</span>
+                     <span class="s2">&quot;activation function(s) will be ignored.&quot;</span><span class="p">,</span>
+                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Add the layers.</span>
         <span class="c1"># As this is a feedforward layer we always add linear layers, and then</span>
@@ -395,6 +400,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activation_mappings</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span>
                                        <span class="n">layer_activations</span><span class="p">[</span><span class="n">i</span><span class="p">]]())</span>
+                <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid activation type seleceted.&quot;</span><span class="p">)</span>
 
