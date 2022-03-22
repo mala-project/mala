@@ -222,7 +222,7 @@ class LDOS(Target):
     def get_total_energy(self, ldos_data=None, dos_data=None,
                          density_data=None, fermi_energy_eV=None,
                          temperature_K=None,
-                         grid_spacing_bohr=None,
+                         voxel_Bohr=None,
                          grid_integration_method="summation",
                          energy_integration_method="analytical",
                          atoms_Angstrom=None,
@@ -255,16 +255,16 @@ class LDOS(Target):
         temperature_K : float
             Temperature in K.
 
-        grid_spacing_bohr : float
-            Grid spacing (in Bohr) used to construct this grid. As of now,
-            only equidistant grids are supported.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         grid_integration_method : str
             Integration method used to integrate the density on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
@@ -293,8 +293,8 @@ class LDOS(Target):
 
         """
         # Get relevant values from DFT calculation, if not otherwise specified.
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
         if fermi_energy_eV is None:
             fermi_energy_eV = self.fermi_energy_eV
         if temperature_K is None:
@@ -310,8 +310,8 @@ class LDOS(Target):
         # Calculate DOS data if need be.
         if dos_data is None:
             dos_data = self.get_density_of_states(ldos_data,
-                                                  grid_spacing_bohr=
-                                                  grid_spacing_bohr,
+                                                  voxel_Bohr=
+                                                  voxel_Bohr,
                                                   integration_method=
                                                   grid_integration_method)
 
@@ -359,7 +359,7 @@ class LDOS(Target):
         return e_total
 
     def get_band_energy(self, ldos_data, fermi_energy_eV=None,
-                        temperature_K=None, grid_spacing_bohr=None,
+                        temperature_K=None, voxel_Bohr=None,
                         grid_integration_method="summation",
                         energy_integration_method="analytical"):
         """
@@ -381,8 +381,8 @@ class LDOS(Target):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
@@ -392,8 +392,9 @@ class LDOS(Target):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
-        grid_spacing_bohr : float
-            Grid spacing (distance between grid points) in Bohr.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         Returns
         -------
@@ -401,9 +402,9 @@ class LDOS(Target):
             Band energy in eV.
         """
         # The band energy is calculated using the DOS.
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
-        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr,
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
+        dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
                                               integration_method=
                                               grid_integration_method)
 
@@ -415,7 +416,7 @@ class LDOS(Target):
                             temperature_K=temperature_K,
                             integration_method=energy_integration_method)
 
-    def get_number_of_electrons(self, ldos_data, grid_spacing_bohr=None,
+    def get_number_of_electrons(self, ldos_data, voxel_Bohr=None,
                                 fermi_energy_eV=None, temperature_K=None,
                                 grid_integration_method="summation",
                                 energy_integration_method="analytical"):
@@ -438,8 +439,8 @@ class LDOS(Target):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
@@ -449,8 +450,9 @@ class LDOS(Target):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
-        grid_spacing_bohr : float
-            Grid spacing (distance between grid points) in Bohr.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         Returns
         -------
@@ -458,9 +460,9 @@ class LDOS(Target):
             Number of electrons.
         """
         # The number of electrons is calculated using the DOS.
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
-        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr,
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
+        dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
                                               integration_method=
                                               grid_integration_method)
 
@@ -474,7 +476,7 @@ class LDOS(Target):
                                     energy_integration_method)
 
     def get_self_consistent_fermi_energy_ev(self, ldos_data,
-                                            grid_spacing_bohr=None,
+                                            voxel_Bohr=None,
                                             temperature_K=None,
                                             grid_integration_method=
                                             "summation",
@@ -501,8 +503,8 @@ class LDOS(Target):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
@@ -512,8 +514,9 @@ class LDOS(Target):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
-        grid_spacing_bohr : float
-            Grid spacing (distance between grid points) in Bohr.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         Returns
         -------
@@ -521,9 +524,9 @@ class LDOS(Target):
             E_F in eV.
         """
         # The Fermi energy is calculated using the DOS.
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
-        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr,
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
+        dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
                                               integration_method=
                                               grid_integration_method)
 
@@ -633,7 +636,7 @@ class LDOS(Target):
 
         return density_values
 
-    def get_density_of_states(self, ldos_data, grid_spacing_bohr=None,
+    def get_density_of_states(self, ldos_data, voxel_Bohr=None,
                               integration_method="summation",
                               gather_dos=True):
         """
@@ -645,16 +648,16 @@ class LDOS(Target):
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid].
 
-        grid_spacing_bohr : float
-            Grid spacing (in Bohr) used to construct this grid. As of now,
-            only equidistant grids are supported.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         integration_method : str
             Integration method used to integrate LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         gather_dos : bool
@@ -671,8 +674,8 @@ class LDOS(Target):
         if self.cached_dos_exists:
             return self.cached_dos
 
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
 
         ldos_data_shape = np.shape(ldos_data)
         if len(ldos_data_shape) != 4:
@@ -690,12 +693,15 @@ class LDOS(Target):
         # If there is only one point in a certain direction we do not
         # integrate, but rather reduce in this direction.
         # Integration over one point leads to zero.
+        grid_spacing_bohr_x = np.linalg.norm(voxel_Bohr[0])
+        grid_spacing_bohr_y = np.linalg.norm(voxel_Bohr[1])
+        grid_spacing_bohr_z = np.linalg.norm(voxel_Bohr[2])
 
         if integration_method != "summation":
             # X
             if ldos_data_shape[0] > 1:
                 dos_values = integrate_values_on_spacing(dos_values,
-                                                         grid_spacing_bohr,
+                                                         grid_spacing_bohr_x,
                                                          axis=0,
                                                          method=
                                                          integration_method)
@@ -703,37 +709,37 @@ class LDOS(Target):
                 dos_values = np.reshape(dos_values, (ldos_data_shape[1],
                                                      ldos_data_shape[2],
                                                      ldos_data_shape[3]))
-                dos_values *= grid_spacing_bohr
+                dos_values *= grid_spacing_bohr_x
 
             # Y
             if ldos_data_shape[1] > 1:
                 dos_values = integrate_values_on_spacing(dos_values,
-                                                         grid_spacing_bohr,
+                                                         grid_spacing_bohr_y,
                                                          axis=0,
                                                          method=
                                                          integration_method)
             else:
                 dos_values = np.reshape(dos_values, (ldos_data_shape[2],
                                                      ldos_data_shape[3]))
-                dos_values *= grid_spacing_bohr
+                dos_values *= grid_spacing_bohr_y
 
             # Z
             if ldos_data_shape[2] > 1:
                 dos_values = integrate_values_on_spacing(dos_values,
-                                                         grid_spacing_bohr,
+                                                         grid_spacing_bohr_z,
                                                          axis=0,
                                                          method=
                                                          integration_method)
             else:
                 dos_values = np.reshape(dos_values, ldos_data_shape[3])
-                dos_values *= grid_spacing_bohr
+                dos_values *= grid_spacing_bohr_z
         else:
             if len(ldos_data_shape) == 4:
                 dos_values = np.sum(ldos_data, axis=(0, 1, 2)) * \
-                             (grid_spacing_bohr ** 3)
+                             voxel_Bohr.volume
             if len(ldos_data_shape) == 2:
                 dos_values = np.sum(ldos_data, axis=0) * \
-                             (grid_spacing_bohr ** 3)
+                             voxel_Bohr.volume
 
         if self.parameters._configuration["mpi"] and gather_dos:
             comm = get_comm()
@@ -786,7 +792,7 @@ class LDOS(Target):
         return dd_dB
 
     def get_and_cache_density_of_states(self, ldos_data,
-                                        grid_spacing_bohr=None,
+                                        voxel_Bohr=None,
                                         integration_method="summation"):
         """
         Calculate a DOS from LDOS data and keep it in memory.
@@ -801,16 +807,16 @@ class LDOS(Target):
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid].
 
-        grid_spacing_bohr : float
-            Grid spacing (in Bohr) used to construct this grid. As of now,
-            only equidistant grids are supported.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         integration_method : str
             Integration method used to integrate LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         Returns
@@ -822,7 +828,7 @@ class LDOS(Target):
         self.uncache_density_of_states()
         self.cached_dos = self.\
             get_density_of_states(ldos_data,
-                                  grid_spacing_bohr=grid_spacing_bohr,
+                                  voxel_Bohr=voxel_Bohr,
                                   integration_method=integration_method)
         self.cached_dos_exists = True
         return self.cached_dos
@@ -855,13 +861,6 @@ class LDOS(Target):
 
         temperature_K : float
             Temperature in K.
-
-        integration_method : string
-            Integration method to be used. Currently supported:
-
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
-                - "analytical" for analytical integration. Recommended.
 
         ldos_data : numpy.array
             LDOS data, either as [gridsize, energygrid] or

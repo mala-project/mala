@@ -54,7 +54,7 @@ class Density(Target):
         data, meta = read_cube(os.path.join(directory, file_name))
         return data
 
-    def get_number_of_electrons(self, density_data, grid_spacing_bohr=None,
+    def get_number_of_electrons(self, density_data, voxel_Bohr=None,
                                 integration_method="summation"):
         """
         Calculate the number of electrons from given density data.
@@ -65,20 +65,20 @@ class Density(Target):
             Electronic density on the given grid. Has to either be of the form
             gridpoints or gridx x gridy x gridz.
 
-        grid_spacing_bohr : float
-            Grid spacing (in Bohr) used to construct this grid. As of now,
-            only equidistant grids are supported.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         integration_method : str
             Integration method used to integrate density on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
         """
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
 
         # Check input data for correctness.
         data_shape = np.shape(np.squeeze(density_data))
@@ -95,6 +95,10 @@ class Density(Target):
         # integrate, but rather reduce in this direction.
         # Integration over one point leads to zero.
 
+        grid_spacing_bohr_x = np.linalg.norm(voxel_Bohr[0])
+        grid_spacing_bohr_y = np.linalg.norm(voxel_Bohr[1])
+        grid_spacing_bohr_z = np.linalg.norm(voxel_Bohr[2])
+
         number_of_electrons = None
         if integration_method != "summation":
             number_of_electrons = density_data
@@ -103,40 +107,40 @@ class Density(Target):
             if data_shape[0] > 1:
                 number_of_electrons = \
                     integrate_values_on_spacing(number_of_electrons,
-                                                grid_spacing_bohr, axis=0,
+                                                grid_spacing_bohr_x, axis=0,
                                                 method=integration_method)
             else:
                 number_of_electrons =\
                     np.reshape(number_of_electrons, (data_shape[1],
                                                      data_shape[2]))
-                number_of_electrons *= grid_spacing_bohr
+                number_of_electrons *= grid_spacing_bohr_x
 
             # Y
             if data_shape[1] > 1:
                 number_of_electrons = \
                     integrate_values_on_spacing(number_of_electrons,
-                                                grid_spacing_bohr, axis=0,
+                                                grid_spacing_bohr_y, axis=0,
                                                 method=integration_method)
             else:
                 number_of_electrons = \
                     np.reshape(number_of_electrons, (data_shape[2]))
-                number_of_electrons *= grid_spacing_bohr
+                number_of_electrons *= grid_spacing_bohr_y
 
             # Z
             if data_shape[2] > 1:
                 number_of_electrons = \
                     integrate_values_on_spacing(number_of_electrons,
-                                                grid_spacing_bohr, axis=0,
+                                                grid_spacing_bohr_z, axis=0,
                                                 method=integration_method)
             else:
-                number_of_electrons *= grid_spacing_bohr
+                number_of_electrons *= grid_spacing_bohr_z
         else:
             if len(data_shape) == 3:
                 number_of_electrons = np.sum(density_data, axis=(0, 1, 2)) \
-                                      * (grid_spacing_bohr ** 3)
+                                      * voxel_Bohr.volume
             if len(data_shape) == 1:
                 number_of_electrons = np.sum(density_data, axis=0) * \
-                                      (grid_spacing_bohr ** 3)
+                                      voxel_Bohr.volume
 
         return number_of_electrons
 
@@ -421,7 +425,7 @@ class Density(Target):
         return_density_object = Density(ldos_object.parameters)
         return_density_object.fermi_energy_eV = ldos_object.fermi_energy_eV
         return_density_object.temperature_K = ldos_object.temperature_K
-        return_density_object.grid_spacing_Bohr = ldos_object.grid_spacing_Bohr
+        return_density_object.voxel_Bohr = ldos_object.voxel_Bohr
         return_density_object.number_of_electrons = ldos_object.\
             number_of_electrons
         return_density_object.band_energy_dft_calculation = ldos_object.\
