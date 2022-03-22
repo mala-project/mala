@@ -220,7 +220,12 @@ class FeedForwardNet(Network):
         elif len(self.params.layer_activations) < self.number_of_layers:
             raise Exception("Not enough activation layers provided.")
         elif len(self.params.layer_activations) > self.number_of_layers:
-            raise Exception("Too many activation layers provided.")
+            printout("Too many activation layers provided. "
+                     "The last",
+                     str(len(self.params.layer_activations) -
+                         self.number_of_layers),
+                     "activation function(s) will be ignored.",
+                     min_verbosity=1)
 
         # Add the layers.
         # As this is a feedforward layer we always add linear layers, and then
@@ -235,6 +240,7 @@ class FeedForwardNet(Network):
                 else:
                     self.layers.append(self.activation_mappings[self.params.
                                        layer_activations[i]]())
+                print(self.layers[-1])
             except KeyError:
                 raise Exception("Invalid activation type seleceted.")
 
