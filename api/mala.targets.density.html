@@ -330,20 +330,20 @@ interface. If None (recommended), MALA will create one.</p></li>
 
 <dl class="py method">
 <dt id="mala.targets.density.Density.get_number_of_electrons">
-<code class="sig-name descname"><span class="pre">get_number_of_electrons</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.get_number_of_electrons" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_number_of_electrons</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_Bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.get_number_of_electrons" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the number of electrons from given density data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>density_data</strong> (<em>numpy.array</em>) – Electronic density on the given grid. Has to either be of the form
 gridpoints or gridx x gridy x gridz.</p></li>
-<li><p><strong>grid_spacing_bohr</strong> (<em>float</em>) – Grid spacing (in Bohr) used to construct this grid. As of now,
-only equidistant grids are supported.</p></li>
+<li><p><strong>voxel_Bohr</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation. Needs to reflect the
+symmetry of the simulation cell. In Bohr.</p></li>
 <li><p><strong>integration_method</strong> (<em>str</em>) – <p>Integration method used to integrate density on the grid.
 Currently supported:</p>
 <ul>
-<li><p>”trapz” for trapezoid method</p></li>
-<li><p>”simps” for Simpson method.</p></li>
+<li><p>”trapz” for trapezoid method (only for cubic grids).</p></li>
+<li><p>”simps” for Simpson method (only for cubic grids).</p></li>
 <li><p>”summation” for summation and scaling of the values (recommended)</p></li>
 </ul>
 </p></li>
