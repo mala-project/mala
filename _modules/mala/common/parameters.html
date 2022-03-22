@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -182,7 +182,7 @@
 <span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
 
 
-<div class="viewcode-block" id="ParametersBase"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersBase">[docs]</a><span class="k">class</span> <span class="nc">ParametersBase</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="ParametersBase"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase">[docs]</a><span class="k">class</span> <span class="nc">ParametersBase</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base parameter class for MALA.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
@@ -191,7 +191,7 @@
                                <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;cpu&quot;</span><span class="p">}</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="ParametersBase.show"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersBase.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="ParametersBase.show"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print name and values of all attributes of this object.</span>
 
@@ -230,7 +230,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">member</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ParametersBase.to_json"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersBase.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ParametersBase.to_json"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert this object to a dictionary that can be saved in a JSON file.</span>
 
@@ -293,7 +293,7 @@
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not decode JSON file, error in&quot;</span><span class="p">,</span>
                                 <span class="n">json_value</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ParametersBase.from_json"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersBase.from_json">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ParametersBase.from_json"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase.from_json">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read this object from a dictionary saved in a JSON file.</span>
@@ -342,7 +342,7 @@
         <span class="k">return</span> <span class="n">deserialized_object</span></div></div>
 
 
-<div class="viewcode-block" id="ParametersNetwork"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersNetwork">[docs]</a><span class="k">class</span> <span class="nc">ParametersNetwork</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<div class="viewcode-block" id="ParametersNetwork"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersNetwork">[docs]</a><span class="k">class</span> <span class="nc">ParametersNetwork</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for constructing a neural network.</span>
 
@@ -419,7 +419,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="mf">0.1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">=</span> <span class="mi">10</span></div>
 
-<div class="viewcode-block" id="ParametersDescriptors"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersDescriptors">[docs]</a><span class="k">class</span> <span class="nc">ParametersDescriptors</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<div class="viewcode-block" id="ParametersDescriptors"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors">[docs]</a><span class="k">class</span> <span class="nc">ParametersDescriptors</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for calculating/parsing input descriptors.</span>
 
@@ -465,7 +465,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="ParametersTargets"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersTargets">[docs]</a><span class="k">class</span> <span class="nc">ParametersTargets</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<div class="viewcode-block" id="ParametersTargets"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersTargets">[docs]</a><span class="k">class</span> <span class="nc">ParametersTargets</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for calculating/parsing output quantites.</span>
 
@@ -510,7 +510,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_restrict_targets</span> <span class="o">=</span> <span class="n">value</span></div>
 
 
-<div class="viewcode-block" id="ParametersData"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersData">[docs]</a><span class="k">class</span> <span class="nc">ParametersData</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<div class="viewcode-block" id="ParametersData"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersData">[docs]</a><span class="k">class</span> <span class="nc">ParametersData</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for loading and preprocessing data.</span>
 
@@ -593,7 +593,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_ratio</span> <span class="o">=</span> <span class="mf">0.5</span></div>
 
 
-<div class="viewcode-block" id="ParametersRunning"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersRunning">[docs]</a><span class="k">class</span> <span class="nc">ParametersRunning</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<div class="viewcode-block" id="ParametersRunning"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersRunning">[docs]</a><span class="k">class</span> <span class="nc">ParametersRunning</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters needed for network runs (train, test or inference).</span>
 
@@ -765,7 +765,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_after_before_training_metric</span> <span class="o">=</span> <span class="n">value</span></div>
 
 
-<div class="viewcode-block" id="ParametersHyperparameterOptimization"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization">[docs]</a><span class="k">class</span> <span class="nc">ParametersHyperparameterOptimization</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<div class="viewcode-block" id="ParametersHyperparameterOptimization"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization">[docs]</a><span class="k">class</span> <span class="nc">ParametersHyperparameterOptimization</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hyperparameter optimization parameters.</span>
 
@@ -940,7 +940,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_trial_ensemble_evaluation</span> <span class="o">=</span> <span class="n">value</span>
 
-<div class="viewcode-block" id="ParametersHyperparameterOptimization.show"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersHyperparameterOptimization.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="ParametersHyperparameterOptimization.show"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print name and values of all attributes of this object.</span>
 
@@ -970,7 +970,7 @@
                         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
 
 
-<div class="viewcode-block" id="ParametersDebug"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.ParametersDebug">[docs]</a><span class="k">class</span> <span class="nc">ParametersDebug</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+<div class="viewcode-block" id="ParametersDebug"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersDebug">[docs]</a><span class="k">class</span> <span class="nc">ParametersDebug</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    All debugging parameters.</span>
 
@@ -987,7 +987,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[]</span></div>
 
 
-<div class="viewcode-block" id="Parameters"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.Parameters">[docs]</a><span class="k">class</span> <span class="nc">Parameters</span><span class="p">:</span>
+<div class="viewcode-block" id="Parameters"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters">[docs]</a><span class="k">class</span> <span class="nc">Parameters</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    All parameter MALA needs to perform its various tasks.</span>
 
@@ -1153,7 +1153,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="o">.</span><span class="n">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Parameters.show"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.Parameters.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Parameters.show"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Print name and values of all attributes of this object.&quot;&quot;&quot;</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;--- &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; ---&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
@@ -1175,7 +1175,7 @@
                          <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="n">parobject</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Parameters.save"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.Parameters.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Parameters.save"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the Parameters object to a file.</span>
 
@@ -1225,7 +1225,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported parameter save format.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Parameters.save_as_pickle"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.Parameters.save_as_pickle">[docs]</a>    <span class="k">def</span> <span class="nf">save_as_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="Parameters.save_as_pickle"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.save_as_pickle">[docs]</a>    <span class="k">def</span> <span class="nf">save_as_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the Parameters object to a pickle file.</span>
 
@@ -1237,7 +1237,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Parameters.save_as_json"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.Parameters.save_as_json">[docs]</a>    <span class="k">def</span> <span class="nf">save_as_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="Parameters.save_as_json"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.save_as_json">[docs]</a>    <span class="k">def</span> <span class="nf">save_as_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the Parameters object to a json file.</span>
 
@@ -1249,7 +1249,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Parameters.load_from_file"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.Parameters.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Parameters.load_from_file"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
                        <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1301,7 +1301,7 @@
 
         <span class="k">return</span> <span class="n">loaded_parameters</span></div>
 
-<div class="viewcode-block" id="Parameters.load_from_pickle"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.Parameters.load_from_pickle">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Parameters.load_from_pickle"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_pickle">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_pickle</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a Parameters object from a pickle file.</span>
@@ -1324,7 +1324,7 @@
         <span class="k">return</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">,</span>
                                   <span class="n">no_snapshots</span><span class="o">=</span><span class="n">no_snapshots</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Parameters.load_from_json"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parameters.Parameters.load_from_json">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Parameters.load_from_json"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_json">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a Parameters object from a json file.</span>

@@ -1,45 +1,23 @@
-mala.common package
-===================
-
-Submodules
-----------
-
-mala.common.check\_modules module
----------------------------------
-
-.. automodule:: mala.common.check_modules
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.common.json\_serializable module
--------------------------------------
-
-.. automodule:: mala.common.json_serializable
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.common.parallelizer module
--------------------------------
-
-.. automodule:: mala.common.parallelizer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.common.parameters module
------------------------------
-
-.. automodule:: mala.common.parameters
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
 
 .. automodule:: mala.common
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+
+
+
+common
+======
+
+
+
+.. toctree::
+   :maxdepth: 6
+
+   mala.common.check_modules
+   mala.common.json_serializable
+   mala.common.parallelizer
+   mala.common.parameters
+

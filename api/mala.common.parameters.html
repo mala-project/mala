@@ -1,0 +1,1363 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>parameters &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="datahandling" href="mala.datahandling.html" />
+    <link rel="prev" title="parallelizer" href="mala.common.parallelizer.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="mala.common.html">common</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mala.common.check_modules.html">check_modules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.json_serializable.html">json_serializable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.parallelizer.html">parallelizer</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.html">targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">API reference</a> &raquo;</li>
+        
+          <li><a href="mala.html">mala</a> &raquo;</li>
+        
+          <li><a href="mala.common.html">common</a> &raquo;</li>
+        
+      <li>parameters</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.common.parameters.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-mala.common.parameters">
+<span id="parameters"></span><h1>parameters<a class="headerlink" href="#module-mala.common.parameters" title="Permalink to this headline">¶</a></h1>
+<p>Collection of all parameter related classes and functions.</p>
+<dl class="py class">
+<dt id="mala.common.parameters.Parameters">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Parameters</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>All parameter MALA needs to perform its various tasks.</p>
+<dl class="py attribute">
+<dt id="mala.common.parameters.Parameters.comment">
+<code class="sig-name descname"><span class="pre">comment</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Characterizes a set of parameters (e.g. “experiment_ddmmyy”).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.Parameters.network">
+<code class="sig-name descname"><span class="pre">network</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains all parameters necessary for constructing a neural network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.ParametersNetwork" title="mala.common.parameters.ParametersNetwork">ParametersNetwork</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.Parameters.descriptors">
+<code class="sig-name descname"><span class="pre">descriptors</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.descriptors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains all parameters necessary for calculating/parsing descriptors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.ParametersDescriptors" title="mala.common.parameters.ParametersDescriptors">ParametersDescriptors</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.Parameters.targets">
+<code class="sig-name descname"><span class="pre">targets</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains all parameters necessary for calculating/parsing output
+quantites.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.ParametersTargets" title="mala.common.parameters.ParametersTargets">ParametersTargets</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.Parameters.data">
+<code class="sig-name descname"><span class="pre">data</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains all parameters necessary for loading and preprocessing data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.ParametersData" title="mala.common.parameters.ParametersData">ParametersData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.Parameters.running">
+<code class="sig-name descname"><span class="pre">running</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.running" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains parameters needed for network runs (train, test or inference).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.ParametersRunning" title="mala.common.parameters.ParametersRunning">ParametersRunning</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.Parameters.hyperparameters">
+<code class="sig-name descname"><span class="pre">hyperparameters</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.hyperparameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameters used for hyperparameter optimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.ParametersHyperparameterOptimization" title="mala.common.parameters.ParametersHyperparameterOptimization">ParametersHyperparameterOptimization</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.Parameters.debug">
+<code class="sig-name descname"><span class="pre">debug</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container for all debugging parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.ParametersDebug" title="mala.common.parameters.ParametersDebug">ParametersDebug</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.Parameters.manual_seed">
+<code class="sig-name descname"><span class="pre">manual_seed</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.manual_seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>If not none, this value is used as manual seed for the neural networks.
+Can be used to make experiments comparable. Default: None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.load_from_file">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a Parameters object from a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>string</em>) – File to which the parameters will be saved to.</p></li>
+<li><p><strong>save_format</strong> (<em>string</em>) – File format which is used for parameter saving.
+Currently only supported file format is “pickle”.</p></li>
+<li><p><strong>no_snapshots</strong> (<em>bool</em>) – If True, than the snapshot list will be emptied. Useful when
+performing inference/testing after training a network.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loaded_parameters</strong> – The loaded Parameters object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters">Parameters</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.load_from_json">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a Parameters object from a json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>string</em>) – File to which the parameters will be saved to.</p></li>
+<li><p><strong>no_snapshots</strong> (<em>bool</em>) – If True, than the snapshot list will be emptied. Useful when
+performing inference/testing after training a network.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loaded_parameters</strong> – The loaded Parameters object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters">Parameters</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.load_from_pickle">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_pickle</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_pickle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a Parameters object from a pickle file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>string</em>) – File to which the parameters will be saved to.</p></li>
+<li><p><strong>no_snapshots</strong> (<em>bool</em>) – If True, than the snapshot list will be emptied. Useful when
+performing inference/testing after training a network.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loaded_parameters</strong> – The loaded Parameters object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters">Parameters</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.save">
+<code class="sig-name descname"><span class="pre">save</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the Parameters object to a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>string</em>) – File to which the parameters will be saved to.</p></li>
+<li><p><strong>save_format</strong> (<em>string</em>) – File format which is used for parameter saving.
+Currently only supported file format is “pickle”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.save_as_json">
+<code class="sig-name descname"><span class="pre">save_as_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.save_as_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.save_as_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the Parameters object to a json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>string</em>) – File to which the parameters will be saved to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.save_as_pickle">
+<code class="sig-name descname"><span class="pre">save_as_pickle</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.save_as_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.save_as_pickle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the Parameters object to a pickle file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>string</em>) – File to which the parameters will be saved to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.show">
+<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.show" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print name and values of all attributes of this object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.device">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">device</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the device used by MALA. Read-only.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.use_gpu">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">use_gpu</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.use_gpu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not a GPU is used (provided there is one).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.use_horovod">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">use_horovod</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.use_horovod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not horovod is used for parallel training.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.use_mpi">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">use_mpi</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.use_mpi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not horovod is used for parallel training.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.Parameters.verbosity">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">verbosity</span></code><a class="headerlink" href="#mala.common.parameters.Parameters.verbosity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control the level of output for MALA.</p>
+<p>The following options are available:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>1: “low”, only essential output will be printed</p></li>
+<li><p>1: “medium”, most diagnostic output will be printed. (Default)</p></li>
+<li><p>2: “high”, all information will be printed.</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.common.parameters.ParametersBase">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersBase</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable" title="mala.common.json_serializable.JSONSerializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.json_serializable.JSONSerializable</span></code></a></p>
+<p>Base parameter class for MALA.</p>
+<dl class="py method">
+<dt id="mala.common.parameters.ParametersBase.from_json">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read this object from a dictionary saved in a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_dict</strong> (<em>dict</em>) – A dictionary containing all attributes, properties, etc. as saved
+in the json file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>deserialized_object</strong> – The object as read from the JSON file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable" title="mala.common.json_serializable.JSONSerializable">JSONSerializable</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.ParametersBase.show">
+<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase.show" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print name and values of all attributes of this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>indent</strong> (<em>string</em>) – The indent used in the list with which the parameter
+shows itself.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.ParametersBase.to_json">
+<code class="sig-name descname"><span class="pre">to_json</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert this object to a dictionary that can be saved in a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>json_dict</strong> – The object as dictionary for export to JSON.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.common.parameters.ParametersData">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersData</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
+<p>Parameters necessary for loading and preprocessing data.</p>
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.descriptors_contain_xyz">
+<code class="sig-name descname"><span class="pre">descriptors_contain_xyz</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.descriptors_contain_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Legacy option. If True, it is assumed that the first three entries of
+the descriptor vector are the xyz coordinates and they are cut from the
+descriptor vector. If False, no such cutting is peformed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.snapshot_directories_list">
+<code class="sig-name descname"><span class="pre">snapshot_directories_list</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.snapshot_directories_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of all added snapshots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.data_splitting_type">
+<code class="sig-name descname"><span class="pre">data_splitting_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.data_splitting_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify how the data for validation, test and training is splitted.
+Currently the only supported option is by_snapshot,
+which splits the data by snapshot boundaries. It is also the default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.input_rescaling_type">
+<code class="sig-name descname"><span class="pre">input_rescaling_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.input_rescaling_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies how input quantities are normalized.
+Options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“None”: No normalization is applied.</p></li>
+<li><p>“standard”: Standardization (Scale to mean 0, standard
+deviation 1)</p></li>
+<li><p>“normal”: Min-Max scaling (Scale to be in range 0…1)</p></li>
+<li><p>“feature-wise-standard”: Row Standardization (Scale to mean 0,
+standard deviation 1)</p></li>
+<li><p>“feature-wise-normal”: Row Min-Max scaling (Scale to be in range
+0…1)</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.output_rescaling_type">
+<code class="sig-name descname"><span class="pre">output_rescaling_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.output_rescaling_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies how output quantities are normalized.
+Options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“None”: No normalization is applied.</p></li>
+<li><dl class="simple">
+<dt>“standard”: Standardization (Scale to mean 0,</dt><dd><p>standard deviation 1)</p>
+</dd>
+</dl>
+</li>
+<li><p>“normal”: Min-Max scaling (Scale to be in range 0…1)</p></li>
+<li><dl class="simple">
+<dt>“feature-wise-standard”: Row Standardization (Scale to mean 0,</dt><dd><p>standard deviation 1)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>“feature-wise-normal”: Row Min-Max scaling (Scale to be in</dt><dd><p>range 0…1)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.use_lazy_loading">
+<code class="sig-name descname"><span class="pre">use_lazy_loading</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.use_lazy_loading" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True, data is lazily loaded, i.e. only the snapshots that are
+currently needed will be kept in memory. This greatly reduces memory
+demands, but adds additional computational time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.use_clustering">
+<code class="sig-name descname"><span class="pre">use_clustering</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.use_clustering" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True, and use_lazy_loading is True as well, the data is clustered,
+i.e. not the entire training data is used by rather only a subset
+which is determined by a clustering algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.number_of_clusters">
+<code class="sig-name descname"><span class="pre">number_of_clusters</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.number_of_clusters" title="Permalink to this definition">¶</a></dt>
+<dd><p>If use_clustering is True, this is the number of clusters used per
+snapshot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersData.train_ratio">
+<code class="sig-name descname"><span class="pre">train_ratio</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData.train_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>If use_clustering is True, this is the ratio of training data used
+to train the encoder for the clustering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="simple">
+<dt>sample_ratio<span class="classifier">float</span></dt><dd><p>If use_clustering is True, this is the ratio of training data used
+for sampling per snapshot (according to clustering then, of course).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.common.parameters.ParametersDebug">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersDebug</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersDebug"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersDebug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
+<p>All debugging parameters.</p>
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersDebug.grid_dimensions">
+<code class="sig-name descname"><span class="pre">grid_dimensions</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDebug.grid_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list containing three elements. It enforces a smaller grid size
+globally when it is not empty.. Default : []</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.common.parameters.ParametersDescriptors">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersDescriptors</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
+<p>Parameters necessary for calculating/parsing input descriptors.</p>
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersDescriptors.descriptor_type">
+<code class="sig-name descname"><span class="pre">descriptor_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.descriptor_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type of descriptors that is used to represent the atomic fingerprint.
+Currently only “SNAP” is supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersDescriptors.twojmax">
+<code class="sig-name descname"><span class="pre">twojmax</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.twojmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>SNAP calculation: 2*jmax-parameter used for calculation of SNAP
+descriptors. Default value for jmax is 5, so default value for
+twojmax is 10.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersDescriptors.rcutfac">
+<code class="sig-name descname"><span class="pre">rcutfac</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.rcutfac" title="Permalink to this definition">¶</a></dt>
+<dd><p>SNAP calculation: radius cutoff factor for the fingerprint sphere in
+Angstroms. Default value is 4.67637.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersDescriptors.lammps_compute_file">
+<code class="sig-name descname"><span class="pre">lammps_compute_file</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.lammps_compute_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>SNAP calculation: LAMMPS input file that is used to calculate the
+SNAP descriptors. If this string is empty, the standard LAMMPS input
+file found in this repository will be used (recommended).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersDescriptors.acsd_points">
+<code class="sig-name descname"><span class="pre">acsd_points</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.acsd_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of points used to calculate the ACSD.
+The actual number of distances will be acsd_points x acsd_points,
+since the cosine similarity is only defined for pairs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersDescriptors.descriptors_contain_xyz">
+<code class="sig-name descname"><span class="pre">descriptors_contain_xyz</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.descriptors_contain_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Legacy option. If True, it is assumed that the first three entries of
+the descriptor vector are the xyz coordinates and they are cut from the
+descriptor vector. If False, no such cutting is peformed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.common.parameters.ParametersHyperparameterOptimization">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersHyperparameterOptimization</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersHyperparameterOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
+<p>Hyperparameter optimization parameters.</p>
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersHyperparameterOptimization.direction">
+<code class="sig-name descname"><span class="pre">direction</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.direction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls whether to minimize or maximize the loss function.
+Arguments are “minimize” and “maximize” respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersHyperparameterOptimization.n_trials">
+<code class="sig-name descname"><span class="pre">n_trials</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.n_trials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls how many trials are performed (when using optuna).
+Default: 100.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersHyperparameterOptimization.hlist">
+<code class="sig-name descname"><span class="pre">hlist</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.hlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>List containing hyperparameters, that are then passed to optuna.
+Supported options so far include:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>learning_rate (float): learning rate of the training algorithm</p></li>
+<li><p>layer_activation_xxx (categorical): Activation function used for
+the feed forward network (see Netwok  parameters for supported
+activation functions). Note that _xxx is only so that optuna
+will differentiate between variables. No reordering is
+performed by the; the order depends on the order in the
+list. _xxx can be essentially anything. Please note further
+that you need to either only request one acitvation function
+(for all layers) or one for specifically for each layer.</p></li>
+<li><p>ff_neurons_layer_xxx(int): Number of neurons per a layer. Note
+that _xxx is only so that optuna will differentiate between
+variables. No reordering is performed by MALA; the order
+depends on the order in the list. _xxx can be essentially
+anything.</p></li>
+</ul>
+</div></blockquote>
+<p>Users normally don’t have to fill this list by hand, the hyperparamer
+optimizer provide interfaces for this task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt>hyper_opt_method<span class="classifier">string</span></dt><dd><p>Method used for hyperparameter optimization. Currently supported:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“optuna” : Use optuna for the hyperparameter optimization.</p></li>
+<li><p>“oat” : Use orthogonal array tuning (currently limited to
+categorical hyperparemeters). Range analysis is
+currently done by simply choosing the lowest loss.</p></li>
+<li><p>“naswot” : Using a NAS without training, based on jacobians.</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt>checkpoints_each_trial<span class="classifier">int</span></dt><dd><p>If not 0, checkpoint files will be saved after each
+checkpoints_each_trial trials. Currently, this only works with
+optuna.</p>
+</dd>
+<dt>checkpoint_name<span class="classifier">string</span></dt><dd><p>Name used for the checkpoints. Using this, multiple runs
+can be performed in the same directory. Currently. this
+only works with optuna.</p>
+</dd>
+<dt>study_name<span class="classifier">string</span></dt><dd><p>Name used for this study (in optuna#s storage). Necessary
+when operating with a RDB storage.</p>
+</dd>
+<dt>rdb_storage<span class="classifier">string</span></dt><dd><p>Adress of the RDB storage to be used by optuna.</p>
+</dd>
+<dt>rdb_storage_heartbeat<span class="classifier">int</span></dt><dd><p>Heartbeat interval for optuna (in seconds). Default is None.
+If not None and above 0, optuna will record the heartbeat of intervals.
+If no action on a RUNNING trial is recognized for longer then this
+interval, then this trial will be moved to FAILED. In distributed
+training, setting a heartbeat is currently the only way to achieve
+a precise number of trials:</p>
+<p><a class="reference external" href="https://github.com/optuna/optuna/issues/1883">https://github.com/optuna/optuna/issues/1883</a></p>
+<p>For optuna versions below 2.8.0, larger heartbeat intervals are
+detrimental to performance and should be avoided:</p>
+<p><a class="reference external" href="https://github.com/optuna/optuna/issues/2685">https://github.com/optuna/optuna/issues/2685</a></p>
+<p>For MALA, no evidence for decreased performance using smaller
+heartbeat values could be found. So if this is used, 1s is a reasonable
+value.</p>
+</dd>
+<dt>number_training_per_trial<span class="classifier">int</span></dt><dd><p>Number of network trainings performed per trial. Default is 1,
+but it makes sense to choose a higher number, to exclude networks
+that performed by chance (good initilization). Naturally this impedes
+performance.</p>
+</dd>
+<dt>trial_ensemble_evaluation<span class="classifier">string</span></dt><dd><p>Control how multiple trainings performed during a trial are evaluated.
+By default, simply “mean” is used. For smaller numbers of training
+per trial it might make sense to use “mean_std”, which means that
+the mean of all metrics plus the standard deviation is used,
+as an estimate of the minimal accuracy to be expected. Currently,
+“mean” and “mean_std” are allowed.</p>
+</dd>
+<dt>use_multivariate<span class="classifier">bool</span></dt><dd><p>If True, the optuna multivariate sampler is used. It is experimental
+since v2.2.0, but reported to perform very well.
+<a class="reference external" href="http://proceedings.mlr.press/v80/falkner18a.html">http://proceedings.mlr.press/v80/falkner18a.html</a></p>
+</dd>
+<dt>naswot_pruner_cutoff<span class="classifier">float</span></dt><dd><p>If the surrogate loss algorithm is used as a pruner during a study,
+this cutoff determines which trials are neglected.</p>
+</dd>
+<dt>pruner: string</dt><dd><p>Pruner type to be used by optuna. Currently only “naswot” is
+supported, which will use the NASWOT algorithm as pruner.</p>
+</dd>
+<dt>naswot_pruner_batch_size<span class="classifier">int</span></dt><dd><p>Batch size for the NASWOT pruner</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.common.parameters.ParametersHyperparameterOptimization.show">
+<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersHyperparameterOptimization.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.show" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print name and values of all attributes of this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>indent</strong> (<em>string</em>) – The indent used in the list with which the parameter
+shows itself.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.ParametersHyperparameterOptimization.number_training_per_trial">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">number_training_per_trial</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.number_training_per_trial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control how many trainings are run per optuna trial.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.ParametersHyperparameterOptimization.rdb_storage_heartbeat">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">rdb_storage_heartbeat</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.rdb_storage_heartbeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether a heartbeat is used for distributed optuna runs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.ParametersHyperparameterOptimization.trial_ensemble_evaluation">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">trial_ensemble_evaluation</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.trial_ensemble_evaluation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control how multiple trainings performed during a trial are evaluated.</p>
+<p>By default, simply “mean” is used. For smaller numbers of training
+per trial it might make sense to use “mean_std”, which means that
+the mean of all metrics plus the standard deviation is used,
+as an estimate of the minimal accuracy to be expected. Currently,
+“mean” and “mean_std” are allowed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.common.parameters.ParametersNetwork">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersNetwork</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
+<p>Parameters necessary for constructing a neural network.</p>
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersNetwork.nn_type">
+<code class="sig-name descname"><span class="pre">nn_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork.nn_type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Type of the neural network that will be used. Currently supported are</dt><dd><ul class="simple">
+<li><p>“feed_forward” (default)</p></li>
+<li><p>“transformer”</p></li>
+<li><p>“lstm”</p></li>
+<li><p>“gru”</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt>layer_sizes<span class="classifier">list</span></dt><dd><p>A list of integers detailing the sizes of the layer of the neural
+network. Please note that the input layer is included therein.
+Default: [10,10,0]</p>
+</dd>
+<dt>layer_activations: list</dt><dd><p>A list of strings detailing the activation functions to be used
+by the neural network. If the dimension of layer_activations is
+smaller than the dimension of layer_sizes-1, than the first entry
+is used for all layers.
+Currently supported activation functions are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Sigmoid (default)</p></li>
+<li><p>ReLU</p></li>
+<li><p>LeakyReLU</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt>loss_function_type: string</dt><dd><p>Loss function for the neural network
+Currently supported loss functions include:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>mse (Mean squared error; default)</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt>no_hidden_state<span class="classifier">bool</span></dt><dd><p>If True hidden and cell state is assigned to zeros for LSTM Network.
+false will keep the hidden state active
+Default: False</p>
+</dd>
+<dt>bidirection: bool</dt><dd><p>Sets lstm network size based on bidirectional or just one direction
+Default: False</p>
+</dd>
+<dt>num_hidden_layers: int</dt><dd><p>Number of hidden layers to be used in lstm or gru or transformer nets
+Default: None</p>
+</dd>
+<dt>dropout: float</dt><dd><p>Dropout rate for transformer net
+0.0 &lt;= dropout &lt;=1.0
+Default: 0.0</p>
+</dd>
+<dt>num_heads: int</dt><dd><p>Number of heads to be used in Multi head attention network
+This should be a divisor of input dimension
+Default: None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.common.parameters.ParametersRunning">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersRunning</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersRunning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersRunning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
+<p>Parameters needed for network runs (train, test or inference).</p>
+<p>Some of these parameters only apply to either the train or test or
+inference case.</p>
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.trainingtype">
+<code class="sig-name descname"><span class="pre">trainingtype</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.trainingtype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Training type to be used. Supported options at the moment:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>SGD: Stochastic gradient descent.</p></li>
+<li><p>Adam: Adam Optimization Algorithm</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.learning_rate">
+<code class="sig-name descname"><span class="pre">learning_rate</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learning rate for chosen optimization algorithm. Default: 0.5.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.max_number_epochs">
+<code class="sig-name descname"><span class="pre">max_number_epochs</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.max_number_epochs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of epochs to train for. Default: 100.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.mini_batch_size">
+<code class="sig-name descname"><span class="pre">mini_batch_size</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.mini_batch_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of the mini batch for the optimization algorihm. Default: 10.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.weight_decay">
+<code class="sig-name descname"><span class="pre">weight_decay</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.weight_decay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weight decay for regularization. Always refers to L2 regularization.
+Default: 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.early_stopping_epochs">
+<code class="sig-name descname"><span class="pre">early_stopping_epochs</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.early_stopping_epochs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of epochs the validation accuracy is allowed to not improve by
+at leastearly_stopping_threshold, before we terminate. If 0, no
+early stopping is performed. Default: 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.early_stopping_threshold">
+<code class="sig-name descname"><span class="pre">early_stopping_threshold</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.early_stopping_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the validation accuracy does not improve by at least threshold for
+early_stopping_epochs epochs, training is terminated:
+validation_loss &lt; validation_loss_old * (1+early_stopping_threshold),
+or patience counter will go up.
+Default: 0. Numbers bigger than 0 can make early stopping very
+aggresive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.learning_rate_scheduler">
+<code class="sig-name descname"><span class="pre">learning_rate_scheduler</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate_scheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learning rate scheduler to be used. If not None, an instance of the
+corresponding pytorch class will be used to manage the learning rate
+schedule.
+Options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>None: No learning rate schedule will be used.</p></li>
+<li><p>“ReduceLROnPlateau”: The learning rate will be reduced when the
+validation loss is plateauing.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.learning_rate_decay">
+<code class="sig-name descname"><span class="pre">learning_rate_decay</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate_decay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decay rate to be used in the learning rate (if the chosen scheduler
+supports that).
+Default: 0.1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.learning_rate_patience">
+<code class="sig-name descname"><span class="pre">learning_rate_patience</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.learning_rate_patience" title="Permalink to this definition">¶</a></dt>
+<dd><p>Patience parameter used in the learning rate schedule (how long the
+validation loss has to plateau before the schedule takes effect).
+Default: 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.use_compression">
+<code class="sig-name descname"><span class="pre">use_compression</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.use_compression" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True and horovod is used, horovod compression will be used for
+allreduce communication. This can improve performance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.num_workers">
+<code class="sig-name descname"><span class="pre">num_workers</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.num_workers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of workers to be used for data loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.sampler">
+<code class="sig-name descname"><span class="pre">sampler</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.sampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary with samplers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.use_shuffling_for_samplers">
+<code class="sig-name descname"><span class="pre">use_shuffling_for_samplers</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.use_shuffling_for_samplers" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True, the training data will be shuffled in between epochs.
+If lazy loading is selected, then this shuffling will be done on
+a “by snapshot” basis.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.checkpoints_each_epoch">
+<code class="sig-name descname"><span class="pre">checkpoints_each_epoch</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.checkpoints_each_epoch" title="Permalink to this definition">¶</a></dt>
+<dd><p>If not 0, checkpoint files will be saved after eac
+checkpoints_each_epoch epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.checkpoint_name">
+<code class="sig-name descname"><span class="pre">checkpoint_name</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.checkpoint_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name used for the checkpoints. Using this, multiple runs
+can be performed in the same directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.visualisation">
+<code class="sig-name descname"><span class="pre">visualisation</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.visualisation" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True then Tensorboard is activated for visualisation
+case 0: No tensorboard activated
+case 1: tensorboard activated with Loss and learning rate
+case 2; additonally weights and biases and gradient</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersRunning.inference_data_grid">
+<code class="sig-name descname"><span class="pre">inference_data_grid</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.inference_data_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>List holding the grid to be used for inference in the form of
+[x,y,z].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.ParametersRunning.after_before_training_metric">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">after_before_training_metric</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.after_before_training_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the metric used during training.</p>
+<p>Metric for evaluated on the validation and test set before and after
+training. Default is “LDOS”, meaning that the regular loss on the LDOS
+will be used as a metric. Possible options are “band_energy” and
+“total_energy”. For these, the band resp. total energy of the
+validation snapshots will be calculated and compared to the provided
+DFT results. Of these, the mean average error in eV/atom will be
+calculated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.ParametersRunning.during_training_metric">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">during_training_metric</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning.during_training_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control the metric used during training.</p>
+<p>Metric for evaluated on the validation set during training.
+Default is “ldos”, meaning that the regular loss on the LDOS will be
+used as a metric. Possible options are “band_energy” and
+“total_energy”. For these, the band resp. total energy of the
+validation snapshots will be calculated and compared to the provided
+DFT results. Of these, the mean average error in eV/atom will be
+calculated.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mala.common.parameters.ParametersTargets">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersTargets</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersTargets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersTargets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
+<p>Parameters necessary for calculating/parsing output quantites.</p>
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersTargets.target_type">
+<code class="sig-name descname"><span class="pre">target_type</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.target_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of points in the energy grid that is used to calculate the
+(L)DOS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersTargets.ldos_gridsize">
+<code class="sig-name descname"><span class="pre">ldos_gridsize</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gridspacing of the energy grid the (L)DOS is evaluated on [eV].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersTargets.ldos_gridspacing_ev">
+<code class="sig-name descname"><span class="pre">ldos_gridspacing_ev</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridspacing_ev" title="Permalink to this definition">¶</a></dt>
+<dd><p>SNAP calculation: radius cutoff factor for the fingerprint sphere in
+Angstroms. Default value is 4.67637.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersTargets.ldos_gridoffset_ev">
+<code class="sig-name descname"><span class="pre">ldos_gridoffset_ev</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridoffset_ev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lowest energy value on the (L)DOS energy grid [eV].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.common.parameters.ParametersTargets.restrict_targets">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">restrict_targets</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.restrict_targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control if and how targets are restricted to physical values..</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mala.datahandling.html" class="btn btn-neutral float-right" title="datahandling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.common.parallelizer.html" class="btn btn-neutral float-left" title="parallelizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

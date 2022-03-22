@@ -1,0 +1,7 @@
+parallelizer
+============
+
+.. automodule:: mala.common.parallelizer
+   :members:
+   :undoc-members:
+   :show-inheritance:

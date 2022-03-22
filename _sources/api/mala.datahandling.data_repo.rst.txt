@@ -1,0 +1,7 @@
+data\_repo
+==========
+
+.. automodule:: mala.datahandling.data_repo
+   :members:
+   :undoc-members:
+   :show-inheritance:

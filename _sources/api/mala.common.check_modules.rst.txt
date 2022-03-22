@@ -1,0 +1,7 @@
+check\_modules
+==============
+
+.. automodule:: mala.common.check_modules
+   :members:
+   :undoc-members:
+   :show-inheritance:

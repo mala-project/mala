@@ -1,0 +1,7 @@
+hyperparameter\_naswot
+======================
+
+.. automodule:: mala.network.hyperparameter_naswot
+   :members:
+   :undoc-members:
+   :show-inheritance:

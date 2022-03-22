@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -163,7 +163,7 @@
 <span class="kn">import</span> <span class="nn">inspect</span>
 
 
-<div class="viewcode-block" id="JSONSerializable"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.json_serializable.JSONSerializable">[docs]</a><span class="k">class</span> <span class="nc">JSONSerializable</span><span class="p">:</span>
+<div class="viewcode-block" id="JSONSerializable"><a class="viewcode-back" href="../../../api/mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable">[docs]</a><span class="k">class</span> <span class="nc">JSONSerializable</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for all objects that need to be JSON serializable.</span>
 
@@ -175,7 +175,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="JSONSerializable.to_json"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.json_serializable.JSONSerializable.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="JSONSerializable.to_json"><a class="viewcode-back" href="../../../api/mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert this object to a dictionary that can be saved in a JSON file.</span>
 
@@ -187,7 +187,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_standard_serializer</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="JSONSerializable.from_json"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.json_serializable.JSONSerializable.from_json">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="JSONSerializable.from_json"><a class="viewcode-back" href="../../../api/mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable.from_json">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read this object from a dictionary saved in a JSON file.</span>

@@ -1,11 +1,19 @@
-mala package
-============
 
-Subpackages
------------
+.. automodule:: mala
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+
+
+
+mala
+====
+
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 6
 
    mala.common
    mala.datahandling
@@ -14,21 +22,10 @@ Subpackages
    mala.network
    mala.targets
 
-Submodules
-----------
 
-mala.version module
--------------------
 
-.. automodule:: mala.version
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 6
 
-Module contents
----------------
+   mala.version
 
-.. automodule:: mala
-   :members:
-   :undoc-members:
-   :show-inheritance:

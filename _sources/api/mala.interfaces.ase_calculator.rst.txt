@@ -1,0 +1,7 @@
+ase\_calculator
+===============
+
+.. automodule:: mala.interfaces.ase_calculator
+   :members:
+   :undoc-members:
+   :show-inheritance:

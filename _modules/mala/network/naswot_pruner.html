@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -167,7 +167,7 @@
 <span class="kn">from</span> <span class="nn">mala.network.objective_naswot</span> <span class="kn">import</span> <span class="n">ObjectiveNASWOT</span>
 
 
-<div class="viewcode-block" id="NASWOTPruner"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.naswot_pruner.NASWOTPruner">[docs]</a><span class="k">class</span> <span class="nc">NASWOTPruner</span><span class="p">(</span><span class="n">BasePruner</span><span class="p">):</span>
+<div class="viewcode-block" id="NASWOTPruner"><a class="viewcode-back" href="../../../api/mala.network.naswot_pruner.html#mala.network.naswot_pruner.NASWOTPruner">[docs]</a><span class="k">class</span> <span class="nc">NASWOTPruner</span><span class="p">(</span><span class="n">BasePruner</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the NASWOT method (first version of paper) as an optuna pruner.</span>
 
@@ -193,7 +193,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trial_type</span> <span class="o">!=</span> <span class="s2">&quot;optuna&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;This pruner only works for optuna at the moment.&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="NASWOTPruner.prune"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.naswot_pruner.NASWOTPruner.prune">[docs]</a>    <span class="k">def</span> <span class="nf">prune</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">:</span> <span class="s2">&quot;optuna.study.Study&quot;</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span>
+<div class="viewcode-block" id="NASWOTPruner.prune"><a class="viewcode-back" href="../../../api/mala.network.naswot_pruner.html#mala.network.naswot_pruner.NASWOTPruner.prune">[docs]</a>    <span class="k">def</span> <span class="nf">prune</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">:</span> <span class="s2">&quot;optuna.study.Study&quot;</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span>
               <span class="s2">&quot;optuna.trial.FrozenTrial&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Judge whether the trial should be pruned based on the reported values.</span>

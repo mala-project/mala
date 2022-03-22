@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -170,7 +170,7 @@
 <span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="n">fermi_function</span>
 
 
-<div class="viewcode-block" id="Target"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target">[docs]</a><span class="k">class</span> <span class="nc">Target</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Target"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target">[docs]</a><span class="k">class</span> <span class="nc">Target</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for all target quantity parser.</span>
 
@@ -272,7 +272,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># (2, 2, 2)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span> <span class="o">=</span> <span class="p">{}</span>
 
-<div class="viewcode-block" id="Target.get_feature_size"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.get_feature_size">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="Target.get_feature_size"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_feature_size">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">get_feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
@@ -289,46 +289,46 @@
     <span class="k">def</span> <span class="nf">qe_input_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_qe_input_data</span> <span class="o">=</span> <span class="n">value</span>
 
-<div class="viewcode-block" id="Target.read_from_cube"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.read_from_cube">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.read_from_cube"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.read_from_cube">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Read the quantity from a .cube file.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No function defined to read this quantity &quot;</span>
                         <span class="s2">&quot;from a .cube file.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.read_from_qe_dos_txt"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.read_from_qe_dos_txt">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_qe_dos_txt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.read_from_qe_dos_txt"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.read_from_qe_dos_txt">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_qe_dos_txt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Read the quantity from a Quantum Espresso .dos.txt file.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No function defined to read this quantity &quot;</span>
                         <span class="s2">&quot;from a qe.dos.txt file&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.get_density"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.get_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.get_density"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the electronic density.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No function to calculate or provide the &quot;</span>
                         <span class="s2">&quot;density has been implemented for this target type.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.get_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.get_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.get_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the density of states.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No function to calculate or provide the&quot;</span>
                         <span class="s2">&quot;density of states (DOS) has been implemented &quot;</span>
                         <span class="s2">&quot;for this target type.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the band energy.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No function to calculate or provide the&quot;</span>
                         <span class="s2">&quot;band energy has been implemented for this target &quot;</span>
                         <span class="s2">&quot;type.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the number of electrons.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No function to calculate or provide the number of&quot;</span>
                         <span class="s2">&quot; electrons has been implemented for this target &quot;</span>
                         <span class="s2">&quot;type.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.get_total_energy"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.get_total_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.get_total_energy"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_total_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the total energy.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No function to calculate or provide the number &quot;</span>
                         <span class="s2">&quot;of electons has been implemented for this target &quot;</span>
                         <span class="s2">&quot;type.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.read_additional_calculation_data"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.read_additional_calculation_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.read_additional_calculation_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.read_additional_calculation_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read in additional input about a calculation.</span>
 
@@ -493,11 +493,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported auxiliary file type.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.get_energy_grid"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.get_energy_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.get_energy_grid"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_energy_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get energy grid.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No method implement to calculate an energy grid.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.get_real_space_grid"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.get_real_space_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_real_space_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.get_real_space_grid"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_real_space_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_real_space_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the real space grid.&quot;&quot;&quot;</span>
         <span class="n">grid3D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
@@ -509,7 +509,7 @@
                     <span class="n">grid3D</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_spacing_Bohr</span>
         <span class="k">return</span> <span class="n">grid3D</span></div>
 
-<div class="viewcode-block" id="Target.write_tem_input_file"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.write_tem_input_file">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Target.write_tem_input_file"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_tem_input_file">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">write_tem_input_file</span><span class="p">(</span><span class="n">atoms_Angstrom</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="p">,</span>
                              <span class="n">qe_pseudopotentials</span><span class="p">,</span>
                              <span class="n">grid_dimensions</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">):</span>
@@ -561,7 +561,7 @@
                      <span class="n">pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
                      <span class="n">kpts</span><span class="o">=</span><span class="n">kpoints</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.convert_units"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Target.convert_units"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array into the MALA units.</span>
@@ -583,7 +583,7 @@
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No unit conversion method implemented for&quot;</span>
                         <span class="s2">&quot; this target type.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.backconvert_units"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Target.backconvert_units"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array from MALA units into desired units.</span>
@@ -605,7 +605,7 @@
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No unit back conversion method implemented &quot;</span>
                         <span class="s2">&quot;for this target type.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.restrict_data"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.target.Target.restrict_data">[docs]</a>    <span class="k">def</span> <span class="nf">restrict_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.restrict_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.restrict_data">[docs]</a>    <span class="k">def</span> <span class="nf">restrict_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Restrict target data to only contain physically meaningful values.</span>
 

@@ -1,0 +1,7 @@
+hyperparameter\_optuna
+======================
+
+.. automodule:: mala.network.hyperparameter_optuna
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,283 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>objective_naswot &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="predictor" href="mala.network.predictor.html" />
+    <link rel="prev" title="objective_base" href="mala.network.objective_base.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.network.html">network</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt.html">hyper_opt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_naswot.html">hyper_opt_naswot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html">hyper_opt_oat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_optuna.html">hyper_opt_optuna</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_interface.html">hyperparameter_interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_naswot.html">hyperparameter_naswot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_oat.html">hyperparameter_oat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_optuna.html">hyperparameter_optuna</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.naswot_pruner.html">naswot_pruner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html">network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.objective_base.html">objective_base</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">objective_naswot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.predictor.html">predictor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.runner.html">runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.tester.html">tester</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.trainer.html">trainer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.html">targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">API reference</a> &raquo;</li>
+        
+          <li><a href="mala.html">mala</a> &raquo;</li>
+        
+          <li><a href="mala.network.html">network</a> &raquo;</li>
+        
+      <li>objective_naswot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.network.objective_naswot.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-mala.network.objective_naswot">
+<span id="objective-naswot"></span><h1>objective_naswot<a class="headerlink" href="#module-mala.network.objective_naswot" title="Permalink to this headline">¶</a></h1>
+<p>Objective functions for hyperparameter optimizations without training.</p>
+<dl class="py class">
+<dt id="mala.network.objective_naswot.ObjectiveNASWOT">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ObjectiveNASWOT</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_parameters</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_handler</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><span class="pre">mala.datahandling.data_handler.DataHandler</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/objective_naswot.html#ObjectiveNASWOT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.objective_naswot.ObjectiveNASWOT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mala.network.objective_base.html#mala.network.objective_base.ObjectiveBase" title="mala.network.objective_base.ObjectiveBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.objective_base.ObjectiveBase</span></code></a></p>
+<p>Represents the objective function using no NN training.</p>
+<p>The objective value is calculated using the Jacobian.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>search_parameters</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this objective.</p></li>
+<li><p><strong>data_handler</strong> (<a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – datahandler to be used during the hyperparameter optimization.</p></li>
+<li><p><strong>trial_type</strong> (<em>string</em>) – <p>Format of hyperparameters used in this objective. Supported
+choices are:</p>
+<blockquote>
+<div><ul>
+<li><p>optuna</p></li>
+<li><p>oat</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size for the forwarding. Default (None) means that the regular
+mini batch size from ParametersRunning is used; however, for some
+applications it might make sense to specify something different.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mala.network.predictor.html" class="btn btn-neutral float-right" title="predictor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.network.objective_base.html" class="btn btn-neutral float-left" title="objective_base" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

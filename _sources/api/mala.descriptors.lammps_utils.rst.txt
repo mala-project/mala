@@ -1,0 +1,7 @@
+lammps\_utils
+=============
+
+.. automodule:: mala.descriptors.lammps_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

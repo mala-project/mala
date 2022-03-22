@@ -1,0 +1,7 @@
+atomic\_force
+=============
+
+.. automodule:: mala.targets.atomic_force
+   :members:
+   :undoc-members:
+   :show-inheritance:

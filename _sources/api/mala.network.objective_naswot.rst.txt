@@ -1,0 +1,7 @@
+objective\_naswot
+=================
+
+.. automodule:: mala.network.objective_naswot
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+naswot\_pruner
+==============
+
+.. automodule:: mala.network.naswot_pruner
+   :members:
+   :undoc-members:
+   :show-inheritance:

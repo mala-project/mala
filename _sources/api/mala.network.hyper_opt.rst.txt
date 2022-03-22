@@ -1,0 +1,7 @@
+hyper\_opt
+==========
+
+.. automodule:: mala.network.hyper_opt
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -177,7 +177,7 @@
 <span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">functional</span>
 
 
-<div class="viewcode-block" id="Network"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network">[docs]</a><span class="k">class</span> <span class="nc">Network</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="Network"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.Network">[docs]</a><span class="k">class</span> <span class="nc">Network</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Central network class for this framework, based on pytorch.nn.Module.</span>
 
 <span class="sd">    Parameters</span>
@@ -256,12 +256,12 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported loss function.&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Network.forward"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network.forward">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="Network.forward"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.Network.forward">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Abstract method. To be implemented by the derived class.&quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Network.do_prediction"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network.do_prediction">[docs]</a>    <span class="k">def</span> <span class="nf">do_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+<div class="viewcode-block" id="Network.do_prediction"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.Network.do_prediction">[docs]</a>    <span class="k">def</span> <span class="nf">do_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Predict the output values for an input array..</span>
 
@@ -285,7 +285,7 @@
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
             <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">array</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Network.calculate_loss"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network.calculate_loss">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+<div class="viewcode-block" id="Network.calculate_loss"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.Network.calculate_loss">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the loss for a predicted output and target.</span>
 
@@ -307,7 +307,7 @@
 
     <span class="c1"># FIXME: This guarentees downwards compatibility, but it is ugly.</span>
     <span class="c1">#  Rather enforce the right package versions in the repo.</span>
-<div class="viewcode-block" id="Network.save_network"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network.save_network">[docs]</a>    <span class="k">def</span> <span class="nf">save_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">):</span>
+<div class="viewcode-block" id="Network.save_network"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.Network.save_network">[docs]</a>    <span class="k">def</span> <span class="nf">save_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the network.</span>
 
@@ -326,7 +326,7 @@
         <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">path_to_file</span><span class="p">,</span>
                    <span class="n">_use_new_zipfile_serialization</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Network.load_from_file"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.Network.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Network.load_from_file"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.Network.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a network from a file.</span>
@@ -358,7 +358,7 @@
         <span class="k">return</span> <span class="n">loaded_network</span></div></div>
 
 
-<div class="viewcode-block" id="FeedForwardNet"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.FeedForwardNet">[docs]</a><span class="k">class</span> <span class="nc">FeedForwardNet</span><span class="p">(</span><span class="n">Network</span><span class="p">):</span>
+<div class="viewcode-block" id="FeedForwardNet"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.FeedForwardNet">[docs]</a><span class="k">class</span> <span class="nc">FeedForwardNet</span><span class="p">(</span><span class="n">Network</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize this network as a feed-forward network.&quot;&quot;&quot;</span>
 
         <span class="c1"># Check if multiple types of activations were selected or only one</span>
@@ -402,7 +402,7 @@
         <span class="c1"># device.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
 
-<div class="viewcode-block" id="FeedForwardNet.forward"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.FeedForwardNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+<div class="viewcode-block" id="FeedForwardNet.forward"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.FeedForwardNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform a forward pass through the network.</span>
 
@@ -421,7 +421,7 @@
             <span class="n">inputs</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">inputs</span></div></div>
 
-<div class="viewcode-block" id="LSTM"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.LSTM">[docs]</a><span class="k">class</span> <span class="nc">LSTM</span><span class="p">(</span><span class="n">Network</span><span class="p">):</span>
+<div class="viewcode-block" id="LSTM"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.LSTM">[docs]</a><span class="k">class</span> <span class="nc">LSTM</span><span class="p">(</span><span class="n">Network</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize this network as a LSTM network.&quot;&quot;&quot;</span>
 
     <span class="c1"># was passed to be used in the entire network.</span>
@@ -457,7 +457,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
 
     <span class="c1"># Apply Network</span>
-<div class="viewcode-block" id="LSTM.forward"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.LSTM.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="LSTM.forward"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.LSTM.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform a forward pass through the network.</span>
 
@@ -498,7 +498,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
     <span class="c1"># Initialize hidden and cell states</span>
-<div class="viewcode-block" id="LSTM.init_hidden"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.LSTM.init_hidden">[docs]</a>    <span class="k">def</span> <span class="nf">init_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LSTM.init_hidden"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.LSTM.init_hidden">[docs]</a>    <span class="k">def</span> <span class="nf">init_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize hidden state and cell state to zero when called and assigns specific sizes.</span>
 
@@ -526,7 +526,7 @@
 
         <span class="k">return</span> <span class="p">(</span><span class="n">h0</span><span class="p">,</span> <span class="n">c0</span><span class="p">)</span></div></div>
 
-<div class="viewcode-block" id="GRU"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.GRU">[docs]</a><span class="k">class</span> <span class="nc">GRU</span><span class="p">(</span><span class="n">LSTM</span><span class="p">):</span>
+<div class="viewcode-block" id="GRU"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.GRU">[docs]</a><span class="k">class</span> <span class="nc">GRU</span><span class="p">(</span><span class="n">LSTM</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize this network as a GRU network.&quot;&quot;&quot;</span>
 
     <span class="c1"># was passed to be used similar to LSTM but with small tweek for the layer as GRU.</span>
@@ -557,7 +557,7 @@
         <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">use_gpu</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cuda&#39;</span><span class="p">)</span>
      <span class="c1"># Apply Network</span>
-<div class="viewcode-block" id="GRU.forward"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.GRU.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="GRU.forward"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.GRU.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform a forward pass through the network.</span>
 
@@ -598,7 +598,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
        <span class="c1"># Initialize hidden states</span>
-<div class="viewcode-block" id="GRU.init_hidden"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.GRU.init_hidden">[docs]</a>    <span class="k">def</span> <span class="nf">init_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GRU.init_hidden"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.GRU.init_hidden">[docs]</a>    <span class="k">def</span> <span class="nf">init_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize hidden state to zero when called and assigns specific sizes.</span>
 
@@ -619,7 +619,7 @@
 
         <span class="k">return</span> <span class="n">h0</span></div></div>
 
-<div class="viewcode-block" id="TransformerNet"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.TransformerNet">[docs]</a><span class="k">class</span> <span class="nc">TransformerNet</span><span class="p">(</span><span class="n">Network</span><span class="p">):</span>
+<div class="viewcode-block" id="TransformerNet"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.TransformerNet">[docs]</a><span class="k">class</span> <span class="nc">TransformerNet</span><span class="p">(</span><span class="n">Network</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize this network as the transformer net.</span>
 
 <span class="sd">    Parameters</span>
@@ -655,7 +655,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
 
 
-<div class="viewcode-block" id="TransformerNet.generate_square_subsequent_mask"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.TransformerNet.generate_square_subsequent_mask">[docs]</a>    <span class="k">def</span> <span class="nf">generate_square_subsequent_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+<div class="viewcode-block" id="TransformerNet.generate_square_subsequent_mask"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.TransformerNet.generate_square_subsequent_mask">[docs]</a>    <span class="k">def</span> <span class="nf">generate_square_subsequent_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate a mask so that only the current and previous tokens are visible to the transformer.</span>
 
@@ -669,7 +669,7 @@
 
         <span class="k">return</span> <span class="n">mask</span></div>
 
-<div class="viewcode-block" id="TransformerNet.init_weights"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.TransformerNet.init_weights">[docs]</a>    <span class="k">def</span> <span class="nf">init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TransformerNet.init_weights"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.TransformerNet.init_weights">[docs]</a>    <span class="k">def</span> <span class="nf">init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialise weights with a uniform random distribution in the range (-initrange, initrange).&quot;&quot;&quot;</span>
         <span class="n">initrange</span> <span class="o">=</span> <span class="mf">0.1</span>
     <span class="c1">#        self.encoder.weight.data.uniform_(-initrange, initrange)</span>
@@ -677,7 +677,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">uniform_</span><span class="p">(</span><span class="o">-</span><span class="n">initrange</span><span class="p">,</span> <span class="n">initrange</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TransformerNet.forward"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.TransformerNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="TransformerNet.forward"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.TransformerNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform a forward pass through the network.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">src_mask</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">src_mask</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
             <span class="n">device</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">device</span>
@@ -691,7 +691,7 @@
         <span class="n">output</span><span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">output</span></div></div>
 
-<div class="viewcode-block" id="PositionalEncoding"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.PositionalEncoding">[docs]</a><span class="k">class</span> <span class="nc">PositionalEncoding</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="PositionalEncoding"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.PositionalEncoding">[docs]</a><span class="k">class</span> <span class="nc">PositionalEncoding</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Injects some information of relative/absolute position of token in a sequence.</span>
 
 <span class="sd">    Parameters</span>
@@ -721,7 +721,7 @@
         <span class="n">pe</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s1">&#39;pe&#39;</span><span class="p">,</span> <span class="n">pe</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PositionalEncoding.forward"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.network.PositionalEncoding.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="PositionalEncoding.forward"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.PositionalEncoding.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform a forward pass through the network.&quot;&quot;&quot;</span>
         <span class="n">x</span><span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1">#add extra dimension for batch_size</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pe</span><span class="p">[:</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="p">:]</span>

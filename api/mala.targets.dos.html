@@ -1,0 +1,518 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>dos &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ldos" href="mala.targets.ldos.html" />
+    <link rel="prev" title="density" href="mala.targets.density.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.targets.html">targets</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.atomic_force.html">atomic_force</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.calculation_helpers.html">calculation_helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.cube_parser.html">cube_parser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html">density</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">dos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html">ldos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html">target</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">API reference</a> &raquo;</li>
+        
+          <li><a href="mala.html">mala</a> &raquo;</li>
+        
+          <li><a href="mala.targets.html">targets</a> &raquo;</li>
+        
+      <li>dos</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.targets.dos.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-mala.targets.dos">
+<span id="dos"></span><h1>dos<a class="headerlink" href="#module-mala.targets.dos" title="Permalink to this headline">¶</a></h1>
+<p>DOS calculation class.</p>
+<dl class="py class">
+<dt id="mala.targets.dos.DOS">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">DOS</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target" title="mala.targets.target.Target"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.targets.target.Target</span></code></a></p>
+<p>Postprocessing / parsing functions for the density of states (DOS).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this TargetBase object.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.backconvert_units">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">backconvert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.backconvert_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the units of an array from MALA units into desired units.</p>
+<p>MALA units for the DOS means 1/eV.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>numpy.array</em>) – Data in 1/eV.</p></li>
+<li><p><strong>out_units</strong> (<em>string</em>) – Desired units of output array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>converted_array</strong> – Data in out_units.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.convert_units">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">convert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.convert_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the units of an array into the MALA units.</p>
+<p>MALA units for the DOS means 1/eV.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>numpy.array</em>) – Data for which the units should be converted.</p></li>
+<li><p><strong>in_units</strong> (<em>string</em>) – <p>Units of array. Currently supported are:</p>
+<blockquote>
+<div><ul>
+<li><p>1/eV (no conversion, MALA unit)</p></li>
+<li><p>1/Ry</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>converted_array</strong> – Data in 1/eV.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.from_ldos">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_ldos</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.from_ldos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.from_ldos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a DOS object from an LDOS object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ldos_object</strong> (<a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS" title="mala.targets.ldos.LDOS"><em>mala.targets.ldos.LDOS</em></a>) – LDOS object used as input.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dos_object</strong> – DOS object created from LDOS object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.dos.DOS" title="mala.targets.dos.DOS">DOS</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.get_band_energy">
+<code class="sig-name descname"><span class="pre">get_band_energy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_band_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_band_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the band energy from given DOS data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid].</p></li>
+<li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
+<li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
+<li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
+<blockquote>
+<div><ul>
+<li><p>”trapz” for trapezoid method</p></li>
+<li><p>”simps” for Simpson method.</p></li>
+<li><p>”analytical” for analytical integration. Recommended.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>band_energy</strong> – Band energy in eV.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.get_density_of_states">
+<code class="sig-name descname"><span class="pre">get_density_of_states</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_density_of_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_density_of_states" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the density of states.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.get_energy_grid">
+<code class="sig-name descname"><span class="pre">get_energy_grid</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_energy_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_energy_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get energy grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>e_grid</strong> – Energy grid on which the DOS is defined.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.get_entropy_contribution">
+<code class="sig-name descname"><span class="pre">get_entropy_contribution</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_entropy_contribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_entropy_contribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the entropy contribution to the total energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid].</p></li>
+<li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
+<li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
+<li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
+<blockquote>
+<div><ul>
+<li><p>”trapz” for trapezoid method</p></li>
+<li><p>”simps” for Simpson method.</p></li>
+<li><p>”analytical” for analytical integration. Recommended.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>entropy_contribution</strong> – S/beta in eV.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.get_feature_size">
+<code class="sig-name descname"><span class="pre">get_feature_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_feature_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_feature_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get dimension of this target if used as feature in ML.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.get_number_of_electrons">
+<code class="sig-name descname"><span class="pre">get_number_of_electrons</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_number_of_electrons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the number of electrons from given DOS data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid].</p></li>
+<li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
+<li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
+<li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
+<blockquote>
+<div><ul>
+<li><p>”trapz” for trapezoid method</p></li>
+<li><p>”simps” for Simpson method.</p></li>
+<li><p>”analytical” for analytical integration. Recommended.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>number_of_electrons</strong> – Number of electrons.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev">
+<code class="sig-name descname"><span class="pre">get_self_consistent_fermi_energy_ev</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_self_consistent_fermi_energy_ev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the self-consistent Fermi energy.</p>
+<p>“Self-consistent” does not mean self-consistent in the DFT sense,
+but rather the Fermi energy, for which DOS integration reproduces
+the exact number of electrons. The term “self-consistent” stems
+from how this quantity is calculated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid].</p></li>
+<li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
+<li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
+<blockquote>
+<div><ul>
+<li><p>”trapz” for trapezoid method</p></li>
+<li><p>”simps” for Simpson method.</p></li>
+<li><p>”analytical” for analytical integration. Recommended.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>fermi_energy_self_consistent</strong> – E_F in eV.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.read_from_qe_dos_txt">
+<code class="sig-name descname"><span class="pre">read_from_qe_dos_txt</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_qe_dos_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_qe_dos_txt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the DOS from a Quantum Espresso generated file.</p>
+<p>These files do not have a specified file ending, so I will call them
+qe.dos.txt here. QE saves the DOS in 1/eV.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> (<em>string</em>) – Name of the file containing the DOS.</p></li>
+<li><p><strong>directory</strong> (<em>string</em>) – Directory containing the file file_name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DOS data in 1/eV.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dos_data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.dos.DOS.read_from_qe_out">
+<code class="sig-name descname"><span class="pre">read_from_qe_out</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_to_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smearing_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_qe_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_qe_out" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the DOS from a Quantum Espresso DFT output file.</p>
+<p>The DOS will be read calculated via the eigenvalues and the equation</p>
+<p>D(E) = sum_i sum_k w_k delta(E-epsilon_{ik})</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_to_file</strong> (<em>string</em>) – Path to the QE out file. If None, the QE output that was loaded
+via read_additional_calculation_data will be used.</p></li>
+<li><p><strong>smearing_factor</strong> (<em>int</em>) – Smearing factor relative to the energy grid spacing. Default is 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DOS data in 1/eV.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dos_data</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mala.targets.ldos.html" class="btn btn-neutral float-right" title="ldos" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.targets.density.html" class="btn btn-neutral float-left" title="density" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -181,7 +181,7 @@
 <span class="kn">from</span> <span class="nn">mala.network.runner</span> <span class="kn">import</span> <span class="n">Runner</span>
 
 
-<div class="viewcode-block" id="Trainer"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.trainer.Trainer">[docs]</a><span class="k">class</span> <span class="nc">Trainer</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
+<div class="viewcode-block" id="Trainer"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer">[docs]</a><span class="k">class</span> <span class="nc">Trainer</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A class for training a neural network.</span>
 
 <span class="sd">    Parameters</span>
@@ -231,7 +231,7 @@
             <span class="c1"># Set the path to log files</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tensor_board</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">visualisation_dir</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Trainer.checkpoint_exists"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.trainer.Trainer.checkpoint_exists">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Trainer.checkpoint_exists"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.checkpoint_exists">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">checkpoint_exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if a hyperparameter optimization checkpoint exists.</span>
@@ -264,7 +264,7 @@
         <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">,</span> <span class="p">[</span><span class="n">iscaler_name</span><span class="p">,</span> <span class="n">oscaler_name</span><span class="p">,</span> <span class="n">param_name</span><span class="p">,</span>
                                         <span class="n">network_name</span><span class="p">,</span> <span class="n">optimizer_name</span><span class="p">]))</span></div>
 
-<div class="viewcode-block" id="Trainer.resume_checkpoint"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.trainer.Trainer.resume_checkpoint">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Trainer.resume_checkpoint"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.resume_checkpoint">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">resume_checkpoint</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prepare resumption of training from a checkpoint.</span>
@@ -323,7 +323,7 @@
 
         <span class="k">return</span> <span class="n">loaded_params</span><span class="p">,</span> <span class="n">loaded_network</span><span class="p">,</span> <span class="n">new_datahandler</span><span class="p">,</span> <span class="n">new_trainer</span></div>
 
-<div class="viewcode-block" id="Trainer.load_from_file"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.trainer.Trainer.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Trainer.load_from_file"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a trainer from a file.</span>
@@ -357,7 +357,7 @@
                                  <span class="n">optimizer_dict</span><span class="o">=</span><span class="n">checkpoint</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">loaded_trainer</span></div>
 
-<div class="viewcode-block" id="Trainer.train_network"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.trainer.Trainer.train_network">[docs]</a>    <span class="k">def</span> <span class="nf">train_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Trainer.train_network"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.train_network">[docs]</a>    <span class="k">def</span> <span class="nf">train_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Train a network using data given by a DataHandler.&quot;&quot;&quot;</span>
         <span class="c1">############################</span>
         <span class="c1"># CALCULATE INITIAL METRICS</span>

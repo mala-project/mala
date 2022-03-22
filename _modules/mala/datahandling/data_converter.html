@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -169,7 +169,7 @@
 <span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
 
 
-<div class="viewcode-block" id="DataConverter"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter">[docs]</a><span class="k">class</span> <span class="nc">DataConverter</span><span class="p">:</span>
+<div class="viewcode-block" id="DataConverter"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter">[docs]</a><span class="k">class</span> <span class="nc">DataConverter</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts raw snapshots (direct DFT outputs) into numpy arrays for MALA.</span>
 
@@ -214,7 +214,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span> <span class="o">=</span> <span class="p">[]</span>
 
-<div class="viewcode-block" id="DataConverter.add_snapshot_qeout_cube"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot_qeout_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">,</span>
+<div class="viewcode-block" id="DataConverter.add_snapshot_qeout_cube"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot_qeout_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">,</span>
                                 <span class="n">cube_naming_scheme</span><span class="p">,</span> <span class="n">cube_directory</span><span class="p">,</span>
                                 <span class="n">input_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -251,7 +251,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s2">&quot;qe.out&quot;</span><span class="p">,</span> <span class="s2">&quot;.cube&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">input_units</span><span class="p">,</span> <span class="n">output_units</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="DataConverter.convert_single_snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.convert_single_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">convert_single_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">,</span>
+<div class="viewcode-block" id="DataConverter.convert_single_snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_single_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">convert_single_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">,</span>
                                 <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -343,7 +343,7 @@
         <span class="k">if</span> <span class="n">return_data</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">tmp_input</span><span class="p">,</span> <span class="n">tmp_output</span></div>
 
-<div class="viewcode-block" id="DataConverter.convert_snapshots"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">[docs]</a>    <span class="k">def</span> <span class="nf">convert_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
+<div class="viewcode-block" id="DataConverter.convert_snapshots"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">[docs]</a>    <span class="k">def</span> <span class="nf">convert_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
                           <span class="n">naming_scheme</span><span class="o">=</span><span class="s2">&quot;ELEM_snapshot*&quot;</span><span class="p">,</span> <span class="n">starts_at</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the snapshots in the list to numpy arrays.</span>

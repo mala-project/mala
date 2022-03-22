@@ -1,0 +1,7 @@
+trainer
+=======
+
+.. automodule:: mala.network.trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:

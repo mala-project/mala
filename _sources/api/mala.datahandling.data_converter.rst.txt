@@ -1,0 +1,7 @@
+data\_converter
+===============
+
+.. automodule:: mala.datahandling.data_converter
+   :members:
+   :undoc-members:
+   :show-inheritance:

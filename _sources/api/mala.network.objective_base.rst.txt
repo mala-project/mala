@@ -1,0 +1,7 @@
+objective\_base
+===============
+
+.. automodule:: mala.network.objective_base
+   :members:
+   :undoc-members:
+   :show-inheritance:

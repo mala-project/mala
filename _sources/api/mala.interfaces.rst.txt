@@ -1,21 +1,20 @@
-mala.interfaces package
-=======================
-
-Submodules
-----------
-
-mala.interfaces.ase\_calculator module
---------------------------------------
-
-.. automodule:: mala.interfaces.ase_calculator
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
 
 .. automodule:: mala.interfaces
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+
+
+
+interfaces
+==========
+
+
+
+.. toctree::
+   :maxdepth: 6
+
+   mala.interfaces.ase_calculator
+

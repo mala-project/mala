@@ -1,0 +1,7 @@
+cube\_parser
+============
+
+.. automodule:: mala.targets.cube_parser
+   :members:
+   :undoc-members:
+   :show-inheritance:

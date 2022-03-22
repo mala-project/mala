@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -174,7 +174,7 @@
 <span class="kn">from</span> <span class="nn">mala.datahandling.snapshot</span> <span class="kn">import</span> <span class="n">Snapshot</span>
 
 
-<div class="viewcode-block" id="LazyLoadDataset"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset">[docs]</a><span class="k">class</span> <span class="nc">LazyLoadDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+<div class="viewcode-block" id="LazyLoadDataset"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset">[docs]</a><span class="k">class</span> <span class="nc">LazyLoadDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    DataSet class for lazy loading.</span>
 
@@ -257,7 +257,7 @@
     <span class="k">def</span> <span class="nf">return_outputs_directly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_return_outputs_directly</span> <span class="o">=</span> <span class="n">value</span>
 
-<div class="viewcode-block" id="LazyLoadDataset.add_snapshot_to_dataset"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">:</span> <span class="n">Snapshot</span><span class="p">):</span>
+<div class="viewcode-block" id="LazyLoadDataset.add_snapshot_to_dataset"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">:</span> <span class="n">Snapshot</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Addsa snapshot to a DataSet.</span>
 
@@ -273,7 +273,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span></div>
 
-<div class="viewcode-block" id="LazyLoadDataset.mix_datasets"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets">[docs]</a>    <span class="k">def</span> <span class="nf">mix_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LazyLoadDataset.mix_datasets"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets">[docs]</a>    <span class="k">def</span> <span class="nf">mix_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Mix the order of the snapshots.</span>
 
@@ -286,7 +286,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">used_perm</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_new_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LazyLoadDataset.get_new_data"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_new_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_index</span><span class="p">):</span>
+<div class="viewcode-block" id="LazyLoadDataset.get_new_data"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_new_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_index</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read a new snapshot into RAM.</span>
 

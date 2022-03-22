@@ -1,0 +1,7 @@
+version
+=======
+
+.. automodule:: mala.version
+   :members:
+   :undoc-members:
+   :show-inheritance:

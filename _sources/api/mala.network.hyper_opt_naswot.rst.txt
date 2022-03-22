@@ -1,0 +1,7 @@
+hyper\_opt\_naswot
+==================
+
+.. automodule:: mala.network.hyper_opt_naswot
+   :members:
+   :undoc-members:
+   :show-inheritance:

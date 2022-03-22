@@ -1,0 +1,7 @@
+lazy\_load\_dataset
+===================
+
+.. automodule:: mala.datahandling.lazy_load_dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:

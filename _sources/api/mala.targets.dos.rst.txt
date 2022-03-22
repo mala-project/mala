@@ -1,0 +1,7 @@
+dos
+===
+
+.. automodule:: mala.targets.dos
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+descriptor
+==========
+
+.. automodule:: mala.descriptors.descriptor
+   :members:
+   :undoc-members:
+   :show-inheritance:

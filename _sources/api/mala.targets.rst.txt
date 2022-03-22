@@ -1,69 +1,26 @@
-mala.targets package
-====================
-
-Submodules
-----------
-
-mala.targets.atomic\_force module
----------------------------------
-
-.. automodule:: mala.targets.atomic_force
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.targets.calculation\_helpers module
-----------------------------------------
-
-.. automodule:: mala.targets.calculation_helpers
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.targets.cube\_parser module
---------------------------------
-
-.. automodule:: mala.targets.cube_parser
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.targets.density module
----------------------------
-
-.. automodule:: mala.targets.density
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.targets.dos module
------------------------
-
-.. automodule:: mala.targets.dos
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.targets.ldos module
-------------------------
-
-.. automodule:: mala.targets.ldos
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.targets.target module
---------------------------
-
-.. automodule:: mala.targets.target
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
 
 .. automodule:: mala.targets
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+
+
+
+targets
+=======
+
+
+
+.. toctree::
+   :maxdepth: 6
+
+   mala.targets.atomic_force
+   mala.targets.calculation_helpers
+   mala.targets.cube_parser
+   mala.targets.density
+   mala.targets.dos
+   mala.targets.ldos
+   mala.targets.target
+

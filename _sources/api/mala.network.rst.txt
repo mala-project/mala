@@ -1,141 +1,35 @@
-mala.network package
-====================
-
-Submodules
-----------
-
-mala.network.hyper\_opt module
-------------------------------
-
-.. automodule:: mala.network.hyper_opt
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.hyper\_opt\_naswot module
---------------------------------------
-
-.. automodule:: mala.network.hyper_opt_naswot
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.hyper\_opt\_oat module
------------------------------------
-
-.. automodule:: mala.network.hyper_opt_oat
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.hyper\_opt\_optuna module
---------------------------------------
-
-.. automodule:: mala.network.hyper_opt_optuna
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.hyperparameter\_interface module
----------------------------------------------
-
-.. automodule:: mala.network.hyperparameter_interface
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.hyperparameter\_naswot module
-------------------------------------------
-
-.. automodule:: mala.network.hyperparameter_naswot
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.hyperparameter\_oat module
----------------------------------------
-
-.. automodule:: mala.network.hyperparameter_oat
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.hyperparameter\_optuna module
-------------------------------------------
-
-.. automodule:: mala.network.hyperparameter_optuna
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.naswot\_pruner module
-----------------------------------
-
-.. automodule:: mala.network.naswot_pruner
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.network module
----------------------------
-
-.. automodule:: mala.network.network
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.objective\_base module
------------------------------------
-
-.. automodule:: mala.network.objective_base
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.objective\_naswot module
--------------------------------------
-
-.. automodule:: mala.network.objective_naswot
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.predictor module
------------------------------
-
-.. automodule:: mala.network.predictor
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.runner module
---------------------------
-
-.. automodule:: mala.network.runner
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.tester module
---------------------------
-
-.. automodule:: mala.network.tester
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.trainer module
----------------------------
-
-.. automodule:: mala.network.trainer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
 
 .. automodule:: mala.network
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+
+
+
+network
+=======
+
+
+
+.. toctree::
+   :maxdepth: 6
+
+   mala.network.hyper_opt
+   mala.network.hyper_opt_naswot
+   mala.network.hyper_opt_oat
+   mala.network.hyper_opt_optuna
+   mala.network.hyperparameter_interface
+   mala.network.hyperparameter_naswot
+   mala.network.hyperparameter_oat
+   mala.network.hyperparameter_optuna
+   mala.network.naswot_pruner
+   mala.network.network
+   mala.network.objective_base
+   mala.network.objective_naswot
+   mala.network.predictor
+   mala.network.runner
+   mala.network.tester
+   mala.network.trainer
+

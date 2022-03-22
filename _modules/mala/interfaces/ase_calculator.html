@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -172,7 +172,7 @@
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">barrier</span>
 
 
-<div class="viewcode-block" id="MALA"><a class="viewcode-back" href="../../../api/mala.interfaces.html#mala.interfaces.ase_calculator.MALA">[docs]</a><span class="k">class</span> <span class="nc">MALA</span><span class="p">(</span><span class="n">Calculator</span><span class="p">):</span>
+<div class="viewcode-block" id="MALA"><a class="viewcode-back" href="../../../api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA">[docs]</a><span class="k">class</span> <span class="nc">MALA</span><span class="p">(</span><span class="n">Calculator</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements an ASE calculator based on MALA predictions.</span>
 
@@ -224,7 +224,7 @@
             <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">reference_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                              <span class="n">reference_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-<div class="viewcode-block" id="MALA.calculate"><a class="viewcode-back" href="../../../api/mala.interfaces.html#mala.interfaces.ase_calculator.MALA.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span>
+<div class="viewcode-block" id="MALA.calculate"><a class="viewcode-back" href="../../../api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span>
                   <span class="n">system_changes</span><span class="o">=</span><span class="n">all_changes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform the calculations.</span>

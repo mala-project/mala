@@ -1,0 +1,414 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>cube_parser &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="density" href="mala.targets.density.html" />
+    <link rel="prev" title="calculation_helpers" href="mala.targets.calculation_helpers.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.targets.html">targets</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.atomic_force.html">atomic_force</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.calculation_helpers.html">calculation_helpers</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">cube_parser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.density.html">density</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html">dos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html">ldos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html">target</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">API reference</a> &raquo;</li>
+        
+          <li><a href="mala.html">mala</a> &raquo;</li>
+        
+          <li><a href="mala.targets.html">targets</a> &raquo;</li>
+        
+      <li>cube_parser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.targets.cube_parser.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-mala.targets.cube_parser">
+<span id="cube-parser"></span><h1>cube_parser<a class="headerlink" href="#module-mala.targets.cube_parser" title="Permalink to this headline">¶</a></h1>
+<p>Cube parser, taken from cubetools (see below).</p>
+<hr class="docutils" />
+<p>Module: cubetools</p>
+<hr class="docutils" />
+<p>Description:
+Module to work with Gaussian cube format files
+(see <a class="reference external" href="http://paulbourke.net/dataformats/cube/">http://paulbourke.net/dataformats/cube/</a>)</p>
+<hr class="docutils" />
+<p>What does it do:</p>
+<ul class="simple">
+<li><p>Read/write cube files to/from numpy arrays (dtype=float*)</p></li>
+<li><p>Read/write pairse of cube files to/from numpy arrays (dtype=complex*)</p></li>
+<li><p>Provides a CubeFile object, to be used when cubefiles with constant and
+static data is required. It simulates the readline method
+of a file object with a cube file opened, without creating a file</p></li>
+</ul>
+<hr class="docutils" />
+<p>Dependency: numpy</p>
+<hr class="docutils" />
+<p>Author: P. R. Vaidyanathan (aditya95sriram &lt;at&gt; gmail &lt;dot&gt; com)
+Date: 25th June 2017</p>
+<hr class="docutils" />
+<p>MIT License</p>
+<p>Copyright (c) 2019 P. R. Vaidyanathan</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</p>
+<hr class="docutils" />
+<dl class="py class">
+<dt id="mala.targets.cube_parser.CubeFile">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">CubeFile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">srcname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/cube_parser.html#CubeFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.cube_parser.CubeFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Object which mimics a cube file opened as a file object.</p>
+<p>Done by returning output in the correct format, matching the
+metadata of the source cube file and replacing volumetric
+data with static data provided as arg to the constructor.
+Doesn’t copy atoms metadata, retains number of atoms, but
+returns dummy atoms
+Mimics file object’s readline method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>srcname</strong> (<em>string</em>) – source file to copy metadata from</p></li>
+<li><p><strong>const</strong> (<em>int</em>) – numeric value to return instead of volumetric data</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.targets.cube_parser.CubeFile.readline">
+<code class="sig-name descname"><span class="pre">readline</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/cube_parser.html#CubeFile.readline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.cube_parser.CubeFile.readline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read next line.</p>
+<p>Mimic readline method of file object with cube file opened.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>retval</strong> – Current line.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.targets.cube_parser.read_cube">
+<code class="sig-name descname"><span class="pre">read_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/cube_parser.html#read_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.cube_parser.read_cube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read cube file into numpy array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fname</strong> (<em>string</em>) – filename of cube file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>data</strong> (<em>numpy.array</em>) – Data from cube file.</p></li>
+<li><p><strong>meta</strong> (<em>dict</em>) – Meta data from cube file.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.targets.cube_parser.read_imcube">
+<code class="sig-name descname"><span class="pre">read_imcube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rfname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/cube_parser.html#read_imcube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.cube_parser.read_imcube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in two cube files at once.</p>
+<p>One contains the real part and the other contains the
+imag part. If only one filename given, other filename is inferred.</p>
+<p>params:</p>
+<p>returns: np.array (real part + j*imag part)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rfname</strong> (<em>string</em>) – filename of cube file of real part</p></li>
+<li><p><strong>ifname</strong> (<em>string</em>) – optional, filename of cube file of imag part</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>data</strong> (<em>numpy.array</em>) – Data from cube file.</p></li>
+<li><p><strong>meta</strong> (<em>dict</em>) – Meta data from cube file.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.targets.cube_parser.write_cube">
+<code class="sig-name descname"><span class="pre">write_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/cube_parser.html#write_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.cube_parser.write_cube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write volumetric data to cube file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>numpy.array</em>) – volumetric data consisting real values</p></li>
+<li><p><strong>meta</strong> (<em>dict</em>) – <p>dict containing metadata with following keys:</p>
+<blockquote>
+<div><ul>
+<li><p>atoms: list of atoms in the form (mass, [position])</p></li>
+<li><p>org: origin</p></li>
+<li><p>xvec,yvec,zvec: lattice vector basis</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>fname</strong> (<em>string</em>) – filename of cubefile (existing files overwritten)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mala.targets.cube_parser.write_imcube">
+<code class="sig-name descname"><span class="pre">write_imcube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/cube_parser.html#write_imcube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.cube_parser.write_imcube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write two cube files from compley valued volumetric data.</p>
+<p>One for the real part and one for the imaginary part.
+Data about atoms, origin and lattice vectors are kept same for both.
+If only one filename given, other filename is inferred.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>numpy.array</em>) – volumetric data consisting complex values</p></li>
+<li><p><strong>meta</strong> (<em>dict</em>) – <p>dict containing metadata with following keys:</p>
+<blockquote>
+<div><ul>
+<li><p>atoms: list of atoms in the form (mass, [position])</p></li>
+<li><p>org: origin</p></li>
+<li><p>xvec,yvec,zvec: lattice vector basis</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>rfname</strong> (<em>string</em>) – filename of cube file containing real part</p></li>
+<li><p><strong>ifname</strong> (<em>string</em>) – optional, filename of cube file containing imag part</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mala.targets.density.html" class="btn btn-neutral float-right" title="density" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.targets.calculation_helpers.html" class="btn btn-neutral float-left" title="calculation_helpers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

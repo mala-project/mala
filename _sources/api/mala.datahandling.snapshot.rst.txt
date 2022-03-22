@@ -1,0 +1,7 @@
+snapshot
+========
+
+.. automodule:: mala.datahandling.snapshot
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+density
+=======
+
+.. automodule:: mala.targets.density
+   :members:
+   :undoc-members:
+   :show-inheritance:

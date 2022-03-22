@@ -1,0 +1,7 @@
+snap
+====
+
+.. automodule:: mala.descriptors.snap
+   :members:
+   :undoc-members:
+   :show-inheritance:

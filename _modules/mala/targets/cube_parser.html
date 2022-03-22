@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -230,7 +230,7 @@
 <span class="c1">#        print &quot; &quot;.join(map(str, args))</span>
 
 
-<div class="viewcode-block" id="CubeFile"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.CubeFile">[docs]</a><span class="k">class</span> <span class="nc">CubeFile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="CubeFile"><a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.CubeFile">[docs]</a><span class="k">class</span> <span class="nc">CubeFile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Object which mimics a cube file opened as a file object.</span>
 
@@ -277,7 +277,7 @@
         <span class="sd">&quot;&quot;&quot;Close Cube file.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-<div class="viewcode-block" id="CubeFile.readline"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.CubeFile.readline">[docs]</a>    <span class="k">def</span> <span class="nf">readline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CubeFile.readline"><a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.CubeFile.readline">[docs]</a>    <span class="k">def</span> <span class="nf">readline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read next line.</span>
 
@@ -347,7 +347,7 @@
     <span class="k">return</span> <span class="n">s</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
 
 
-<div class="viewcode-block" id="read_cube"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.read_cube">[docs]</a><span class="k">def</span> <span class="nf">read_cube</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+<div class="viewcode-block" id="read_cube"><a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.read_cube">[docs]</a><span class="k">def</span> <span class="nf">read_cube</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read cube file into numpy array.</span>
 <span class="sd">    </span>
@@ -384,7 +384,7 @@
     <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">meta</span></div>
 
 
-<div class="viewcode-block" id="read_imcube"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.read_imcube">[docs]</a><span class="k">def</span> <span class="nf">read_imcube</span><span class="p">(</span><span class="n">rfname</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="read_imcube"><a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.read_imcube">[docs]</a><span class="k">def</span> <span class="nf">read_imcube</span><span class="p">(</span><span class="n">rfname</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read in two cube files at once.</span>
 
@@ -422,7 +422,7 @@
     <span class="k">return</span> <span class="n">fin</span><span class="p">,</span> <span class="n">re</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="write_cube"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.write_cube">[docs]</a><span class="k">def</span> <span class="nf">write_cube</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+<div class="viewcode-block" id="write_cube"><a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.write_cube">[docs]</a><span class="k">def</span> <span class="nf">write_cube</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write volumetric data to cube file.</span>
 
@@ -460,7 +460,7 @@
                     <span class="n">cube</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">{0: .5E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]))</span></div>
 
 
-<div class="viewcode-block" id="write_imcube"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.cube_parser.write_imcube">[docs]</a><span class="k">def</span> <span class="nf">write_imcube</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">rfname</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="write_imcube"><a class="viewcode-back" href="../../../api/mala.targets.cube_parser.html#mala.targets.cube_parser.write_imcube">[docs]</a><span class="k">def</span> <span class="nf">write_imcube</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">rfname</span><span class="p">,</span> <span class="n">ifname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write two cube files from compley valued volumetric data.</span>
 

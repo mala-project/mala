@@ -1,37 +1,22 @@
-mala.descriptors package
-========================
-
-Submodules
-----------
-
-mala.descriptors.descriptor module
-----------------------------------
-
-.. automodule:: mala.descriptors.descriptor
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.descriptors.lammps\_utils module
--------------------------------------
-
-.. automodule:: mala.descriptors.lammps_utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.descriptors.snap module
-----------------------------
-
-.. automodule:: mala.descriptors.snap
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
 
 .. automodule:: mala.descriptors
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+
+
+
+descriptors
+===========
+
+
+
+.. toctree::
+   :maxdepth: 6
+
+   mala.descriptors.descriptor
+   mala.descriptors.lammps_utils
+   mala.descriptors.snap
+

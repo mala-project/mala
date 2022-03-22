@@ -1,0 +1,347 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>trainer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="targets" href="mala.targets.html" />
+    <link rel="prev" title="tester" href="mala.network.tester.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.network.html">network</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt.html">hyper_opt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_naswot.html">hyper_opt_naswot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html">hyper_opt_oat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_optuna.html">hyper_opt_optuna</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_interface.html">hyperparameter_interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_naswot.html">hyperparameter_naswot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_oat.html">hyperparameter_oat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_optuna.html">hyperparameter_optuna</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.naswot_pruner.html">naswot_pruner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.network.html">network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.objective_base.html">objective_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.objective_naswot.html">objective_naswot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.predictor.html">predictor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.runner.html">runner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.tester.html">tester</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">trainer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.html">targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">API reference</a> &raquo;</li>
+        
+          <li><a href="mala.html">mala</a> &raquo;</li>
+        
+          <li><a href="mala.network.html">network</a> &raquo;</li>
+        
+      <li>trainer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.network.trainer.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-mala.network.trainer">
+<span id="trainer"></span><h1>trainer<a class="headerlink" href="#module-mala.network.trainer" title="Permalink to this headline">¶</a></h1>
+<p>Trainer class for training a network.</p>
+<dl class="py class">
+<dt id="mala.network.trainer.Trainer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Trainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mala.network.runner.html#mala.network.runner.Runner" title="mala.network.runner.Runner"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.runner.Runner</span></code></a></p>
+<p>A class for training a neural network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this Trainer object.</p></li>
+<li><p><strong>network</strong> (<a class="reference internal" href="mala.network.network.html#mala.network.network.Network" title="mala.network.network.Network"><em>mala.network.network.Network</em></a>) – Network which is being trained.</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the training data.</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be created.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.network.trainer.Trainer.checkpoint_exists">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">checkpoint_exists</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.checkpoint_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer.checkpoint_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a hyperparameter optimization checkpoint exists.</p>
+<p>Returns True if it does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint.</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be loaded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>checkpoint_exists</strong> – True if the checkpoint exists, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.trainer.Trainer.load_from_file">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer.load_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a trainer from a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters object with which the trainer should be created.
+Has to be compatible with network and data.</p></li>
+<li><p><strong>file_path</strong> (<em>string</em>) – Path to the file from which the trainer should be loaded.</p></li>
+<li><p><strong>network</strong> (<a class="reference internal" href="mala.network.network.html#mala.network.network.Network" title="mala.network.network.Network"><em>mala.network.network.Network</em></a>) – Network which is being trained.</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the training data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loaded_trainer</strong> – The trainer that was loaded from the file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.network.network.html#mala.network.network.Network" title="mala.network.network.Network">Network</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.trainer.Trainer.resume_checkpoint">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">resume_checkpoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.resume_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer.resume_checkpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare resumption of training from a checkpoint.</p>
+<p>Please note that to actually resume the training,
+Trainer.train_network() still has to be called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint from which</p></li>
+<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be loaded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>loaded_params</strong> (<em>mala.common.parameters.Parameters</em>) – The Parameters saved in the checkpoint.</p></li>
+<li><p><strong>loaded_network</strong> (<em>mala.network.network.Network</em>) – The network saved in the checkpoint.</p></li>
+<li><p><strong>new_datahandler</strong> (<em>mala.datahandling.data_handler.DataHandler</em>) – The data handler reconstructed from the checkpoint.</p></li>
+<li><p><strong>new_trainer</strong> (<em>Trainer</em>) – The trainer reconstructed from the checkpoint.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.network.trainer.Trainer.train_network">
+<code class="sig-name descname"><span class="pre">train_network</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.train_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer.train_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train a network using data given by a DataHandler.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mala.targets.html" class="btn btn-neutral float-right" title="targets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.network.tester.html" class="btn btn-neutral float-left" title="tester" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

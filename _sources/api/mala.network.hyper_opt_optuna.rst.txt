@@ -1,0 +1,7 @@
+hyper\_opt\_optuna
+==================
+
+.. automodule:: mala.network.hyper_opt_optuna
+   :members:
+   :undoc-members:
+   :show-inheritance:

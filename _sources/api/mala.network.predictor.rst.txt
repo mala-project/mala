@@ -1,0 +1,7 @@
+predictor
+=========
+
+.. automodule:: mala.network.predictor
+   :members:
+   :undoc-members:
+   :show-inheritance:

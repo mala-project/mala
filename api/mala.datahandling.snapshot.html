@@ -1,0 +1,300 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>snapshot &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="descriptors" href="mala.descriptors.html" />
+    <link rel="prev" title="lazy_load_dataset_clustered" href="mala.datahandling.lazy_load_dataset_clustered.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.datahandling.html">datahandling</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_converter.html">data_converter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler.html">data_handler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_repo.html">data_repo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html">data_scaler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html">lazy_load_dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_clustered.html">lazy_load_dataset_clustered</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">snapshot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.html">targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">API reference</a> &raquo;</li>
+        
+          <li><a href="mala.html">mala</a> &raquo;</li>
+        
+          <li><a href="mala.datahandling.html">datahandling</a> &raquo;</li>
+        
+      <li>snapshot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datahandling.snapshot.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-mala.datahandling.snapshot">
+<span id="snapshot"></span><h1>snapshot<a class="headerlink" href="#module-mala.datahandling.snapshot" title="Permalink to this headline">¶</a></h1>
+<p>Snapshot class.</p>
+<dl class="py class">
+<dt id="mala.datahandling.snapshot.Snapshot">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Snapshot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_npy_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_npy_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshot_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculation_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/snapshot.html#Snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable" title="mala.common.json_serializable.JSONSerializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.json_serializable.JSONSerializable</span></code></a></p>
+<p>Represents a snapshot on a hard drive.</p>
+<p>A snapshot consists of numpy arrays for input/output data and an
+optional DFT calculation output, needed for post-processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_npy_file</strong> (<em>string</em>) – File with saved numpy input array.</p></li>
+<li><p><strong>input_npy_directory</strong> (<em>string</em>) – Directory containing input_npy_directory.</p></li>
+<li><p><strong>output_npy_file</strong> (<em>string</em>) – File with saved numpy output array.</p></li>
+<li><p><strong>output_npy_directory</strong> (<em>string</em>) – Directory containing output_npy_file.</p></li>
+<li><p><strong>input_units</strong> (<em>string</em>) – Units of input data. See descriptor classes to see which units are
+supported.</p></li>
+<li><p><strong>output_units</strong> (<em>string</em>) – Units of output data. See target classes to see which units are
+supported.</p></li>
+<li><p><strong>calculation_output</strong> (<em>string</em>) – File with the output of the original snapshot calculation. This is
+only needed when testing multiple snapshots.</p></li>
+<li><p><strong>snapshot_function</strong> (<em>string</em>) – <p>“Function” of the snapshot in the MALA workflow.</p>
+<blockquote>
+<div><ul>
+<li><p>te: This snapshot will be a testing snapshot.</p></li>
+<li><p>tr: This snapshot will be a training snapshot.</p></li>
+<li><p>va: This snapshot will be a validation snapshot.</p></li>
+</ul>
+</div></blockquote>
+<p>Replaces the old approach of MALA to have a separate list.
+Default is None.</p>
+</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.datahandling.snapshot.Snapshot.from_json">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/snapshot.html#Snapshot.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.snapshot.Snapshot.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read this object from a dictionary saved in a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_dict</strong> (<em>dict</em>) – A dictionary containing all attributes, properties, etc. as saved
+in the json file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>deserialized_object</strong> – The object as read from the JSON file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable" title="mala.common.json_serializable.JSONSerializable">JSONSerializable</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mala.descriptors.html" class="btn btn-neutral float-right" title="descriptors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.datahandling.lazy_load_dataset_clustered.html" class="btn btn-neutral float-left" title="lazy_load_dataset_clustered" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

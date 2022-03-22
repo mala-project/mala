@@ -1,0 +1,449 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>density &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dos" href="mala.targets.dos.html" />
+    <link rel="prev" title="cube_parser" href="mala.targets.cube_parser.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.targets.html">targets</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.atomic_force.html">atomic_force</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.calculation_helpers.html">calculation_helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.cube_parser.html">cube_parser</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">density</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html">dos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html">ldos</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html">target</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">API reference</a> &raquo;</li>
+        
+          <li><a href="mala.html">mala</a> &raquo;</li>
+        
+          <li><a href="mala.targets.html">targets</a> &raquo;</li>
+        
+      <li>density</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.targets.density.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-mala.targets.density">
+<span id="density"></span><h1>density<a class="headerlink" href="#module-mala.targets.density" title="Permalink to this headline">¶</a></h1>
+<p>Electronic density calculation class.</p>
+<dl class="py class">
+<dt id="mala.targets.density.Density">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Density</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target" title="mala.targets.target.Target"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.targets.target.Target</span></code></a></p>
+<p>Postprocessing / parsing functions for the electronic density.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this TargetBase object.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="mala.targets.density.Density.from_ldos">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_ldos</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.from_ldos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.from_ldos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a density object from an LDOS object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ldos_object</strong> (<a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS" title="mala.targets.ldos.LDOS"><em>mala.targets.ldos.LDOS</em></a>) – LDOS object used as input.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dos_object</strong> – Density object created from LDOS object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.density.Density" title="mala.targets.density.Density">Density</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.density.Density.get_atomic_forces">
+<code class="sig-name descname"><span class="pre">get_atomic_forces</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.get_atomic_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.get_atomic_forces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the atomic forces.</p>
+<p>This function uses an interface to QE. The atomic forces are
+calculated via the Hellman-Feynman theorem, although only the local
+contributions are calculated. The non-local contributions, as well
+as the SCF correction (so anythin wavefunction dependent) is ignored.
+Therefore, this function is best used for data that was created using
+local pseudopotentials.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>density_data</strong> (<em>numpy.array</em>) – Density data on a grid.</p></li>
+<li><p><strong>create_file</strong> (<em>bool</em>) – If False, the last mala.pw.scf.in file will be used as input for
+Quantum Espresso. If True (recommended), MALA will create this
+file according to calculation parameters.</p></li>
+<li><p><strong>atoms_Angstrom</strong> (<em>ase.Atoms</em>) – ASE atoms object for the current system. If None, MALA will
+create one.</p></li>
+<li><p><strong>qe_input_data</strong> (<em>dict</em>) – Quantum Espresso parameters dictionary for the ASE&lt;-&gt;QE interface.
+If None (recommended), MALA will create one.</p></li>
+<li><p><strong>qe_pseudopotentials</strong> (<em>dict</em>) – Quantum Espresso pseudopotential dictionaty for the ASE&lt;-&gt;QE
+interface. If None (recommended), MALA will create one.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>atomic_forces</strong> – An array of the form (natoms, 3), containing the atomic forces
+in eV/Ang.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.density.Density.get_density">
+<code class="sig-name descname"><span class="pre">get_density</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_threedimensional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.get_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.get_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the electronic density, based on density data.</p>
+<p>This function only does reshaping, no calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>density_data</strong> (<em>numpy.array</em>) – Electronic density data, this array will be returned unchanged
+depending on the other parameters.</p></li>
+<li><p><strong>convert_to_threedimensional</strong> (<em>bool</em>) – If True, then a density saved as a 1D array will be converted to
+a 3D array (gridsize -&gt; gridx * gridy * gridz)</p></li>
+<li><p><strong>grid_dimensions</strong> (<em>list</em>) – Provide a list of dimensions to be used in the transformation
+1D -&gt; 3D. If None, MALA will attempt to use the values read with
+TargetBase.read_additional_read_additional_calculation_data .
+If that cannot be done, this function will raise an exception.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>density_data</strong> – Electronic density data in the desired shape.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.density.Density.get_energy_contributions">
+<code class="sig-name descname"><span class="pre">get_energy_contributions</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.get_energy_contributions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.get_energy_contributions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract density based energy contributions from Quantum Espresso.</p>
+<p>Done via a Fortran module accesible through python using f2py.
+Returns: e_rho_times_v_hxc, e_hartree,  e_xc, e_ewald</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>density_data</strong> (<em>numpy.array</em>) – Density data on a grid.</p></li>
+<li><p><strong>create_file</strong> (<em>bool</em>) – If False, the last mala.pw.scf.in file will be used as input for
+Quantum Espresso. If True (recommended), MALA will create this
+file according to calculation parameters.</p></li>
+<li><p><strong>atoms_Angstrom</strong> (<em>ase.Atoms</em>) – ASE atoms object for the current system. If None, MALA will
+create one.</p></li>
+<li><p><strong>qe_input_data</strong> (<em>dict</em>) – Quantum Espresso parameters dictionary for the ASE&lt;-&gt;QE interface.
+If None (recommended), MALA will create one.</p></li>
+<li><p><strong>qe_pseudopotentials</strong> (<em>dict</em>) – Quantum Espresso pseudopotential dictionaty for the ASE&lt;-&gt;QE
+interface. If None (recommended), MALA will create one.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p><strong>energies</strong> –</p>
+<dl class="simple">
+<dt>A list containing, in order, the following energy contributions:</dt><dd><ul class="simple">
+<li><p>n*V_xc</p></li>
+<li><p>E_Hartree</p></li>
+<li><p>E_xc</p></li>
+<li><p>e_Ewald</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.density.Density.get_feature_size">
+<code class="sig-name descname"><span class="pre">get_feature_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.get_feature_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.get_feature_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get dimension of this target if used as feature in ML.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.density.Density.get_number_of_electrons">
+<code class="sig-name descname"><span class="pre">get_number_of_electrons</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">density_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing_bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.get_number_of_electrons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the number of electrons from given density data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>density_data</strong> (<em>numpy.array</em>) – Electronic density on the given grid. Has to either be of the form
+gridpoints or gridx x gridy x gridz.</p></li>
+<li><p><strong>grid_spacing_bohr</strong> (<em>float</em>) – Grid spacing (in Bohr) used to construct this grid. As of now,
+only equidistant grids are supported.</p></li>
+<li><p><strong>integration_method</strong> (<em>str</em>) – <p>Integration method used to integrate density on the grid.
+Currently supported:</p>
+<ul>
+<li><p>”trapz” for trapezoid method</p></li>
+<li><p>”simps” for Simpson method.</p></li>
+<li><p>”summation” for summation and scaling of the values (recommended)</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.density.Density.get_scaled_positions_for_qe">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">get_scaled_positions_for_qe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.get_scaled_positions_for_qe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.get_scaled_positions_for_qe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the positions correctly scaled for QE.</p>
+<p>QE (for ibrav=0) scales a little bit different then ASE would.
+ASE uses all provided cell parameters, while QE simply sets the
+first entry in the cell parameter matrix as reference and divides
+all positions by this value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>atoms</strong> (<em>ase.Atoms</em>) – The atom objects for which the scaled positions should be
+calculated.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>scaled_positions</strong> – The scaled positions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.density.Density.read_from_cube">
+<code class="sig-name descname"><span class="pre">read_from_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.read_from_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.read_from_cube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the density data from a cube file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> – Name of the cube file.</p></li>
+<li><p><strong>directory</strong> – Directory containing the cube file.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in. Usually none.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.targets.density.Density.te_mutex">
+<code class="sig-name descname"><span class="pre">te_mutex</span></code><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#mala.targets.density.Density.te_mutex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mala.targets.dos.html" class="btn btn-neutral float-right" title="dos" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.targets.cube_parser.html" class="btn btn-neutral float-left" title="cube_parser" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

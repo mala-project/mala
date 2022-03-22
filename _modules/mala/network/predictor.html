@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -172,7 +172,7 @@
 <span class="kn">from</span> <span class="nn">mala.network.runner</span> <span class="kn">import</span> <span class="n">Runner</span>
 
 
-<div class="viewcode-block" id="Predictor"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.predictor.Predictor">[docs]</a><span class="k">class</span> <span class="nc">Predictor</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
+<div class="viewcode-block" id="Predictor"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor">[docs]</a><span class="k">class</span> <span class="nc">Predictor</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class for testing a neural network.</span>
 
@@ -200,7 +200,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="mi">0</span>
 
-<div class="viewcode-block" id="Predictor.predict_from_qeout"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.predictor.Predictor.predict_from_qeout">[docs]</a>    <span class="k">def</span> <span class="nf">predict_from_qeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Predictor.predict_from_qeout"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_from_qeout">[docs]</a>    <span class="k">def</span> <span class="nf">predict_from_qeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get predicted LDOS for the atomic configuration of a QE.out file.</span>
 
@@ -225,7 +225,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
                                       <span class="n">gather_ldos</span><span class="o">=</span><span class="n">gather_ldos</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Predictor.predict_for_atoms"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.predictor.Predictor.predict_for_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Predictor.predict_for_atoms"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_for_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get predicted LDOS for an atomic configuration.</span>
 

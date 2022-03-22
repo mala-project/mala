@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -170,7 +170,7 @@
 <span class="kn">from</span> <span class="nn">mala.network.naswot_pruner</span> <span class="kn">import</span> <span class="n">NASWOTPruner</span>
 
 
-<div class="viewcode-block" id="HyperOptOptuna"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna">[docs]</a><span class="k">class</span> <span class="nc">HyperOptOptuna</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperOptOptuna"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna">[docs]</a><span class="k">class</span> <span class="nc">HyperOptOptuna</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Hyperparameter optimizer using Optuna.</span>
 
 <span class="sd">    Parameters</span>
@@ -228,7 +228,7 @@
                              <span class="n">pruner</span><span class="o">=</span><span class="n">pruner</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
-<div class="viewcode-block" id="HyperOptOptuna.perform_study"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.perform_study">[docs]</a>    <span class="k">def</span> <span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperOptOptuna.perform_study"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.perform_study">[docs]</a>    <span class="k">def</span> <span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform the study, i.e. the optimization.</span>
 
@@ -250,7 +250,7 @@
         <span class="c1"># Return the best lost value we could achieve.</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">best_value</span></div>
 
-<div class="viewcode-block" id="HyperOptOptuna.set_optimal_parameters"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.set_optimal_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperOptOptuna.set_optimal_parameters"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.set_optimal_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the optimal parameters found in the present study.</span>
 
@@ -260,7 +260,7 @@
         <span class="c1"># Parse the parameters from the best trial.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">parse_trial_optuna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">best_trial</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HyperOptOptuna.get_trials_from_study"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study">[docs]</a>    <span class="k">def</span> <span class="nf">get_trials_from_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperOptOptuna.get_trials_from_study"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study">[docs]</a>    <span class="k">def</span> <span class="nf">get_trials_from_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the trials from the last study.</span>
 
@@ -272,7 +272,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">get_trials</span><span class="p">(</span><span class="n">states</span><span class="o">=</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span>
                                               <span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,</span> <span class="p">))</span></div>
 
-<div class="viewcode-block" id="HyperOptOptuna.resume_checkpoint"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="HyperOptOptuna.resume_checkpoint"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">resume_checkpoint</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">alternative_storage_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">no_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -323,7 +323,7 @@
 
         <span class="k">return</span> <span class="n">loaded_params</span><span class="p">,</span> <span class="n">new_datahandler</span><span class="p">,</span> <span class="n">new_hyperopt</span></div>
 
-<div class="viewcode-block" id="HyperOptOptuna.load_from_file"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="HyperOptOptuna.load_from_file"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a hyperparameter optimizer from a file.</span>

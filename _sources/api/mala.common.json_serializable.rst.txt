@@ -1,0 +1,7 @@
+json\_serializable
+==================
+
+.. automodule:: mala.common.json_serializable
+   :members:
+   :undoc-members:
+   :show-inheritance:

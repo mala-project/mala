@@ -90,7 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
@@ -163,7 +163,7 @@
 <span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
 
 
-<div class="viewcode-block" id="HyperparameterOAT"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyperparameter_oat.HyperparameterOAT">[docs]</a><span class="k">class</span> <span class="nc">HyperparameterOAT</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperparameterOAT"><a class="viewcode-back" href="../../../api/mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT">[docs]</a><span class="k">class</span> <span class="nc">HyperparameterOAT</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents a hyperparameter for OAT.</span>
 
 <span class="sd">    Parameters</span>
@@ -207,7 +207,7 @@
     <span class="k">def</span> <span class="nf">num_choices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="HyperparameterOAT.get_parameter"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_parameter">[docs]</a>    <span class="k">def</span> <span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperparameterOAT.get_parameter"><a class="viewcode-back" href="../../../api/mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_parameter">[docs]</a>    <span class="k">def</span> <span class="nf">get_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract current value of hyperparameter from an orthogonal array.</span>
 
@@ -229,7 +229,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Wrong hyperparameter type.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="HyperparameterOAT.get_categorical"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_categorical">[docs]</a>    <span class="k">def</span> <span class="nf">get_categorical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperparameterOAT.get_categorical"><a class="viewcode-back" href="../../../api/mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT.get_categorical">[docs]</a>    <span class="k">def</span> <span class="nf">get_categorical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract categorical (string) hyperparameter from on a optuna Trial.</span>
 

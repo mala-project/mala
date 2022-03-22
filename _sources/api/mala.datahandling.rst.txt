@@ -1,69 +1,26 @@
-mala.datahandling package
-=========================
-
-Submodules
-----------
-
-mala.datahandling.data\_converter module
-----------------------------------------
-
-.. automodule:: mala.datahandling.data_converter
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.datahandling.data\_handler module
---------------------------------------
-
-.. automodule:: mala.datahandling.data_handler
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.datahandling.data\_repo module
------------------------------------
-
-.. automodule:: mala.datahandling.data_repo
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.datahandling.data\_scaler module
--------------------------------------
-
-.. automodule:: mala.datahandling.data_scaler
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.datahandling.lazy\_load\_dataset module
---------------------------------------------
-
-.. automodule:: mala.datahandling.lazy_load_dataset
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.datahandling.lazy\_load\_dataset\_clustered module
--------------------------------------------------------
-
-.. automodule:: mala.datahandling.lazy_load_dataset_clustered
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.datahandling.snapshot module
----------------------------------
-
-.. automodule:: mala.datahandling.snapshot
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
 
 .. automodule:: mala.datahandling
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+
+
+
+datahandling
+============
+
+
+
+.. toctree::
+   :maxdepth: 6
+
+   mala.datahandling.data_converter
+   mala.datahandling.data_handler
+   mala.datahandling.data_repo
+   mala.datahandling.data_scaler
+   mala.datahandling.lazy_load_dataset
+   mala.datahandling.lazy_load_dataset_clustered
+   mala.datahandling.snapshot
+
