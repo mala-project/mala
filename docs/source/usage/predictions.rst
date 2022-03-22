@@ -32,6 +32,6 @@ Using Calculators
 ******************
 
 The ``Predictor`` class can also be accessed through an ``ase`` calculator.
-For this, use the ``mala.MALA`` class. See e.g. ``ex14_mala_md``.
+For this, use the ``mala.MALA`` class. See e.g. ``ex15_ase_calculator``.
 
-.. warning:: The current implementation of atomic forces is highly experimental. It only works with a specific QE version, and only with local pseudopotentials.
+.. warning:: Currently, the calculation of forces with this calculator is not officially supported.

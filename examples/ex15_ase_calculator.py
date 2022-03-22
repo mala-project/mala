@@ -3,57 +3,20 @@ import os
 import mala
 from mala import printout
 from ase.io import read
-from ase.md.nptberendsen import NVTBerendsen
-from ase.md import MDLogger
-from ase.calculators.espresso import Espresso
-from ase.units import fs
 
 from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 
 """
-ex14_mala_md.py: Shows how MALA can be used to run a surrogate model based
-MD simulation, and comares that to a QE calculation.
-Please not that the resulting trajectories will NOT be correct. For one,
-the QE MD will have far too few k-points to be meaningful. Secondly, 
-for the MALA run, a non-local PP is being used, while the implementation
-of HF forces in MALA relies on local PPs. Lastly, the network training is far
-from rigorous here. 
-For production runs, make sure to alleviate these issues by using an approriate 
-amount of k-points, a local PP and a properly trained and verified network.  
+ex15_ase_calculator.py: Shows how MALA can be used as an ASE calculator. 
+Currently, calculation of forces is not supported. 
 
-IMPORTANT: This example will currently only run with the version of the TEM 
-that supports Hellmann-Feynman forces. If you are not sure if you have loaded
-the correct version, contact the devs for further clarification.
+REQUIRES LAMMPS.
 """
 
 
-# Run a regular QE MD.
-def md_qe():
-    # Prepare the QE inputs for the run. This does not necessarily has
-    # to be done with MALA.
-    params = mala.Parameters()
-    params.targets.pseudopotential_path = os.path.join(data_repo_path, "Be2")
-    ldos = mala.LDOS(params)
-    ldos.read_additional_calculation_data("qe.out",
-                                          os.path.join(data_path,
-                                                       "Be_snapshot1.out"))
-    ldos.qe_input_data["tprnfor"] = True
-
-    # Set up the ASE objects.
-    atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
-    calculator = Espresso(input_data=ldos.qe_input_data,
-                          pseudopotentials=ldos.qe_pseudopotentials)
-    atoms.set_calculator(calculator)
-
-    # Define and run the MD.
-    dyn = NVTBerendsen(atoms, 1*fs, 298, 10)
-    dyn.attach(MDLogger(dyn, atoms, 'qe_md.log', mode="w"), interval=1)
-    dyn.run(10)
-
-
-# Run a MALA MD.
-def md_mala(network, new_parameters, iscaler, oscaler):
+# Use an ASE calculator to make predictions.
+def use_calculator(network, new_parameters, iscaler, oscaler):
     ####################
     # PARAMETERS
     # Make sure all parameters are prepared for the run.
@@ -84,11 +47,7 @@ def md_mala(network, new_parameters, iscaler, oscaler):
                                      os.path.join(data_path,
                                                   "Be_snapshot1.out")])
     atoms.set_calculator(calculator)
-
-    # Define and run the MD.
-    dyn = NVTBerendsen(atoms, 1*fs, 298, 10)
-    dyn.attach(MDLogger(dyn, atoms, 'mala_md.log', mode="w"), interval=1)
-    dyn.run(10)
+    print(atoms.get_potential_energy())
 
 
 # Trains a network.
@@ -163,27 +122,25 @@ def initial_training():
     # Parameters, input/output scaler, network.
     ####################
     # Save networks for debugging.
-    test_network.save_network("ex13.network.pth")
-    test_parameters.save("ex13.params.pkl")
-    data_handler.input_data_scaler.save("ex13.iscaler.pkl")
-    data_handler.output_data_scaler.save("ex13.oscaler.pkl")
+    test_network.save_network("ex15.network.pth")
+    test_parameters.save("ex15.params.json")
+    data_handler.input_data_scaler.save("ex15.iscaler.pkl")
+    data_handler.output_data_scaler.save("ex15.oscaler.pkl")
     return test_network, test_parameters, data_handler.input_data_scaler,\
            data_handler.output_data_scaler
 
 
 if __name__ == "__main__":
     # First, train a MALA network.
-    # network, parameters, input_scaler, output_scaler = \
-    #     initial_training()
+    network, parameters, input_scaler, output_scaler = \
+        initial_training()
 
     # Instead of training, these can also be loaded.
-    parameters = mala.Parameters.load_from_file("ex13.params.pkl")
-    input_scaler = mala.DataScaler.load_from_file("ex13.iscaler.pkl")
-    output_scaler = mala.DataScaler.load_from_file("ex13.oscaler.pkl")
-    network = mala.Network.load_from_file(parameters, "ex13.network.pth")
+    # parameters = mala.Parameters.load_from_file("ex15.params.json")
+    # input_scaler = mala.DataScaler.load_from_file("ex15.iscaler.pkl")
+    # output_scaler = mala.DataScaler.load_from_file("ex15.oscaler.pkl")
+    # network = mala.Network.load_from_file(parameters, "ex15.network.pth")
 
     # Next, use these values to run an MD simulation.
-    md_mala(network, parameters, input_scaler, output_scaler)
+    use_calculator(network, parameters, input_scaler, output_scaler)
 
-    # Finally, as an comparison, run a QE MD.
-    md_qe()
