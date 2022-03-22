@@ -4,18 +4,10 @@ mala.network package
 Submodules
 ----------
 
-mala.network.hyper\_opt\_base module
-------------------------------------
+mala.network.hyper\_opt module
+------------------------------
 
-.. automodule:: mala.network.hyper_opt_base
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.network.hyper\_opt\_interface module
------------------------------------------
-
-.. automodule:: mala.network.hyper_opt_interface
+.. automodule:: mala.network.hyper_opt
    :members:
    :undoc-members:
    :show-inheritance:

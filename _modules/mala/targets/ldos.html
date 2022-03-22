@@ -172,13 +172,13 @@
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_size</span><span class="p">,</span> \
     <span class="n">barrier</span>
 <span class="kn">from</span> <span class="nn">mala.targets.cube_parser</span> <span class="kn">import</span> <span class="n">read_cube</span>
-<span class="kn">from</span> <span class="nn">mala.targets.target_base</span> <span class="kn">import</span> <span class="n">TargetBase</span>
+<span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
 <span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">mala.targets.dos</span> <span class="kn">import</span> <span class="n">DOS</span>
 <span class="kn">from</span> <span class="nn">mala.targets.density</span> <span class="kn">import</span> <span class="n">Density</span>
 
 
-<div class="viewcode-block" id="LDOS"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.ldos.LDOS">[docs]</a><span class="k">class</span> <span class="nc">LDOS</span><span class="p">(</span><span class="n">TargetBase</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.ldos.LDOS">[docs]</a><span class="k">class</span> <span class="nc">LDOS</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Postprocessing / parsing functions for the local density of states.</span>
 
 <span class="sd">    Parameters</span>

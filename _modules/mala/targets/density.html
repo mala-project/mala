@@ -170,14 +170,14 @@
     <span class="k">pass</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">printout</span>
-<span class="kn">from</span> <span class="nn">mala.targets.target_base</span> <span class="kn">import</span> <span class="n">TargetBase</span>
+<span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
 <span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">mala.targets.cube_parser</span> <span class="kn">import</span> <span class="n">read_cube</span>
 <span class="kn">from</span> <span class="nn">mala.targets.atomic_force</span> <span class="kn">import</span> <span class="n">AtomicForce</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_rank</span>
 
 
-<div class="viewcode-block" id="Density"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.density.Density">[docs]</a><span class="k">class</span> <span class="nc">Density</span><span class="p">(</span><span class="n">TargetBase</span><span class="p">):</span>
+<div class="viewcode-block" id="Density"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.density.Density">[docs]</a><span class="k">class</span> <span class="nc">Density</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Postprocessing / parsing functions for the electronic density.</span>
 
 <span class="sd">    Parameters</span>

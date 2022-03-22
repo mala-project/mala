@@ -43,7 +43,7 @@ by themselves if needed.
             parameters.descriptors.descriptor_type = 'SNAP'
 
             # Creates a SNAP object via interface
-            snap = mala.DescriptorInterface(parameters)
+            snap = mala.Descriptor(parameters)
 
             # Creates a SNAP object directly
             snap = mala.SNAP(parameters)
@@ -58,6 +58,7 @@ Targets
 ``Target`` objects hold information about the electronic structure of a material.
 In comparison to the ``Descriptor`` objects these objects are more common
 in workflows, as they can be used for a variety of physical calculations.
+They can also be used to parse data from ab-initio simulations
 E.g. a script like this:
 
       .. code-block:: python
@@ -68,13 +69,13 @@ E.g. a script like this:
             parameters.targets.descriptor_type = 'LDOS'
 
             # Creates a LDOS object via interface
-            ldos = mala.TargetInterface(parameters)
+            ldos = mala.Target(parameters)
 
             # Creates a LDOS object directly
             ldos = mala.LDOS(parameters)
 
             # Use the LDOS object to calculate the band energy from LDOS data.
-            band_energy = ldos.get_band_energy(...)
+            band_energy = ldos.read_from_cube(...)
 
 
 Data Scaling

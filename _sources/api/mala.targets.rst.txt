@@ -52,18 +52,10 @@ mala.targets.ldos module
    :undoc-members:
    :show-inheritance:
 
-mala.targets.target\_base module
---------------------------------
+mala.targets.target module
+--------------------------
 
-.. automodule:: mala.targets.target_base
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.targets.target\_interface module
--------------------------------------
-
-.. automodule:: mala.targets.target_interface
+.. automodule:: mala.targets.target
    :members:
    :undoc-members:
    :show-inheritance:

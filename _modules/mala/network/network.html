@@ -199,22 +199,27 @@
 <span class="sd">        params : mala.common.parametes.Parameters</span>
 <span class="sd">            Parameters used to create this neural network.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># The correct type of model is instantiated automatically.</span>
         <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;feed-forward&quot;</span><span class="p">:</span>
-            <span class="n">model</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">FeedForwardNet</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">FeedForwardNet</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;transformer&quot;</span><span class="p">:</span>
-            <span class="n">model</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">TransformerNet</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">TransformerNet</span><span class="p">)</span>
+        <span class="c1"># Check if we&#39;re accessing through base class.</span>
+        <span class="c1"># If not, we need to return the correct object directly.</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="o">==</span> <span class="n">Network</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;feed-forward&quot;</span><span class="p">:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">FeedForwardNet</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">FeedForwardNet</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;lstm&quot;</span><span class="p">:</span>
-            <span class="n">model</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">LSTM</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">LSTM</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;transformer&quot;</span><span class="p">:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">TransformerNet</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">TransformerNet</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;gru&quot;</span><span class="p">:</span>
-            <span class="n">model</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">GRU</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">GRU</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;lstm&quot;</span><span class="p">:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">LSTM</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">LSTM</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported network architecture.&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">nn_type</span> <span class="o">==</span> <span class="s2">&quot;gru&quot;</span><span class="p">:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">GRU</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">GRU</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported network architecture.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">model</span>
 

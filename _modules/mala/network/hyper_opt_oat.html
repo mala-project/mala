@@ -170,7 +170,7 @@
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
 
-<span class="kn">from</span> <span class="nn">mala.network.hyper_opt_base</span> <span class="kn">import</span> <span class="n">HyperOptBase</span>
+<span class="kn">from</span> <span class="nn">mala.network.hyper_opt</span> <span class="kn">import</span> <span class="n">HyperOpt</span>
 <span class="kn">from</span> <span class="nn">mala.network.objective_base</span> <span class="kn">import</span> <span class="n">ObjectiveBase</span>
 <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_oat</span> <span class="kn">import</span> <span class="n">HyperparameterOAT</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
@@ -179,7 +179,7 @@
 <span class="kn">from</span> <span class="nn">mala.datahandling.data_scaler</span> <span class="kn">import</span> <span class="n">DataScaler</span>
 
 
-<div class="viewcode-block" id="HyperOptOAT"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT">[docs]</a><span class="k">class</span> <span class="nc">HyperOptOAT</span><span class="p">(</span><span class="n">HyperOptBase</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperOptOAT"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_oat.HyperOptOAT">[docs]</a><span class="k">class</span> <span class="nc">HyperOptOAT</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Hyperparameter optimizer using Orthogonal Array Tuning.</span>
 
 <span class="sd">    Parameters</span>

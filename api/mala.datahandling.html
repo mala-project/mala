@@ -202,10 +202,10 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parameters</strong> (<a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – The parameters object used for creating this instance.</p></li>
-<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase"><em>mala.descriptors.descriptor_base.DescriptorBase</em></a>) – The descriptor calculator used for parsing/converting fingerprint
+<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor.Descriptor" title="mala.descriptors.descriptor.Descriptor"><em>mala.descriptors.descriptor.Descriptor</em></a>) – The descriptor calculator used for parsing/converting fingerprint
 data. If None, the descriptor calculator will be created by this
 object using the parameters provided. Default: None</p></li>
-<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.html#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><em>mala.targets.target_base.TargetBase</em></a>) – Target calculator used for parsing/converting target data. If None,
+<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.html#mala.targets.target.Target" title="mala.targets.target.Target"><em>mala.targets.target.Target</em></a>) – Target calculator used for parsing/converting target data. If None,
 the target calculator will be created by this object using the
 parameters provided.</p></li>
 </ul>
@@ -217,7 +217,7 @@ parameters provided.</p></li>
 <dd><p>Descriptor calculator used for parsing/converting fingerprint data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase">mala.descriptors.descriptor_base.DescriptorBase</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor.Descriptor" title="mala.descriptors.descriptor.Descriptor">mala.descriptors.descriptor.Descriptor</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -228,7 +228,7 @@ parameters provided.</p></li>
 <dd><p>Target calculator used for parsing/converting target data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="mala.targets.html#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase">mala.targets.target_base.TargetBase</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="mala.targets.html#mala.targets.target.Target" title="mala.targets.target.Target">mala.targets.target.Target</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -323,9 +323,9 @@ class.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parameters</strong> (<a class="reference internal" href="mala.common.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – </p></li>
-<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase"><em>mala.descriptors.descriptor_base.DescriptorBase</em></a>) – Used to do unit conversion on input data. If None, then one will
+<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor.Descriptor" title="mala.descriptors.descriptor.Descriptor"><em>mala.descriptors.descriptor.Descriptor</em></a>) – Used to do unit conversion on input data. If None, then one will
 be created by this class.</p></li>
-<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.html#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><em>mala.targets.target_base.TargetBase</em></a>) – Used to do unit conversion on output data. If None, then one will
+<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.html#mala.targets.target.Target" title="mala.targets.target.Target"><em>mala.targets.target.Target</em></a>) – Used to do unit conversion on output data. If None, then one will
 be created by this class.</p></li>
 <li><p><strong>input_data_scaler</strong> (<a class="reference internal" href="#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler"><em>mala.datahandling.data_scaler.DataScaler</em></a>) – Used to scale the input data. If None, then one will be created by
 this class.</p></li>
@@ -724,8 +724,8 @@ at all.</p>
 <li><p><strong>output_dimension</strong> (<em>int</em>) – Dimension of an output vector.</p></li>
 <li><p><strong>input_data_scaler</strong> (<a class="reference internal" href="#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler"><em>mala.datahandling.data_scaler.DataScaler</em></a>) – Used to scale the input data.</p></li>
 <li><p><strong>output_data_scaler</strong> (<a class="reference internal" href="#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler"><em>mala.datahandling.data_scaler.DataScaler</em></a>) – Used to scale the output data.</p></li>
-<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase"><em>mala.descriptors.descriptor_base.DescriptorBase</em></a>) – Used to do unit conversion on input data.</p></li>
-<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.html#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><em>mala.targets.target_base.TargetBase</em></a><em> or </em><em>derivative</em>) – Used to do unit conversion on output data.</p></li>
+<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor.Descriptor" title="mala.descriptors.descriptor.Descriptor"><em>mala.descriptors.descriptor.Descriptor</em></a>) – Used to do unit conversion on input data.</p></li>
+<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.html#mala.targets.target.Target" title="mala.targets.target.Target"><em>mala.targets.target.Target</em></a><em> or </em><em>derivative</em>) – Used to do unit conversion on output data.</p></li>
 <li><p><strong>grid_dimensions</strong> (<em>list</em>) – Dimensions of the grid (x,y,z).</p></li>
 <li><p><strong>grid_size</strong> (<em>int</em>) – Size of the grid (x*y*z), i.e. the number of datapoints per
 snapshot.</p></li>
@@ -796,8 +796,8 @@ at all.</p>
 <li><p><strong>output_dimension</strong> (<em>int</em>) – Dimension of an output vector.</p></li>
 <li><p><strong>input_data_scaler</strong> (<a class="reference internal" href="#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler"><em>mala.datahandling.data_scaler.DataScaler</em></a>) – Used to scale the input data.</p></li>
 <li><p><strong>output_data_scaler</strong> (<a class="reference internal" href="#mala.datahandling.data_scaler.DataScaler" title="mala.datahandling.data_scaler.DataScaler"><em>mala.datahandling.data_scaler.DataScaler</em></a>) – Used to scale the output data.</p></li>
-<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase"><em>mala.descriptors.descriptor_base.DescriptorBase</em></a>) – Used to do unit conversion on input data.</p></li>
-<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.html#mala.targets.target_base.TargetBase" title="mala.targets.target_base.TargetBase"><em>mala.targets.target_base.TargetBase</em></a><em> or </em><em>derivative</em>) – Used to do unit conversion on output data.</p></li>
+<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.html#mala.descriptors.descriptor.Descriptor" title="mala.descriptors.descriptor.Descriptor"><em>mala.descriptors.descriptor.Descriptor</em></a>) – Used to do unit conversion on input data.</p></li>
+<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.html#mala.targets.target.Target" title="mala.targets.target.Target"><em>mala.targets.target.Target</em></a><em> or </em><em>derivative</em>) – Used to do unit conversion on output data.</p></li>
 <li><p><strong>grid_dimensions</strong> (<em>list</em>) – Dimensions of the grid (x,y,z).</p></li>
 <li><p><strong>grid_size</strong> (<em>int</em>) – Size of the grid (x*y*z), i.e. the number of datapoints per
 snapshot.</p></li>

@@ -219,7 +219,7 @@ by themselves if needed.</p>
 <span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">=</span> <span class="s1">&#39;SNAP&#39;</span>
 
 <span class="c1"># Creates a SNAP object via interface</span>
-<span class="n">snap</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">DescriptorInterface</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+<span class="n">snap</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Descriptor</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
 <span class="c1"># Creates a SNAP object directly</span>
 <span class="n">snap</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">SNAP</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
@@ -235,6 +235,7 @@ by themselves if needed.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Target</span></code> objects hold information about the electronic structure of a material.
 In comparison to the <code class="docutils literal notranslate"><span class="pre">Descriptor</span></code> objects these objects are more common
 in workflows, as they can be used for a variety of physical calculations.
+They can also be used to parse data from ab-initio simulations
 E.g. a script like this:</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mala</span>
@@ -243,13 +244,13 @@ E.g. a script like this:</p>
 <span class="n">parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">=</span> <span class="s1">&#39;LDOS&#39;</span>
 
 <span class="c1"># Creates a LDOS object via interface</span>
-<span class="n">ldos</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">TargetInterface</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+<span class="n">ldos</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Target</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
 <span class="c1"># Creates a LDOS object directly</span>
 <span class="n">ldos</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">LDOS</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
 <span class="c1"># Use the LDOS object to calculate the band energy from LDOS data.</span>
-<span class="n">band_energy</span> <span class="o">=</span> <span class="n">ldos</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">band_energy</span> <span class="o">=</span> <span class="n">ldos</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 </pre></div>
 </div>
 </div></blockquote>

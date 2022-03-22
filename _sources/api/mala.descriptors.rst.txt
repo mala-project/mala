@@ -4,18 +4,10 @@ mala.descriptors package
 Submodules
 ----------
 
-mala.descriptors.descriptor\_base module
-----------------------------------------
+mala.descriptors.descriptor module
+----------------------------------
 
-.. automodule:: mala.descriptors.descriptor_base
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-mala.descriptors.descriptor\_interface module
----------------------------------------------
-
-.. automodule:: mala.descriptors.descriptor_interface
+.. automodule:: mala.descriptors.descriptor
    :members:
    :undoc-members:
    :show-inheritance:

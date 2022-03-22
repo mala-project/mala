@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mala.network.hyper_opt_base &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>mala.network.hyper_opt &mdash; Materials Learning Algorithms (MALA)  documentation</title>
   
 
   
@@ -142,7 +142,7 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-      <li>mala.network.hyper_opt_base</li>
+      <li>mala.network.hyper_opt</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -157,7 +157,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for mala.network.hyper_opt_base</h1><div class="highlight"><pre>
+  <h1>Source code for mala.network.hyper_opt</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Base class for all hyperparameter optimizers.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">ABC</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -170,7 +170,7 @@
 <span class="kn">from</span> <span class="nn">mala.network.objective_base</span> <span class="kn">import</span> <span class="n">ObjectiveBase</span>
 
 
-<div class="viewcode-block" id="HyperOptBase"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase">[docs]</a><span class="k">class</span> <span class="nc">HyperOptBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperOpt"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt.HyperOpt">[docs]</a><span class="k">class</span> <span class="nc">HyperOpt</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class for hyperparameter optimizater.</span>
 
 <span class="sd">    Parameters</span>
@@ -185,13 +185,49 @@
 <span class="sd">        If true, .pkl checkpoints will be created.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a HyperOpt instance.</span>
+
+<span class="sd">        The correct type of hyperparameter optimizer will automatically be</span>
+<span class="sd">        instantiated by this class if possible. You can also instantiate</span>
+<span class="sd">        the desired hyperparameter optimizer directly by calling upon the</span>
+<span class="sd">        subclass.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : mala.common.parametes.Parameters</span>
+<span class="sd">            Parameters used to create this hyperparameter optimizer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">hoptimizer</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Check if we&#39;re accessing through base class.</span>
+        <span class="c1"># If not, we need to return the correct object directly.</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="o">==</span> <span class="n">HyperOpt</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">mala.network.hyper_opt_optuna</span> <span class="kn">import</span> <span class="n">HyperOptOptuna</span>
+                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptOptuna</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptOptuna</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">==</span> <span class="s2">&quot;oat&quot;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">mala.network.hyper_opt_oat</span> <span class="kn">import</span> <span class="n">HyperOptOAT</span>
+                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptOAT</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptOAT</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">==</span> <span class="s2">&quot;naswot&quot;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">mala.network.hyper_opt_naswot</span> <span class="kn">import</span> <span class="n">HyperOptNASWOT</span>
+                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptNASWOT</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptNASWOT</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">hoptimizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown hyperparameter optimizer requested.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">hoptimizer</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span> <span class="o">=</span> <span class="n">params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">ObjectiveBase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_pkl_checkpoints</span> <span class="o">=</span> <span class="n">use_pkl_checkpoints</span>
 
-<div class="viewcode-block" id="HyperOptBase.add_hyperparameter"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.add_hyperparameter">[docs]</a>    <span class="k">def</span> <span class="nf">add_hyperparameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<div class="viewcode-block" id="HyperOpt.add_hyperparameter"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt.HyperOpt.add_hyperparameter">[docs]</a>    <span class="k">def</span> <span class="nf">add_hyperparameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                            <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a hyperparameter to the current investigation.</span>
@@ -234,11 +270,11 @@
                                         <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span>
                                         <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="HyperOptBase.clear_hyperparameters"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.clear_hyperparameters">[docs]</a>    <span class="k">def</span> <span class="nf">clear_hyperparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperOpt.clear_hyperparameters"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt.HyperOpt.clear_hyperparameters">[docs]</a>    <span class="k">def</span> <span class="nf">clear_hyperparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Clear the list of hyperparameters that are to be investigated.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span> <span class="o">=</span> <span class="p">[]</span></div>
 
-<div class="viewcode-block" id="HyperOptBase.perform_study"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.perform_study">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="HyperOpt.perform_study"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt.HyperOpt.perform_study">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform the study, i.e. the optimization.</span>
@@ -247,7 +283,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="HyperOptBase.set_optimal_parameters"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.set_optimal_parameters">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="HyperOpt.set_optimal_parameters"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt.HyperOpt.set_optimal_parameters">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">set_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the optimal parameters found in the present study.</span>
@@ -257,7 +293,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="HyperOptBase.set_parameters"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.set_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperOpt.set_parameters"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt.HyperOpt.set_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the parameters to a specific trial.</span>
 
@@ -286,7 +322,7 @@
                          <span class="o">+</span> <span class="s2">&quot;_params.json&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">save_as_json</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
 
-<div class="viewcode-block" id="HyperOptBase.checkpoint_exists"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_base.HyperOptBase.checkpoint_exists">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="HyperOpt.checkpoint_exists"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt.HyperOpt.checkpoint_exists">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">checkpoint_exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if a hyperparameter optimization checkpoint exists.</span>
