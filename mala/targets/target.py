@@ -76,7 +76,7 @@ class Target(ABC):
             raise Exception("Wrong type of parameters for Targets class.")
         self.fermi_energy_eV = None
         self.temperature_K = None
-        self.grid_spacing_Bohr = None
+        self.voxel_Bohr = None
         self.number_of_electrons = None
         self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
@@ -197,7 +197,7 @@ class Target(ABC):
             # Reset everything.
             self.fermi_energy_eV = None
             self.temperature_K = None
-            self.grid_spacing_Bohr = None
+            self.voxel_Bohr = None
             self.number_of_electrons = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
@@ -268,11 +268,14 @@ class Target(ABC):
                     if "set verbosity='high' to print them." in line:
                         bands_included = False
 
-            # Post process the text values.
-            cell_volume = vol / (self.grid_dimensions[0] *
-                                 self.grid_dimensions[1] *
-                                 self.grid_dimensions[2] * Bohr ** 3)
-            self.grid_spacing_Bohr = cell_volume ** (1 / 3)
+            # The voxel is needed for e.g. LDOS integration.
+            self.voxel_Bohr = self.atoms.cell.copy()
+            self.voxel_Bohr[0] = self.voxel_Bohr[0] / (
+                        self.grid_dimensions[0] * Bohr)
+            self.voxel_Bohr[1] = self.voxel_Bohr[1] / (
+                        self.grid_dimensions[1] * Bohr)
+            self.voxel_Bohr[2] = self.voxel_Bohr[2] / (
+                        self.grid_dimensions[2] * Bohr)
 
             # This is especially important for size extrapolation.
             self.electrons_per_atom = self.number_of_electrons/len(self.atoms)
@@ -300,7 +303,7 @@ class Target(ABC):
 
         elif data_type == "atoms+grid":
             # Reset everything that we can get this way.
-            self.grid_spacing_Bohr = None
+            self.voxel_Bohr = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
@@ -314,11 +317,14 @@ class Target(ABC):
             self.grid_dimensions[1] = data[1][1]
             self.grid_dimensions[2] = data[1][2]
 
-            # Post process the text values.
-            cell_volume = vol / (self.grid_dimensions[0] *
-                                 self.grid_dimensions[1] *
-                                 self.grid_dimensions[2] * Bohr ** 3)
-            self.grid_spacing_Bohr = cell_volume ** (1 / 3)
+            # The voxel is needed for e.g. LDOS integration.
+            self.voxel_Bohr = self.atoms.cell.copy()
+            self.voxel_Bohr[0] = self.voxel_Bohr[0] / (
+                        self.grid_dimensions[0] * Bohr)
+            self.voxel_Bohr[1] = self.voxel_Bohr[1] / (
+                        self.grid_dimensions[1] * Bohr)
+            self.voxel_Bohr[2] = self.voxel_Bohr[2] / (
+                        self.grid_dimensions[2] * Bohr)
 
             if self.electrons_per_atom is None:
                 printout("No number of electrons per atom provided, "
@@ -344,9 +350,7 @@ class Target(ABC):
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
                 for k in range(0, self.grid_dimensions[2]):
-                    grid3D[i, j, k, 0] = i * self.grid_spacing_Bohr
-                    grid3D[i, j, k, 1] = j * self.grid_spacing_Bohr
-                    grid3D[i, j, k, 2] = k * self.grid_spacing_Bohr
+                    grid3D[i, j, k, :] = np.matmul(self.voxel_Bohr, [i, j, k])
         return grid3D
 
     @staticmethod
