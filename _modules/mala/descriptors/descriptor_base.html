@@ -1,0 +1,516 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.descriptors.descriptor_base &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.descriptors.descriptor_base</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.descriptors.descriptor_base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Base class for all descriptor calculators.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">ase</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">ParametersDescriptors</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
+
+
+<div class="viewcode-block" id="DescriptorBase"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase">[docs]</a><span class="k">class</span> <span class="nc">DescriptorBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for all descriptors available in MALA.</span>
+
+<span class="sd">    Descriptors encode the atomic fingerprint of a DFT calculation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.common.parameters.Parameters</span>
+<span class="sd">        Parameters object used to create this object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersDescriptors</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># so iterations will fail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">debug</span><span class="o">.</span><span class="n">grid_dimensions</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">descriptors_contain_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Control whether descriptor vectors will contain xyz coordinates.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span>
+
+    <span class="nd">@descriptors_contain_xyz</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">descriptors_contain_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="DescriptorBase.convert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert descriptors from a specified unit into the ones used in MALA.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            Data for which the units should be converted.</span>
+
+<span class="sd">        in_units : string</span>
+<span class="sd">            Units of array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">            Data in MALA units.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No unit conversion method implemented for this&quot;</span>
+                        <span class="s2">&quot; descriptor type.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DescriptorBase.backconvert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert descriptors from MALA units into a specified unit.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            Data in MALA units.</span>
+
+<span class="sd">        out_units : string</span>
+<span class="sd">            Desired units of output array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">            Data in out_units.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No unit back conversion method implemented for &quot;</span>
+                        <span class="s2">&quot;this descriptor type.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DescriptorBase.enforce_pbc"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.enforce_pbc">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">enforce_pbc</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Explictly enforeces the PBC on an ASE atoms object.</span>
+
+<span class="sd">        QE (and potentially other codes?) do that internally. Meaning that the</span>
+<span class="sd">        raw positions of atoms (in Angstrom) can lie outside of the unit cell.</span>
+<span class="sd">        When setting up the DFT calculation, these atoms get shifted into</span>
+<span class="sd">        the unit cell. Since we directly use these raw positions for the</span>
+<span class="sd">        descriptor calculation, we need to enforce that in the ASE atoms</span>
+<span class="sd">        objects, the atoms are explicitly in the unit cell.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : ase.atoms</span>
+<span class="sd">            The ASE atoms object for which the PBC need to be enforced.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        new_atoms : ase.atoms</span>
+<span class="sd">            The ASE atoms object for which the PBC have been enforced.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_atoms</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">new_atoms</span><span class="o">.</span><span class="n">set_scaled_positions</span><span class="p">(</span><span class="n">new_atoms</span><span class="o">.</span><span class="n">get_scaled_positions</span><span class="p">())</span>
+
+        <span class="c1"># This might be unecessary, but I think it is nice to have some sort of</span>
+        <span class="c1"># metric here.</span>
+        <span class="n">rescaled_atoms</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="kc">False</span> <span class="ow">in</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">new_atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+                          <span class="n">atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)):</span>
+                <span class="n">rescaled_atoms</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Descriptor calculation: had to enforce periodic boundary &quot;</span>
+                 <span class="s2">&quot;conditions on&quot;</span><span class="p">,</span> <span class="n">rescaled_atoms</span><span class="p">,</span> <span class="s2">&quot;atoms before calculation.&quot;</span><span class="p">,</span>
+                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_atoms</span></div>
+
+<div class="viewcode-block" id="DescriptorBase.calculate_from_qe_out"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.calculate_from_qe_out">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">calculate_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the descriptors based on a Quantum Espresso outfile.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        qe_out_file : string</span>
+<span class="sd">            Name of Quantum Espresso output file for snapshot.</span>
+
+<span class="sd">        qe_out_directory : string</span>
+<span class="sd">            Path to Quantum Espresso output file for snapshot.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        descriptors : numpy.array</span>
+<span class="sd">            Numpy array containing the descriptors with the dimension</span>
+<span class="sd">            (x,y,z,descriptor_dimension)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="DescriptorBase.calculate_from_atoms"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.calculate_from_atoms">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">calculate_from_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the descriptors based on the atomic configurations.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            Atoms object holding the atomic configuration.</span>
+
+<span class="sd">        grid_dimensions : list</span>
+<span class="sd">            Grid dimensions to be used, in the format [x,y,z].</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        descriptors : numpy.array</span>
+<span class="sd">            Numpy array containing the descriptors with the dimension</span>
+<span class="sd">            (x,y,z,descriptor_dimension)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="DescriptorBase.get_acsd"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.descriptor_base.DescriptorBase.get_acsd">[docs]</a>    <span class="k">def</span> <span class="nf">get_acsd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor_data</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the ACSD for given descriptors and LDOS data.</span>
+
+<span class="sd">        ACSD stands for average cosine similarity distance and is a metric</span>
+<span class="sd">        of how well the descriptors capture the local environment to a</span>
+<span class="sd">        degree where similar vectors result in simlar LDOS vectors.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        descriptor_data : numpy.ndarray</span>
+<span class="sd">            Array containing the descriptors.</span>
+
+<span class="sd">        ldos_data : numpy.ndarray</span>
+<span class="sd">            Array containing the LDOS.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        acsd : float</span>
+<span class="sd">            The average cosine similarity distance.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_acsd</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">acsd_points</span><span class="p">,</span>
+                                    <span class="n">descriptor_vectors_contain_xyz</span><span class="o">=</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_calculate_cosine_similarities</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">nr_points</span><span class="p">,</span>
+                                       <span class="n">descriptor_vectors_contain_xyz</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the raw cosine similarities for descriptor and LDOS data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        descriptor_data : numpy.ndarray</span>
+<span class="sd">            Array containing the descriptors.</span>
+
+<span class="sd">        ldos_data : numpy.ndarray</span>
+<span class="sd">            Array containing the LDOS.</span>
+
+<span class="sd">        descriptor_vectors_contain_xyz : bool</span>
+<span class="sd">            If true, the xyz values are cut from the beginning of the</span>
+<span class="sd">            descriptor vectors.</span>
+
+<span class="sd">        nr_points : int</span>
+<span class="sd">            The number of points for which to calculate the ACSD.</span>
+<span class="sd">            The actual number of distances will be acsd_points x acsd_points,</span>
+<span class="sd">            since the cosine similarity is only defined for pairs.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        similarity_array : numpy.ndarray</span>
+<span class="sd">            A (2,nr_points*nr_points) array containing the cosine similarities.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">calc_cosine_similarity</span><span class="p">(</span><span class="n">vector1</span><span class="p">,</span> <span class="n">vector2</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vector1</span><span class="p">,</span> <span class="n">vector2</span><span class="p">)</span> <span class="o">/</span> \
+                   <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector1</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span> <span class="o">*</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector2</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="n">norm</span><span class="p">))</span>
+
+        <span class="n">descriptor_dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">)</span>
+        <span class="n">ldos_dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptor_dim</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">descriptor_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span> <span class="p">(</span><span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span>
+                                               <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">descriptor_vectors_contain_xyz</span><span class="p">:</span>
+                <span class="n">descriptor_data</span> <span class="o">=</span> <span class="n">descriptor_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptor_dim</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot work with this descriptor data.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_dim</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">ldos_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="p">(</span><span class="n">ldos_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ldos_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span>
+                                               <span class="n">ldos_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ldos_dim</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_dim</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot work with this LDOS data.&quot;</span><span class="p">)</span>
+
+        <span class="n">similarity_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Draw nr_points at random from snapshot.</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+        <span class="n">points_i</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                              <span class="n">size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                              <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nr_points</span><span class="p">):</span>
+            <span class="c1"># Draw another nr_points at random from snapshot.</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+            <span class="n">points_j</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                                  <span class="n">size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                                  <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nr_points</span><span class="p">):</span>
+                <span class="c1"># Calculate similarities between these two pairs.</span>
+                <span class="n">descriptor_distance</span> <span class="o">=</span> <span class="n">calc_cosine_similarity</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">[</span><span class="n">points_i</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
+                                                       <span class="n">descriptor_data</span><span class="p">[</span><span class="n">points_j</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
+                <span class="n">ldos_distance</span> <span class="o">=</span> <span class="n">calc_cosine_similarity</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">[</span><span class="n">points_i</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
+                                                       <span class="n">ldos_data</span><span class="p">[</span><span class="n">points_j</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
+                <span class="n">similarity_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">descriptor_distance</span><span class="p">,</span> <span class="n">ldos_distance</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">similarity_array</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_calculate_acsd</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">acsd_points</span><span class="p">,</span>
+                        <span class="n">descriptor_vectors_contain_xyz</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the ACSD for given descriptor and LDOS data.</span>
+
+<span class="sd">        ACSD stands for average cosine similarity distance and is a metric</span>
+<span class="sd">        of how well the descriptors capture the local environment to a</span>
+<span class="sd">        degree where similar descriptor vectors result in simlar LDOS vectors.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        descriptor_data : numpy.ndarray</span>
+<span class="sd">            Array containing the descriptors.</span>
+
+<span class="sd">        ldos_data : numpy.ndarray</span>
+<span class="sd">            Array containing the LDOS.</span>
+
+<span class="sd">        descriptor_vectors_contain_xyz : bool</span>
+<span class="sd">            If true, the xyz values are cut from the beginning of the</span>
+<span class="sd">            descriptor vectors.</span>
+
+<span class="sd">        acsd_points : int</span>
+<span class="sd">            The number of points for which to calculate the ACSD.</span>
+<span class="sd">            The actual number of distances will be acsd_points x acsd_points,</span>
+<span class="sd">            since the cosine similarity is only defined for pairs.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        acsd : float</span>
+<span class="sd">            The average cosine similarity distance.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">distance_between_points</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y2</span><span class="p">))</span>
+
+        <span class="n">similarity_data</span> <span class="o">=</span> <span class="n">DescriptorBase</span><span class="o">.</span>\
+            <span class="n">_calculate_cosine_similarities</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">acsd_points</span><span class="p">,</span>
+                                           <span class="n">descriptor_vectors_contain_xyz</span><span class="o">=</span>
+                                          <span class="n">descriptor_vectors_contain_xyz</span><span class="p">)</span>
+        <span class="n">data_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">similarity_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data_size</span><span class="p">):</span>
+            <span class="n">distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distance_between_points</span><span class="p">(</span><span class="n">similarity_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                                     <span class="n">similarity_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                                     <span class="n">similarity_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                                     <span class="n">similarity_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span></div>
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

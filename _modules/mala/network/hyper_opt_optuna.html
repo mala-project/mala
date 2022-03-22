@@ -1,0 +1,479 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.network.hyper_opt_optuna &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.network.hyper_opt_optuna</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.network.hyper_opt_optuna</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Hyperparameter optimizer using optuna.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="kn">import</span> <span class="nn">optuna</span>
+
+<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">printout</span>
+<span class="kn">from</span> <span class="nn">mala.network.hyper_opt_base</span> <span class="kn">import</span> <span class="n">HyperOptBase</span>
+<span class="kn">from</span> <span class="nn">mala.network.objective_base</span> <span class="kn">import</span> <span class="n">ObjectiveBase</span>
+<span class="kn">from</span> <span class="nn">mala.network.naswot_pruner</span> <span class="kn">import</span> <span class="n">NASWOTPruner</span>
+
+
+<div class="viewcode-block" id="HyperOptOptuna"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna">[docs]</a><span class="k">class</span> <span class="nc">HyperOptOptuna</span><span class="p">(</span><span class="n">HyperOptBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Hyperparameter optimizer using Optuna.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    params : mala.common.parameters.Parameters</span>
+<span class="sd">        Parameters used to create this hyperparameter optimizer.</span>
+
+<span class="sd">    data : mala.datahandling.data_handler.DataHandler</span>
+<span class="sd">        DataHandler holding the data for the hyperparameter optimization.</span>
+
+<span class="sd">    use_pkl_checkpoints : bool</span>
+<span class="sd">        If true, .pkl checkpoints will be created.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HyperOptOptuna</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span>
+                                             <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="n">use_pkl_checkpoints</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+
+        <span class="c1"># Make the sample behave in a reproducible way, if so specified by</span>
+        <span class="c1"># the user.</span>
+        <span class="n">sampler</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">TPESampler</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">,</span>
+                                             <span class="n">multivariate</span><span class="o">=</span><span class="n">params</span><span class="o">.</span> \
+                                             <span class="n">hyperparameters</span><span class="o">.</span><span class="n">use_multivariate</span><span class="p">)</span>
+
+        <span class="c1"># See if the user specified a pruner.</span>
+        <span class="n">pruner</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">pruner</span> <span class="o">==</span> <span class="s2">&quot;naswot&quot;</span><span class="p">:</span>
+            <span class="n">pruner</span> <span class="o">=</span> <span class="n">NASWOTPruner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># Create the study.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span>\
+                <span class="n">create_study</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">direction</span><span class="p">,</span>
+                             <span class="n">sampler</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span>
+                             <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>
+                             <span class="n">study_name</span><span class="p">,</span>
+                             <span class="n">pruner</span><span class="o">=</span><span class="n">pruner</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">study_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;If RDB storage is used, a name for the study &quot;</span>
+                                <span class="s2">&quot;has to be provided.&quot;</span><span class="p">)</span>
+            <span class="n">rdb_storage</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">storages</span><span class="o">.</span><span class="n">RDBStorage</span><span class="p">(</span>
+                    <span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span><span class="p">,</span>
+                    <span class="n">heartbeat_interval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>
+                    <span class="n">rdb_storage_heartbeat</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span>\
+                <span class="n">create_study</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">direction</span><span class="p">,</span>
+                             <span class="n">sampler</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span>
+                             <span class="n">study_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>
+                             <span class="n">study_name</span><span class="p">,</span>
+                             <span class="n">storage</span><span class="o">=</span><span class="n">rdb_storage</span><span class="p">,</span>
+                             <span class="n">load_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">pruner</span><span class="o">=</span><span class="n">pruner</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="HyperOptOptuna.perform_study"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.perform_study">[docs]</a>    <span class="k">def</span> <span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform the study, i.e. the optimization.</span>
+
+<span class="sd">        This is done by sampling a certain subset of network architectures.</span>
+<span class="sd">        In this case, optuna is used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># The parameters could have changed.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">ObjectiveBase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">)</span>
+
+        <span class="c1"># Fill callback list based on user checkpoint wishes.</span>
+        <span class="n">callback_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__check_max_number_trials</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoints_each_trial</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">callback_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__create_checkpointing</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">,</span>
+                            <span class="n">n_trials</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">callbacks</span><span class="o">=</span><span class="n">callback_list</span><span class="p">)</span>
+
+        <span class="c1"># Return the best lost value we could achieve.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">best_value</span></div>
+
+<div class="viewcode-block" id="HyperOptOptuna.set_optimal_parameters"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.set_optimal_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the optimal parameters found in the present study.</span>
+
+<span class="sd">        The parameters will be written to the parameter object with which the</span>
+<span class="sd">        hyperparameter optimizer was created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Parse the parameters from the best trial.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">parse_trial_optuna</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">best_trial</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HyperOptOptuna.get_trials_from_study"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study">[docs]</a>    <span class="k">def</span> <span class="nf">get_trials_from_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the trials from the last study.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        last_trials: list</span>
+<span class="sd">            A list of optuna.FrozenTrial objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">get_trials</span><span class="p">(</span><span class="n">states</span><span class="o">=</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span>
+                                              <span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,</span> <span class="p">))</span></div>
+
+<div class="viewcode-block" id="HyperOptOptuna.resume_checkpoint"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">resume_checkpoint</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">alternative_storage_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">no_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepare resumption of hyperparameter optimization from a checkpoint.</span>
+
+<span class="sd">        Please note that to actually resume the optimization,</span>
+<span class="sd">        HyperOptOptuna.perform_study() still has to be called.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        checkpoint_name : string</span>
+<span class="sd">            Name of the checkpoint from which the checkpoint is loaded.</span>
+
+<span class="sd">        alternative_storage_path: string</span>
+<span class="sd">            Alternative storage string to load the study from.</span>
+<span class="sd">            For applications on an HPC cluster it might be necessary to</span>
+<span class="sd">            slightly modify the storage path between runs, since the SQL</span>
+<span class="sd">            server might be running on different nodes each time.</span>
+
+<span class="sd">        no_data : bool</span>
+<span class="sd">            If True, the data won&#39;t actually be loaded into RAM or scaled.</span>
+<span class="sd">            This can be useful for cases where a checkpoint is loaded</span>
+<span class="sd">            for analysis purposes.</span>
+
+<span class="sd">        use_pkl_checkpoints : bool</span>
+<span class="sd">            If true, .pkl checkpoints will be loaded.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        loaded_params : mala.common.parameters.Parameters</span>
+<span class="sd">            The Parameters saved in the checkpoint.</span>
+
+<span class="sd">        new_datahandler : mala.datahandling.data_handler.DataHandler</span>
+<span class="sd">            The data handler reconstructed from the checkpoint.</span>
+
+<span class="sd">        new_hyperopt : HyperOptOptuna</span>
+<span class="sd">            The hyperparameter optimizer reconstructed from the checkpoint.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">loaded_params</span><span class="p">,</span> <span class="n">new_datahandler</span><span class="p">,</span> <span class="n">optimizer_name</span> <span class="o">=</span> \
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_resume_checkpoint</span><span class="p">(</span><span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">no_data</span><span class="o">=</span><span class="n">no_data</span><span class="p">,</span>
+                                   <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="n">use_pkl_checkpoints</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">alternative_storage_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loaded_params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span> <span class="o">=</span> \
+                <span class="n">alternative_storage_path</span>
+        <span class="n">new_hyperopt</span> <span class="o">=</span> <span class="n">HyperOptOptuna</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span><span class="n">loaded_params</span><span class="p">,</span>
+                                                     <span class="n">optimizer_name</span><span class="p">,</span>
+                                                     <span class="n">new_datahandler</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">loaded_params</span><span class="p">,</span> <span class="n">new_datahandler</span><span class="p">,</span> <span class="n">new_hyperopt</span></div>
+
+<div class="viewcode-block" id="HyperOptOptuna.load_from_file"><a class="viewcode-back" href="../../../api/mala.network.html#mala.network.hyper_opt_optuna.HyperOptOptuna.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a hyperparameter optimizer from a file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : mala.common.parameters.Parameters</span>
+<span class="sd">            Parameters object with which the hyperparameter optimizer</span>
+<span class="sd">            should be created Has to be compatible with data.</span>
+
+<span class="sd">        file_path : string</span>
+<span class="sd">            Path to the file from which the hyperparameter optimizer should</span>
+<span class="sd">            be loaded.</span>
+
+<span class="sd">        data : mala.datahandling.data_handler.DataHandler</span>
+<span class="sd">            DataHandler holding the training data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        loaded_trainer : Network</span>
+<span class="sd">            The hyperparameter optimizer that was loaded from the file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First, load the checkpoint.</span>
+        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                <span class="n">loaded_study</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
+
+            <span class="c1"># Now, create the Trainer class with it.</span>
+            <span class="n">loaded_hyperopt</span> <span class="o">=</span> <span class="n">HyperOptOptuna</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">loaded_study</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">loaded_hyperopt</span> <span class="o">=</span> <span class="n">HyperOptOptuna</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">loaded_hyperopt</span></div>
+
+    <span class="k">def</span> <span class="nf">__get_number_of_completed_trials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the number of maximum trials.&quot;&quot;&quot;</span>
+        <span class="c1"># How to calculate this depends on whether or not a heartbeat was</span>
+        <span class="c1"># used. If one was used, then both COMPLETE and RUNNING trials</span>
+        <span class="c1"># Can be taken into account, as it can be expected that RUNNING</span>
+        <span class="c1"># trials will actually finish. If no heartbeat is used,</span>
+        <span class="c1"># then RUNNING trials might be Zombie trials.</span>
+        <span class="c1"># See</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage_heartbeat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">study</span><span class="o">.</span><span class="n">trials</span> <span class="k">if</span>
+                        <span class="n">t</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span>
+                        <span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">study</span><span class="o">.</span><span class="n">trials</span> <span class="k">if</span>
+                        <span class="n">t</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span>
+                        <span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span> <span class="ow">or</span>
+                        <span class="n">t</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span>
+                        <span class="n">TrialState</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__check_max_number_trials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if this trial was already the maximum number of trials.&quot;&quot;&quot;</span>
+        <span class="c1"># How to check for this depends on whether or not a heartbeat was</span>
+        <span class="c1"># used. If one was used, then both COMPLETE and RUNNING trials</span>
+        <span class="c1"># Can be taken into account, as it can be expected that RUNNING</span>
+        <span class="c1"># trials will actually finish. If no heartbeat is used,</span>
+        <span class="c1"># then RUNNING trials might be Zombie trials.</span>
+        <span class="c1"># See</span>
+        <span class="c1"># https://github.com/optuna/optuna/issues/1883#issuecomment-841844834</span>
+        <span class="c1"># https://github.com/optuna/optuna/issues/1883#issuecomment-842106950</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_number_of_completed_trials</span><span class="p">(</span><span class="n">study</span><span class="p">)</span> <span class="o">&gt;=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">n_trials</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__create_checkpointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a checkpoint of optuna study, if necessary.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">need_to_checkpoint</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>\
+                <span class="n">checkpoints_each_trial</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>\
+                <span class="n">checkpoints_each_trial</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">need_to_checkpoint</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">printout</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>
+                     <span class="n">checkpoints_each_trial</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; trials have passed, creating a &quot;</span>
+                                             <span class="s2">&quot;checkpoint for hyperparameter &quot;</span>
+                                             <span class="s2">&quot;optimization.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoints_each_trial</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> \
+           <span class="bp">self</span><span class="o">.</span><span class="n">__get_number_of_completed_trials</span><span class="p">(</span><span class="n">study</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">trial</span><span class="o">.</span><span class="n">number</span> <span class="o">==</span> <span class="n">study</span><span class="o">.</span><span class="n">best_trial</span><span class="o">.</span><span class="n">number</span><span class="p">:</span>
+                    <span class="n">need_to_checkpoint</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Best trial is &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">number</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;, creating a &quot;</span>
+                             <span class="s2">&quot;checkpoint for it.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">need_to_checkpoint</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># We need to create a checkpoint!</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_params_and_scaler</span><span class="p">()</span>
+
+            <span class="c1"># Next, we save all the other objects.</span>
+            <span class="c1"># Here some horovod stuff would have to go.</span>
+            <span class="c1"># But so far, the optuna implementation is not horovod-ready...</span>
+            <span class="c1"># if self.params.use_horovod:</span>
+            <span class="c1">#     if hvd.rank() != 0:</span>
+            <span class="c1">#         return</span>
+            <span class="c1"># The study only has to be saved if the no RDB storage is used.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">hyperopt_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> \
+                            <span class="o">+</span> <span class="s2">&quot;_hyperopt.pth&quot;</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">hyperopt_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

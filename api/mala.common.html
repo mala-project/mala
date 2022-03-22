@@ -194,7 +194,7 @@
 <p>Function to check module availability in MALA.</p>
 <dl class="py function">
 <dt id="mala.common.check_modules.check_modules">
-<code class="sig-name descname"><span class="pre">check_modules</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.check_modules.check_modules" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">check_modules</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/check_modules.html#check_modules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.check_modules.check_modules" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether/which optional modules MALA can access.</p>
 </dd></dl>
 
@@ -204,7 +204,7 @@
 <p>Base class for all objects that need to be JSON serializable.</p>
 <dl class="py class">
 <dt id="mala.common.json_serializable.JSONSerializable">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">JSONSerializable</span></code><a class="headerlink" href="#mala.common.json_serializable.JSONSerializable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">JSONSerializable</span></code><a class="reference internal" href="../_modules/mala/common/json_serializable.html#JSONSerializable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.json_serializable.JSONSerializable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Base class for all objects that need to be JSON serializable.</p>
 <p>Implements “to_json” and “from_json” for serialization and deserialization,
@@ -212,7 +212,7 @@ respectively. Other classes that also need to be JSON serializable have
 to inherit from this class and reimplement these methods, if necessary</p>
 <dl class="py method">
 <dt id="mala.common.json_serializable.JSONSerializable.from_json">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.json_serializable.JSONSerializable.from_json" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/json_serializable.html#JSONSerializable.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.json_serializable.JSONSerializable.from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read this object from a dictionary saved in a JSON file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -230,7 +230,7 @@ in the json file.</p>
 
 <dl class="py method">
 <dt id="mala.common.json_serializable.JSONSerializable.to_json">
-<code class="sig-name descname"><span class="pre">to_json</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.json_serializable.JSONSerializable.to_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">to_json</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/json_serializable.html#JSONSerializable.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.json_serializable.JSONSerializable.to_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert this object to a dictionary that can be saved in a JSON file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -250,13 +250,13 @@ in the json file.</p>
 <p>Functions for safely printing in parallel.</p>
 <dl class="py function">
 <dt id="mala.common.parallelizer.barrier">
-<code class="sig-name descname"><span class="pre">barrier</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.barrier" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">barrier</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#barrier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.barrier" title="Permalink to this definition">¶</a></dt>
 <dd><p>General interface for a barrier.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.get_comm">
-<code class="sig-name descname"><span class="pre">get_comm</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_comm" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_comm</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#get_comm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.get_comm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the MPI communicator, if MPI is being used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -270,7 +270,7 @@ in the json file.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.get_local_rank">
-<code class="sig-name descname"><span class="pre">get_local_rank</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_local_rank" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_local_rank</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#get_local_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.get_local_rank" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the local rank of the process.</p>
 <p>This is the rank WITHIN a node. Useful when multiple GPUs are
 used on one node.</p>
@@ -298,7 +298,7 @@ DEALINGS IN THE SOFTWARE.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.get_rank">
-<code class="sig-name descname"><span class="pre">get_rank</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_rank" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_rank</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#get_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.get_rank" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the rank of the current thread.</p>
 <p>Always returns 0 in the serial case.</p>
 <dl class="field-list simple">
@@ -313,7 +313,7 @@ DEALINGS IN THE SOFTWARE.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.get_size">
-<code class="sig-name descname"><span class="pre">get_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.get_size" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_size</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#get_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.get_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the number of ranks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -327,7 +327,7 @@ DEALINGS IN THE SOFTWARE.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.printout">
-<code class="sig-name descname"><span class="pre">printout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.printout" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">printout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#printout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.printout" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interface to built-in “print” for parallel runs. Can be used like print.</p>
 <p>Linked to the verbosity option in parameters. By default, all messages are
 treated as high level messages and will be printed.</p>
@@ -344,7 +344,7 @@ treated as high level messages and will be printed.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.set_current_verbosity">
-<code class="sig-name descname"><span class="pre">set_current_verbosity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_current_verbosity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set_current_verbosity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#set_current_verbosity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.set_current_verbosity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the verbosity used for the printout statements.</p>
 <p>Should only be called by the parameters file, not by the user directly!</p>
 <dl class="field-list simple">
@@ -356,7 +356,7 @@ treated as high level messages and will be printed.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.set_horovod_status">
-<code class="sig-name descname"><span class="pre">set_horovod_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_horovod_status" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set_horovod_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#set_horovod_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.set_horovod_status" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the horovod status.</p>
 <p>By setting the horovod status via this function it can be ensured that
 printing works in parallel. The Parameters class does that for the user.</p>
@@ -369,7 +369,7 @@ printing works in parallel. The Parameters class does that for the user.</p>
 
 <dl class="py function">
 <dt id="mala.common.parallelizer.set_mpi_status">
-<code class="sig-name descname"><span class="pre">set_mpi_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parallelizer.set_mpi_status" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set_mpi_status</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#set_mpi_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.set_mpi_status" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the MPI status.</p>
 <p>By setting the horovod status via this function it can be ensured that
 printing works in parallel. The Parameters class does that for the user.</p>
@@ -386,7 +386,7 @@ printing works in parallel. The Parameters class does that for the user.</p>
 <p>Collection of all parameter related classes and functions.</p>
 <dl class="py class">
 <dt id="mala.common.parameters.Parameters">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Parameters</span></code><a class="headerlink" href="#mala.common.parameters.Parameters" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Parameters</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>All parameter MALA needs to perform its various tasks.</p>
 <dl class="py attribute">
@@ -492,7 +492,7 @@ Can be used to make experiments comparable. Default: None.</p>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.load_from_file">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_file" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a Parameters object from a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -515,7 +515,7 @@ performing inference/testing after training a network.</p></li>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.load_from_json">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_json" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a Parameters object from a json file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -536,7 +536,7 @@ performing inference/testing after training a network.</p></li>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.load_from_pickle">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_pickle</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_pickle" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_pickle</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.load_from_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.load_from_pickle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a Parameters object from a pickle file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -557,7 +557,7 @@ performing inference/testing after training a network.</p></li>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.save">
-<code class="sig-name descname"><span class="pre">save</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parameters.Parameters.save" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">save</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the Parameters object to a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -572,7 +572,7 @@ Currently only supported file format is “pickle”.</p></li>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.save_as_json">
-<code class="sig-name descname"><span class="pre">save_as_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parameters.Parameters.save_as_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">save_as_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.save_as_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.save_as_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the Parameters object to a json file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -583,7 +583,7 @@ Currently only supported file format is “pickle”.</p></li>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.save_as_pickle">
-<code class="sig-name descname"><span class="pre">save_as_pickle</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parameters.Parameters.save_as_pickle" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">save_as_pickle</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.save_as_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.save_as_pickle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the Parameters object to a pickle file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -594,7 +594,7 @@ Currently only supported file format is “pickle”.</p></li>
 
 <dl class="py method">
 <dt id="mala.common.parameters.Parameters.show">
-<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parameters.Parameters.show" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.show" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print name and values of all attributes of this object.</p>
 </dd></dl>
 
@@ -640,12 +640,12 @@ Currently only supported file format is “pickle”.</p></li>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersBase">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersBase</span></code><a class="headerlink" href="#mala.common.parameters.ParametersBase" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersBase</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.json_serializable.JSONSerializable" title="mala.common.json_serializable.JSONSerializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.json_serializable.JSONSerializable</span></code></a></p>
 <p>Base parameter class for MALA.</p>
 <dl class="py method">
 <dt id="mala.common.parameters.ParametersBase.from_json">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parameters.ParametersBase.from_json" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase.from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read this object from a dictionary saved in a JSON file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -663,7 +663,7 @@ in the json file.</p>
 
 <dl class="py method">
 <dt id="mala.common.parameters.ParametersBase.show">
-<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parameters.ParametersBase.show" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase.show" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print name and values of all attributes of this object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -675,7 +675,7 @@ shows itself.</p>
 
 <dl class="py method">
 <dt id="mala.common.parameters.ParametersBase.to_json">
-<code class="sig-name descname"><span class="pre">to_json</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parameters.ParametersBase.to_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">to_json</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersBase.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersBase.to_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert this object to a dictionary that can be saved in a JSON file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -691,7 +691,7 @@ shows itself.</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersData">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersData</span></code><a class="headerlink" href="#mala.common.parameters.ParametersData" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersData</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for loading and preprocessing data.</p>
 <dl class="py attribute">
@@ -847,7 +847,7 @@ for sampling per snapshot (according to clustering then, of course).</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersDebug">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersDebug</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDebug" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersDebug</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersDebug"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersDebug" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>All debugging parameters.</p>
 <dl class="py attribute">
@@ -866,7 +866,7 @@ globally when it is not empty.. Default : []</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersDescriptors">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersDescriptors</span></code><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersDescriptors</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for calculating/parsing input descriptors.</p>
 <dl class="py attribute">
@@ -949,7 +949,7 @@ descriptor vector. If False, no such cutting is peformed.</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersHyperparameterOptimization">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersHyperparameterOptimization</span></code><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersHyperparameterOptimization</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersHyperparameterOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Hyperparameter optimization parameters.</p>
 <dl class="py attribute">
@@ -1074,7 +1074,7 @@ supported, which will use the NASWOT algorithm as pruner.</p>
 </dl>
 <dl class="py method">
 <dt id="mala.common.parameters.ParametersHyperparameterOptimization.show">
-<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.show" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">show</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersHyperparameterOptimization.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersHyperparameterOptimization.show" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print name and values of all attributes of this object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1111,7 +1111,7 @@ as an estimate of the minimal accuracy to be expected. Currently,
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersNetwork">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersNetwork</span></code><a class="headerlink" href="#mala.common.parameters.ParametersNetwork" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersNetwork</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersNetwork" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for constructing a neural network.</p>
 <dl class="py attribute">
@@ -1182,7 +1182,7 @@ Default: None</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersRunning">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersRunning</span></code><a class="headerlink" href="#mala.common.parameters.ParametersRunning" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersRunning</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersRunning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersRunning" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters needed for network runs (train, test or inference).</p>
 <p>Some of these parameters only apply to either the train or test or
@@ -1447,7 +1447,7 @@ calculated.</p>
 
 <dl class="py class">
 <dt id="mala.common.parameters.ParametersTargets">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersTargets</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">ParametersTargets</span></code><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersTargets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersTargets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
 <p>Parameters necessary for calculating/parsing output quantites.</p>
 <dl class="py attribute">

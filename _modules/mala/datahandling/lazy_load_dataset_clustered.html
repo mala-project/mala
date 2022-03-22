@@ -1,0 +1,577 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.datahandling.lazy_load_dataset_clustered &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.datahandling.lazy_load_dataset_clustered</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.datahandling.lazy_load_dataset_clustered</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;DataSet for lazy-loading.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="c1"># Warning is thrown by Parameters class.</span>
+    <span class="k">pass</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pqkmeans</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
+
+<span class="kn">from</span> <span class="nn">mala.datahandling.snapshot</span> <span class="kn">import</span> <span class="n">Snapshot</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">barrier</span>
+
+
+<div class="viewcode-block" id="LazyLoadDatasetClustered"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered">[docs]</a><span class="k">class</span> <span class="nc">LazyLoadDatasetClustered</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    DataSet class for lazy loading.</span>
+
+<span class="sd">    Only loads snapshots in the memory that are currently being processed.</span>
+<span class="sd">    Uses a &quot;caching&quot; approach of keeping the last used snapshot in memory,</span>
+<span class="sd">    until values from a new ones are used. Therefore, shuffling at DataSampler</span>
+<span class="sd">    / DataLoader level is discouraged to the point that it was disabled.</span>
+<span class="sd">    Instead, we mix the snapshot load order here ot have some sort of mixing</span>
+<span class="sd">    at all.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_dimension : int</span>
+<span class="sd">        Dimension of an input vector.</span>
+
+<span class="sd">    output_dimension : int</span>
+<span class="sd">        Dimension of an output vector.</span>
+
+<span class="sd">    input_data_scaler : mala.datahandling.data_scaler.DataScaler</span>
+<span class="sd">        Used to scale the input data.</span>
+
+<span class="sd">    output_data_scaler : mala.datahandling.data_scaler.DataScaler</span>
+<span class="sd">        Used to scale the output data.</span>
+
+<span class="sd">    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase</span>
+<span class="sd">        Used to do unit conversion on input data.</span>
+
+<span class="sd">    target_calculator : mala.targets.target_base.TargetBase or derivative</span>
+<span class="sd">        Used to do unit conversion on output data.</span>
+
+<span class="sd">    grid_dimensions : list</span>
+<span class="sd">        Dimensions of the grid (x,y,z).</span>
+
+<span class="sd">    grid_size : int</span>
+<span class="sd">        Size of the grid (x*y*z), i.e. the number of datapoints per</span>
+<span class="sd">        snapshot.</span>
+
+<span class="sd">    use_horovod : bool</span>
+<span class="sd">        If true, it is assumed that horovod is used.</span>
+
+<span class="sd">    input_requires_grad : bool</span>
+<span class="sd">        If True, then the gradient is stored for the inputs.</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dimension</span><span class="p">,</span> <span class="n">output_dimension</span><span class="p">,</span> <span class="n">input_data_scaler</span><span class="p">,</span>
+                 <span class="n">output_data_scaler</span><span class="p">,</span> <span class="n">descriptor_calculator</span><span class="p">,</span>
+                 <span class="n">target_calculator</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">use_horovod</span><span class="p">,</span>
+                 <span class="n">number_of_clusters</span><span class="p">,</span> <span class="n">train_ratio</span><span class="p">,</span> <span class="n">sample_ratio</span><span class="p">,</span>
+                 <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">=</span> <span class="n">input_dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">=</span> <span class="n">output_dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span> <span class="o">=</span> <span class="n">input_data_scaler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span> <span class="o">=</span> <span class="n">output_data_scaler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">descriptor_calculator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">grid_dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="n">grid_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
+            <span class="n">descriptors_contain_xyz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span> <span class="o">=</span> <span class="n">use_horovod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_outputs_directly</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_requires_grad</span> <span class="o">=</span> <span class="n">input_requires_grad</span>
+
+        <span class="c1"># Clustering specific things.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span> <span class="o">=</span> <span class="n">number_of_clusters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_ratio</span> <span class="o">=</span> <span class="n">train_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_ratio</span> <span class="o">=</span> <span class="n">sample_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clustered_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_per_cluster</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cluster_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampling_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_sampling_idx</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">return_outputs_directly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Control whether outputs are actually transformed.</span>
+
+<span class="sd">        Has to be False for training. In the testing case,</span>
+<span class="sd">        Numerical errors are smaller if set to True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_outputs_directly</span>
+
+    <span class="nd">@return_outputs_directly</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">return_outputs_directly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_return_outputs_directly</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="LazyLoadDatasetClustered.add_snapshot_to_dataset"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.add_snapshot_to_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">:</span> <span class="n">Snapshot</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Addsa snapshot to a DataSet.</span>
+
+<span class="sd">        Afterwards, the DataSet can and will load this snapshot as needed.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snapshot : mala.datahandling.snapshot.Snapshot</span>
+<span class="sd">            Snapshot that is to be added to this DataSet.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">*</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">sample_ratio</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__cluster_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_idx</span><span class="p">):</span>
+
+        <span class="c1"># Load the data into memory, and transform it as necessary.</span>
+        <span class="c1"># I know, the here-and-there transform via torch is ugly, but</span>
+        <span class="c1"># currently, the MALA scalers only support torch tensors.</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">snapshot_idx</span><span class="p">]</span><span class="o">.</span>
+                                 <span class="n">input_npy_directory</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">snapshot_idx</span><span class="p">]</span><span class="o">.</span>
+                                 <span class="n">input_npy_file</span><span class="p">)</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="c1"># Transform the data.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+            <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">])</span>
+        <span class="n">input_data</span> <span class="o">*=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
+            <span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">snapshot_idx</span><span class="p">]</span><span class="o">.</span><span class="n">input_units</span><span class="p">)</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+
+        <span class="c1"># Pad the vector to be a power of 2.</span>
+        <span class="n">power2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">input_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+        <span class="n">input_data_padded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">input_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="o">**</span><span class="n">power2</span><span class="p">])</span>
+        <span class="n">input_data_padded</span><span class="p">[:</span><span class="n">input_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">input_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> \
+            <span class="n">input_data</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">input_data_padded</span><span class="p">)</span>
+
+        <span class="c1"># Determine the number of subdimensions and Ks. The latter is currently</span>
+        <span class="c1"># fixed.</span>
+        <span class="n">nsbdm</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">power2</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">))</span>
+        <span class="n">Ks</span> <span class="o">=</span> <span class="mi">256</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Clustering: Begin encoder training with subdimension&quot;</span><span class="p">,</span> <span class="n">nsbdm</span><span class="p">,</span>
+                 <span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="n">Ks</span><span class="p">,</span> <span class="s2">&quot;k-s.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Set up the encoder and fit it.</span>
+        <span class="n">encoder</span> <span class="o">=</span> <span class="n">pqkmeans</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">PQEncoder</span><span class="p">(</span><span class="n">num_subdim</span><span class="o">=</span><span class="n">nsbdm</span><span class="p">,</span> <span class="n">Ks</span><span class="o">=</span><span class="n">Ks</span><span class="p">)</span>
+        <span class="n">fit_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">train_ratio</span><span class="p">)</span>
+        <span class="n">fit_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">fit_mask</span><span class="p">[:</span><span class="n">fit_samples</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">fit_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">fit_mask</span><span class="p">)</span>
+        <span class="n">encoder</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">input_data_padded</span><span class="p">[</span><span class="n">fit_mask</span><span class="p">])</span>
+
+        <span class="c1"># Use the encoder for transformation.</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Clustering: Begin input transformation.&quot;</span><span class="p">)</span>
+        <span class="n">input_data_pqcode</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">input_data_padded</span><span class="p">)</span>
+
+        <span class="k">del</span> <span class="n">input_data</span>
+        <span class="k">del</span> <span class="n">input_data_padded</span>
+
+        <span class="c1"># Use the result of this transformation for the K-Means.</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Clustering: Begin K-Means set.&quot;</span><span class="p">)</span>
+        <span class="n">kmeans</span> <span class="o">=</span> <span class="n">pqkmeans</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">PQKMeans</span><span class="p">(</span><span class="n">encoder</span><span class="o">=</span><span class="n">encoder</span><span class="p">,</span>
+                                              <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">)</span>
+
+        <span class="c1"># In turn use the result of this for prediction.</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Begin Kmeans fit predict&quot;</span><span class="p">)</span>
+        <span class="n">clustered_inputs</span> <span class="o">=</span> <span class="n">kmeans</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">input_data_pqcode</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">clustered_inputs</span>
+
+<div class="viewcode-block" id="LazyLoadDatasetClustered.cluster_dataset"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.cluster_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">cluster_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate clusters for dataset (individually per snapshot.</span>
+
+<span class="sd">        IMPORTANT: Only call this function AFTER all snapshots were added.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Clustered inputs holds the cluster a snapshot belongs to for every</span>
+        <span class="c1"># input of that snapshot.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clustered_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_per_cluster</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">)):</span>
+            <span class="c1"># For each snapshot, we calculate which cluster a particular</span>
+            <span class="c1"># grid point would belong to.</span>
+            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Clustering file </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">idx</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clustered_inputs</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">__cluster_snapshot</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+            <span class="c1"># Count how many samples we have per cluster, per snapshot.</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">samples_per_cluster</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clustered_inputs</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples_per_cluster</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:])</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Sum of clustered inputs is different from&quot;</span>
+                                 <span class="s2">&quot; number of inputs itself.&quot;</span><span class="p">)</span>
+
+        <span class="n">barrier</span><span class="p">()</span></div>
+
+        <span class="c1"># In the original code there is a mixing at this point. I omit this</span>
+        <span class="c1"># here because we do it later in the training routine.</span>
+
+<div class="viewcode-block" id="LazyLoadDatasetClustered.mix_datasets"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.mix_datasets">[docs]</a>    <span class="k">def</span> <span class="nf">mix_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mix the order of the snapshots.</span>
+
+<span class="sd">        With this, there can be some variance between runs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">used_perm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span><span class="p">)</span>
+            <span class="n">barrier</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
+                <span class="n">used_perm</span> <span class="o">=</span> <span class="n">hvd</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span><span class="n">used_perm</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="c1"># Not only the snapshots, but also the clustered inputs and samples</span>
+            <span class="c1"># per clusters have to be permutated.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">used_perm</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clustered_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustered_inputs</span><span class="p">[</span><span class="n">used_perm</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">samples_per_cluster</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples_per_cluster</span><span class="p">[</span><span class="n">used_perm</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_new_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LazyLoadDatasetClustered.get_new_data"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.get_new_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_new_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read a new snapshot into RAM.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        file_index : i</span>
+<span class="sd">            File to be read.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Load the data into RAM.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_directory</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">))</span>
+
+        <span class="c1"># Transform the data.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">*=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
+            <span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">input_units</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_requires_grad</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">*=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+            <span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">output_units</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_outputs_directly</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">)</span>
+
+        <span class="c1"># Save which data we have currently loaded.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">=</span> <span class="n">file_index</span>
+
+        <span class="c1"># Reset the clustering indices.</span>
+        <span class="c1"># cluster_idxs will hold all the indices belonging to a specific</span>
+        <span class="c1"># cluster (per snapshot).</span>
+        <span class="c1"># sampling_idx holds the indices from which to sample for a specific</span>
+        <span class="c1"># snapshot.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cluster_idxs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">clustered_inputs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span><span class="p">,</span> <span class="p">:]</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampling_idxs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples_per_cluster</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_sampling_idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+    <span class="k">def</span> <span class="nf">__get_clustered_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">file_idx</span><span class="p">):</span>
+        <span class="n">cluster</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">idx</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">)</span>
+        <span class="n">num_cluster_samples</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">samples_per_cluster</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span><span class="p">,</span> <span class="n">cluster</span><span class="p">]</span>
+
+        <span class="c1"># Rejection sampling - if this file does not contain any instance of</span>
+        <span class="c1"># this cluster at all, different cluster will be tried.</span>
+        <span class="k">if</span> <span class="n">num_cluster_samples</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">bad_iters</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">while</span> <span class="n">num_cluster_samples</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cluster</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">)</span>
+                <span class="n">num_cluster_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples_per_cluster</span><span class="p">[</span><span class="n">file_idx</span><span class="p">,</span>
+                                                               <span class="n">cluster</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">bad_iters</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;100 successive bad clusters. Exiting.&quot;</span><span class="p">)</span>
+
+                <span class="n">bad_iters</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># If the cluster is alright, we can sample from it.</span>
+        <span class="n">front</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_idxs</span><span class="p">[</span><span class="n">cluster</span><span class="p">]</span>
+        <span class="n">back</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_sampling_idx</span><span class="p">[</span><span class="n">cluster</span><span class="p">]</span> <span class="o">%</span> <span class="n">num_cluster_samples</span>
+        <span class="n">back</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">back</span><span class="p">)</span>
+        <span class="n">idx_within_cluster</span> <span class="o">=</span> <span class="n">front</span><span class="p">[</span><span class="n">back</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_sampling_idx</span><span class="p">[</span><span class="n">cluster</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">file_idx</span><span class="p">,</span> <span class="n">cluster</span><span class="p">,</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">cluster_idxs</span><span class="p">[</span><span class="n">cluster</span><span class="p">][</span><span class="n">idx_within_cluster</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_idxs</span><span class="p">[</span><span class="n">cluster</span><span class="p">][</span><span class="n">idx_within_cluster</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get an item of the DataSet.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        idx : int</span>
+<span class="sd">            Requested index. NOTE: Slices are currently NOT supported.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        inputs, outputs : torch.Tensor</span>
+<span class="sd">            The requested inputs and outputs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We sample self.grid_size*self.sample_ratio per file.</span>
+        <span class="n">file_index</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">//</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_ratio</span><span class="p">)</span>
+
+        <span class="c1"># Find out if new data is needed.</span>
+        <span class="k">if</span> <span class="n">file_index</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_new_data</span><span class="p">(</span><span class="n">file_index</span><span class="p">)</span>
+
+        <span class="n">sample_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_clustered_idx</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">file_index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">[</span><span class="n">sample_idx</span><span class="p">],</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">[</span><span class="n">sample_idx</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the length of the DataSet.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        length : int</span>
+<span class="sd">            Number of data points in DataSet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

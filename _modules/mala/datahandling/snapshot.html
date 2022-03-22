@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.datahandling.snapshot &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.datahandling.snapshot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.datahandling.snapshot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Snapshot class.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
+
+
+<div class="viewcode-block" id="Snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.snapshot.Snapshot">[docs]</a><span class="k">class</span> <span class="nc">Snapshot</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a snapshot on a hard drive.</span>
+
+<span class="sd">    A snapshot consists of numpy arrays for input/output data and an</span>
+<span class="sd">    optional DFT calculation output, needed for post-processing.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_npy_file : string</span>
+<span class="sd">        File with saved numpy input array.</span>
+
+<span class="sd">    input_npy_directory : string</span>
+<span class="sd">        Directory containing input_npy_directory.</span>
+
+<span class="sd">    output_npy_file : string</span>
+<span class="sd">        File with saved numpy output array.</span>
+
+<span class="sd">    output_npy_directory : string</span>
+<span class="sd">        Directory containing output_npy_file.</span>
+
+<span class="sd">    input_units : string</span>
+<span class="sd">        Units of input data. See descriptor classes to see which units are</span>
+<span class="sd">        supported.</span>
+
+<span class="sd">    output_units : string</span>
+<span class="sd">        Units of output data. See target classes to see which units are</span>
+<span class="sd">        supported.</span>
+
+<span class="sd">    calculation_output : string</span>
+<span class="sd">        File with the output of the original snapshot calculation. This is</span>
+<span class="sd">        only needed when testing multiple snapshots.</span>
+
+<span class="sd">    snapshot_function : string</span>
+<span class="sd">        &quot;Function&quot; of the snapshot in the MALA workflow.</span>
+
+<span class="sd">          - te: This snapshot will be a testing snapshot.</span>
+<span class="sd">          - tr: This snapshot will be a training snapshot.</span>
+<span class="sd">          - va: This snapshot will be a validation snapshot.</span>
+
+<span class="sd">        Replaces the old approach of MALA to have a separate list.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_npy_file</span><span class="p">,</span> <span class="n">input_npy_directory</span><span class="p">,</span>
+                 <span class="n">output_npy_file</span><span class="p">,</span>  <span class="n">output_npy_directory</span><span class="p">,</span>
+                 <span class="n">snapshot_function</span><span class="p">,</span>
+                 <span class="n">input_units</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">output_units</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                 <span class="n">calculation_output</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Snapshot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># Inputs.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_npy_file</span> <span class="o">=</span> <span class="n">input_npy_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_npy_directory</span> <span class="o">=</span> <span class="n">input_npy_directory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_units</span> <span class="o">=</span> <span class="n">input_units</span>
+
+        <span class="c1"># Outputs.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_npy_file</span> <span class="o">=</span> <span class="n">output_npy_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_npy_directory</span> <span class="o">=</span> <span class="n">output_npy_directory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_units</span> <span class="o">=</span> <span class="n">output_units</span>
+
+        <span class="c1"># Calculation output.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculation_output</span> <span class="o">=</span> <span class="n">calculation_output</span>
+
+        <span class="c1"># Function of the snapshot.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">=</span> <span class="n">snapshot_function</span>
+
+<div class="viewcode-block" id="Snapshot.from_json"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.snapshot.Snapshot.from_json">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read this object from a dictionary saved in a JSON file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        json_dict : dict</span>
+<span class="sd">            A dictionary containing all attributes, properties, etc. as saved</span>
+<span class="sd">            in the json file.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        deserialized_object : JSONSerializable</span>
+<span class="sd">            The object as read from the JSON file.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">deserialized_object</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;input_npy_file&quot;</span><span class="p">],</span>
+                                  <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;input_npy_directory&quot;</span><span class="p">],</span>
+                                  <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;output_npy_file&quot;</span><span class="p">],</span>
+                                  <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;output_npy_directory&quot;</span><span class="p">],</span>
+                                  <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;snapshot_function&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">deserialized_object</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">deserialized_object</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -194,7 +194,7 @@
 <p>Base class for all descriptor calculators.</p>
 <dl class="py class">
 <dt id="mala.descriptors.descriptor_base.DescriptorBase">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">DescriptorBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">DescriptorBase</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_base.html#DescriptorBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Base class for all descriptors available in MALA.</p>
 <p>Descriptors encode the atomic fingerprint of a DFT calculation.</p>
@@ -205,7 +205,7 @@
 </dl>
 <dl class="py method">
 <dt id="mala.descriptors.descriptor_base.DescriptorBase.backconvert_units">
-<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">backconvert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.backconvert_units" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">backconvert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_base.html#DescriptorBase.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.backconvert_units" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert descriptors from MALA units into a specified unit.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -225,7 +225,7 @@
 
 <dl class="py method">
 <dt id="mala.descriptors.descriptor_base.DescriptorBase.calculate_from_atoms">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">calculate_from_atoms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.calculate_from_atoms" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">calculate_from_atoms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_base.html#DescriptorBase.calculate_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.calculate_from_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the descriptors based on the atomic configurations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -246,7 +246,7 @@
 
 <dl class="py method">
 <dt id="mala.descriptors.descriptor_base.DescriptorBase.calculate_from_qe_out">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">calculate_from_qe_out</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.calculate_from_qe_out" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">calculate_from_qe_out</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_base.html#DescriptorBase.calculate_from_qe_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.calculate_from_qe_out" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the descriptors based on a Quantum Espresso outfile.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -267,7 +267,7 @@
 
 <dl class="py method">
 <dt id="mala.descriptors.descriptor_base.DescriptorBase.convert_units">
-<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">convert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.convert_units" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">convert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_base.html#DescriptorBase.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.convert_units" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert descriptors from a specified unit into the ones used in MALA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -287,7 +287,7 @@
 
 <dl class="py method">
 <dt id="mala.descriptors.descriptor_base.DescriptorBase.enforce_pbc">
-<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">enforce_pbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.enforce_pbc" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">enforce_pbc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_base.html#DescriptorBase.enforce_pbc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.enforce_pbc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Explictly enforeces the PBC on an ASE atoms object.</p>
 <p>QE (and potentially other codes?) do that internally. Meaning that the
 raw positions of atoms (in Angstrom) can lie outside of the unit cell.
@@ -310,7 +310,7 @@ objects, the atoms are explicitly in the unit cell.</p>
 
 <dl class="py method">
 <dt id="mala.descriptors.descriptor_base.DescriptorBase.get_acsd">
-<code class="sig-name descname"><span class="pre">get_acsd</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptor_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.get_acsd" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_acsd</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptor_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_base.html#DescriptorBase.get_acsd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_base.DescriptorBase.get_acsd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the ACSD for given descriptors and LDOS data.</p>
 <p>ACSD stands for average cosine similarity distance and is a metric
 of how well the descriptors capture the local environment to a
@@ -345,7 +345,7 @@ degree where similar vectors result in simlar LDOS vectors.</p>
 <p>Interface functions to automatically get descriptors.</p>
 <dl class="py function">
 <dt id="mala.descriptors.descriptor_interface.DescriptorInterface">
-<code class="sig-name descname"><span class="pre">DescriptorInterface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.descriptor_interface.DescriptorInterface" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">DescriptorInterface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor_interface.html#DescriptorInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor_interface.DescriptorInterface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a DescriptorBase object that adheres to the parameters provided.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -360,7 +360,7 @@ degree where similar vectors result in simlar LDOS vectors.</p>
 <p>Collection of useful functions for working with LAMMPS.</p>
 <dl class="py function">
 <dt id="mala.descriptors.lammps_utils.extract_compute_np">
-<code class="sig-name descname"><span class="pre">extract_compute_np</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.lammps_utils.extract_compute_np" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">extract_compute_np</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/lammps_utils.html#extract_compute_np"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.lammps_utils.extract_compute_np" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a lammps compute to a numpy array.</p>
 <p>Assumes the compute returns a floating point numbers.
 Note that the result is a view into the original memory.
@@ -381,7 +381,7 @@ skipped and a python float is returned.</p>
 
 <dl class="py function">
 <dt id="mala.descriptors.lammps_utils.set_cmdlinevars">
-<code class="sig-name descname"><span class="pre">set_cmdlinevars</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmdargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argdict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.lammps_utils.set_cmdlinevars" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set_cmdlinevars</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmdargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argdict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/lammps_utils.html#set_cmdlinevars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.lammps_utils.set_cmdlinevars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a dicitionary of LAMMPS arguments in a command line argument string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -405,7 +405,7 @@ skipped and a python float is returned.</p>
 <p>SNAP descriptor class.</p>
 <dl class="py class">
 <dt id="mala.descriptors.snap.SNAP">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">SNAP</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.snap.SNAP" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">SNAP</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/snap.html#SNAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.snap.SNAP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#mala.descriptors.descriptor_base.DescriptorBase" title="mala.descriptors.descriptor_base.DescriptorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.descriptors.descriptor_base.DescriptorBase</span></code></a></p>
 <p>Class for calculation and parsing of SNAP descriptors.</p>
 <dl class="field-list simple">
@@ -415,7 +415,7 @@ skipped and a python float is returned.</p>
 </dl>
 <dl class="py method">
 <dt id="mala.descriptors.snap.SNAP.backconvert_units">
-<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">backconvert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.snap.SNAP.backconvert_units" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">backconvert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/snap.html#SNAP.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.snap.SNAP.backconvert_units" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert the units of a SNAP descriptor.</p>
 <p>Since these do not really have units this function does nothing yet.</p>
 <dl class="field-list simple">
@@ -436,7 +436,7 @@ skipped and a python float is returned.</p>
 
 <dl class="py method">
 <dt id="mala.descriptors.snap.SNAP.calculate_from_atoms">
-<code class="sig-name descname"><span class="pre">calculate_from_atoms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.snap.SNAP.calculate_from_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">calculate_from_atoms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/snap.html#SNAP.calculate_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.snap.SNAP.calculate_from_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the SNAP descriptors based on the atomic configurations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -458,7 +458,7 @@ skipped and a python float is returned.</p>
 
 <dl class="py method">
 <dt id="mala.descriptors.snap.SNAP.calculate_from_qe_out">
-<code class="sig-name descname"><span class="pre">calculate_from_qe_out</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.snap.SNAP.calculate_from_qe_out" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">calculate_from_qe_out</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/snap.html#SNAP.calculate_from_qe_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.snap.SNAP.calculate_from_qe_out" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the SNAP descriptors based on a Quantum Espresso outfile.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -479,7 +479,7 @@ skipped and a python float is returned.</p>
 
 <dl class="py method">
 <dt id="mala.descriptors.snap.SNAP.convert_units">
-<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">convert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.snap.SNAP.convert_units" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">convert_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/snap.html#SNAP.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.snap.SNAP.convert_units" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert the units of a SNAP descriptor.</p>
 <p>Since these do not really have units this function does nothing yet.</p>
 <dl class="field-list simple">
@@ -500,7 +500,7 @@ skipped and a python float is returned.</p>
 
 <dl class="py method">
 <dt id="mala.descriptors.snap.SNAP.gather_descriptors">
-<code class="sig-name descname"><span class="pre">gather_descriptors</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snap_descriptors_np</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pickled_comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mala.descriptors.snap.SNAP.gather_descriptors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">gather_descriptors</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snap_descriptors_np</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pickled_comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/snap.html#SNAP.gather_descriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.snap.SNAP.gather_descriptors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gathers all SNAP descriptors on rank 0 and sorts them.</p>
 <p>This is useful for e.g. parallel preprocessing.
 This function removes the extra 3 components that come from parallel

@@ -1,0 +1,344 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.interfaces.ase_calculator &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.interfaces.ase_calculator</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.interfaces.ase_calculator</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;ASE calculator for MALA predictions.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">ase.calculators.calculator</span> <span class="kn">import</span> <span class="n">Calculator</span><span class="p">,</span> <span class="n">all_changes</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="c1"># Warning thrown in parameters.py</span>
+    <span class="k">pass</span>
+<span class="kn">from</span> <span class="nn">mala</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">DataHandler</span><span class="p">,</span> <span class="n">Predictor</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">,</span> <span class="n">Density</span><span class="p">,</span> \
+                 <span class="n">DOS</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">barrier</span>
+
+
+<div class="viewcode-block" id="MALA"><a class="viewcode-back" href="../../../api/mala.interfaces.html#mala.interfaces.ase_calculator.MALA">[docs]</a><span class="k">class</span> <span class="nc">MALA</span><span class="p">(</span><span class="n">Calculator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implements an ASE calculator based on MALA predictions.</span>
+
+<span class="sd">    With this, MD simulations can be performed.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    params : mala.common.parametes.Parameters</span>
+<span class="sd">        Parameters used to create this Interface.</span>
+
+<span class="sd">    network : mala.network.network.Network</span>
+<span class="sd">        Network which is being used for the run.</span>
+
+<span class="sd">    data : mala.datahandling.data_handler.DataHandler</span>
+<span class="sd">        DataHandler; not really used in the classical sense, more as a</span>
+<span class="sd">        collector of properties and objects (such as a target calculator).</span>
+
+<span class="sd">    reference_data : list</span>
+<span class="sd">        A list containing</span>
+<span class="sd">        [0]: A type of additional calculation data</span>
+<span class="sd">        [1]: A path to it.</span>
+<span class="sd">        With this additonal calculation data (preferably from the training of</span>
+<span class="sd">        the neural network), calculator can access all important data such as</span>
+<span class="sd">        temperature, number of electrons, etc. that might not be known simply</span>
+<span class="sd">        from the atomic positions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">implemented_properties</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">,</span> <span class="s1">&#39;forces&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Network</span><span class="p">,</span>
+                 <span class="n">data</span><span class="p">:</span> <span class="n">DataHandler</span><span class="p">,</span> <span class="n">reference_data</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MALA</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># Copy the MALA relevant objects.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">target_type</span> <span class="o">!=</span> <span class="s2">&quot;LDOS&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The MALA calculator currently only works with the&quot;</span>
+                            <span class="s2">&quot;LDOS.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">:</span> <span class="n">Network</span> <span class="o">=</span> <span class="n">network</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">:</span> <span class="n">DataHandler</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="c1"># Prepare for prediction.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="n">Predictor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">)</span>
+
+        <span class="c1"># Get critical values from a reference file (cutoff, temperature, etc.)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+            <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">reference_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                             <span class="n">reference_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+<div class="viewcode-block" id="MALA.calculate"><a class="viewcode-back" href="../../../api/mala.interfaces.html#mala.interfaces.ase_calculator.MALA.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span>
+                  <span class="n">system_changes</span><span class="o">=</span><span class="n">all_changes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform the calculations.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            Atoms object for which to perform the calculation.</span>
+
+<span class="sd">        properties: list of str</span>
+<span class="sd">            List of what needs to be calculated.  Can be any combination</span>
+<span class="sd">            of &#39;energy&#39;, &#39;forces&#39;, &#39;stress&#39;, &#39;dipole&#39;, &#39;charges&#39;, &#39;magmom&#39;</span>
+<span class="sd">            and &#39;magmoms&#39;.</span>
+
+<span class="sd">        system_changes: list of str</span>
+<span class="sd">            List of what has changed since last calculation.  Can be</span>
+<span class="sd">            any combination of these six: &#39;positions&#39;, &#39;numbers&#39;, &#39;cell&#39;,</span>
+<span class="sd">            &#39;pbc&#39;, &#39;initial_charges&#39; and &#39;initial_magmoms&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">barrier</span><span class="p">()</span>
+        <span class="n">Calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">system_changes</span><span class="p">)</span>
+
+        <span class="c1"># Get the LDOS from the NN.</span>
+        <span class="n">ldos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">energy</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">),</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="c1"># If an MPI environment is detected, ASE will use it for writing.</span>
+        <span class="c1"># Therefore we have to do this before forking.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span>\
+            <span class="n">target_calculator</span><span class="o">.</span>\
+            <span class="n">write_tem_input_file</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span>
+                                 <span class="n">target_calculator</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span>
+                                 <span class="n">target_calculator</span><span class="o">.</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span>
+                                 <span class="n">target_calculator</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span>
+                                 <span class="n">target_calculator</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Define calculator objects.</span>
+            <span class="n">ldos_calculator</span><span class="p">:</span> <span class="n">LDOS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span>
+            <span class="n">density_calculator</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">from_ldos</span><span class="p">(</span><span class="n">ldos_calculator</span><span class="p">)</span>
+            <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos</span><span class="p">(</span><span class="n">ldos_calculator</span><span class="p">)</span>
+
+            <span class="c1"># Get DOS and density.</span>
+            <span class="n">dos</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos</span><span class="p">)</span>
+            <span class="n">fermi_energy_ev</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy_ev</span><span class="p">(</span>
+                <span class="n">dos</span><span class="p">)</span>
+            <span class="n">density</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="n">ldos</span><span class="p">,</span>
+                                                  <span class="n">fermi_energy_ev</span><span class="o">=</span><span class="n">fermi_energy_ev</span><span class="p">)</span>
+            <span class="n">energy</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span>\
+            <span class="n">get_total_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="o">=</span><span class="n">dos</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
+                             <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_ev</span><span class="p">,</span>
+                             <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;forces&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+                <span class="n">forces</span> <span class="o">=</span> <span class="n">density_calculator</span><span class="o">.</span><span class="n">get_atomic_forces</span><span class="p">(</span><span class="n">density</span><span class="p">,</span>
+                                                              <span class="n">create_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">barrier</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
+            <span class="n">energy</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;forces&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+                <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">Bcast</span><span class="p">([</span><span class="n">forces</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Use the LDOS determined DOS and density to get energy and forces.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy</span>
+        <span class="k">if</span> <span class="s2">&quot;forces&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">forces</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

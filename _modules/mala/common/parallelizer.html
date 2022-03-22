@@ -1,0 +1,419 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.common.parallelizer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.common.parallelizer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.common.parallelizer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Functions for safely printing in parallel.&quot;&quot;&quot;</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="n">use_horovod</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">comm</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">local_mpi_rank</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">current_verbosity</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<div class="viewcode-block" id="set_current_verbosity"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parallelizer.set_current_verbosity">[docs]</a><span class="k">def</span> <span class="nf">set_current_verbosity</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the verbosity used for the printout statements.</span>
+
+<span class="sd">    Should only be called by the parameters file, not by the user directly!</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    new_value : int</span>
+<span class="sd">        New verbosity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">current_verbosity</span>
+    <span class="n">current_verbosity</span> <span class="o">=</span> <span class="n">new_value</span></div>
+
+
+<div class="viewcode-block" id="set_horovod_status"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parallelizer.set_horovod_status">[docs]</a><span class="k">def</span> <span class="nf">set_horovod_status</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the horovod status.</span>
+
+<span class="sd">    By setting the horovod status via this function it can be ensured that</span>
+<span class="sd">    printing works in parallel. The Parameters class does that for the user.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    new_value : bool</span>
+<span class="sd">        Value the horovod status has.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_mpi</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">new_value</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot use horovod and inference-level MPI at &quot;</span>
+                        <span class="s2">&quot;the same time yet.&quot;</span><span class="p">)</span>
+    <span class="k">global</span> <span class="n">use_horovod</span>
+    <span class="n">use_horovod</span> <span class="o">=</span> <span class="n">new_value</span></div>
+
+
+<div class="viewcode-block" id="set_mpi_status"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parallelizer.set_mpi_status">[docs]</a><span class="k">def</span> <span class="nf">set_mpi_status</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the MPI status.</span>
+
+<span class="sd">    By setting the horovod status via this function it can be ensured that</span>
+<span class="sd">    printing works in parallel. The Parameters class does that for the user.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    new_value : bool</span>
+<span class="sd">        Value the horovod status has.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_horovod</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">new_value</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot use horovod and inference-level MPI at &quot;</span>
+                        <span class="s2">&quot;the same time yet.&quot;</span><span class="p">)</span>
+    <span class="k">global</span> <span class="n">use_mpi</span>
+    <span class="n">use_mpi</span> <span class="o">=</span> <span class="n">new_value</span>
+    <span class="k">if</span> <span class="n">use_mpi</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">comm</span>
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span></div>
+
+    <span class="c1"># else:</span>
+    <span class="c1">#     global comm</span>
+    <span class="c1">#     comm = MockCommunicator()</span>
+
+
+<div class="viewcode-block" id="get_rank"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parallelizer.get_rank">[docs]</a><span class="k">def</span> <span class="nf">get_rank</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the rank of the current thread.</span>
+
+<span class="sd">    Always returns 0 in the serial case.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    rank : int</span>
+<span class="sd">        The rank of the current thread.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_horovod</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">use_mpi</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span>
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="get_local_rank"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parallelizer.get_local_rank">[docs]</a><span class="k">def</span> <span class="nf">get_local_rank</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the local rank of the process.</span>
+
+<span class="sd">    This is the rank WITHIN a node. Useful when multiple GPUs are</span>
+<span class="sd">    used on one node.</span>
+
+<span class="sd">    Originally obtained from:</span>
+<span class="sd">    https://github.com/hiwonjoon/ICML2019-TREX/blob/master/mujoco/learner/baselines/baselines/common/mpi_util.py</span>
+
+<span class="sd">    License:</span>
+<span class="sd">    MIT License</span>
+
+<span class="sd">    Copyright (c) 2019 Daniel Brown and Wonjoon Goo</span>
+
+<span class="sd">    Permission is hereby granted, free of charge, to any person obtaining a</span>
+<span class="sd">    copy of this software and associated documentation files (the &quot;Software&quot;),</span>
+<span class="sd">    to deal in the Software without restriction, including without limitation</span>
+<span class="sd">    the rights to use, copy, modify, merge, publish, distribute, sublicense,</span>
+<span class="sd">    and/or sell copies of the Software, and to permit persons to whom the</span>
+<span class="sd">    Software is furnished to do so, subject to the following conditions:</span>
+
+<span class="sd">    The above copyright notice and this permission notice shall be included in</span>
+<span class="sd">    all copies or substantial portions of the Software.</span>
+
+<span class="sd">    THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="sd">    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="sd">    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="sd">    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="sd">    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING</span>
+<span class="sd">    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER</span>
+<span class="sd">    DEALINGS IN THE SOFTWARE.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_horovod</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">hvd</span><span class="o">.</span><span class="n">local_rank</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">use_mpi</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">local_mpi_rank</span>
+        <span class="k">if</span> <span class="n">local_mpi_rank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">this_node</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
+            <span class="n">ranks_nodes</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">allgather</span><span class="p">((</span><span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">(),</span> <span class="n">this_node</span><span class="p">))</span>
+            <span class="n">node2rankssofar</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">local_rank</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ranks_nodes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">():</span>
+                    <span class="n">local_rank</span> <span class="o">=</span> <span class="n">node2rankssofar</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+                <span class="n">node2rankssofar</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">assert</span> <span class="n">local_rank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">local_mpi_rank</span> <span class="o">=</span> <span class="n">local_rank</span>
+        <span class="k">return</span> <span class="n">local_mpi_rank</span>
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="get_size"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parallelizer.get_size">[docs]</a><span class="k">def</span> <span class="nf">get_size</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the number of ranks.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    size : int</span>
+<span class="sd">        The number of ranks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_horovod</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">use_mpi</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span></div>
+
+
+<span class="c1"># TODO: This is hacky, improve it.</span>
+<div class="viewcode-block" id="get_comm"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parallelizer.get_comm">[docs]</a><span class="k">def</span> <span class="nf">get_comm</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the MPI communicator, if MPI is being used.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    comm : MPI.COMM_WORLD</span>
+<span class="sd">        A MPI communicator.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">comm</span></div>
+
+
+<div class="viewcode-block" id="barrier"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parallelizer.barrier">[docs]</a><span class="k">def</span> <span class="nf">barrier</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;General interface for a barrier.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_horovod</span><span class="p">:</span>
+        <span class="n">hvd</span><span class="o">.</span><span class="n">allreduce</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;barrier&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_mpi</span><span class="p">:</span>
+        <span class="n">comm</span><span class="o">.</span><span class="n">Barrier</span><span class="p">()</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="printout"><a class="viewcode-back" href="../../../api/mala.common.html#mala.common.parallelizer.printout">[docs]</a><span class="k">def</span> <span class="nf">printout</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interface to built-in &quot;print&quot; for parallel runs. Can be used like print.</span>
+
+<span class="sd">    Linked to the verbosity option in parameters. By default, all messages are</span>
+<span class="sd">    treated as high level messages and will be printed.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    values</span>
+<span class="sd">        Values to be printed.</span>
+
+<span class="sd">    sep : string</span>
+<span class="sd">        Separator between printed values.</span>
+
+<span class="sd">    min_verbosity : int</span>
+<span class="sd">        Minimum number of verbosity for this output to still be printed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">current_verbosity</span> <span class="o">&gt;=</span> <span class="n">min_verbosity</span><span class="p">:</span>
+        <span class="n">outstring</span> <span class="o">=</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">outstring</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

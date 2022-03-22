@@ -1,0 +1,436 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.datahandling.data_converter &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.datahandling.data_converter</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.datahandling.data_converter</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;DataConverter class for converting snapshots into numpy arrays.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span>
+<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">ParametersData</span>
+<span class="kn">from</span> <span class="nn">mala.descriptors.descriptor_interface</span> <span class="kn">import</span> <span class="n">DescriptorInterface</span>
+<span class="kn">from</span> <span class="nn">mala.targets.target_interface</span> <span class="kn">import</span> <span class="n">TargetInterface</span>
+
+
+<div class="viewcode-block" id="DataConverter"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter">[docs]</a><span class="k">class</span> <span class="nc">DataConverter</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts raw snapshots (direct DFT outputs) into numpy arrays for MALA.</span>
+
+<span class="sd">    These snapshots can be e.g. Quantum Espresso results.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.common.parameters.Parameters</span>
+<span class="sd">        The parameters object used for creating this instance.</span>
+
+<span class="sd">    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase</span>
+<span class="sd">        The descriptor calculator used for parsing/converting fingerprint</span>
+<span class="sd">        data. If None, the descriptor calculator will be created by this</span>
+<span class="sd">        object using the parameters provided. Default: None</span>
+
+<span class="sd">    target_calculator : mala.targets.target_base.TargetBase</span>
+<span class="sd">        Target calculator used for parsing/converting target data. If None,</span>
+<span class="sd">        the target calculator will be created by this object using the</span>
+<span class="sd">        parameters provided.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase</span>
+<span class="sd">        Descriptor calculator used for parsing/converting fingerprint data.</span>
+
+<span class="sd">    target_calculator : mala.targets.target_base.TargetBase</span>
+<span class="sd">        Target calculator used for parsing/converting target data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">descriptor_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersData</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">TargetInterface</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">descriptor_calculator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">DescriptorInterface</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="DataConverter.add_snapshot_qeout_cube"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot_qeout_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">,</span>
+                                <span class="n">cube_naming_scheme</span><span class="p">,</span> <span class="n">cube_directory</span><span class="p">,</span>
+                                <span class="n">input_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a Quantum Espresso snapshot to the list of conversion list.</span>
+
+<span class="sd">        Please not that a Quantum Espresso snapshot consists of:</span>
+
+<span class="sd">            - a Quantum Espresso output file for a self-consistent calculation.</span>
+<span class="sd">            - multiple .cube files containing the LDOS</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        qe_out_file : string</span>
+<span class="sd">            Name of Quantum Espresso output file for snapshot.</span>
+
+<span class="sd">        qe_out_directory : string</span>
+<span class="sd">            Path to Quantum Espresso output file for snapshot.</span>
+
+<span class="sd">        cube_naming_scheme : string</span>
+<span class="sd">            Naming scheme for the LDOS .cube files.</span>
+
+<span class="sd">        cube_directory : string</span>
+<span class="sd">            Directory containing the LDOS .cube files.</span>
+
+<span class="sd">        input_units : string</span>
+<span class="sd">            Unit of the input data.</span>
+
+<span class="sd">        output_units : string</span>
+<span class="sd">            Unit of the output data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">,</span>
+                                            <span class="n">cube_naming_scheme</span><span class="p">,</span>
+                                            <span class="n">cube_directory</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s2">&quot;qe.out&quot;</span><span class="p">,</span> <span class="s2">&quot;.cube&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">input_units</span><span class="p">,</span> <span class="n">output_units</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="DataConverter.convert_single_snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.convert_single_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">convert_single_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">,</span>
+                                <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">return_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert single snapshot from the conversion lists.</span>
+
+<span class="sd">        Returns the preprocessed data as numpy array, which might be</span>
+<span class="sd">        beneficial during testing.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snapshot_number : integer</span>
+<span class="sd">            Position of the desired snapshot in the snapshot list.</span>
+
+<span class="sd">        use_memmap : string</span>
+<span class="sd">            If not None, a memory mapped file will be used to gather the LDOS.</span>
+<span class="sd">            If run in MPI parallel mode, such a file MUST be provided.</span>
+
+<span class="sd">        input_path : string</span>
+<span class="sd">            If not None, inputs will be saved in this file.</span>
+
+<span class="sd">        output_path : string</span>
+<span class="sd">            If not None, outputs will be saved in this file.</span>
+
+<span class="sd">        return_data : bool</span>
+<span class="sd">            If True, inputs and outputs will be returned directly.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        inputs : numpy.array , optional</span>
+<span class="sd">            Numpy array containing the preprocessed inputs.</span>
+
+<span class="sd">        outputs : numpy.array , optional</span>
+<span class="sd">            Numpy array containing the preprocessed outputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span><span class="p">[</span><span class="n">snapshot_number</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="p">[</span><span class="n">snapshot_number</span><span class="p">]</span>
+        <span class="n">original_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="p">[</span><span class="n">snapshot_number</span><span class="p">]</span>
+
+        <span class="c1"># Parse and/or calculate the input descriptors.</span>
+        <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;qe.out&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">original_units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
+                    <span class="n">calculate_from_qe_out</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">snapshot</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
+                    <span class="n">calculate_from_qe_out</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">snapshot</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                          <span class="n">units</span><span class="o">=</span><span class="n">original_units</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+                <span class="n">tmp_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">gather_descriptors</span><span class="p">(</span><span class="n">tmp_input</span><span class="p">)</span>
+
+            <span class="c1"># Cut the xyz information if requested by the user.</span>
+            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="n">tmp_input</span> <span class="o">=</span> <span class="n">tmp_input</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown file extension, cannot convert target&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Save data and delete, if not requested otherwise.</span>
+        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">input_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">tmp_input</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">return_data</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">tmp_input</span>
+
+        <span class="c1"># Parse and/or calculate the output descriptors.</span>
+        <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.cube&quot;</span><span class="p">:</span>
+
+            <span class="c1"># If no units are provided we just assume standard units.</span>
+            <span class="k">if</span> <span class="n">original_units</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span>
+                    <span class="n">snapshot</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">snapshot</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">use_memmap</span><span class="o">=</span><span class="n">use_memmap</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                    <span class="n">read_from_cube</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">snapshot</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">units</span><span class="o">=</span>
+                <span class="n">original_units</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">use_memmap</span><span class="o">=</span><span class="n">use_memmap</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Unknown file extension, cannot convert target&quot;</span>
+                <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">tmp_output</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tmp_input</span><span class="p">,</span> <span class="n">tmp_output</span></div>
+
+<div class="viewcode-block" id="DataConverter.convert_snapshots"><a class="viewcode-back" href="../../../api/mala.datahandling.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">[docs]</a>    <span class="k">def</span> <span class="nf">convert_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
+                          <span class="n">naming_scheme</span><span class="o">=</span><span class="s2">&quot;ELEM_snapshot*&quot;</span><span class="p">,</span> <span class="n">starts_at</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the snapshots in the list to numpy arrays.</span>
+
+<span class="sd">        These can then be used by MALA.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        save_path : string</span>
+<span class="sd">            Directory in which the snapshots will be saved.</span>
+
+<span class="sd">        naming_scheme : string</span>
+<span class="sd">            String detailing the naming scheme for the snapshots. * symbols</span>
+<span class="sd">            will be replaced with the snapshot number.</span>
+
+<span class="sd">        starts_at : int</span>
+<span class="sd">            Number of the first snapshot generated using this approach.</span>
+<span class="sd">            Default is 0, but may be set to any integer. This is to ensure</span>
+<span class="sd">            consistency in naming when converting e.g. only a certain portion</span>
+<span class="sd">            of all available snapshots. If set to e.g. 4,</span>
+<span class="sd">            the first snapshot generated will be called snapshot4.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span><span class="p">)):</span>
+            <span class="n">snapshot_number</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">starts_at</span>
+            <span class="n">snapshot_name</span> <span class="o">=</span> <span class="n">naming_scheme</span>
+            <span class="n">snapshot_name</span> <span class="o">=</span> <span class="n">snapshot_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
+
+            <span class="c1"># A memory mapped file is used as buffer for distributed cases.</span>
+            <span class="n">memmap</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+                <span class="n">memmap</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">snapshot_name</span> <span class="o">+</span>
+                                      <span class="s2">&quot;.out.npy_temp&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">convert_single_snapshot</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span>
+                                         <span class="n">snapshot_name</span><span class="o">+</span><span class="s2">&quot;.in.npy&quot;</span><span class="p">),</span>
+                                         <span class="n">output_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span>
+                                         <span class="n">snapshot_name</span><span class="o">+</span><span class="s2">&quot;.out.npy&quot;</span><span class="p">),</span>
+                                         <span class="n">use_memmap</span><span class="o">=</span><span class="n">memmap</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Saved snapshot&quot;</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">,</span> <span class="s2">&quot;at &quot;</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span>
+                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">memmap</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

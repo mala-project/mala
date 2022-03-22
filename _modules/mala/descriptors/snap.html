@@ -1,0 +1,594 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.descriptors.snap &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.descriptors.snap</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.descriptors.snap</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;SNAP descriptor class.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">ase</span>
+<span class="kn">import</span> <span class="nn">ase.io</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
+    <span class="c1"># For version compatibility; older lammps versions (the serial version</span>
+    <span class="c1"># we still use on some machines) do not have this constants.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">lammps_constants</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">pass</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">mala.descriptors.descriptor_base</span> <span class="kn">import</span> <span class="n">DescriptorBase</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_size</span><span class="p">,</span> \
+    <span class="n">barrier</span>
+
+
+<div class="viewcode-block" id="SNAP"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.snap.SNAP">[docs]</a><span class="k">class</span> <span class="nc">SNAP</span><span class="p">(</span><span class="n">DescriptorBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for calculation and parsing of SNAP descriptors.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.common.parameters.Parameters</span>
+<span class="sd">        Parameters object used to create this object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SNAP</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="SNAP.convert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.snap.SNAP.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the units of a SNAP descriptor.</span>
+
+<span class="sd">        Since these do not really have units this function does nothing yet.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            Data for which the units should be converted.</span>
+
+<span class="sd">        in_units : string</span>
+<span class="sd">            Units of array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">            Data in MALA units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;None&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for SNAP.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SNAP.backconvert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.snap.SNAP.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the units of a SNAP descriptor.</span>
+
+<span class="sd">        Since these do not really have units this function does nothing yet.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            Data in MALA units.</span>
+
+<span class="sd">        out_units : string</span>
+<span class="sd">            Desired units of output array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">            Data in out_units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;None&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for SNAP.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SNAP.calculate_from_qe_out"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.snap.SNAP.calculate_from_qe_out">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the SNAP descriptors based on a Quantum Espresso outfile.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        qe_out_file : string</span>
+<span class="sd">            Name of Quantum Espresso output file for snapshot.</span>
+
+<span class="sd">        qe_out_directory : string</span>
+<span class="sd">            Path to Quantum Espresso output file for snapshot.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        snap_descriptors : numpy.array</span>
+<span class="sd">            Numpy array containing the SNAP descriptors with the dimension</span>
+<span class="sd">            (x,y,z,snap_dimension)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span> <span class="o">=</span> <span class="s2">&quot;espresso-out&quot;</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Calculating SNAP descriptors from&quot;</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="s2">&quot;at&quot;</span><span class="p">,</span>
+                 <span class="n">qe_out_directory</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># We get the atomic information by using ASE.</span>
+        <span class="n">infile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">qe_out_directory</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">)</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span><span class="p">)</span>
+
+        <span class="c1"># Enforcing / Checking PBC on the read atoms.</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enforce_pbc</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+
+        <span class="c1"># Get the grid dimensions.</span>
+        <span class="n">qe_outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">qe_outfile</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">nx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ny</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nz</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;FFT dimensions&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">nx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">ny</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">nz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_snap</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
+                                     <span class="n">qe_out_directory</span><span class="p">,</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="SNAP.calculate_from_atoms"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.snap.SNAP.calculate_from_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_from_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span>
+                             <span class="n">working_directory</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the SNAP descriptors based on the atomic configurations.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            Atoms object holding the atomic configuration.l</span>
+
+<span class="sd">        grid_dimensions : list</span>
+<span class="sd">            Grid dimensions to be used, in the format [x,y,z].</span>
+
+<span class="sd">        working_directory : string</span>
+<span class="sd">            A directory in which to perform the LAMMPS calculation.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        descriptors : numpy.array</span>
+<span class="sd">            Numpy array containing the descriptors with the dimension</span>
+<span class="sd">            (x,y,z,descriptor_dimension)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Enforcing / Checking PBC on the input atoms.</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enforce_pbc</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_snap</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">working_directory</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SNAP.gather_descriptors"><a class="viewcode-back" href="../../../api/mala.descriptors.html#mala.descriptors.snap.SNAP.gather_descriptors">[docs]</a>    <span class="k">def</span> <span class="nf">gather_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snap_descriptors_np</span><span class="p">,</span> <span class="n">use_pickled_comm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gathers all SNAP descriptors on rank 0 and sorts them.</span>
+
+<span class="sd">        This is useful for e.g. parallel preprocessing.</span>
+<span class="sd">        This function removes the extra 3 components that come from parallel</span>
+<span class="sd">        processing.</span>
+<span class="sd">        I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us</span>
+<span class="sd">        97 (in parallel mode), and this function returns, as to retain the</span>
+<span class="sd">        3 x,y,z ones we by default include.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        snap_descriptors_np : numpy.array</span>
+<span class="sd">            Numpy array with the SNAP descriptors of this ranks local grid.</span>
+
+<span class="sd">        use_pickled_comm : bool</span>
+<span class="sd">            If True, the pickled communication route from mpi4py is used.</span>
+<span class="sd">            If False, a Recv/Sendv combination is used. I am not entirely</span>
+<span class="sd">            sure what is faster. Technically Recv/Sendv should be faster,</span>
+<span class="sd">            but I doubt my implementation is all that optimal. For the pickled</span>
+<span class="sd">            route we can use gather(), which should be fairly quick.</span>
+<span class="sd">            However, for large grids, one CANNOT use the pickled route;</span>
+<span class="sd">            too large python objects will break it. Therefore, I am setting</span>
+<span class="sd">            the Recv/Sendv route as default.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Barrier to make sure all ranks have descriptors..</span>
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
+        <span class="n">barrier</span><span class="p">()</span>
+
+        <span class="c1"># Gather the SNAP descriptors into a list.</span>
+        <span class="k">if</span> <span class="n">use_pickled_comm</span><span class="p">:</span>
+            <span class="n">all_snap_descriptors_list</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">snap_descriptors_np</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sendcounts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">snap_descriptors_np</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                                              <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">raw_feature_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="o">+</span><span class="mi">3</span>
+
+            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># print(&quot;sendcounts: {}, total: {}&quot;.format(sendcounts,</span>
+                <span class="c1">#                                          sum(sendcounts)))</span>
+
+                <span class="c1"># Preparing the list of buffers.</span>
+                <span class="n">all_snap_descriptors_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">get_size</span><span class="p">()):</span>
+                    <span class="n">all_snap_descriptors_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">sendcounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span>
+                                                              <span class="n">raw_feature_length</span><span class="p">,</span>
+                                                              <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+
+                <span class="c1"># No MPI necessary for first rank. For all the others,</span>
+                <span class="c1"># collect the buffers.</span>
+                <span class="n">all_snap_descriptors_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">snap_descriptors_np</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">get_size</span><span class="p">()):</span>
+                    <span class="n">comm</span><span class="o">.</span><span class="n">Recv</span><span class="p">(</span><span class="n">all_snap_descriptors_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">source</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
+                              <span class="n">tag</span><span class="o">=</span><span class="mi">100</span><span class="o">+</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">all_snap_descriptors_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">all_snap_descriptors_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                   <span class="p">(</span><span class="n">sendcounts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">raw_feature_length</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">comm</span><span class="o">.</span><span class="n">Send</span><span class="p">(</span><span class="n">snap_descriptors_np</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">get_rank</span><span class="p">()</span><span class="o">+</span><span class="mi">100</span><span class="p">)</span>
+            <span class="n">barrier</span><span class="p">()</span>
+
+        <span class="c1"># if get_rank() == 0:</span>
+        <span class="c1">#     printout(np.shape(all_snap_descriptors_list[0]))</span>
+        <span class="c1">#     printout(np.shape(all_snap_descriptors_list[1]))</span>
+        <span class="c1">#     printout(np.shape(all_snap_descriptors_list[2]))</span>
+        <span class="c1">#     printout(np.shape(all_snap_descriptors_list[3]))</span>
+
+        <span class="c1"># Dummy for the other ranks.</span>
+        <span class="c1"># (For now, might later simply broadcast to other ranks).</span>
+        <span class="n">snap_descriptors_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Reorder the list.</span>
+        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Prepare the SNAP descriptor array.</span>
+            <span class="n">nx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ny</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">nz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">snap_descriptors_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">])</span>
+            <span class="c1"># Fill the full SNAP descriptors array.</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">local_snap_grid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">all_snap_descriptors_list</span><span class="p">):</span>
+                <span class="c1"># We glue the individual cells back together, and transpose.</span>
+                <span class="n">first_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_snap_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">first_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_snap_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">first_z</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_snap_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">last_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_snap_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span>
+                <span class="n">last_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_snap_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span>
+                <span class="n">last_z</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_snap_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span>
+                <span class="n">snap_descriptors_full</span><span class="p">[</span><span class="n">first_x</span><span class="p">:</span><span class="n">last_x</span><span class="p">,</span>
+                                      <span class="n">first_y</span><span class="p">:</span><span class="n">last_y</span><span class="p">,</span>
+                                      <span class="n">first_z</span><span class="p">:</span><span class="n">last_z</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">local_snap_grid</span><span class="p">[:,</span><span class="mi">3</span><span class="p">:],[</span><span class="n">last_z</span><span class="o">-</span><span class="n">first_z</span><span class="p">,</span>
+                                                      <span class="n">last_y</span><span class="o">-</span><span class="n">first_y</span><span class="p">,</span>
+                                                      <span class="n">last_x</span><span class="o">-</span><span class="n">first_x</span><span class="p">,</span>
+                                                      <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+                <span class="c1"># Leaving this in here for debugging purposes.</span>
+                <span class="c1"># This is the slow way to reshape the descriptors.</span>
+                <span class="c1"># for entry in local_snap_grid:</span>
+                <span class="c1">#     x = int(entry[0])</span>
+                <span class="c1">#     y = int(entry[1])</span>
+                <span class="c1">#     z = int(entry[2])</span>
+                <span class="c1">#     snap_descriptors_full[x, y, z] = entry[3:]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">snap_descriptors_full</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">snap_descriptors_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span></div>
+
+    <span class="k">def</span> <span class="nf">__calculate_snap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform actual SNAP calculation.&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
+        <span class="n">lammps_format</span> <span class="o">=</span> <span class="s2">&quot;lammps-data&quot;</span>
+        <span class="n">ase_out_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_input.tmp&quot;</span><span class="p">)</span>
+        <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ase_out_path</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">lammps_format</span><span class="p">)</span>
+
+        <span class="c1"># We also need to know how big the grid is.</span>
+        <span class="c1"># Iterating directly through the file is slow, but the</span>
+        <span class="c1"># grid information is at the top (around line 200).</span>
+        <span class="n">nx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">ny</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">nz</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">nx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ny</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">nz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nx</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ny</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">nz</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># Build LAMMPS arguments from the data we read.</span>
+        <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;-screen&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;-log&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span>
+                                                               <span class="s2">&quot;lammps_log.tmp&quot;</span><span class="p">)]</span>
+        <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ngridx&quot;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span>
+                       <span class="s2">&quot;ngridy&quot;</span><span class="p">:</span> <span class="n">ny</span><span class="p">,</span>
+                       <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">,</span>
+                       <span class="s2">&quot;twojmax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">twojmax</span><span class="p">,</span>
+                       <span class="s2">&quot;rcutfac&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">rcutfac</span><span class="p">,</span>
+                       <span class="s2">&quot;atom_config_fname&quot;</span><span class="p">:</span> <span class="n">ase_out_path</span><span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;bgridglobalflag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="n">set_cmdlinevars</span><span class="p">(</span><span class="n">lmp_cmdargs</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
+
+        <span class="c1"># Build the LAMMPS object.</span>
+        <span class="n">lmp</span> <span class="o">=</span> <span class="n">lammps</span><span class="p">(</span><span class="n">cmdargs</span><span class="o">=</span><span class="n">lmp_cmdargs</span><span class="p">)</span>
+
+        <span class="c1"># An empty string means that the user wants to use the standard input.</span>
+        <span class="c1"># What that is differs depending on serial/parallel execution.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="vm">__file__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;snap&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgridlocal.python&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgrid.python&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Do the LAMMPS calculation.</span>
+        <span class="n">lmp</span><span class="o">.</span><span class="n">file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span><span class="p">)</span>
+
+        <span class="c1"># Set things not accessible from LAMMPS</span>
+        <span class="c1"># First 3 cols are x, y, z, coords</span>
+        <span class="n">ncols0</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="c1"># Analytical relation for fingerprint length</span>
+        <span class="n">ncoeff</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">twojmax</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> \
+                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">twojmax</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">twojmax</span><span class="o">+</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">ncoeff</span> <span class="o">=</span> <span class="n">ncoeff</span> <span class="o">//</span> <span class="mi">24</span>   <span class="c1"># integer division</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="n">ncols0</span><span class="o">+</span><span class="n">ncoeff</span>
+
+        <span class="c1"># Extract data from LAMMPS calculation.</span>
+        <span class="c1"># This is different for the parallel and the serial case.</span>
+        <span class="c1"># In the serial case we can expect to have a full SNAP array at the</span>
+        <span class="c1"># end of this function.</span>
+        <span class="c1"># This is not necessarily true for the parallel case.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="n">nrows_local</span> <span class="o">=</span> <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
+                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span>
+                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_SIZE_ROWS</span><span class="p">)</span>
+            <span class="n">ncols_local</span> <span class="o">=</span> <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
+                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span>
+                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_SIZE_COLS</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ncols_local</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">+</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Inconsistent number of features.&quot;</span><span class="p">)</span>
+
+            <span class="n">snap_descriptors_np</span> <span class="o">=</span> \
+                <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
+                                   <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
+                                   <span class="n">array_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows_local</span><span class="p">,</span> <span class="n">ncols_local</span><span class="p">))</span>
+
+            <span class="c1"># Copy the grid dimensions only at the end.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">]</span>
+
+            <span class="c1"># If I directly return the descriptors, this sometimes leads</span>
+            <span class="c1"># to errors, because presumably the python garbage collection</span>
+            <span class="c1"># deallocates memory too quickly. This copy is more memory</span>
+            <span class="c1"># hungry, and we might have to tackle this later on, but</span>
+            <span class="c1"># for now it works.</span>
+            <span class="k">return</span> <span class="n">snap_descriptors_np</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">nrows_local</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Extract data from LAMMPS calculation.</span>
+            <span class="n">snap_descriptors_np</span> <span class="o">=</span> \
+                <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgrid&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
+                                   <span class="p">(</span><span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">))</span>
+            <span class="c1"># switch from x-fastest to z-fastest order (swaps 0th and 2nd</span>
+            <span class="c1"># dimension)</span>
+            <span class="n">snap_descriptors_np</span> <span class="o">=</span> <span class="n">snap_descriptors_np</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+            <span class="c1"># Copy the grid dimensions only at the end.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">]</span>
+            <span class="c1"># If I directly return the descriptors, this sometimes leads</span>
+            <span class="c1"># to errors, because presumably the python garbage collection</span>
+            <span class="c1"># deallocates memory too quickly. This copy is more memory</span>
+            <span class="c1"># hungry, and we might have to tackle this later on, but</span>
+            <span class="c1"># for now it works.</span>
+            <span class="c1"># I thought the transpose would take care of that, but apparently</span>
+            <span class="c1"># it does not necessarily do that - so we have do go down</span>
+            <span class="c1"># that route.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">snap_descriptors_np</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">snap_descriptors_np</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

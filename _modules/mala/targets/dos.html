@@ -1,0 +1,715 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mala.targets.dos &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">mala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>mala.targets.dos</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mala.targets.dos</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;DOS calculation class.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">mala.targets.target_base</span> <span class="kn">import</span> <span class="n">TargetBase</span>
+<span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span><span class="p">,</span> <span class="n">interpolate</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">toms748</span>
+<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span>
+<span class="kn">import</span> <span class="nn">ase.io</span>
+<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">printout</span>
+
+
+<div class="viewcode-block" id="DOS"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS">[docs]</a><span class="k">class</span> <span class="nc">DOS</span><span class="p">(</span><span class="n">TargetBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Postprocessing / parsing functions for the density of states (DOS).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    params : mala.common.parameters.Parameters</span>
+<span class="sd">        Parameters used to create this TargetBase object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DOS</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+
+<div class="viewcode-block" id="DOS.get_feature_size"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.get_feature_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span></div>
+
+<div class="viewcode-block" id="DOS.convert_units"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the units of an array into the MALA units.</span>
+
+<span class="sd">        MALA units for the DOS means 1/eV.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            Data for which the units should be converted.</span>
+
+<span class="sd">        in_units : string</span>
+<span class="sd">            Units of array. Currently supported are:</span>
+
+<span class="sd">                 - 1/eV (no conversion, MALA unit)</span>
+<span class="sd">                 - 1/Ry</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">            Data in 1/eV.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/eV&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span>
+        <span class="k">elif</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/Ry&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Rydberg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for LDOS.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DOS.backconvert_units"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the units of an array from MALA units into desired units.</span>
+
+<span class="sd">        MALA units for the DOS means 1/eV.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            Data in 1/eV.</span>
+
+<span class="sd">        out_units : string</span>
+<span class="sd">            Desired units of output array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">            Data in out_units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;1/eV&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span>
+        <span class="k">elif</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;1/Ry&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="n">Rydberg</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for LDOS.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DOS.read_from_qe_dos_txt"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.read_from_qe_dos_txt">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_qe_dos_txt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the DOS from a Quantum Espresso generated file.</span>
+
+<span class="sd">        These files do not have a specified file ending, so I will call them</span>
+<span class="sd">        qe.dos.txt here. QE saves the DOS in 1/eV.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        file_name : string</span>
+<span class="sd">            Name of the file containing the DOS.</span>
+
+<span class="sd">        directory : string</span>
+<span class="sd">            Directory containing the file file_name.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dos_data:</span>
+<span class="sd">            DOS data in 1/eV.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create the desired/specified energy grid. We will use this to</span>
+        <span class="c1"># check whether we have a correct file.</span>
+
+        <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
+        <span class="n">return_dos_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Open the file, then iterate through its contents.</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file_name</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">for</span> <span class="n">dos_line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="c1"># The first column contains the energy value.</span>
+                <span class="k">if</span> <span class="s2">&quot;#&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dos_line</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">:</span>
+                    <span class="n">e_val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dos_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">dosval</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dos_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e_val</span><span class="o">-</span><span class="n">energy_grid</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
+                            <span class="n">ldos_gridspacing_ev</span><span class="o">*</span><span class="mf">0.98</span><span class="p">:</span>
+                        <span class="n">return_dos_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dosval</span><span class="p">)</span>
+                        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">return_dos_values</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DOS.read_from_qe_out"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.read_from_qe_out">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smearing_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the DOS from a Quantum Espresso DFT output file.</span>
+
+<span class="sd">        The DOS will be read calculated via the eigenvalues and the equation</span>
+
+<span class="sd">        D(E) = sum_i sum_k w_k delta(E-epsilon_{ik})</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path_to_file : string</span>
+<span class="sd">            Path to the QE out file. If None, the QE output that was loaded</span>
+<span class="sd">            via read_additional_calculation_data will be used.</span>
+
+<span class="sd">        smearing_factor : int</span>
+<span class="sd">            Smearing factor relative to the energy grid spacing. Default is 2.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dos_data:</span>
+<span class="sd">            DOS data in 1/eV.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># dos_per_band = delta_f(e_grid,dft.eigs)</span>
+        <span class="k">if</span> <span class="n">path_to_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atoms_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">atoms_object</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path_to_file</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;espresso-out&quot;</span><span class="p">)</span>
+        <span class="n">kweights</span> <span class="o">=</span> <span class="n">atoms_object</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span><span class="n">get_k_point_weights</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">kweights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;QE output file does not contain band information.&quot;</span>
+                            <span class="s2">&quot;Rerun calculation with verbosity set to &#39;high&#39;.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Get the gaussians for all energy values and calculate the DOS per</span>
+        <span class="c1"># band.</span>
+        <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">gaussians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">(),</span>
+                                 <span class="n">atoms_object</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span>
+                                 <span class="n">band_structure</span><span class="p">()</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
+                                 <span class="n">smearing_factor</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                 <span class="n">ldos_gridspacing_ev</span><span class="p">)</span>
+        <span class="n">dos_per_band</span> <span class="o">=</span> <span class="n">kweights</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span><span class="o">*</span><span class="n">dos_per_band</span>
+
+        <span class="c1"># QE gives the band energies in eV, so no conversion necessary here.</span>
+        <span class="n">dos_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dos_per_band</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">dos_data</span></div>
+
+<div class="viewcode-block" id="DOS.get_energy_grid"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.get_energy_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get energy grid.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        e_grid : numpy.array</span>
+<span class="sd">            Energy grid on which the DOS is defined.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">emin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span>
+
+        <span class="n">emax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span> <span class="o">+</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">*</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridspacing_ev</span>
+        <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+        <span class="n">linspace_array</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span> <span class="n">emax</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">linspace_array</span></div>
+
+<div class="viewcode-block" id="DOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the band energy from given DOS data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dos_data : numpy.array</span>
+<span class="sd">            DOS data with dimension [energygrid].</span>
+
+<span class="sd">        fermi_energy_eV : float</span>
+<span class="sd">            Fermi energy level in eV.</span>
+
+<span class="sd">        temperature_K : float</span>
+<span class="sd">            Temperature in K.</span>
+
+<span class="sd">        integration_method : string</span>
+<span class="sd">            Integration method to be used. Currently supported:</span>
+
+<span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
+<span class="sd">                - &quot;simps&quot; for Simpson method.</span>
+<span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        band_energy : float</span>
+<span class="sd">            Band energy in eV.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Parse the parameters.</span>
+        <span class="k">if</span> <span class="n">fermi_energy_eV</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_eV</span>
+        <span class="k">if</span> <span class="n">temperature_K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">temperature_K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span>
+
+        <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__band_energy_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
+                                           <span class="n">fermi_energy_eV</span><span class="p">,</span> <span class="n">temperature_K</span><span class="p">,</span>
+                                           <span class="n">integration_method</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DOS.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the number of electrons from given DOS data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dos_data : numpy.array</span>
+<span class="sd">            DOS data with dimension [energygrid].</span>
+
+<span class="sd">        fermi_energy_eV : float</span>
+<span class="sd">            Fermi energy level in eV.</span>
+
+<span class="sd">        temperature_K : float</span>
+<span class="sd">            Temperature in K.</span>
+
+<span class="sd">        integration_method : string</span>
+<span class="sd">            Integration method to be used. Currently supported:</span>
+
+<span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
+<span class="sd">                - &quot;simps&quot; for Simpson method.</span>
+<span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        number_of_electrons : float</span>
+<span class="sd">            Number of electrons.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Parse the parameters.</span>
+        <span class="k">if</span> <span class="n">fermi_energy_eV</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_eV</span>
+        <span class="k">if</span> <span class="n">temperature_K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">temperature_K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span>
+        <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__number_of_electrons_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
+                                                   <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                                   <span class="n">temperature_K</span><span class="p">,</span>
+                                                   <span class="n">integration_method</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DOS.get_entropy_contribution"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.get_entropy_contribution">[docs]</a>    <span class="k">def</span> <span class="nf">get_entropy_contribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                 <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                 <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the entropy contribution to the total energy.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dos_data : numpy.array</span>
+<span class="sd">            DOS data with dimension [energygrid].</span>
+
+<span class="sd">        fermi_energy_eV : float</span>
+<span class="sd">            Fermi energy level in eV.</span>
+
+<span class="sd">        temperature_K : float</span>
+<span class="sd">            Temperature in K.</span>
+
+<span class="sd">        integration_method : string</span>
+<span class="sd">            Integration method to be used. Currently supported:</span>
+
+<span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
+<span class="sd">                - &quot;simps&quot; for Simpson method.</span>
+<span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        entropy_contribution : float</span>
+<span class="sd">            S/beta in eV.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fermi_energy_eV</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_eV</span>
+        <span class="k">if</span> <span class="n">temperature_K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">temperature_K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span>
+
+        <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span>\
+            <span class="n">__entropy_contribution_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
+                                            <span class="n">fermi_energy_eV</span><span class="p">,</span> <span class="n">temperature_K</span><span class="p">,</span>
+                                            <span class="n">integration_method</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DOS.get_self_consistent_fermi_energy_ev"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy_ev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">,</span>
+                                            <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the self-consistent Fermi energy.</span>
+
+<span class="sd">        &quot;Self-consistent&quot; does not mean self-consistent in the DFT sense,</span>
+<span class="sd">        but rather the Fermi energy, for which DOS integration reproduces</span>
+<span class="sd">        the exact number of electrons. The term &quot;self-consistent&quot; stems</span>
+<span class="sd">        from how this quantity is calculated.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dos_data : numpy.array</span>
+<span class="sd">            DOS data with dimension [energygrid].</span>
+
+<span class="sd">        temperature_K : float</span>
+<span class="sd">            Temperature in K.</span>
+
+<span class="sd">        integration_method : string</span>
+<span class="sd">            Integration method to be used. Currently supported:</span>
+
+<span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
+<span class="sd">                - &quot;simps&quot; for Simpson method.</span>
+<span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fermi_energy_self_consistent : float</span>
+<span class="sd">            E_F in eV.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Parse the parameters.</span>
+        <span class="k">if</span> <span class="n">temperature_K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">temperature_K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span>
+        <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
+        <span class="n">fermi_energy_sc</span> <span class="o">=</span> <span class="n">toms748</span><span class="p">(</span><span class="k">lambda</span> <span class="n">fermi_sc</span><span class="p">:</span>
+                                  <span class="p">(</span><span class="bp">self</span><span class="o">.</span>
+                                   <span class="n">__number_of_electrons_from_dos</span>
+                                   <span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
+                                    <span class="n">fermi_sc</span><span class="p">,</span> <span class="n">temperature_K</span><span class="p">,</span>
+                                    <span class="n">integration_method</span><span class="p">)</span>
+                                   <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons</span><span class="p">),</span>
+                                  <span class="n">a</span><span class="o">=</span><span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                  <span class="n">b</span><span class="o">=</span><span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">fermi_energy_sc</span></div>
+
+<div class="viewcode-block" id="DOS.get_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.get_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the density of states.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">dos_data</span></div>
+
+<div class="viewcode-block" id="DOS.from_ldos"><a class="viewcode-back" href="../../../api/mala.targets.html#mala.targets.dos.DOS.from_ldos">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_ldos</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ldos_object</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a DOS object from an LDOS object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ldos_object : mala.targets.ldos.LDOS</span>
+<span class="sd">            LDOS object used as input.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dos_object : DOS</span>
+<span class="sd">            DOS object created from LDOS object.</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">return_dos_object</span> <span class="o">=</span> <span class="n">DOS</span><span class="p">(</span><span class="n">ldos_object</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">fermi_energy_eV</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">temperature_K</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">temperature_K</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">grid_spacing_Bohr</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">grid_spacing_Bohr</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">number_of_electrons</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> \
+            <span class="n">ldos_object</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">atoms</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">qe_input_data</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">qe_input_data</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">qe_pseudopotentials</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">qe_pseudopotentials</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> \
+            <span class="n">ldos_object</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">kpoints</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span> <span class="o">=</span> \
+            <span class="n">ldos_object</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span>
+
+        <span class="k">return</span> <span class="n">return_dos_object</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__number_of_electrons_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                       <span class="n">temperature_K</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the number of electrons from DOS data.&quot;&quot;&quot;</span>
+        <span class="c1"># Calculate the energy levels and the Fermi function.</span>
+
+        <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                    <span class="n">temperature_K</span><span class="p">)</span>
+        <span class="c1"># Calculate the number of electrons.</span>
+        <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
+            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">,</span>
+                                                  <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
+            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">,</span>
+                                                  <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
+            <span class="n">dos_pointer</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">)</span>
+            <span class="n">number_of_electrons</span><span class="p">,</span> <span class="n">abserr</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">dos_pointer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                                          <span class="n">temperature_K</span><span class="p">),</span>
+                <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+                <span class="n">points</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
+            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;F0&quot;</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span>
+                                                         <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                                         <span class="n">energy_grid</span><span class="p">,</span>
+                                                         <span class="n">temperature_K</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">number_of_electrons</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__band_energy_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
+                               <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                               <span class="n">temperature_K</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the band energy from DOS data.&quot;&quot;&quot;</span>
+        <span class="c1"># Calculate the energy levels and the Fermi function.</span>
+        <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                    <span class="n">temperature_K</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the band energy.</span>
+        <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
+            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="p">(</span><span class="n">energy_grid</span> <span class="o">*</span>
+                                                      <span class="n">fermi_vals</span><span class="p">),</span>
+                                          <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
+            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="p">(</span><span class="n">energy_grid</span> <span class="o">*</span>
+                                                      <span class="n">fermi_vals</span><span class="p">),</span>
+                                          <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
+            <span class="n">dos_pointer</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">)</span>
+            <span class="n">band_energy</span><span class="p">,</span> <span class="n">abserr</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">dos_pointer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">e</span> <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">e</span><span class="p">,</span>
+                                                              <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                                              <span class="n">temperature_K</span><span class="p">),</span>
+                <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+                <span class="n">points</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
+            <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;F0&quot;</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span>
+                                                         <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                                         <span class="n">energy_grid</span><span class="p">,</span>
+                                                         <span class="n">temperature_K</span><span class="p">)</span>
+            <span class="n">band_energy_minus_uN</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span> <span class="s2">&quot;F2&quot;</span><span class="p">,</span>
+                                                          <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                                          <span class="n">energy_grid</span><span class="p">,</span>
+                                                          <span class="n">temperature_K</span><span class="p">)</span>
+            <span class="n">band_energy</span> <span class="o">=</span> <span class="n">band_energy_minus_uN</span><span class="o">+</span><span class="n">fermi_energy_eV</span> <span class="o">*</span>\
+                <span class="n">number_of_electrons</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">band_energy</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__entropy_contribution_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                        <span class="n">temperature_K</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the entropy contribution to the total energy from DOS data.</span>
+
+<span class="sd">        More specifically, this gives -\beta^-1*S_S</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate the entropy contribution to the energy.</span>
+        <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
+            <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">entropy_multiplicator</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span>
+                                                  <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                                  <span class="n">temperature_K</span><span class="p">)</span>
+            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="n">multiplicator</span><span class="p">,</span>
+                                                   <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">entropy_contribution</span> <span class="o">/=</span> <span class="n">get_beta</span><span class="p">(</span><span class="n">temperature_K</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;simps&quot;</span><span class="p">:</span>
+            <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">entropy_multiplicator</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                                  <span class="n">temperature_K</span><span class="p">)</span>
+            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="n">multiplicator</span><span class="p">,</span>
+                                                   <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">entropy_contribution</span> <span class="o">/=</span> <span class="n">get_beta</span><span class="p">(</span><span class="n">temperature_K</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
+            <span class="n">dos_pointer</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">)</span>
+            <span class="n">entropy_contribution</span><span class="p">,</span> <span class="n">abserr</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">dos_pointer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span>
+                <span class="n">entropy_multiplicator</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="p">,</span> <span class="n">temperature_K</span><span class="p">),</span>
+                <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+                <span class="n">points</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">)</span>
+            <span class="n">entropy_contribution</span> <span class="o">/=</span> <span class="n">get_beta</span><span class="p">(</span><span class="n">temperature_K</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
+            <span class="n">entropy_contribution</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="s2">&quot;S0&quot;</span><span class="p">,</span> <span class="s2">&quot;S1&quot;</span><span class="p">,</span>
+                                                          <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                                          <span class="n">energy_grid</span><span class="p">,</span>
+                                                          <span class="n">temperature_K</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">entropy_contribution</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
