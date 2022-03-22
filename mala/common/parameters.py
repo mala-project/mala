@@ -892,7 +892,7 @@ class Parameters:
 
         The following options are available:
 
-            - 1: "low", only essential output will be printed
+            - 0: "low", only essential output will be printed
             - 1: "medium", most diagnostic output will be printed. (Default)
             - 2: "high", all information will be printed.
 
