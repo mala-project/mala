@@ -10,14 +10,14 @@ except ModuleNotFoundError:
     pass
 
 from mala.common.parameters import printout
-from mala.targets.target_base import TargetBase
+from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube
 from mala.targets.atomic_force import AtomicForce
 from mala.common.parallelizer import get_rank
 
 
-class Density(TargetBase):
+class Density(Target):
     """Postprocessing / parsing functions for the electronic density.
 
     Parameters

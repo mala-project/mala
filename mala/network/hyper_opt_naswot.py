@@ -6,11 +6,11 @@ import numpy as np
 
 from mala.common.parallelizer import printout, get_rank, get_size, get_comm, \
     barrier
-from mala.network.hyper_opt_base import HyperOptBase
+from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_naswot import ObjectiveNASWOT
 
 
-class HyperOptNASWOT(HyperOptBase):
+class HyperOptNASWOT(HyperOpt):
     """
     Hyperparameter optimizer that does not require training networks.
 

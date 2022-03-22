@@ -248,13 +248,16 @@ class ParametersNetwork(ParametersBase):
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
 
-        self.num_hidden_layers = None
-        #for lstm/gru
+        # for LSTM/Gru + Transformer
+        self.num_hidden_layers = 1
+
+        # for LSTM/Gru
         self.no_hidden_state = False
         self.bidirection = False
+
         # for transformer net
-        self.dropout = 0.0
-        self.num_heads= None
+        self.dropout = 0.1
+        self.num_heads = 10
 
 class ParametersDescriptors(ParametersBase):
     """
