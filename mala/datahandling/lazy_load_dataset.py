@@ -10,6 +10,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
+from mala.common.parallelizer import barrier
 from mala.datahandling.snapshot import Snapshot
 
 
@@ -119,8 +120,8 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         With this, there can be some variance between runs.
         """
         used_perm = torch.randperm(self.number_of_snapshots)
+        barrier()
         if self.use_horovod:
-            hvd.allreduce(torch.tensor(0), name='barrier')
             used_perm = hvd.broadcast(used_perm, 0)
         self.snapshot_list = [self.snapshot_list[i] for i in used_perm]
         self.get_new_data(0)

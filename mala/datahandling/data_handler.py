@@ -10,7 +10,7 @@ import numpy as np
 import torch
 from torch.utils.data import TensorDataset
 
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, barrier
 from mala.common.parameters import Parameters, ParametersData
 from mala.datahandling.data_scaler import DataScaler
 from mala.datahandling.snapshot import Snapshot
@@ -262,8 +262,11 @@ class DataHandler:
         printout("Build dataset: Done.", min_verbosity=0)
 
         # Wait until all ranks are finished with data preparation.
-        if self.use_horovod:
-            hvd.allreduce(torch.tensor(0), name='barrier')
+        # It is not uncommon that ranks might be asynchronous in their
+        # data preparation by a small amount of minutes. If you notice
+        # an elongated wait time at this barrier, check that your file system
+        # allows for parallel I/O.
+        barrier()
 
     def mix_datasets(self):
         """

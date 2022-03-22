@@ -4,9 +4,13 @@ from ase.units import Rydberg
 import numpy as np
 import math
 import os
+try:
+    from mpi4py import MPI
+except ModuleNotFoundError:
+    pass
 
-from mala.common.parameters import printout
-from mala.common.parallelizer import get_comm, get_rank, get_size
+from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
+    barrier
 from mala.targets.cube_parser import read_cube
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
@@ -175,7 +179,7 @@ class LDOS(Target):
         # If a memmap is used for communication, this has to be brought into
         # play now.
         if self.parameters._configuration["mpi"]:
-            get_comm().Barrier()
+            barrier()
             data_shape = np.shape(ldos_data)
             if get_rank() == 0:
                 ldos_data_full = np.memmap(use_memmap,
@@ -183,14 +187,14 @@ class LDOS(Target):
                                                  data_shape[2], self.parameters.
                                                  ldos_gridsize), mode="w+",
                                            dtype=np.float64)
-            get_comm().Barrier()
+            barrier()
             if get_rank() != 0:
                 ldos_data_full = np.memmap(use_memmap,
                                            shape=(data_shape[0], data_shape[1],
                                                   data_shape[2], self.parameters.
                                                   ldos_gridsize), mode="r+",
                                            dtype=np.float64)
-            get_comm().Barrier()
+            barrier()
             ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
             return ldos_data_full
 
@@ -630,7 +634,8 @@ class LDOS(Target):
         return density_values
 
     def get_density_of_states(self, ldos_data, grid_spacing_bohr=None,
-                              integration_method="summation"):
+                              integration_method="summation",
+                              gather_dos=True):
         """
         Calculate the density of states from given LDOS data.
 
@@ -651,6 +656,12 @@ class LDOS(Target):
             - "trapz" for trapezoid method
             - "simps" for Simpson method.
             - "summation" for summation and scaling of the values (recommended)
+
+        gather_dos : bool
+            Only important if MPI is used. If True, the DOS will be
+            are gathered on rank 0.
+            Helpful when using multiple CPUs for descriptor calculations
+            and only one for network pass.
 
         Returns
         -------
@@ -724,7 +735,16 @@ class LDOS(Target):
                 dos_values = np.sum(ldos_data, axis=0) * \
                              (grid_spacing_bohr ** 3)
 
-        return dos_values
+        if self.parameters._configuration["mpi"] and gather_dos:
+            comm = get_comm()
+            comm.Barrier()
+            dos_values_full = np.zeros_like(dos_values)
+            comm.Reduce([dos_values, MPI.DOUBLE],
+                        [dos_values_full, MPI.DOUBLE],
+                        op=MPI.SUM, root=0)
+            return dos_values_full
+        else:
+            return dos_values
 
     def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
                           snapshot_number=0):

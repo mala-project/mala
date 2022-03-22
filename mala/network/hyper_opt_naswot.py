@@ -4,7 +4,8 @@ import itertools
 import optuna
 import numpy as np
 
-from mala.common.parallelizer import printout, get_rank, get_size, get_comm
+from mala.common.parallelizer import printout, get_rank, get_size, get_comm, \
+    barrier
 from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_naswot import ObjectiveNASWOT
 
@@ -122,8 +123,7 @@ class HyperOptNASWOT(HyperOpt):
                          ", best is trial", best_trial[0],
                          "with", best_trial[1], min_verbosity=0)
 
-        if self.params.use_mpi:
-            get_comm().Barrier()
+        barrier()
 
         # Return the best loss value we could achieve.
         return self.get_best_trial_results()[1]
