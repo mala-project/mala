@@ -16,6 +16,8 @@ Set do_total_energy to False, if you don't have the QuantumEspresso
 Python module installed.
 Since actual LDOS files are rather larger, this uses a drastically reduced
 LDOS. Therefore the accuracy of the overall result is rather poor. 
+
+REQUIRES QUANTUM ESPRESSO (TOTAL ENERGY MODULE).
 """
 
 # If you don't have the total energy module installed,

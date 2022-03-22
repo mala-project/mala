@@ -11,7 +11,9 @@ ex09_distributed_hyperopt.py: Shows how a hyperparameter
 optimization can be sped up using a RDB storage. Ideally this should be done
 using a database server system, such as PostgreSQL or MySQL. 
 For this easy example, sqlite will be used. It is highly advisory not to
-to use this for actual, at-scale calculations!  
+to use this for actual, at-scale calculations!
+
+REQUIRES SQLITE.
 """
 
 

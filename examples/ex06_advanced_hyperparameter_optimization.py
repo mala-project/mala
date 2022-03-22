@@ -10,6 +10,9 @@ data_path = os.path.join(data_repo_path, "Al36")
 ex06_advanced_hyperparameter_optimization.py: Shows how recent developments 
 in hyperparameter optimization techniques can be used 
 (OAT / training-free NAS).
+
+
+REQUIRES OAPACKAGE.
 """
 
 printout("Welcome to MALA.")

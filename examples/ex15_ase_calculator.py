@@ -11,7 +11,7 @@ data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 ex15_ase_calculator.py: Shows how MALA can be used as an ASE calculator. 
 Currently, calculation of forces is not supported. 
 
-REQUIRES LAMMPS.
+REQUIRES LAMMPS AND QUANTUM ESPRESSO (TOTAL ENERGY MODULE).
 """
 
 
