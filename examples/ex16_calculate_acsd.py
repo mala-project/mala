@@ -30,7 +30,7 @@ test_parameters.descriptors.acsd_points = 100
 # DESCRIPTORS
 # Create a Descriptors object, load the data, and calculate the ACSD.
 ####################
-descriptors = mala.DescriptorInterface(test_parameters)
+descriptors = mala.Descriptor(test_parameters)
 snap_data = np.load(os.path.join(data_path, "Be_snapshot1.in.npy"))
 ldos_data = np.load(os.path.join(data_path, "Be_snapshot1.out.npy"))
 print(descriptors.get_acsd(snap_data, ldos_data))

@@ -16,8 +16,8 @@ from mala.datahandling.data_scaler import DataScaler
 from mala.datahandling.snapshot import Snapshot
 from mala.datahandling.lazy_load_dataset import LazyLoadDataset
 from mala.datahandling.lazy_load_dataset_clustered import LazyLoadDatasetClustered
-from mala.descriptors.descriptor_interface import DescriptorInterface
-from mala.targets.target_interface import TargetInterface
+from mala.descriptors.descriptor import Descriptor
+from mala.targets.target import Target
 
 
 class DataHandler:
@@ -30,11 +30,11 @@ class DataHandler:
     Parameters
     ----------
     parameters : mala.common.parameters.Parameters
-    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
+    descriptor_calculator : mala.descriptors.descriptor.Descriptor
         Used to do unit conversion on input data. If None, then one will
         be created by this class.
 
-    target_calculator : mala.targets.target_base.TargetBase
+    target_calculator : mala.targets.target.Target
         Used to do unit conversion on output data. If None, then one will
         be created by this class.
 
@@ -73,11 +73,11 @@ class DataHandler:
 
         self.target_calculator = target_calculator
         if self.target_calculator is None:
-            self.target_calculator = TargetInterface(parameters)
+            self.target_calculator = Target(parameters)
 
         self.descriptor_calculator = descriptor_calculator
         if self.descriptor_calculator is None:
-            self.descriptor_calculator = DescriptorInterface(parameters)
+            self.descriptor_calculator = Descriptor(parameters)
 
         self.nr_snapshots = 0
         self.grid_dimension = [0, 0, 0]

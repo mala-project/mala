@@ -87,7 +87,7 @@ printout("Read data: DONE.")
 # of interest.
 ####################
 
-test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
+test_hp_optimizer = mala.HyperOpt(test_parameters, data_handler)
 
 # Learning rate will be optimized.
 test_hp_optimizer.add_hyperparameter("float", "learning_rate",

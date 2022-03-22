@@ -45,7 +45,7 @@ class TestHyperoptCheckpointing:
 
         Returns
         -------
-        hyperopt: mala.network.hyper_opt_base.HyperOptBase:
+        hyperopt: mala.network.hyper_opt.HyperOpt:
             The hyperopt object.
 
         """
@@ -105,8 +105,7 @@ class TestHyperoptCheckpointing:
         # of interest.
         ####################
 
-        test_hp_optimizer = mala.HyperOptInterface(test_parameters,
-                                                   data_handler)
+        test_hp_optimizer = mala.HyperOpt(test_parameters, data_handler)
 
         # Learning rate will be optimized.
         test_hp_optimizer.add_hyperparameter("float", "learning_rate",
@@ -136,7 +135,7 @@ class TestHyperoptCheckpointing:
 
         Returns
         -------
-        hyperopt: mala.network.hyper_opt_base.HyperOptBase:
+        hyperopt: mala.network.hyper_opt.HyperOpt:
             The hyperopt object.
 
         """

@@ -12,13 +12,13 @@ except ModuleNotFoundError:
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier
 from mala.targets.cube_parser import read_cube
-from mala.targets.target_base import TargetBase
+from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.dos import DOS
 from mala.targets.density import Density
 
 
-class LDOS(TargetBase):
+class LDOS(Target):
     """Postprocessing / parsing functions for the local density of states.
 
     Parameters

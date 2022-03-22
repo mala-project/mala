@@ -43,7 +43,7 @@ test_parameters.targets.pseudopotential_path = data_path
 # Create a target calculator to postprocess data.
 # Use this calculator to perform various operations.
 ####################
-ldos = mala.TargetInterface(test_parameters)
+ldos = mala.Target(test_parameters)
 
 # Read additional information about the calculation.
 # By doing this, the calculator is able to know e.g. the temperature

@@ -11,7 +11,7 @@ The basic usage is the same:
           parameters = mala.Parameters()
           datahandler = mala.DataHandler(parameters)
           datahandler.add_snapshot(...)
-          hyperp_optimizer = mala.HyperOptInterface(parameters, datahandler)
+          hyperp_optimizer = mala.HyperOpt(parameters, datahandler)
           hyperp_optimizer.add_hyperparameter(...)
           hyperp_optimizer.perform_study()
           hyperp_optimizer.set_optimal_parameters()
