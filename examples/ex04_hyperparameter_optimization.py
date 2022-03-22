@@ -91,7 +91,7 @@ def initial_setup():
 
 if mala.HyperOptOptuna.checkpoint_exists("ex04"):
     parameters, datahandler, hyperoptimizer = \
-        mala.HyperOptOAT.resume_checkpoint(
+        mala.HyperOptOptuna.resume_checkpoint(
             "ex04")
     printout("Starting resumed hyperparameter optimization.")
 else:
