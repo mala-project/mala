@@ -330,7 +330,7 @@ class DataScaler:
             Scaled data.
 
         as_numpy : bool
-            If True, a numpy array is returned, otherwsie
+            If True, a numpy array is returned, otherwsie.
 
         Returns
         -------

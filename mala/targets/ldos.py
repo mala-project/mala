@@ -115,7 +115,8 @@ class LDOS(Target):
             Units the LDOS is saved in.
 
         use_memmap : string
-            If not None, a memory mapped file will be used to gather the LDOS.
+            If not None, a memory mapped file with this name will be used to
+            gather the LDOS.
             If run in MPI parallel mode, such a file MUST be provided.
 
         Returns
@@ -521,7 +522,7 @@ class LDOS(Target):
         Returns
         -------
         fermi_energy_self_consistent : float
-            E_F in eV.
+            :math:`\epsilon_F` in eV.
         """
         # The Fermi energy is calculated using the DOS.
         if voxel_Bohr is None:
@@ -599,7 +600,7 @@ class LDOS(Target):
             ldos_data_used = ldos_data
             pass
         elif len(ldos_data_shape) == 4:
-            # We have the LDOS as gridx x gridy x gridz x energygrid,
+            # We have the LDOS as (gridx, gridy, gridz, energygrid),
             # so some reshaping needs to be done.
             ldos_data_used = ldos_data.reshape(
                 [ldos_data_shape[0] * ldos_data_shape[1] * ldos_data_shape[2],
@@ -685,7 +686,7 @@ class LDOS(Target):
                 raise Exception("If using a 2D LDOS array, you can only "
                                 "use summation as integration method.")
 
-        # We have the LDOS as gridx x gridy x gridz x energygrid, no
+        # We have the LDOS as (gridx, gridy, gridz, energygrid), no
         # further operation is necessary.
         dos_values = ldos_data  # .copy()
 
@@ -755,9 +756,10 @@ class LDOS(Target):
     def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
                           snapshot_number=0):
         """
-        Get the atomic forces (dE/dR), currently work in progress.
+        Get the atomic forces, currently work in progress.
 
-        Will only give the dd_dB.
+        Will eventually give :math:`\\frac{dE}{d \\underline{\\boldsymbol{R}}}`.
+        Will currently only give :math:`\\frac{dd}{dB}`.
 
         Parameters
         ----------

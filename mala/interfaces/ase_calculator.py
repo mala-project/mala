@@ -32,8 +32,10 @@ class MALA(Calculator):
 
     reference_data : list
         A list containing
-        [0]: A type of additional calculation data
-        [1]: A path to it.
+
+        - [0]: A type of additional calculation data
+        - [1]: A path to it.
+
         With this additonal calculation data (preferably from the training of
         the neural network), calculator can access all important data such as
         temperature, number of electrons, etc. that might not be known simply

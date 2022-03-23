@@ -18,7 +18,12 @@ import torch.nn.functional as functional
 
 
 class Network(nn.Module):
-    """Central network class for this framework, based on pytorch.nn.Module.
+    """
+    Central network class for this framework, based on pytorch.nn.Module.
+
+    The correct type of neural network will automatically be instantiated
+    by this class if possible. You can also instantiate the desired
+    network directly by calling upon the subclass.
 
     Parameters
     ----------

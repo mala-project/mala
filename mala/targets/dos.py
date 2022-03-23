@@ -133,7 +133,7 @@ class DOS(Target):
 
         The DOS will be read calculated via the eigenvalues and the equation
 
-        D(E) = sum_i sum_k w_k delta(E-epsilon_{ik})
+        .. math:: D(E) = \sum_i \sum_k w_k \delta(\epsilon-\epsilon_{ik})
 
         Parameters
         ----------
@@ -338,7 +338,7 @@ class DOS(Target):
         Returns
         -------
         fermi_energy_self_consistent : float
-            E_F in eV.
+            :math:`\epsilon_F` in eV.
         """
         # Parse the parameters.
         if temperature_K is None:

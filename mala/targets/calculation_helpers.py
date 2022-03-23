@@ -41,7 +41,11 @@ def integrate_values_on_spacing(values, spacing, method, axis=0):
 
 def fermi_function(energy, fermi_energy, temperature_K, energy_units="eV"):
     """
-    Calculate the Fermi function f(E) = 1 / (1 + e^((E-E_F)/(k_B*T))).
+    Calculate the Fermi function.
+
+    The Fermi function reads
+
+    .. math:: f(\epsilon) = 1/(1 + e^{\\frac{\epsilon-\epsilon_F}{k_\mathrm{B} T}})
 
     Parameters
     ----------
@@ -71,7 +75,9 @@ def entropy_multiplicator(energy, fermi_energy, temperature_K,
     """
     Calculate the multiplicator function for the entropy integral.
 
-    Entropy integral is f(E)*log(f(E))+(1-f(E)*log(1-f(E))
+    The Entropy integral is
+
+    .. math:: f(\epsilon)\log(f(\epsilon))+(1-f(\epsilon)\log(1-f(\epsilon))
 
     Parameters
     ----------
@@ -125,7 +131,11 @@ def entropy_multiplicator(energy, fermi_energy, temperature_K,
 
 def fermi_function_eV(energy_ev, fermi_energy_ev, temperature_K):
     """
-    Calculate the Fermi function f(E) = 1 / (1 + e^((E-E_F)/(k_B*T))).
+    Calculate the Fermi function.
+
+    The Fermi function reads
+
+    .. math:: f(\epsilon) = 1/(1 + e^{\\frac{\epsilon-\epsilon_F}{k_\mathrm{B} T}})
 
     Parameters
     ----------
@@ -147,7 +157,7 @@ def fermi_function_eV(energy_ev, fermi_energy_ev, temperature_K):
 
 def get_beta(temperature_K):
     """
-    Calculate beta = 1 / (k_B * T).
+    Calculate :math:`\\beta = {(k_\mathrm{B}T)}^{-1}`.
 
     Parameters
     ----------
@@ -387,7 +397,8 @@ def gaussians(grid, centers, sigma):
 
     Gaussian functions are used as approximations to the delta in the
     Brillouin zone integration. Note that this defines Gaussians without the
-    factor of 1/sqrt(2). All the Gaussians will have the same sigmas
+    factor of :math:`1/\sqrt{2}`. All the Gaussians will have the same sigmas.
+
     Parameters
     ----------
     grid : np.array
