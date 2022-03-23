@@ -229,6 +229,38 @@ any combination of these six: ‘positions’, ‘numbers’, ‘cell’,
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt id="mala.interfaces.ase_calculator.MALA.calculate_properties">
+<code class="sig-name descname"><span class="pre">calculate_properties</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/interfaces/ase_calculator.html#MALA.calculate_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.calculate_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>After a calculation, calculate additional properties.</p>
+<p>This is separate from the calculate function because of
+MALA-MC simulations. For these energy and additional property
+calculation need to be separate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms object for which to perform the calculation.
+No needed per se, we can use it for a correctness check
+eventually.</p></li>
+<li><p><strong>properties</strong> (<em>list of str</em>) – List of what needs to be calculated.  Can be any combination
+of “rdf”, …</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.interfaces.ase_calculator.MALA.save_calculator">
+<code class="sig-name descname"><span class="pre">save_calculator</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/interfaces/ase_calculator.html#MALA.save_calculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.save_calculator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save parameters used for this calculator.</p>
+<p>This is useful for e.g. checkpointing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>string</em>) – Path to file in which to store the Calculator.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt id="mala.interfaces.ase_calculator.MALA.implemented_properties">
 <code class="sig-name descname"><span class="pre">implemented_properties</span></code><em class="property"> <span class="pre">=</span> <span class="pre">['energy',</span> <span class="pre">'forces']</span></em><a class="headerlink" href="#mala.interfaces.ase_calculator.MALA.implemented_properties" title="Permalink to this definition">¶</a></dt>

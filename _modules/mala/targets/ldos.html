@@ -387,7 +387,8 @@
                          <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
                          <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                         <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                         <span class="n">return_energy_contributions</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the total energy from LDOS or given DOS + density data.</span>
 
@@ -445,6 +446,16 @@
 <span class="sd">        qe_pseudopotentials : dict</span>
 <span class="sd">            Quantum Espresso pseudopotential dictionaty for the ASE&lt;-&gt;QE</span>
 <span class="sd">            interface. If None (recommended), MALA will create one.</span>
+
+<span class="sd">        create_qe_file : bool</span>
+<span class="sd">            If True, a QE input file will be created by MALA during the</span>
+<span class="sd">            calculation. This is the default, however there may be</span>
+<span class="sd">            cases in which it makes sense for the user to provide a custom</span>
+<span class="sd">            one.</span>
+
+<span class="sd">        return_energy_contributions : bool</span>
+<span class="sd">            If True, a dictionary of energy contributions will be provided</span>
+<span class="sd">            alongside the total energy. The default is False.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -515,8 +526,17 @@
                                      <span class="n">create_file</span><span class="o">=</span><span class="n">create_qe_file</span><span class="p">)</span>
         <span class="n">e_total</span> <span class="o">=</span> <span class="n">e_band</span> <span class="o">+</span> <span class="n">e_rho_times_v_hxc</span> <span class="o">+</span> <span class="n">e_hartree</span> <span class="o">+</span> <span class="n">e_xc</span> <span class="o">+</span> <span class="n">e_ewald</span> <span class="o">+</span>\
             <span class="n">e_entropy_contribution</span>
-
-        <span class="k">return</span> <span class="n">e_total</span></div>
+        <span class="k">if</span> <span class="n">return_energy_contributions</span><span class="p">:</span>
+            <span class="n">energy_contribtuons</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;e_band&quot;</span><span class="p">:</span> <span class="n">e_band</span><span class="p">,</span>
+                                   <span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">:</span> <span class="n">e_rho_times_v_hxc</span><span class="p">,</span>
+                                   <span class="s2">&quot;e_hartree&quot;</span><span class="p">:</span> <span class="n">e_hartree</span><span class="p">,</span>
+                                   <span class="s2">&quot;e_xc&quot;</span><span class="p">:</span> <span class="n">e_xc</span><span class="p">,</span>
+                                   <span class="s2">&quot;e_ewald&quot;</span><span class="p">:</span> <span class="n">e_ewald</span><span class="p">,</span>
+                                   <span class="s2">&quot;e_entropy_contribution&quot;</span><span class="p">:</span>
+                                       <span class="n">e_entropy_contribution</span><span class="p">}</span>
+            <span class="k">return</span> <span class="n">e_total</span><span class="p">,</span> <span class="n">energy_contribtuons</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">e_total</span></div>
 
 <div class="viewcode-block" id="LDOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel_Bohr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>

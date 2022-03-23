@@ -286,15 +286,109 @@ format and performs postprocessing calculations on the quantity.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.targets.target.Target.get_radial_distribution_function">
+<code class="sig-name descname"><span class="pre">get_radial_distribution_function</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">ase.Atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_radial_distribution_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_radial_distribution_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the radial distribution function (RDF).</p>
+<p>Uses the values as given in the parameters object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>rdf</strong> (<em>numpy.ndarray</em>) – The RDF as [rMax] array.</p></li>
+<li><p><strong>radii</strong> (<em>numpy.ndarray</em>) – The radii  at which the RDF was calculated (for plotting),
+as [rMax] array.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.targets.target.Target.get_real_space_grid">
 <code class="sig-name descname"><span class="pre">get_real_space_grid</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_real_space_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_real_space_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the real space grid.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.targets.target.Target.get_static_structure_factor">
+<code class="sig-name descname"><span class="pre">get_static_structure_factor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">ase.Atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_static_structure_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_static_structure_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the static structure factor (SSF).</p>
+<p>Uses the values as given in the parameters object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>ssf</strong> (<em>numpy.ndarray</em>) – The SSF as [kMax] array.</p></li>
+<li><p><strong>kpoints</strong> (<em>numpy.ndarray</em>) – The k-points  at which the SSF was calculated (for plotting),
+as [kMax] array.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.target.Target.get_three_particle_correlation_function">
+<code class="sig-name descname"><span class="pre">get_three_particle_correlation_function</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">ase.Atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_three_particle_correlation_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_three_particle_correlation_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the three particle correlation function (TPCF).</p>
+<p>Uses the values as given in the parameters object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>tpcf</strong> (<em>numpy.ndarray</em>) – The TPCF as [rMax, rMax, rMax] array.</p></li>
+<li><p><strong>radii</strong> (<em>numpy.ndarray</em>) – The radii at which the TPCF was calculated (for plotting),
+[rMax, rMax, rMax].</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.targets.target.Target.get_total_energy">
 <code class="sig-name descname"><span class="pre">get_total_energy</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_total_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_total_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the total energy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.target.Target.radial_distribution_function_from_atoms">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">radial_distribution_function_from_atoms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.radial_distribution_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.radial_distribution_function_from_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the radial distribution function (RDF).</p>
+<p>In comparison with other python implementation, this function
+can handle arbitrary radii by incorporating a neighbor list.
+Loosely based on the implementation in the ASAP3 code
+(specifically, this file:
+<a class="reference external" href="https://gitlab.com/asap/asap/-/blob/master/Tools/RawRadialDistribution.cpp">https://gitlab.com/asap/asap/-/blob/master/Tools/RawRadialDistribution.cpp</a>),
+but without the restriction for the radii.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p></li>
+<li><p><strong>number_of_bins</strong> (<em>int</em>) – Number of bins used to create the histogram.</p></li>
+<li><p><strong>rMax</strong> (<em>float</em>) – Radius up to which to calculate the RDF. None by default; this
+is the suggested behavior, as MALA will then on its own calculate
+the maximum radius up until which the calculation of the RDF is
+indisputably physically meaningful. Larger radii may be specified,
+e.g. for a Fourier transformation to calculate the static structure
+factor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>rdf</strong> (<em>numpy.ndarray</em>) – The RDF as [rMax] array.</p></li>
+<li><p><strong>radii</strong> (<em>numpy.ndarray</em>) – The radii  at which the RDF was calculated (for plotting),
+as [rMax] array.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -318,7 +412,7 @@ this mode will not change any member variables;
 values have to be adjusted BEFORE.</p></li>
 </ul>
 </p></li>
-<li><p><strong>data</strong> (<em>string</em><em> or </em><em>list</em>) – Data from which additional calculation data is inputted.</p></li>
+<li><p><strong>data</strong> (<em>string</em><em> or </em><em>List</em>) – Data from which additional calculation data is inputted.</p></li>
 </ul>
 </dd>
 </dl>
@@ -356,6 +450,75 @@ of data restriction is specified by the parameters.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="mala.targets.target.Target.static_structure_factor_from_atoms">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">static_structure_factor_from_atoms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kMax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radial_distribution_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'direct'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.static_structure_factor_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.static_structure_factor_from_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the static structure factor (SSF).</p>
+<p>Implemented according to <a class="reference external" href="https://arxiv.org/abs/1606.03610">https://arxiv.org/abs/1606.03610</a>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Eq. 2 as calculation_type = “direct”, i.e. via summation in Fourier space</p></li>
+<li><p>Eq. 6 as calculation_type = “fourier_transform”, i.e. via calculation of RDF and thereafter Fourier transformation.</p></li>
+</ul>
+</div></blockquote>
+<p>The direct calculation is significantly more accurate and about
+as efficient, at least for small systems.
+In either case, the SSF will be given as S(k), even though
+technically, the direct method calculates S(<strong>k</strong>); during binning,
+this function averages over all <strong>k</strong> with the same k.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p></li>
+<li><p><strong>number_of_bins</strong> (<em>int</em>) – Number of bins used to create the histogram.</p></li>
+<li><p><strong>kMax</strong> (<em>float</em>) – Maximum wave vector up to which to calculate the SSF.</p></li>
+<li><p><strong>radial_distribution_function</strong> (<em>List of numpy.ndarray</em>) – If not None, and calculation_type=”fourier_transform”, this RDf
+will be used for the Fourier transformation.</p></li>
+<li><p><strong>calculation_type</strong> (<em>string</em>) – Either “direct” or “fourier_transform”. Controls how the SSF is
+calculated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>ssf</strong> (<em>numpy.ndarray</em>) – The SSF as [kMax] array.</p></li>
+<li><p><strong>kpoints</strong> (<em>numpy.ndarray</em>) – The k-points  at which the SSF was calculated (for plotting),
+as [kMax] array.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mala.targets.target.Target.three_particle_correlation_function_from_atoms">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">three_particle_correlation_function_from_atoms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.three_particle_correlation_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.three_particle_correlation_function_from_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the three particle correlation function (TPCF).</p>
+<p>The implementation was done as given by doi.org/10.1063/5.0048450,
+equation 17, with only small modifications. Pleas be aware that,
+while optimized, this function tends to be compuational heavy for
+large radii or number of bins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p></li>
+<li><p><strong>number_of_bins</strong> (<em>int</em>) – Number of bins used to create the histogram.</p></li>
+<li><p><strong>rMax</strong> (<em>float</em>) – Radius up to which to calculate the TPCF. If None, MALA will
+determine the maximum radius for which the TPCF is indisputably
+defined. Be advised - this may come at increased computational
+cost.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>tpcf</strong> (<em>numpy.ndarray</em>) – The TPCF as [rMax, rMax, rMax] array.</p></li>
+<li><p><strong>radii</strong> (<em>numpy.ndarray</em>) – The radii at which the TPCF was calculated (for plotting),
+[rMax, rMax, rMax].</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mala.targets.target.Target.write_tem_input_file">
 <em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">write_tem_input_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpoints</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_tem_input_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_tem_input_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write a QE-style input file for the total energy module.</p>
@@ -371,7 +534,7 @@ create one.</p></li>
 If None (recommended), MALA will create one.</p></li>
 <li><p><strong>qe_pseudopotentials</strong> (<em>dict</em>) – Quantum Espresso pseudopotential dictionaty for the ASE&lt;-&gt;QE
 interface. If None (recommended), MALA will create one.</p></li>
-<li><p><strong>grid_dimensions</strong> (<em>list</em>) – A list containing the x,y,z dimensions of the real space grid.</p></li>
+<li><p><strong>grid_dimensions</strong> (<em>List</em>) – A list containing the x,y,z dimensions of the real space grid.</p></li>
 <li><p><strong>kpoints</strong> (<em>dict</em>) – k-grid used, usually None or (1,1,1) for TEM calculations.</p></li>
 </ul>
 </dd>

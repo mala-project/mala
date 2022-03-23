@@ -224,6 +224,9 @@
             <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">reference_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                              <span class="n">reference_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
+        <span class="c1"># Needed for e.g. Monte Carlo.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span> <span class="o">=</span> <span class="p">{}</span>
+
 <div class="viewcode-block" id="MALA.calculate"><a class="viewcode-back" href="../../../api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span>
                   <span class="n">system_changes</span><span class="o">=</span><span class="n">all_changes</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -279,10 +282,11 @@
                 <span class="n">dos</span><span class="p">)</span>
             <span class="n">density</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="n">ldos</span><span class="p">,</span>
                                                   <span class="n">fermi_energy_ev</span><span class="o">=</span><span class="n">fermi_energy_ev</span><span class="p">)</span>
-            <span class="n">energy</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span>\
+            <span class="n">energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span>\
             <span class="n">get_total_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="o">=</span><span class="n">dos</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
                              <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_ev</span><span class="p">,</span>
-                             <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                             <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">return_energy_contributions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">if</span> <span class="s2">&quot;forces&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
                 <span class="n">forces</span> <span class="o">=</span> <span class="n">density_calculator</span><span class="o">.</span><span class="n">get_atomic_forces</span><span class="p">(</span><span class="n">density</span><span class="p">,</span>
                                                               <span class="n">create_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -295,7 +299,56 @@
         <span class="c1"># Use the LDOS determined DOS and density to get energy and forces.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy</span>
         <span class="k">if</span> <span class="s2">&quot;forces&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">forces</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">forces</span></div>
+
+<div class="viewcode-block" id="MALA.calculate_properties"><a class="viewcode-back" href="../../../api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.calculate_properties">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        After a calculation, calculate additional properties.</span>
+
+<span class="sd">        This is separate from the calculate function because of</span>
+<span class="sd">        MALA-MC simulations. For these energy and additional property</span>
+<span class="sd">        calculation need to be separate.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            Atoms object for which to perform the calculation.</span>
+<span class="sd">            No needed per se, we can use it for a correctness check</span>
+<span class="sd">            eventually.</span>
+
+<span class="sd">        properties: list of str</span>
+<span class="sd">            List of what needs to be calculated.  Can be any combination</span>
+<span class="sd">            of &quot;rdf&quot;, ...</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: Check atoms.</span>
+
+        <span class="k">if</span> <span class="s2">&quot;rdf&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;rdf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                <span class="n">get_radial_distribution_function</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;tpcf&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;tpcf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                <span class="n">get_three_particle_correlation_function</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;static_structure_factor&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;static_structure_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span>\
+                <span class="n">target_calculator</span><span class="o">.</span><span class="n">get_static_structure_factor</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;ion_ion_energy&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;ion_ion_energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
+                <span class="n">last_energy_contributions</span><span class="p">[</span><span class="s2">&quot;e_ewald&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="MALA.save_calculator"><a class="viewcode-back" href="../../../api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.save_calculator">[docs]</a>    <span class="k">def</span> <span class="nf">save_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save parameters used for this calculator.</span>
+
+<span class="sd">        This is useful for e.g. checkpointing.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : string</span>
+<span class="sd">            Path to file in which to store the Calculator.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div></div>
+
 </pre></div>
 
            </div>

@@ -160,10 +160,15 @@
   <h1>Source code for mala.targets.target</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Base class for all target calculators.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
+<span class="kn">from</span> <span class="nn">ase.neighborlist</span> <span class="kn">import</span> <span class="n">NeighborList</span>
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">kB</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">simps</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">ParametersTargets</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
@@ -229,9 +234,9 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">targets</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersTargets</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">targets</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">ParametersTargets</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">params</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersTargets</span> <span class="o">=</span> <span class="n">params</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Wrong type of parameters for Targets class.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="kc">None</span>
@@ -350,7 +355,7 @@
 <span class="sd">              this mode will not change any member variables;</span>
 <span class="sd">              values have to be adjusted BEFORE.</span>
 
-<span class="sd">        data : string or list</span>
+<span class="sd">        data : string or List</span>
 <span class="sd">            Data from which additional calculation data is inputted.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;qe.out&quot;</span><span class="p">:</span>
@@ -387,15 +392,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> \
                                              <span class="n">Rydberg</span> <span class="o">/</span> <span class="n">kB</span>
                     <span class="k">if</span> <span class="s2">&quot;xc contribution&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                        <span class="n">xc_contribution</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span>
-                                                <span class="n">split</span><span class="p">(</span><span class="s1">&#39;Ry&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
                         <span class="k">break</span>
-                    <span class="k">if</span> <span class="s2">&quot;one-electron contribution&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                        <span class="n">one_electron_contribution</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span>
-                                                          <span class="n">split</span><span class="p">(</span><span class="s1">&#39;Ry&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="s2">&quot;hartree contribution&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                        <span class="n">hartree_contribution</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span>
-                                                     <span class="n">split</span><span class="p">(</span><span class="s1">&#39;Ry&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="k">if</span> <span class="s2">&quot;FFT dimensions&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                         <span class="n">dims</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dims</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
@@ -513,6 +510,448 @@
                     <span class="n">grid3D</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel_Bohr</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">grid3D</span></div>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.0001</span>
+
+<div class="viewcode-block" id="Target.radial_distribution_function_from_atoms"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.radial_distribution_function_from_atoms">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
+                                                <span class="n">number_of_bins</span><span class="p">,</span>
+                                                <span class="n">rMax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the radial distribution function (RDF).</span>
+
+<span class="sd">        In comparison with other python implementation, this function</span>
+<span class="sd">        can handle arbitrary radii by incorporating a neighbor list.</span>
+<span class="sd">        Loosely based on the implementation in the ASAP3 code</span>
+<span class="sd">        (specifically, this file:</span>
+<span class="sd">        https://gitlab.com/asap/asap/-/blob/master/Tools/RawRadialDistribution.cpp),</span>
+<span class="sd">        but without the restriction for the radii.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            Atoms for which to construct the RDF.</span>
+
+<span class="sd">        number_of_bins : int</span>
+<span class="sd">            Number of bins used to create the histogram.</span>
+
+<span class="sd">        rMax : float</span>
+<span class="sd">            Radius up to which to calculate the RDF. None by default; this</span>
+<span class="sd">            is the suggested behavior, as MALA will then on its own calculate</span>
+<span class="sd">            the maximum radius up until which the calculation of the RDF is</span>
+<span class="sd">            indisputably physically meaningful. Larger radii may be specified,</span>
+<span class="sd">            e.g. for a Fourier transformation to calculate the static structure</span>
+<span class="sd">            factor.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        rdf : numpy.ndarray</span>
+<span class="sd">            The RDF as [rMax] array.</span>
+
+<span class="sd">        radii : numpy.ndarray</span>
+<span class="sd">            The radii  at which the RDF was calculated (for plotting),</span>
+<span class="sd">            as [rMax] array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Leaving this here for potential future use - this is much faster</span>
+        <span class="c1"># because C++.</span>
+        <span class="c1"># from asap3.analysis.rdf import RadialDistributionFunction</span>
+        <span class="c1"># (RadialDistributionFunction(atoms, rMax, 500)).get_rdf()</span>
+
+        <span class="c1"># This is quite a large RDF.</span>
+        <span class="c1"># We may want a smaller one eventually.</span>
+        <span class="k">if</span> <span class="n">rMax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rMax</span> <span class="o">=</span> <span class="n">TargetBase</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">rMax</span><span class="o">/</span><span class="n">number_of_bins</span><span class="p">)</span>
+        <span class="n">rdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">cell</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
+        <span class="n">pbc</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_pbc</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">pbc</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">rMax</span> <span class="o">&gt;</span> <span class="n">cell</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="s2">&quot;Calculating RDF with a radius larger then the unit&quot;</span>
+                        <span class="s2">&quot; cell. While this will work numerically, be cautious&quot;</span>
+                        <span class="s2">&quot; about the physicality of its results&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># Calculate all the distances.</span>
+        <span class="c1"># rMax/2 because this is the radius around one atom, so half the</span>
+        <span class="c1"># distance to the next one.</span>
+        <span class="c1"># Using neighborlists grants us access to the PBC.</span>
+        <span class="n">neighborlist</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">NeighborList</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span> <span class="o">+</span>
+                                                     <span class="p">[</span><span class="n">rMax</span><span class="o">/</span><span class="mf">2.0</span><span class="p">],</span>
+                                                     <span class="n">bothways</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">neighborlist</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)):</span>
+            <span class="n">indices</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">neighborlist</span><span class="o">.</span><span class="n">get_neighbors</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">dm</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">([</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()[</span><span class="n">i</span><span class="p">]],</span>
+                                <span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span> <span class="o">+</span> <span class="n">offsets</span> <span class="o">@</span>
+                                <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">())</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">dm</span> <span class="o">/</span> <span class="n">dr</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">out_of_scope</span> <span class="o">=</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="n">number_of_bins</span>
+            <span class="n">index</span><span class="p">[</span><span class="n">out_of_scope</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">index</span><span class="p">:</span>
+                <span class="n">rdf</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Normalize the RDF and calculate the distances</span>
+        <span class="n">rr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span> <span class="o">/</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">phi</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">rr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
+            <span class="n">rdf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/=</span> <span class="p">(</span><span class="n">norm</span> <span class="o">*</span> <span class="p">((</span><span class="n">rr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">dr</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">rdf</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">rr</span></div>
+        
+<div class="viewcode-block" id="Target.three_particle_correlation_function_from_atoms"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.three_particle_correlation_function_from_atoms">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">three_particle_correlation_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
+                                                       <span class="n">number_of_bins</span><span class="p">,</span>
+                                                       <span class="n">rMax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the three particle correlation function (TPCF).</span>
+
+<span class="sd">        The implementation was done as given by doi.org/10.1063/5.0048450,</span>
+<span class="sd">        equation 17, with only small modifications. Pleas be aware that,</span>
+<span class="sd">        while optimized, this function tends to be compuational heavy for</span>
+<span class="sd">        large radii or number of bins.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            Atoms for which to construct the RDF.</span>
+
+<span class="sd">        number_of_bins : int</span>
+<span class="sd">            Number of bins used to create the histogram.</span>
+
+<span class="sd">        rMax : float</span>
+<span class="sd">            Radius up to which to calculate the TPCF. If None, MALA will</span>
+<span class="sd">            determine the maximum radius for which the TPCF is indisputably</span>
+<span class="sd">            defined. Be advised - this may come at increased computational</span>
+<span class="sd">            cost.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tpcf : numpy.ndarray</span>
+<span class="sd">            The TPCF as [rMax, rMax, rMax] array.</span>
+
+<span class="sd">        radii : numpy.ndarray</span>
+<span class="sd">            The radii at which the TPCF was calculated (for plotting),</span>
+<span class="sd">            [rMax, rMax, rMax].</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">rMax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rMax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.0001</span>
+
+        <span class="c1"># TPCF is a function of three radii.</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">rMax</span><span class="o">/</span><span class="n">number_of_bins</span><span class="p">)</span>
+        <span class="n">tpcf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">cell</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
+        <span class="n">pbc</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_pbc</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">pbc</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">rMax</span> <span class="o">&gt;</span> <span class="n">cell</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate RDF with this radius. &quot;</span>
+                                    <span class="s2">&quot;Please choose a smaller value.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Construct a neighbor list for calculation of distances.</span>
+        <span class="c1"># With this, the PBC are satisfied.</span>
+        <span class="n">neighborlist</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">NeighborList</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span><span class="o">+</span><span class="p">[</span><span class="n">rMax</span><span class="o">/</span><span class="mf">2.0</span><span class="p">],</span>
+                                                     <span class="n">bothways</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">neighborlist</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+
+        <span class="c1"># To calculate the TPCF we calculate the three distances between</span>
+        <span class="c1"># three atoms. We use a neighbor list for this.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)):</span>
+
+            <span class="c1"># Debugging</span>
+            <span class="c1"># if i == 1:</span>
+            <span class="c1">#     break</span>
+
+            <span class="n">pos1</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c1"># Generate all pairs of atoms, and calculate distances of</span>
+            <span class="c1"># reference atom to them.</span>
+            <span class="n">indices</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">neighborlist</span><span class="o">.</span><span class="n">get_neighbors</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">neighbor_pairs</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span>\
+                <span class="n">combinations</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">offsets</span><span class="p">)),</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">neighbor_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">neighbor_pairs</span><span class="p">)</span>
+            <span class="n">pair_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">pair1</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> \
+                                                       <span class="n">pair1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">@</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span>
+                                                       <span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">pair2</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> \
+                                                       <span class="n">pair2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">@</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()))</span>
+                                       <span class="k">for</span> <span class="n">pair1</span><span class="p">,</span> <span class="n">pair2</span> <span class="ow">in</span> <span class="n">neighbor_list</span><span class="p">])</span>
+            <span class="n">dists_between_atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">])</span> <span class="o">+</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">])</span> <span class="o">+</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">pair_positions</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]))</span>
+            <span class="n">pair_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pair_positions</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">neighbor_list</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
+                                                         <span class="mi">3</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+            <span class="n">all_dists</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">([</span><span class="n">pos1</span><span class="p">],</span> <span class="n">pair_positions</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">neighbor_pair</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">neighbor_list</span><span class="p">):</span>
+                <span class="n">r1</span> <span class="o">=</span> <span class="n">all_dists</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">idx</span><span class="p">]</span>
+                <span class="n">r2</span> <span class="o">=</span> <span class="n">all_dists</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># We don&#39;t need to do any calculation if either of the</span>
+                <span class="c1"># atoms are already out of range.</span>
+                <span class="k">if</span> <span class="n">r1</span> <span class="o">&lt;</span> <span class="n">rMax</span> <span class="ow">and</span> <span class="n">r2</span> <span class="o">&lt;</span> <span class="n">rMax</span><span class="p">:</span>
+                    <span class="n">r3</span> <span class="o">=</span> <span class="n">dists_between_atoms</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">r3</span> <span class="o">&lt;</span> <span class="n">rMax</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r1</span><span class="o">-</span><span class="n">r2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">r3</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">r1</span><span class="o">+</span><span class="n">r2</span><span class="p">):</span>
+                        <span class="c1"># print(r1, r2, r3)</span>
+                        <span class="n">id1</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">r1</span> <span class="o">/</span> <span class="n">dr</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                        <span class="n">id2</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">r2</span> <span class="o">/</span> <span class="n">dr</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                        <span class="n">id3</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">r3</span> <span class="o">/</span> <span class="n">dr</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                        <span class="n">tpcf</span><span class="p">[</span><span class="n">id1</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="n">id3</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Normalize the TPCF and calculate the distances.</span>
+        <span class="c1"># This loop takes almost no time compared to the one above.</span>
+        <span class="n">rr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                       <span class="n">number_of_bins</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span> <span class="o">/</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="mf">8.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">phi</span> <span class="o">*</span> <span class="n">phi</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">r1</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span>
+                    <span class="n">r2</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span>
+                    <span class="n">r3</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span>
+                    <span class="n">tpcf</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">/=</span> <span class="p">(</span><span class="n">norm</span> <span class="o">*</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">r3</span>
+                                      <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
+                    <span class="n">rr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">r1</span>
+                    <span class="n">rr</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">r2</span>
+                    <span class="n">rr</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">r3</span>
+        <span class="k">return</span> <span class="n">tpcf</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">rr</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span></div>
+
+<div class="viewcode-block" id="Target.static_structure_factor_from_atoms"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.static_structure_factor_from_atoms">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">static_structure_factor_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="p">,</span> <span class="n">kMax</span><span class="p">,</span>
+                                           <span class="n">radial_distribution_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                           <span class="n">calculation_type</span><span class="o">=</span><span class="s2">&quot;direct&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the static structure factor (SSF).</span>
+
+<span class="sd">        Implemented according to https://arxiv.org/abs/1606.03610:</span>
+
+<span class="sd">            - Eq. 2 as calculation_type = &quot;direct&quot;, i.e. via summation in Fourier space</span>
+<span class="sd">            - Eq. 6 as calculation_type = &quot;fourier_transform&quot;, i.e. via calculation of RDF and thereafter Fourier transformation.</span>
+
+<span class="sd">        The direct calculation is significantly more accurate and about</span>
+<span class="sd">        as efficient, at least for small systems.</span>
+<span class="sd">        In either case, the SSF will be given as S(k), even though</span>
+<span class="sd">        technically, the direct method calculates S(**k**); during binning,</span>
+<span class="sd">        this function averages over all **k** with the same k.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            Atoms for which to construct the RDF.</span>
+
+<span class="sd">        number_of_bins : int</span>
+<span class="sd">            Number of bins used to create the histogram.</span>
+
+<span class="sd">        kMax : float</span>
+<span class="sd">            Maximum wave vector up to which to calculate the SSF.</span>
+
+<span class="sd">        radial_distribution_function : List of numpy.ndarray</span>
+<span class="sd">            If not None, and calculation_type=&quot;fourier_transform&quot;, this RDf</span>
+<span class="sd">            will be used for the Fourier transformation.</span>
+
+<span class="sd">        calculation_type : string</span>
+<span class="sd">            Either &quot;direct&quot; or &quot;fourier_transform&quot;. Controls how the SSF is</span>
+<span class="sd">            calculated.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ssf : numpy.ndarray</span>
+<span class="sd">            The SSF as [kMax] array.</span>
+
+<span class="sd">        kpoints : numpy.ndarray</span>
+<span class="sd">            The k-points  at which the SSF was calculated (for plotting),</span>
+<span class="sd">            as [kMax] array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">calculation_type</span> <span class="o">==</span> <span class="s2">&quot;fourier_transform&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">radial_distribution_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">rMax</span> <span class="o">=</span> <span class="n">TargetBase</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span><span class="o">*</span><span class="mi">3</span>
+                <span class="n">radial_distribution_function</span> <span class="o">=</span> <span class="n">TargetBase</span><span class="o">.</span>\
+                    <span class="n">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">rMax</span><span class="o">=</span><span class="n">rMax</span><span class="p">,</span>
+                                                            <span class="n">number_of_bins</span><span class="o">=</span>
+                                                            <span class="mi">1500</span><span class="p">)</span>
+            <span class="n">rdf</span> <span class="o">=</span> <span class="n">radial_distribution_function</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">radii</span> <span class="o">=</span> <span class="n">radial_distribution_function</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">structure_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">dk</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">kMax</span> <span class="o">/</span> <span class="n">number_of_bins</span><span class="p">)</span>
+            <span class="n">kpoints</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Fourier transform the RDF by calculating the integral at each</span>
+            <span class="c1"># k-point we investigate.</span>
+            <span class="n">rho</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span><span class="o">/</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># Construct integrand.</span>
+                <span class="n">kpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dk</span><span class="o">*</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">kr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">radii</span><span class="p">)</span><span class="o">*</span><span class="n">kpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">integrand</span> <span class="o">=</span> <span class="p">(</span><span class="n">rdf</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">radii</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">kr</span><span class="p">)</span><span class="o">/</span><span class="n">kpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">structure_factor</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rho</span> <span class="o">*</span> <span class="n">simps</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span>
+                                                               <span class="n">radii</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="n">structure_factor</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">kpoints</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="k">elif</span> <span class="n">calculation_type</span> <span class="o">==</span> <span class="s2">&quot;direct&quot;</span><span class="p">:</span>
+            <span class="c1"># This is the delta for the binning.</span>
+            <span class="c1"># The delta for the generation of the k-points themselves is</span>
+            <span class="c1"># fixed as delta k = 2pi/L with L being the length of a</span>
+            <span class="c1"># cubic cell. More generally, it can be determined via the</span>
+            <span class="c1"># reciprocal unit vectors.</span>
+            <span class="c1"># The structure factor is undefined for wave vectors smaller</span>
+            <span class="c1"># then this number.</span>
+            <span class="n">dk</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">kMax</span> <span class="o">/</span> <span class="n">number_of_bins</span><span class="p">)</span>
+            <span class="n">dk_threedimensional</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">()</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+            <span class="c1"># From this, the necessary dimensions of the k-grid for this</span>
+            <span class="c1"># particular k-max can be determined as</span>
+            <span class="n">kgrid_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">dk_threedimensional</span><span class="p">),</span>
+                                           <span class="p">[</span><span class="n">kMax</span><span class="p">,</span> <span class="n">kMax</span><span class="p">,</span> <span class="n">kMax</span><span class="p">]))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating SSF on k-grid of size&quot;</span><span class="p">,</span> <span class="n">kgrid_size</span><span class="p">)</span>
+
+            <span class="c1"># k-grids:</span>
+            <span class="c1"># The first will hold the full 3D k-points, the second only</span>
+            <span class="c1"># |k|.</span>
+            <span class="n">kgrid</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">kgrid_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">kgrid_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">kgrid_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                        <span class="n">k_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">dk_threedimensional</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">k_point</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">kMax</span><span class="p">:</span>
+                            <span class="n">kgrid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k_point</span><span class="p">)</span>
+            <span class="n">kpoints</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">kpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dk</span><span class="o">*</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="c1"># The first will hold S(|k|) (i.e., what we are actually interested</span>
+            <span class="c1"># in, the second will hold lists of all S(k) corresponding to the</span>
+            <span class="c1"># same |k|.</span>
+            <span class="n">structure_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">structure_factor_kpoints</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">structure_factor_kpoints</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+
+            <span class="c1"># Dot product, cosine and sine calculation are done as vector</span>
+            <span class="c1"># operations. I am aware this is not particularly memory-friendly,</span>
+            <span class="c1"># but it is fast.</span>
+            <span class="n">dot_product</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()))</span>
+            <span class="n">cosine_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">dot_product</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">sine_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">dot_product</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">dot_product</span>
+            <span class="n">s_values</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">cosine_sum</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">sine_sum</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">cosine_sum</span>
+            <span class="k">del</span> <span class="n">sine_sum</span>
+
+            <span class="c1"># s_value holds S(k), now we have to group this into</span>
+            <span class="c1"># S(|k|).</span>
+            <span class="n">k_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">k_value</span> <span class="o">/</span> <span class="n">dk</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">indices</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indices</span><span class="p">):</span>
+                <span class="n">structure_factor_kpoints</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s_values</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure_factor_kpoints</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">structure_factor</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">structure_factor_kpoints</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+            <span class="k">return</span> <span class="n">structure_factor</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">kpoints</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Static structure factor calculation method &quot;</span>
+                            <span class="s2">&quot;unsupported.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Target.get_radial_distribution_function"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_radial_distribution_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_radial_distribution_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the radial distribution function (RDF).</span>
+
+<span class="sd">        Uses the values as given in the parameters object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            Atoms for which to construct the RDF.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        rdf : numpy.ndarray</span>
+<span class="sd">            The RDF as [rMax] array.</span>
+
+<span class="sd">        radii : numpy.ndarray</span>
+<span class="sd">            The radii  at which the RDF was calculated (for plotting),</span>
+<span class="sd">            as [rMax] array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TargetBase</span><span class="o">.</span>\
+            <span class="n">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
+                                                    <span class="n">number_of_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span>
+                                                    <span class="n">parameters</span><span class="o">.</span>
+                                                    <span class="n">rdf_parameters</span>
+                                                    <span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
+                                                    <span class="n">rMax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                                    <span class="n">rdf_parameters</span><span class="p">[</span><span class="s2">&quot;rMax&quot;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Target.get_three_particle_correlation_function"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_three_particle_correlation_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_three_particle_correlation_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the three particle correlation function (TPCF).</span>
+
+<span class="sd">        Uses the values as given in the parameters object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            Atoms for which to construct the RDF.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tpcf : numpy.ndarray</span>
+<span class="sd">            The TPCF as [rMax, rMax, rMax] array.</span>
+
+<span class="sd">        radii : numpy.ndarray</span>
+<span class="sd">            The radii at which the TPCF was calculated (for plotting),</span>
+<span class="sd">            [rMax, rMax, rMax].</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TargetBase</span><span class="o">.</span>\
+            <span class="n">three_particle_correlation_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
+                                                           <span class="n">number_of_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span>
+                                                           <span class="n">parameters</span><span class="o">.</span>
+                                                           <span class="n">tpcf_parameters</span>
+                                                           <span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
+                                                           <span class="n">rMax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                                           <span class="n">tpcf_parameters</span><span class="p">[</span><span class="s2">&quot;rMax&quot;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Target.get_static_structure_factor"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_static_structure_factor">[docs]</a>    <span class="k">def</span> <span class="nf">get_static_structure_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the static structure factor (SSF).</span>
+
+<span class="sd">        Uses the values as given in the parameters object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : ase.Atoms</span>
+<span class="sd">            Atoms for which to construct the RDF.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ssf : numpy.ndarray</span>
+<span class="sd">            The SSF as [kMax] array.</span>
+
+<span class="sd">        kpoints : numpy.ndarray</span>
+<span class="sd">            The k-points  at which the SSF was calculated (for plotting),</span>
+<span class="sd">            as [kMax] array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TargetBase</span><span class="o">.</span><span class="n">static_structure_factor_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
+                                                             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                                             <span class="n">ssf_parameters</span><span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
+                                                             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                                             <span class="n">ssf_parameters</span><span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">])</span></div>
+
 <div class="viewcode-block" id="Target.write_tem_input_file"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_tem_input_file">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">write_tem_input_file</span><span class="p">(</span><span class="n">atoms_Angstrom</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="p">,</span>
                              <span class="n">qe_pseudopotentials</span><span class="p">,</span>
@@ -538,7 +977,7 @@
 <span class="sd">            Quantum Espresso pseudopotential dictionaty for the ASE&lt;-&gt;QE</span>
 <span class="sd">            interface. If None (recommended), MALA will create one.</span>
 
-<span class="sd">        grid_dimensions : list</span>
+<span class="sd">        grid_dimensions : List</span>
 <span class="sd">            A list containing the x,y,z dimensions of the real space grid.</span>
 
 <span class="sd">        kpoints : dict</span>

@@ -1302,10 +1302,93 @@ Angstroms. Default value is 4.67637.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersTargets.pseudopotential_path">
+<code class="sig-name descname"><span class="pre">pseudopotential_path</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.pseudopotential_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path at which pseudopotentials are located (for TEM).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersTargets.rdf_parameters">
+<code class="sig-name descname"><span class="pre">rdf_parameters</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.rdf_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameters for calculating the radial distribution function(RDF).
+The RDF can directly be calculated via a function call, but if it is
+calculated e.g. during a MD or MC run, these parameters will control
+how. The following keywords are recognized:</p>
+<dl class="simple">
+<dt>number_of_bins<span class="classifier">int</span></dt><dd><p>Number of bins used to create the histogram.</p>
+</dd>
+<dt>rMax<span class="classifier">float</span></dt><dd><p>Radius up to which to calculate the RDF. None by default; this
+is the suggested behavior, as MALA will then on its own calculate
+the maximum radius up until which the calculation of the RDF is
+indisputably physically meaningful. Larger radii may be specified,
+e.g. for a Fourier transformation to calculate the static structure
+factor.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersTargets.tpcf_parameters">
+<code class="sig-name descname"><span class="pre">tpcf_parameters</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.tpcf_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameters for calculating the three particle correlation function
+(TPCF).
+The TPCF can directly be calculated via a function call, but if it is
+calculated e.g. during a MD or MC run, these parameters will control
+how. The following keywords are recognized:</p>
+<dl class="simple">
+<dt>number_of_bins<span class="classifier">int</span></dt><dd><p>Number of bins used to create the histogram.</p>
+</dd>
+<dt>rMax<span class="classifier">float</span></dt><dd><p>Radius up to which to calculate the TPCF. If None, MALA will
+determine the maximum radius for which the TPCF is indisputably
+defined. Be advised - this may come at increased computational
+cost.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mala.common.parameters.ParametersTargets.ssf_parameters">
+<code class="sig-name descname"><span class="pre">ssf_parameters</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ssf_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameters for calculating the static structure factor
+(SSF).
+The SSF can directly be calculated via a function call, but if it is
+calculated e.g. during a MD or MC run, these parameters will control
+how. The following keywords are recognized:</p>
+<dl class="simple">
+<dt>number_of_bins<span class="classifier">int</span></dt><dd><p>Number of bins used to create the histogram.</p>
+</dd>
+<dt>kMax<span class="classifier">float</span></dt><dd><p>Maximum wave vector up to which to calculate the SSF.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt id="mala.common.parameters.ParametersTargets.restrict_targets">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">restrict_targets</span></code><a class="headerlink" href="#mala.common.parameters.ParametersTargets.restrict_targets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Control if and how targets are restricted to physical values..</p>
+<dd><p>Control if and how targets are restricted to physical values.</p>
+<p>Can be “zero_out_negative”, i.e. all negative values are set to zero
+or “absolute_values”, i.e. all negative values are multiplied by -1.</p>
 </dd></dl>
 
 </dd></dl>

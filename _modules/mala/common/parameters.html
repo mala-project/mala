@@ -485,7 +485,54 @@
 <span class="sd">    ldos_gridoffset_ev: float</span>
 <span class="sd">        Lowest energy value on the (L)DOS energy grid [eV].</span>
 
+<span class="sd">    pseudopotential_path : string</span>
+<span class="sd">        Path at which pseudopotentials are located (for TEM).</span>
 
+<span class="sd">    rdf_parameters : dict</span>
+<span class="sd">        Parameters for calculating the radial distribution function(RDF).</span>
+<span class="sd">        The RDF can directly be calculated via a function call, but if it is</span>
+<span class="sd">        calculated e.g. during a MD or MC run, these parameters will control</span>
+<span class="sd">        how. The following keywords are recognized:</span>
+
+<span class="sd">        number_of_bins : int</span>
+<span class="sd">            Number of bins used to create the histogram.</span>
+
+<span class="sd">        rMax : float</span>
+<span class="sd">            Radius up to which to calculate the RDF. None by default; this</span>
+<span class="sd">            is the suggested behavior, as MALA will then on its own calculate</span>
+<span class="sd">            the maximum radius up until which the calculation of the RDF is</span>
+<span class="sd">            indisputably physically meaningful. Larger radii may be specified,</span>
+<span class="sd">            e.g. for a Fourier transformation to calculate the static structure</span>
+<span class="sd">            factor.</span>
+
+<span class="sd">    tpcf_parameters : dict</span>
+<span class="sd">        Parameters for calculating the three particle correlation function</span>
+<span class="sd">        (TPCF).</span>
+<span class="sd">        The TPCF can directly be calculated via a function call, but if it is</span>
+<span class="sd">        calculated e.g. during a MD or MC run, these parameters will control</span>
+<span class="sd">        how. The following keywords are recognized:</span>
+
+<span class="sd">        number_of_bins : int</span>
+<span class="sd">            Number of bins used to create the histogram.</span>
+
+<span class="sd">        rMax : float</span>
+<span class="sd">            Radius up to which to calculate the TPCF. If None, MALA will</span>
+<span class="sd">            determine the maximum radius for which the TPCF is indisputably</span>
+<span class="sd">            defined. Be advised - this may come at increased computational</span>
+<span class="sd">            cost.</span>
+
+<span class="sd">    ssf_parameters : dict</span>
+<span class="sd">        Parameters for calculating the static structure factor</span>
+<span class="sd">        (SSF).</span>
+<span class="sd">        The SSF can directly be calculated via a function call, but if it is</span>
+<span class="sd">        calculated e.g. during a MD or MC run, these parameters will control</span>
+<span class="sd">        how. The following keywords are recognized:</span>
+
+<span class="sd">        number_of_bins : int</span>
+<span class="sd">            Number of bins used to create the histogram.</span>
+
+<span class="sd">        kMax : float</span>
+<span class="sd">            Maximum wave vector up to which to calculate the SSF.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -496,10 +543,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ldos_gridoffset_ev</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">restrict_targets</span> <span class="o">=</span> <span class="s2">&quot;zero_out_negative&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pseudopotential_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rdf_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s2">&quot;rMax&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tpcf_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;rMax&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssf_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;kMax&quot;</span><span class="p">:</span> <span class="mf">12.0</span><span class="p">}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">restrict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Control if and how targets are restricted to physical values..&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Control if and how targets are restricted to physical values.</span>
+
+<span class="sd">        Can be &quot;zero_out_negative&quot;, i.e. all negative values are set to zero</span>
+<span class="sd">        or &quot;absolute_values&quot;, i.e. all negative values are multiplied by -1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_restrict_targets</span>
 
     <span class="nd">@restrict_targets</span><span class="o">.</span><span class="n">setter</span>
