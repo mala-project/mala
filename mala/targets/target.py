@@ -401,7 +401,7 @@ class Target(ABC):
         # This is quite a large RDF.
         # We may want a smaller one eventually.
         if rMax is None:
-            rMax = TargetBase._get_ideal_rmax_for_rdf(atoms)
+            rMax = Target._get_ideal_rmax_for_rdf(atoms)
 
         atoms = atoms
         dr = float(rMax/number_of_bins)
@@ -615,8 +615,8 @@ class Target(ABC):
         """
         if calculation_type == "fourier_transform":
             if radial_distribution_function is None:
-                rMax = TargetBase._get_ideal_rmax_for_rdf(atoms)*3
-                radial_distribution_function = TargetBase.\
+                rMax = Target._get_ideal_rmax_for_rdf(atoms)*3
+                radial_distribution_function = Target.\
                     radial_distribution_function_from_atoms(atoms, rMax=rMax,
                                                             number_of_bins=
                                                             1500)
@@ -728,7 +728,7 @@ class Target(ABC):
             The radii  at which the RDF was calculated (for plotting),
             as [rMax] array.
         """
-        return TargetBase.\
+        return Target.\
             radial_distribution_function_from_atoms(atoms,
                                                     number_of_bins=self.
                                                     parameters.
@@ -757,7 +757,7 @@ class Target(ABC):
             The radii at which the TPCF was calculated (for plotting),
             [rMax, rMax, rMax].
         """
-        return TargetBase.\
+        return Target.\
             three_particle_correlation_function_from_atoms(atoms,
                                                            number_of_bins=self.
                                                            parameters.
@@ -786,7 +786,7 @@ class Target(ABC):
             The k-points  at which the SSF was calculated (for plotting),
             as [kMax] array.
         """
-        return TargetBase.static_structure_factor_from_atoms(atoms,
+        return Target.static_structure_factor_from_atoms(atoms,
                                                              self.parameters.
                                                              ssf_parameters["number_of_bins"],
                                                              self.parameters.
