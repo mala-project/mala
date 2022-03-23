@@ -40,12 +40,12 @@ def integrate_values_on_spacing(values, spacing, method, axis=0):
 
 
 def fermi_function(energy, fermi_energy, temperature_K, energy_units="eV"):
-    """
+    r"""
     Calculate the Fermi function.
 
     The Fermi function reads
 
-    .. math:: f(\epsilon) = 1/(1 + e^{\\frac{\epsilon-\epsilon_F}{k_\mathrm{B} T}})
+    .. math:: f(\epsilon) = 1/(1 + e^{\frac{\epsilon-\epsilon_F}{k_\mathrm{B} T}})
 
     Parameters
     ----------
@@ -72,7 +72,7 @@ def fermi_function(energy, fermi_energy, temperature_K, energy_units="eV"):
 
 def entropy_multiplicator(energy, fermi_energy, temperature_K,
                           energy_units="eV"):
-    """
+    r"""
     Calculate the multiplicator function for the entropy integral.
 
     The Entropy integral is
@@ -130,12 +130,12 @@ def entropy_multiplicator(energy, fermi_energy, temperature_K,
 
 
 def fermi_function_eV(energy_ev, fermi_energy_ev, temperature_K):
-    """
+    r"""
     Calculate the Fermi function.
 
     The Fermi function reads
 
-    .. math:: f(\epsilon) = 1/(1 + e^{\\frac{\epsilon-\epsilon_F}{k_\mathrm{B} T}})
+    .. math:: f(\epsilon) = 1/(1 + e^{\frac{\epsilon-\epsilon_F}{k_\mathrm{B} T}})
 
     Parameters
     ----------
@@ -156,8 +156,8 @@ def fermi_function_eV(energy_ev, fermi_energy_ev, temperature_K):
 
 
 def get_beta(temperature_K):
-    """
-    Calculate :math:`\\beta = {(k_\mathrm{B}T)}^{-1}`.
+    r"""
+    Calculate :math:`\beta = {(k_\mathrm{B}T)}^{-1}`.
 
     Parameters
     ----------
@@ -392,7 +392,7 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
 
 # Define Gaussian
 def gaussians(grid, centers, sigma):
-    """
+    r"""
     Calculate multiple gaussians on the same grid, but with different centers.
 
     Gaussian functions are used as approximations to the delta in the

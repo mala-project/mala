@@ -483,7 +483,7 @@ class LDOS(Target):
                                             "summation",
                                             energy_integration_method=
                                             "analytical"):
-        """
+        r"""
         Calculate the self-consistent Fermi energy.
 
         "Self-consistent" does not mean self-consistent in the DFT sense,
@@ -755,11 +755,11 @@ class LDOS(Target):
 
     def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
                           snapshot_number=0):
-        """
+        r"""
         Get the atomic forces, currently work in progress.
 
-        Will eventually give :math:`\\frac{dE}{d \\underline{\\boldsymbol{R}}}`.
-        Will currently only give :math:`\\frac{dd}{dB}`.
+        Will eventually give :math:`\frac{dE}{d \underline{\boldsymbol{R}}}`.
+        Will currently only give :math:`\frac{dd}{dB}`.
 
         Parameters
         ----------

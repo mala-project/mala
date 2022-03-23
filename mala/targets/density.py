@@ -187,7 +187,7 @@ class Density(Target):
     def get_energy_contributions(self, density_data, create_file=True,
                                  atoms_Angstrom=None, qe_input_data=None,
                                  qe_pseudopotentials=None):
-        """
+        r"""
         Extract density based energy contributions from Quantum Espresso.
 
         Done via a Fortran module accesible through python using f2py.
@@ -220,7 +220,7 @@ class Density(Target):
         energies : list
             A list containing, in order, the following energy contributions:
 
-                - :math:`n*V_\mathrm{xc}`
+                - :math:`n\,V_\mathrm{xc}`
                 - :math:`E_\mathrm{H}`
                 - :math:`E_\mathrm{xc}`
                 - :math:`E_\mathrm{Ewald}`

@@ -128,7 +128,7 @@ class DOS(Target):
         return np.array(return_dos_values)
 
     def read_from_qe_out(self, path_to_file=None, smearing_factor=2):
-        """
+        r"""
         Calculate the DOS from a Quantum Espresso DFT output file.
 
         The DOS will be read calculated via the eigenvalues and the equation
@@ -312,7 +312,7 @@ class DOS(Target):
     def get_self_consistent_fermi_energy_ev(self, dos_data,
                                             temperature_K=None,
                                             integration_method="analytical"):
-        """
+        r"""
         Calculate the self-consistent Fermi energy.
 
         "Self-consistent" does not mean self-consistent in the DFT sense,
