@@ -325,7 +325,54 @@ class ParametersTargets(ParametersBase):
     ldos_gridoffset_ev: float
         Lowest energy value on the (L)DOS energy grid [eV].
 
+    pseudopotential_path : string
+        Path at which pseudopotentials are located (for TEM).
 
+    rdf_parameters : dict
+        Parameters for calculating the radial distribution function(RDF).
+        The RDF can directly be calculated via a function call, but if it is
+        calculated e.g. during a MD or MC run, these parameters will control
+        how. The following keywords are recognized:
+
+        number_of_bins : int
+            Number of bins used to create the histogram.
+
+        rMax : float
+            Radius up to which to calculate the RDF. None by default; this
+            is the suggested behavior, as MALA will then on its own calculate
+            the maximum radius up until which the calculation of the RDF is
+            indisputably physically meaningful. Larger radii may be specified,
+            e.g. for a Fourier transformation to calculate the static structure
+            factor.
+
+    tpcf_parameters : dict
+        Parameters for calculating the three particle correlation function
+        (TPCF).
+        The TPCF can directly be calculated via a function call, but if it is
+        calculated e.g. during a MD or MC run, these parameters will control
+        how. The following keywords are recognized:
+
+        number_of_bins : int
+            Number of bins used to create the histogram.
+
+        rMax : float
+            Radius up to which to calculate the TPCF. If None, MALA will
+            determine the maximum radius for which the TPCF is indisputably
+            defined. Be advised - this may come at increased computational
+            cost.
+
+    ssf_parameters : dict
+        Parameters for calculating the static structure factor
+        (SSF).
+        The SSF can directly be calculated via a function call, but if it is
+        calculated e.g. during a MD or MC run, these parameters will control
+        how. The following keywords are recognized:
+
+        number_of_bins : int
+            Number of bins used to create the histogram.
+
+        kMax : float
+            Maximum wave vector up to which to calculate the SSF.
     """
 
     def __init__(self):
@@ -336,10 +383,18 @@ class ParametersTargets(ParametersBase):
         self.ldos_gridoffset_ev = 0
         self.restrict_targets = "zero_out_negative"
         self.pseudopotential_path = None
+        self.rdf_parameters = {"number_of_bins": 500, "rMax": None}
+        self.tpcf_parameters = {"number_of_bins": 20, "rMax": 5.0}
+        self.ssf_parameters = {"number_of_bins": 100, "kMax": 12.0}
 
     @property
     def restrict_targets(self):
-        """Control if and how targets are restricted to physical values.."""
+        """
+        Control if and how targets are restricted to physical values.
+
+        Can be "zero_out_negative", i.e. all negative values are set to zero
+        or "absolute_values", i.e. all negative values are multiplied by -1.
+        """
         return self._restrict_targets
 
     @restrict_targets.setter
