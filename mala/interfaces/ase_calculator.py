@@ -177,8 +177,9 @@ class MALA(Calculator):
 
     def save_calculator(self, filename):
         """
-        Saves enough information about the calculator to be reconstructed
-        at a later time.
+        Save parameters used for this calculator.
+
+        This is useful for e.g. checkpointing.
 
         Parameters
         ----------
