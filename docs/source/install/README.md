@@ -2,95 +2,22 @@
 
 This document details the manual installation of the MALA package.
 
-## Prerequisites
 
-### Python version
+## Supported python version
 
 MALA itself is not bound to a certain python version, as long as the package requirements for MALA can be met by the
-version of your choice. MALA has been successfully tested for python 3.8.5.
-If you intend to use the optional Quantum Espresso total energy module or LAMMPS and install these software packages
-yourself the necessary python bindings will be created for your python version. If you operate on a machine that
-provides pre-installed versions of these packages (e.g. on an HPC cluster), you need to adhere to the python version
-for which these python bindings have been created. A list of machines on which MALA was tested can be found in
-[Successfully tested on](tested_systems).
+version of your choice. MALA has been successfully tested for python 3.8.x.
+A list of machines on which MALA was tested can be found in [Successfully tested on](tested_systems).
 
-### Python packages
+## Using conda to manage dependencies (Recommended)
 
-In order to run MALA you have to have the following packages installed:
+While installing MALA from `pip` will install required packages, we recommend
+using [conda](https://docs.conda.io/en/latest/miniconda.html)  to install them 
+beforehand. However, using `pip` to resolve dependencies works as well 
+(see below). 
 
-* torch (PyTorch)
-* numpy
-* scipy
-* oapackage
-* tensorboard
-* optuna
-* ase
-* mpmath
-
-See also the `requirements.txt` file.
-You can install each Python package with
-
-```sh
-$ pip install packagename
-```
-
-or all with
-
-```sh
-$ pip install -r requirements.txt
-```
-
-or just install the package along with its basic dependencies
-
-```sh
-$ pip install -e .
-```
-
-In order to install additional dependencies (enabling optional features, building documentaion locally, testing etc.) do
-
-```sh
-$ pip install -e .[opt,test,doc]
-```
-
-
-See below for what the `-e` option does.
-
-Note that we exclude `torch` in `requirements.txt` We don't want torch to be
-installed automatically, just note that we need it. For local testing, people
-might want to install the CPU-only version using something like
-
-```sh
-$ pip install torch==1.7.1+cpu torchvision==0.8.2+cpu \
-    torchaudio==0.7.2 -f \
-    https://download.pytorch.org/whl/torch_stable.html
-```
-while a plain `pip install torch` will pull the much larger GPU version by
-default.
-
-For other ways to install PyTorch you might also refer to <https://pytorch.org/>.
-
-### Optional python packages
-
-MALA uses some optional packages that have to be installed manually:
-
-* `lammps`: Enables the calculation of descriptors, see [the instructions on external modules](external_modules.rst).
-* `total_energy`: Enables the calculation of the total energy, see [the instructions on external modules](external_modules.rst).
-* `mpi4py`: Enables inference parallelization
-* `horovod`: Enables training parallelization
-* `oapackage`: Enables usage of OAT method for hyperparameter optimization
-* `pqkmeans`:  Enables clustering of training data
-
-MALA can be used without these packages, an error will only occure when attempting
-perform an operation these packages are crucial for. With the exception
-of `lammps` and `total_energy`, these packages can be installed using
-`pip`.
-
-#### Conda environment (optional)
-
-Alternatively to pip, you can install the required packages within a
-[conda](https://docs.conda.io/en/latest/miniconda.html) environment.
 We provide four different environment files, depending on the architecture and
-ganularity of dependencies specified (find them in the `install` folder).
+granularity of dependencies specified (find them in the `install` folder).
 We use the explicit environment files for our reproducible and tested builds. Feel free to
 start off with a basic environment file specifing only the direct dependencies (these
 files will likely install newer versions of (sub-)dependencies and we cannot guarantee everything to work).
@@ -125,35 +52,61 @@ environment by replacing `3.6` with your desired version in `environment.yml`:
     $ conda env update --name mala  --file environment.yml
     ```
 
+## Installation from pip
 
-## Installing the MALA package
+When installing MALA via `pip`, all necessary packages are downloaded, 
+if they have not already been installed with e.g. `conda`. The exception to 
+this is `torch`.  We don't want `torch` to be installed automatically, as 
+users may have or want to work with special `torch` builds provided by their 
+HPC infrastructure. If you install MALA manually from scratch, make sure there 
+is a `torch` version available to python. For local testing, people
+might want to install the CPU-only version using something like
 
-1. Make sure that all prerequisites are fulfilled (see above)
-2. Install the package using
-
-    ```sh
-    $ cd ~/path/to/this/git/root/directory
-    $ pip install -e .
-    ```
-    (note: the `-e` is absolutely crucial, so that changes in the code will be
-    reflected system wide)
-3. (Optional): Download example data (see below) to run the examples.
-
-### Build documentation locally (optional)
-
-Install the prerequisites:
 ```sh
-$ pip install -r docs/requirements.txt
+$ pip install torch==1.7.1+cpu torchvision==0.8.2+cpu \
+    torchaudio==0.7.2 -f \
+    https://download.pytorch.org/whl/torch_stable.html
 ```
 
-1. Change into `docs/` folder.
-2. Run `make apidocs`.
-3. Run `make html`. This creates a `_build` folder inside `docs`. You may also want to use `make html SPHINXOPTS="-W"` sometimes. This treats warnings as errors and stops the output at first occurence of an error (useful for debugging rST syntax).
-4. Open `docs/_build/html/index.html`.
-5. `make clean` if required (e.g. after fixing erros) and building again
+while a plain `pip install torch` will pull the much larger GPU version by
+default. For other ways to install PyTorch you might also refer 
+to <https://pytorch.org/>.
 
+Afterwards, MALA can easily be installed via
 
-## Downloading and adding example data
+```sh
+$ cd ~/path/to/this/git/root/directory
+$ pip install -e .[options]
+```
+
+The following options are available:
+- `dev`: Installs `bump2version` which is needed to correctly increment 
+  the version and thus needed for large code development
+- `opt`: Installs `oapackage` and `pqkmeans`, so that the orthogonal array
+  method may be used for hyperparameter optimization and clustered 
+  training data sets are accesible, both of which may be relevant if you 
+  plan to do large scale hyperparameter optimization
+- `test`: Installs `pytest` which allows users to test the code
+- `doc`: Installs all dependencies for building the documentary locally
+
+Similar to `torch`, MALA also uses optional packages which we do not include 
+in our general pip setup, as their configuration and/or installation is 
+generally more specific to the machine you operate on. Namely, MALA can be 
+used with:
+
+* `lammps`: Enables the calculation of descriptors, see [the instructions on external modules](external_modules.rst).
+* `total_energy`: Enables the calculation of the total energy, see [the instructions on external modules](external_modules.rst).
+* `mpi4py`: Enables inference parallelization (not installed alongside other
+            packages as installation may be very specific to your setup)
+* `horovod`: Enables training parallelization (not installed alongside other
+            packages as installation may be very specific to your setup)
+  
+MALA can be used without these packages, an error will only occur when attempting
+perform an operation these packages are crucial for. With the exception
+of `lammps` and `total_energy`, these packages can be installed using
+`pip`.
+
+## Downloading and adding example data (Recommended)
 
 The examples and tests need additional data to run. The MALA team provides a
 data repository, that can be obtained from
@@ -163,16 +116,31 @@ subject to ongoing development as well.
 
 Download data repository and check out correct tag.
 
-   ```sh
-   $ git clone https://github.com/mala-project/test-data ~/path/to/data/repo
-   $ cd ~/path/to/data/repo
-   $ git checkout v1.1.0
-   ```
+```sh
+$ git clone https://github.com/mala-project/test-data ~/path/to/data/repo
+$ cd ~/path/to/data/repo
+$ git checkout v1.3.0
+```
 
-Export
+Export the path to that repo by
 
 ```sh
 $ export MALA_DATA_REPO=~/path/to/data/repo
 ```
 
-pointing to that repo. This will be used by tests and examples.
+This will be used by tests and examples.
+
+## Build documentation locally (Optional)
+
+Install the prerequisites (if you haven't already during the MALA setup).
+```sh
+$ pip install -r docs/requirements.txt
+```
+
+Afterwards, the documentation can be built via:
+
+1. Change into `docs/` folder.
+2. Run `make apidocs`.
+3. Run `make html`. This creates a `_build` folder inside `docs`. You may also want to use `make html SPHINXOPTS="-W"` sometimes. This treats warnings as errors and stops the output at first occurence of an error (useful for debugging rST syntax).
+4. Open `docs/_build/html/index.html`.
+5. `make clean` if required (e.g. after fixing erros) and building again

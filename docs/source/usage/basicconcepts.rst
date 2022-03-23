@@ -27,7 +27,7 @@ network, and train it. What data is loaded, how it is scaled, what kind of
 neural network will be used and how it's trained - all that is controlled
 by the ``Parameters`` object. For most tasks there exist Interface-classes
 that can be directly called, like ``Network`` or ``Descriptor``.
-These will, under the hood, give youn the correct object. However, it may
+These will, under the hood, give you the correct object. However, it may
 sometimes be useful to instead directly instantiate an object, e.g. for post-
 processing:
 

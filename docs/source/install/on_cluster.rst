@@ -16,38 +16,30 @@ Installation: tips & tricks
 Hemera5  (HZDR)
 ---------------
 
-- Tested by: Lenz Fiedler, 16.04.2021
-- Scope of test: mala, torch, horovod; I ommited LAMMPS and QE for this test
+- Tested by: Lenz Fiedler, 23.03.2022
+- Scope of test: mala, torch
 - Test log:
+
     1. Create a conda environment:
 
         - ``conda create --name mala_train python=3.8.5``
 
-    2. Installing requirements:
-
-        - ``pip install -r requirements.txt``
-            - I got "Requirement already satisfied: oapackage in /home/fiedle09/.local/lib/python3.8/site-packages (from -r requirements.txt (line 9)) (2.6.8)" - I don't know how I got to this point, but the experience might differ for other people
-
-    3. Install Pytorch. I load CUDA for this.
+    2. Install Pytorch. I load CUDA for this.
 
         - ``module load cuda/10.2``
         - ``pip install torch``
 
-    4. Horovod needs CMAKE to work, so we need to load it along with the other dependencies required for it:
+    3. Then I install `mala` via
 
-        - ``module load gcc/7.3.0``
-        - ``module load cmake``
-
-    5. Then I install horovod as
-
-        ``pip install horovod[pytorch]``
+        - ``pip install -e .``
 
 Summit cluster (ORNL)
 ---------------------
 
 - Tested by: Vladyslav Oles, 16.04.2021
-- Scope of test: mala, torch, horovod; I ommited LAMMPS and QE for this test
+- Scope of test: mala, torch, horovod, oapackage
 - Test log:
+
     1. Install a current version of SWIG (instead of Summit's 2.0.10) as per http://www.swig.org/svn.html:
 
         - ``git clone https://github.com/swig/swig.git``
@@ -68,7 +60,7 @@ Summit cluster (ORNL)
 
     3. Install MALA (from the directory with cloned MALA repository):
 
-        - ``pip install -e .`` (note that it will install required packages for MALA listed in ``requirements.txt``)
+        - ``pip install -e .``
 
 
 SQL
