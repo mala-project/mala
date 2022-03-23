@@ -561,7 +561,7 @@
         <span class="c1"># This is quite a large RDF.</span>
         <span class="c1"># We may want a smaller one eventually.</span>
         <span class="k">if</span> <span class="n">rMax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">rMax</span> <span class="o">=</span> <span class="n">TargetBase</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+            <span class="n">rMax</span> <span class="o">=</span> <span class="n">Target</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 
         <span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span>
         <span class="n">dr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">rMax</span><span class="o">/</span><span class="n">number_of_bins</span><span class="p">)</span>
@@ -775,8 +775,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">calculation_type</span> <span class="o">==</span> <span class="s2">&quot;fourier_transform&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">radial_distribution_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">rMax</span> <span class="o">=</span> <span class="n">TargetBase</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span><span class="o">*</span><span class="mi">3</span>
-                <span class="n">radial_distribution_function</span> <span class="o">=</span> <span class="n">TargetBase</span><span class="o">.</span>\
+                <span class="n">rMax</span> <span class="o">=</span> <span class="n">Target</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span><span class="o">*</span><span class="mi">3</span>
+                <span class="n">radial_distribution_function</span> <span class="o">=</span> <span class="n">Target</span><span class="o">.</span>\
                     <span class="n">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">rMax</span><span class="o">=</span><span class="n">rMax</span><span class="p">,</span>
                                                             <span class="n">number_of_bins</span><span class="o">=</span>
                                                             <span class="mi">1500</span><span class="p">)</span>
@@ -888,7 +888,7 @@
 <span class="sd">            The radii  at which the RDF was calculated (for plotting),</span>
 <span class="sd">            as [rMax] array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">TargetBase</span><span class="o">.</span>\
+        <span class="k">return</span> <span class="n">Target</span><span class="o">.</span>\
             <span class="n">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
                                                     <span class="n">number_of_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span>
                                                     <span class="n">parameters</span><span class="o">.</span>
@@ -917,7 +917,7 @@
 <span class="sd">            The radii at which the TPCF was calculated (for plotting),</span>
 <span class="sd">            [rMax, rMax, rMax].</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">TargetBase</span><span class="o">.</span>\
+        <span class="k">return</span> <span class="n">Target</span><span class="o">.</span>\
             <span class="n">three_particle_correlation_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
                                                            <span class="n">number_of_bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span>
                                                            <span class="n">parameters</span><span class="o">.</span>
@@ -946,7 +946,7 @@
 <span class="sd">            The k-points  at which the SSF was calculated (for plotting),</span>
 <span class="sd">            as [kMax] array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">TargetBase</span><span class="o">.</span><span class="n">static_structure_factor_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">Target</span><span class="o">.</span><span class="n">static_structure_factor_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
                                                              <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
                                                              <span class="n">ssf_parameters</span><span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
                                                              <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
