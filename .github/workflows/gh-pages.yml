@@ -1,8 +1,6 @@
 name: docs
 
 on:
-  pull_request_review:
-    types: [submitted,edited]
   pull_request:
     branches:
       - master
@@ -55,12 +53,12 @@ jobs:
 
       - name: Build API and docs
         run: |
-          sphinx-apidoc -o docs/source/api mala
+          make -C docs apidocs
           sphinx-build -W --keep-going -b html -d docs/_build/doctrees docs/source docs/_build/html
           mv -v docs/_build/html public
 
       - name: Deploy
-        if: ${{ github.event.review.state == 'approved' || github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}

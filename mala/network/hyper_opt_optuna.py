@@ -5,12 +5,12 @@ import pickle
 import optuna
 
 from mala.common.parameters import printout
-from mala.network.hyper_opt_base import HyperOptBase
+from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_base import ObjectiveBase
 from mala.network.naswot_pruner import NASWOTPruner
 
 
-class HyperOptOptuna(HyperOptBase):
+class HyperOptOptuna(HyperOpt):
     """Hyperparameter optimizer using Optuna.
 
     Parameters
@@ -245,13 +245,13 @@ class HyperOptOptuna(HyperOptBase):
             printout(str(self.params.hyperparameters.
                      checkpoints_each_trial)+" trials have passed, creating a "
                                              "checkpoint for hyperparameter "
-                                             "optimization.")
+                                             "optimization.", min_verbosity=0)
         if self.params.hyperparameters.checkpoints_each_trial < 0 and \
            self.__get_number_of_completed_trials(study) > 0:
                 if trial.number == study.best_trial.number:
                     need_to_checkpoint = True
                     printout("Best trial is "+str(trial.number)+", creating a "
-                             "checkpoint for it.")
+                             "checkpoint for it.", min_verbosity=0)
 
         if need_to_checkpoint is True:
             # We need to create a checkpoint!

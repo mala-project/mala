@@ -5,6 +5,8 @@ import numpy as np
 
 from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Al36")
+data_path_be = os.path.join(os.path.join(data_repo_path, "Be2"),
+                            "training_data")
 
 # Control how much the loss should be better after hyperopt compared to
 # before. This value is fairly high, but we're training on absolutely
@@ -14,6 +16,9 @@ desired_loss_improvement_factor = 2
 # Different HO methods will lead to different results, but they should be
 # approximately the same.
 desired_std_ho = 0.1
+
+# Values for the ACSD.
+targeted_acsd_value = 0.04
 
 
 class TestHyperparameterOptimization:
@@ -25,7 +30,6 @@ class TestHyperparameterOptimization:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.running.max_number_epochs = 20
@@ -38,18 +42,18 @@ class TestHyperparameterOptimization:
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path,
+                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path,
+                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path,
+                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
                                   output_units="1/Ry")
         data_handler.prepare_data()
 
         # Perform the hyperparameter optimization.
-        test_hp_optimizer = mala.HyperOptInterface(test_parameters,
+        test_hp_optimizer = mala.HyperOpt(test_parameters,
                                                    data_handler)
         test_hp_optimizer.add_hyperparameter("float", "learning_rate",
                                              0.0000001, 0.01)
@@ -80,20 +84,10 @@ class TestHyperparameterOptimization:
                max(performed_trials_values)
 
     def test_different_ho_methods(self):
-        results = []
-        result, last_study = self.__optimize_hyperparameters("optuna")
-        results.append(result)
-        results.append(self.__optimize_hyperparameters("oat"))
-        results.append(self.
-                       __optimize_hyperparameters("naswot",
-                                                  input_creator_naswot=
-                                                  "oat"))
-        results.append(self.
-                       __optimize_hyperparameters("naswot",
-                                                  input_creator_naswot=
-                                                  "optuna",
-                                                  last_optuna_study=
-                                                  last_study))
+        results = [self.__optimize_hyperparameters("optuna"),
+                   self.__optimize_hyperparameters("oat"),
+                   self.__optimize_hyperparameters("naswot")]
+
         assert np.std(results) < desired_std_ho
 
     def test_distributed_hyperopt(self):
@@ -106,7 +100,6 @@ class TestHyperparameterOptimization:
         # Set up parameters
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.running.max_number_epochs = 5
@@ -123,18 +116,18 @@ class TestHyperparameterOptimization:
 
         # Add all the snapshots we want to use in to the list.
         data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path,
+                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path,
+                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path,
+                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
                                   output_units="1/Ry")
         data_handler.prepare_data()
 
         # Create and perform hyperparameter optimization.
-        test_hp_optimizer = mala.HyperOptInterface(test_parameters,
+        test_hp_optimizer = mala.HyperOpt(test_parameters,
                                                    data_handler)
         test_hp_optimizer.add_hyperparameter("float", "learning_rate",
                                              0.0000001, 0.01)
@@ -159,16 +152,22 @@ class TestHyperparameterOptimization:
                min(performed_trials_values) < \
                max(performed_trials_values)
 
+    def test_acsd(self):
+        """Test that the ACSD routine is still working."""
+        test_parameters = mala.Parameters()
+        test_parameters.descriptors.acsd_points = 100
+        descriptors = mala.Descriptor(test_parameters)
+        snap_data = np.load(os.path.join(data_path_be, "Be_snapshot1.in.npy"))
+        ldos_data = np.load(os.path.join(data_path_be, "Be_snapshot1.out.npy"))
+        assert descriptors.get_acsd(snap_data, ldos_data) < targeted_acsd_value
+
     @staticmethod
-    def __optimize_hyperparameters(hyper_optimizer,
-                                   input_creator_naswot="oat",
-                                   last_optuna_study=None):
+    def __optimize_hyperparameters(hyper_optimizer):
         """Perform a hyperparameter optimization with the specified method."""
 
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.running.max_number_epochs = 20
@@ -181,18 +180,18 @@ class TestHyperparameterOptimization:
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path,
+                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path,
+                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
                                   output_units="1/Ry")
         data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path,
+                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
                                   output_units="1/Ry")
         data_handler.prepare_data()
 
         # Perform the actual hyperparameter optimization.
-        test_hp_optimizer = mala.HyperOptInterface(test_parameters,
+        test_hp_optimizer = mala.HyperOpt(test_parameters,
                                                    data_handler)
         test_parameters.network.layer_sizes = [
             data_handler.get_input_dimension(),
@@ -202,50 +201,20 @@ class TestHyperparameterOptimization:
         # Add hyperparameters we want to have optimized to the list.
         # If we do a NASWOT run currently we can provide an input
         # array of trials.
-        tmp_hp_optimizer = None
-        if hyper_optimizer == "oat" or hyper_optimizer == "optuna":
-            test_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
-                                                 choices=["Adam", "SGD"])
-            test_hp_optimizer.add_hyperparameter("categorical",
-                                                 "layer_activation_00",
-                                                 choices=["ReLU", "Sigmoid"])
-            test_hp_optimizer.add_hyperparameter("categorical",
-                                                 "layer_activation_01",
-                                                 choices=["ReLU", "Sigmoid"])
-            test_hp_optimizer.add_hyperparameter("categorical",
-                                                 "layer_activation_02",
-                                                 choices=["ReLU", "Sigmoid"])
-        elif hyper_optimizer == "naswot":
-            tmp_parameters = test_parameters
-            if input_creator_naswot == "optuna" and last_optuna_study is None:
-                input_creator_naswot = "oat"
-            tmp_parameters.hyperparameters.hyper_opt_method = \
-                input_creator_naswot
-            tmp_hp_optimizer = mala.HyperOptInterface(tmp_parameters,
-                                                      data_handler)
-            tmp_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
-                                                choices=["Adam", "SGD"])
-            tmp_hp_optimizer.add_hyperparameter("categorical",
-                                                "layer_activation_00",
-                                                choices=["ReLU", "Sigmoid"])
-            tmp_hp_optimizer.add_hyperparameter("categorical",
-                                                "layer_activation_01",
-                                                choices=["ReLU", "Sigmoid"])
-            tmp_hp_optimizer.add_hyperparameter("categorical",
-                                                "layer_activation_02",
-                                                choices=["ReLU", "Sigmoid"])
+        test_hp_optimizer.add_hyperparameter("categorical", "trainingtype",
+                                             choices=["Adam", "SGD"])
+        test_hp_optimizer.add_hyperparameter("categorical",
+                                             "layer_activation_00",
+                                             choices=["ReLU", "Sigmoid"])
+        test_hp_optimizer.add_hyperparameter("categorical",
+                                             "layer_activation_01",
+                                             choices=["ReLU", "Sigmoid"])
+        test_hp_optimizer.add_hyperparameter("categorical",
+                                             "layer_activation_02",
+                                             choices=["ReLU", "Sigmoid"])
 
         # Perform hyperparameter optimization.
-        if hyper_optimizer == "oat" or hyper_optimizer == "optuna":
-            test_hp_optimizer.perform_study()
-            if hyper_optimizer == "optuna":
-                last_optuna_study = test_hp_optimizer.get_trials_from_study()
-        elif hyper_optimizer == "naswot":
-            if input_creator_naswot == "optuna":
-                test_hp_optimizer.perform_study(trial_list=last_optuna_study)
-            else:
-                test_hp_optimizer.perform_study(trial_list=
-                                                tmp_hp_optimizer.get_orthogonal_array())
+        test_hp_optimizer.perform_study()
         test_hp_optimizer.set_optimal_parameters()
 
         # Train the final network.
@@ -254,7 +223,4 @@ class TestHyperparameterOptimization:
                                     data_handler)
         test_trainer.train_network()
         test_parameters.show()
-        if hyper_optimizer == "optuna":
-            return test_trainer.final_test_loss, last_optuna_study
-        else:
-            return test_trainer.final_test_loss
+        return test_trainer.final_test_loss

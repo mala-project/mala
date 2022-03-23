@@ -69,24 +69,24 @@ class TestLazyLoading:
                 data_handler.clear_data()
                 data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                           "Al_debug_2k_nr0.out.npy", data_path,
-                                          output_units="1/Ry",
-                                          add_snapshot_as="tr")
+                                          add_snapshot_as="tr",
+                                          output_units="1/Ry")
                 data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                           "Al_debug_2k_nr1.out.npy", data_path,
-                                          output_units="1/Ry",
-                                          add_snapshot_as="tr")
+                                          add_snapshot_as="tr",
+                                          output_units="1/Ry")
                 data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                           "Al_debug_2k_nr2.out.npy", data_path,
-                                          output_units="1/Ry",
-                                          add_snapshot_as="tr")
+                                          add_snapshot_as="tr",
+                                          output_units="1/Ry")
                 data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                           "Al_debug_2k_nr1.out.npy", data_path,
-                                          output_units="1/Ry",
-                                          add_snapshot_as="va")
+                                          add_snapshot_as="va",
+                                          output_units="1/Ry")
                 data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                           "Al_debug_2k_nr2.out.npy", data_path,
-                                          output_units="1/Ry",
-                                          add_snapshot_as="te")
+                                          add_snapshot_as="te",
+                                          output_units="1/Ry")
                 data_handler.prepare_data()
                 if scalingtype == "standard":
                     # The lazy-loading STD equation (and to a smaller amount the
@@ -196,36 +196,26 @@ class TestLazyLoading:
                 test_parameters.use_horovod = hvduse
                 data_handler = DataHandler(test_parameters)
                 data_handler.clear_data()
-                data_handler.add_snapshot("Al_debug_2k_nr0.in.npy",
-                                          data_path,
-                                          "Al_debug_2k_nr0.out.npy",
-                                          data_path,
-                                          output_units="1/Ry",
-                                          add_snapshot_as="tr")
-                data_handler.add_snapshot("Al_debug_2k_nr1.in.npy",
-                                          data_path,
-                                          "Al_debug_2k_nr1.out.npy",
-                                          data_path,
-                                          output_units="1/Ry",
-                                          add_snapshot_as="tr")
-                data_handler.add_snapshot("Al_debug_2k_nr2.in.npy",
-                                          data_path,
-                                          "Al_debug_2k_nr2.out.npy",
-                                          data_path,
-                                          output_units="1/Ry",
-                                          add_snapshot_as="tr")
-                data_handler.add_snapshot("Al_debug_2k_nr1.in.npy",
-                                          data_path,
-                                          "Al_debug_2k_nr1.out.npy",
-                                          data_path,
-                                          output_units="1/Ry",
-                                          add_snapshot_as="va")
-                data_handler.add_snapshot("Al_debug_2k_nr2.in.npy",
-                                          data_path,
-                                          "Al_debug_2k_nr2.out.npy",
-                                          data_path,
-                                          output_units="1/Ry",
-                                          add_snapshot_as="te")
+                data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
+                                          "Al_debug_2k_nr0.out.npy", data_path,
+                                          add_snapshot_as="tr",
+                                          output_units="1/Ry")
+                data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
+                                          "Al_debug_2k_nr1.out.npy", data_path,
+                                          add_snapshot_as="tr",
+                                          output_units="1/Ry")
+                data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
+                                          "Al_debug_2k_nr2.out.npy", data_path,
+                                          add_snapshot_as="tr",
+                                          output_units="1/Ry")
+                data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
+                                          "Al_debug_2k_nr1.out.npy", data_path,
+                                          add_snapshot_as="va",
+                                          output_units="1/Ry")
+                data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
+                                          "Al_debug_2k_nr2.out.npy", data_path,
+                                          add_snapshot_as="te",
+                                          output_units="1/Ry")
 
                 data_handler.prepare_data()
                 test_parameters.network.layer_sizes = \
@@ -271,10 +261,10 @@ class TestLazyLoading:
         # Time:  3.2193074226379395
 
         for r in results:
-            printout("Test: ", r[0], ", ", r[1])
-            printout("Initial loss: ", r[2])
-            printout("Final loss: ", r[3])
-            printout("Time: ", r[4])
+            printout("Test: ", r[0], ", ", r[1], min_verbosity=0)
+            printout("Initial loss: ", r[2], min_verbosity=0)
+            printout("Final loss: ", r[3], min_verbosity=0)
+            printout("Time: ", r[4], min_verbosity=0)
             diff.append(r[3] - r[2])
             
         diff = np.array(diff)

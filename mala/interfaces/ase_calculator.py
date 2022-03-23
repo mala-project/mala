@@ -9,7 +9,7 @@ except:
     pass
 from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, \
                  DOS
-from mala.common.parallelizer import get_rank, get_comm
+from mala.common.parallelizer import get_rank, get_comm, barrier
 
 
 class MALA(Calculator):
@@ -87,12 +87,11 @@ class MALA(Calculator):
             any combination of these six: 'positions', 'numbers', 'cell',
             'pbc', 'initial_charges' and 'initial_magmoms'.
         """
-        if self.params.use_mpi:
-            get_comm().Barrier()
+        barrier()
         Calculator.calculate(self, atoms, properties, system_changes)
 
         # Get the LDOS from the NN.
-        ldos = self.predictor.predict_for_atoms(atoms)
+        ldos = self.predictor.predict_for_atoms(atoms, gather_ldos=True)
 
         energy = 0.0
         forces = np.zeros([len(atoms), 3], dtype=np.float64)
@@ -131,8 +130,8 @@ class MALA(Calculator):
             if "forces" in properties:
                 forces = density_calculator.get_atomic_forces(density,
                                                               create_file=False)
+        barrier()
         if self.params.use_mpi:
-            get_comm().Barrier()
             energy = get_comm().bcast(energy, root=0)
             if "forces" in properties:
                 get_comm().Bcast([forces, MPI.DOUBLE], root=0)

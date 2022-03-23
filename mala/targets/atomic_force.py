@@ -1,12 +1,12 @@
 """Electronic density calculation class."""
-from .target_base import TargetBase
+from .target import Target
 from .calculation_helpers import *
 import warnings
 from ase.units import Rydberg, Bohr
 from mala.common.parameters import printout
 
 
-class AtomicForce(TargetBase):
+class AtomicForce(Target):
     """Postprocessing / parsing functions for atomic forces.
 
     Parameters
@@ -59,5 +59,4 @@ class AtomicForce(TargetBase):
         elif in_units == "Ry/Bohr":
             return array * (Rydberg/Bohr)
         else:
-            printout(in_units)
-            raise Exception("Unsupported unit for LDOS.")
+            raise Exception("Unsupported unit for atomic forces.")

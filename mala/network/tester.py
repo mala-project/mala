@@ -70,7 +70,7 @@ class Tester(Runner):
         if optimal_batch_size != self.parameters.mini_batch_size:
             printout("Had to readjust batch size from",
                      self.parameters.mini_batch_size, "to",
-                     optimal_batch_size)
+                     optimal_batch_size, min_verbosity=0)
             self.parameters.mini_batch_size = optimal_batch_size
         self.number_of_batches_per_snapshot = int(self.data.grid_size /
                                                   self.parameters.

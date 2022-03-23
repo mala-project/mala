@@ -1,7 +1,7 @@
 """DOS calculation class."""
 import os
 
-from mala.targets.target_base import TargetBase
+from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from scipy import integrate, interpolate
 from scipy.optimize import toms748
@@ -10,7 +10,7 @@ import ase.io
 from mala.common.parameters import printout
 
 
-class DOS(TargetBase):
+class DOS(Target):
     """Postprocessing / parsing functions for the density of states (DOS).
 
     Parameters
@@ -55,7 +55,6 @@ class DOS(TargetBase):
         elif in_units == "1/Ry":
             return array * (1/Rydberg)
         else:
-            printout(in_units)
             raise Exception("Unsupported unit for LDOS.")
 
     @staticmethod
@@ -83,7 +82,6 @@ class DOS(TargetBase):
         elif out_units == "1/Ry":
             return array * Rydberg
         else:
-            printout(out_units)
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_qe_dos_txt(self, file_name, directory):
@@ -381,7 +379,7 @@ class DOS(TargetBase):
         return_dos_object = DOS(ldos_object.parameters)
         return_dos_object.fermi_energy_eV = ldos_object.fermi_energy_eV
         return_dos_object.temperature_K = ldos_object.temperature_K
-        return_dos_object.grid_spacing_Bohr = ldos_object.grid_spacing_Bohr
+        return_dos_object.voxel_Bohr = ldos_object.voxel_Bohr
         return_dos_object.number_of_electrons = ldos_object.number_of_electrons
         return_dos_object.band_energy_dft_calculation = \
             ldos_object.band_energy_dft_calculation

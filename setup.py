@@ -16,7 +16,7 @@ with open("LICENSE") as f:
 
 extras = {
     'dev': ['bump2version'],
-    'opt': ['oapackage'],
+    'opt': ['oapackage', 'pqkmeans'],
     'test': ['pytest'],
     'doc': open('docs/requirements.txt').read().splitlines(),
 }

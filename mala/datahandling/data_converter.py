@@ -5,8 +5,8 @@ import numpy as np
 
 from mala.common.parallelizer import printout, get_rank
 from mala.common.parameters import ParametersData
-from mala.descriptors.descriptor_interface import DescriptorInterface
-from mala.targets.target_interface import TargetInterface
+from mala.descriptors.descriptor import Descriptor
+from mala.targets.target import Target
 
 
 class DataConverter:
@@ -20,22 +20,22 @@ class DataConverter:
     parameters : mala.common.parameters.Parameters
         The parameters object used for creating this instance.
 
-    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
+    descriptor_calculator : mala.descriptors.descriptor.Descriptor
         The descriptor calculator used for parsing/converting fingerprint
         data. If None, the descriptor calculator will be created by this
         object using the parameters provided. Default: None
 
-    target_calculator : mala.targets.target_base.TargetBase
+    target_calculator : mala.targets.target.Target
         Target calculator used for parsing/converting target data. If None,
         the target calculator will be created by this object using the
         parameters provided.
 
     Attributes
     ----------
-    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
+    descriptor_calculator : mala.descriptors.descriptor.Descriptor
         Descriptor calculator used for parsing/converting fingerprint data.
 
-    target_calculator : mala.targets.target_base.TargetBase
+    target_calculator : mala.targets.target.Target
         Target calculator used for parsing/converting target data.
     """
 
@@ -44,11 +44,11 @@ class DataConverter:
         self.parameters: ParametersData = parameters.data
         self.target_calculator = target_calculator
         if self.target_calculator is None:
-            self.target_calculator = TargetInterface(parameters)
+            self.target_calculator = Target(parameters)
 
         self.descriptor_calculator = descriptor_calculator
         if self.descriptor_calculator is None:
-            self.descriptor_calculator = DescriptorInterface(parameters)
+            self.descriptor_calculator = Descriptor(parameters)
 
         self.__snapshots_to_convert = []
         self.__snapshot_description = []
@@ -135,10 +135,10 @@ class DataConverter:
         # Parse and/or calculate the input descriptors.
         if description[0] == "qe.out":
             if original_units[0] is None:
-                tmp_input = self.descriptor_calculator. \
+                tmp_input, local_size = self.descriptor_calculator. \
                     calculate_from_qe_out(snapshot[0], snapshot[1])
             else:
-                tmp_input = self.descriptor_calculator. \
+                tmp_input, local_size = self.descriptor_calculator. \
                     calculate_from_qe_out(snapshot[0], snapshot[1],
                                           units=original_units[0])
             if self.parameters._configuration["mpi"]:
@@ -146,7 +146,7 @@ class DataConverter:
 
             # Cut the xyz information if requested by the user.
             if get_rank() == 0:
-                if self.parameters.descriptors_contain_xyz is False:
+                if self.descriptor_calculator.descriptors_contain_xyz is False:
                     tmp_input = tmp_input[:, :, :, 3:]
 
         else:
@@ -222,7 +222,8 @@ class DataConverter:
                                          output_path=os.path.join(save_path,
                                          snapshot_name+".out.npy"),
                                          use_memmap=memmap)
-            printout("Saved snapshot", snapshot_number, "at ", save_path)
+            printout("Saved snapshot", snapshot_number, "at ", save_path,
+                     min_verbosity=0)
 
             if get_rank() == 0:
                 if self.parameters._configuration["mpi"]:

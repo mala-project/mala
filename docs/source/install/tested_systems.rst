@@ -13,8 +13,8 @@ Pop!_OS
 
   * python version: 3.8.6
   * Installation successful: Yes
-* LAMMPS: Yes, installed using :doc:`Setting up LAMMPS <INSTALL_LAMMPS>`
-* Quantum Espresso: :doc:`Python bindings to Quantum Espresso <INSTALL_TE_QE>`
+* LAMMPS: Yes, installed using :doc:`the instructions on external modules <external_modules>`
+* Quantum Espresso: Yes, installed using :doc:`the instructions on external modules <external_modules>`
 
 Ubuntu
 ---------------
@@ -43,8 +43,12 @@ macOS
 
 HPC clusters
 ***************
-hemera (CentOS)
----------------
+Hemera5 (CentOS)
+-----------------
+
+Hemera5 is the local cluster of the Helmholtz-Zentrum Dresden-Rossendorf
+(one of the founding institutions of the MALA project).
+
 .. warning:: Currently Quantum Espresso and LAMMPS have python bindings in different python version. They cannot be used
    within the same virtual environment. This issue will be adressed shortly.
 

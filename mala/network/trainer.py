@@ -56,7 +56,14 @@ class Trainer(Runner):
         self.validation_data_loader = None
         self.test_data_loader = None
         self.use_pkl_checkpoints = use_pkl_checkpoints
+
+        # Samplers for the horovod case.
+        self.train_sampler = None
+        self.test_sampler = None
+        self.validation_sampler = None
+
         self.__prepare_to_train(optimizer_dict)
+
         self.tensor_board = None
         if self.parameters.visualisation:
             if not os.path.exists(self.parameters.visualisation_dir):
@@ -127,7 +134,7 @@ class Trainer(Runner):
         new_trainer : Trainer
             The trainer reconstructed from the checkpoint.
         """
-        printout("Loading training run from checkpoint.")
+        printout("Loading training run from checkpoint.", min_verbosity=0)
         # The names are based upon the checkpoint name.
         network_name = checkpoint_name + "_network.pth"
         iscaler_name = checkpoint_name + "_iscaler.pkl"
@@ -145,7 +152,7 @@ class Trainer(Runner):
         loaded_network = Network.load_from_file(loaded_params,
                                                 network_name)
 
-        printout("Preparing data used for last checkpoint.")
+        printout("Preparing data used for last checkpoint.", min_verbosity=0)
         # Create a new data handler and prepare the data.
         new_datahandler = DataHandler(loaded_params,
                                       input_data_scaler=loaded_iscaler,
@@ -211,13 +218,16 @@ class Trainer(Runner):
         # Collect and average all the losses from all the devices
         if self.parameters_full.use_horovod:
             vloss = self.__average_validation(vloss, 'average_loss')
+            self.initial_validation_loss = vloss
             if self.data.test_data_set is not None:
                 tloss = self.__average_validation(tloss, 'average_loss')
+                self.initial_test_loss = tloss
 
-        if self.parameters.verbosity:
-            printout("Initial Guess - validation data loss: ", vloss)
-            if self.data.test_data_set is not None:
-                printout("Initial Guess - test data loss: ", tloss)
+        printout("Initial Guess - validation data loss: ", vloss,
+                 min_verbosity=1)
+        if self.data.test_data_set is not None:
+            printout("Initial Guess - test data loss: ", tloss,
+                     min_verbosity=1)
 
         # Save losses for later use.
         self.initial_validation_loss = vloss
@@ -248,14 +258,12 @@ class Trainer(Runner):
 
             # train sampler
             if self.parameters_full.use_horovod:
-                self.parameters.sampler["train_sampler"].set_epoch(epoch)
+                self.train_sampler.set_epoch(epoch)
 
             for batchid, (inputs, outputs) in \
                     enumerate(self.training_data_loader):
-                if self.parameters_full.use_gpu:
-
-                    inputs = inputs.to('cuda')
-                    outputs = outputs.to('cuda')
+                inputs = inputs.to(self.parameters._configuration["device"])
+                outputs = outputs.to(self.parameters._configuration["device"])
                 training_loss += self.__process_mini_batch(self.network,
                                                            inputs, outputs)
 
@@ -264,27 +272,27 @@ class Trainer(Runner):
                                             "validation",
                                             self.parameters.
                                             during_training_metric)
+
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
-            if self.parameters.verbosity:
-                printout("Epoch: ", epoch, "validation data loss: ", vloss)
+            printout("Epoch: ", epoch, "validation data loss: ", vloss,
+                     min_verbosity=1)
 
-            #summary_writer tensor board
+            # summary_writer tensor board
             if self.parameters.visualisation:
                 self.tensor_board.add_scalar("Loss", vloss, epoch)
-                self.tensor_board.add_scalar("Learning rate", self.parameters.learning_rate, epoch)
+                self.tensor_board.add_scalar("Learning rate",
+                                             self.parameters.learning_rate,
+                                             epoch)
                 if self.parameters.visualisation == 2:
-                    print("visualisation = 2")
                     for name, param in self.network.named_parameters():
-                        self.tensor_board.add_histogram(name,param,epoch)
-                        self.tensor_board.add_histogram(f'{name}.grad',param.grad,epoch)
+                        self.tensor_board.add_histogram(name, param, epoch)
+                        self.tensor_board.add_histogram(f'{name}.grad',
+                                                        param.grad, epoch)
 
-                self.tensor_board.close() #method to make sure that all pending events have been written to disk
-
-
-
-                
-                 
+                # method to make sure that all pending events have been written
+                # to disk
+                self.tensor_board.close()
 
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
@@ -305,16 +313,14 @@ class Trainer(Runner):
                     vloss_old = vloss
                 else:
                     self.patience_counter += 1
-                    if self.parameters.verbosity:
-                        printout("Validation accuracy has not improved "
-                                 "enough.")
+                    printout("Validation accuracy has not improved "
+                             "enough.", min_verbosity=1)
                     if self.patience_counter >= self.parameters.\
                             early_stopping_epochs:
-                        if self.parameters.verbosity:
-                            printout("Stopping the training, validation "
-                                     "accuracy has not improved for",
-                                     self.patience_counter,
-                                     "epochs.")
+                        printout("Stopping the training, validation "
+                                 "accuracy has not improved for",
+                                 self.patience_counter,
+                                 "epochs.", min_verbosity=1)
                         self.last_epoch = epoch
                         break
 
@@ -323,14 +329,14 @@ class Trainer(Runner):
                 checkpoint_counter += 1
                 if checkpoint_counter >= \
                         self.parameters.checkpoints_each_epoch:
-                    printout("Checkpointing training.")
+                    printout("Checkpointing training.", min_verbosity=0)
                     self.last_epoch = epoch
                     self.last_loss = vloss_old
                     self.__create_training_checkpoint()
                     checkpoint_counter = 0
 
-            if self.parameters.verbosity:
-                printout("Time for epoch[s]:", time.time() - start_time)
+            printout("Time for epoch[s]:", time.time() - start_time,
+                     min_verbosity=2)
 
         ############################
         # CALCULATE FINAL METRICS
@@ -345,11 +351,9 @@ class Trainer(Runner):
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
 
-
-
         # Calculate final loss.
         self.final_validation_loss = vloss
-        printout("Final validation data loss: ", vloss)
+        printout("Final validation data loss: ", vloss, min_verbosity=0)
 
         tloss = float("inf")
         if self.data.test_data_set is not None:
@@ -359,22 +363,22 @@ class Trainer(Runner):
                                             after_before_training_metric)
             if self.parameters_full.use_horovod:
                 tloss = self.__average_validation(tloss, 'average_loss')
-            printout("Final test data loss: ", tloss)
+            printout("Final test data loss: ", tloss, min_verbosity=0)
         self.final_test_loss = tloss
-
-        
 
     def __prepare_to_train(self, optimizer_dict):
         """Prepare everything for training."""
         # Configure keyword arguments for DataSampler.
+        kwargs = {'num_workers': self.parameters.num_workers,
+                  'pin_memory': False}
         if self.parameters_full.use_gpu:
-            self.parameters.kwargs['pin_memory'] = True
+            kwargs['pin_memory'] = True
 
         # Scale the learning rate according to horovod.
         if self.parameters_full.use_horovod:
             if hvd.size() > 1:
                 printout("Rescaling learning rate because multiple workers are"
-                         " used for training.")
+                         " used for training.", min_verbosity=1)
                 self.parameters.learning_rate = self.parameters.learning_rate \
                     * hvd.size()
 
@@ -416,21 +420,20 @@ class Trainer(Runner):
             if self.data.parameters.use_lazy_loading:
                 do_shuffle = False
 
-            # Set the data sampler for multiGPU
-            self.parameters.sampler["train_sampler"] = torch.utils.data.\
+            self.train_sampler = torch.utils.data.\
                 distributed.DistributedSampler(self.data.training_data_set,
                                                num_replicas=hvd.size(),
                                                rank=hvd.rank(),
                                                shuffle=do_shuffle)
 
-            self.parameters.sampler["validate_sampler"] = torch.utils.data.\
+            self.validation_sampler = torch.utils.data.\
                 distributed.DistributedSampler(self.data.validation_data_set,
                                                num_replicas=hvd.size(),
                                                rank=hvd.rank(),
                                                shuffle=False)
 
             if self.data.test_data_set is not None:
-                self.parameters.sampler["test_sampler"] = torch.utils.data.\
+                self.test_sampler = torch.utils.data.\
                     distributed.DistributedSampler(self.data.test_data_set,
                                                    num_replicas=hvd.size(),
                                                    rank=hvd.rank(),
@@ -481,25 +484,22 @@ class Trainer(Runner):
         self.training_data_loader = DataLoader(self.data.training_data_set,
                                                batch_size=self.parameters.
                                                mini_batch_size,
-                                               sampler=self.parameters.
-                                               sampler["train_sampler"],
-                                               **self.parameters.kwargs,
+                                               sampler=self.train_sampler,
+                                               **kwargs,
                                                shuffle=do_shuffle)
 
         self.validation_data_loader = DataLoader(self.data.validation_data_set,
                                                  batch_size=self.parameters.
                                                  mini_batch_size * 1,
-                                                 sampler=self.parameters.
-                                                 sampler["validate_sampler"],
-                                                 **self.parameters.kwargs)
+                                                 sampler=self.validation_sampler,
+                                                 **kwargs)
 
         if self.data.test_data_set is not None:
             self.test_data_loader = DataLoader(self.data.test_data_set,
                                                batch_size=self.parameters.
                                                mini_batch_size * 1,
-                                               sampler=self.parameters.
-                                               sampler["test_sampler"],
-                                               **self.parameters.kwargs)
+                                               sampler=self.test_sampler,
+                                               **kwargs)
 
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
@@ -533,9 +533,8 @@ class Trainer(Runner):
             validation_loss = []
             with torch.no_grad():
                 for x, y in data_loader:
-                    if self.parameters_full.use_gpu:
-                        x = x.to('cuda')
-                        y = y.to('cuda')
+                    x = x.to(self.parameters._configuration["device"])
+                    y = y.to(self.parameters._configuration["device"])
                     prediction = network(x)
                     validation_loss.append(network.calculate_loss(prediction, y)
                                            .item())
@@ -647,16 +646,20 @@ class Trainer(Runner):
         oscaler_name = self.parameters.checkpoint_name \
             + "_oscaler.pkl"
         if self.use_pkl_checkpoints:
-            param_name = self.parameters.checkpoint_name + "_params.pkl"
+            param_name = self.parameters.checkpoint_name \
+                         + "_params.pkl"
+            self.parameters_full.save_as_pickle(param_name)
         else:
-            param_name = self.parameters.checkpoint_name + "_params.json"
+            param_name = self.parameters.checkpoint_name \
+                         + "_params.json"
+            self.parameters_full.save_as_json(param_name)
+
         optimizer_name = self.parameters.checkpoint_name \
             + "_optimizer.pth"
 
         # First we save the objects we would also save for inference.
         self.data.input_data_scaler.save(iscaler_name)
         self.data.output_data_scaler.save(oscaler_name)
-        self.parameters_full.save(param_name)
         self.network.save_network(network_name)
 
         # Next, we save all the other objects.

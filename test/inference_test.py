@@ -26,7 +26,6 @@ class TestInference:
         """Test that RAM inexpensive unit conversion works."""
         new_parameters = Parameters.load_from_file(params_path,
                                                    no_snapshots=True)
-        new_parameters.data.data_splitting_snapshots = ["te"]
         new_parameters.data.use_lazy_loading = False
         new_parameters.running.mini_batch_size = 50
 
@@ -42,7 +41,7 @@ class TestInference:
         inference_data_handler.add_snapshot("Al_debug_2k_nr0.in.npy",
                                             data_path,
                                             "Al_debug_2k_nr0.out.npy",
-                                            data_path,
+                                            data_path, "te",
                                             output_units="1/Ry")
 
         inference_data_handler.prepare_data()
@@ -112,7 +111,6 @@ class TestInference:
 
         test_parameters = Parameters()
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.data.data_splitting_snapshots = ["tr", "va"]
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.network.layer_activations = ["ReLU"]
@@ -131,9 +129,9 @@ class TestInference:
 
         data_handler = DataHandler(test_parameters)
         data_handler.add_snapshot("Be_snapshot1.in.npy", beryllium_path,
-                                  "Be_snapshot1.out.npy", beryllium_path)
+                                  "Be_snapshot1.out.npy", beryllium_path, "tr")
         data_handler.add_snapshot("Be_snapshot2.in.npy", beryllium_path,
-                                  "Be_snapshot2.out.npy", beryllium_path)
+                                  "Be_snapshot2.out.npy", beryllium_path, "va")
         data_handler.prepare_data()
 
         test_parameters.network.layer_sizes = [
@@ -156,11 +154,10 @@ class TestInference:
                                              output_data_scaler=data_handler.
                                              output_data_scaler)
         inference_data_handler.clear_data()
-        test_parameters.data.data_splitting_snapshots = ["te"]
         inference_data_handler.add_snapshot("Be_snapshot3.in.npy",
                                             beryllium_path,
                                             "Be_snapshot3.out.npy",
-                                            beryllium_path)
+                                            beryllium_path, "te")
         inference_data_handler.prepare_data(reparametrize_scaler=False)
 
         tester = Tester(test_parameters, test_network, inference_data_handler)
@@ -209,7 +206,6 @@ class TestInference:
         # First we load Parameters and network.
         new_parameters = Parameters.load_from_file(params_path,
                                                    no_snapshots=True)
-        new_parameters.data.data_splitting_snapshots = ["te"]
         new_parameters.data.use_lazy_loading = use_lazy_loading
         new_parameters.running.mini_batch_size = batchsize
 
@@ -225,7 +221,7 @@ class TestInference:
         inference_data_handler.add_snapshot("Al_debug_2k_nr0.in.npy",
                                             data_path,
                                             "Al_debug_2k_nr0.out.npy",
-                                            data_path,
+                                            data_path, "te",
                                             output_units="1/Ry")
 
         inference_data_handler.prepare_data()

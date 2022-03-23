@@ -50,14 +50,9 @@ def load_whole_snapshot():
     # Units: output_units="1/Ry" means that the output (target) data (LDOS) has
     # unit 1/Ry. Rescaled network output, after oscaler.inverse_transform() is
     # applied (see below) will be in 1/eV.
-    parameters.data.data_splitting_snapshots = ["te"]
-    inference_data_handler.add_snapshot(
-        "Al_debug_2k_nr2.in.npy",
-        data_path,
-        "Al_debug_2k_nr2.out.npy",
-        data_path,
-        output_units="1/Ry",
-    )
+    inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
+                                        "Al_debug_2k_nr2.out.npy", data_path,
+                                        "te", output_units="1/Ry")
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 
     # Extract single feature vector from snapshot. The x,y,z part (first 3

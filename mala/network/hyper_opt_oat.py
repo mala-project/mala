@@ -1,7 +1,6 @@
 """Hyperparameter optimizer using orthogonal array tuning."""
 from bisect import bisect
 import itertools
-import warnings
 import os
 import pickle
 
@@ -9,12 +8,9 @@ import numpy as np
 try:
     import oapackage as oa
 except ModuleNotFoundError:
-    warnings.warn("You do not have the OApackage installed. This will not "
-                  "affect MALA performance except for when attempting to use "
-                  "orthogonal array tuning. ",
-                  stacklevel=2)
+    pass
 
-from mala.network.hyper_opt_base import HyperOptBase
+from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_base import ObjectiveBase
 from mala.network.hyperparameter_oat import HyperparameterOAT
 from mala.common.parallelizer import printout
@@ -23,7 +19,7 @@ from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
 
 
-class HyperOptOAT(HyperOptBase):
+class HyperOptOAT(HyperOpt):
     """Hyperparameter optimizer using Orthogonal Array Tuning.
 
     Parameters
@@ -93,7 +89,8 @@ class HyperOptOAT(HyperOptBase):
             self.trial_losses = np.zeros(self.__OA.shape[0])+float("inf")
 
         printout("Performing",self.N_runs,
-                 "trials, starting with trial number", self.current_trial)
+                 "trials, starting with trial number", self.current_trial,
+                 min_verbosity=0)
 
         # The parameters could have changed.
         self.objective = ObjectiveBase(self.params, self.data_handler)
@@ -108,7 +105,7 @@ class HyperOptOAT(HyperOptBase):
             printout("Trial number", self.current_trial,
                      "finished with:", self.trial_losses[self.current_trial],
                      ", best is trial", best_trial[0],
-                     "with", best_trial[1])
+                     "with", best_trial[1], min_verbosity=0)
             self.current_trial += 1
             self.__create_checkpointing(row)
 
@@ -121,7 +118,7 @@ class HyperOptOAT(HyperOptBase):
 
         This is done using loss instead of accuracy as done in the paper.
         """
-        printout("Performing Range Analysis.")
+        printout("Performing Range Analysis.", min_verbosity=1)
 
         def indices(idx, val): return np.where(
             self.__OA[:, idx] == val)[0]
@@ -136,9 +133,9 @@ class HyperOptOAT(HyperOptBase):
 
     def show_order_of_importance(self):
         """Print the order of importance of the hyperparameters that are being optimised."""
-        printout("Order of Importance: ")
+        printout("Order of Importance: ", min_verbosity=0)
         printout(
-            *[self.params.hyperparameters.hlist[idx].name for idx in self.importance], sep=" < ")
+            *[self.params.hyperparameters.hlist[idx].name for idx in self.importance], sep=" < ", min_verbosity=0)
 
     def set_optimal_parameters(self):
         """
@@ -331,12 +328,12 @@ class HyperOptOAT(HyperOptBase):
             printout(str(self.params.hyperparameters.
                      checkpoints_each_trial)+" trials have passed, creating a "
                                              "checkpoint for hyperparameter "
-                                             "optimization.")
+                                             "optimization.", min_verbosity=1)
         if self.params.hyperparameters.checkpoints_each_trial < 0 and \
                 np.argmin(self.trial_losses) == self.current_trial-1:
             need_to_checkpoint = True
             printout("Best trial is "+str(self.current_trial-1)+", creating a "
-                     "checkpoint for it.")
+                     "checkpoint for it.", min_verbosity=1)
 
         if need_to_checkpoint is True:
             # We need to create a checkpoint!
