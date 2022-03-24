@@ -36,5 +36,5 @@ setup(
                                     "ml-dft-sandia")),
     zip_safe=False,
     install_requires=open('requirements.txt').read().splitlines(),
-    etxras_require=extras,
+    extras_require=extras,
 )
