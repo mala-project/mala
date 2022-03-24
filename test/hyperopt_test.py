@@ -1,4 +1,5 @@
 import os
+import importlib
 
 import mala
 import numpy as np
@@ -85,8 +86,13 @@ class TestHyperparameterOptimization:
 
     def test_different_ho_methods(self):
         results = [self.__optimize_hyperparameters("optuna"),
-                   self.__optimize_hyperparameters("oat"),
                    self.__optimize_hyperparameters("naswot")]
+
+        # Since the OApackage is optional, we should only run
+        # it if it is actually there.
+        if importlib.util.find_spec("oapackage") is not None:
+            results.append(
+                   self.__optimize_hyperparameters("oat"))
 
         assert np.std(results) < desired_std_ho
 
