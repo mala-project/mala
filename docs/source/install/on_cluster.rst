@@ -29,7 +29,7 @@ Hemera5  (HZDR)
         - ``module load cuda/10.2``
         - ``pip install torch``
 
-    3. Then I install `mala` via
+    3. Then install `mala` via
 
         - ``pip install -e .``
 
