@@ -245,7 +245,6 @@ class FeedForwardNet(Network):
                 else:
                     self.layers.append(self.activation_mappings[self.params.
                                        layer_activations[i]]())
-                print(self.layers[-1])
             except KeyError:
                 raise Exception("Invalid activation type seleceted.")
 
