@@ -3,10 +3,12 @@
 This document details the manual installation of the MALA package.
 
 
-## Supported python version
+## Supported OS and python version
 
 MALA itself is not bound to a certain python version, as long as the package requirements for MALA can be met by the
 version of your choice. MALA has been successfully tested for python 3.8.x.
+MALA can be run on Linux, macOS and Windows, so as long as you have a working
+python installation with the required depdencies.
 A list of machines on which MALA was tested can be found in [Successfully tested on](tested_systems).
 
 ## Using conda to manage dependencies (Recommended)
