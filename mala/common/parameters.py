@@ -232,7 +232,7 @@ class ParametersNetwork(ParametersBase):
 
     dropout: float
         Dropout rate for transformer net
-        0.0 <= dropout <=1.0
+        0.0 ≤ dropout ≤ 1.0
         Default: 0.0
 
     num_heads: int
