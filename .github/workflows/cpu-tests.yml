@@ -154,8 +154,12 @@ jobs:
           # epxort Docker image Conda environment for a later comparison
           conda env export -n mala-cpu > env_1.yml
 
+          # Manually install oapackage because we are bound to a certain
+          # version currently
+          pip install oapackage==2.6.8
+
           # install mala package
-          pip --no-cache-dir install -e .[opt,test]
+          pip --no-cache-dir install -e .[test]
 
       - name: Check if Conda environment meets the specified requirements
         shell: 'bash -c "docker exec -i mala-cpu bash < {0}"'
