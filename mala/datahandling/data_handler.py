@@ -22,7 +22,7 @@ from mala.targets.target import Target
 
 class DataHandler:
     """
-    Loads and scales dara. Can only process numpy arrays at the moment.
+    Loads and scales data. Can only process numpy arrays at the moment.
 
     Data that is not in a numpy array can be converted using the DataConverter
     class.
@@ -180,8 +180,9 @@ class DataHandler:
             only needed when testing multiple snapshots.
 
         add_snapshot_as : string
-            If "tr", "va" or "te", the snapshot will be added to the snapshot
-            list as training, validation or testing snapshot, respectively.
+            Must be "tr", "va" or "te", the snapshot will be added to the
+            snapshot list as training, validation or testing snapshot,
+            respectively.
         """
         snapshot = Snapshot(input_npy_file, input_npy_directory,
                             output_npy_file, output_npy_directory,
@@ -335,7 +336,7 @@ class DataHandler:
                                        naming_scheme_output=
                                        "test_Al_debug_2k_nr*.out"):
         """
-        Resize all snapsshot in the list.
+        Resize all snapshots in the list.
 
         Parameters
         ----------

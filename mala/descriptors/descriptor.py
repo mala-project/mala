@@ -109,7 +109,7 @@ class Descriptor(ABC):
     @staticmethod
     def enforce_pbc(atoms):
         """
-        Explictly enforeces the PBC on an ASE atoms object.
+        Explictly enforces the PBC on an ASE atoms object.
 
         QE (and potentially other codes?) do that internally. Meaning that the
         raw positions of atoms (in Angstrom) can lie outside of the unit cell.
@@ -125,7 +125,7 @@ class Descriptor(ABC):
 
         Returns
         -------
-        new_atoms : ase.atoms
+        new_atoms : ase.Atoms
             The ASE atoms object for which the PBC have been enforced.
         """
         new_atoms = atoms.copy()

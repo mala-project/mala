@@ -28,7 +28,7 @@ class DataConverter:
     target_calculator : mala.targets.target.Target
         Target calculator used for parsing/converting target data. If None,
         the target calculator will be created by this object using the
-        parameters provided.
+        parameters provided. Default: None
 
     Attributes
     ----------
@@ -68,10 +68,10 @@ class DataConverter:
         Parameters
         ----------
         qe_out_file : string
-            Name of Quantum Espresso output file for snapshot.
+            Name of Quantum Espresso output file for this snapshot.
 
         qe_out_directory : string
-            Path to Quantum Espresso output file for snapshot.
+            Path to Quantum Espresso output file for this snapshot.
 
         cube_naming_scheme : string
             Naming scheme for the LDOS .cube files.
@@ -108,7 +108,8 @@ class DataConverter:
             Position of the desired snapshot in the snapshot list.
 
         use_memmap : string
-            If not None, a memory mapped file will be used to gather the LDOS.
+            If not None, a memory mapped file with this name will be used to
+            gather the LDOS.
             If run in MPI parallel mode, such a file MUST be provided.
 
         input_path : string

@@ -14,20 +14,21 @@ from mala.network.runner import Runner
 
 class Predictor(Runner):
     """
-    A class for testing a neural network.
+    A class for running predictions using a neural network.
 
-    It enables easy inference throughout a test set.
+    It enables production-level inference.
 
     Parameters
     ----------
     params : mala.common.parametes.Parameters
-        Parameters used to create this Tester object.
+        Parameters used to create this Predictor object.
 
     network : mala.network.network.Network
-        Network which is being tested.
+        Network used for predictions.
 
     data : mala.datahandling.data_handler.DataHandler
-        DataHandler holding the test data.
+        DataHandler, in this case not directly holding data, but serving
+        as an interface to Target and Descriptor objects.
     """
 
     def __init__(self, params, network, data):

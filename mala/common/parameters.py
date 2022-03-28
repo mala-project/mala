@@ -232,7 +232,7 @@ class ParametersNetwork(ParametersBase):
 
     dropout: float
         Dropout rate for transformer net
-        0.0 <= dropout <=1.0
+        0.0 ≤ dropout ≤ 1.0
         Default: 0.0
 
     num_heads: int
@@ -443,12 +443,12 @@ class ParametersData(ParametersBase):
 
             - "None": No normalization is applied.
             - "standard": Standardization (Scale to mean 0,
-                standard deviation 1)
+              standard deviation 1)
             - "normal": Min-Max scaling (Scale to be in range 0...1)
             - "feature-wise-standard": Row Standardization (Scale to mean 0,
-                standard deviation 1)
+              standard deviation 1)
             - "feature-wise-normal": Row Min-Max scaling (Scale to be in
-                range 0...1)
+              range 0...1)
 
     use_lazy_loading : bool
         If True, data is lazily loaded, i.e. only the snapshots that are
