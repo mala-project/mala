@@ -94,7 +94,6 @@ dependencies:
   - openssl=1.1.1l=h7f98852_0
   - optuna=2.10.0=pyhd8ed1ab_0
   - packaging=21.3=pyhd8ed1ab_0
-  - pandas=1.4.1=py38h43a58ef_0
   - pbr=5.8.1=pyhd8ed1ab_0
   - pillow=9.0.1=py38he2f12e7_1
   - pip=22.0.3=pyhd8ed1ab_0
