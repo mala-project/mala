@@ -1,4 +1,4 @@
-docutils==0.18.1         # dependency of myst-parser; problems with 0.17.*
+docutils==0.17.1         # dependency of myst-parser; problems with 0.17.*
 sphinx==4.5.*
 sphinx_rtd_theme==1.0.0
 myst-parser==0.17.0
