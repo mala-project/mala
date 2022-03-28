@@ -1,44 +1,22 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>data_handler &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -46,29 +24,14 @@
     <link rel="prev" title="data_converter" href="mala.datahandling.data_converter.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html">
-          
-
-          
-            
             <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -76,18 +39,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -117,85 +69,39 @@
 <li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Materials Learning Algorithms (MALA)</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="modules.html">API reference</a> &raquo;</li>
-        
           <li><a href="mala.html">mala</a> &raquo;</li>
-        
           <li><a href="mala.datahandling.html">datahandling</a> &raquo;</li>
-        
       <li>data_handler</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-            
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datahandling.data_handler.rst" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <div class="section" id="module-mala.datahandling.data_handler">
-<span id="data-handler"></span><h1>data_handler<a class="headerlink" href="#module-mala.datahandling.data_handler" title="Permalink to this headline">¶</a></h1>
+<span id="data-handler"></span><h1>data_handler<a class="headerlink" href="#module-mala.datahandling.data_handler" title="Permalink to this headline"></a></h1>
 <p>DataHandler class that loads and scales data.</p>
 <dl class="py class">
-<dt id="mala.datahandling.data_handler.DataHandler">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">DataHandler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_data_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_data_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_data_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_data_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Loads and scales dara. Can only process numpy arrays at the moment.</p>
 <p>Data that is not in a numpy array can be converted using the DataConverter
@@ -216,8 +122,8 @@ this class.</p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="mala.datahandling.data_handler.DataHandler.add_snapshot">
-<code class="sig-name descname"><span class="pre">add_snapshot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_npy_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_npy_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_snapshot_as</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculation_output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.add_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.add_snapshot" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.add_snapshot">
+<span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_npy_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_npy_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_npy_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_snapshot_as</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculation_output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.add_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.add_snapshot" title="Permalink to this definition"></a></dt>
 <dd><p>Add a snapshot to the data pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -240,15 +146,15 @@ list as training, validation or testing snapshot, respectively.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_handler.DataHandler.clear_data">
-<code class="sig-name descname"><span class="pre">clear_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.clear_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.clear_data" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.clear_data">
+<span class="sig-name descname"><span class="pre">clear_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.clear_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.clear_data" title="Permalink to this definition"></a></dt>
 <dd><p>Reset the entire data pipeline.</p>
 <p>Useful when doing multiple investigations in the same python file.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_handler.DataHandler.get_input_dimension">
-<code class="sig-name descname"><span class="pre">get_input_dimension</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_input_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_input_dimension" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.get_input_dimension">
+<span class="sig-name descname"><span class="pre">get_input_dimension</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_input_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_input_dimension" title="Permalink to this definition"></a></dt>
 <dd><p>Get the dimension of the input vector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -261,8 +167,8 @@ list as training, validation or testing snapshot, respectively.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_handler.DataHandler.get_output_dimension">
-<code class="sig-name descname"><span class="pre">get_output_dimension</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_output_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_output_dimension" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.get_output_dimension">
+<span class="sig-name descname"><span class="pre">get_output_dimension</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_output_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_output_dimension" title="Permalink to this definition"></a></dt>
 <dd><p>Get the dimension of the output vector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -275,8 +181,8 @@ list as training, validation or testing snapshot, respectively.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output">
-<code class="sig-name descname"><span class="pre">get_snapshot_calculation_output</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_snapshot_calculation_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output">
+<span class="sig-name descname"><span class="pre">get_snapshot_calculation_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_snapshot_calculation_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output" title="Permalink to this definition"></a></dt>
 <dd><p>Get the path to the output file for a specific snapshot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -292,8 +198,8 @@ list as training, validation or testing snapshot, respectively.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_handler.DataHandler.get_test_input_gradient">
-<code class="sig-name descname"><span class="pre">get_test_input_gradient</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_test_input_gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_test_input_gradient" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.get_test_input_gradient">
+<span class="sig-name descname"><span class="pre">get_test_input_gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_test_input_gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_test_input_gradient" title="Permalink to this definition"></a></dt>
 <dd><p>Get the gradient of the test inputs for an entire snapshot.</p>
 <p>This gradient will be returned as scaled Tensor.
 The reason the gradient is returned (rather then returning the entire
@@ -315,16 +221,16 @@ slice it.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_handler.DataHandler.mix_datasets">
-<code class="sig-name descname"><span class="pre">mix_datasets</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.mix_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.mix_datasets" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.mix_datasets">
+<span class="sig-name descname"><span class="pre">mix_datasets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.mix_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.mix_datasets" title="Permalink to this definition"></a></dt>
 <dd><p>For lazily-loaded data sets, the snapshot ordering is (re-)mixed.</p>
 <p>This applies only to the training data set. For the validation and
 test set it does not matter.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_handler.DataHandler.prepare_data">
-<code class="sig-name descname"><span class="pre">prepare_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reparametrize_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.prepare_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.prepare_data" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.prepare_data">
+<span class="sig-name descname"><span class="pre">prepare_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reparametrize_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.prepare_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.prepare_data" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare the data to be used in a training process.</p>
 <p>This includes:</p>
 <blockquote>
@@ -343,16 +249,16 @@ training data.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_handler.DataHandler.prepare_for_testing">
-<code class="sig-name descname"><span class="pre">prepare_for_testing</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.prepare_for_testing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.prepare_for_testing" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.prepare_for_testing">
+<span class="sig-name descname"><span class="pre">prepare_for_testing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.prepare_for_testing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.prepare_for_testing" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare DataHandler for usage within Tester class.</p>
 <p>Ensures that lazily-loaded data sets do not perform unnecessary I/O
 operations. Only needed in Tester class.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor">
-<code class="sig-name descname"><span class="pre">raw_numpy_to_converted_scaled_tensor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numpy_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert3Dto1D</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.raw_numpy_to_converted_scaled_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor">
+<span class="sig-name descname"><span class="pre">raw_numpy_to_converted_scaled_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numpy_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert3Dto1D</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.raw_numpy_to_converted_scaled_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor" title="Permalink to this definition"></a></dt>
 <dd><p>Transform a raw numpy array into a scaled torch tensor.</p>
 <p>This tensor will also be in the right units, i.e. a tensor that can
 simply be put into a MALA network.</p>
@@ -377,8 +283,8 @@ into a (x*y*z,dim) array.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging">
-<code class="sig-name descname"><span class="pre">resize_snapshots_for_debugging</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'test_Al_debug_2k_nr*.in'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'test_Al_debug_2k_nr*.out'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.resize_snapshots_for_debugging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging">
+<span class="sig-name descname"><span class="pre">resize_snapshots_for_debugging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'test_Al_debug_2k_nr*.in'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'test_Al_debug_2k_nr*.out'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.resize_snapshots_for_debugging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging" title="Permalink to this definition"></a></dt>
 <dd><p>Resize all snapsshot in the list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -392,38 +298,38 @@ into a (x*y*z,dim) array.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="mala.datahandling.data_handler.DataHandler.test_data_inputs">
-<code class="sig-name descname"><span class="pre">test_data_inputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.test_data_inputs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.test_data_inputs">
+<span class="sig-name descname"><span class="pre">test_data_inputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.test_data_inputs" title="Permalink to this definition"></a></dt>
 <dd><p>Torch tensor holding all scaled testing data inputs.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="mala.datahandling.data_handler.DataHandler.test_data_outputs">
-<code class="sig-name descname"><span class="pre">test_data_outputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.test_data_outputs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.test_data_outputs">
+<span class="sig-name descname"><span class="pre">test_data_outputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.test_data_outputs" title="Permalink to this definition"></a></dt>
 <dd><p>Torch tensor holding all scaled testing data output.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="mala.datahandling.data_handler.DataHandler.training_data_inputs">
-<code class="sig-name descname"><span class="pre">training_data_inputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.training_data_inputs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.training_data_inputs">
+<span class="sig-name descname"><span class="pre">training_data_inputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.training_data_inputs" title="Permalink to this definition"></a></dt>
 <dd><p>Torch tensor holding all scaled training data inputs.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="mala.datahandling.data_handler.DataHandler.training_data_outputs">
-<code class="sig-name descname"><span class="pre">training_data_outputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.training_data_outputs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.training_data_outputs">
+<span class="sig-name descname"><span class="pre">training_data_outputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.training_data_outputs" title="Permalink to this definition"></a></dt>
 <dd><p>Torch tensor holding all scaled training data output.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="mala.datahandling.data_handler.DataHandler.validation_data_inputs">
-<code class="sig-name descname"><span class="pre">validation_data_inputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.validation_data_inputs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.validation_data_inputs">
+<span class="sig-name descname"><span class="pre">validation_data_inputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.validation_data_inputs" title="Permalink to this definition"></a></dt>
 <dd><p>Torch tensor holding all scaled validation data inputs.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="mala.datahandling.data_handler.DataHandler.validation_data_outputs">
-<code class="sig-name descname"><span class="pre">validation_data_outputs</span></code><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.validation_data_outputs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.validation_data_outputs">
+<span class="sig-name descname"><span class="pre">validation_data_outputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.validation_data_outputs" title="Permalink to this definition"></a></dt>
 <dd><p>Torch tensor holding all scaled validation data output.</p>
 </dd></dl>
 
@@ -433,50 +339,33 @@ into a (x*y*z,dim) array.</p></li>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="mala.datahandling.data_repo.html" class="btn btn-neutral float-right" title="data_repo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="mala.datahandling.data_converter.html" class="btn btn-neutral float-left" title="data_converter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.datahandling.data_repo.html" class="btn btn-neutral float-right" title="data_repo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
-
-    </p>
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

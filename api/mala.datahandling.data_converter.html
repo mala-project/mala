@@ -1,44 +1,22 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>data_converter &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -46,29 +24,14 @@
     <link rel="prev" title="datahandling" href="mala.datahandling.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html">
-          
-
-          
-            
             <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -76,18 +39,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -117,85 +69,39 @@
 <li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Materials Learning Algorithms (MALA)</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="modules.html">API reference</a> &raquo;</li>
-        
           <li><a href="mala.html">mala</a> &raquo;</li>
-        
           <li><a href="mala.datahandling.html">datahandling</a> &raquo;</li>
-        
       <li>data_converter</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-            
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datahandling.data_converter.rst" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <div class="section" id="module-mala.datahandling.data_converter">
-<span id="data-converter"></span><h1>data_converter<a class="headerlink" href="#module-mala.datahandling.data_converter" title="Permalink to this headline">¶</a></h1>
+<span id="data-converter"></span><h1>data_converter<a class="headerlink" href="#module-mala.datahandling.data_converter" title="Permalink to this headline"></a></h1>
 <p>DataConverter class for converting snapshots into numpy arrays.</p>
 <dl class="py class">
-<dt id="mala.datahandling.data_converter.DataConverter">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">DataConverter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Converts raw snapshots (direct DFT outputs) into numpy arrays for MALA.</p>
 <p>These snapshots can be e.g. Quantum Espresso results.</p>
@@ -213,8 +119,8 @@ parameters provided.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt id="mala.datahandling.data_converter.DataConverter.descriptor_calculator">
-<code class="sig-name descname"><span class="pre">descriptor_calculator</span></code><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.descriptor_calculator" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.descriptor_calculator">
+<span class="sig-name descname"><span class="pre">descriptor_calculator</span></span><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.descriptor_calculator" title="Permalink to this definition"></a></dt>
 <dd><p>Descriptor calculator used for parsing/converting fingerprint data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -224,8 +130,8 @@ parameters provided.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="mala.datahandling.data_converter.DataConverter.target_calculator">
-<code class="sig-name descname"><span class="pre">target_calculator</span></code><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.target_calculator" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.target_calculator">
+<span class="sig-name descname"><span class="pre">target_calculator</span></span><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.target_calculator" title="Permalink to this definition"></a></dt>
 <dd><p>Target calculator used for parsing/converting target data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -235,8 +141,8 @@ parameters provided.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube">
-<code class="sig-name descname"><span class="pre">add_snapshot_qeout_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_naming_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_qeout_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube">
+<span class="sig-name descname"><span class="pre">add_snapshot_qeout_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_naming_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_qeout_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube" title="Permalink to this definition"></a></dt>
 <dd><p>Add a Quantum Espresso snapshot to the list of conversion list.</p>
 <p>Please note that a Quantum Espresso snapshot consists of:</p>
 <blockquote>
@@ -260,8 +166,8 @@ parameters provided.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_converter.DataConverter.convert_single_snapshot">
-<code class="sig-name descname"><span class="pre">convert_single_snapshot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_single_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_single_snapshot" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.convert_single_snapshot">
+<span class="sig-name descname"><span class="pre">convert_single_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_single_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_single_snapshot" title="Permalink to this definition"></a></dt>
 <dd><p>Convert single snapshot from the conversion lists.</p>
 <p>Returns the preprocessed data as numpy array, which might be
 beneficial during testing.</p>
@@ -287,8 +193,8 @@ If run in MPI parallel mode, such a file MUST be provided.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_converter.DataConverter.convert_snapshots">
-<code class="sig-name descname"><span class="pre">convert_snapshots</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ELEM_snapshot*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starts_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_snapshots" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.convert_snapshots">
+<span class="sig-name descname"><span class="pre">convert_snapshots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ELEM_snapshot*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starts_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_snapshots" title="Permalink to this definition"></a></dt>
 <dd><p>Convert the snapshots in the list to numpy arrays.</p>
 <p>These can then be used by MALA.</p>
 <dl class="field-list simple">
@@ -313,50 +219,33 @@ the first snapshot generated will be called snapshot4.</p></li>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="mala.datahandling.data_handler.html" class="btn btn-neutral float-right" title="data_handler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="mala.datahandling.html" class="btn btn-neutral float-left" title="datahandling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.datahandling.data_handler.html" class="btn btn-neutral float-right" title="data_handler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
-
-    </p>
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

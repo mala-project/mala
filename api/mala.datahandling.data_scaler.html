@@ -1,44 +1,22 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>data_scaler &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -46,29 +24,14 @@
     <link rel="prev" title="data_repo" href="mala.datahandling.data_repo.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html">
-          
-
-          
-            
             <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -76,18 +39,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -117,85 +69,39 @@
 <li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Materials Learning Algorithms (MALA)</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="modules.html">API reference</a> &raquo;</li>
-        
           <li><a href="mala.html">mala</a> &raquo;</li>
-        
           <li><a href="mala.datahandling.html">datahandling</a> &raquo;</li>
-        
       <li>data_scaler</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-            
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datahandling.data_scaler.rst" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <div class="section" id="module-mala.datahandling.data_scaler">
-<span id="data-scaler"></span><h1>data_scaler<a class="headerlink" href="#module-mala.datahandling.data_scaler" title="Permalink to this headline">¶</a></h1>
+<span id="data-scaler"></span><h1>data_scaler<a class="headerlink" href="#module-mala.datahandling.data_scaler" title="Permalink to this headline"></a></h1>
 <p>DataScaler class for scaling DFT data.</p>
 <dl class="py class">
-<dt id="mala.datahandling.data_scaler.DataScaler">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">DataScaler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typestring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_horovod</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataScaler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typestring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_horovod</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Scales input and output data.</p>
 <p>Sort of emulates the functionality of the scikit-learn library, but by
@@ -222,15 +128,15 @@ only saved on the root process in parallel execution.</p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting">
-<code class="sig-name descname"><span class="pre">finish_incremental_fitting</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.finish_incremental_fitting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting">
+<span class="sig-name descname"><span class="pre">finish_incremental_fitting</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.finish_incremental_fitting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.finish_incremental_fitting" title="Permalink to this definition"></a></dt>
 <dd><p>Indicate that all data has been added to the incremental calculation.</p>
 <p>This is necessary for lazy loading.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_scaler.DataScaler.fit">
-<code class="sig-name descname"><span class="pre">fit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.fit" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the quantities necessary for scaling.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -240,8 +146,8 @@ only saved on the root process in parallel execution.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_scaler.DataScaler.incremental_fit">
-<code class="sig-name descname"><span class="pre">incremental_fit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.incremental_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.incremental_fit" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.incremental_fit">
+<span class="sig-name descname"><span class="pre">incremental_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.incremental_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.incremental_fit" title="Permalink to this definition"></a></dt>
 <dd><p>Add data to the incremental calculation of scaling parameters.</p>
 <p>This is necessary for lazy loading.</p>
 <dl class="field-list simple">
@@ -252,8 +158,8 @@ only saved on the root process in parallel execution.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_scaler.DataScaler.inverse_transform">
-<code class="sig-name descname"><span class="pre">inverse_transform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaled</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.inverse_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.inverse_transform" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.inverse_transform">
+<span class="sig-name descname"><span class="pre">inverse_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaled</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.inverse_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.inverse_transform" title="Permalink to this definition"></a></dt>
 <dd><p>Transform data from scaled to unscaled.</p>
 <p>Unscaled means real world data, scaled means data as is used in
 the network.</p>
@@ -274,8 +180,8 @@ the network.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_scaler.DataScaler.load_from_file">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load_from_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.load_from_file" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.load_from_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.load_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.load_from_file" title="Permalink to this definition"></a></dt>
 <dd><p>Load a saved Scaler object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -294,8 +200,8 @@ the network.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_scaler.DataScaler.save">
-<code class="sig-name descname"><span class="pre">save</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.save" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.save" title="Permalink to this definition"></a></dt>
 <dd><p>Save the Scaler object so that it can be accessed again later.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -308,15 +214,15 @@ the network.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_scaler.DataScaler.start_incremental_fitting">
-<code class="sig-name descname"><span class="pre">start_incremental_fitting</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.start_incremental_fitting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.start_incremental_fitting" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.start_incremental_fitting">
+<span class="sig-name descname"><span class="pre">start_incremental_fitting</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.start_incremental_fitting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.start_incremental_fitting" title="Permalink to this definition"></a></dt>
 <dd><p>Start the incremental calculation of scaling parameters.</p>
 <p>This is necessary for lazy loading.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.data_scaler.DataScaler.transform">
-<code class="sig-name descname"><span class="pre">transform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.transform" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.data_scaler.DataScaler.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unscaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_scaler.html#DataScaler.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_scaler.DataScaler.transform" title="Permalink to this definition"></a></dt>
 <dd><p>Transform data from unscaled to scaled.</p>
 <p>Unscaled means real world data, scaled means data as is used in
 the network.</p>
@@ -339,50 +245,33 @@ the network.</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="mala.datahandling.lazy_load_dataset.html" class="btn btn-neutral float-right" title="lazy_load_dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="mala.datahandling.data_repo.html" class="btn btn-neutral float-left" title="data_repo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.datahandling.lazy_load_dataset.html" class="btn btn-neutral float-right" title="lazy_load_dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
-
-    </p>
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

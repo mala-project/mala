@@ -1,44 +1,22 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>lazy_load_dataset_clustered &mdash; Materials Learning Algorithms (MALA)  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
-
-  
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -46,29 +24,14 @@
     <link rel="prev" title="lazy_load_dataset" href="mala.datahandling.lazy_load_dataset.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html">
-          
-
-          
-            
             <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -76,18 +39,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -117,86 +69,40 @@
 <li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Materials Learning Algorithms (MALA)</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="modules.html">API reference</a> &raquo;</li>
-        
           <li><a href="mala.html">mala</a> &raquo;</li>
-        
           <li><a href="mala.datahandling.html">datahandling</a> &raquo;</li>
-        
       <li>lazy_load_dataset_clustered</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-            
               <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datahandling.lazy_load_dataset_clustered.rst" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <div class="section" id="module-mala.datahandling.lazy_load_dataset_clustered">
-<span id="lazy-load-dataset-clustered"></span><h1>lazy_load_dataset_clustered<a class="headerlink" href="#module-mala.datahandling.lazy_load_dataset_clustered" title="Permalink to this headline">¶</a></h1>
+<span id="lazy-load-dataset-clustered"></span><h1>lazy_load_dataset_clustered<a class="headerlink" href="#module-mala.datahandling.lazy_load_dataset_clustered" title="Permalink to this headline"></a></h1>
 <p>DataSet for lazy-loading.</p>
 <dl class="py class">
-<dt id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">LazyLoadDatasetClustered</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.</span></code></p>
+<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LazyLoadDatasetClustered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.Dataset</span></code></p>
 <p>DataSet class for lazy loading.</p>
 <p>Only loads snapshots in the memory that are currently being processed.
 Uses a “caching” approach of keeping the last used snapshot in memory,
@@ -222,8 +128,8 @@ snapshot.</p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.add_snapshot_to_dataset">
-<code class="sig-name descname"><span class="pre">add_snapshot_to_dataset</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot" title="mala.datahandling.snapshot.Snapshot"><span class="pre">mala.datahandling.snapshot.Snapshot</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered.add_snapshot_to_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.add_snapshot_to_dataset" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.add_snapshot_to_dataset">
+<span class="sig-name descname"><span class="pre">add_snapshot_to_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot" title="mala.datahandling.snapshot.Snapshot"><span class="pre">mala.datahandling.snapshot.Snapshot</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered.add_snapshot_to_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.add_snapshot_to_dataset" title="Permalink to this definition"></a></dt>
 <dd><p>Addsa snapshot to a DataSet.</p>
 <p>Afterwards, the DataSet can and will load this snapshot as needed.</p>
 <dl class="field-list simple">
@@ -234,15 +140,15 @@ snapshot.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.cluster_dataset">
-<code class="sig-name descname"><span class="pre">cluster_dataset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered.cluster_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.cluster_dataset" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.cluster_dataset">
+<span class="sig-name descname"><span class="pre">cluster_dataset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered.cluster_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.cluster_dataset" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate clusters for dataset (individually per snapshot.</p>
 <p>IMPORTANT: Only call this function AFTER all snapshots were added.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.get_new_data">
-<code class="sig-name descname"><span class="pre">get_new_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered.get_new_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.get_new_data" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.get_new_data">
+<span class="sig-name descname"><span class="pre">get_new_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered.get_new_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.get_new_data" title="Permalink to this definition"></a></dt>
 <dd><p>Read a new snapshot into RAM.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -252,15 +158,15 @@ snapshot.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.mix_datasets">
-<code class="sig-name descname"><span class="pre">mix_datasets</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered.mix_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.mix_datasets" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.mix_datasets">
+<span class="sig-name descname"><span class="pre">mix_datasets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered.mix_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.mix_datasets" title="Permalink to this definition"></a></dt>
 <dd><p>Mix the order of the snapshots.</p>
 <p>With this, there can be some variance between runs.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.return_outputs_directly">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">return_outputs_directly</span></code><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.return_outputs_directly" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.return_outputs_directly">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_outputs_directly</span></span><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.return_outputs_directly" title="Permalink to this definition"></a></dt>
 <dd><p>Control whether outputs are actually transformed.</p>
 <p>Has to be False for training. In the testing case,
 Numerical errors are smaller if set to True.</p>
@@ -272,50 +178,33 @@ Numerical errors are smaller if set to True.</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="mala.datahandling.snapshot.html" class="btn btn-neutral float-right" title="snapshot" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="mala.datahandling.lazy_load_dataset.html" class="btn btn-neutral float-left" title="lazy_load_dataset" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.datahandling.snapshot.html" class="btn btn-neutral float-right" title="snapshot" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.
-
-    </p>
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
