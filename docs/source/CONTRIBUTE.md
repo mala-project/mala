@@ -11,7 +11,7 @@ MALA has a versioning system. The version number is only updated when merging
 on `master`. This constitues a release. Please note that not all changes
 to code constitute such a release and generally, merges will be directed
 to the `develop` branch
-(see [branching strategy](#branching-strategy)). The version number has
+(see [branching strategy](#Branching strategy)). The version number has
 the form `MAJOR.MINOR.FIX`:
 
 * `MAJOR`: Big changes to the code, that fundamentally change the way it
@@ -43,7 +43,7 @@ the core development team.
 ## Pull Requests
 We actively welcome pull requests.
 1. Fork the repo and create your branch from `develop`
-2. During development, make sure that you follow the guidelines for [developing code](#developing-code)
+2. During development, make sure that you follow the guidelines for [developing code](#Developing code)
 3. Rebase your branch onto `develop` before submitting a merge request
 4. Ensure the test suite passes before submitting a pull request
 
