@@ -44,17 +44,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../installation.html">Installation</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Installation of MALA</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#python-version">Python version</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#python-packages">Python packages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#optional-python-packages">Optional python packages</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#installing-the-mala-package">Installing the MALA package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#build-documentation-locally-optional">Build documentation locally (optional)</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#downloading-and-adding-example-data">Downloading and adding example data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#supported-os-and-python-version">Supported OS and python version</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-conda-to-manage-dependencies-recommended">Using conda to manage dependencies (Recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installation-from-pip">Installation from pip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#downloading-and-adding-example-data-recommended">Downloading and adding example data (Recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-documentation-locally-optional">Build documentation locally (Optional)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="external_modules.html">External modules</a></li>
@@ -95,82 +89,22 @@
   <div class="section" id="installation-of-mala">
 <h1>Installation of MALA<a class="headerlink" href="#installation-of-mala" title="Permalink to this headline"></a></h1>
 <p>This document details the manual installation of the MALA package.</p>
-<div class="section" id="prerequisites">
-<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline"></a></h2>
-<div class="section" id="python-version">
-<h3>Python version<a class="headerlink" href="#python-version" title="Permalink to this headline"></a></h3>
+<div class="section" id="supported-os-and-python-version">
+<h2>Supported OS and python version<a class="headerlink" href="#supported-os-and-python-version" title="Permalink to this headline"></a></h2>
 <p>MALA itself is not bound to a certain python version, as long as the package requirements for MALA can be met by the
-version of your choice. MALA has been successfully tested for python 3.8.5.
-If you intend to use the optional Quantum Espresso total energy module or LAMMPS and install these software packages
-yourself the necessary python bindings will be created for your python version. If you operate on a machine that
-provides pre-installed versions of these packages (e.g. on an HPC cluster), you need to adhere to the python version
-for which these python bindings have been created. A list of machines on which MALA was tested can be found in
-<a class="reference internal" href="tested_systems.html"><span class="doc std std-doc">Successfully tested on</span></a>.</p>
+version of your choice. MALA has been successfully tested for python 3.8.x.
+MALA can be run on Linux, macOS and Windows, so as long as you have a working
+python installation with the required depdencies.
+A list of machines on which MALA was tested can be found in <a class="reference internal" href="tested_systems.html"><span class="doc std std-doc">Successfully tested on</span></a>.</p>
 </div>
-<div class="section" id="python-packages">
-<h3>Python packages<a class="headerlink" href="#python-packages" title="Permalink to this headline"></a></h3>
-<p>In order to run MALA you have to have the following packages installed:</p>
-<ul class="simple">
-<li><p>torch (PyTorch)</p></li>
-<li><p>numpy</p></li>
-<li><p>scipy</p></li>
-<li><p>oapackage</p></li>
-<li><p>tensorboard</p></li>
-<li><p>optuna</p></li>
-<li><p>ase</p></li>
-<li><p>mpmath</p></li>
-</ul>
-<p>See also the <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file.
-You can install each Python package with</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install packagename
-</pre></div>
-</div>
-<p>or all with</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -r requirements.txt
-</pre></div>
-</div>
-<p>or just install the package along with its basic dependencies</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -e .
-</pre></div>
-</div>
-<p>In order to install additional dependencies (enabling optional features, building documentaion locally, testing etc.) do</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -e .<span class="o">[</span>opt,test,doc<span class="o">]</span>
-</pre></div>
-</div>
-<p>See below for what the <code class="docutils literal notranslate"><span class="pre">-e</span></code> option does.</p>
-<p>Note that we exclude <code class="docutils literal notranslate"><span class="pre">torch</span></code> in <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> We don’t want torch to be
-installed automatically, just note that we need it. For local testing, people
-might want to install the CPU-only version using something like</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install <span class="nv">torch</span><span class="o">==</span><span class="m">1</span>.7.1+cpu <span class="nv">torchvision</span><span class="o">==</span><span class="m">0</span>.8.2+cpu <span class="se">\</span>
-    <span class="nv">torchaudio</span><span class="o">==</span><span class="m">0</span>.7.2 -f <span class="se">\</span>
-    https://download.pytorch.org/whl/torch_stable.html
-</pre></div>
-</div>
-<p>while a plain <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">torch</span></code> will pull the much larger GPU version by
-default.</p>
-<p>For other ways to install PyTorch you might also refer to <a class="reference external" href="https://pytorch.org/">https://pytorch.org/</a>.</p>
-</div>
-<div class="section" id="optional-python-packages">
-<h3>Optional python packages<a class="headerlink" href="#optional-python-packages" title="Permalink to this headline"></a></h3>
-<p>MALA uses some optional packages that have to be installed manually:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">lammps</span></code>: Enables the calculation of descriptors, see <a class="reference internal" href="external_modules.html"><span class="doc std std-doc">the instructions on external modules</span></a>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_energy</span></code>: Enables the calculation of the total energy, see <a class="reference internal" href="external_modules.html"><span class="doc std std-doc">the instructions on external modules</span></a>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">mpi4py</span></code>: Enables inference parallelization</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">horovod</span></code>: Enables training parallelization</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">oapackage</span></code>: Enables usage of OAT method for hyperparameter optimization</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pqkmeans</span></code>:  Enables clustering of training data</p></li>
-</ul>
-<p>MALA can be used without these packages, an error will only occure when attempting
-perform an operation these packages are crucial for. With the exception
-of <code class="docutils literal notranslate"><span class="pre">lammps</span></code> and <code class="docutils literal notranslate"><span class="pre">total_energy</span></code>, these packages can be installed using
-<code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
-<div class="section" id="conda-environment-optional">
-<h4>Conda environment (optional)<a class="headerlink" href="#conda-environment-optional" title="Permalink to this headline"></a></h4>
-<p>Alternatively to pip, you can install the required packages within a
-<a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">conda</a> environment.
-We provide four different environment files, depending on the architecture and
-ganularity of dependencies specified (find them in the <code class="docutils literal notranslate"><span class="pre">install</span></code> folder).
+<div class="section" id="using-conda-to-manage-dependencies-recommended">
+<h2>Using conda to manage dependencies (Recommended)<a class="headerlink" href="#using-conda-to-manage-dependencies-recommended" title="Permalink to this headline"></a></h2>
+<p>While installing MALA from <code class="docutils literal notranslate"><span class="pre">pip</span></code> will install required packages, we recommend
+using <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">conda</a>  to install them
+beforehand. However, using <code class="docutils literal notranslate"><span class="pre">pip</span></code> to resolve dependencies works as well
+(see below).</p>
+<p>We provide four different environment files, depending on the architecture and
+granularity of dependencies specified (find them in the <code class="docutils literal notranslate"><span class="pre">install</span></code> folder).
 We use the explicit environment files for our reproducible and tested builds. Feel free to
 start off with a basic environment file specifing only the direct dependencies (these
 files will likely install newer versions of (sub-)dependencies and we cannot guarantee everything to work).</p>
@@ -226,39 +160,58 @@ environment by replacing <code class="docutils literal notranslate"><span class=
 </li>
 </ol>
 </div>
+<div class="section" id="installation-from-pip">
+<h2>Installation from pip<a class="headerlink" href="#installation-from-pip" title="Permalink to this headline"></a></h2>
+<p>When installing MALA via <code class="docutils literal notranslate"><span class="pre">pip</span></code>, all necessary packages are downloaded,
+if they have not already been installed with e.g. <code class="docutils literal notranslate"><span class="pre">conda</span></code>. The exception to
+this is <code class="docutils literal notranslate"><span class="pre">torch</span></code>.  We don’t want <code class="docutils literal notranslate"><span class="pre">torch</span></code> to be installed automatically, as
+users may have or want to work with special <code class="docutils literal notranslate"><span class="pre">torch</span></code> builds provided by their
+HPC infrastructure. If you install MALA manually from scratch, make sure there
+is a <code class="docutils literal notranslate"><span class="pre">torch</span></code> version available to python. For local testing, people
+might want to install the CPU-only version using something like</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install <span class="nv">torch</span><span class="o">==</span><span class="m">1</span>.7.1+cpu <span class="nv">torchvision</span><span class="o">==</span><span class="m">0</span>.8.2+cpu <span class="se">\</span>
+    <span class="nv">torchaudio</span><span class="o">==</span><span class="m">0</span>.7.2 -f <span class="se">\</span>
+    https://download.pytorch.org/whl/torch_stable.html
+</pre></div>
 </div>
-</div>
-<div class="section" id="installing-the-mala-package">
-<h2>Installing the MALA package<a class="headerlink" href="#installing-the-mala-package" title="Permalink to this headline"></a></h2>
-<ol class="arabic">
-<li><p>Make sure that all prerequisites are fulfilled (see above)</p></li>
-<li><p>Install the package using</p>
+<p>while a plain <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">torch</span></code> will pull the much larger GPU version by
+default. For other ways to install PyTorch you might also refer
+to <a class="reference external" href="https://pytorch.org/">https://pytorch.org/</a>.</p>
+<p>Afterwards, MALA can easily be installed via</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> ~/path/to/this/git/root/directory
-$ pip install -e .
+$ pip install -e .<span class="o">[</span>options<span class="o">]</span>
 </pre></div>
 </div>
-<p>(note: the <code class="docutils literal notranslate"><span class="pre">-e</span></code> is absolutely crucial, so that changes in the code will be
-reflected system wide)</p>
-</li>
-<li><p>(Optional): Download example data (see below) to run the examples.</p></li>
-</ol>
-<div class="section" id="build-documentation-locally-optional">
-<h3>Build documentation locally (optional)<a class="headerlink" href="#build-documentation-locally-optional" title="Permalink to this headline"></a></h3>
-<p>Install the prerequisites:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -r docs/requirements.txt
-</pre></div>
+<p>The following options are available:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dev</span></code>: Installs <code class="docutils literal notranslate"><span class="pre">bump2version</span></code> which is needed to correctly increment
+the version and thus needed for large code development</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">opt</span></code>: Installs <code class="docutils literal notranslate"><span class="pre">oapackage</span></code> and <code class="docutils literal notranslate"><span class="pre">pqkmeans</span></code>, so that the orthogonal array
+method may be used for hyperparameter optimization and clustered
+training data sets are accesible, both of which may be relevant if you
+plan to do large scale hyperparameter optimization</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test</span></code>: Installs <code class="docutils literal notranslate"><span class="pre">pytest</span></code> which allows users to test the code</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">doc</span></code>: Installs all dependencies for building the documentary locally</p></li>
+</ul>
+<p>Similar to <code class="docutils literal notranslate"><span class="pre">torch</span></code>, MALA also uses optional packages which we do not include
+in our general pip setup, as their configuration and/or installation is
+generally more specific to the machine you operate on. Namely, MALA can be
+used with:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">lammps</span></code>: Enables the calculation of descriptors, see <a class="reference internal" href="external_modules.html"><span class="doc std std-doc">the instructions on external modules</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_energy</span></code>: Enables the calculation of the total energy, see <a class="reference internal" href="external_modules.html"><span class="doc std std-doc">the instructions on external modules</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mpi4py</span></code>: Enables inference parallelization (not installed alongside other
+packages as installation may be very specific to your setup)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">horovod</span></code>: Enables training parallelization (not installed alongside other
+packages as installation may be very specific to your setup)</p></li>
+</ul>
+<p>MALA can be used without these packages, an error will only occur when attempting
+perform an operation these packages are crucial for. With the exception
+of <code class="docutils literal notranslate"><span class="pre">lammps</span></code> and <code class="docutils literal notranslate"><span class="pre">total_energy</span></code>, these packages can be installed using
+<code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
 </div>
-<ol class="arabic simple">
-<li><p>Change into <code class="docutils literal notranslate"><span class="pre">docs/</span></code> folder.</p></li>
-<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">apidocs</span></code> on Linux/macOS or <code class="docutils literal notranslate"><span class="pre">.\make.bat</span> <span class="pre">apidocs</span></code> on Windows.</p></li>
-<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span></code> on Linux/macOS or <code class="docutils literal notranslate"><span class="pre">.\make.bat</span> <span class="pre">html</span></code> on Windows. This creates a <code class="docutils literal notranslate"><span class="pre">_build</span></code> folder inside <code class="docutils literal notranslate"><span class="pre">docs</span></code>. You may also want to use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span> <span class="pre">SPHINXOPTS=&quot;-W&quot;</span></code> sometimes. This treats warnings as errors and stops the output at first occurence of an error (useful for debugging rST syntax).</p></li>
-<li><p>Open <code class="docutils literal notranslate"><span class="pre">docs/_build/html/index.html</span></code>.</p></li>
-<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code> on Linux/macOS or <code class="docutils literal notranslate"><span class="pre">.\make.bat</span> <span class="pre">clean</span></code> on Windows. if required (e.g. after fixing erros) and building again</p></li>
-</ol>
-</div>
-</div>
-<div class="section" id="downloading-and-adding-example-data">
-<h2>Downloading and adding example data<a class="headerlink" href="#downloading-and-adding-example-data" title="Permalink to this headline"></a></h2>
+<div class="section" id="downloading-and-adding-example-data-recommended">
+<h2>Downloading and adding example data (Recommended)<a class="headerlink" href="#downloading-and-adding-example-data-recommended" title="Permalink to this headline"></a></h2>
 <p>The examples and tests need additional data to run. The MALA team provides a
 data repository, that can be obtained from
 <a class="reference external" href="https://github.com/mala-project/test-data">https://github.com/mala-project/test-data</a>. Please be sure to check out the
@@ -267,14 +220,29 @@ subject to ongoing development as well.</p>
 <p>Download data repository and check out correct tag.</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/mala-project/test-data ~/path/to/data/repo
 $ <span class="nb">cd</span> ~/path/to/data/repo
-$ git checkout v1.1.0
+$ git checkout v1.3.0
 </pre></div>
 </div>
-<p>Export</p>
+<p>Export the path to that repo by</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">export</span> <span class="nv">MALA_DATA_REPO</span><span class="o">=</span>~/path/to/data/repo
 </pre></div>
 </div>
-<p>pointing to that repo. This will be used by tests and examples.</p>
+<p>This will be used by tests and examples.</p>
+</div>
+<div class="section" id="build-documentation-locally-optional">
+<h2>Build documentation locally (Optional)<a class="headerlink" href="#build-documentation-locally-optional" title="Permalink to this headline"></a></h2>
+<p>Install the prerequisites (if you haven’t already during the MALA setup).</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -r docs/requirements.txt
+</pre></div>
+</div>
+<p>Afterwards, the documentation can be built via:</p>
+<ol class="arabic simple">
+<li><p>Change into <code class="docutils literal notranslate"><span class="pre">docs/</span></code> folder.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">apidocs</span></code> on Linux/macOS or <code class="docutils literal notranslate"><span class="pre">.\make.bat</span> <span class="pre">apidocs</span></code> on Windows.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span></code> on Linux/macOS or <code class="docutils literal notranslate"><span class="pre">.\make.bat</span> <span class="pre">html</span></code> on Windows. This creates a <code class="docutils literal notranslate"><span class="pre">_build</span></code> folder inside <code class="docutils literal notranslate"><span class="pre">docs</span></code>. You may also want to use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span> <span class="pre">SPHINXOPTS=&quot;-W&quot;</span></code> sometimes. This treats warnings as errors and stops the output at first occurence of an error (useful for debugging rST syntax).</p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">docs/_build/html/index.html</span></code>.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code> on Linux/macOS or <code class="docutils literal notranslate"><span class="pre">.\make.bat</span> <span class="pre">clean</span></code> on Windows. if required (e.g. after fixing erros) and building again</p></li>
+</ol>
 </div>
 </div>
 

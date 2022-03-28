@@ -71,7 +71,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mala.common.parallelizer</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Functions for safely printing in parallel.&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Functions for operating MALA in parallel.&quot;&quot;&quot;</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
@@ -177,7 +177,7 @@
 <span class="sd">    Get the local rank of the process.</span>
 
 <span class="sd">    This is the rank WITHIN a node. Useful when multiple GPUs are</span>
-<span class="sd">    used on one node.</span>
+<span class="sd">    used on one node. Always returns 0 in the serial case.</span>
 
 <span class="sd">    Originally obtained from:</span>
 <span class="sd">    https://github.com/hiwonjoon/ICML2019-TREX/blob/master/mujoco/learner/baselines/baselines/common/mpi_util.py</span>

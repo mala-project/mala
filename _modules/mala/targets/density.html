@@ -96,7 +96,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    params : mala.common.parameters.Parameters</span>
-<span class="sd">        Parameters used to create this TargetBase object.</span>
+<span class="sd">        Parameters used to create this Target object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">te_mutex</span> <span class="o">=</span> <span class="kc">False</span>
@@ -136,7 +136,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        density_data : numpy.array</span>
 <span class="sd">            Electronic density on the given grid. Has to either be of the form</span>
-<span class="sd">            gridpoints or gridx x gridy x gridz.</span>
+<span class="sd">            gridpoints or (gridx, gridy, gridz).</span>
 
 <span class="sd">        voxel_Bohr : ase.cell.Cell</span>
 <span class="sd">            Voxel to be used for grid intergation. Needs to reflect the</span>
@@ -237,7 +237,7 @@
 <span class="sd">        grid_dimensions : list</span>
 <span class="sd">            Provide a list of dimensions to be used in the transformation</span>
 <span class="sd">            1D -&gt; 3D. If None, MALA will attempt to use the values read with</span>
-<span class="sd">            TargetBase.read_additional_read_additional_calculation_data .</span>
+<span class="sd">            Target.read_additional_read_additional_calculation_data .</span>
 <span class="sd">            If that cannot be done, this function will raise an exception.</span>
 
 <span class="sd">        Returns</span>
@@ -260,7 +260,7 @@
 <div class="viewcode-block" id="Density.get_energy_contributions"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.get_energy_contributions">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_contributions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_data</span><span class="p">,</span> <span class="n">create_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                  <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                  <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract density based energy contributions from Quantum Espresso.</span>
 
 <span class="sd">        Done via a Fortran module accesible through python using f2py.</span>
@@ -292,10 +292,11 @@
 <span class="sd">        -------</span>
 <span class="sd">        energies : list</span>
 <span class="sd">            A list containing, in order, the following energy contributions:</span>
-<span class="sd">                - n*V_xc</span>
-<span class="sd">                - E_Hartree</span>
-<span class="sd">                - E_xc</span>
-<span class="sd">                - e_Ewald</span>
+
+<span class="sd">                - :math:`n\,V_\mathrm{xc}`</span>
+<span class="sd">                - :math:`E_\mathrm{H}`</span>
+<span class="sd">                - :math:`E_\mathrm{xc}`</span>
+<span class="sd">                - :math:`E_\mathrm{Ewald}`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">atoms_Angstrom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">atoms_Angstrom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
@@ -318,7 +319,7 @@
 <span class="sd">        This function uses an interface to QE. The atomic forces are</span>
 <span class="sd">        calculated via the Hellman-Feynman theorem, although only the local</span>
 <span class="sd">        contributions are calculated. The non-local contributions, as well</span>
-<span class="sd">        as the SCF correction (so anythin wavefunction dependent) is ignored.</span>
+<span class="sd">        as the SCF correction (so anything wavefunction dependent) are ignored.</span>
 <span class="sd">        Therefore, this function is best used for data that was created using</span>
 <span class="sd">        local pseudopotentials.</span>
 

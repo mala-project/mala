@@ -191,7 +191,7 @@
 
 <div class="viewcode-block" id="LazyLoadDatasetClustered.add_snapshot_to_dataset"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset_clustered.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.add_snapshot_to_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot_to_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">:</span> <span class="n">Snapshot</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Addsa snapshot to a DataSet.</span>
+<span class="sd">        Add a snapshot to a DataSet.</span>
 
 <span class="sd">        Afterwards, the DataSet can and will load this snapshot as needed.</span>
 
@@ -270,9 +270,9 @@
 
 <div class="viewcode-block" id="LazyLoadDatasetClustered.cluster_dataset"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset_clustered.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.cluster_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">cluster_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate clusters for dataset (individually per snapshot.</span>
+<span class="sd">        Calculate clusters for dataset (individually per snapshot).</span>
 
-<span class="sd">        IMPORTANT: Only call this function AFTER all snapshots were added.</span>
+<span class="sd">        .. important:: Only call this function AFTER all snapshots were added.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Clustered inputs holds the cluster a snapshot belongs to for every</span>
         <span class="c1"># input of that snapshot.</span>

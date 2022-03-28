@@ -103,7 +103,7 @@
 <dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_data_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_data_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Loads and scales dara. Can only process numpy arrays at the moment.</p>
+<p>Loads and scales data. Can only process numpy arrays at the moment.</p>
 <p>Data that is not in a numpy array can be converted using the DataConverter
 class.</p>
 <dl class="field-list simple">
@@ -138,8 +138,9 @@ supported.</p></li>
 supported.</p></li>
 <li><p><strong>calculation_output_file</strong> (<em>string</em>) – File with the output of the original snapshot calculation. This is
 only needed when testing multiple snapshots.</p></li>
-<li><p><strong>add_snapshot_as</strong> (<em>string</em>) – If “tr”, “va” or “te”, the snapshot will be added to the snapshot
-list as training, validation or testing snapshot, respectively.</p></li>
+<li><p><strong>add_snapshot_as</strong> (<em>string</em>) – Must be “tr”, “va” or “te”, the snapshot will be added to the
+snapshot list as training, validation or testing snapshot,
+respectively.</p></li>
 </ul>
 </dd>
 </dl>
@@ -285,7 +286,7 @@ into a (x*y*z,dim) array.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging">
 <span class="sig-name descname"><span class="pre">resize_snapshots_for_debugging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'test_Al_debug_2k_nr*.in'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'test_Al_debug_2k_nr*.out'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.resize_snapshots_for_debugging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.resize_snapshots_for_debugging" title="Permalink to this definition"></a></dt>
-<dd><p>Resize all snapsshot in the list.</p>
+<dd><p>Resize all snapshots in the list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

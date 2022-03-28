@@ -99,7 +99,7 @@
 <dt class="sig sig-object py" id="mala.descriptors.lammps_utils.extract_compute_np">
 <span class="sig-name descname"><span class="pre">extract_compute_np</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lmp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/lammps_utils.html#extract_compute_np"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.lammps_utils.extract_compute_np" title="Permalink to this definition"></a></dt>
 <dd><p>Convert a lammps compute to a numpy array.</p>
-<p>Assumes the compute returns a floating point numbers.
+<p>Assumes the compute returns floating point numbers.
 Note that the result is a view into the original memory.
 If the result type is 0 (scalar) then conversion to numpy is
 skipped and a python float is returned.</p>

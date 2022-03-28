@@ -16,6 +16,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -151,7 +152,9 @@ be used. Arguments are:</p>
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.entropy_multiplicator">
 <span class="sig-name descname"><span class="pre">entropy_multiplicator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#entropy_multiplicator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.entropy_multiplicator" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the multiplicator function for the entropy integral.</p>
-<p>Entropy integral is f(E)*log(f(E))+(1-f(E)*log(1-f(E))</p>
+<p>The Entropy integral is</p>
+<div class="math notranslate nohighlight">
+\[f(\epsilon)\log(f(\epsilon))+(1-f(\epsilon)\log(1-f(\epsilon))\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -180,7 +183,10 @@ energy_units.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.fermi_function">
 <span class="sig-name descname"><span class="pre">fermi_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#fermi_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.fermi_function" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the Fermi function f(E) = 1 / (1 + e^((E-E_F)/(k_B*T))).</p>
+<dd><p>Calculate the Fermi function.</p>
+<p>The Fermi function reads</p>
+<div class="math notranslate nohighlight">
+\[f(\epsilon) = 1/(1 + e^{\frac{\epsilon-\epsilon_F}{k_\mathrm{B} T}})\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -209,7 +215,10 @@ energy_units.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.fermi_function_eV">
 <span class="sig-name descname"><span class="pre">fermi_function_eV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_ev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#fermi_function_eV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.fermi_function_eV" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the Fermi function f(E) = 1 / (1 + e^((E-E_F)/(k_B*T))).</p>
+<dd><p>Calculate the Fermi function.</p>
+<p>The Fermi function reads</p>
+<div class="math notranslate nohighlight">
+\[f(\epsilon) = 1/(1 + e^{\frac{\epsilon-\epsilon_F}{k_\mathrm{B} T}})\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -233,19 +242,20 @@ energy_units.</p></li>
 <dd><p>Calculate multiple gaussians on the same grid, but with different centers.</p>
 <p>Gaussian functions are used as approximations to the delta in the
 Brillouin zone integration. Note that this defines Gaussians without the
-factor of 1/sqrt(2). All the Gaussians will have the same sigmas
-:param grid: Grid on which this Gaussian is defined.
-:type grid: np.array
-:param centers: Array of centers for the Gaussians
-:type centers: np.array
-:param sigma: Sigma value for the Gaussian.
-:type sigma: float</p>
+factor of <span class="math notranslate nohighlight">\(1/\sqrt{2}\)</span>. All the Gaussians will have the same sigmas.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>multiple_gaussians</strong> – multiple gaussians on the same grid, but with different centers.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> (<em>np.array</em>) – Grid on which this Gaussian is defined.</p></li>
+<li><p><strong>centers</strong> (<em>np.array</em>) – Array of centers for the Gaussians</p></li>
+<li><p><strong>sigma</strong> (<em>float</em>) – Sigma value for the Gaussian.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.array</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>multiple_gaussians</strong> – multiple gaussians on the same grid, but with different centers.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -253,7 +263,7 @@ factor of 1/sqrt(2). All the Gaussians will have the same sigmas
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.get_beta">
 <span class="sig-name descname"><span class="pre">get_beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#get_beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.get_beta" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate beta = 1 / (k_B * T).</p>
+<dd><p>Calculate <span class="math notranslate nohighlight">\(\beta = {(k_\mathrm{B}T)}^{-1}\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K</p>

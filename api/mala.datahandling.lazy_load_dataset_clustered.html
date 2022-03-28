@@ -130,7 +130,7 @@ snapshot.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.add_snapshot_to_dataset">
 <span class="sig-name descname"><span class="pre">add_snapshot_to_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot" title="mala.datahandling.snapshot.Snapshot"><span class="pre">mala.datahandling.snapshot.Snapshot</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered.add_snapshot_to_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.add_snapshot_to_dataset" title="Permalink to this definition"></a></dt>
-<dd><p>Addsa snapshot to a DataSet.</p>
+<dd><p>Add a snapshot to a DataSet.</p>
 <p>Afterwards, the DataSet can and will load this snapshot as needed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -142,8 +142,11 @@ snapshot.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.cluster_dataset">
 <span class="sig-name descname"><span class="pre">cluster_dataset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/lazy_load_dataset_clustered.html#LazyLoadDatasetClustered.cluster_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.cluster_dataset" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate clusters for dataset (individually per snapshot.</p>
-<p>IMPORTANT: Only call this function AFTER all snapshots were added.</p>
+<dd><p>Calculate clusters for dataset (individually per snapshot).</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Only call this function AFTER all snapshots were added.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">

@@ -95,7 +95,7 @@
              
   <div class="section" id="module-mala.common.parallelizer">
 <span id="parallelizer"></span><h1>parallelizer<a class="headerlink" href="#module-mala.common.parallelizer" title="Permalink to this headline"></a></h1>
-<p>Functions for safely printing in parallel.</p>
+<p>Functions for operating MALA in parallel.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.common.parallelizer.barrier">
 <span class="sig-name descname"><span class="pre">barrier</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#barrier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.barrier" title="Permalink to this definition"></a></dt>
@@ -121,7 +121,7 @@
 <span class="sig-name descname"><span class="pre">get_local_rank</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#get_local_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.get_local_rank" title="Permalink to this definition"></a></dt>
 <dd><p>Get the local rank of the process.</p>
 <p>This is the rank WITHIN a node. Useful when multiple GPUs are
-used on one node.</p>
+used on one node. Always returns 0 in the serial case.</p>
 <p>Originally obtained from:
 <a class="reference external" href="https://github.com/hiwonjoon/ICML2019-TREX/blob/master/mujoco/learner/baselines/baselines/common/mpi_util.py">https://github.com/hiwonjoon/ICML2019-TREX/blob/master/mujoco/learner/baselines/baselines/common/mpi_util.py</a></p>
 <p>License:

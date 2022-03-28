@@ -16,6 +16,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -106,7 +107,7 @@
 <p>Postprocessing / parsing functions for the electronic density.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this TargetBase object.</p>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this Target object.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -133,7 +134,7 @@
 <p>This function uses an interface to QE. The atomic forces are
 calculated via the Hellman-Feynman theorem, although only the local
 contributions are calculated. The non-local contributions, as well
-as the SCF correction (so anythin wavefunction dependent) is ignored.
+as the SCF correction (so anything wavefunction dependent) are ignored.
 Therefore, this function is best used for data that was created using
 local pseudopotentials.</p>
 <dl class="field-list simple">
@@ -175,7 +176,7 @@ depending on the other parameters.</p></li>
 a 3D array (gridsize -&gt; gridx * gridy * gridz)</p></li>
 <li><p><strong>grid_dimensions</strong> (<em>list</em>) – Provide a list of dimensions to be used in the transformation
 1D -&gt; 3D. If None, MALA will attempt to use the values read with
-TargetBase.read_additional_read_additional_calculation_data .
+Target.read_additional_read_additional_calculation_data .
 If that cannot be done, this function will raise an exception.</p></li>
 </ul>
 </dd>
@@ -211,15 +212,15 @@ interface. If None (recommended), MALA will create one.</p></li>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><p><strong>energies</strong> –</p>
-<dl class="simple">
-<dt>A list containing, in order, the following energy contributions:</dt><dd><ul class="simple">
-<li><p>n*V_xc</p></li>
-<li><p>E_Hartree</p></li>
-<li><p>E_xc</p></li>
-<li><p>e_Ewald</p></li>
+<p>A list containing, in order, the following energy contributions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(n\,V_\mathrm{xc}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(E_\mathrm{H}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(E_\mathrm{xc}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(E_\mathrm{Ewald}\)</span></p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </p>
 </dd>
 <dt class="field-odd">Return type</dt>
@@ -242,7 +243,7 @@ interface. If None (recommended), MALA will create one.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>density_data</strong> (<em>numpy.array</em>) – Electronic density on the given grid. Has to either be of the form
-gridpoints or gridx x gridy x gridz.</p></li>
+gridpoints or (gridx, gridy, gridz).</p></li>
 <li><p><strong>voxel_Bohr</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation. Needs to reflect the
 symmetry of the simulation cell. In Bohr.</p></li>
 <li><p><strong>integration_method</strong> (<em>str</em>) – <p>Integration method used to integrate density on the grid.

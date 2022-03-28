@@ -16,6 +16,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -233,8 +234,9 @@ Currently supported:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_atomic_forces">
 <span class="sig-name descname"><span class="pre">get_atomic_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dE_dd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_data_handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_atomic_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_atomic_forces" title="Permalink to this definition"></a></dt>
-<dd><p>Get the atomic forces (dE/dR), currently work in progress.</p>
-<p>Will only give the dd_dB.</p>
+<dd><p>Get the atomic forces, currently work in progress.</p>
+<p>Will eventually give <span class="math notranslate nohighlight">\(\frac{dE}{d \underline{\boldsymbol{R}}}\)</span>.
+Will currently only give <span class="math notranslate nohighlight">\(\frac{dd}{dB}\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -476,7 +478,7 @@ symmetry of the simulation cell. In Bohr.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>fermi_energy_self_consistent</strong> – E_F in eV.</p>
+<dd class="field-even"><p><strong>fermi_energy_self_consistent</strong> – <span class="math notranslate nohighlight">\(\epsilon_F\)</span> in eV.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
@@ -553,7 +555,8 @@ alongside the total energy. The default is False.</p></li>
 <li><p><strong>file_name_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files.</p></li>
 <li><p><strong>directory</strong> (<em>string</em>) – Directory containing the LDOS .cube files.</p></li>
 <li><p><strong>units</strong> (<em>string</em>) – Units the LDOS is saved in.</p></li>
-<li><p><strong>use_memmap</strong> (<em>string</em>) – If not None, a memory mapped file will be used to gather the LDOS.
+<li><p><strong>use_memmap</strong> (<em>string</em>) – If not None, a memory mapped file with this name will be used to
+gather the LDOS.
 If run in MPI parallel mode, such a file MUST be provided.</p></li>
 </ul>
 </dd>

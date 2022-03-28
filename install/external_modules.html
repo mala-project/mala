@@ -46,11 +46,7 @@
 <li class="toctree-l2"><a class="reference internal" href="README.html">Installation of MALA</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">External modules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#quantumespresso-total-energy-module">QuantumESPRESSO (total energy module)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#lammps-descriptor-calculation">LAMMPS (descriptor calculation)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#installing-lammps">Installing LAMMPS</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#make-the-lammps-libray-visible">Make the LAMMPS libray visible</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#lammps-descriptor-calculation">LAMMPS (descriptor calculation)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="on_cluster.html">Using MALA on HPC systems</a></li>
@@ -100,44 +96,24 @@ training or inference.</p>
 You can find it at
 <a class="reference external" href="https://gitlab.com/casus/q-e/-/tree/tem_original_development">https://gitlab.com/casus/q-e/-/tree/tem_original_development</a> after
 gaining access from the MALA development team. After checking out this
-fork and branch, go to <code class="docutils literal notranslate"><span class="pre">total_energy_module/</span></code> amd follow the installation
+fork and branch, go to <code class="docutils literal notranslate"><span class="pre">total_energy_module/</span></code> and follow the installation
 instructions described therein.</p>
 </div>
 <div class="section" id="lammps-descriptor-calculation">
 <h2>LAMMPS (descriptor calculation)<a class="headerlink" href="#lammps-descriptor-calculation" title="Permalink to this headline"></a></h2>
-<div class="section" id="installing-lammps">
-<h3>Installing LAMMPS<a class="headerlink" href="#installing-lammps" title="Permalink to this headline"></a></h3>
 <ul class="simple">
-<li><p>checkout <a class="reference external" href="https://github.com/athomps/lammps/tree/compute-grid-new">https://github.com/athomps/lammps/tree/compute-grid-new</a></p></li>
+<li><p>Checkout <a class="reference external" href="https://github.com/athomps/lammps/tree/compute-grid-new">https://github.com/athomps/lammps/tree/compute-grid-new</a></p></li>
 <li><p>Make sure the compute-grid tree is checked out!</p></li>
-<li><dl class="simple">
-<dt>Compile the LAMMPS shared library with the SNAP package installed</dt><dd><ul>
+<li><p>Compile the LAMMPS shared library with the SNAP package installed</p>
+<ul>
 <li><p>cd into <code class="docutils literal notranslate"><span class="pre">/path/to/lammps/src</span></code> folder of LAMMPS</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yes-ml-snap</span></code></p></li>
 <li><p>(optional: check with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">ps</span></code> that <code class="docutils literal notranslate"><span class="pre">ml-snap</span></code> was correctly added)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">mode=shlib</span> <span class="pre">mpi</span></code></p></li>
 </ul>
-</dd>
-</dl>
 </li>
+<li><p>Make the LAMMPS library visible via <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">install.py</span> <span class="pre">-p</span> <span class="pre">lammps</span> <span class="pre">-l</span> <span class="pre">../src/liblammps.so</span> <span class="pre">-v</span> <span class="pre">../src/version.h</span></code></p></li>
 </ul>
-</div>
-<div class="section" id="make-the-lammps-libray-visible">
-<h3>Make the LAMMPS libray visible<a class="headerlink" href="#make-the-lammps-libray-visible" title="Permalink to this headline"></a></h3>
-<div class="section" id="method-1-links-not-recommended">
-<h4>Method 1 (links, not recommended)<a class="headerlink" href="#method-1-links-not-recommended" title="Permalink to this headline"></a></h4>
-<ul class="simple">
-<li><p>Make the shared library visible e.g. <code class="docutils literal notranslate"><span class="pre">ln</span> <span class="pre">-s</span> <span class="pre">$LAMMPS/src/liblammps.so</span> <span class="pre">/path/to/repo/src/datahandling</span></code></p></li>
-<li><p>Make the LAMMPS <code class="docutils literal notranslate"><span class="pre">lammps.py</span></code> visible e.g. <code class="docutils literal notranslate"><span class="pre">ln</span> <span class="pre">-s</span> <span class="pre">$LAMMPS/python/lammps.py</span> <span class="pre">/path/to/repo/src/datahandling</span></code></p></li>
-</ul>
-</div>
-<div class="section" id="method-2-package-recommended">
-<h4>Method 2 (package, recommended)<a class="headerlink" href="#method-2-package-recommended" title="Permalink to this headline"></a></h4>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">install.py</span> <span class="pre">-p</span> <span class="pre">lammps</span> <span class="pre">-l</span> <span class="pre">../src/liblammps.so</span> <span class="pre">-v</span> <span class="pre">../src/version.h</span></code></p></li>
-</ul>
-</div>
-</div>
 </div>
 </div>
 

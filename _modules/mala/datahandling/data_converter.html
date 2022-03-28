@@ -101,7 +101,7 @@
 <span class="sd">    target_calculator : mala.targets.target.Target</span>
 <span class="sd">        Target calculator used for parsing/converting target data. If None,</span>
 <span class="sd">        the target calculator will be created by this object using the</span>
-<span class="sd">        parameters provided.</span>
+<span class="sd">        parameters provided. Default: None</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -141,10 +141,10 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        qe_out_file : string</span>
-<span class="sd">            Name of Quantum Espresso output file for snapshot.</span>
+<span class="sd">            Name of Quantum Espresso output file for this snapshot.</span>
 
 <span class="sd">        qe_out_directory : string</span>
-<span class="sd">            Path to Quantum Espresso output file for snapshot.</span>
+<span class="sd">            Path to Quantum Espresso output file for this snapshot.</span>
 
 <span class="sd">        cube_naming_scheme : string</span>
 <span class="sd">            Naming scheme for the LDOS .cube files.</span>
@@ -181,7 +181,8 @@
 <span class="sd">            Position of the desired snapshot in the snapshot list.</span>
 
 <span class="sd">        use_memmap : string</span>
-<span class="sd">            If not None, a memory mapped file will be used to gather the LDOS.</span>
+<span class="sd">            If not None, a memory mapped file with this name will be used to</span>
+<span class="sd">            gather the LDOS.</span>
 <span class="sd">            If run in MPI parallel mode, such a file MUST be provided.</span>
 
 <span class="sd">        input_path : string</span>

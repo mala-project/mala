@@ -59,7 +59,7 @@ Targets
 In comparison to the ``Descriptor`` objects these objects are more common
 in workflows, as they can be used for a variety of physical calculations.
 They can also be used to parse data from ab-initio simulations
-E.g. a script like this:
+E.g. in a script like this:
 
       .. code-block:: python
 
@@ -75,7 +75,8 @@ E.g. a script like this:
             ldos = mala.LDOS(parameters)
 
             # Use the LDOS object to calculate the band energy from LDOS data.
-            band_energy = ldos.read_from_cube(...)
+            ldos_data = ldos.read_from_cube(...)
+            band_energy = ldos.get_band_energy(ldos_data)
 
 
 Data Scaling

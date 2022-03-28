@@ -112,14 +112,15 @@
 <dt class="sig sig-object py" id="mala.network.predictor.Predictor">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Predictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/predictor.html#Predictor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.predictor.Predictor" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="mala.network.runner.html#mala.network.runner.Runner" title="mala.network.runner.Runner"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.runner.Runner</span></code></a></p>
-<p>A class for testing a neural network.</p>
-<p>It enables easy inference throughout a test set.</p>
+<p>A class for running predictions using a neural network.</p>
+<p>It enables production-level inference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this Tester object.</p></li>
-<li><p><strong>network</strong> (<a class="reference internal" href="mala.network.network.html#mala.network.network.Network" title="mala.network.network.Network"><em>mala.network.network.Network</em></a>) – Network which is being tested.</p></li>
-<li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the test data.</p></li>
+<li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this Predictor object.</p></li>
+<li><p><strong>network</strong> (<a class="reference internal" href="mala.network.network.html#mala.network.network.Network" title="mala.network.network.Network"><em>mala.network.network.Network</em></a>) – Network used for predictions.</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler, in this case not directly holding data, but serving
+as an interface to Target and Descriptor objects.</p></li>
 </ul>
 </dd>
 </dl>

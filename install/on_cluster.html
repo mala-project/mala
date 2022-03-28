@@ -111,27 +111,15 @@ Ridge national laboratories.</p>
 <div class="section" id="hemera5-hzdr">
 <h3>Hemera5  (HZDR)<a class="headerlink" href="#hemera5-hzdr" title="Permalink to this headline"></a></h3>
 <ul>
-<li><p>Tested by: Lenz Fiedler, 16.04.2021</p></li>
-<li><p>Scope of test: mala, torch, horovod; I ommited LAMMPS and QE for this test</p></li>
-<li><dl>
-<dt>Test log:</dt><dd><ol class="arabic">
+<li><p>Tested by: Lenz Fiedler, 23.03.2022</p></li>
+<li><p>Scope of test: mala, torch</p></li>
+<li><p>Test log:</p>
+<blockquote>
+<div><ol class="arabic">
 <li><p>Create a conda environment:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">--name</span> <span class="pre">mala_train</span> <span class="pre">python=3.8.5</span></code></p></li>
-</ul>
-</div></blockquote>
-</li>
-<li><p>Installing requirements:</p>
-<blockquote>
-<div><ul class="simple">
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code></dt><dd><ul>
-<li><p>I got “Requirement already satisfied: oapackage in /home/fiedle09/.local/lib/python3.8/site-packages (from -r requirements.txt (line 9)) (2.6.8)” - I don’t know how I got to this point, but the experience might differ for other people</p></li>
-</ul>
-</dd>
-</dl>
-</li>
 </ul>
 </div></blockquote>
 </li>
@@ -143,22 +131,15 @@ Ridge national laboratories.</p>
 </ul>
 </div></blockquote>
 </li>
-<li><p>Horovod needs CMAKE to work, so we need to load it along with the other dependencies required for it:</p>
+<li><p>Then install <cite>mala</cite> via</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">gcc/7.3.0</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">cmake</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code></p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p>Then I install horovod as</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">horovod[pytorch]</span></code></p>
-</div></blockquote>
-</li>
 </ol>
-</dd>
-</dl>
+</div></blockquote>
 </li>
 </ul>
 </div>
@@ -166,9 +147,10 @@ Ridge national laboratories.</p>
 <h3>Summit cluster (ORNL)<a class="headerlink" href="#summit-cluster-ornl" title="Permalink to this headline"></a></h3>
 <ul>
 <li><p>Tested by: Vladyslav Oles, 16.04.2021</p></li>
-<li><p>Scope of test: mala, torch, horovod; I ommited LAMMPS and QE for this test</p></li>
-<li><dl>
-<dt>Test log:</dt><dd><ol class="arabic">
+<li><p>Scope of test: mala, torch, horovod, oapackage</p></li>
+<li><p>Test log:</p>
+<blockquote>
+<div><ol class="arabic">
 <li><p>Install a current version of SWIG (instead of Summit’s 2.0.10) as per <a class="reference external" href="http://www.swig.org/svn.html">http://www.swig.org/svn.html</a>:</p>
 <blockquote>
 <div><ul class="simple">
@@ -196,13 +178,12 @@ Ridge national laboratories.</p>
 <li><p>Install MALA (from the directory with cloned MALA repository):</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> (note that it will install required packages for MALA listed in <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code></p></li>
 </ul>
 </div></blockquote>
 </li>
 </ol>
-</dd>
-</dl>
+</div></blockquote>
 </li>
 </ul>
 </div>

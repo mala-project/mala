@@ -188,7 +188,8 @@
 <span class="sd">            Units the LDOS is saved in.</span>
 
 <span class="sd">        use_memmap : string</span>
-<span class="sd">            If not None, a memory mapped file will be used to gather the LDOS.</span>
+<span class="sd">            If not None, a memory mapped file with this name will be used to</span>
+<span class="sd">            gather the LDOS.</span>
 <span class="sd">            If run in MPI parallel mode, such a file MUST be provided.</span>
 
 <span class="sd">        Returns</span>
@@ -575,7 +576,7 @@
                                             <span class="s2">&quot;summation&quot;</span><span class="p">,</span>
                                             <span class="n">energy_integration_method</span><span class="o">=</span>
                                             <span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the self-consistent Fermi energy.</span>
 
 <span class="sd">        &quot;Self-consistent&quot; does not mean self-consistent in the DFT sense,</span>
@@ -614,7 +615,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        fermi_energy_self_consistent : float</span>
-<span class="sd">            E_F in eV.</span>
+<span class="sd">            :math:`\epsilon_F` in eV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># The Fermi energy is calculated using the DOS.</span>
         <span class="k">if</span> <span class="n">voxel_Bohr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -692,7 +693,7 @@
             <span class="n">ldos_data_used</span> <span class="o">=</span> <span class="n">ldos_data</span>
             <span class="k">pass</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="c1"># We have the LDOS as gridx x gridy x gridz x energygrid,</span>
+            <span class="c1"># We have the LDOS as (gridx, gridy, gridz, energygrid),</span>
             <span class="c1"># so some reshaping needs to be done.</span>
             <span class="n">ldos_data_used</span> <span class="o">=</span> <span class="n">ldos_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
@@ -778,7 +779,7 @@
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;If using a 2D LDOS array, you can only &quot;</span>
                                 <span class="s2">&quot;use summation as integration method.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># We have the LDOS as gridx x gridy x gridz x energygrid, no</span>
+        <span class="c1"># We have the LDOS as (gridx, gridy, gridz, energygrid), no</span>
         <span class="c1"># further operation is necessary.</span>
         <span class="n">dos_values</span> <span class="o">=</span> <span class="n">ldos_data</span>  <span class="c1"># .copy()</span>
 
@@ -847,10 +848,11 @@
 
 <div class="viewcode-block" id="LDOS.get_atomic_forces"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_atomic_forces">[docs]</a>    <span class="k">def</span> <span class="nf">get_atomic_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">dE_dd</span><span class="p">,</span> <span class="n">used_data_handler</span><span class="p">,</span>
                           <span class="n">snapshot_number</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the atomic forces (dE/dR), currently work in progress.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the atomic forces, currently work in progress.</span>
 
-<span class="sd">        Will only give the dd_dB.</span>
+<span class="sd">        Will eventually give :math:`\frac{dE}{d \underline{\boldsymbol{R}}}`.</span>
+<span class="sd">        Will currently only give :math:`\frac{dd}{dB}`.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>

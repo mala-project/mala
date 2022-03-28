@@ -100,7 +100,8 @@ come directly from a DFT calculation. Basic postprocessing can be done via</p>
 <span class="n">ldos</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">LDOS</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
 <span class="c1"># Use the LDOS object to calculate the band energy from LDOS data.</span>
-<span class="n">band_energy</span> <span class="o">=</span> <span class="n">ldos</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">ldos_data</span> <span class="o">=</span> <span class="n">ldos</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">band_energy</span> <span class="o">=</span> <span class="n">ldos</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)</span>
 </pre></div>
 </div>
 </div></blockquote>

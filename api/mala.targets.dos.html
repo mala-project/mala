@@ -16,6 +16,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -316,7 +317,7 @@ from how this quantity is calculated.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>fermi_energy_self_consistent</strong> – E_F in eV.</p>
+<dd class="field-even"><p><strong>fermi_energy_self_consistent</strong> – <span class="math notranslate nohighlight">\(\epsilon_F\)</span> in eV.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
@@ -351,7 +352,8 @@ qe.dos.txt here. QE saves the DOS in 1/eV.</p>
 <span class="sig-name descname"><span class="pre">read_from_qe_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_to_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smearing_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_qe_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_qe_out" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the DOS from a Quantum Espresso DFT output file.</p>
 <p>The DOS will be read calculated via the eigenvalues and the equation</p>
-<p>D(E) = sum_i sum_k w_k delta(E-epsilon_{ik})</p>
+<div class="math notranslate nohighlight">
+\[D(E) = \sum_i \sum_k w_k \delta(\epsilon-\epsilon_{ik})\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

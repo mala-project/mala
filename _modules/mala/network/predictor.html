@@ -87,20 +87,21 @@
 
 <div class="viewcode-block" id="Predictor"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor">[docs]</a><span class="k">class</span> <span class="nc">Predictor</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for testing a neural network.</span>
+<span class="sd">    A class for running predictions using a neural network.</span>
 
-<span class="sd">    It enables easy inference throughout a test set.</span>
+<span class="sd">    It enables production-level inference.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    params : mala.common.parametes.Parameters</span>
-<span class="sd">        Parameters used to create this Tester object.</span>
+<span class="sd">        Parameters used to create this Predictor object.</span>
 
 <span class="sd">    network : mala.network.network.Network</span>
-<span class="sd">        Network which is being tested.</span>
+<span class="sd">        Network used for predictions.</span>
 
 <span class="sd">    data : mala.datahandling.data_handler.DataHandler</span>
-<span class="sd">        DataHandler holding the test data.</span>
+<span class="sd">        DataHandler, in this case not directly holding data, but serving</span>
+<span class="sd">        as an interface to Target and Descriptor objects.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>

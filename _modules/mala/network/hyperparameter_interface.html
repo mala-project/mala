@@ -87,8 +87,9 @@
 <span class="sd">    hotype : string</span>
 <span class="sd">        Type of hyperparameter. Currently supported:</span>
 
-<span class="sd">            - optuna: Optuna style hyperparameter, for HyperOptOptuna.</span>
+<span class="sd">            - optuna: Hyperparameter for HyperOptOptuna.</span>
 <span class="sd">            - oat: Hyperparameter for HyperOptOAT.</span>
+<span class="sd">            - naswot: Hyperparameter for HyperOptNASWOT.</span>
 
 <span class="sd">    opttype : string</span>
 <span class="sd">        Datatype of the hyperparameter. Follows optunas naming convetions.</span>
@@ -118,7 +119,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    hyperparameter : HyperparameterOptuna or HyperparameterOAT</span>
+<span class="sd">    hyperparameter : HyperparameterOptuna or HyperparameterOAT or HyperparameterNASWOT</span>
 <span class="sd">        Hyperparameter in desired format.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">hparam</span> <span class="o">=</span> <span class="kc">None</span>

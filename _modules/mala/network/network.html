@@ -91,7 +91,12 @@
 
 
 <div class="viewcode-block" id="Network"><a class="viewcode-back" href="../../../api/mala.network.network.html#mala.network.network.Network">[docs]</a><span class="k">class</span> <span class="nc">Network</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Central network class for this framework, based on pytorch.nn.Module.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Central network class for this framework, based on pytorch.nn.Module.</span>
+
+<span class="sd">    The correct type of neural network will automatically be instantiated</span>
+<span class="sd">    by this class if possible. You can also instantiate the desired</span>
+<span class="sd">    network directly by calling upon the subclass.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

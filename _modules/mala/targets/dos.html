@@ -201,12 +201,12 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">return_dos_values</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DOS.read_from_qe_out"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_out">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smearing_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the DOS from a Quantum Espresso DFT output file.</span>
 
 <span class="sd">        The DOS will be read calculated via the eigenvalues and the equation</span>
 
-<span class="sd">        D(E) = sum_i sum_k w_k delta(E-epsilon_{ik})</span>
+<span class="sd">        .. math:: D(E) = \sum_i \sum_k w_k \delta(\epsilon-\epsilon_{ik})</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -385,7 +385,7 @@
 <div class="viewcode-block" id="DOS.get_self_consistent_fermi_energy_ev"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy_ev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">,</span>
                                             <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                             <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the self-consistent Fermi energy.</span>
 
 <span class="sd">        &quot;Self-consistent&quot; does not mean self-consistent in the DFT sense,</span>
@@ -411,7 +411,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        fermi_energy_self_consistent : float</span>
-<span class="sd">            E_F in eV.</span>
+<span class="sd">            :math:`\epsilon_F` in eV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Parse the parameters.</span>
         <span class="k">if</span> <span class="n">temperature_K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
