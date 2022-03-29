@@ -185,7 +185,8 @@ class DataConverter:
             return tmp_input, tmp_output
 
     def convert_snapshots(self, save_path="./",
-                          naming_scheme="ELEM_snapshot*", starts_at=0):
+                          naming_scheme="ELEM_snapshot*", starts_at=0,
+                          file_based_communication=False):
         """
         Convert the snapshots in the list to numpy arrays.
 
@@ -206,6 +207,12 @@ class DataConverter:
             consistency in naming when converting e.g. only a certain portion
             of all available snapshots. If set to e.g. 4,
             the first snapshot generated will be called snapshot4.
+
+        file_based_communication : bool
+            If True, the LDOS will be gathered using a file based mechanism.
+            This is drastically less performant then using MPI, but may be
+            necessary when memory is scarce. Default is False, i.e., the faster
+            MPI version will be used.
         """
         for i in range(0, len(self.__snapshots_to_convert)):
             snapshot_number = i + starts_at
@@ -214,7 +221,8 @@ class DataConverter:
 
             # A memory mapped file is used as buffer for distributed cases.
             memmap = None
-            if self.parameters._configuration["mpi"]:
+            if self.parameters._configuration["mpi"] and \
+                    file_based_communication:
                 memmap = os.path.join(save_path, snapshot_name +
                                       ".out.npy_temp")
 
@@ -227,5 +235,6 @@ class DataConverter:
                      min_verbosity=0)
 
             if get_rank() == 0:
-                if self.parameters._configuration["mpi"]:
+                if self.parameters._configuration["mpi"] \
+                        and file_based_communication:
                     os.remove(memmap)
