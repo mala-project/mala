@@ -21,12 +21,12 @@ except ModuleNotFoundError:
     pass
 
 from mala.descriptors.lammps_utils import *
-from mala.descriptors.descriptor_base import DescriptorBase
+from mala.descriptors.descriptor import Descriptor
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier
 
 
-class SNAP(DescriptorBase):
+class SNAP(Descriptor):
     """Class for calculation and parsing of SNAP descriptors.
 
     Parameters
@@ -145,7 +145,7 @@ class SNAP(DescriptorBase):
         Parameters
         ----------
         atoms : ase.Atoms
-            Atoms object holding the atomic configuration.l
+            Atoms object holding the atomic configuration.
 
         grid_dimensions : list
             Grid dimensions to be used, in the format [x,y,z].
@@ -171,7 +171,7 @@ class SNAP(DescriptorBase):
         This function removes the extra 3 components that come from parallel
         processing.
         I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
-        97 (in parallel mode), and this function returns, as to retain the
+        97 (in parallel mode), and this function returns 94, as to retain the
         3 x,y,z ones we by default include.
 
         Parameters

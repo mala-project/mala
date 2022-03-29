@@ -1,4 +1,4 @@
-"""Snapshot class."""
+"""Represents an entire atomic snapshot (including descriptor/target data)."""
 
 from mala.common.json_serializable import JSONSerializable
 

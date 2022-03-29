@@ -10,8 +10,8 @@ from mala.network.hyperparameter_interface import HyperparameterInterface
 from mala.network.objective_base import ObjectiveBase
 
 
-class HyperOptBase(ABC):
-    """Base class for hyperparameter optimizater.
+class HyperOpt(ABC):
+    """Base class for hyperparameter optimizer.
 
     Parameters
     ----------
@@ -24,6 +24,42 @@ class HyperOptBase(ABC):
     use_pkl_checkpoints : bool
         If true, .pkl checkpoints will be created.
     """
+
+    def __new__(cls, params: Parameters, data, use_pkl_checkpoints=False):
+        """
+        Create a HyperOpt instance.
+
+        The correct type of hyperparameter optimizer will automatically be
+        instantiated by this class if possible. You can also instantiate
+        the desired hyperparameter optimizer directly by calling upon the
+        subclass.
+
+        Parameters
+        ----------
+        params : mala.common.parametes.Parameters
+            Parameters used to create this hyperparameter optimizer.
+        """
+        hoptimizer = None
+
+        # Check if we're accessing through base class.
+        # If not, we need to return the correct object directly.
+        if cls == HyperOpt:
+            if params.hyperparameters.hyper_opt_method == "optuna":
+                from mala.network.hyper_opt_optuna import HyperOptOptuna
+                hoptimizer = super(HyperOpt, HyperOptOptuna).__new__(HyperOptOptuna)
+            if params.hyperparameters.hyper_opt_method == "oat":
+                from mala.network.hyper_opt_oat import HyperOptOAT
+                hoptimizer = super(HyperOpt, HyperOptOAT).__new__(HyperOptOAT)
+            if params.hyperparameters.hyper_opt_method == "naswot":
+                from mala.network.hyper_opt_naswot import HyperOptNASWOT
+                hoptimizer = super(HyperOpt, HyperOptNASWOT).__new__(HyperOptNASWOT)
+
+            if hoptimizer is None:
+                raise Exception("Unknown hyperparameter optimizer requested.")
+        else:
+            hoptimizer = super(HyperOpt, cls).__new__(cls)
+
+        return hoptimizer
 
     def __init__(self, params: Parameters, data, use_pkl_checkpoints=False):
         self.params: Parameters = params
@@ -39,7 +75,8 @@ class HyperOptBase(ABC):
         Parameters
         ----------
         opttype : string
-            Datatype of the hyperparameter. Follows optunas naming convetions.
+            Datatype of the hyperparameter. Follows optuna's naming
+            conventions.
             In principle supported are:
 
                 - float

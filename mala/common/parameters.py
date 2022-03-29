@@ -232,7 +232,7 @@ class ParametersNetwork(ParametersBase):
 
     dropout: float
         Dropout rate for transformer net
-        0.0 <= dropout <=1.0
+        0.0 ≤ dropout ≤ 1.0
         Default: 0.0
 
     num_heads: int
@@ -248,13 +248,16 @@ class ParametersNetwork(ParametersBase):
         self.layer_activations = ["Sigmoid"]
         self.loss_function_type = "mse"
 
-        self.num_hidden_layers = None
-        #for lstm/gru
+        # for LSTM/Gru + Transformer
+        self.num_hidden_layers = 1
+
+        # for LSTM/Gru
         self.no_hidden_state = False
         self.bidirection = False
+
         # for transformer net
-        self.dropout = 0.0
-        self.num_heads= None
+        self.dropout = 0.1
+        self.num_heads = 10
 
 class ParametersDescriptors(ParametersBase):
     """
@@ -322,7 +325,54 @@ class ParametersTargets(ParametersBase):
     ldos_gridoffset_ev: float
         Lowest energy value on the (L)DOS energy grid [eV].
 
+    pseudopotential_path : string
+        Path at which pseudopotentials are located (for TEM).
 
+    rdf_parameters : dict
+        Parameters for calculating the radial distribution function(RDF).
+        The RDF can directly be calculated via a function call, but if it is
+        calculated e.g. during a MD or MC run, these parameters will control
+        how. The following keywords are recognized:
+
+        number_of_bins : int
+            Number of bins used to create the histogram.
+
+        rMax : float
+            Radius up to which to calculate the RDF. None by default; this
+            is the suggested behavior, as MALA will then on its own calculate
+            the maximum radius up until which the calculation of the RDF is
+            indisputably physically meaningful. Larger radii may be specified,
+            e.g. for a Fourier transformation to calculate the static structure
+            factor.
+
+    tpcf_parameters : dict
+        Parameters for calculating the three particle correlation function
+        (TPCF).
+        The TPCF can directly be calculated via a function call, but if it is
+        calculated e.g. during a MD or MC run, these parameters will control
+        how. The following keywords are recognized:
+
+        number_of_bins : int
+            Number of bins used to create the histogram.
+
+        rMax : float
+            Radius up to which to calculate the TPCF. If None, MALA will
+            determine the maximum radius for which the TPCF is indisputably
+            defined. Be advised - this may come at increased computational
+            cost.
+
+    ssf_parameters : dict
+        Parameters for calculating the static structure factor
+        (SSF).
+        The SSF can directly be calculated via a function call, but if it is
+        calculated e.g. during a MD or MC run, these parameters will control
+        how. The following keywords are recognized:
+
+        number_of_bins : int
+            Number of bins used to create the histogram.
+
+        kMax : float
+            Maximum wave vector up to which to calculate the SSF.
     """
 
     def __init__(self):
@@ -333,10 +383,18 @@ class ParametersTargets(ParametersBase):
         self.ldos_gridoffset_ev = 0
         self.restrict_targets = "zero_out_negative"
         self.pseudopotential_path = None
+        self.rdf_parameters = {"number_of_bins": 500, "rMax": None}
+        self.tpcf_parameters = {"number_of_bins": 20, "rMax": 5.0}
+        self.ssf_parameters = {"number_of_bins": 100, "kMax": 12.0}
 
     @property
     def restrict_targets(self):
-        """Control if and how targets are restricted to physical values.."""
+        """
+        Control if and how targets are restricted to physical values.
+
+        Can be "zero_out_negative", i.e. all negative values are set to zero
+        or "absolute_values", i.e. all negative values are multiplied by -1.
+        """
         return self._restrict_targets
 
     @restrict_targets.setter
@@ -385,12 +443,12 @@ class ParametersData(ParametersBase):
 
             - "None": No normalization is applied.
             - "standard": Standardization (Scale to mean 0,
-                standard deviation 1)
+              standard deviation 1)
             - "normal": Min-Max scaling (Scale to be in range 0...1)
             - "feature-wise-standard": Row Standardization (Scale to mean 0,
-                standard deviation 1)
+              standard deviation 1)
             - "feature-wise-normal": Row Min-Max scaling (Scale to be in
-                range 0...1)
+              range 0...1)
 
     use_lazy_loading : bool
         If True, data is lazily loaded, i.e. only the snapshots that are
@@ -889,7 +947,7 @@ class Parameters:
 
         The following options are available:
 
-            - 1: "low", only essential output will be printed
+            - 0: "low", only essential output will be printed
             - 1: "medium", most diagnostic output will be printed. (Default)
             - 2: "high", all information will be printed.
 

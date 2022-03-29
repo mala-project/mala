@@ -32,7 +32,7 @@ def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None):
     """
     Convert a lammps compute to a numpy array.
 
-    Assumes the compute returns a floating point numbers.
+    Assumes the compute returns floating point numbers.
     Note that the result is a view into the original memory.
     If the result type is 0 (scalar) then conversion to numpy is
     skipped and a python float is returned.

@@ -46,7 +46,7 @@ class TestTensorMemory:
 
         # Check if tensor and array are still the same.
         assert np.isclose(torch.sum(torch_tensor),
-                          torch.sum(loaded_array[0:index1]),
+                          np.sum(loaded_array[0:index1]),
                           accuracy)
 
         # Simulate data operation.
@@ -55,7 +55,7 @@ class TestTensorMemory:
         # Check if tensor and array are still the same.
         test1 = torch.abs(torch.sum(torch_tensor-loaded_array[0:index1]))
         assert np.isclose(torch.sum(torch_tensor),
-                          torch.sum(loaded_array[0:index1]),
+                          np.sum(loaded_array[0:index1]),
                           accuracy)
 
         # Simulate Tensor data handling in pytorch workflow.
@@ -66,6 +66,6 @@ class TestTensorMemory:
         loaded_array *= 10
         for (x, y) in data_loader:
             assert np.isclose(torch.sum(x),
-                              torch.sum(loaded_array[0:index1]),
+                              np.sum(loaded_array[0:index1]),
                               accuracy)
 

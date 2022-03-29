@@ -16,13 +16,13 @@ from mala.datahandling.data_scaler import DataScaler
 from mala.datahandling.snapshot import Snapshot
 from mala.datahandling.lazy_load_dataset import LazyLoadDataset
 from mala.datahandling.lazy_load_dataset_clustered import LazyLoadDatasetClustered
-from mala.descriptors.descriptor_interface import DescriptorInterface
-from mala.targets.target_interface import TargetInterface
+from mala.descriptors.descriptor import Descriptor
+from mala.targets.target import Target
 
 
 class DataHandler:
     """
-    Loads and scales dara. Can only process numpy arrays at the moment.
+    Loads and scales data. Can only process numpy arrays at the moment.
 
     Data that is not in a numpy array can be converted using the DataConverter
     class.
@@ -30,11 +30,11 @@ class DataHandler:
     Parameters
     ----------
     parameters : mala.common.parameters.Parameters
-    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
+    descriptor_calculator : mala.descriptors.descriptor.Descriptor
         Used to do unit conversion on input data. If None, then one will
         be created by this class.
 
-    target_calculator : mala.targets.target_base.TargetBase
+    target_calculator : mala.targets.target.Target
         Used to do unit conversion on output data. If None, then one will
         be created by this class.
 
@@ -73,11 +73,11 @@ class DataHandler:
 
         self.target_calculator = target_calculator
         if self.target_calculator is None:
-            self.target_calculator = TargetInterface(parameters)
+            self.target_calculator = Target(parameters)
 
         self.descriptor_calculator = descriptor_calculator
         if self.descriptor_calculator is None:
-            self.descriptor_calculator = DescriptorInterface(parameters)
+            self.descriptor_calculator = Descriptor(parameters)
 
         self.nr_snapshots = 0
         self.grid_dimension = [0, 0, 0]
@@ -180,8 +180,9 @@ class DataHandler:
             only needed when testing multiple snapshots.
 
         add_snapshot_as : string
-            If "tr", "va" or "te", the snapshot will be added to the snapshot
-            list as training, validation or testing snapshot, respectively.
+            Must be "tr", "va" or "te", the snapshot will be added to the
+            snapshot list as training, validation or testing snapshot,
+            respectively.
         """
         snapshot = Snapshot(input_npy_file, input_npy_directory,
                             output_npy_file, output_npy_directory,
@@ -335,7 +336,7 @@ class DataHandler:
                                        naming_scheme_output=
                                        "test_Al_debug_2k_nr*.out"):
         """
-        Resize all snapsshot in the list.
+        Resize all snapshots in the list.
 
         Parameters
         ----------

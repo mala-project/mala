@@ -11,14 +11,15 @@ The basic usage is the same:
           parameters = mala.Parameters()
           datahandler = mala.DataHandler(parameters)
           datahandler.add_snapshot(...)
-          hyperp_optimizer = mala.HyperOptInterface(parameters, datahandler)
+          hyperp_optimizer = mala.HyperOpt(parameters, datahandler)
           hyperp_optimizer.add_hyperparameter(...)
           hyperp_optimizer.perform_study()
           hyperp_optimizer.set_optimal_parameters()
 
 
 COMING SOON: We are currently in the process of publishing a research article
-on hyperparameter optimiuzation in MALA.
+on hyperparameter optimization in MALA. The preprint can be accessed at
+https://arxiv.org/abs/2202.09186.
 
 Optuna
 *******

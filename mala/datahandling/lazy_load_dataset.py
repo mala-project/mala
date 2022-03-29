@@ -39,10 +39,10 @@ class LazyLoadDataset(torch.utils.data.Dataset):
     output_data_scaler : mala.datahandling.data_scaler.DataScaler
         Used to scale the output data.
 
-    descriptor_calculator : mala.descriptors.descriptor_base.DescriptorBase
+    descriptor_calculator : mala.descriptors.descriptor.Descriptor
         Used to do unit conversion on input data.
 
-    target_calculator : mala.targets.target_base.TargetBase or derivative
+    target_calculator : mala.targets.target.Target or derivative
         Used to do unit conversion on output data.
 
     grid_dimensions : list
@@ -99,7 +99,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
 
     def add_snapshot_to_dataset(self, snapshot: Snapshot):
         """
-        Addsa snapshot to a DataSet.
+        Add a snapshot to a DataSet.
 
         Afterwards, the DataSet can and will load this snapshot as needed.
 

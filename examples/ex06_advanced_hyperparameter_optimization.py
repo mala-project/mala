@@ -71,7 +71,7 @@ def optimize_hyperparameters(hyper_optimizer):
     # of interest.
     ####################
 
-    test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
+    test_hp_optimizer = mala.HyperOpt(test_parameters, data_handler)
     test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),
                                            100, 100,
                                            data_handler.get_output_dimension()]
