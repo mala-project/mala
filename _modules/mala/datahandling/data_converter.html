@@ -258,7 +258,8 @@
             <span class="k">return</span> <span class="n">tmp_input</span><span class="p">,</span> <span class="n">tmp_output</span></div>
 
 <div class="viewcode-block" id="DataConverter.convert_snapshots"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">[docs]</a>    <span class="k">def</span> <span class="nf">convert_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
-                          <span class="n">naming_scheme</span><span class="o">=</span><span class="s2">&quot;ELEM_snapshot*&quot;</span><span class="p">,</span> <span class="n">starts_at</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+                          <span class="n">naming_scheme</span><span class="o">=</span><span class="s2">&quot;ELEM_snapshot*&quot;</span><span class="p">,</span> <span class="n">starts_at</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                          <span class="n">file_based_communication</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the snapshots in the list to numpy arrays.</span>
 
@@ -279,6 +280,12 @@
 <span class="sd">            consistency in naming when converting e.g. only a certain portion</span>
 <span class="sd">            of all available snapshots. If set to e.g. 4,</span>
 <span class="sd">            the first snapshot generated will be called snapshot4.</span>
+
+<span class="sd">        file_based_communication : bool</span>
+<span class="sd">            If True, the LDOS will be gathered using a file based mechanism.</span>
+<span class="sd">            This is drastically less performant then using MPI, but may be</span>
+<span class="sd">            necessary when memory is scarce. Default is False, i.e., the faster</span>
+<span class="sd">            MPI version will be used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span><span class="p">)):</span>
             <span class="n">snapshot_number</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">starts_at</span>
@@ -287,7 +294,8 @@
 
             <span class="c1"># A memory mapped file is used as buffer for distributed cases.</span>
             <span class="n">memmap</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> \
+                    <span class="n">file_based_communication</span><span class="p">:</span>
                 <span class="n">memmap</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">snapshot_name</span> <span class="o">+</span>
                                       <span class="s2">&quot;.out.npy_temp&quot;</span><span class="p">)</span>
 
@@ -300,7 +308,8 @@
                      <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> \
+                        <span class="ow">and</span> <span class="n">file_based_communication</span><span class="p">:</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">memmap</span><span class="p">)</span></div></div>
 </pre></div>
 
