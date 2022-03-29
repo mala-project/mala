@@ -117,6 +117,9 @@ class Target(ABC):
         self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
 
+        # Local grid for distributed inference.
+        self.local_grid = None
+
     @abstractmethod
     def get_feature_size(self):
         """Get dimension of this target if used as feature in ML."""
