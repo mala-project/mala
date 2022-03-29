@@ -41,7 +41,8 @@ class Predictor(Runner):
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
 
-    def predict_from_qeout(self, path_to_file, gather_ldos=False):
+    def predict_from_qeout(self, path_to_file, gather_ldos=False,
+                           save_local_grid=False):
         """
         Get predicted LDOS for the atomic configuration of a QE.out file.
 
@@ -56,6 +57,12 @@ class Predictor(Runner):
             Helpful for using multiple CPUs for descriptor calculations
             and only one for network pass.
 
+        save_local_grid : bool
+            Only important if MPI is used. If True, the info about which
+            portion of the grid this rank is used is forwarded to the target
+            calculator for further post processing (e.g. density calculation).
+            Default is False. Has no effect if gather_ldos is True.
+
         Returns
         -------
         predicted_ldos : numpy.array
@@ -64,9 +71,11 @@ class Predictor(Runner):
         self.data.target_calculator.\
             read_additional_calculation_data("qe.out", path_to_file)
         return self.predict_for_atoms(self.data.target_calculator.atoms,
-                                      gather_ldos=gather_ldos)
+                                      gather_ldos=gather_ldos,
+                                      save_local_grid=save_local_grid)
 
-    def predict_for_atoms(self, atoms, gather_ldos=False):
+    def predict_for_atoms(self, atoms, gather_ldos=False,
+                          save_local_grid=False):
         """
         Get predicted LDOS for an atomic configuration.
 
@@ -80,6 +89,12 @@ class Predictor(Runner):
             are gathered on rank 0, and the pass is performed there.
             Helpful for using multiple CPUs for descriptor calculations
             and only one for network pass.
+
+        save_local_grid : bool
+            Only important if MPI is used. If True, the info about which
+            portion of the grid this rank is used is forwarded to the target
+            calculator for further post processing (e.g. density calculation).
+            Default is False. Has no effect if gather_ldos is True.
 
         Returns
         -------
@@ -112,7 +127,18 @@ class Predictor(Runner):
                     return None
 
             else:
+                if save_local_grid and \
+                    not self.data.descriptor_calculator.\
+                        descriptors_contain_xyz:
+                    raise Exception("Cannot calculate the local grid without "
+                                    "calculating the xyz positions of the "
+                                    "descriptors. Please revise your "
+                                    "script.")
+
                 if self.data.descriptor_calculator.descriptors_contain_xyz:
+                    if save_local_grid:
+                        self.data.target_calculator.local_grid = \
+                            snap_descriptors[:, 0:3]
                     snap_descriptors = snap_descriptors[:, 6:]
                     feature_length -= 3
 

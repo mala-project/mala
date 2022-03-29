@@ -119,7 +119,7 @@ class MALA(Calculator):
             dos_calculator = DOS.from_ldos(ldos_calculator)
 
             # Get DOS and density.
-            dos = ldos_calculator.get_density_of_states(ldos)
+            dos = ldos_calculator.get_density_of_states(ldos, gather_dos=False)
             fermi_energy_ev = dos_calculator.get_self_consistent_fermi_energy_ev(
                 dos)
             density = ldos_calculator.get_density(ldos,
