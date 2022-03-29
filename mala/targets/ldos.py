@@ -177,28 +177,56 @@ class LDOS(Target):
             data = data*self.convert_units(1, in_units=units)
             ldos_data[:, :, :, i-start_index] = data[:, :, :]
 
-        # If a memmap is used for communication, this has to be brought into
-        # play now.
+        # We have to gather the LDOS either file based or not.
         if self.parameters._configuration["mpi"]:
             barrier()
             data_shape = np.shape(ldos_data)
-            if get_rank() == 0:
-                ldos_data_full = np.memmap(use_memmap,
-                                           shape=(data_shape[0], data_shape[1],
-                                                 data_shape[2], self.parameters.
-                                                 ldos_gridsize), mode="w+",
-                                           dtype=np.float64)
-            barrier()
-            if get_rank() != 0:
-                ldos_data_full = np.memmap(use_memmap,
-                                           shape=(data_shape[0], data_shape[1],
-                                                  data_shape[2], self.parameters.
-                                                  ldos_gridsize), mode="r+",
-                                           dtype=np.float64)
-            barrier()
-            ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
-            return ldos_data_full
+            if use_memmap is not None:
+                if get_rank() == 0:
+                    ldos_data_full = np.memmap(use_memmap,
+                                               shape=(data_shape[0], data_shape[1],
+                                                     data_shape[2], self.parameters.
+                                                     ldos_gridsize), mode="w+",
+                                               dtype=np.float64)
+                barrier()
+                if get_rank() != 0:
+                    ldos_data_full = np.memmap(use_memmap,
+                                               shape=(data_shape[0], data_shape[1],
+                                                      data_shape[2], self.parameters.
+                                                      ldos_gridsize), mode="r+",
+                                               dtype=np.float64)
+                barrier()
+                ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
+                return ldos_data_full
+            else:
+                comm = get_comm()
 
+                # First get the indices from all the ranks.
+                indices = np.array(
+                    comm.gather([get_rank(), start_index, end_index],
+                                root=0))
+                ldos_data_full = None
+                if get_rank() == 0:
+                    ldos_data_full = np.empty((data_shape[0], data_shape[1],
+                                               data_shape[2], self.parameters.
+                                               ldos_gridsize),dtype=np.float64)
+                    ldos_data_full[:, :, :, start_index-1:end_index-1] = \
+                        ldos_data[:, :, :, :]
+
+                    # No MPI necessary for first rank. For all the others,
+                    # collect the buffers.
+                    for i in range(1, get_size()):
+                        local_start = indices[i][1]
+                        local_end = indices[i][2]
+                        local_size = local_end-local_start
+                        ldos_local = np.empty(local_size*data_shape[0]*data_shape[1]*data_shape[2], dtype=np.float64)
+                        comm.Recv(ldos_local, source=i, tag=100 + i)
+                        ldos_data_full[:, :, :, local_start-1:local_end-1] = np.reshape(ldos_local, (data_shape[0], data_shape[1], data_shape[2], local_size))[:,:,:,:]
+                else:
+                    comm.Send(ldos_data, dest=0,
+                              tag=get_rank() + 100)
+                barrier()
+                return ldos_data_full
         else:
             return ldos_data
 

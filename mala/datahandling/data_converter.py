@@ -185,7 +185,8 @@ class DataConverter:
             return tmp_input, tmp_output
 
     def convert_snapshots(self, save_path="./",
-                          naming_scheme="ELEM_snapshot*", starts_at=0):
+                          naming_scheme="ELEM_snapshot*", starts_at=0,
+                          file_based_communication=False):
         """
         Convert the snapshots in the list to numpy arrays.
 
@@ -214,7 +215,8 @@ class DataConverter:
 
             # A memory mapped file is used as buffer for distributed cases.
             memmap = None
-            if self.parameters._configuration["mpi"]:
+            if self.parameters._configuration["mpi"] and \
+                    file_based_communication:
                 memmap = os.path.join(save_path, snapshot_name +
                                       ".out.npy_temp")
 
@@ -227,5 +229,6 @@ class DataConverter:
                      min_verbosity=0)
 
             if get_rank() == 0:
-                if self.parameters._configuration["mpi"]:
+                if self.parameters._configuration["mpi"] \
+                        and file_based_communication:
                     os.remove(memmap)
