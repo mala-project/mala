@@ -304,7 +304,7 @@ symmetry of the simulation cell. In Bohr.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_density">
-<span class="sig-name descname"><span class="pre">get_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conserve_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_density" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conserve_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_density" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the density from given LDOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -335,6 +335,10 @@ Currently supported:</p>
 </ul>
 </div></blockquote>
 </p></li>
+<li><p><strong>gather_density</strong> (<em>bool</em>) – Only important if MPI is used. If True, the density will be
+gathered on rank 0.
+Helpful when using multiple CPUs for descriptor calculations
+and only one for network pass.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

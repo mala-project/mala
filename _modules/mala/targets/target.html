@@ -190,6 +190,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">kpoints</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># (2, 2, 2)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span> <span class="o">=</span> <span class="p">{}</span>
 
+        <span class="c1"># Local grid for distributed inference.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_grid</span> <span class="o">=</span> <span class="kc">None</span>
+
 <div class="viewcode-block" id="Target.get_feature_size"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_feature_size">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">get_feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>

@@ -192,7 +192,7 @@
             <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos</span><span class="p">(</span><span class="n">ldos_calculator</span><span class="p">)</span>
 
             <span class="c1"># Get DOS and density.</span>
-            <span class="n">dos</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos</span><span class="p">)</span>
+            <span class="n">dos</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos</span><span class="p">,</span> <span class="n">gather_dos</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">fermi_energy_ev</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy_ev</span><span class="p">(</span>
                 <span class="n">dos</span><span class="p">)</span>
             <span class="n">density</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="n">ldos</span><span class="p">,</span>

@@ -663,7 +663,8 @@
 
 <div class="viewcode-block" id="LDOS.get_density"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">fermi_energy_ev</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">conserve_dimensions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
+                    <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+                    <span class="n">gather_density</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the density from given LDOS data.</span>
 
@@ -698,6 +699,12 @@
 <span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
 <span class="sd">                - &quot;simps&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
+
+<span class="sd">        gather_density : bool</span>
+<span class="sd">            Only important if MPI is used. If True, the density will be</span>
+<span class="sd">            gathered on rank 0.</span>
+<span class="sd">            Helpful when using multiple CPUs for descriptor calculations</span>
+<span class="sd">            and only one for network pass.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -756,7 +763,22 @@
             <span class="n">ldos_data_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">density_values</span> <span class="o">=</span> <span class="n">density_values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">density_values</span></div>
+        <span class="c1"># Now we have the full density; We now need to collect it, in the</span>
+        <span class="c1"># MPI case.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">gather_density</span><span class="p">:</span>
+            <span class="n">density_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">density_values</span><span class="p">,</span>
+                                        <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">density_values</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="n">density_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">local_grid</span><span class="p">,</span> <span class="n">density_values</span><span class="p">),</span>
+                                          <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">full_density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gather_density</span><span class="p">(</span><span class="n">density_values</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">ldos_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">full_density</span><span class="p">)</span>
+                <span class="n">full_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">full_density</span><span class="p">,</span> <span class="p">[</span><span class="n">ldos_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span>
+                                                         <span class="n">ldos_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span>
+                                                         <span class="n">ldos_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">full_density</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">density_values</span></div>
 
 <div class="viewcode-block" id="LDOS.get_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel_Bohr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
@@ -1016,7 +1038,100 @@
 
 <div class="viewcode-block" id="LDOS.uncache_density"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.uncache_density">[docs]</a>    <span class="k">def</span> <span class="nf">uncache_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Uncache a density, to calculate a new one in following steps.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density_exists</span> <span class="o">=</span> <span class="kc">False</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density_exists</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+    <span class="k">def</span> <span class="nf">_gather_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_values</span><span class="p">,</span> <span class="n">use_pickled_comm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gathers all SNAP descriptors on rank 0 and sorts them.</span>
+
+<span class="sd">        This is useful for e.g. parallel preprocessing.</span>
+<span class="sd">        This function removes the extra 3 components that come from parallel</span>
+<span class="sd">        processing.</span>
+<span class="sd">        I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us</span>
+<span class="sd">        97 (in parallel mode), and this function returns, as to retain the</span>
+<span class="sd">        3 x,y,z ones we by default include.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        density_values : numpy.array</span>
+<span class="sd">            Numpy array with the SNAP descriptors of this ranks local grid.</span>
+
+<span class="sd">        use_pickled_comm : bool</span>
+<span class="sd">            If True, the pickled communication route from mpi4py is used.</span>
+<span class="sd">            If False, a Recv/Sendv combination is used. I am not entirely</span>
+<span class="sd">            sure what is faster. Technically Recv/Sendv should be faster,</span>
+<span class="sd">            but I doubt my implementation is all that optimal. For the pickled</span>
+<span class="sd">            route we can use gather(), which should be fairly quick.</span>
+<span class="sd">            However, for large grids, one CANNOT use the pickled route;</span>
+<span class="sd">            too large python objects will break it. Therefore, I am setting</span>
+<span class="sd">            the Recv/Sendv route as default.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Barrier to make sure all ranks have descriptors..</span>
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
+        <span class="n">barrier</span><span class="p">()</span>
+
+        <span class="c1"># Gather the SNAP descriptors into a list.</span>
+        <span class="k">if</span> <span class="n">use_pickled_comm</span><span class="p">:</span>
+            <span class="n">density_list</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">density_values</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sendcounts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">density_values</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                                              <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># print(&quot;sendcounts: {}, total: {}&quot;.format(sendcounts,</span>
+                <span class="c1">#                                          sum(sendcounts)))</span>
+
+                <span class="c1"># Preparing the list of buffers.</span>
+                <span class="n">density_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">get_size</span><span class="p">()):</span>
+                    <span class="n">density_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">sendcounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span>
+                                                 <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+                <span class="c1"># No MPI necessary for first rank. For all the others,</span>
+                <span class="c1"># collect the buffers.</span>
+                <span class="n">density_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">density_values</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">get_size</span><span class="p">()):</span>
+                    <span class="n">comm</span><span class="o">.</span><span class="n">Recv</span><span class="p">(</span><span class="n">density_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">source</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
+                              <span class="n">tag</span><span class="o">=</span><span class="mi">100</span><span class="o">+</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">density_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">density_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                   <span class="p">(</span><span class="n">sendcounts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">4</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">comm</span><span class="o">.</span><span class="n">Send</span><span class="p">(</span><span class="n">density_values</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">get_rank</span><span class="p">()</span><span class="o">+</span><span class="mi">100</span><span class="p">)</span>
+            <span class="n">barrier</span><span class="p">()</span>
+        <span class="c1"># if get_rank() == 0:</span>
+        <span class="c1">#     printout(np.shape(all_snap_descriptors_list[0]))</span>
+        <span class="c1">#     printout(np.shape(all_snap_descriptors_list[1]))</span>
+        <span class="c1">#     printout(np.shape(all_snap_descriptors_list[2]))</span>
+        <span class="c1">#     printout(np.shape(all_snap_descriptors_list[3]))</span>
+
+        <span class="c1"># Dummy for the other ranks.</span>
+        <span class="c1"># (For now, might later simply broadcast to other ranks).</span>
+        <span class="n">full_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Reorder the list.</span>
+        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Prepare the SNAP descriptor array.</span>
+            <span class="n">nx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ny</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">nz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">full_density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># Fill the full SNAP descriptors array.</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">local_density</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">density_list</span><span class="p">):</span>
+                <span class="c1"># We glue the individual cells back together, and transpose.</span>
+                <span class="n">first_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">first_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">first_z</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">last_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span>
+                <span class="n">last_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span>
+                <span class="n">last_z</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">local_density</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span>
+                <span class="n">full_density</span><span class="p">[</span><span class="n">first_x</span><span class="p">:</span><span class="n">last_x</span><span class="p">,</span>
+                             <span class="n">first_y</span><span class="p">:</span><span class="n">last_y</span><span class="p">,</span>
+                             <span class="n">first_z</span><span class="p">:</span><span class="n">last_z</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">local_density</span><span class="p">[:,</span><span class="mi">3</span><span class="p">],[</span><span class="n">last_z</span><span class="o">-</span><span class="n">first_z</span><span class="p">,</span>
+                                                    <span class="n">last_y</span><span class="o">-</span><span class="n">first_y</span><span class="p">,</span>
+                                                    <span class="n">last_x</span><span class="o">-</span><span class="n">first_x</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">full_density</span></div>
 
 </pre></div>
 

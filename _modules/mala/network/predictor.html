@@ -114,7 +114,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="mi">0</span>
 
-<div class="viewcode-block" id="Predictor.predict_from_qeout"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_from_qeout">[docs]</a>    <span class="k">def</span> <span class="nf">predict_from_qeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Predictor.predict_from_qeout"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_from_qeout">[docs]</a>    <span class="k">def</span> <span class="nf">predict_from_qeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                           <span class="n">save_local_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get predicted LDOS for the atomic configuration of a QE.out file.</span>
 
@@ -129,6 +130,12 @@
 <span class="sd">            Helpful for using multiple CPUs for descriptor calculations</span>
 <span class="sd">            and only one for network pass.</span>
 
+<span class="sd">        save_local_grid : bool</span>
+<span class="sd">            Only important if MPI is used. If True, the info about which</span>
+<span class="sd">            portion of the grid this rank is used is forwarded to the target</span>
+<span class="sd">            calculator for further post processing (e.g. density calculation).</span>
+<span class="sd">            Default is False. Has no effect if gather_ldos is True.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        predicted_ldos : numpy.array</span>
@@ -137,9 +144,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
             <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="s2">&quot;qe.out&quot;</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
-                                      <span class="n">gather_ldos</span><span class="o">=</span><span class="n">gather_ldos</span><span class="p">)</span></div>
+                                      <span class="n">gather_ldos</span><span class="o">=</span><span class="n">gather_ldos</span><span class="p">,</span>
+                                      <span class="n">save_local_grid</span><span class="o">=</span><span class="n">save_local_grid</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Predictor.predict_for_atoms"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_for_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Predictor.predict_for_atoms"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_for_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">save_local_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get predicted LDOS for an atomic configuration.</span>
 
@@ -153,6 +162,12 @@
 <span class="sd">            are gathered on rank 0, and the pass is performed there.</span>
 <span class="sd">            Helpful for using multiple CPUs for descriptor calculations</span>
 <span class="sd">            and only one for network pass.</span>
+
+<span class="sd">        save_local_grid : bool</span>
+<span class="sd">            Only important if MPI is used. If True, the info about which</span>
+<span class="sd">            portion of the grid this rank is used is forwarded to the target</span>
+<span class="sd">            calculator for further post processing (e.g. density calculation).</span>
+<span class="sd">            Default is False. Has no effect if gather_ldos is True.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -185,7 +200,18 @@
                     <span class="k">return</span> <span class="kc">None</span>
 
             <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">save_local_grid</span> <span class="ow">and</span> \
+                    <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
+                        <span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate the local grid without &quot;</span>
+                                    <span class="s2">&quot;calculating the xyz positions of the &quot;</span>
+                                    <span class="s2">&quot;descriptors. Please revise your &quot;</span>
+                                    <span class="s2">&quot;script.&quot;</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">save_local_grid</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">local_grid</span> <span class="o">=</span> \
+                            <span class="n">snap_descriptors</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
                     <span class="n">snap_descriptors</span> <span class="o">=</span> <span class="n">snap_descriptors</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">:]</span>
                     <span class="n">feature_length</span> <span class="o">-=</span> <span class="mi">3</span>
 
