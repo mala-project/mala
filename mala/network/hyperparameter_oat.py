@@ -71,7 +71,7 @@ class HyperparameterOAT(JSONSerializable):
 
     def get_categorical(self, trial, idx):
         """
-        Extract categorical (string) hyperparameter from on a optuna Trial.
+        Extract categorical (string) hyperparameter from an optuna Trial.
 
         Parameters
         ----------

@@ -52,7 +52,7 @@ class HyperparameterOptuna(JSONSerializable):
 
     def get_parameter(self, trial: Trial):
         """
-        Extract current value of hyperparameter from on a optuna Trial.
+        Extract current value of hyperparameter from an optuna Trial.
 
         Parameters
         ----------
@@ -75,7 +75,7 @@ class HyperparameterOptuna(JSONSerializable):
 
     def get_float(self, trial: Trial):
         """
-        Extract float hyperparameter from on a optuna Trial.
+        Extract float hyperparameter from an optuna Trial.
 
         Parameters
         ----------
@@ -95,7 +95,7 @@ class HyperparameterOptuna(JSONSerializable):
 
     def get_int(self, trial: Trial):
         """
-        Extract integer hyperparameter from on a optuna Trial.
+        Extract integer hyperparameter from an optuna Trial.
 
         Parameters
         ----------
@@ -115,7 +115,7 @@ class HyperparameterOptuna(JSONSerializable):
 
     def get_categorical(self, trial: Trial):
         """
-        Extract categorical (string) hyperparameter from on a optuna Trial.
+        Extract categorical (string) hyperparameter from an optuna Trial.
 
         Parameters
         ----------

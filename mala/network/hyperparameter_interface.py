@@ -14,8 +14,9 @@ def HyperparameterInterface(hotype, opttype="float", name="", low=0, high=0,
     hotype : string
         Type of hyperparameter. Currently supported:
 
-            - optuna: Optuna style hyperparameter, for HyperOptOptuna.
+            - optuna: Hyperparameter for HyperOptOptuna.
             - oat: Hyperparameter for HyperOptOAT.
+            - naswot: Hyperparameter for HyperOptNASWOT.
 
     opttype : string
         Datatype of the hyperparameter. Follows optunas naming convetions.
@@ -45,7 +46,7 @@ def HyperparameterInterface(hotype, opttype="float", name="", low=0, high=0,
 
     Returns
     -------
-    hyperparameter : HyperparameterOptuna or HyperparameterOAT
+    hyperparameter : HyperparameterOptuna or HyperparameterOAT or HyperparameterNASWOT
         Hyperparameter in desired format.
     """
     hparam = None

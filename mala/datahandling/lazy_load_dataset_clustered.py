@@ -118,7 +118,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
 
     def add_snapshot_to_dataset(self, snapshot: Snapshot):
         """
-        Addsa snapshot to a DataSet.
+        Add a snapshot to a DataSet.
 
         Afterwards, the DataSet can and will load this snapshot as needed.
 
@@ -197,9 +197,9 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
 
     def cluster_dataset(self):
         """
-        Calculate clusters for dataset (individually per snapshot.
+        Calculate clusters for dataset (individually per snapshot).
 
-        IMPORTANT: Only call this function AFTER all snapshots were added.
+        .. important:: Only call this function AFTER all snapshots were added.
         """
         # Clustered inputs holds the cluster a snapshot belongs to for every
         # input of that snapshot.

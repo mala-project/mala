@@ -9,7 +9,7 @@ class JSONSerializable:
 
     Implements "to_json" and "from_json" for serialization and deserialization,
     respectively. Other classes that also need to be JSON serializable have
-    to inherit from this class and reimplement these methods, if necessary
+    to inherit from this class and reimplement these methods, if necessary.
     """
 
     def __init__(self):
