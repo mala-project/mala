@@ -207,6 +207,12 @@ class DataConverter:
             consistency in naming when converting e.g. only a certain portion
             of all available snapshots. If set to e.g. 4,
             the first snapshot generated will be called snapshot4.
+
+        file_based_communication : bool
+            If True, the LDOS will be gathered using a file based mechanism.
+            This is drastically less performant then using MPI, but may be
+            necessary when memory is scarce. Default is False, i.e., the faster
+            MPI version will be used.
         """
         for i in range(0, len(self.__snapshots_to_convert)):
             snapshot_number = i + starts_at
