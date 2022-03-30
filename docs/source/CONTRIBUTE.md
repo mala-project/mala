@@ -39,11 +39,8 @@ the core development team.
   for docstrings
 * Keep your code object-oriented, modular, and easily reusable
 * If you're adding code that should be tested, add tests
-* If you're adding or modifying examples, make sure to add them to `test_examples.py` and test via
-```bash
-cd examples/
-pytest 
-```
+* If you're adding or modifying examples, make sure to add them to `test_examples.py`
+
 
 ## Pull Requests
 We actively welcome pull requests.
