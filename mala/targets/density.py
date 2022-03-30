@@ -14,7 +14,7 @@ from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube
 from mala.targets.atomic_force import AtomicForce
-from mala.common.parallelizer import get_rank
+from mala.common.parallelizer import get_rank, barrier
 
 
 class Density(Target):
@@ -176,9 +176,29 @@ class Density(Target):
             return density_data
         elif len(density_data.shape) == 1:
             if convert_to_threedimensional:
-                if grid_dimensions is None:
-                    grid_dimensions = self.grid_dimensions
-                return density_data.reshape(grid_dimensions)
+                if self.parameters._configuration["mpi"]:
+                    # In the MPI case we have to use the local grid to
+                    # reshape the density properly.
+
+                    first_x = int(self.local_grid[0][0])
+                    first_y = int(self.local_grid[0][1])
+                    first_z = int(self.local_grid[0][2])
+                    last_x = int(self.local_grid[-1][0]) + 1
+                    last_y = int(self.local_grid[-1][1]) + 1
+                    last_z = int(self.local_grid[-1][2]) + 1
+                    # density_data_reshaped = np.zeros([last_x-first_x,
+                    #                                   last_y-first_y,
+                    #                                   last_z-first_z],
+                    #                                  dtype=np.float64)
+                    density_data = \
+                        np.reshape(density_data,
+                                   [last_z - first_z, last_y - first_y,
+                                    last_x - first_x]).transpose([2, 1, 0])
+                    return density_data
+                else:
+                    if grid_dimensions is None:
+                        grid_dimensions = self.grid_dimensions
+                    return density_data.reshape(grid_dimensions)
             else:
                 return density_data
         else:
@@ -441,4 +461,5 @@ class Density(Target):
         return_density_object.kpoints = ldos_object.kpoints
         return_density_object.number_of_electrons_from_eigenvals = \
             ldos_object.number_of_electrons_from_eigenvals
+        return_density_object.local_grid = ldos_object.local_grid
         return return_density_object

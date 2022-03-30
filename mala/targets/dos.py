@@ -391,7 +391,7 @@ class DOS(Target):
         return_dos_object.kpoints = ldos_object.kpoints
         return_dos_object.number_of_electrons_from_eigenvals = \
             ldos_object.number_of_electrons_from_eigenvals
-
+        return_dos_object.local_grid = ldos_object.local_grid
         return return_dos_object
 
     @staticmethod

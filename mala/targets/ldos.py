@@ -591,7 +591,7 @@ class LDOS(Target):
     def get_density(self, ldos_data, fermi_energy_ev=None, temperature_K=None,
                     conserve_dimensions=False,
                     integration_method="analytical",
-                    gather_density=True):
+                    gather_density=False):
         """
         Calculate the density from given LDOS data.
 
@@ -686,9 +686,14 @@ class LDOS(Target):
             raise Exception("Unknown integration method.")
 
         if len(ldos_data_shape) == 4 and conserve_dimensions is True:
+            # This breaks in the distributed case currently,
+            # but I don't see an application where we would need it.
+            # It would mean that we load an LDOS in distributed 3D fashion,
+            # which is not implemented either.
             ldos_data_shape = list(ldos_data_shape)
             ldos_data_shape[-1] = 1
             density_values = density_values.reshape(ldos_data_shape)
+
 
         # Now we have the full density; We now need to collect it, in the
         # MPI case.
