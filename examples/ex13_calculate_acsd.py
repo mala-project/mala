@@ -6,7 +6,7 @@ from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 
 """
-ex16_calculate_acsd.py: Shows how MALA can be used to calculate the ACSD,
+ex13_calculate_acsd.py: Shows how MALA can be used to calculate the ACSD,
 the average cosine similarity distance, which can be useful in correctly 
 preprocessing data.
 """

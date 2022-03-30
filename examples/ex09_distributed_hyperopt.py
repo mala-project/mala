@@ -4,14 +4,16 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36")
+data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 
 """
 ex09_distributed_hyperopt.py: Shows how a hyperparameter 
 optimization can be sped up using a RDB storage. Ideally this should be done
 using a database server system, such as PostgreSQL or MySQL. 
 For this easy example, sqlite will be used. It is highly advisory not to
-to use this for actual, at-scale calculations!  
+to use this for actual, at-scale calculations!
+
+REQUIRES SQLITE.
 """
 
 
@@ -54,6 +56,9 @@ test_parameters.hyperparameters.rdb_storage = 'sqlite:///ex09.db'
 # at each step and by using a different metric then the validation loss
 # (e.g. the band energy). It is recommended not to use the ensemble training
 # method in Single-GPU use, as it naturally drastically decreases performance.
+test_parameters.targets.ldos_gridsize = 11
+test_parameters.targets.ldos_gridspacing_ev = 2.5
+test_parameters.targets.ldos_gridoffset_ev = -5
 test_parameters.hyperparameters.number_training_per_trial = 5
 test_parameters.running.after_before_training_metric = "band_energy"
 
@@ -64,15 +69,14 @@ test_parameters.running.after_before_training_metric = "band_energy"
 data_handler = mala.DataHandler(test_parameters)
 
 # Add all the snapshots we want to use in to the list.
-data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                          "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                          output_units="1/Ry")
-data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                          "Al_debug_2k_nr1.out.npy", data_path, "va",
-                          output_units="1/Ry")
-data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                          "Al_debug_2k_nr2.out.npy", data_path, "te",
-                          output_units="1/Ry")
+data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                          "Be_snapshot1.out.npy", data_path, "tr",
+                          calculation_output_file=
+                          os.path.join(data_path, "Be_snapshot1.out"))
+data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                          "Be_snapshot2.out.npy", data_path, "va",
+                          calculation_output_file=
+                          os.path.join(data_path, "Be_snapshot2.out"))
 data_handler.prepare_data()
 printout("Read data: DONE.")
 
