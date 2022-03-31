@@ -9,6 +9,7 @@ authors:
   - affiliation: "Oak Ridge National Laboratory (ORNL)"
     family-names: Ellis
     given-names: J. Austin
+    orcid: https://orcid.org/0000-0002-9901-102X
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Fiedler
     given-names: Lenz
@@ -29,6 +30,7 @@ authors:
   - affiliation: "Sandia National Laboratories (SNL)"
     family-names: Rajamanickam
     given-names: Siva
+    orcid: https://orcid.org/0000-0002-5854-409X
   - affiliation: "Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Schmerler
     given-names: Steve
@@ -39,6 +41,7 @@ authors:
   - affiliation: "Sandia National Laboratories (SNL)"
     family-names: Thompson
     given-names: Aidan P.
+    orcid: https://orcid.org/0000-0002-0324-9114
 
 
 date-released: 2021-10-08
