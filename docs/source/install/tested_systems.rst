@@ -41,6 +41,21 @@ macOS
   * python version: 3.8.5
   * Installation successful: Not tested
 
+
+Windows
+----------
+* Windows 10
+* OS Version: 10.0.19044 Build 19044
+* pip:
+  * pip version: 3.8.10
+  * Installation successful: Yes
+* conda:
+
+  * Installation successful: Not tested
+* LAMMPS: Not tested
+* Quantum Espresso: Not tested
+
+
 HPC clusters
 ***************
 Hemera5 (CentOS)

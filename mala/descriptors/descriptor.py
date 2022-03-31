@@ -3,11 +3,11 @@ import ase
 import numpy as np
 from abc import ABC, abstractmethod
 
-from mala.common.parameters import ParametersDescriptors
+from mala.common.parameters import ParametersDescriptors, Parameters
 from mala.common.parallelizer import printout
 
 
-class DescriptorBase(ABC):
+class Descriptor(ABC):
     """
     Base class for all descriptors available in MALA.
 
@@ -19,6 +19,34 @@ class DescriptorBase(ABC):
         Parameters object used to create this object.
 
     """
+
+    def __new__(cls, params: Parameters):
+        """
+        Create a Descriptor instance.
+
+        The correct type of descriptor calculator will automatically be
+        instantiated by this class if possible. You can also instantiate
+        the desired descriptor directly by calling upon the subclass.
+
+        Parameters
+        ----------
+        params : mala.common.parametes.Parameters
+            Parameters used to create this descriptor calculator.
+        """
+        descriptors = None
+        # Check if we're accessing through base class.
+        # If not, we need to return the correct object directly.
+        if cls == Descriptor:
+            if params.descriptors.descriptor_type == 'SNAP':
+                from mala.descriptors.snap import SNAP
+                descriptors = super(Descriptor, SNAP).__new__(SNAP)
+
+            if descriptors is None:
+                raise Exception("Unsupported descriptor calculator.")
+        else:
+            descriptors = super(Descriptor, cls).__new__(cls)
+
+        return descriptors
 
     def __init__(self, parameters):
         self.parameters: ParametersDescriptors = parameters.descriptors
@@ -81,7 +109,7 @@ class DescriptorBase(ABC):
     @staticmethod
     def enforce_pbc(atoms):
         """
-        Explictly enforeces the PBC on an ASE atoms object.
+        Explictly enforces the PBC on an ASE atoms object.
 
         QE (and potentially other codes?) do that internally. Meaning that the
         raw positions of atoms (in Angstrom) can lie outside of the unit cell.
@@ -97,7 +125,7 @@ class DescriptorBase(ABC):
 
         Returns
         -------
-        new_atoms : ase.atoms
+        new_atoms : ase.Atoms
             The ASE atoms object for which the PBC have been enforced.
         """
         new_atoms = atoms.copy()
@@ -294,7 +322,7 @@ class DescriptorBase(ABC):
         def distance_between_points(x1, y1, x2, y2):
             return np.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 
-        similarity_data = DescriptorBase.\
+        similarity_data = Descriptor.\
             _calculate_cosine_similarities(descriptor_data, ldos_data, acsd_points,
                                            descriptor_vectors_contain_xyz=
                                           descriptor_vectors_contain_xyz)

@@ -49,7 +49,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
-#    'sphinx.ext.viewcode',
+    'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
 ]
 
@@ -70,6 +70,8 @@ autodoc_mock_imports = [
     'total_energy',
     'pqkmeans'
 ]
+
+myst_heading_anchors = 3
 
 autodoc_member_order = 'groupwise'
 

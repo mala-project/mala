@@ -18,7 +18,12 @@ import torch.nn.functional as functional
 
 
 class Network(nn.Module):
-    """Central network class for this framework, based on pytorch.nn.Module.
+    """
+    Central network class for this framework, based on pytorch.nn.Module.
+
+    The correct type of neural network will automatically be instantiated
+    by this class if possible. You can also instantiate the desired
+    network directly by calling upon the subclass.
 
     Parameters
     ----------
@@ -39,22 +44,27 @@ class Network(nn.Module):
         params : mala.common.parametes.Parameters
             Parameters used to create this neural network.
         """
-        # The correct type of model is instantiated automatically.
         model = None
-        if params.network.nn_type == "feed-forward":
-            model = super(Network, FeedForwardNet).__new__(FeedForwardNet)
 
-        elif params.network.nn_type == "transformer":
-            model = super(Network, TransformerNet).__new__(TransformerNet)
+        # Check if we're accessing through base class.
+        # If not, we need to return the correct object directly.
+        if cls == Network:
+            if params.network.nn_type == "feed-forward":
+                model = super(Network, FeedForwardNet).__new__(FeedForwardNet)
 
-        elif params.network.nn_type == "lstm":
-            model = super(Network, LSTM).__new__(LSTM)
+            elif params.network.nn_type == "transformer":
+                model = super(Network, TransformerNet).__new__(TransformerNet)
 
-        elif params.network.nn_type == "gru":
-            model = super(Network, GRU).__new__(GRU)
+            elif params.network.nn_type == "lstm":
+                model = super(Network, LSTM).__new__(LSTM)
 
-        if model is None:
-            raise Exception("Unsupported network architecture.")
+            elif params.network.nn_type == "gru":
+                model = super(Network, GRU).__new__(GRU)
+
+            if model is None:
+                raise Exception("Unsupported network architecture.")
+        else:
+            model = super(Network, cls).__new__(cls)
 
         return model
 
@@ -215,7 +225,12 @@ class FeedForwardNet(Network):
         elif len(self.params.layer_activations) < self.number_of_layers:
             raise Exception("Not enough activation layers provided.")
         elif len(self.params.layer_activations) > self.number_of_layers:
-            raise Exception("Too many activation layers provided.")
+            printout("Too many activation layers provided. "
+                     "The last",
+                     str(len(self.params.layer_activations) -
+                         self.number_of_layers),
+                     "activation function(s) will be ignored.",
+                     min_verbosity=1)
 
         # Add the layers.
         # As this is a feedforward layer we always add linear layers, and then

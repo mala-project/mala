@@ -5,12 +5,12 @@ import pickle
 import optuna
 
 from mala.common.parameters import printout
-from mala.network.hyper_opt_base import HyperOptBase
+from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_base import ObjectiveBase
 from mala.network.naswot_pruner import NASWOTPruner
 
 
-class HyperOptOptuna(HyperOptBase):
+class HyperOptOptuna(HyperOpt):
     """Hyperparameter optimizer using Optuna.
 
     Parameters

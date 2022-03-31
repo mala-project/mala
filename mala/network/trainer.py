@@ -645,15 +645,21 @@ class Trainer(Runner):
             + "_iscaler.pkl"
         oscaler_name = self.parameters.checkpoint_name \
             + "_oscaler.pkl"
-        param_name = self.parameters.checkpoint_name \
-            + "_params.pkl"
+        if self.use_pkl_checkpoints:
+            param_name = self.parameters.checkpoint_name \
+                         + "_params.pkl"
+            self.parameters_full.save_as_pickle(param_name)
+        else:
+            param_name = self.parameters.checkpoint_name \
+                         + "_params.json"
+            self.parameters_full.save_as_json(param_name)
+
         optimizer_name = self.parameters.checkpoint_name \
             + "_optimizer.pth"
 
         # First we save the objects we would also save for inference.
         self.data.input_data_scaler.save(iscaler_name)
         self.data.output_data_scaler.save(oscaler_name)
-        self.parameters_full.save(param_name)
         self.network.save_network(network_name)
 
         # Next, we save all the other objects.

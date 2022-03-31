@@ -42,9 +42,6 @@ def initial_setup():
     test_parameters.running.verbosity = False
     test_parameters.hyperparameters.checkpoint_name = "ex04"
     test_parameters.hyperparameters.checkpoints_each_trial = -1
-    test_parameters.hyperparameters.pruner = "naswot"
-    test_parameters.hyperparameters.naswot_pruner_batch_size = 60
-    test_parameters.hyperparameters.naswot_pruner_cutoff = 1000000000000
 
     ####################
     # DATA
@@ -74,7 +71,7 @@ def initial_setup():
     # of interest.
     ####################
 
-    test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
+    test_hp_optimizer = mala.HyperOpt(test_parameters, data_handler)
 
     # Learning rate will be optimized.
     test_hp_optimizer.add_hyperparameter("categorical", "learning_rate",
@@ -94,7 +91,7 @@ def initial_setup():
 
 if mala.HyperOptOptuna.checkpoint_exists("ex04"):
     parameters, datahandler, hyperoptimizer = \
-        mala.HyperOptOAT.resume_checkpoint(
+        mala.HyperOptOptuna.resume_checkpoint(
             "ex04")
     printout("Starting resumed hyperparameter optimization.")
 else:

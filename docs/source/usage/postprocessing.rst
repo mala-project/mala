@@ -14,13 +14,14 @@ come directly from a DFT calculation. Basic postprocessing can be done via
             parameters.targets.descriptor_type = 'LDOS'
 
             # Creates a LDOS object via interface
-            ldos = mala.TargetInterface(parameters)
+            ldos = mala.Target(parameters)
 
             # Creates a LDOS object directly
             ldos = mala.LDOS(parameters)
 
             # Use the LDOS object to calculate the band energy from LDOS data.
-            band_energy = ldos.get_band_energy(...)
+            ldos_data = ldos.read_from_cube(...)
+            band_energy = ldos.get_band_energy(ldos_data)
 
 But a wider range of properties is available, see e.g. ``ex03_postprocess_data``.
 For a full list, consult the API reference.

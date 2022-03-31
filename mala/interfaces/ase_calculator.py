@@ -32,8 +32,10 @@ class MALA(Calculator):
 
     reference_data : list
         A list containing
-        [0]: A type of additional calculation data
-        [1]: A path to it.
+
+        - [0]: A type of additional calculation data
+        - [1]: A path to it.
+
         With this additonal calculation data (preferably from the training of
         the neural network), calculator can access all important data such as
         temperature, number of electrons, etc. that might not be known simply
@@ -63,6 +65,9 @@ class MALA(Calculator):
         self.data_handler.target_calculator.\
             read_additional_calculation_data(reference_data[0],
                                              reference_data[1])
+
+        # Needed for e.g. Monte Carlo.
+        self.last_energy_contributions = {}
 
     def calculate(self, atoms=None, properties=['energy'],
                   system_changes=all_changes):
@@ -114,15 +119,16 @@ class MALA(Calculator):
             dos_calculator = DOS.from_ldos(ldos_calculator)
 
             # Get DOS and density.
-            dos = ldos_calculator.get_density_of_states(ldos)
+            dos = ldos_calculator.get_density_of_states(ldos, gather_dos=False)
             fermi_energy_ev = dos_calculator.get_self_consistent_fermi_energy_ev(
                 dos)
             density = ldos_calculator.get_density(ldos,
                                                   fermi_energy_ev=fermi_energy_ev)
-            energy = ldos_calculator.\
+            energy, self.last_energy_contributions = ldos_calculator.\
             get_total_energy(dos_data=dos, density_data=density,
                              fermi_energy_eV=fermi_energy_ev,
-                             create_qe_file=False)
+                             create_qe_file=False,
+                             return_energy_contributions=True)
             if "forces" in properties:
                 forces = density_calculator.get_atomic_forces(density,
                                                               create_file=False)
@@ -136,3 +142,52 @@ class MALA(Calculator):
         self.results["energy"] = energy
         if "forces" in properties:
             self.results["forces"] = forces
+
+    def calculate_properties(self, atoms, properties):
+        """
+        After a calculation, calculate additional properties.
+
+        This is separate from the calculate function because of
+        MALA-MC simulations. For these energy and additional property
+        calculation need to be separate.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            Atoms object for which to perform the calculation.
+            No needed per se, we can use it for a correctness check
+            eventually.
+
+        properties: list of str
+            List of what needs to be calculated.  Can be any combination
+            of "rdf", ...
+        """
+        # TODO: Check atoms.
+
+        if "rdf" in properties:
+            self.results["rdf"] = self.data_handler.target_calculator.\
+                get_radial_distribution_function(atoms)
+        if "tpcf" in properties:
+            self.results["tpcf"] = self.data_handler.target_calculator.\
+                get_three_particle_correlation_function(atoms)
+        if "static_structure_factor" in properties:
+            self.results["static_structure_factor"] = self.data_handler.\
+                target_calculator.get_static_structure_factor(atoms)
+        if "ion_ion_energy" in properties:
+            self.results["ion_ion_energy"] = self.\
+                last_energy_contributions["e_ewald"]
+
+    def save_calculator(self, filename):
+        """
+        Save parameters used for this calculator.
+
+        This is useful for e.g. checkpointing.
+
+        Parameters
+        ----------
+        filename : string
+            Path to file in which to store the Calculator.
+
+        """
+        self.params.save(filename)
+

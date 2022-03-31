@@ -1,4 +1,4 @@
-"""Functions for safely printing in parallel."""
+"""Functions for operating MALA in parallel."""
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
@@ -104,7 +104,7 @@ def get_local_rank():
     Get the local rank of the process.
 
     This is the rank WITHIN a node. Useful when multiple GPUs are
-    used on one node.
+    used on one node. Always returns 0 in the serial case.
 
     Originally obtained from:
     https://github.com/hiwonjoon/ICML2019-TREX/blob/master/mujoco/learner/baselines/baselines/common/mpi_util.py
