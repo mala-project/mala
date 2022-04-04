@@ -1,4 +1,5 @@
 FROM continuumio/miniconda3:4.9.2
+MAINTAINER Daniel Kotik <d.kotik@hzdr.de>
 
 # Update the image to the latest packages
 RUN apt-get --allow-releaseinfo-change update && apt-get upgrade -y
