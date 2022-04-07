@@ -148,6 +148,7 @@ class Target(ABC):
                         "from a qe.dos.txt file")
 
     def write_as_cube(self):
+        """Write the quantity in a cube file."""
         raise Exception("No function defined to write this quantity "
                         "to a .cube file.")
 
