@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 from mala.common.parameters import printout
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
-from mala.targets.cube_parser import read_cube
+from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.atomic_force import AtomicForce
 from mala.common.parallelizer import get_rank
 
@@ -53,6 +53,51 @@ class Density(Target):
         printout("Reading density from .cube file in ", directory, min_verbosity=0)
         data, meta = read_cube(os.path.join(directory, file_name))
         return data
+
+    def write_as_cube(self, file_name, density_data, atoms=None,
+                      grid_dimensions=None):
+        """
+        Write the density data in a cube file.
+
+        Parameters
+        ----------
+        file_name : string
+            Name of the file.
+
+        density_data : numpy.ndarray
+            1D or 3D array of the density.
+
+        atoms : ase.Atoms
+            Atoms to be written to the file alongside the density data.
+            If None, and the target object has an atoms object, this will
+            be used.
+
+        grid_dimensions : list
+            Grid dimensions. Only necessary if a 1D density is provided.
+        """
+        if grid_dimensions is None:
+            grid_dimensions = self.grid_dimensions
+        if atoms is None:
+            atoms = self.atoms
+        if len(density_data.shape) != 3:
+            if len(density_data.shape) == 1:
+                density_data = np.reshape(density_data, grid_dimensions)
+            else:
+                raise Exception("Unknown density shape provided.")
+        # %%
+        meta = {}
+        atom_list = []
+        for i in range(0, len(atoms)):
+            atom_list.append(
+                (atoms[i].number, [4.0, ] + list(atoms[i].position / Bohr)))
+
+        meta["atoms"] = atom_list
+        meta["org"] = [0.0, 0.0, 0.0]
+        meta["xvec"] = self.voxel_Bohr[0]
+        meta["yvec"] = self.voxel_Bohr[1]
+        meta["zvec"] = self.voxel_Bohr[2]
+        write_cube(density_data, meta, file_name)
+
 
     def get_number_of_electrons(self, density_data, voxel_Bohr=None,
                                 integration_method="summation"):
