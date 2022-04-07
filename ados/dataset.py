@@ -11,41 +11,33 @@ from .fp_spherical import ConfigurationFingerprint, spherical_neighbors
 import ados.DFT_calculators as DFT_calculators
 
 
+def load_snapshots_list(filename):
+    ss = []
+    with open(filename, "r") as f:
+        for line in f:
+            temp, density, ss_id, phase = line.split()
+            ss.append((temp, density, ss_id, phase))
+    return ss
+
+
 class AtomicConfigurations(torch.utils.data.Dataset):
 
 
-    def __init__(self, root, mode, temp, rcut, data_transform=None, target_transform=None, rotate=False):
+    def __init__(self, root, snapshots, rcut, data_transform=None, target_transform=None, rotate=False):
         self.root = os.path.expanduser(root)
-        self.mode = mode
-        self.temp = temp
+        self.snapshots = snapshots
         self.rcut = rcut
         self.data_transform = data_transform
         self.target_transform = target_transform
         self.rotate = rotate
         self.splits = None
-        if temp == 298:
-            self.splits = {
-                "train": [*range(0, 8)],
-                "validation": [8],
-                "test": [9]
-            }
-        elif temp == 933:
-            self.splits = {
-                "train": [*range(0, 6)] + [*range(10, 16)],
-                "validation": (6, 16),
-                "test": [*range(7, 10)] + [*range(17, 20)]
-            }
 
-        if temp not in (298, 933):
-            raise Exception("Temp {}K dataset not implemented".format(temp))
-        if mode not in ["train", "validation", "test"]:
-            raise Exception("Invalid dataset mode {}".format(mode))
-
-        self.config_ids, self.ref_files, dft_files = self.get_files()
+        self.ref_files, dft_files = self.get_files()
 
         self.atom_env_data = []
         self.ref_data = []
-        self.atom_config_ids = []
+        # The index_config_map is used to look up the snapshot/config that a sample belongs to
+        self.index_config_map = []
 
         self.dft_results = []
         for i, dft_file in enumerate(dft_files):
@@ -57,8 +49,7 @@ class AtomicConfigurations(torch.utils.data.Dataset):
             config_structure = Structure(dft_result.cell, config_species, dft_pos, 0, coords_are_cartesian=True)
             local_env_data = spherical_neighbors(config_structure, self.rcut)
             self.atom_env_data.extend(local_env_data)
-            config_id = self.config_ids[i]
-            self.atom_config_ids.extend(np.full(n_atoms, config_id))
+            self.index_config_map.extend([self.snapshots[i]]*n_atoms)
 
         for ref_file in self.ref_files:
             ados_data = np.load(ref_file)
@@ -69,26 +60,24 @@ class AtomicConfigurations(torch.utils.data.Dataset):
     def get_files(self):
         data_fpaths = []
         dft_fpaths = []
-        sshot_ids = self.splits[self.mode]
-        sshot_dir = os.path.join(self.root, "{}K/2.699gcc".format(self.temp))
-        for sshot_id in sshot_ids:
-            sshot_fpath = os.path.join(sshot_dir, "Al.scf.pw.snapshot{}.lammps".format(sshot_id))
-            data_fpath = os.path.join(sshot_dir, "Al_ados_250elvls_sigma1.3_snapshot{}.npy".format(sshot_id))
+        for temp, density, ss_id, _ in self.snapshots:
+            sshot_dir = os.path.join(self.root, f"{temp}K/{density}gcc")
+            data_fpath = os.path.join(sshot_dir, f"Al_ados_250elvls_sigma1.3_snapshot{ss_id}.npy")
             data_fpaths.append(data_fpath)
-            dft_fpath = os.path.join(sshot_dir, "QE_Al.scf.pw.snapshot{}.out".format(sshot_id))
+            dft_fpath = os.path.join(sshot_dir, f"QE_Al.scf.pw.snapshot{ss_id}.out")
             dft_fpaths.append(dft_fpath)
 
-        return sshot_ids, data_fpaths, dft_fpaths
+        return data_fpaths, dft_fpaths
 
 
     def __getitem__(self, index):
         pos, neighbor_pos, neighbor_dists = self.atom_env_data[index]
-        config_id = self.atom_config_ids[index]
         y = self.ref_data[index]
         x = self.data_transform(pos, neighbor_pos, neighbor_dists, self.rotate)
         x = torch.FloatTensor(x)
-        items = [x, y, config_id]
-
+        # Return the index so it can be used to look up the config/snapshot using
+        # self.index_config_map
+        items = [x, y, index]
         return items
 
 

@@ -2,13 +2,14 @@ import torch
 import torch.nn.functional as F
 import argparse
 import os
+import pathlib
 import logging
 import sys
 import time
 import numpy as np
 import csv
-from .model import CSGNN
-from .dataset import AtomicConfigurations
+from .model import CSGNN, disable_dropout, enable_dropout
+from .dataset import AtomicConfigurations, load_snapshots_list
 from .fp_spherical import ConfigurationFingerprint
 from ados.common import E_LVLS
 from mesh.mesh import icosphere
@@ -20,6 +21,7 @@ def count_parameters(model):
 
 def train_step(model, data, target, optimizer):
     model.train()
+    enable_dropout(model)
     data = data.cuda()
     ados = model(data)
     ref_ados = target.cuda()
@@ -32,9 +34,10 @@ def train_step(model, data, target, optimizer):
     return loss_ados.item() 
 
 
-@torch.inference_mode()
+#@torch.inference_mode()
 def test_step(model, data, target):
     model.eval()
+    disable_dropout(model)
     data = data.cuda()
     ados = model(data)
     ref_ados = target.cuda()
@@ -44,7 +47,7 @@ def test_step(model, data, target):
 
 
 def get_log_name(args):
-    log_name = "ados-{}K-l{}-F{}-B{}-R{}-kr{}-rcut{}-{}-m_{}-sc_{}-p{}-lr{}".format(args.temp, args.l, args.param_factor, args.batch_size, args.R, args.k_radial, args.rcut, args.g, args.m, args.scaling, args.p, args.lr)
+    log_name = "ados-l{}-F{}-B{}-R{}-kr{}-rcut{}-{}-m_{}-sc_{}-p{}-lr{}".format(args.l, args.param_factor, args.batch_size, args.R, args.k_radial, args.rcut, args.g, args.m, args.scaling, args.p, args.lr)
     if args.rotate_train:
         log_name += "-rtrain"
     if args.dropout:
@@ -97,12 +100,18 @@ def model_setup(args, **kwargs):
     return model
 
 
+
+
+
 def train(args, model, **kwargs):
+
+    training_snapshots = load_snapshots_list(args.training_snapshots)
+    validation_snapshots = load_snapshots_list(args.validation_snapshots)
 
     data_path = os.path.join(args.data_dir, args.dataset)
     fp_transform = ConfigurationFingerprint(args.rcut, args.R, args.l, args.m, args.scaling)
-    train_data = AtomicConfigurations(data_path, "train", args.temp, args.rcut, data_transform=fp_transform, rotate=args.rotate_train)
-    valid_data = AtomicConfigurations(data_path, "validation", args.temp, args.rcut, data_transform=fp_transform, rotate=args.rotate_test)
+    train_data = AtomicConfigurations(data_path, training_snapshots, args.rcut, data_transform=fp_transform, rotate=args.rotate_train)
+    valid_data = AtomicConfigurations(data_path, validation_snapshots, args.rcut, data_transform=fp_transform, rotate=args.rotate_test)
     n_train, n_valid = len(train_data), len(valid_data)
     print("n_train: {}, n_valid: {}".format(n_train, n_valid))
 
@@ -117,12 +126,9 @@ def train(args, model, **kwargs):
     console = logging.StreamHandler(sys.stdout)
     logger.addHandler(console)
     this_file_dir = os.path.dirname(os.path.abspath(__file__))
-    out_dir = os.path.join(args.data_dir, "ados_out")
-    log_dir = os.path.join(out_dir, "logs")
-    if args.out:
-        log_dir = os.path.join(log_dir, args.out)
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir, exist_ok=True)
+    out_dir = pathlib.Path(args.out)
+    log_dir = out_dir / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
 
     log_name = get_log_name(args)
     save_model_name = log_name + ".pkl"
@@ -153,7 +159,7 @@ def train(args, model, **kwargs):
 
         time_before_train = time.perf_counter()
         time_before_load = time.perf_counter()
-        for batch_idx, (input_data, target_data, config_ids) in enumerate(train_loader):
+        for batch_idx, (input_data, target_data, _) in enumerate(train_loader):
             time_after_load = time.perf_counter()
             n_batches += 1
             time_before_step = time.perf_counter()
@@ -183,7 +189,7 @@ def train(args, model, **kwargs):
 
         n_batches = 0
         time_before_eval = time.perf_counter()
-        for batch_idx, (input_data, target_data, config_ids) in enumerate(valid_loader):
+        for batch_idx, (input_data, target_data, _) in enumerate(valid_loader):
             loss = test_step(model, input_data, target_data)
             total_val_loss += loss
             n_batches += 1
@@ -246,7 +252,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-dataset", default="aluminum", help="Dataset name")
     parser.add_argument("-d", "--data_dir", help="Data directory")
-    parser.add_argument("-o", "--out", default='', help="Name of output directory") 
+    parser.add_argument("--training_snapshots", help="File containing list of training snapshots", default="training_data.txt")
+    parser.add_argument("--validation_snapshots", help="File containing list of validation snapshots", default="validation_data.txt")
+    parser.add_argument("-o", "--out", help="Name of output directory", default="ados_out") 
     parser.add_argument("-x", "--results", default='', help="Name of experiment results file")
     parser.add_argument('-l', '--level', help='Level of mesh refinement', type=int, dest='l', default=3)
     parser.add_argument('-R', type=int, default=16, help='Number of radial levels')
@@ -258,7 +266,6 @@ if __name__ == "__main__":
     parser.add_argument("-g", help="Graph convolution type", choices=["gcn", "graphsage"], default="gcn")
     parser.add_argument("-b", "--batch_size", type=int, help="Batch size", default=32)
     parser.add_argument("-F", "--param-factor", type=float, help="Parameter increase factor", default=4)
-    parser.add_argument("--temp", type=int, default=933, choices=[298, 933], help="Temperature of snapshots")
     parser.add_argument("--dropout", type=float, default=0)
     parser.add_argument("--weight-decay", type=float, default=0)
     parser.add_argument("--lr", type=float, default=1e-2)
@@ -273,15 +280,16 @@ if __name__ == "__main__":
     parser.add_argument("--workers", type=int, default=8, help="Number of processes for data loading")
 
     args = parser.parse_args()
+   
+    out_dir = pathlib.Path(args.out)
+    out_dir.mkdir(parents=True, exist_ok=True)
     os.environ["CUDA_VISIBLE_DEVICES"]=str(args.device)
 
     icosphere = icosphere(args.l)
     model = model_setup(args, mesh=icosphere)
     val_results, logger = train(args, model)
 
-    log_dir = os.path.join(args.data_dir, "ados_out/logs")
-    if args.out:
-        log_dir = os.path.join(log_dir, args.out)
+
     if args.results:
-        write_path = os.path.join(log_dir, args.results)
+        write_path = os.path.join(args.out, args.results)
         write_results(val_results,  write_path, args)

@@ -9,6 +9,20 @@ BATCH_NORM = True
 GC_BIAS = True
 
 
+def disable_dropout(model):
+    """Disable dropout on the model by setting eval mode on dropout layers"""
+    for module in model.modules():
+        if 'Dropout' in type(module).__name__:
+            module.eval()
+            
+
+def enable_dropout(model):
+    """Disable dropout on the model by setting train mode on dropout layers"""
+    for module in model.modules():
+        if 'Dropout' in type(module).__name__:
+            module.train()
+
+
 class CSGNN(nn.Module):
 
     def __init__(self, icosphere, radius_lvls, gconv_type, gconv_dims, gconv_depths, outblock_hidden_dims,
