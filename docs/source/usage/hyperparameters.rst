@@ -18,7 +18,8 @@ The basic usage is the same:
 
 
 COMING SOON: We are currently in the process of publishing a research article
-on hyperparameter optimiuzation in MALA.
+on hyperparameter optimization in MALA. The preprint can be accessed at
+https://arxiv.org/abs/2202.09186.
 
 Optuna
 *******

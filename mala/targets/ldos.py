@@ -115,7 +115,8 @@ class LDOS(Target):
             Units the LDOS is saved in.
 
         use_memmap : string
-            If not None, a memory mapped file will be used to gather the LDOS.
+            If not None, a memory mapped file with this name will be used to
+            gather the LDOS.
             If run in MPI parallel mode, such a file MUST be provided.
 
         Returns
@@ -176,28 +177,56 @@ class LDOS(Target):
             data = data*self.convert_units(1, in_units=units)
             ldos_data[:, :, :, i-start_index] = data[:, :, :]
 
-        # If a memmap is used for communication, this has to be brought into
-        # play now.
+        # We have to gather the LDOS either file based or not.
         if self.parameters._configuration["mpi"]:
             barrier()
             data_shape = np.shape(ldos_data)
-            if get_rank() == 0:
-                ldos_data_full = np.memmap(use_memmap,
-                                           shape=(data_shape[0], data_shape[1],
-                                                 data_shape[2], self.parameters.
-                                                 ldos_gridsize), mode="w+",
-                                           dtype=np.float64)
-            barrier()
-            if get_rank() != 0:
-                ldos_data_full = np.memmap(use_memmap,
-                                           shape=(data_shape[0], data_shape[1],
-                                                  data_shape[2], self.parameters.
-                                                  ldos_gridsize), mode="r+",
-                                           dtype=np.float64)
-            barrier()
-            ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
-            return ldos_data_full
+            if use_memmap is not None:
+                if get_rank() == 0:
+                    ldos_data_full = np.memmap(use_memmap,
+                                               shape=(data_shape[0], data_shape[1],
+                                                     data_shape[2], self.parameters.
+                                                     ldos_gridsize), mode="w+",
+                                               dtype=np.float64)
+                barrier()
+                if get_rank() != 0:
+                    ldos_data_full = np.memmap(use_memmap,
+                                               shape=(data_shape[0], data_shape[1],
+                                                      data_shape[2], self.parameters.
+                                                      ldos_gridsize), mode="r+",
+                                               dtype=np.float64)
+                barrier()
+                ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
+                return ldos_data_full
+            else:
+                comm = get_comm()
 
+                # First get the indices from all the ranks.
+                indices = np.array(
+                    comm.gather([get_rank(), start_index, end_index],
+                                root=0))
+                ldos_data_full = None
+                if get_rank() == 0:
+                    ldos_data_full = np.empty((data_shape[0], data_shape[1],
+                                               data_shape[2], self.parameters.
+                                               ldos_gridsize),dtype=np.float64)
+                    ldos_data_full[:, :, :, start_index-1:end_index-1] = \
+                        ldos_data[:, :, :, :]
+
+                    # No MPI necessary for first rank. For all the others,
+                    # collect the buffers.
+                    for i in range(1, get_size()):
+                        local_start = indices[i][1]
+                        local_end = indices[i][2]
+                        local_size = local_end-local_start
+                        ldos_local = np.empty(local_size*data_shape[0]*data_shape[1]*data_shape[2], dtype=np.float64)
+                        comm.Recv(ldos_local, source=i, tag=100 + i)
+                        ldos_data_full[:, :, :, local_start-1:local_end-1] = np.reshape(ldos_local, (data_shape[0], data_shape[1], data_shape[2], local_size))[:,:,:,:]
+                else:
+                    comm.Send(ldos_data, dest=0,
+                              tag=get_rank() + 100)
+                barrier()
+                return ldos_data_full
         else:
             return ldos_data
 
@@ -502,7 +531,7 @@ class LDOS(Target):
                                             "summation",
                                             energy_integration_method=
                                             "analytical"):
-        """
+        r"""
         Calculate the self-consistent Fermi energy.
 
         "Self-consistent" does not mean self-consistent in the DFT sense,
@@ -541,7 +570,7 @@ class LDOS(Target):
         Returns
         -------
         fermi_energy_self_consistent : float
-            E_F in eV.
+            :math:`\epsilon_F` in eV.
         """
         # The Fermi energy is calculated using the DOS.
         if voxel_Bohr is None:
@@ -561,7 +590,8 @@ class LDOS(Target):
 
     def get_density(self, ldos_data, fermi_energy_ev=None, temperature_K=None,
                     conserve_dimensions=False,
-                    integration_method="analytical"):
+                    integration_method="analytical",
+                    gather_density=True):
         """
         Calculate the density from given LDOS data.
 
@@ -597,6 +627,12 @@ class LDOS(Target):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
+        gather_density : bool
+            Only important if MPI is used. If True, the density will be
+            gathered on rank 0.
+            Helpful when using multiple CPUs for descriptor calculations
+            and only one for network pass.
+
         Returns
         -------
         density_data : numpy.array
@@ -619,7 +655,7 @@ class LDOS(Target):
             ldos_data_used = ldos_data
             pass
         elif len(ldos_data_shape) == 4:
-            # We have the LDOS as gridx x gridy x gridz x energygrid,
+            # We have the LDOS as (gridx, gridy, gridz, energygrid),
             # so some reshaping needs to be done.
             ldos_data_used = ldos_data.reshape(
                 [ldos_data_shape[0] * ldos_data_shape[1] * ldos_data_shape[2],
@@ -654,7 +690,22 @@ class LDOS(Target):
             ldos_data_shape[-1] = 1
             density_values = density_values.reshape(ldos_data_shape)
 
-        return density_values
+        # Now we have the full density; We now need to collect it, in the
+        # MPI case.
+        if self.parameters._configuration["mpi"] and gather_density:
+            density_values = np.reshape(density_values,
+                                        [np.shape(density_values)[0], 1])
+            density_values = np.concatenate((self.local_grid, density_values),
+                                          axis=1)
+            full_density = self._gather_density(density_values)
+            if len(ldos_data_shape) == 2:
+                ldos_shape = np.shape(full_density)
+                full_density = np.reshape(full_density, [ldos_shape[0] *
+                                                         ldos_shape[1] *
+                                                         ldos_shape[2], 1])
+            return full_density
+        else:
+            return density_values
 
     def get_density_of_states(self, ldos_data, voxel_Bohr=None,
                               integration_method="summation",
@@ -705,7 +756,7 @@ class LDOS(Target):
                 raise Exception("If using a 2D LDOS array, you can only "
                                 "use summation as integration method.")
 
-        # We have the LDOS as gridx x gridy x gridz x energygrid, no
+        # We have the LDOS as (gridx, gridy, gridz, energygrid), no
         # further operation is necessary.
         dos_values = ldos_data  # .copy()
 
@@ -774,10 +825,11 @@ class LDOS(Target):
 
     def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
                           snapshot_number=0):
-        """
-        Get the atomic forces (dE/dR), currently work in progress.
+        r"""
+        Get the atomic forces, currently work in progress.
 
-        Will only give the dd_dB.
+        Will eventually give :math:`\frac{dE}{d \underline{\boldsymbol{R}}}`.
+        Will currently only give :math:`\frac{dd}{dB}`.
 
         Parameters
         ----------
@@ -914,4 +966,97 @@ class LDOS(Target):
     def uncache_density(self):
         """Uncache a density, to calculate a new one in following steps."""
         self.cached_density_exists = False
+
+    def _gather_density(self, density_values, use_pickled_comm=False):
+        """
+        Gathers all SNAP descriptors on rank 0 and sorts them.
+
+        This is useful for e.g. parallel preprocessing.
+        This function removes the extra 3 components that come from parallel
+        processing.
+        I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
+        97 (in parallel mode), and this function returns, as to retain the
+        3 x,y,z ones we by default include.
+
+        Parameters
+        ----------
+        density_values : numpy.array
+            Numpy array with the SNAP descriptors of this ranks local grid.
+
+        use_pickled_comm : bool
+            If True, the pickled communication route from mpi4py is used.
+            If False, a Recv/Sendv combination is used. I am not entirely
+            sure what is faster. Technically Recv/Sendv should be faster,
+            but I doubt my implementation is all that optimal. For the pickled
+            route we can use gather(), which should be fairly quick.
+            However, for large grids, one CANNOT use the pickled route;
+            too large python objects will break it. Therefore, I am setting
+            the Recv/Sendv route as default.
+        """
+        # Barrier to make sure all ranks have descriptors..
+        comm = get_comm()
+        barrier()
+
+        # Gather the SNAP descriptors into a list.
+        if use_pickled_comm:
+            density_list = comm.gather(density_values, root=0)
+        else:
+            sendcounts = np.array(comm.gather(np.shape(density_values)[0],
+                                              root=0))
+            if get_rank() == 0:
+                # print("sendcounts: {}, total: {}".format(sendcounts,
+                #                                          sum(sendcounts)))
+
+                # Preparing the list of buffers.
+                density_list = []
+                for i in range(0, get_size()):
+                    density_list.append(np.empty(sendcounts[i]*4,
+                                                 dtype=np.float64))
+                # No MPI necessary for first rank. For all the others,
+                # collect the buffers.
+                density_list[0] = density_values
+                for i in range(1, get_size()):
+                    comm.Recv(density_list[i], source=i,
+                              tag=100+i)
+                    density_list[i] = \
+                        np.reshape(density_list[i],
+                                   (sendcounts[i], 4))
+            else:
+                comm.Send(density_values, dest=0, tag=get_rank()+100)
+            barrier()
+        # if get_rank() == 0:
+        #     printout(np.shape(all_snap_descriptors_list[0]))
+        #     printout(np.shape(all_snap_descriptors_list[1]))
+        #     printout(np.shape(all_snap_descriptors_list[2]))
+        #     printout(np.shape(all_snap_descriptors_list[3]))
+
+        # Dummy for the other ranks.
+        # (For now, might later simply broadcast to other ranks).
+        full_density = np.zeros([1, 1, 1, 1])
+
+        # Reorder the list.
+        if get_rank() == 0:
+            # Prepare the SNAP descriptor array.
+            nx = self.grid_dimensions[0]
+            ny = self.grid_dimensions[1]
+            nz = self.grid_dimensions[2]
+            full_density = np.zeros(
+                [nx, ny, nz, 1])
+            # Fill the full SNAP descriptors array.
+            for idx, local_density in enumerate(density_list):
+                # We glue the individual cells back together, and transpose.
+                first_x = int(local_density[0][0])
+                first_y = int(local_density[0][1])
+                first_z = int(local_density[0][2])
+                last_x = int(local_density[-1][0])+1
+                last_y = int(local_density[-1][1])+1
+                last_z = int(local_density[-1][2])+1
+                full_density[first_x:last_x,
+                             first_y:last_y,
+                             first_z:last_z] = \
+                    np.reshape(local_density[:,3],[last_z-first_z,
+                                                    last_y-first_y,
+                                                    last_x-first_x,1]).transpose([2, 1, 0, 3])
+
+        return full_density
 

@@ -22,6 +22,8 @@ from mala.datahandling.data_scaler import DataScaler
 class HyperOptOAT(HyperOpt):
     """Hyperparameter optimizer using Orthogonal Array Tuning.
 
+    Based on https://link.springer.com/chapter/10.1007/978-3-030-36808-1_31.
+
     Parameters
     ----------
     params : mala.common.parametes.Parameters
@@ -61,8 +63,8 @@ class HyperOptOAT(HyperOpt):
         Parameters
         ----------
         opttype : string
-            Datatype of the hyperparameter. Follows optunas naming convetions.
-            Default value - categorical (list)
+            Datatype of the hyperparameter. Follows optuna's naming
+            conventions, but currently only supports "categorical" (a list).
         """
         if not self.sorted_num_choices:  # if empty
             super(HyperOptOAT, self).add_hyperparameter(
@@ -79,8 +81,7 @@ class HyperOptOAT(HyperOpt):
         """
         Perform the study, i.e. the optimization.
 
-        This is done by sampling a certain subset of network architectures.
-        In this case, these are choosen based on an orthogonal array.
+        Uses Optunas TPE sampler.
         """
         if self.__OA is None:
             self.__OA = self.get_orthogonal_array()
@@ -150,7 +151,7 @@ class HyperOptOAT(HyperOpt):
         """
         Generate the best OA used for optimal hyperparameter sampling.
 
-        This is function is taken from the example notebook of OApackage
+        This is function is taken from the example notebook of OApackage.
         """
         self.__check_factor_levels()
         print("Sorted factor levels:", self.sorted_num_choices)
@@ -242,7 +243,7 @@ class HyperOptOAT(HyperOpt):
         Prepare resumption of hyperparameter optimization from a checkpoint.
 
         Please note that to actually resume the optimization,
-        HyperOptOptuna.perform_study() still has to be called.
+        HyperOptOAT.perform_study() still has to be called.
 
         Parameters
         ----------
@@ -260,7 +261,7 @@ class HyperOptOAT(HyperOpt):
         Returns
         -------
         loaded_params : mala.common.parameters.Parameters
-            The Parameters saved in the checkpoint.
+            The parameters saved in the checkpoint.
 
         new_datahandler : mala.datahandling.data_handler.DataHandler
             The data handler reconstructed from the checkpoint.

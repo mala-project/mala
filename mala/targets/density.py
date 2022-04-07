@@ -23,7 +23,7 @@ class Density(Target):
     Parameters
     ----------
     params : mala.common.parameters.Parameters
-        Parameters used to create this TargetBase object.
+        Parameters used to create this Target object.
     """
 
     te_mutex = False
@@ -108,7 +108,7 @@ class Density(Target):
         ----------
         density_data : numpy.array
             Electronic density on the given grid. Has to either be of the form
-            gridpoints or gridx x gridy x gridz.
+            gridpoints or (gridx, gridy, gridz).
 
         voxel_Bohr : ase.cell.Cell
             Voxel to be used for grid intergation. Needs to reflect the
@@ -209,7 +209,7 @@ class Density(Target):
         grid_dimensions : list
             Provide a list of dimensions to be used in the transformation
             1D -> 3D. If None, MALA will attempt to use the values read with
-            TargetBase.read_additional_read_additional_calculation_data .
+            Target.read_additional_read_additional_calculation_data .
             If that cannot be done, this function will raise an exception.
 
         Returns
@@ -232,7 +232,7 @@ class Density(Target):
     def get_energy_contributions(self, density_data, create_file=True,
                                  atoms_Angstrom=None, qe_input_data=None,
                                  qe_pseudopotentials=None):
-        """
+        r"""
         Extract density based energy contributions from Quantum Espresso.
 
         Done via a Fortran module accesible through python using f2py.
@@ -264,10 +264,11 @@ class Density(Target):
         -------
         energies : list
             A list containing, in order, the following energy contributions:
-                - n*V_xc
-                - E_Hartree
-                - E_xc
-                - e_Ewald
+
+                - :math:`n\,V_\mathrm{xc}`
+                - :math:`E_\mathrm{H}`
+                - :math:`E_\mathrm{xc}`
+                - :math:`E_\mathrm{Ewald}`
         """
         if atoms_Angstrom is None:
             atoms_Angstrom = self.atoms
@@ -290,7 +291,7 @@ class Density(Target):
         This function uses an interface to QE. The atomic forces are
         calculated via the Hellman-Feynman theorem, although only the local
         contributions are calculated. The non-local contributions, as well
-        as the SCF correction (so anythin wavefunction dependent) is ignored.
+        as the SCF correction (so anything wavefunction dependent) are ignored.
         Therefore, this function is best used for data that was created using
         local pseudopotentials.
 

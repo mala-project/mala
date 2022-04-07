@@ -1,11 +1,11 @@
 import mala
 from mala import printout
 import os
-from data_repo_path import get_data_repo_path
-data_path = os.path.join(get_data_repo_path(), "Al36/")
+from mala.datahandling.data_repo import data_repo_path
+data_path = os.path.join(data_repo_path, "Al36/")
 
 """
-ex17_advanced_networks.py: Shows how advanced network models such as 
+ex14_advanced_networks.py: Shows how advanced network models such as 
 lstm, gru and transformer can be used for prediction.
 """
 

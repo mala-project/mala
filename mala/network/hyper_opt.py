@@ -11,7 +11,7 @@ from mala.network.objective_base import ObjectiveBase
 
 
 class HyperOpt(ABC):
-    """Base class for hyperparameter optimizater.
+    """Base class for hyperparameter optimizer.
 
     Parameters
     ----------
@@ -75,7 +75,8 @@ class HyperOpt(ABC):
         Parameters
         ----------
         opttype : string
-            Datatype of the hyperparameter. Follows optunas naming convetions.
+            Datatype of the hyperparameter. Follows optuna's naming
+            conventions.
             In principle supported are:
 
                 - float

@@ -153,6 +153,7 @@ cython_debug/
 *.npy
 *.pkl
 *.pth
+*.json
 
 # JupyterNotebooks
 .ipynb_checkpoints
@@ -163,3 +164,4 @@ cython_debug/
 
 # LAMMPS
 *.tmp
+

@@ -5,9 +5,11 @@ authors:
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Cangi
     given-names: Attila
+    orcid: https://orcid.org/0000-0001-9162-262X
   - affiliation: "Oak Ridge National Laboratory (ORNL)"
     family-names: Ellis
     given-names: J. Austin
+    orcid: https://orcid.org/0000-0002-9901-102X
   - affiliation: "Center for Advanced Systems Understanding (CASUS), Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Fiedler
     given-names: Lenz
@@ -28,15 +30,18 @@ authors:
   - affiliation: "Sandia National Laboratories (SNL)"
     family-names: Rajamanickam
     given-names: Siva
+    orcid: https://orcid.org/0000-0002-5854-409X
   - affiliation: "Helmholtz-Zentrum Dresden-Rossendorf e.V. (HZDR)"
     family-names: Schmerler
     given-names: Steve
+    orcid: https://orcid.org/0000-0003-1354-0578
   - affiliation: "Sandia National Laboratories (SNL)"
     family-names: Stephens
     given-names: J. Adam
   - affiliation: "Sandia National Laboratories (SNL)"
     family-names: Thompson
     given-names: Aidan P.
+    orcid: https://orcid.org/0000-0002-0324-9114
 
 
 date-released: 2021-10-08
@@ -45,6 +50,6 @@ keywords:
   - "dft"
 license: "BSD-3-Clause"
 repository-code: "https://github.com/mala-project/mala"
-title: mala
+title: MALA
 doi: 10.5281/zenodo.5557254 # This DOI represents all versions, and will always resolve to the latest one.
 version: 0.2.0

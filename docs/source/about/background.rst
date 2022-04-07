@@ -89,7 +89,7 @@ These connections are important, since the
 
 with the band energy :math:`E_b`.
 
-If the LDOS can be learned appropriately accurate, MALA can therefore,
+If the LDOS can be learned appropriately accurate, MALA can therefore
 evaluate energies analytically. To approximate the LDOS, an NN, :math:`M`, is
 employed via
 
