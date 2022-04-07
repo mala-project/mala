@@ -53,3 +53,9 @@ class TestExamples:
 
     def test_ex15(self):
         runpy.run_path("../examples/ex15_ase_calculator.py")
+
+    def test_ex16(self):
+        runpy.run_path("../examples/ex16_observables.py")
+
+    def test_ex17(self):
+        runpy.run_path("../examples/ex17_visualize_electronic_structure.py")
