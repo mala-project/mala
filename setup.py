@@ -22,7 +22,7 @@ extras = {
 }
 
 setup(
-    name="mala",
+    name="pymala",
     version=version["__version__"],
     description=("Materials Learning Algorithms. "
                  "A framework for machine learning materials properties from "
