@@ -147,6 +147,11 @@ class Target(ABC):
         raise Exception("No function defined to read this quantity "
                         "from a qe.dos.txt file")
 
+    def write_as_cube(self):
+        """Write the quantity in a cube file."""
+        raise Exception("No function defined to write this quantity "
+                        "to a .cube file.")
+
     def get_density(self):
         """Get the electronic density."""
         raise Exception("No function to calculate or provide the "

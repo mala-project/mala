@@ -13,6 +13,8 @@ numpy arrays of the correct size. For the input data, this means descriptor
 calculation.
 
 Further preprocessing steps (scaling, unit conversion) is done later. 
+
+REQUIRES LAMMPS.
 """
 
 

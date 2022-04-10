@@ -19,7 +19,7 @@ ex05_* files used below.
 data_repo_path = os.environ["MALA_DATA_REPO"]
 
 data_path = pj(data_repo_path, "Al36")
-params_path = "ex05_params.pkl"
+params_path = "ex05_params.json"
 network_path = "ex05_network.pth"
 input_scaler_path = "ex05_iscaler.pkl"
 output_scaler_path = "ex05_oscaler.pkl"
