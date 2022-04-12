@@ -1,3 +1,3 @@
 """Version number of MALA."""
 
-__version__: str = '0.2.0'
+__version__: str = '1.0.0'
