@@ -11,4 +11,4 @@ dependencies:
   - ase
   - pytorch-cpu
   - mpmath
-  - pandas
+  - tensorboard

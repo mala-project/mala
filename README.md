@@ -5,6 +5,7 @@
 [![CPU](https://github.com/mala-project/mala/actions/workflows/cpu-tests.yml/badge.svg)](https://github.com/mala-project/mala/actions/workflows/cpu-tests.yml)
 [![image](https://github.com/mala-project/mala/actions/workflows/gh-pages.yml/badge.svg)](https://mala-project.github.io/mala/)
 [![image](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5557255.svg)](https://doi.org/10.5281/zenodo.5557255)
 
 
 MALA (Materials Learning Algorithms) is a data-driven framework to generate surrogate models of density functional theory calculations based on machine learning. Its purpose is to enable multiscale modeling by bypassing computationally expensive steps in state-of-the-art density functional simulations.
@@ -21,6 +22,8 @@ This repository is structured as follows:
 ```
 
 ## Installation
+
+> **WARNING**: Even if you install MALA via PyPI, please consult the full installation instructions afterwards. External modules (like the QuantumESPRESSO bindings) are not distributed via PyPI!
 
 Please refer to [Installation of MALA](docs/source/install/README.md).
 

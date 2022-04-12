@@ -3,7 +3,7 @@ import os
 import mala
 from mala import printout
 
-from data_repo_path import data_repo_path
+from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Al36")
 
 """
@@ -21,11 +21,8 @@ def initial_setup():
     ####################
     test_parameters = mala.Parameters()
     # Currently, the splitting in training, validation and test set are
-    # done on a "by snapshot" basis. Specify how this is
-    # done by providing a list containing entries of the form
-    # "tr", "va" and "te".
+    # done on a "by snapshot" basis.
     test_parameters.data.data_splitting_type = "by_snapshot"
-    test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
 
     # Specify the data scaling.
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
@@ -40,11 +37,12 @@ def initial_setup():
     # Specify the number of trials, the hyperparameter optimizer should run
     # and the type of hyperparameter.
     test_parameters.hyperparameters.n_trials = 20
-    test_parameters.hyperparameters.hyper_opt_method = "oat"
+    test_parameters.hyperparameters.hyper_opt_method = "optuna"
     test_parameters.hyperparameters.number_training_per_trial = 1
     test_parameters.running.verbosity = False
     test_parameters.hyperparameters.checkpoint_name = "ex04"
     test_parameters.hyperparameters.checkpoints_each_trial = -1
+
     ####################
     # DATA
     # Add and prepare snapshots for training.
@@ -53,13 +51,13 @@ def initial_setup():
 
     # Add all the snapshots we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                              "Al_debug_2k_nr0.out.npy", data_path,
+                              "Al_debug_2k_nr0.out.npy", data_path, "tr",
                               output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                              "Al_debug_2k_nr1.out.npy", data_path,
+                              "Al_debug_2k_nr1.out.npy", data_path, "va",
                               output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                              "Al_debug_2k_nr2.out.npy", data_path,
+                              "Al_debug_2k_nr2.out.npy", data_path, "te",
                               output_units="1/Ry")
     data_handler.prepare_data()
     printout("Read data: DONE.")
@@ -73,7 +71,7 @@ def initial_setup():
     # of interest.
     ####################
 
-    test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
+    test_hp_optimizer = mala.HyperOpt(test_parameters, data_handler)
 
     # Learning rate will be optimized.
     test_hp_optimizer.add_hyperparameter("categorical", "learning_rate",
@@ -93,7 +91,7 @@ def initial_setup():
 
 if mala.HyperOptOptuna.checkpoint_exists("ex04"):
     parameters, datahandler, hyperoptimizer = \
-        mala.HyperOptOAT.resume_checkpoint(
+        mala.HyperOptOptuna.resume_checkpoint(
             "ex04")
     printout("Starting resumed hyperparameter optimization.")
 else:

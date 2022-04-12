@@ -1,8 +1,10 @@
 """Hyperparameter to use with optuna."""
 from optuna.trial import Trial
 
+from mala.common.json_serializable import JSONSerializable
 
-class HyperparameterOptuna:
+
+class HyperparameterOptuna(JSONSerializable):
     """Represents an optuna parameter.
 
     Parameters
@@ -35,6 +37,7 @@ class HyperparameterOptuna:
     """
 
     def __init__(self, opttype="float", name="", low=0, high=0, choices=None):
+        super(HyperparameterOptuna, self).__init__()
         self.name = name
         self.high = high
         self.low = low
@@ -49,7 +52,7 @@ class HyperparameterOptuna:
 
     def get_parameter(self, trial: Trial):
         """
-        Extract current value of hyperparameter from on a optuna Trial.
+        Extract current value of hyperparameter from an optuna Trial.
 
         Parameters
         ----------
@@ -72,7 +75,7 @@ class HyperparameterOptuna:
 
     def get_float(self, trial: Trial):
         """
-        Extract float hyperparameter from on a optuna Trial.
+        Extract float hyperparameter from an optuna Trial.
 
         Parameters
         ----------
@@ -92,7 +95,7 @@ class HyperparameterOptuna:
 
     def get_int(self, trial: Trial):
         """
-        Extract integer hyperparameter from on a optuna Trial.
+        Extract integer hyperparameter from an optuna Trial.
 
         Parameters
         ----------
@@ -112,7 +115,7 @@ class HyperparameterOptuna:
 
     def get_categorical(self, trial: Trial):
         """
-        Extract categorical (string) hyperparameter from on a optuna Trial.
+        Extract categorical (string) hyperparameter from an optuna Trial.
 
         Parameters
         ----------

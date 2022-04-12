@@ -4,16 +4,21 @@ from ase.units import Rydberg
 import numpy as np
 import math
 import os
+try:
+    from mpi4py import MPI
+except ModuleNotFoundError:
+    pass
 
-from mala.common.parameters import printout
+from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
+    barrier
 from mala.targets.cube_parser import read_cube
-from mala.targets.target_base import TargetBase
+from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.dos import DOS
 from mala.targets.density import Density
 
 
-class LDOS(TargetBase):
+class LDOS(Target):
     """Postprocessing / parsing functions for the local density of states.
 
     Parameters
@@ -62,7 +67,6 @@ class LDOS(TargetBase):
         elif in_units == "1/Ry":
             return array * (1/Rydberg)
         else:
-            printout(in_units)
             raise Exception("Unsupported unit for LDOS.")
 
     @staticmethod
@@ -90,10 +94,10 @@ class LDOS(TargetBase):
         elif out_units == "1/Ry":
             return array * Rydberg
         else:
-            printout(out_units)
             raise Exception("Unsupported unit for LDOS.")
 
-    def read_from_cube(self, file_name_scheme, directory, units="1/eV"):
+    def read_from_cube(self, file_name_scheme, directory, units="1/eV",
+                       use_memmap=None):
         """
         Read the LDOS data from multiple cube files.
 
@@ -109,6 +113,11 @@ class LDOS(TargetBase):
 
         units : string
             Units the LDOS is saved in.
+
+        use_memmap : string
+            If not None, a memory mapped file with this name will be used to
+            gather the LDOS.
+            If run in MPI parallel mode, such a file MUST be provided.
 
         Returns
         -------
@@ -133,9 +142,22 @@ class LDOS(TargetBase):
         # Iterate over the amount of specified LDOS input files.
         # QE is a Fortran code, so everything is 1 based.
         printout("Reading "+str(self.parameters.ldos_gridsize) +
-                 " LDOS files from"+directory+".")
+                 " LDOS files from"+directory+".", min_verbosity=0)
         ldos_data = None
-        for i in range(1, self.parameters.ldos_gridsize + 1):
+        if self.parameters._configuration["mpi"]:
+            local_size = int(np.floor(self.parameters.ldos_gridsize /
+                                     get_size()))
+            start_index = get_rank()*local_size + 1
+            if get_rank()+1 == get_size():
+                local_size += self.parameters.ldos_gridsize % \
+                                     get_size()
+            end_index = start_index+local_size
+        else:
+            start_index = 1
+            end_index = self.parameters.ldos_gridsize + 1
+            local_size = self.parameters.ldos_gridsize
+
+        for i in range(start_index, end_index):
             tmp_file_name = file_name_scheme
             tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
 
@@ -145,16 +167,68 @@ class LDOS(TargetBase):
             # Once we have read the first cube file, we know the dimensions
             # of the LDOS and can prepare the array
             # in which we want to store the LDOS.
-            if i == 1:
+            if i == start_index:
                 data_shape = np.shape(data)
                 ldos_data = np.zeros((data_shape[0], data_shape[1],
-                                      data_shape[2], self.parameters.
-                                      ldos_gridsize), dtype=np.float64)
+                                      data_shape[2], local_size),
+                                     dtype=np.float64)
 
             # Convert and then append the LDOS data.
             data = data*self.convert_units(1, in_units=units)
-            ldos_data[:, :, :, i-1] = data[:, :, :]
-        return ldos_data
+            ldos_data[:, :, :, i-start_index] = data[:, :, :]
+
+        # We have to gather the LDOS either file based or not.
+        if self.parameters._configuration["mpi"]:
+            barrier()
+            data_shape = np.shape(ldos_data)
+            if use_memmap is not None:
+                if get_rank() == 0:
+                    ldos_data_full = np.memmap(use_memmap,
+                                               shape=(data_shape[0], data_shape[1],
+                                                     data_shape[2], self.parameters.
+                                                     ldos_gridsize), mode="w+",
+                                               dtype=np.float64)
+                barrier()
+                if get_rank() != 0:
+                    ldos_data_full = np.memmap(use_memmap,
+                                               shape=(data_shape[0], data_shape[1],
+                                                      data_shape[2], self.parameters.
+                                                      ldos_gridsize), mode="r+",
+                                               dtype=np.float64)
+                barrier()
+                ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
+                return ldos_data_full
+            else:
+                comm = get_comm()
+
+                # First get the indices from all the ranks.
+                indices = np.array(
+                    comm.gather([get_rank(), start_index, end_index],
+                                root=0))
+                ldos_data_full = None
+                if get_rank() == 0:
+                    ldos_data_full = np.empty((data_shape[0], data_shape[1],
+                                               data_shape[2], self.parameters.
+                                               ldos_gridsize),dtype=np.float64)
+                    ldos_data_full[:, :, :, start_index-1:end_index-1] = \
+                        ldos_data[:, :, :, :]
+
+                    # No MPI necessary for first rank. For all the others,
+                    # collect the buffers.
+                    for i in range(1, get_size()):
+                        local_start = indices[i][1]
+                        local_end = indices[i][2]
+                        local_size = local_end-local_start
+                        ldos_local = np.empty(local_size*data_shape[0]*data_shape[1]*data_shape[2], dtype=np.float64)
+                        comm.Recv(ldos_local, source=i, tag=100 + i)
+                        ldos_data_full[:, :, :, local_start-1:local_end-1] = np.reshape(ldos_local, (data_shape[0], data_shape[1], data_shape[2], local_size))[:,:,:,:]
+                else:
+                    comm.Send(ldos_data, dest=0,
+                              tag=get_rank() + 100)
+                barrier()
+                return ldos_data_full
+        else:
+            return ldos_data
 
     def get_energy_grid(self):
         """
@@ -177,11 +251,13 @@ class LDOS(TargetBase):
     def get_total_energy(self, ldos_data=None, dos_data=None,
                          density_data=None, fermi_energy_eV=None,
                          temperature_K=None,
-                         grid_spacing_bohr=None,
+                         voxel_Bohr=None,
                          grid_integration_method="summation",
                          energy_integration_method="analytical",
                          atoms_Angstrom=None,
-                         qe_input_data=None, qe_pseudopotentials=None):
+                         qe_input_data=None, qe_pseudopotentials=None,
+                         create_qe_file=True,
+                         return_energy_contributions=False):
         """
         Calculate the total energy from LDOS or given DOS + density data.
 
@@ -209,16 +285,16 @@ class LDOS(TargetBase):
         temperature_K : float
             Temperature in K.
 
-        grid_spacing_bohr : float
-            Grid spacing (in Bohr) used to construct this grid. As of now,
-            only equidistant grids are supported.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         grid_integration_method : str
             Integration method used to integrate the density on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
@@ -240,6 +316,16 @@ class LDOS(TargetBase):
             Quantum Espresso pseudopotential dictionaty for the ASE<->QE
             interface. If None (recommended), MALA will create one.
 
+        create_qe_file : bool
+            If True, a QE input file will be created by MALA during the
+            calculation. This is the default, however there may be
+            cases in which it makes sense for the user to provide a custom
+            one.
+
+        return_energy_contributions : bool
+            If True, a dictionary of energy contributions will be provided
+            alongside the total energy. The default is False.
+
         Returns
         -------
         total_energy : float
@@ -247,8 +333,8 @@ class LDOS(TargetBase):
 
         """
         # Get relevant values from DFT calculation, if not otherwise specified.
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
         if fermi_energy_eV is None:
             fermi_energy_eV = self.fermi_energy_eV
         if temperature_K is None:
@@ -264,8 +350,8 @@ class LDOS(TargetBase):
         # Calculate DOS data if need be.
         if dos_data is None:
             dos_data = self.get_density_of_states(ldos_data,
-                                                  grid_spacing_bohr=
-                                                  grid_spacing_bohr,
+                                                  voxel_Bohr=
+                                                  voxel_Bohr,
                                                   integration_method=
                                                   grid_integration_method)
 
@@ -305,14 +391,24 @@ class LDOS(TargetBase):
             = density_calculator.\
             get_energy_contributions(density_data, qe_input_data=qe_input_data,
                                      atoms_Angstrom=atoms_Angstrom,
-                                     qe_pseudopotentials=qe_pseudopotentials)
+                                     qe_pseudopotentials=qe_pseudopotentials,
+                                     create_file=create_qe_file)
         e_total = e_band + e_rho_times_v_hxc + e_hartree + e_xc + e_ewald +\
             e_entropy_contribution
-
-        return e_total
+        if return_energy_contributions:
+            energy_contribtuons = {"e_band": e_band,
+                                   "e_rho_times_v_hxc": e_rho_times_v_hxc,
+                                   "e_hartree": e_hartree,
+                                   "e_xc": e_xc,
+                                   "e_ewald": e_ewald,
+                                   "e_entropy_contribution":
+                                       e_entropy_contribution}
+            return e_total, energy_contribtuons
+        else:
+            return e_total
 
     def get_band_energy(self, ldos_data, fermi_energy_eV=None,
-                        temperature_K=None, grid_spacing_bohr=None,
+                        temperature_K=None, voxel_Bohr=None,
                         grid_integration_method="summation",
                         energy_integration_method="analytical"):
         """
@@ -334,8 +430,8 @@ class LDOS(TargetBase):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
@@ -345,8 +441,9 @@ class LDOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
-        grid_spacing_bohr : float
-            Grid spacing (distance between grid points) in Bohr.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         Returns
         -------
@@ -354,9 +451,9 @@ class LDOS(TargetBase):
             Band energy in eV.
         """
         # The band energy is calculated using the DOS.
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
-        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr,
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
+        dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
                                               integration_method=
                                               grid_integration_method)
 
@@ -368,7 +465,7 @@ class LDOS(TargetBase):
                             temperature_K=temperature_K,
                             integration_method=energy_integration_method)
 
-    def get_number_of_electrons(self, ldos_data, grid_spacing_bohr=None,
+    def get_number_of_electrons(self, ldos_data, voxel_Bohr=None,
                                 fermi_energy_eV=None, temperature_K=None,
                                 grid_integration_method="summation",
                                 energy_integration_method="analytical"):
@@ -391,8 +488,8 @@ class LDOS(TargetBase):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
@@ -402,8 +499,9 @@ class LDOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
-        grid_spacing_bohr : float
-            Grid spacing (distance between grid points) in Bohr.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         Returns
         -------
@@ -411,9 +509,9 @@ class LDOS(TargetBase):
             Number of electrons.
         """
         # The number of electrons is calculated using the DOS.
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
-        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr,
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
+        dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
                                               integration_method=
                                               grid_integration_method)
 
@@ -427,13 +525,13 @@ class LDOS(TargetBase):
                                     energy_integration_method)
 
     def get_self_consistent_fermi_energy_ev(self, ldos_data,
-                                            grid_spacing_bohr=None,
+                                            voxel_Bohr=None,
                                             temperature_K=None,
                                             grid_integration_method=
                                             "summation",
                                             energy_integration_method=
                                             "analytical"):
-        """
+        r"""
         Calculate the self-consistent Fermi energy.
 
         "Self-consistent" does not mean self-consistent in the DFT sense,
@@ -454,8 +552,8 @@ class LDOS(TargetBase):
             Integration method used to integrate the LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         energy_integration_method : string
@@ -465,18 +563,19 @@ class LDOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. (recommended)
 
-        grid_spacing_bohr : float
-            Grid spacing (distance between grid points) in Bohr.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         Returns
         -------
         fermi_energy_self_consistent : float
-            E_F in eV.
+            :math:`\epsilon_F` in eV.
         """
         # The Fermi energy is calculated using the DOS.
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
-        dos_data = self.get_density_of_states(ldos_data, grid_spacing_bohr,
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
+        dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
                                               integration_method=
                                               grid_integration_method)
 
@@ -491,7 +590,8 @@ class LDOS(TargetBase):
 
     def get_density(self, ldos_data, fermi_energy_ev=None, temperature_K=None,
                     conserve_dimensions=False,
-                    integration_method="analytical"):
+                    integration_method="analytical",
+                    gather_density=True):
         """
         Calculate the density from given LDOS data.
 
@@ -527,6 +627,12 @@ class LDOS(TargetBase):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
+        gather_density : bool
+            Only important if MPI is used. If True, the density will be
+            gathered on rank 0.
+            Helpful when using multiple CPUs for descriptor calculations
+            and only one for network pass.
+
         Returns
         -------
         density_data : numpy.array
@@ -549,7 +655,7 @@ class LDOS(TargetBase):
             ldos_data_used = ldos_data
             pass
         elif len(ldos_data_shape) == 4:
-            # We have the LDOS as gridx x gridy x gridz x energygrid,
+            # We have the LDOS as (gridx, gridy, gridz, energygrid),
             # so some reshaping needs to be done.
             ldos_data_used = ldos_data.reshape(
                 [ldos_data_shape[0] * ldos_data_shape[1] * ldos_data_shape[2],
@@ -584,10 +690,26 @@ class LDOS(TargetBase):
             ldos_data_shape[-1] = 1
             density_values = density_values.reshape(ldos_data_shape)
 
-        return density_values
+        # Now we have the full density; We now need to collect it, in the
+        # MPI case.
+        if self.parameters._configuration["mpi"] and gather_density:
+            density_values = np.reshape(density_values,
+                                        [np.shape(density_values)[0], 1])
+            density_values = np.concatenate((self.local_grid, density_values),
+                                          axis=1)
+            full_density = self._gather_density(density_values)
+            if len(ldos_data_shape) == 2:
+                ldos_shape = np.shape(full_density)
+                full_density = np.reshape(full_density, [ldos_shape[0] *
+                                                         ldos_shape[1] *
+                                                         ldos_shape[2], 1])
+            return full_density
+        else:
+            return density_values
 
-    def get_density_of_states(self, ldos_data, grid_spacing_bohr=None,
-                              integration_method="summation"):
+    def get_density_of_states(self, ldos_data, voxel_Bohr=None,
+                              integration_method="summation",
+                              gather_dos=True):
         """
         Calculate the density of states from given LDOS data.
 
@@ -597,17 +719,23 @@ class LDOS(TargetBase):
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid].
 
-        grid_spacing_bohr : float
-            Grid spacing (in Bohr) used to construct this grid. As of now,
-            only equidistant grids are supported.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         integration_method : str
             Integration method used to integrate LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
+
+        gather_dos : bool
+            Only important if MPI is used. If True, the DOS will be
+            are gathered on rank 0.
+            Helpful when using multiple CPUs for descriptor calculations
+            and only one for network pass.
 
         Returns
         -------
@@ -617,8 +745,8 @@ class LDOS(TargetBase):
         if self.cached_dos_exists:
             return self.cached_dos
 
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
 
         ldos_data_shape = np.shape(ldos_data)
         if len(ldos_data_shape) != 4:
@@ -628,7 +756,7 @@ class LDOS(TargetBase):
                 raise Exception("If using a 2D LDOS array, you can only "
                                 "use summation as integration method.")
 
-        # We have the LDOS as gridx x gridy x gridz x energygrid, no
+        # We have the LDOS as (gridx, gridy, gridz, energygrid), no
         # further operation is necessary.
         dos_values = ldos_data  # .copy()
 
@@ -636,12 +764,15 @@ class LDOS(TargetBase):
         # If there is only one point in a certain direction we do not
         # integrate, but rather reduce in this direction.
         # Integration over one point leads to zero.
+        grid_spacing_bohr_x = np.linalg.norm(voxel_Bohr[0])
+        grid_spacing_bohr_y = np.linalg.norm(voxel_Bohr[1])
+        grid_spacing_bohr_z = np.linalg.norm(voxel_Bohr[2])
 
         if integration_method != "summation":
             # X
             if ldos_data_shape[0] > 1:
                 dos_values = integrate_values_on_spacing(dos_values,
-                                                         grid_spacing_bohr,
+                                                         grid_spacing_bohr_x,
                                                          axis=0,
                                                          method=
                                                          integration_method)
@@ -649,42 +780,91 @@ class LDOS(TargetBase):
                 dos_values = np.reshape(dos_values, (ldos_data_shape[1],
                                                      ldos_data_shape[2],
                                                      ldos_data_shape[3]))
-                dos_values *= grid_spacing_bohr
+                dos_values *= grid_spacing_bohr_x
 
             # Y
             if ldos_data_shape[1] > 1:
                 dos_values = integrate_values_on_spacing(dos_values,
-                                                         grid_spacing_bohr,
+                                                         grid_spacing_bohr_y,
                                                          axis=0,
                                                          method=
                                                          integration_method)
             else:
                 dos_values = np.reshape(dos_values, (ldos_data_shape[2],
                                                      ldos_data_shape[3]))
-                dos_values *= grid_spacing_bohr
+                dos_values *= grid_spacing_bohr_y
 
             # Z
             if ldos_data_shape[2] > 1:
                 dos_values = integrate_values_on_spacing(dos_values,
-                                                         grid_spacing_bohr,
+                                                         grid_spacing_bohr_z,
                                                          axis=0,
                                                          method=
                                                          integration_method)
             else:
                 dos_values = np.reshape(dos_values, ldos_data_shape[3])
-                dos_values *= grid_spacing_bohr
+                dos_values *= grid_spacing_bohr_z
         else:
             if len(ldos_data_shape) == 4:
                 dos_values = np.sum(ldos_data, axis=(0, 1, 2)) * \
-                             (grid_spacing_bohr ** 3)
+                             voxel_Bohr.volume
             if len(ldos_data_shape) == 2:
                 dos_values = np.sum(ldos_data, axis=0) * \
-                             (grid_spacing_bohr ** 3)
+                             voxel_Bohr.volume
 
-        return dos_values
+        if self.parameters._configuration["mpi"] and gather_dos:
+            comm = get_comm()
+            comm.Barrier()
+            dos_values_full = np.zeros_like(dos_values)
+            comm.Reduce([dos_values, MPI.DOUBLE],
+                        [dos_values_full, MPI.DOUBLE],
+                        op=MPI.SUM, root=0)
+            return dos_values_full
+        else:
+            return dos_values
+
+    def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
+                          snapshot_number=0):
+        r"""
+        Get the atomic forces, currently work in progress.
+
+        Will eventually give :math:`\frac{dE}{d \underline{\boldsymbol{R}}}`.
+        Will currently only give :math:`\frac{dd}{dB}`.
+
+        Parameters
+        ----------
+        ldos_data: torch.Tensor
+            Scaled (!) torch tensor holding the LDOS data for the snapshot
+            for which the atomic force should be calculated.
+
+        dE_dd: np.array
+            (WIP) Derivative of the total energy w.r.t the LDOS.
+            Later on, this will be evaluated within this subroutine. For now
+            it is provided from outside.
+
+        used_data_handler: mala.data.data_handler.DataHandler
+            DataHandler that was used to predict the LDOS for which the
+            atomic forces are supposed to be calculated.
+
+        snapshot_number:
+            Snapshot number (number within the data handler) for which this
+            LDOS prediction was performed. Always 0 in the inference case.
+
+        Returns
+        -------
+        dd_dB: torch.tensor
+            (WIP) Returns the scaled (!) derivative of the LDOS w.r.t to
+            the SNAP descriptors.
+
+        """
+        # For now this only works with ML generated LDOS.
+        # Gradient of the LDOS respect to the SNAP descriptors.
+        ldos_data.backward(dE_dd)
+        dd_dB = used_data_handler.get_test_input_gradient(snapshot_number)
+        return dd_dB
 
     def get_and_cache_density_of_states(self, ldos_data,
-                                        grid_spacing_bohr=None,
+                                        voxel_Bohr=None,
                                         integration_method="summation"):
         """
         Calculate a DOS from LDOS data and keep it in memory.
@@ -699,16 +879,16 @@ class LDOS(TargetBase):
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid].
 
-        grid_spacing_bohr : float
-            Grid spacing (in Bohr) used to construct this grid. As of now,
-            only equidistant grids are supported.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         integration_method : str
             Integration method used to integrate LDOS on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
 
         Returns
@@ -720,7 +900,7 @@ class LDOS(TargetBase):
         self.uncache_density_of_states()
         self.cached_dos = self.\
             get_density_of_states(ldos_data,
-                                  grid_spacing_bohr=grid_spacing_bohr,
+                                  voxel_Bohr=voxel_Bohr,
                                   integration_method=integration_method)
         self.cached_dos_exists = True
         return self.cached_dos
@@ -754,13 +934,6 @@ class LDOS(TargetBase):
         temperature_K : float
             Temperature in K.
 
-        integration_method : string
-            Integration method to be used. Currently supported:
-
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
-                - "analytical" for analytical integration. Recommended.
-
         ldos_data : numpy.array
             LDOS data, either as [gridsize, energygrid] or
             [gridx,gridy,gridz,energygrid].
@@ -793,4 +966,97 @@ class LDOS(TargetBase):
     def uncache_density(self):
         """Uncache a density, to calculate a new one in following steps."""
         self.cached_density_exists = False
+
+    def _gather_density(self, density_values, use_pickled_comm=False):
+        """
+        Gathers all SNAP descriptors on rank 0 and sorts them.
+
+        This is useful for e.g. parallel preprocessing.
+        This function removes the extra 3 components that come from parallel
+        processing.
+        I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
+        97 (in parallel mode), and this function returns, as to retain the
+        3 x,y,z ones we by default include.
+
+        Parameters
+        ----------
+        density_values : numpy.array
+            Numpy array with the SNAP descriptors of this ranks local grid.
+
+        use_pickled_comm : bool
+            If True, the pickled communication route from mpi4py is used.
+            If False, a Recv/Sendv combination is used. I am not entirely
+            sure what is faster. Technically Recv/Sendv should be faster,
+            but I doubt my implementation is all that optimal. For the pickled
+            route we can use gather(), which should be fairly quick.
+            However, for large grids, one CANNOT use the pickled route;
+            too large python objects will break it. Therefore, I am setting
+            the Recv/Sendv route as default.
+        """
+        # Barrier to make sure all ranks have descriptors..
+        comm = get_comm()
+        barrier()
+
+        # Gather the SNAP descriptors into a list.
+        if use_pickled_comm:
+            density_list = comm.gather(density_values, root=0)
+        else:
+            sendcounts = np.array(comm.gather(np.shape(density_values)[0],
+                                              root=0))
+            if get_rank() == 0:
+                # print("sendcounts: {}, total: {}".format(sendcounts,
+                #                                          sum(sendcounts)))
+
+                # Preparing the list of buffers.
+                density_list = []
+                for i in range(0, get_size()):
+                    density_list.append(np.empty(sendcounts[i]*4,
+                                                 dtype=np.float64))
+                # No MPI necessary for first rank. For all the others,
+                # collect the buffers.
+                density_list[0] = density_values
+                for i in range(1, get_size()):
+                    comm.Recv(density_list[i], source=i,
+                              tag=100+i)
+                    density_list[i] = \
+                        np.reshape(density_list[i],
+                                   (sendcounts[i], 4))
+            else:
+                comm.Send(density_values, dest=0, tag=get_rank()+100)
+            barrier()
+        # if get_rank() == 0:
+        #     printout(np.shape(all_snap_descriptors_list[0]))
+        #     printout(np.shape(all_snap_descriptors_list[1]))
+        #     printout(np.shape(all_snap_descriptors_list[2]))
+        #     printout(np.shape(all_snap_descriptors_list[3]))
+
+        # Dummy for the other ranks.
+        # (For now, might later simply broadcast to other ranks).
+        full_density = np.zeros([1, 1, 1, 1])
+
+        # Reorder the list.
+        if get_rank() == 0:
+            # Prepare the SNAP descriptor array.
+            nx = self.grid_dimensions[0]
+            ny = self.grid_dimensions[1]
+            nz = self.grid_dimensions[2]
+            full_density = np.zeros(
+                [nx, ny, nz, 1])
+            # Fill the full SNAP descriptors array.
+            for idx, local_density in enumerate(density_list):
+                # We glue the individual cells back together, and transpose.
+                first_x = int(local_density[0][0])
+                first_y = int(local_density[0][1])
+                first_z = int(local_density[0][2])
+                last_x = int(local_density[-1][0])+1
+                last_y = int(local_density[-1][1])+1
+                last_z = int(local_density[-1][2])+1
+                full_density[first_x:last_x,
+                             first_y:last_y,
+                             first_z:last_z] = \
+                    np.reshape(local_density[:,3],[last_z-first_z,
+                                                    last_y-first_y,
+                                                    last_x-first_x,1]).transpose([2, 1, 0, 3])
+
+        return full_density
 

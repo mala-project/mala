@@ -85,8 +85,8 @@ class ObjectiveBase:
             final_validation_loss.append(test_trainer.final_validation_loss)
 
         if self.params.hyperparameters.number_training_per_trial > 1:
-            printout("Losses from multiple runs are: ")
-            printout(final_validation_loss)
+            printout("Losses from multiple runs are: ", min_verbosity=2)
+            printout(final_validation_loss, min_verbosity=2)
 
         if self.params.hyperparameters.trial_ensemble_evaluation == "mean":
             return np.mean(final_validation_loss)
@@ -193,21 +193,21 @@ class ObjectiveBase:
                         turned_off_layers.append(layer_counter)
                     layer_counter += 1
 
-            elif "trainingtype" in par.name:
+            elif "trainingtype" == par.name:
                 self.params.running.trainingtype = par.get_parameter(trial)
 
-            elif "mini_batch_size" in par.name:
+            elif "mini_batch_size" == par.name:
                 self.params.running.mini_batch_size = par.get_parameter(trial)
 
-            elif "early_stopping_epochs" in par.name:
+            elif "early_stopping_epochs" == par.name:
                 self.params.running.early_stopping_epochs = par.\
                     get_parameter(trial)
 
-            elif "learning_rate_patience" in par.name:
+            elif "learning_rate_patience" == par.name:
                 self.params.running.learning_rate_patience = par.\
                     get_parameter(trial)
 
-            elif "learning_rate_decay" in par.name:
+            elif "learning_rate_decay" == par.name:
                 self.params.running.learning_rate_decay = par.\
                     get_parameter(trial)
 
@@ -257,7 +257,7 @@ class ObjectiveBase:
 
         par: HyperparameterOAT
         for factor_idx, par in enumerate(self.params.hyperparameters.hlist):
-            if "learning_rate" in par.name:
+            if "learning_rate" == par.name:
                 self.params.running.learning_rate = \
                     par.get_parameter(trial, factor_idx)
                 # If the user wants to optimize multiple layers simultaneously,
@@ -306,15 +306,23 @@ class ObjectiveBase:
                         turned_off_layers.append(layer_counter)
                     layer_counter += 1
 
-            elif "trainingtype" in par.name:
+            elif "trainingtype" == par.name:
                 self.params.running.trainingtype = par.\
                     get_parameter(trial, factor_idx)
-            elif "mini_batch_size" in par.name:
+            elif "mini_batch_size" == par.name:
                 self.params.running.mini_batch_size = par.get_parameter(trial,
                                                                         factor_idx)
-            elif "early_stopping_epochs" in par.name:
+            elif "early_stopping_epochs" == par.name:
                 self.params.running.early_stopping_epochs = par.\
                     get_parameter(trial, factor_idx)
+
+            elif "learning_rate_patience" == par.name:
+                self.params.running.learning_rate_patience = par.\
+                    get_parameter(trial, factor_idx)
+
+            elif "learning_rate_decay" == par.name:
+                self.params.running.learning_rate_decay = par.\
+                    get_parameter(trial,factor_idx)
 
             elif "layer_activation" in par.name:
                 pass

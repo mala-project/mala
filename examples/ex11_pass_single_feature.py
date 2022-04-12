@@ -6,7 +6,6 @@ import mala
 import numpy as np
 import torch
 
-from data_repo_path import data_repo_path
 
 """
 Show how to run a single feature vector out of a snapshot through a network.
@@ -17,9 +16,10 @@ First run ex05_training_with_postprocessing.py to create the
 ex05_* files used below.
 """
 
+data_repo_path = os.environ["MALA_DATA_REPO"]
 
 data_path = pj(data_repo_path, "Al36")
-params_path = "ex05_params.pkl"
+params_path = "ex05_params.json"
 network_path = "ex05_network.pth"
 input_scaler_path = "ex05_iscaler.pkl"
 output_scaler_path = "ex05_oscaler.pkl"
@@ -50,14 +50,9 @@ def load_whole_snapshot():
     # Units: output_units="1/Ry" means that the output (target) data (LDOS) has
     # unit 1/Ry. Rescaled network output, after oscaler.inverse_transform() is
     # applied (see below) will be in 1/eV.
-    parameters.data.data_splitting_snapshots = ["te"]
-    inference_data_handler.add_snapshot(
-        "Al_debug_2k_nr2.in.npy",
-        data_path,
-        "Al_debug_2k_nr2.out.npy",
-        data_path,
-        output_units="1/Ry",
-    )
+    inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
+                                        "Al_debug_2k_nr2.out.npy", data_path,
+                                        "te", output_units="1/Ry")
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 
     # Extract single feature vector from snapshot. The x,y,z part (first 3

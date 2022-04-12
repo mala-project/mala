@@ -1,6 +1,7 @@
 """Interface function to get the correct type of hyperparameter."""
 from mala.network.hyperparameter_oat import HyperparameterOAT
 from mala.network.hyperparameter_optuna import HyperparameterOptuna
+from mala.network.hyperparameter_naswot import HyperparameterNASWOT
 
 
 def HyperparameterInterface(hotype, opttype="float", name="", low=0, high=0,
@@ -13,8 +14,9 @@ def HyperparameterInterface(hotype, opttype="float", name="", low=0, high=0,
     hotype : string
         Type of hyperparameter. Currently supported:
 
-            - optuna: Optuna style hyperparameter, for HyperOptOptuna.
+            - optuna: Hyperparameter for HyperOptOptuna.
             - oat: Hyperparameter for HyperOptOAT.
+            - naswot: Hyperparameter for HyperOptNASWOT.
 
     opttype : string
         Datatype of the hyperparameter. Follows optunas naming convetions.
@@ -44,12 +46,15 @@ def HyperparameterInterface(hotype, opttype="float", name="", low=0, high=0,
 
     Returns
     -------
-    hyperparameter : HyperparameterOptuna or HyperparameterOAT
+    hyperparameter : HyperparameterOptuna or HyperparameterOAT or HyperparameterNASWOT
         Hyperparameter in desired format.
     """
     hparam = None
     if hotype == "optuna":
         hparam = HyperparameterOptuna(opttype=opttype, name=name, low=low,
+                                      high=high, choices=choices)
+    if hotype == "naswot":
+        hparam = HyperparameterNASWOT(opttype=opttype, name=name, low=low,
                                       high=high, choices=choices)
     elif hotype == "oat":
         hparam = HyperparameterOAT(opttype=opttype, name=name, choices=choices)

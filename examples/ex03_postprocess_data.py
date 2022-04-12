@@ -4,7 +4,7 @@ import mala
 from mala import printout
 import numpy as np
 
-from data_repo_path import data_repo_path
+from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 
@@ -16,6 +16,8 @@ Set do_total_energy to False, if you don't have the QuantumEspresso
 Python module installed.
 Since actual LDOS files are rather larger, this uses a drastically reduced
 LDOS. Therefore the accuracy of the overall result is rather poor. 
+
+REQUIRES QUANTUM ESPRESSO (TOTAL ENERGY MODULE).
 """
 
 # If you don't have the total energy module installed,
@@ -43,7 +45,7 @@ test_parameters.targets.pseudopotential_path = data_path
 # Create a target calculator to postprocess data.
 # Use this calculator to perform various operations.
 ####################
-ldos = mala.TargetInterface(test_parameters)
+ldos = mala.Target(test_parameters)
 
 # Read additional information about the calculation.
 # By doing this, the calculator is able to know e.g. the temperature

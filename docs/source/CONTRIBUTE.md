@@ -16,18 +16,18 @@ the form `MAJOR.MINOR.FIX`:
 
 * `MAJOR`: Big changes to the code, that fundamentally change the way it
   functions or wrap up a longer development.
-* `MINOR`: new features have beend added to the code.
+* `MINOR`: new features have been added to the code.
 * `FIX`: A bug in a feature has been fixed.
 
-Every new version should be accompanied by a changelog. Please include the 
+Every new version should be accompanied by a changelog. Please include the
 version of the test data repository with which this version is supposed to be
-used in this changelog. 
+used in this changelog.
 
 ## Branching strategy
 
 In general, contributors should develop on branches based off of `develop` and
 merge requests should be to `develop`. Please choose a descriptive branch name.
-Branches from `develop` to `master` will be done after prior consultation of 
+Branches from `develop` to `master` will be done after prior consultation of
 the core development team.
 
 ## Developing code
@@ -39,6 +39,8 @@ the core development team.
   for docstrings
 * Keep your code object-oriented, modular, and easily reusable
 * If you're adding code that should be tested, add tests
+* If you're adding or modifying examples, make sure to add them to `test_examples.py`
+
 
 ## Pull Requests
 We actively welcome pull requests.

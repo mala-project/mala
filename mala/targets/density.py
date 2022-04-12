@@ -3,39 +3,33 @@ import os
 import warnings
 
 import ase.io
-from ase.units import Rydberg
+from ase.units import Rydberg, Bohr
 try:
     import total_energy as te
 except ModuleNotFoundError:
-    warnings.warn("You either don't have the QuantumEspresso total_energy "
-                  "python module installed or it is not "
-                  "configured correctly. Using a density calculator will "
-                  "still mostly work, but trying to "
-                  "access the total energy of a system WILL fail.",
-                  stacklevel=2)
+    pass
 
 from mala.common.parameters import printout
-from mala.targets.target_base import TargetBase
+from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
-from mala.targets.cube_parser import read_cube
+from mala.targets.cube_parser import read_cube, write_cube
+from mala.targets.atomic_force import AtomicForce
+from mala.common.parallelizer import get_rank
 
 
-class Density(TargetBase):
+class Density(Target):
     """Postprocessing / parsing functions for the electronic density.
 
     Parameters
     ----------
     params : mala.common.parameters.Parameters
-        Parameters used to create this TargetBase object.
+        Parameters used to create this Target object.
     """
 
     te_mutex = False
 
     def __init__(self, params):
         super(Density, self).__init__(params)
-        # We operate on a per gridpoint basis. Per gridpoint,
-        # there is one value for the density (spin-unpolarized calculations).
-        self.target_length = 1
 
     def get_feature_size(self):
         """Get dimension of this target if used as feature in ML."""
@@ -56,11 +50,56 @@ class Density(TargetBase):
         units : string
             Units the density is saved in. Usually none.
         """
-        printout("Reading density from .cube file in ", directory)
+        printout("Reading density from .cube file in ", directory, min_verbosity=0)
         data, meta = read_cube(os.path.join(directory, file_name))
         return data
 
-    def get_number_of_electrons(self, density_data, grid_spacing_bohr=None,
+    def write_as_cube(self, file_name, density_data, atoms=None,
+                      grid_dimensions=None):
+        """
+        Write the density data in a cube file.
+
+        Parameters
+        ----------
+        file_name : string
+            Name of the file.
+
+        density_data : numpy.ndarray
+            1D or 3D array of the density.
+
+        atoms : ase.Atoms
+            Atoms to be written to the file alongside the density data.
+            If None, and the target object has an atoms object, this will
+            be used.
+
+        grid_dimensions : list
+            Grid dimensions. Only necessary if a 1D density is provided.
+        """
+        if grid_dimensions is None:
+            grid_dimensions = self.grid_dimensions
+        if atoms is None:
+            atoms = self.atoms
+        if len(density_data.shape) != 3:
+            if len(density_data.shape) == 1:
+                density_data = np.reshape(density_data, grid_dimensions)
+            else:
+                raise Exception("Unknown density shape provided.")
+        # %%
+        meta = {}
+        atom_list = []
+        for i in range(0, len(atoms)):
+            atom_list.append(
+                (atoms[i].number, [4.0, ] + list(atoms[i].position / Bohr)))
+
+        meta["atoms"] = atom_list
+        meta["org"] = [0.0, 0.0, 0.0]
+        meta["xvec"] = self.voxel_Bohr[0]
+        meta["yvec"] = self.voxel_Bohr[1]
+        meta["zvec"] = self.voxel_Bohr[2]
+        write_cube(density_data, meta, file_name)
+
+
+    def get_number_of_electrons(self, density_data, voxel_Bohr=None,
                                 integration_method="summation"):
         """
         Calculate the number of electrons from given density data.
@@ -69,22 +108,22 @@ class Density(TargetBase):
         ----------
         density_data : numpy.array
             Electronic density on the given grid. Has to either be of the form
-            gridpoints or gridx x gridy x gridz.
+            gridpoints or (gridx, gridy, gridz).
 
-        grid_spacing_bohr : float
-            Grid spacing (in Bohr) used to construct this grid. As of now,
-            only equidistant grids are supported.
+        voxel_Bohr : ase.cell.Cell
+            Voxel to be used for grid intergation. Needs to reflect the
+            symmetry of the simulation cell. In Bohr.
 
         integration_method : str
             Integration method used to integrate density on the grid.
             Currently supported:
 
-            - "trapz" for trapezoid method
-            - "simps" for Simpson method.
+            - "trapz" for trapezoid method (only for cubic grids).
+            - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
         """
-        if grid_spacing_bohr is None:
-            grid_spacing_bohr = self.grid_spacing_Bohr
+        if voxel_Bohr is None:
+            voxel_Bohr = self.voxel_Bohr
 
         # Check input data for correctness.
         data_shape = np.shape(np.squeeze(density_data))
@@ -101,6 +140,10 @@ class Density(TargetBase):
         # integrate, but rather reduce in this direction.
         # Integration over one point leads to zero.
 
+        grid_spacing_bohr_x = np.linalg.norm(voxel_Bohr[0])
+        grid_spacing_bohr_y = np.linalg.norm(voxel_Bohr[1])
+        grid_spacing_bohr_z = np.linalg.norm(voxel_Bohr[2])
+
         number_of_electrons = None
         if integration_method != "summation":
             number_of_electrons = density_data
@@ -109,40 +152,40 @@ class Density(TargetBase):
             if data_shape[0] > 1:
                 number_of_electrons = \
                     integrate_values_on_spacing(number_of_electrons,
-                                                grid_spacing_bohr, axis=0,
+                                                grid_spacing_bohr_x, axis=0,
                                                 method=integration_method)
             else:
                 number_of_electrons =\
                     np.reshape(number_of_electrons, (data_shape[1],
                                                      data_shape[2]))
-                number_of_electrons *= grid_spacing_bohr
+                number_of_electrons *= grid_spacing_bohr_x
 
             # Y
             if data_shape[1] > 1:
                 number_of_electrons = \
                     integrate_values_on_spacing(number_of_electrons,
-                                                grid_spacing_bohr, axis=0,
+                                                grid_spacing_bohr_y, axis=0,
                                                 method=integration_method)
             else:
                 number_of_electrons = \
                     np.reshape(number_of_electrons, (data_shape[2]))
-                number_of_electrons *= grid_spacing_bohr
+                number_of_electrons *= grid_spacing_bohr_y
 
             # Z
             if data_shape[2] > 1:
                 number_of_electrons = \
                     integrate_values_on_spacing(number_of_electrons,
-                                                grid_spacing_bohr, axis=0,
+                                                grid_spacing_bohr_z, axis=0,
                                                 method=integration_method)
             else:
-                number_of_electrons *= grid_spacing_bohr
+                number_of_electrons *= grid_spacing_bohr_z
         else:
             if len(data_shape) == 3:
                 number_of_electrons = np.sum(density_data, axis=(0, 1, 2)) \
-                                      * (grid_spacing_bohr ** 3)
+                                      * voxel_Bohr.volume
             if len(data_shape) == 1:
                 number_of_electrons = np.sum(density_data, axis=0) * \
-                                      (grid_spacing_bohr ** 3)
+                                      voxel_Bohr.volume
 
         return number_of_electrons
 
@@ -166,7 +209,7 @@ class Density(TargetBase):
         grid_dimensions : list
             Provide a list of dimensions to be used in the transformation
             1D -> 3D. If None, MALA will attempt to use the values read with
-            TargetBase.read_additional_read_additional_calculation_data .
+            Target.read_additional_read_additional_calculation_data .
             If that cannot be done, this function will raise an exception.
 
         Returns
@@ -189,7 +232,7 @@ class Density(TargetBase):
     def get_energy_contributions(self, density_data, create_file=True,
                                  atoms_Angstrom=None, qe_input_data=None,
                                  qe_pseudopotentials=None):
-        """
+        r"""
         Extract density based energy contributions from Quantum Espresso.
 
         Done via a Fortran module accesible through python using f2py.
@@ -221,37 +264,97 @@ class Density(TargetBase):
         -------
         energies : list
             A list containing, in order, the following energy contributions:
-                - n*V_xc
-                - E_Hartree
-                - E_xc
-                - e_Ewald
+
+                - :math:`n\,V_\mathrm{xc}`
+                - :math:`E_\mathrm{H}`
+                - :math:`E_\mathrm{xc}`
+                - :math:`E_\mathrm{Ewald}`
         """
-        # noinspection PyShadowingNames
-        import total_energy as te
+        if atoms_Angstrom is None:
+            atoms_Angstrom = self.atoms
+        self.__setup_total_energy_module(density_data, atoms_Angstrom,
+                                         create_file=create_file,
+                                         qe_input_data=qe_input_data,
+                                         qe_pseudopotentials=
+                                         qe_pseudopotentials)
+
+        # Get and return the energies.
+        energies = np.array(te.get_energies())*Rydberg
+        return energies
+
+    def get_atomic_forces(self, density_data, create_file=True,
+                          atoms_Angstrom=None, qe_input_data=None,
+                          qe_pseudopotentials=None):
+        """
+        Calculate the atomic forces.
+
+        This function uses an interface to QE. The atomic forces are
+        calculated via the Hellman-Feynman theorem, although only the local
+        contributions are calculated. The non-local contributions, as well
+        as the SCF correction (so anything wavefunction dependent) are ignored.
+        Therefore, this function is best used for data that was created using
+        local pseudopotentials.
+
+        Parameters
+        ----------
+        density_data : numpy.array
+            Density data on a grid.
+
+        create_file : bool
+            If False, the last mala.pw.scf.in file will be used as input for
+            Quantum Espresso. If True (recommended), MALA will create this
+            file according to calculation parameters.
+
+        atoms_Angstrom : ase.Atoms
+            ASE atoms object for the current system. If None, MALA will
+            create one.
+
+        qe_input_data : dict
+            Quantum Espresso parameters dictionary for the ASE<->QE interface.
+            If None (recommended), MALA will create one.
+
+        qe_pseudopotentials : dict
+            Quantum Espresso pseudopotential dictionaty for the ASE<->QE
+            interface. If None (recommended), MALA will create one.
+
+        Returns
+        -------
+        atomic_forces : numpy.ndarray
+            An array of the form (natoms, 3), containing the atomic forces
+            in eV/Ang.
+
+        """
+        # First, set up the total energy module for calculation.
+        if atoms_Angstrom is None:
+            atoms_Angstrom = self.atoms
+        self.__setup_total_energy_module(density_data, atoms_Angstrom,
+                                         create_file=create_file,
+                                         qe_input_data=qe_input_data,
+                                         qe_pseudopotentials=
+                                         qe_pseudopotentials)
+
+        # Now calculate the forces.
+        atomic_forces = np.array(te.calc_forces(len(atoms_Angstrom))).transpose()
+
+        # QE returns the forces in Ry/Bohr.
+        atomic_forces = AtomicForce.convert_units(atomic_forces,
+                                                  in_units="Ry/Bohr")
+        return atomic_forces
+
+    def __setup_total_energy_module(self, density_data, atoms_Angstrom,
+                                    create_file=True, qe_input_data=None,
+                                    qe_pseudopotentials=None):
         if create_file:
             # If not otherwise specified, use values as read in.
             if qe_input_data is None:
                 qe_input_data = self.qe_input_data
             if qe_pseudopotentials is None:
                 qe_pseudopotentials = self.qe_pseudopotentials
-            if atoms_Angstrom is None:
-                atoms_Angstrom = self.atoms
 
-            # Specify grid dimensions, if any are given.
-            if self.grid_dimensions[0] != 0 and \
-               self.grid_dimensions[1] != 0 and \
-               self.grid_dimensions[2] != 0:
-                qe_input_data["nr1"] = self.grid_dimensions[0]
-                qe_input_data["nr2"] = self.grid_dimensions[1]
-                qe_input_data["nr3"] = self.grid_dimensions[2]
-                qe_input_data["nr1s"] = self.grid_dimensions[0]
-                qe_input_data["nr2s"] = self.grid_dimensions[1]
-                qe_input_data["nr3s"] = self.grid_dimensions[2]
-
-            ase.io.write("mala.pw.scf.in", atoms_Angstrom, "espresso-in",
-                         input_data=qe_input_data,
-                         pseudopotentials=qe_pseudopotentials,
-                         kpts=self.kpoints)
+            self.write_tem_input_file(atoms_Angstrom, qe_input_data,
+                                      qe_pseudopotentials,
+                                      self.grid_dimensions,
+                                      self.kpoints)
 
         # initialize the total energy module.
         # FIXME: So far, the total energy module can only be initialized once.
@@ -263,13 +366,14 @@ class Density(TargetBase):
 
         if Density.te_mutex is False:
             printout("MALA: Starting QuantumEspresso to get density-based"
-                     " energy contributions.")
+                     " energy contributions.", min_verbosity=0)
             te.initialize()
             Density.te_mutex = True
-            printout("MALA: QuantumEspresso setup done.")
+            printout("MALA: QuantumEspresso setup done.", min_verbosity=0)
         else:
             printout("MALA: QuantumEspresso is already running. Except for"
-                     " the atomic positions, no new parameters will be used.")
+                     " the atomic positions, no new parameters will be used.",
+                     min_verbosity=0)
 
         # Before we proceed, some sanity checks are necessary.
         # Is the calculation spinpolarized?
@@ -318,13 +422,9 @@ class Density(TargetBase):
         # instantiate the process with the file.
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
         te.set_positions(np.transpose(positions_for_qe), number_of_atoms)
-
         # Now we can set the new density.
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
-
-        # Get and return the energies.
-        energies = np.array(te.get_energies())*Rydberg
-        return energies
+        return atoms_Angstrom
 
     @staticmethod
     def get_scaled_positions_for_qe(atoms):
@@ -371,7 +471,7 @@ class Density(TargetBase):
         return_density_object = Density(ldos_object.parameters)
         return_density_object.fermi_energy_eV = ldos_object.fermi_energy_eV
         return_density_object.temperature_K = ldos_object.temperature_K
-        return_density_object.grid_spacing_Bohr = ldos_object.grid_spacing_Bohr
+        return_density_object.voxel_Bohr = ldos_object.voxel_Bohr
         return_density_object.number_of_electrons = ldos_object.\
             number_of_electrons
         return_density_object.band_energy_dft_calculation = ldos_object.\

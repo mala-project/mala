@@ -3,7 +3,7 @@ import os
 import mala
 from mala import printout
 
-from data_repo_path import data_repo_path
+from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Al36")
 
 """
@@ -24,11 +24,8 @@ def initial_setup():
     ####################
     test_parameters = mala.Parameters()
     # Currently, the splitting in training, validation and test set are
-    # done on a "by snapshot" basis. Specify how this is
-    # done by providing a list containing entries of the form
-    # "tr", "va" and "te".
+    # done on a "by snapshot" basis.
     test_parameters.data.data_splitting_type = "by_snapshot"
-    test_parameters.data.data_splitting_snapshots = ["tr", "va", "te"]
 
     # Specify the data scaling.
     test_parameters.data.input_rescaling_type = "feature-wise-standard"
@@ -58,13 +55,13 @@ def initial_setup():
 
     # Add all the snapshots we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                              "Al_debug_2k_nr0.out.npy", data_path,
+                              "Al_debug_2k_nr0.out.npy", data_path, "tr",
                               output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                              "Al_debug_2k_nr1.out.npy", data_path,
+                              "Al_debug_2k_nr1.out.npy", data_path, "va",
                               output_units="1/Ry")
     data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                              "Al_debug_2k_nr2.out.npy", data_path,
+                              "Al_debug_2k_nr2.out.npy", data_path, "te",
                               output_units="1/Ry")
     data_handler.prepare_data()
     printout("Read data: DONE.")
@@ -80,7 +77,7 @@ def initial_setup():
     # and run the remaining trials.
     ####################
 
-    test_hp_optimizer = mala.HyperOptInterface(test_parameters, data_handler)
+    test_hp_optimizer = mala.HyperOpt(test_parameters, data_handler)
 
     # Learning rate will be optimized.
     test_hp_optimizer.add_hyperparameter("float", "learning_rate",

@@ -16,13 +16,13 @@ with open("LICENSE") as f:
 
 extras = {
     'dev': ['bump2version'],
-    'opt': ['oapackage'],
+    'opt': ['oapackage', 'pqkmeans'],
     'test': ['pytest'],
     'doc': open('docs/requirements.txt').read().splitlines(),
 }
 
 setup(
-    name="mala",
+    name="pymala",
     version=version["__version__"],
     description=("Materials Learning Algorithms. "
                  "A framework for machine learning materials properties from "
@@ -36,6 +36,5 @@ setup(
                                     "ml-dft-sandia")),
     zip_safe=False,
     install_requires=open('requirements.txt').read().splitlines(),
-    etxras_require=extras,
-    python_requires='<3.9',
+    extras_require=extras,
 )
