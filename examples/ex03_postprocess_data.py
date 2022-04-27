@@ -93,7 +93,7 @@ if do_total_energy:
     print("Total energy:", total_energy)
 
 print("Values from DFT: ")
-print("Number of electrons:", ldos.number_of_electrons)
+print("Number of electrons:", ldos.number_of_electrons_exact)
 print("Band energy:", ldos.band_energy_dft_calculation)
 if do_total_energy:
     print("Total energy:", ldos.total_energy_dft_calculation)

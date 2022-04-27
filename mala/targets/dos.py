@@ -350,7 +350,7 @@ class DOS(Target):
                                    (dos_data, energy_grid,
                                     fermi_sc, temperature_K,
                                     integration_method)
-                                   - self.number_of_electrons),
+                                   - self.number_of_electrons_exact),
                                   a=energy_grid[0],
                                   b=energy_grid[-1])
         return fermi_energy_sc
@@ -380,7 +380,7 @@ class DOS(Target):
         return_dos_object.fermi_energy_eV = ldos_object.fermi_energy_eV
         return_dos_object.temperature_K = ldos_object.temperature_K
         return_dos_object.voxel_Bohr = ldos_object.voxel_Bohr
-        return_dos_object.number_of_electrons = ldos_object.number_of_electrons
+        return_dos_object.number_of_electrons_exact = ldos_object.number_of_electrons_exact
         return_dos_object.band_energy_dft_calculation = \
             ldos_object.band_energy_dft_calculation
         return_dos_object.atoms = ldos_object.atoms

@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 import itertools
 import warnings
+from functools import cached_property
 
 from ase.neighborlist import NeighborList
 from ase.units import Rydberg, Bohr, kB
@@ -82,7 +83,7 @@ class Target(ABC):
         self.fermi_energy_eV = None
         self.temperature_K = None
         self.voxel_Bohr = None
-        self.number_of_electrons = None
+        self.number_of_electrons_exact = None
         self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
@@ -152,6 +153,12 @@ class Target(ABC):
         raise Exception("No function defined to write this quantity "
                         "to a .cube file.")
 
+    @abstractmethod
+    def density(self):
+        """The electronic density."""
+        raise Exception("No function to calculate or provide the "
+                        "density has been implemented for this target type.")
+
     def get_density(self):
         """Get the electronic density."""
         raise Exception("No function to calculate or provide the "
@@ -211,7 +218,7 @@ class Target(ABC):
             self.fermi_energy_eV = None
             self.temperature_K = None
             self.voxel_Bohr = None
-            self.number_of_electrons = None
+            self.number_of_electrons_exact = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
@@ -234,7 +241,7 @@ class Target(ABC):
                     if "End of self-consistent calculation" in line:
                         past_calculation_part = True
                     if "number of electrons       =" in line:
-                        self.number_of_electrons = np.float64(line.split('=')
+                        self.number_of_electrons_exact = np.float64(line.split('=')
                                                               [1])
                     if "Fermi-Dirac smearing, width (Ry)=" in line:
                         self.temperature_K = np.float64(line.split('=')[2]) * \
@@ -283,7 +290,7 @@ class Target(ABC):
                         self.grid_dimensions[2] * Bohr)
 
             # This is especially important for size extrapolation.
-            self.electrons_per_atom = self.number_of_electrons/len(self.atoms)
+            self.electrons_per_atom = self.number_of_electrons_exact / len(self.atoms)
 
             # Unit conversion
             self.total_energy_dft_calculation = total_energy*Rydberg
@@ -338,8 +345,8 @@ class Target(ABC):
                          "wrong.")
 
             else:
-                self.number_of_electrons = self.electrons_per_atom *\
-                                           len(self.atoms)
+                self.number_of_electrons_exact = self.electrons_per_atom * \
+                                                 len(self.atoms)
 
         else:
             raise Exception("Unsupported auxiliary file type.")

@@ -102,7 +102,7 @@ class TestFullWorkflow:
                                           fermi_energy_eV=
                                           self_consistent_fermi_energy)
 
-        assert np.isclose(number_of_electrons, dos.number_of_electrons,
+        assert np.isclose(number_of_electrons, dos.number_of_electrons_exact,
                           atol=accuracy_electrons)
         assert np.isclose(band_energy, dos.band_energy_dft_calculation,
                           atol=accuracy_band_energy)
@@ -138,7 +138,7 @@ class TestFullWorkflow:
                                            fermi_energy_eV=
                                            self_consistent_fermi_energy)
 
-        assert np.isclose(number_of_electrons, ldos.number_of_electrons,
+        assert np.isclose(number_of_electrons, ldos.number_of_electrons_exact,
                           atol=accuracy_electrons)
         assert np.isclose(band_energy, ldos.band_energy_dft_calculation,
                           atol=accuracy_band_energy)

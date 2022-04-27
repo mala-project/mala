@@ -8,13 +8,14 @@ try:
     import total_energy as te
 except ModuleNotFoundError:
     pass
+import numpy as np
 
 from mala.common.parameters import printout
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.atomic_force import AtomicForce
-from mala.common.parallelizer import get_rank
+from functools import cached_property
 
 
 class Density(Target):
@@ -25,17 +26,99 @@ class Density(Target):
     params : mala.common.parameters.Parameters
         Parameters used to create this Target object.
     """
+    ##############################
+    # Global attributes
+    ##############################
 
     te_mutex = False
 
+    ##############################
+    # Constructors
+    ##############################
+
     def __init__(self, params):
         super(Density, self).__init__(params)
+        self.density = None
+
+    @classmethod
+    def from_numpy(cls, params, path):
+        return_density_object = Density(params)
+        return_density_object.density = np.load(path)
+        return return_density_object
+
+    @classmethod
+    def from_cube_file(cls, params, path):
+        return_density_object = Density(params)
+        return_density_object.density = return_density_object.read_from_cube(path)
+        return return_density_object
+
+    @classmethod
+    def from_ldos(cls, ldos_object):
+        """
+        Create a density object from an LDOS object.
+
+        Parameters
+        ----------
+        ldos_object : mala.targets.ldos.LDOS
+            LDOS object used as input.
+
+        Returns
+        -------
+        dos_object : Density
+            Density object created from LDOS object.
+
+
+        """
+        return_density_object = Density(ldos_object.parameters)
+        return_density_object.fermi_energy_eV = ldos_object.fermi_energy_eV
+        return_density_object.temperature_K = ldos_object.temperature_K
+        return_density_object.voxel_Bohr = ldos_object.voxel_Bohr
+        return_density_object.number_of_electrons = ldos_object.\
+            number_of_electrons_exact
+        return_density_object.band_energy_dft_calculation = ldos_object.\
+            band_energy_dft_calculation
+        return_density_object.grid_dimensions = ldos_object.grid_dimensions
+        return_density_object.atoms = ldos_object.atoms
+        return_density_object.qe_input_data = ldos_object.qe_input_data
+        return_density_object.qe_pseudopotentials = ldos_object.\
+            qe_pseudopotentials
+        return_density_object.total_energy_dft_calculation = \
+            ldos_object.total_energy_dft_calculation
+        return_density_object.kpoints = ldos_object.kpoints
+        return_density_object.number_of_electrons_from_eigenvals = \
+            ldos_object.number_of_electrons_from_eigenvals
+        return return_density_object
+
+    ##############################
+    # Properties
+    ##############################
+
+    @property
+    def density(self):
+        """Electronic density."""
+        return self._density
+
+    @density.setter
+    def density(self, new_density):
+        self._density = new_density
+
+    @cached_property
+    def number_of_electrons(self):
+        if self.density is not None:
+            return self.get_number_of_electrons(density_data=self.density)
+        else:
+            raise Exception("No cached density available to "
+                            "calculate this property.")
+
+    ##############################
+    # Methods
+    ##############################
 
     def get_feature_size(self):
         """Get dimension of this target if used as feature in ML."""
         return 1
 
-    def read_from_cube(self, file_name, directory, units=None):
+    def read_from_cube(self, path, units=None):
         """
         Read the density data from a cube file.
 
@@ -50,8 +133,8 @@ class Density(Target):
         units : string
             Units the density is saved in. Usually none.
         """
-        printout("Reading density from .cube file in ", directory, min_verbosity=0)
-        data, meta = read_cube(os.path.join(directory, file_name))
+        printout("Reading density from .cube file ", path, min_verbosity=0)
+        data, meta = read_cube(path)
         return data
 
     def write_as_cube(self, file_name, density_data, atoms=None,
@@ -188,6 +271,7 @@ class Density(Target):
                                       voxel_Bohr.volume
 
         return number_of_electrons
+
 
     def get_density(self, density_data, convert_to_threedimensional=False,
                     grid_dimensions=None):
@@ -450,40 +534,3 @@ class Density(Target):
         principal_axis = atoms.get_cell()[0][0]
         scaled_positions = atoms.get_positions()/principal_axis
         return scaled_positions
-
-    @classmethod
-    def from_ldos(cls, ldos_object):
-        """
-        Create a density object from an LDOS object.
-
-        Parameters
-        ----------
-        ldos_object : mala.targets.ldos.LDOS
-            LDOS object used as input.
-
-        Returns
-        -------
-        dos_object : Density
-            Density object created from LDOS object.
-
-
-        """
-        return_density_object = Density(ldos_object.parameters)
-        return_density_object.fermi_energy_eV = ldos_object.fermi_energy_eV
-        return_density_object.temperature_K = ldos_object.temperature_K
-        return_density_object.voxel_Bohr = ldos_object.voxel_Bohr
-        return_density_object.number_of_electrons = ldos_object.\
-            number_of_electrons
-        return_density_object.band_energy_dft_calculation = ldos_object.\
-            band_energy_dft_calculation
-        return_density_object.grid_dimensions = ldos_object.grid_dimensions
-        return_density_object.atoms = ldos_object.atoms
-        return_density_object.qe_input_data = ldos_object.qe_input_data
-        return_density_object.qe_pseudopotentials = ldos_object.\
-            qe_pseudopotentials
-        return_density_object.total_energy_dft_calculation = \
-            ldos_object.total_energy_dft_calculation
-        return_density_object.kpoints = ldos_object.kpoints
-        return_density_object.number_of_electrons_from_eigenvals = \
-            ldos_object.number_of_electrons_from_eigenvals
-        return return_density_object
