@@ -19,13 +19,103 @@ class DOS(Target):
         Parameters used to create this TargetBase object.
     """
 
+    ##############################
+    # Constructors
+    ##############################
+
     def __init__(self, params):
         super(DOS, self).__init__(params)
         self.target_length = self.parameters.ldos_gridsize
 
-    def get_feature_size(self):
+    @classmethod
+    def from_ldos(cls, ldos_object):
+        """
+        Create a DOS object from an LDOS object.
+
+        Parameters
+        ----------
+        ldos_object : mala.targets.ldos.LDOS
+            LDOS object used as input.
+
+        Returns
+        -------
+        dos_object : DOS
+            DOS object created from LDOS object.
+
+
+        """
+        return_dos_object = DOS(ldos_object.parameters)
+        return_dos_object.fermi_energy_dft = ldos_object.fermi_energy_dft
+        return_dos_object.temperature_K = ldos_object.temperature_K
+        return_dos_object.voxel_Bohr = ldos_object.voxel_Bohr
+        return_dos_object.number_of_electrons_exact = ldos_object.number_of_electrons_exact
+        return_dos_object.band_energy_dft_calculation = \
+            ldos_object.band_energy_dft_calculation
+        return_dos_object.atoms = ldos_object.atoms
+        return_dos_object.qe_input_data = ldos_object.qe_input_data
+        return_dos_object.qe_pseudopotentials = ldos_object.qe_pseudopotentials
+        return_dos_object.total_energy_dft_calculation = \
+            ldos_object.total_energy_dft_calculation
+        return_dos_object.kpoints = ldos_object.kpoints
+        return_dos_object.number_of_electrons_from_eigenvals = \
+            ldos_object.number_of_electrons_from_eigenvals
+
+        return return_dos_object
+
+    @classmethod
+    def from_numpy(cls, params, path):
+        return_density_object = DOS(params)
+        return_density_object.density.read_from_numpy(path)
+        return return_density_object
+
+    @classmethod
+    def from_qe_dos_txt(cls, params, path):
+        return_density_object = DOS(params)
+        return_density_object.read_from_qe_dos_txt(path)
+        return return_density_object
+
+    @classmethod
+    def from_qe_out(cls, params, path):
+        return_density_object = DOS(params)
+        return_density_object.read_from_qe_out(path)
+        return return_density_object
+
+    ##############################
+    # Properties
+    ##############################
+
+    @property
+    def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
         return self.parameters.ldos_gridsize
+
+    @property
+    def density_of_states(self):
+        return self._density_of_states
+
+    @density_of_states.setter
+    def density_of_states(self, new_dos):
+        self._density_of_states = new_dos
+        # Setting a new DOS means we have to uncache priorly cached
+        # properties.
+        self.uncache_properties()
+
+    def uncache_properties(self):
+        """Uncache all cached properties of this calculator."""
+        if self._is_property_cached("number_of_electrons"):
+            del self.number_of_electrons
+        if self._is_property_cached("energy_grid"):
+            del self.energy_grid
+        if self._is_property_cached("total_energy"):
+            del self.total_energy
+        if self._is_property_cached("band_energy"):
+            del self.band_energy
+        if self._is_property_cached("fermi_energy"):
+            del self.fermi_energy
+        if self._is_property_cached("density"):
+            del self.density
+        if self._is_property_cached("density_of_states"):
+            del self.density_of_states
 
     @staticmethod
     def convert_units(array, in_units="1/eV"):
@@ -376,41 +466,6 @@ class DOS(Target):
     def get_density_of_states(self, dos_data):
         """Get the density of states."""
         return dos_data
-
-    @classmethod
-    def from_ldos(cls, ldos_object):
-        """
-        Create a DOS object from an LDOS object.
-
-        Parameters
-        ----------
-        ldos_object : mala.targets.ldos.LDOS
-            LDOS object used as input.
-
-        Returns
-        -------
-        dos_object : DOS
-            DOS object created from LDOS object.
-
-
-        """
-        return_dos_object = DOS(ldos_object.parameters)
-        return_dos_object.fermi_energy_dft = ldos_object.fermi_energy_dft
-        return_dos_object.temperature_K = ldos_object.temperature_K
-        return_dos_object.voxel_Bohr = ldos_object.voxel_Bohr
-        return_dos_object.number_of_electrons_exact = ldos_object.number_of_electrons_exact
-        return_dos_object.band_energy_dft_calculation = \
-            ldos_object.band_energy_dft_calculation
-        return_dos_object.atoms = ldos_object.atoms
-        return_dos_object.qe_input_data = ldos_object.qe_input_data
-        return_dos_object.qe_pseudopotentials = ldos_object.qe_pseudopotentials
-        return_dos_object.total_energy_dft_calculation = \
-            ldos_object.total_energy_dft_calculation
-        return_dos_object.kpoints = ldos_object.kpoints
-        return_dos_object.number_of_electrons_from_eigenvals = \
-            ldos_object.number_of_electrons_from_eigenvals
-
-        return return_dos_object
 
     @staticmethod
     def __number_of_electrons_from_dos(dos_data, energy_grid, fermi_energy_eV,

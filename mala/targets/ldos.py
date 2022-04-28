@@ -61,7 +61,7 @@ class LDOS(Target):
     @local_density_of_states.setter
     def local_density_of_states(self, new_ldos):
         self._local_density_of_states = new_ldos
-        # Setting a new density means we have to uncache priorly cached
+        # Setting a new LDOS means we have to uncache priorly cached
         # properties.
         self.uncache_properties()
 
@@ -69,6 +69,18 @@ class LDOS(Target):
         """Uncache all cached properties of this calculator."""
         if self._is_property_cached("number_of_electrons"):
             del self.number_of_electrons
+        if self._is_property_cached("energy_grid"):
+            del self.energy_grid
+        if self._is_property_cached("total_energy"):
+            del self.total_energy
+        if self._is_property_cached("band_energy"):
+            del self.band_energy
+        if self._is_property_cached("fermi_energy"):
+            del self.fermi_energy
+        if self._is_property_cached("density"):
+            del self.density
+        if self._is_property_cached("density_of_states"):
+            del self.density_of_states
 
     @cached_property
     def energy_grid(self):
@@ -105,7 +117,27 @@ class LDOS(Target):
                 get_self_consistent_fermi_energy_ev(
                     self.local_density_of_states)
         else:
+            # The Fermi energy is set to None instead of creating an error.
+            # This is because the Fermi energy is used a lot throughout
+            # and it may be benificial not to throw an error directly
+            # but rather we need to revert to the DFT values.
             return None
+
+    @cached_property
+    def density(self):
+        if self.local_density_of_states is not None:
+            return self.get_density(self.local_density_of_states)
+        else:
+            raise Exception("No cached LDOS available to calculate this "
+                            "property.")
+
+    @cached_property
+    def density_of_states(self):
+        if self.local_density_of_states is not None:
+            return self.get_density_of_states(self.local_density_of_states)
+        else:
+            raise Exception("No cached LDOS available to calculate this "
+                            "property.")
 
     ##############################
     # Methods
@@ -962,108 +994,8 @@ class LDOS(Target):
         dd_dB = used_data_handler.get_test_input_gradient(snapshot_number)
         return dd_dB
 
-    def get_and_cache_density_of_states(self, ldos_data,
-                                        voxel_Bohr=None,
-                                        integration_method="summation"):
-        """
-        Calculate a DOS from LDOS data and keep it in memory.
-
-        For all subsequent calculations involving the DOS, this cached
-        DOS will be used. Usage of this function is advised for time-critical
-        calculations.
-
-        Parameters
-        ----------
-        ldos_data : numpy.array
-            LDOS data, either as [gridsize, energygrid] or
-            [gridx,gridy,gridz,energygrid].
-
-        voxel_Bohr : ase.cell.Cell
-            Voxel to be used for grid intergation. Needs to reflect the
-            symmetry of the simulation cell. In Bohr.
-
-        integration_method : str
-            Integration method used to integrate LDOS on the grid.
-            Currently supported:
-
-            - "trapz" for trapezoid method (only for cubic grids).
-            - "simps" for Simpson method (only for cubic grids).
-            - "summation" for summation and scaling of the values (recommended)
-
-        Returns
-        -------
-        dos_values : np.array
-            The DOS.
-
-        """
-        self.uncache_density_of_states()
-        self.cached_dos = self.\
-            get_density_of_states(ldos_data,
-                                  voxel_Bohr=voxel_Bohr,
-                                  integration_method=integration_method)
-        self.cached_dos_exists = True
-        return self.cached_dos
-
-    def uncache_density_of_states(self):
-        """Uncache a DOS, to calculate a new one in following steps."""
-        self.cached_dos_exists = False
-
-    def get_and_cache_density_cached(self, ldos_data,
-                                     fermi_energy_ev=None,
-                                     temperature_K=None,
-                                     conserve_dimensions=False,
-                                     integration_method="analytical"):
-        """
-        Calculate an electronic density from LDOS data and keep it in memory.
-
-        For all subsequent calculations involving the electronic density, this
-        cached density will be used. Usage of this function is advised for
-        time-critical calculations.
-
-        Parameters
-        ----------
-        conserve_dimensions : bool
-            If True, the density is returned in the same dimensions as
-            the LDOS was entered. If False, the density is always given
-            as [gridsize].
-
-        fermi_energy_ev : float
-            Fermi energy level in eV.
-
-        temperature_K : float
-            Temperature in K.
-
-        ldos_data : numpy.array
-            LDOS data, either as [gridsize, energygrid] or
-            [gridx,gridy,gridz,energygrid].
-
-        integration_method : string
-            Integration method to integrate LDOS on energygrid.
-            Currently supported:
-
-                - "trapz" for trapezoid method
-                - "simps" for Simpson method.
-                - "analytical" for analytical integration. Recommended.
-
-        Returns
-        -------
-        density_data : numpy.array
-            Density data, dimensions depend on conserve_dimensions and LDOS
-            dimensions.
-        """
-        self.uncache_density()
-        self.cached_density = self. \
-            get_density(ldos_data, fermi_energy_eV=fermi_energy_ev,
-                        temperature_K=temperature_K,
-                        conserve_dimensions=conserve_dimensions,
-                        integration_method=integration_method)
-
-        self.cached_density_exists = True
-        return self.cached_density
-
-    def uncache_density(self):
-        """Uncache a density, to calculate a new one in following steps."""
-        self.cached_density_exists = False
+    # Private methods
+    #################
 
     def _gather_density(self, density_values, use_pickled_comm=False):
         """
