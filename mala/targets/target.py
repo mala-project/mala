@@ -138,6 +138,9 @@ class Target(ABC):
     def qe_input_data(self, value):
         self._qe_input_data = value
 
+    def _is_property_cached(self, property_name):
+        return property_name in self.__dict__.keys()
+
     def read_from_cube(self):
         """Read the quantity from a .cube file."""
         raise Exception("No function defined to read this quantity "

@@ -387,20 +387,23 @@ class LDOS(Target):
                                      energy_integration_method)
 
         # Density based energy contributions (via QE)
-        e_rho_times_v_hxc, e_hartree,  e_xc, e_ewald \
+        density_contributions \
             = density_calculator.\
             get_energy_contributions(density_data, qe_input_data=qe_input_data,
                                      atoms_Angstrom=atoms_Angstrom,
                                      qe_pseudopotentials=qe_pseudopotentials,
                                      create_file=create_qe_file)
-        e_total = e_band + e_rho_times_v_hxc + e_hartree + e_xc + e_ewald +\
+        e_total = e_band + density_contributions["e_rho_times_v_hxc"] + \
+            density_contributions["e_hartree"] + \
+            density_contributions["e_xc"] + \
+            density_contributions["e_ewald"] +\
             e_entropy_contribution
         if return_energy_contributions:
             energy_contribtuons = {"e_band": e_band,
-                                   "e_rho_times_v_hxc": e_rho_times_v_hxc,
-                                   "e_hartree": e_hartree,
-                                   "e_xc": e_xc,
-                                   "e_ewald": e_ewald,
+                                   "e_rho_times_v_hxc": density_contributions["e_rho_times_v_hxc"],
+                                   "e_hartree": density_contributions["e_hartree"],
+                                   "e_xc": density_contributions["e_xc"],
+                                   "e_ewald": density_contributions["e_ewald"],
                                    "e_entropy_contribution":
                                        e_entropy_contribution}
             return e_total, energy_contribtuons

@@ -49,7 +49,7 @@ class Density(Target):
     @classmethod
     def from_cube_file(cls, params, path):
         return_density_object = Density(params)
-        return_density_object.density = return_density_object.read_from_cube(path)
+        return_density_object.read_from_cube(path)
         return return_density_object
 
     @classmethod
@@ -101,6 +101,9 @@ class Density(Target):
     @density.setter
     def density(self, new_density):
         self._density = new_density
+        # Setting a new density means we have to uncache priorly cached
+        # properties.
+        self.uncache_properties()
 
     @cached_property
     def number_of_electrons(self):
@@ -110,13 +113,29 @@ class Density(Target):
             raise Exception("No cached density available to "
                             "calculate this property.")
 
+    @cached_property
+    def total_energy_contributions(self):
+        if self.density is not None:
+            return self.get_energy_contributions(density_data=self.density)
+        else:
+            raise Exception("No cached density available to "
+                            "calculate this property.")
+
+    def uncache_properties(self):
+        """Uncache all cached properties of this calculator."""
+        if self._is_property_cached("number_of_electrons"):
+            del self.number_of_electrons
+
+        if self._is_property_cached("total_energy_contributions"):
+            del self.total_energy_contributions
+
     ##############################
     # Methods
     ##############################
 
-    def get_feature_size(self):
-        """Get dimension of this target if used as feature in ML."""
-        return 1
+
+    # File I/O
+    ##########
 
     def read_from_cube(self, path, units=None):
         """
@@ -124,18 +143,29 @@ class Density(Target):
 
         Parameters
         ----------
-        file_name :
+        path :
             Name of the cube file.
-
-        directory :
-            Directory containing the cube file.
 
         units : string
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
         data, meta = read_cube(path)
-        return data
+        self.density = data
+
+    def read_from_numpy(self, path, units=None):
+        """
+        Read the density data from a numpy file.
+
+        Parameters
+        ----------
+        path :
+            Name of the numpy file.
+
+        units : string
+            Units the density is saved in. Usually none.
+        """
+        self.density = np.load(path)
 
     def write_as_cube(self, file_name, density_data, atoms=None,
                       grid_dimensions=None):
@@ -181,6 +211,12 @@ class Density(Target):
         meta["zvec"] = self.voxel_Bohr[2]
         write_cube(density_data, meta, file_name)
 
+    # Calculations
+    ##############
+
+    def get_feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return 1
 
     def get_number_of_electrons(self, density_data, voxel_Bohr=None,
                                 integration_method="summation"):
@@ -272,7 +308,6 @@ class Density(Target):
 
         return number_of_electrons
 
-
     def get_density(self, density_data, convert_to_threedimensional=False,
                     grid_dimensions=None):
         """
@@ -346,8 +381,8 @@ class Density(Target):
 
         Returns
         -------
-        energies : list
-            A list containing, in order, the following energy contributions:
+        energies : dict
+            A dict containing the following entries:
 
                 - :math:`n\,V_\mathrm{xc}`
                 - :math:`E_\mathrm{H}`
@@ -364,7 +399,10 @@ class Density(Target):
 
         # Get and return the energies.
         energies = np.array(te.get_energies())*Rydberg
-        return energies
+        energies_dict = {"e_rho_times_v_hxc": energies[0],
+                         "e_hartree": energies[1], "e_xc": energies[2],
+                         "e_ewald": energies[3]}
+        return energies_dict
 
     def get_atomic_forces(self, density_data, create_file=True,
                           atoms_Angstrom=None, qe_input_data=None,
@@ -424,6 +462,34 @@ class Density(Target):
         atomic_forces = AtomicForce.convert_units(atomic_forces,
                                                   in_units="Ry/Bohr")
         return atomic_forces
+
+    @staticmethod
+    def get_scaled_positions_for_qe(atoms):
+        """
+        Get the positions correctly scaled for QE.
+
+        QE (for ibrav=0) scales a little bit different then ASE would.
+        ASE uses all provided cell parameters, while QE simply sets the
+        first entry in the cell parameter matrix as reference and divides
+        all positions by this value.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            The atom objects for which the scaled positions should be
+            calculated.
+
+        Returns
+        -------
+        scaled_positions : numpy.array
+            The scaled positions.
+        """
+        principal_axis = atoms.get_cell()[0][0]
+        scaled_positions = atoms.get_positions()/principal_axis
+        return scaled_positions
+
+    # Private methods
+    #################
 
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
                                     create_file=True, qe_input_data=None,
@@ -510,27 +576,3 @@ class Density(Target):
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
         return atoms_Angstrom
 
-    @staticmethod
-    def get_scaled_positions_for_qe(atoms):
-        """
-        Get the positions correctly scaled for QE.
-
-        QE (for ibrav=0) scales a little bit different then ASE would.
-        ASE uses all provided cell parameters, while QE simply sets the
-        first entry in the cell parameter matrix as reference and divides
-        all positions by this value.
-
-        Parameters
-        ----------
-        atoms : ase.Atoms
-            The atom objects for which the scaled positions should be
-            calculated.
-
-        Returns
-        -------
-        scaled_positions : numpy.array
-            The scaled positions.
-        """
-        principal_axis = atoms.get_cell()[0][0]
-        scaled_positions = atoms.get_positions()/principal_axis
-        return scaled_positions
