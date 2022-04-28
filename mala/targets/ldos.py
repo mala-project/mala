@@ -1,9 +1,9 @@
 """LDOS calculation class."""
-from ase.units import Rydberg
+from functools import cached_property
 
+from ase.units import Rydberg
 import numpy as np
 import math
-import os
 try:
     from mpi4py import MPI
 except ModuleNotFoundError:
@@ -27,17 +27,92 @@ class LDOS(Target):
         Parameters used to create this TargetBase object.
     """
 
+    ##############################
+    # Constructors
+    ##############################
+
     def __init__(self, params):
         super(LDOS, self).__init__(params)
-        self.target_length = self.parameters.ldos_gridsize
-        self.cached_dos_exists = False
-        self.cached_dos = []
-        self.cached_density_exists = False
-        self.cached_density = []
+        self.local_density_of_states = None
 
-    def get_feature_size(self):
+    @classmethod
+    def from_numpy(cls, params, path, units="1/eV"):
+        return_ldos_object = LDOS(params)
+        return_ldos_object.read_from_numpy(path, units=units)
+
+    @classmethod
+    def from_cube_file(cls, params, path_name_scheme, units="1/eV"):
+        return_ldos_object = LDOS(params)
+        return_ldos_object.read_from_cube(path_name_scheme, units=units)
+
+    ##############################
+    # Properties
+    ##############################
+
+    @property
+    def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
         return self.parameters.ldos_gridsize
+
+    @property
+    def local_density_of_states(self):
+        return self._local_density_of_states
+
+    @local_density_of_states.setter
+    def local_density_of_states(self, new_ldos):
+        self._local_density_of_states = new_ldos
+        # Setting a new density means we have to uncache priorly cached
+        # properties.
+        self.uncache_properties()
+
+    def uncache_properties(self):
+        """Uncache all cached properties of this calculator."""
+        if self._is_property_cached("number_of_electrons"):
+            del self.number_of_electrons
+
+    @cached_property
+    def energy_grid(self):
+        return self.get_energy_grid()
+
+    @cached_property
+    def total_energy(self):
+        if self.local_density_of_states is not None:
+            return self.get_total_energy(ldos_data=self.local_density_of_states)
+        else:
+            raise Exception("No cached LDOS available to calculate this "
+                            "property.")
+
+    @cached_property
+    def band_energy(self):
+        if self.local_density_of_states is not None:
+            return self.get_band_energy(ldos_data=self.local_density_of_states)
+        else:
+            raise Exception("No cached LDOS available to calculate this "
+                            "property.")
+
+    @cached_property
+    def number_of_electrons(self):
+        if self.local_density_of_states is not None:
+            return self.get_number_of_electrons(self.local_density_of_states)
+        else:
+            raise Exception("No cached LDOS available to calculate this "
+                            "property.")
+
+    @cached_property
+    def fermi_energy(self):
+        if self.local_density_of_states is not None:
+            return self.\
+                get_self_consistent_fermi_energy_ev(
+                    self.local_density_of_states)
+        else:
+            return None
+
+    ##############################
+    # Methods
+    ##############################
+
+    # File I/O
+    ##########
 
     @staticmethod
     def convert_units(array, in_units="1/eV"):
@@ -96,7 +171,7 @@ class LDOS(Target):
         else:
             raise Exception("Unsupported unit for LDOS.")
 
-    def read_from_cube(self, file_name_scheme, directory, units="1/eV",
+    def read_from_cube(self, path_scheme, units="1/eV",
                        use_memmap=None):
         """
         Read the LDOS data from multiple cube files.
@@ -105,11 +180,10 @@ class LDOS(Target):
 
         Parameters
         ----------
-        file_name_scheme : string
-            Naming scheme for the LDOS .cube files.
-
-        directory : string
-            Directory containing the LDOS .cube files.
+        path_scheme : string
+            Naming scheme for the LDOS .cube files. Every asterisk will be
+            replaced with an appropriate number for the LDOS files. Before
+            the file name, please make sure to include the proper file path.
 
         units : string
             Units the LDOS is saved in.
@@ -118,12 +192,6 @@ class LDOS(Target):
             If not None, a memory mapped file with this name will be used to
             gather the LDOS.
             If run in MPI parallel mode, such a file MUST be provided.
-
-        Returns
-        -------
-        ldos_data : numpy.array
-            Numpy array containing LDOS data.
-
         """
         # First determine how many digits the last file in the list of
         # LDOS.cube files
@@ -142,7 +210,7 @@ class LDOS(Target):
         # Iterate over the amount of specified LDOS input files.
         # QE is a Fortran code, so everything is 1 based.
         printout("Reading "+str(self.parameters.ldos_gridsize) +
-                 " LDOS files from"+directory+".", min_verbosity=0)
+                 " LDOS files from"+path_scheme+".", min_verbosity=0)
         ldos_data = None
         if self.parameters._configuration["mpi"]:
             local_size = int(np.floor(self.parameters.ldos_gridsize /
@@ -158,11 +226,11 @@ class LDOS(Target):
             local_size = self.parameters.ldos_gridsize
 
         for i in range(start_index, end_index):
-            tmp_file_name = file_name_scheme
+            tmp_file_name = path_scheme
             tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
 
             # Open the cube file
-            data, meta = read_cube(os.path.join(directory, tmp_file_name))
+            data, meta = read_cube(tmp_file_name)
 
             # Once we have read the first cube file, we know the dimensions
             # of the LDOS and can prepare the array
@@ -197,7 +265,7 @@ class LDOS(Target):
                                                dtype=np.float64)
                 barrier()
                 ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
-                return ldos_data_full
+                self.local_density_of_states = ldos_data_full
             else:
                 comm = get_comm()
 
@@ -226,9 +294,27 @@ class LDOS(Target):
                     comm.Send(ldos_data, dest=0,
                               tag=get_rank() + 100)
                 barrier()
-                return ldos_data_full
+                self.local_density_of_states = ldos_data_full
         else:
-            return ldos_data
+            self.local_density_of_states = ldos_data
+
+    def read_from_numpy(self, path, units="1/eV"):
+        """
+        Read the density data from a numpy file.
+
+        Parameters
+        ----------
+        path :
+            Name of the numpy file.
+
+        units : string
+            Units the density is saved in. Usually none.
+        """
+        self.local_density_of_states = np.load(path) * \
+            self.convert_units(1, in_units=units)
+
+    # Calculations
+    ##############
 
     def get_energy_grid(self):
         """
@@ -336,7 +422,13 @@ class LDOS(Target):
         if voxel_Bohr is None:
             voxel_Bohr = self.voxel_Bohr
         if fermi_energy_eV is None:
-            fermi_energy_eV = self.fermi_energy_eV
+            fermi_energy_eV = self.fermi_energy
+            if fermi_energy_eV is None:
+                printout("Warning: No fermi energy was provided or could be "
+                         "calculated from electronic structure data. "
+                         "Using the DFT fermi energy, this may "
+                         "yield unexpected results", min_verbosity=1)
+                fermi_energy_eV = self.fermi_energy_dft
         if temperature_K is None:
             temperature_K = self.temperature_K
 
@@ -358,10 +450,9 @@ class LDOS(Target):
         # Calculate density data if need be.
         if density_data is None:
             density_data = self.get_density(ldos_data,
-                                            fermi_energy_ev=fermi_energy_eV,
+                                            fermi_energy_eV=fermi_energy_eV,
                                             temperature_K=temperature_K,
-                                            integration_method=
-                                            energy_integration_method)
+                                            integration_method=energy_integration_method)
 
         # Now we can create calculation objects to get the necessary
         # quantities.
@@ -591,9 +682,8 @@ class LDOS(Target):
                                                 integration_method=
                                                 energy_integration_method)
 
-    def get_density(self, ldos_data, fermi_energy_ev=None, temperature_K=None,
-                    conserve_dimensions=False,
-                    integration_method="analytical",
+    def get_density(self, ldos_data, fermi_energy_eV=None, temperature_K=None,
+                    conserve_dimensions=False, integration_method="analytical",
                     gather_density=True):
         """
         Calculate the density from given LDOS data.
@@ -605,7 +695,7 @@ class LDOS(Target):
             the LDOS was entered. If False, the density is always given
             as [gridsize].
 
-        fermi_energy_ev : float
+        fermi_energy_eV : float
             Fermi energy level in eV.
 
         temperature_K : float
@@ -646,8 +736,14 @@ class LDOS(Target):
         if self.cached_density_exists:
             return self.cached_density
 
-        if fermi_energy_ev is None:
-            fermi_energy_ev = self.fermi_energy_eV
+        if fermi_energy_eV is None:
+            fermi_energy_eV = self.fermi_energy
+            if fermi_energy_eV is None:
+                printout("Warning: No fermi energy was provided or could be "
+                         "calculated from electronic structure data. "
+                         "Using the DFT fermi energy, this may "
+                         "yield unexpected results", min_verbosity=1)
+                fermi_energy_eV = self.fermi_energy_dft
         if temperature_K is None:
             temperature_K = self.temperature_K
 
@@ -670,7 +766,7 @@ class LDOS(Target):
 
         # Build the energy grid and calculate the fermi function.
         energy_grid = self.get_energy_grid()
-        fermi_values = fermi_function(energy_grid, fermi_energy_ev,
+        fermi_values = fermi_function(energy_grid, fermi_energy_eV,
                                       temperature_K, energy_units="eV")
 
         # Calculate the number of electrons.
@@ -682,7 +778,7 @@ class LDOS(Target):
                                              energy_grid, axis=-1)
         elif integration_method == "analytical":
             density_values = analytical_integration(ldos_data_used, "F0", "F1",
-                                                    fermi_energy_ev,
+                                                    fermi_energy_eV,
                                                     energy_grid,
                                                     temperature_K)
         else:
@@ -956,9 +1052,8 @@ class LDOS(Target):
             dimensions.
         """
         self.uncache_density()
-        self.cached_density = self.\
-            get_density(ldos_data,
-                        fermi_energy_ev=fermi_energy_ev,
+        self.cached_density = self. \
+            get_density(ldos_data, fermi_energy_eV=fermi_energy_ev,
                         temperature_K=temperature_K,
                         conserve_dimensions=conserve_dimensions,
                         integration_method=integration_method)

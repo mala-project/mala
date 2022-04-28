@@ -220,7 +220,13 @@ class DOS(Target):
         """
         # Parse the parameters.
         if fermi_energy_eV is None:
-            fermi_energy_eV = self.fermi_energy_eV
+            fermi_energy_eV = self.fermi_energy
+            if fermi_energy_eV is None:
+                printout("Warning: No fermi energy was provided or could be "
+                         "calculated from electronic structure data. "
+                         "Using the DFT fermi energy, this may "
+                         "yield unexpected results", min_verbosity=1)
+                fermi_energy_eV = self.fermi_energy_dft
         if temperature_K is None:
             temperature_K = self.temperature_K
 
@@ -260,7 +266,13 @@ class DOS(Target):
         """
         # Parse the parameters.
         if fermi_energy_eV is None:
-            fermi_energy_eV = self.fermi_energy_eV
+            fermi_energy_eV = self.fermi_energy
+            if fermi_energy_eV is None:
+                printout("Warning: No fermi energy was provided or could be "
+                         "calculated from electronic structure data. "
+                         "Using the DFT fermi energy, this may "
+                         "yield unexpected results", min_verbosity=1)
+                fermi_energy_eV = self.fermi_energy_dft
         if temperature_K is None:
             temperature_K = self.temperature_K
         energy_grid = self.get_energy_grid()
@@ -299,7 +311,13 @@ class DOS(Target):
             S/beta in eV.
         """
         if fermi_energy_eV is None:
-            fermi_energy_eV = self.fermi_energy_eV
+            fermi_energy_eV = self.fermi_energy
+            if fermi_energy_eV is None:
+                printout("Warning: No fermi energy was provided or could be "
+                         "calculated from electronic structure data. "
+                         "Using the DFT fermi energy, this may "
+                         "yield unexpected results", min_verbosity=1)
+                fermi_energy_eV = self.fermi_energy_dft
         if temperature_K is None:
             temperature_K = self.temperature_K
 
@@ -377,7 +395,7 @@ class DOS(Target):
 
         """
         return_dos_object = DOS(ldos_object.parameters)
-        return_dos_object.fermi_energy_eV = ldos_object.fermi_energy_eV
+        return_dos_object.fermi_energy_dft = ldos_object.fermi_energy_dft
         return_dos_object.temperature_K = ldos_object.temperature_K
         return_dos_object.voxel_Bohr = ldos_object.voxel_Bohr
         return_dos_object.number_of_electrons_exact = ldos_object.number_of_electrons_exact

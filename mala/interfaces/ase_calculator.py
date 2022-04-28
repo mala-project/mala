@@ -123,7 +123,7 @@ class MALA(Calculator):
             fermi_energy_ev = dos_calculator.get_self_consistent_fermi_energy_ev(
                 dos)
             density = ldos_calculator.get_density(ldos,
-                                                  fermi_energy_ev=fermi_energy_ev)
+                                                  fermi_energy_eV=fermi_energy_ev)
             energy, self.last_energy_contributions = ldos_calculator.\
             get_total_energy(dos_data=dos, density_data=density,
                              fermi_energy_eV=fermi_energy_ev,

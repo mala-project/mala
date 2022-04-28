@@ -80,7 +80,7 @@ class Target(ABC):
             self.parameters: ParametersTargets = params
         else:
             raise Exception("Wrong type of parameters for Targets class.")
-        self.fermi_energy_eV = None
+        self.fermi_energy_dft = None
         self.temperature_K = None
         self.voxel_Bohr = None
         self.number_of_electrons_exact = None
@@ -121,8 +121,9 @@ class Target(ABC):
         # Local grid for distributed inference.
         self.local_grid = None
 
+    @property
     @abstractmethod
-    def get_feature_size(self):
+    def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
         pass
 
@@ -156,7 +157,6 @@ class Target(ABC):
         raise Exception("No function defined to write this quantity "
                         "to a .cube file.")
 
-    @abstractmethod
     def density(self):
         """The electronic density."""
         raise Exception("No function to calculate or provide the "
@@ -218,7 +218,7 @@ class Target(ABC):
         """
         if data_type == "qe.out":
             # Reset everything.
-            self.fermi_energy_eV = None
+            self.fermi_energy_dft = None
             self.temperature_K = None
             self.voxel_Bohr = None
             self.number_of_electrons_exact = None
@@ -230,7 +230,7 @@ class Target(ABC):
             # Read the file.
             self.atoms = ase.io.read(data, format="espresso-out")
             vol = self.atoms.get_volume()
-            self.fermi_energy_eV = self.atoms.get_calculator().\
+            self.fermi_energy_dft = self.atoms.get_calculator().\
                 get_fermi_level()
 
             # Parse the file for energy values.
@@ -306,12 +306,12 @@ class Target(ABC):
                     energies[0, :, :])
                 kweights = self.atoms.get_calculator().get_k_point_weights()
                 eband_per_band = eigs * fermi_function(eigs,
-                                                       self.fermi_energy_eV,
+                                                       self.fermi_energy_dft,
                                                        self.temperature_K)
                 eband_per_band = kweights[np.newaxis, :] * eband_per_band
                 self.band_energy_dft_calculation = np.sum(eband_per_band)
                 enum_per_band = fermi_function(eigs,
-                                               self.fermi_energy_eV,
+                                               self.fermi_energy_dft,
                                                self.temperature_K)
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)

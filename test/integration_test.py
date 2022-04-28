@@ -138,8 +138,8 @@ class TestMALAIntegration:
         # Calculate the quantities we want to compare.
         self_consistent_fermi_energy = ldos_calculator.\
             get_self_consistent_fermi_energy_ev(ldos_dft)
-        density_mala = ldos_calculator.\
-            get_density(ldos_dft, fermi_energy_ev=self_consistent_fermi_energy)
+        density_mala = ldos_calculator. \
+            get_density(ldos_dft, fermi_energy_eV=self_consistent_fermi_energy)
         density_mala_sum = density_mala.sum()
         density_dft_sum = density_dft.sum()
 

@@ -27,7 +27,7 @@ class Density(Target):
         Parameters used to create this Target object.
     """
     ##############################
-    # Global attributes
+    # Class attributes
     ##############################
 
     te_mutex = False
@@ -43,7 +43,7 @@ class Density(Target):
     @classmethod
     def from_numpy(cls, params, path):
         return_density_object = Density(params)
-        return_density_object.density = np.load(path)
+        return_density_object.density.read_from_numpy(path)
         return return_density_object
 
     @classmethod
@@ -70,7 +70,7 @@ class Density(Target):
 
         """
         return_density_object = Density(ldos_object.parameters)
-        return_density_object.fermi_energy_eV = ldos_object.fermi_energy_eV
+        return_density_object.fermi_energy_dft = ldos_object.fermi_energy_dft
         return_density_object.temperature_K = ldos_object.temperature_K
         return_density_object.voxel_Bohr = ldos_object.voxel_Bohr
         return_density_object.number_of_electrons = ldos_object.\
@@ -105,6 +105,11 @@ class Density(Target):
         # properties.
         self.uncache_properties()
 
+    @property
+    def feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return 1
+
     @cached_property
     def number_of_electrons(self):
         if self.density is not None:
@@ -132,7 +137,6 @@ class Density(Target):
     ##############################
     # Methods
     ##############################
-
 
     # File I/O
     ##########
@@ -213,10 +217,6 @@ class Density(Target):
 
     # Calculations
     ##############
-
-    def get_feature_size(self):
-        """Get dimension of this target if used as feature in ML."""
-        return 1
 
     def get_number_of_electrons(self, density_data, voxel_Bohr=None,
                                 integration_method="summation"):
