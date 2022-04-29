@@ -63,19 +63,19 @@ class DOS(Target):
         return return_dos_object
 
     @classmethod
-    def from_numpy(cls, params, path):
+    def from_numpy(cls, params, path, units="1/eV"):
         return_density_object = DOS(params)
         return_density_object.density.read_from_numpy(path)
         return return_density_object
 
     @classmethod
-    def from_qe_dos_txt(cls, params, path):
+    def from_qe_dos_txt(cls, params, path, units="1/eV"):
         return_density_object = DOS(params)
         return_density_object.read_from_qe_dos_txt(path)
         return return_density_object
 
     @classmethod
-    def from_qe_out(cls, params, path):
+    def from_qe_out(cls, params, path, units="1/eV"):
         return_density_object = DOS(params)
         return_density_object.read_from_qe_out(path)
         return return_density_object
@@ -116,6 +116,13 @@ class DOS(Target):
             del self.density
         if self._is_property_cached("density_of_states"):
             del self.density_of_states
+
+    ##############################
+    # Methods
+    ##############################
+
+    # File I/O
+    ##########
 
     @staticmethod
     def convert_units(array, in_units="1/eV"):
@@ -174,7 +181,7 @@ class DOS(Target):
         else:
             raise Exception("Unsupported unit for LDOS.")
 
-    def read_from_qe_dos_txt(self, file_name, directory):
+    def read_from_qe_dos_txt(self, file_name, directory, units="1/eV"):
         """
         Read the DOS from a Quantum Espresso generated file.
 
