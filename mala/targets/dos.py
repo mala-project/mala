@@ -1,5 +1,6 @@
 """DOS calculation class."""
 import os
+from functools import cached_property
 
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
@@ -25,7 +26,7 @@ class DOS(Target):
 
     def __init__(self, params):
         super(DOS, self).__init__(params)
-        self.target_length = self.parameters.ldos_gridsize
+        self.density_of_states = None
 
     @classmethod
     def from_ldos(cls, ldos_object):
@@ -64,21 +65,26 @@ class DOS(Target):
 
     @classmethod
     def from_numpy(cls, params, path, units="1/eV"):
-        return_density_object = DOS(params)
-        return_density_object.density.read_from_numpy(path)
-        return return_density_object
+        return_dos = DOS(params)
+        return_dos.read_from_numpy(path, units=units)
+        return return_dos
 
     @classmethod
-    def from_qe_dos_txt(cls, params, path, units="1/eV"):
-        return_density_object = DOS(params)
-        return_density_object.read_from_qe_dos_txt(path)
-        return return_density_object
+    def from_qe_dos_txt(cls, params, path):
+        return_dos = DOS(params)
+        return_dos.read_from_qe_dos_txt(path)
+        return return_dos
 
     @classmethod
-    def from_qe_out(cls, params, path, units="1/eV"):
-        return_density_object = DOS(params)
-        return_density_object.read_from_qe_out(path)
-        return return_density_object
+    def from_qe_out(cls, params, path):
+        return_dos = DOS(params)
+
+        # In this case, we may just read the entire qe.out file.
+        return_dos.read_additional_calculation_data("qe.out", path)
+
+        # This method will use the ASE atoms object read above automatically.
+        return_dos.read_from_qe_out()
+        return return_dos
 
     ##############################
     # Properties
@@ -100,22 +106,56 @@ class DOS(Target):
         # properties.
         self.uncache_properties()
 
+    @cached_property
+    def energy_grid(self):
+        return self.get_energy_grid()
+
+    @cached_property
+    def band_energy(self):
+        if self.density_of_states is not None:
+            return self.get_band_energy(self.density_of_states)
+        else:
+            raise Exception("No cached DOS available to calculate this "
+                            "property.")
+
+    @cached_property
+    def number_of_electrons(self):
+        if self.density_of_states is not None:
+            return self.get_number_of_electrons(self.density_of_states)
+        else:
+            raise Exception("No cached DOS available to calculate this "
+                            "property.")
+
+    @cached_property
+    def fermi_energy(self):
+        if self.density_of_states is not None:
+            return self.\
+                get_self_consistent_fermi_energy_ev(self.density_of_states)
+        else:
+            # The Fermi energy is set to None instead of creating an error.
+            # This is because the Fermi energy is used a lot throughout
+            # and it may be benificial not to throw an error directly
+            # but rather we need to revert to the DFT values.
+            return None
+
+    @cached_property
+    def entropy_contribution(self):
+        if self.density_of_states is not None:
+            return self.get_entropy_contribution(self.density_of_states)
+        else:
+            raise Exception("No cached DOS available to calculate this "
+                            "property.")
+
     def uncache_properties(self):
         """Uncache all cached properties of this calculator."""
         if self._is_property_cached("number_of_electrons"):
             del self.number_of_electrons
         if self._is_property_cached("energy_grid"):
             del self.energy_grid
-        if self._is_property_cached("total_energy"):
-            del self.total_energy
         if self._is_property_cached("band_energy"):
             del self.band_energy
         if self._is_property_cached("fermi_energy"):
             del self.fermi_energy
-        if self._is_property_cached("density"):
-            del self.density
-        if self._is_property_cached("density_of_states"):
-            del self.density_of_states
 
     ##############################
     # Methods
@@ -181,7 +221,7 @@ class DOS(Target):
         else:
             raise Exception("Unsupported unit for LDOS.")
 
-    def read_from_qe_dos_txt(self, file_name, directory, units="1/eV"):
+    def read_from_qe_dos_txt(self, path):
         """
         Read the DOS from a Quantum Espresso generated file.
 
@@ -190,11 +230,8 @@ class DOS(Target):
 
         Parameters
         ----------
-        file_name : string
-            Name of the file containing the DOS.
-
-        directory : string
-            Directory containing the file file_name.
+        path : string
+            Path of the file containing the DOS.
 
         Returns
         -------
@@ -208,7 +245,7 @@ class DOS(Target):
         return_dos_values = []
 
         # Open the file, then iterate through its contents.
-        with open(os.path.join(directory, file_name), 'r') as infile:
+        with open(path, 'r') as infile:
             lines = infile.readlines()
             i = 0
 
@@ -222,9 +259,9 @@ class DOS(Target):
                         return_dos_values.append(dosval)
                         i += 1
 
-        return np.array(return_dos_values)
+        self.density_of_states = np.array(return_dos_values)
 
-    def read_from_qe_out(self, path_to_file=None, smearing_factor=2):
+    def read_from_qe_out(self, path=None, smearing_factor=2):
         r"""
         Calculate the DOS from a Quantum Espresso DFT output file.
 
@@ -234,7 +271,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        path_to_file : string
+        path : string
             Path to the QE out file. If None, the QE output that was loaded
             via read_additional_calculation_data will be used.
 
@@ -247,10 +284,10 @@ class DOS(Target):
             DOS data in 1/eV.
         """
         # dos_per_band = delta_f(e_grid,dft.eigs)
-        if path_to_file is None:
+        if path is None:
             atoms_object = self.atoms
         else:
-            atoms_object = ase.io.read(path_to_file, format="espresso-out")
+            atoms_object = ase.io.read(path, format="espresso-out")
         kweights = atoms_object.get_calculator().get_k_point_weights()
         if kweights is None:
             raise Exception("QE output file does not contain band information."
@@ -267,7 +304,25 @@ class DOS(Target):
 
         # QE gives the band energies in eV, so no conversion necessary here.
         dos_data = np.sum(dos_per_band, axis=(0, 1))
-        return dos_data
+        self.density_of_states = dos_data
+
+    def read_from_numpy(self, path, units="1/eV"):
+        """
+        Read the density data from a numpy file.
+
+        Parameters
+        ----------
+        path :
+            Name of the numpy file.
+
+        units : string
+            Units the density is saved in. Usually none.
+        """
+        self.density_of_states = np.load(path) * \
+            self.convert_units(1, in_units=units)
+
+    # Calculations
+    ##############
 
     def get_energy_grid(self):
         """
@@ -473,6 +528,9 @@ class DOS(Target):
     def get_density_of_states(self, dos_data):
         """Get the density of states."""
         return dos_data
+
+    # Private methods
+    #################
 
     @staticmethod
     def __number_of_electrons_from_dos(dos_data, energy_grid, fermi_energy_eV,
