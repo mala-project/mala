@@ -488,8 +488,8 @@ class LDOS(Target):
 
         # Now we can create calculation objects to get the necessary
         # quantities.
-        dos_calculator = DOS.from_ldos(self)
-        density_calculator = Density.from_ldos(self)
+        dos_calculator = DOS.from_ldos_calculator(self)
+        density_calculator = Density.from_ldos_calculator(self)
 
         # With these calculator objects we can calculate all the necessary
         # quantities to construct the total energy.
@@ -585,7 +585,7 @@ class LDOS(Target):
 
         # Once we have the DOS, we can use a DOS object to calculate t
         # he band energy.
-        dos_calculator = DOS.from_ldos(self)
+        dos_calculator = DOS.from_ldos_calculator(self)
         return dos_calculator.\
             get_band_energy(dos_data, fermi_energy_eV=fermi_energy_eV,
                             temperature_K=temperature_K,
@@ -643,7 +643,7 @@ class LDOS(Target):
 
         # Once we have the DOS, we can use a DOS object to calculate the
         # number of electrons.
-        dos_calculator = DOS.from_ldos(self)
+        dos_calculator = DOS.from_ldos_calculator(self)
         return dos_calculator.\
             get_number_of_electrons(dos_data, fermi_energy_eV=fermi_energy_eV,
                                     temperature_K=temperature_K,
@@ -707,7 +707,7 @@ class LDOS(Target):
 
         # Once we have the DOS, we can use a DOS object to calculate the
         # number of electrons.
-        dos_calculator = DOS.from_ldos(self)
+        dos_calculator = DOS.from_ldos_calculator(self)
         return dos_calculator.\
             get_self_consistent_fermi_energy_ev(dos_data,
                                                 temperature_K=temperature_K,

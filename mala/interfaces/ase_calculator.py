@@ -115,8 +115,8 @@ class MALA(Calculator):
         if get_rank() == 0:
             # Define calculator objects.
             ldos_calculator: LDOS = self.data_handler.target_calculator
-            density_calculator = Density.from_ldos(ldos_calculator)
-            dos_calculator = DOS.from_ldos(ldos_calculator)
+            density_calculator = Density.from_ldos_calculator(ldos_calculator)
+            dos_calculator = DOS.from_ldos_calculator(ldos_calculator)
 
             # Get DOS and density.
             dos = ldos_calculator.get_density_of_states(ldos, gather_dos=False)

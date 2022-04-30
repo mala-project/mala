@@ -164,7 +164,7 @@ class TestFullWorkflow:
                                               data_path_ldos, "Be.pw.scf.out"))
         dos_data = np.load(os.path.join(data_path_ldos, "Be_dos.npy"))
         dens_data = np.load(os.path.join(data_path_ldos, "Be_dens.npy"))
-        dos = mala.DOS.from_ldos(ldos)
+        dos = mala.DOS.from_ldos_calculator(ldos)
 
         # Calculate energies
         self_consistent_fermi_energy = dos. \

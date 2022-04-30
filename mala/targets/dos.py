@@ -29,7 +29,7 @@ class DOS(Target):
         self.density_of_states = None
 
     @classmethod
-    def from_ldos(cls, ldos_object):
+    def from_ldos_calculator(cls, ldos_object):
         """
         Create a DOS object from an LDOS object.
 
@@ -60,6 +60,11 @@ class DOS(Target):
         return_dos_object.kpoints = ldos_object.kpoints
         return_dos_object.number_of_electrons_from_eigenvals = \
             ldos_object.number_of_electrons_from_eigenvals
+
+        # If the source calculator has LDOS data, then this new object
+        # can have DOS data.
+        if ldos_object.local_density_of_states is not None:
+            return_dos_object.density_of_states = ldos_object.density_of_states
 
         return return_dos_object
 
@@ -329,7 +334,7 @@ class DOS(Target):
 
     def read_from_array(self, array, units="1/eV"):
         """
-        Read the density data from a numpy file.
+        Read the density data from a numpy array.
 
         Parameters
         ----------
@@ -576,8 +581,18 @@ class DOS(Target):
                                   b=energy_grid[-1])
         return fermi_energy_sc
 
-    def get_density_of_states(self, dos_data):
-        """Get the density of states."""
+    def get_density_of_states(self, dos_data=None):
+        """
+        Get the density of states.
+
+        This function currently doesn't do much. In the LDOS and
+        density equivalents of it, certain dimensionality reorderings
+        may happen, this function purely exists for consistency
+        reasons. In the future, that may change. 
+        """
+        if dos_data is None:
+            dos_data = self.density_of_states
+
         return dos_data
 
     # Private methods
