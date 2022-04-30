@@ -64,9 +64,15 @@ class DOS(Target):
         return return_dos_object
 
     @classmethod
-    def from_numpy(cls, params, path, units="1/eV"):
+    def from_numpy_file(cls, params, path, units="1/eV"):
         return_dos = DOS(params)
         return_dos.read_from_numpy(path, units=units)
+        return return_dos
+
+    @classmethod
+    def from_numpy_array(cls, params, array, units="1/eV"):
+        return_dos = DOS(params)
+        return_dos.read_from_array(array, units=units)
         return return_dos
 
     @classmethod
@@ -113,7 +119,7 @@ class DOS(Target):
     @cached_property
     def band_energy(self):
         if self.density_of_states is not None:
-            return self.get_band_energy(self.density_of_states)
+            return self.get_band_energy()
         else:
             raise Exception("No cached DOS available to calculate this "
                             "property.")
@@ -121,7 +127,7 @@ class DOS(Target):
     @cached_property
     def number_of_electrons(self):
         if self.density_of_states is not None:
-            return self.get_number_of_electrons(self.density_of_states)
+            return self.get_number_of_electrons()
         else:
             raise Exception("No cached DOS available to calculate this "
                             "property.")
@@ -130,7 +136,7 @@ class DOS(Target):
     def fermi_energy(self):
         if self.density_of_states is not None:
             return self.\
-                get_self_consistent_fermi_energy_ev(self.density_of_states)
+                get_self_consistent_fermi_energy_ev()
         else:
             # The Fermi energy is set to None instead of creating an error.
             # This is because the Fermi energy is used a lot throughout
@@ -141,7 +147,7 @@ class DOS(Target):
     @cached_property
     def entropy_contribution(self):
         if self.density_of_states is not None:
-            return self.get_entropy_contribution(self.density_of_states)
+            return self.get_entropy_contribution()
         else:
             raise Exception("No cached DOS available to calculate this "
                             "property.")
@@ -241,7 +247,7 @@ class DOS(Target):
         # Create the desired/specified energy grid. We will use this to
         # check whether we have a correct file.
 
-        energy_grid = self.get_energy_grid()
+        energy_grid = self.energy_grid
         return_dos_values = []
 
         # Open the file, then iterate through its contents.
@@ -295,7 +301,7 @@ class DOS(Target):
 
         # Get the gaussians for all energy values and calculate the DOS per
         # band.
-        dos_per_band = gaussians(self.get_energy_grid(),
+        dos_per_band = gaussians(self.energy_grid,
                                  atoms_object.get_calculator().
                                  band_structure().energies[0, :, :],
                                  smearing_factor*self.parameters.
@@ -312,7 +318,7 @@ class DOS(Target):
 
         Parameters
         ----------
-        path :
+        path : string
             Name of the numpy file.
 
         units : string
@@ -320,6 +326,20 @@ class DOS(Target):
         """
         self.density_of_states = np.load(path) * \
             self.convert_units(1, in_units=units)
+
+    def read_from_array(self, array, units="1/eV"):
+        """
+        Read the density data from a numpy file.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Name of the numpy file.
+
+        units : string
+            Units the density is saved in. Usually none.
+        """
+        self.density_of_states = array*self.convert_units(1, in_units=units)
 
     # Calculations
     ##############
@@ -342,7 +362,7 @@ class DOS(Target):
         linspace_array = (np.linspace(emin, emax, grid_size, endpoint=False))
         return linspace_array
 
-    def get_band_energy(self, dos_data, fermi_energy_eV=None,
+    def get_band_energy(self, dos_data=None, fermi_energy_eV=None,
                         temperature_K=None, integration_method="analytical"):
         """
         Calculate the band energy from given DOS data.
@@ -350,7 +370,8 @@ class DOS(Target):
         Parameters
         ----------
         dos_data : numpy.array
-            DOS data with dimension [energygrid].
+            DOS data with dimension [energygrid]. If None, then the cached
+            DOS will be used for the calculation.
 
         fermi_energy_eV : float
             Fermi energy level in eV.
@@ -370,7 +391,14 @@ class DOS(Target):
         band_energy : float
             Band energy in eV.
         """
+        print("Calculating the band energy.")
         # Parse the parameters.
+        if dos_data is None:
+            dos_data = self.density_of_states
+            if dos_data is None:
+                raise Exception("No DOS data provided, cannot calculate"
+                                " this quantity.")
+
         if fermi_energy_eV is None:
             fermi_energy_eV = self.fermi_energy
             if fermi_energy_eV is None:
@@ -382,12 +410,12 @@ class DOS(Target):
         if temperature_K is None:
             temperature_K = self.temperature_K
 
-        energy_grid = self.get_energy_grid()
+        energy_grid = self.energy_grid
         return self.__band_energy_from_dos(dos_data, energy_grid,
                                            fermi_energy_eV, temperature_K,
                                            integration_method)
 
-    def get_number_of_electrons(self, dos_data, fermi_energy_eV=None,
+    def get_number_of_electrons(self, dos_data=None, fermi_energy_eV=None,
                                 temperature_K=None,
                                 integration_method="analytical"):
         """
@@ -396,7 +424,8 @@ class DOS(Target):
         Parameters
         ----------
         dos_data : numpy.array
-            DOS data with dimension [energygrid].
+            DOS data with dimension [energygrid]. If None, then the cached
+            DOS will be used for the calculation.
 
         fermi_energy_eV : float
             Fermi energy level in eV.
@@ -416,7 +445,14 @@ class DOS(Target):
         number_of_electrons : float
             Number of electrons.
         """
+        print("Calculating the number of electrons.")
         # Parse the parameters.
+        if dos_data is None:
+            dos_data = self.density_of_states
+            if dos_data is None:
+                raise Exception("No DOS data provided, cannot calculate"
+                                " this quantity.")
+
         if fermi_energy_eV is None:
             fermi_energy_eV = self.fermi_energy
             if fermi_energy_eV is None:
@@ -427,13 +463,13 @@ class DOS(Target):
                 fermi_energy_eV = self.fermi_energy_dft
         if temperature_K is None:
             temperature_K = self.temperature_K
-        energy_grid = self.get_energy_grid()
+        energy_grid = self.energy_grid
         return self.__number_of_electrons_from_dos(dos_data, energy_grid,
                                                    fermi_energy_eV,
                                                    temperature_K,
                                                    integration_method)
 
-    def get_entropy_contribution(self, dos_data, fermi_energy_eV=None,
+    def get_entropy_contribution(self, dos_data=None, fermi_energy_eV=None,
                                  temperature_K=None,
                                  integration_method="analytical"):
         """
@@ -442,7 +478,8 @@ class DOS(Target):
         Parameters
         ----------
         dos_data : numpy.array
-            DOS data with dimension [energygrid].
+            DOS data with dimension [energygrid]. If None, then the cached
+            DOS will be used for the calculation.
 
         fermi_energy_eV : float
             Fermi energy level in eV.
@@ -462,6 +499,13 @@ class DOS(Target):
         entropy_contribution : float
             S/beta in eV.
         """
+        # Parse the parameters.
+        if dos_data is None:
+            dos_data = self.density_of_states
+            if dos_data is None:
+                raise Exception("No DOS data provided, cannot calculate"
+                                " this quantity.")
+
         if fermi_energy_eV is None:
             fermi_energy_eV = self.fermi_energy
             if fermi_energy_eV is None:
@@ -473,13 +517,13 @@ class DOS(Target):
         if temperature_K is None:
             temperature_K = self.temperature_K
 
-        energy_grid = self.get_energy_grid()
+        energy_grid = self.energy_grid
         return self.\
             __entropy_contribution_from_dos(dos_data, energy_grid,
                                             fermi_energy_eV, temperature_K,
                                             integration_method)
 
-    def get_self_consistent_fermi_energy_ev(self, dos_data,
+    def get_self_consistent_fermi_energy_ev(self, dos_data=None,
                                             temperature_K=None,
                                             integration_method="analytical"):
         r"""
@@ -493,7 +537,8 @@ class DOS(Target):
         Parameters
         ----------
         dos_data : numpy.array
-            DOS data with dimension [energygrid].
+            DOS data with dimension [energygrid]. If None, then the cached
+            DOS will be used for the calculation.
 
         temperature_K : float
             Temperature in K.
@@ -510,10 +555,16 @@ class DOS(Target):
         fermi_energy_self_consistent : float
             :math:`\epsilon_F` in eV.
         """
-        # Parse the parameters.
+        print("Calculating the fermi energy.")
+        if dos_data is None:
+            dos_data = self.density_of_states
+            if dos_data is None:
+                raise Exception("No DOS data provided, cannot calculate"
+                                " this quantity.")
+
         if temperature_K is None:
             temperature_K = self.temperature_K
-        energy_grid = self.get_energy_grid()
+        energy_grid = self.energy_grid
         fermi_energy_sc = toms748(lambda fermi_sc:
                                   (self.
                                    __number_of_electrons_from_dos
