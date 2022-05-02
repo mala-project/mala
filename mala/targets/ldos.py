@@ -37,6 +37,19 @@ class LDOS(Target):
 
     @classmethod
     def from_numpy_file(cls, params, path, units="1/eV"):
+        """
+        Create an LDOS calculator from a
+
+        Parameters
+        ----------
+        params
+        path
+        units
+
+        Returns
+        -------
+
+        """
         return_ldos_object = LDOS(params)
         return_ldos_object.read_from_numpy(path, units=units)
 
@@ -69,6 +82,10 @@ class LDOS(Target):
         # Setting a new LDOS means we have to uncache priorly cached
         # properties.
         self.uncache_properties()
+
+    def get_target(self):
+        """Generic interface for cached target quantities."""
+        return self.local_density_of_states
 
     def uncache_properties(self):
         """Uncache all cached properties of this calculator."""
@@ -163,8 +180,6 @@ class LDOS(Target):
         else:
             raise Exception("No cached LDOS available to calculate this "
                             "property.")
-
-
 
     ##############################
     # Methods

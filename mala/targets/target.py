@@ -142,6 +142,11 @@ class Target(ABC):
     def _is_property_cached(self, property_name):
         return property_name in self.__dict__.keys()
 
+    @abstractmethod
+    def get_target(self):
+        """Generic interface for cached target quantities."""
+        pass
+
     def read_additional_calculation_data(self, data_type, data=""):
         """
         Read in additional input about a calculation.

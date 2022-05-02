@@ -117,6 +117,10 @@ class DOS(Target):
         # properties.
         self.uncache_properties()
 
+    def get_target(self):
+        """Generic interface for cached target quantities."""
+        return self.density_of_states
+
     @cached_property
     def energy_grid(self):
         return self.get_energy_grid()

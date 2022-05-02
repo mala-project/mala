@@ -117,6 +117,10 @@ class Density(Target):
         # properties.
         self.uncache_properties()
 
+    def get_target(self):
+        """Generic interface for cached target quantities."""
+        return self.density
+
     @property
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""

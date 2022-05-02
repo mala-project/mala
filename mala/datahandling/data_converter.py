@@ -6,7 +6,10 @@ import numpy as np
 from mala.common.parallelizer import printout, get_rank
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor import Descriptor
+from mala.targets.density import Density
+from mala.targets.ldos import LDOS
 from mala.targets.target import Target
+
 
 
 class DataConverter:
@@ -156,12 +159,13 @@ class DataConverter:
 
             # If no units are provided we just assume standard units.
             if original_units[1] is None:
-                tmp_output = self.target_calculator.\
+                self.target_calculator.\
                     read_from_cube(snapshot[1], use_memmap=use_memmap)
             else:
-                tmp_output = self.target_calculator. \
+                self.target_calculator. \
                     read_from_cube(snapshot[1], units=
                 original_units[1], use_memmap=use_memmap)
+            tmp_output = self.target_calculator.get_target()
         else:
             raise Exception(
                 "Unknown file extension, cannot convert target"
