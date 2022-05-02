@@ -90,7 +90,7 @@ class SNAP(Descriptor):
         else:
             raise Exception("Unsupported unit for SNAP.")
 
-    def calculate_from_qe_out(self, qe_out_file, qe_out_directory):
+    def calculate_from_qe_out(self, qe_out_file, working_directory="."):
         """
         Calculate the SNAP descriptors based on a Quantum Espresso outfile.
 
@@ -99,8 +99,10 @@ class SNAP(Descriptor):
         qe_out_file : string
             Name of Quantum Espresso output file for snapshot.
 
-        qe_out_directory : string
-            Path to Quantum Espresso output file for snapshot.
+        working_directory : string
+            A directory in which to write the output of the LAMMPS calculation.
+            Usually the local directory should suffice, given that there
+            are no multiple instances running in the same directory.
 
         Returns
         -------
@@ -110,17 +112,15 @@ class SNAP(Descriptor):
 
         """
         self.in_format_ase = "espresso-out"
-        printout("Calculating SNAP descriptors from", qe_out_file, "at",
-                 qe_out_directory, min_verbosity=0)
+        printout("Calculating SNAP descriptors from", qe_out_file, min_verbosity=0)
         # We get the atomic information by using ASE.
-        infile = os.path.join(qe_out_directory, qe_out_file)
-        atoms = ase.io.read(infile, format=self.in_format_ase)
+        atoms = ase.io.read(qe_out_file, format=self.in_format_ase)
 
         # Enforcing / Checking PBC on the read atoms.
         atoms = self.enforce_pbc(atoms)
 
         # Get the grid dimensions.
-        qe_outfile = open(infile, "r")
+        qe_outfile = open(qe_out_file, "r")
         lines = qe_outfile.readlines()
         nx = 0
         ny = 0
@@ -134,8 +134,7 @@ class SNAP(Descriptor):
                 nz = int(tmp.split(",")[2])
                 break
 
-        return self.__calculate_snap(atoms,
-                                     qe_out_directory, [nx, ny, nz])
+        return self.__calculate_snap(atoms, working_directory, [nx, ny, nz])
 
     def calculate_from_atoms(self, atoms, grid_dimensions,
                              working_directory="."):
@@ -151,7 +150,9 @@ class SNAP(Descriptor):
             Grid dimensions to be used, in the format [x,y,z].
 
         working_directory : string
-            A directory in which to perform the LAMMPS calculation.
+            A directory in which to write the output of the LAMMPS calculation.
+            Usually the local directory should suffice, given that there
+            are no multiple instances running in the same directory.
 
         Returns
         -------

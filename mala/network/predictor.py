@@ -175,7 +175,7 @@ class Predictor(Runner):
             local_data_size = self.data.grid_size
         predicted_outputs = np.zeros((local_data_size,
                                       self.data.target_calculator.\
-                                      get_feature_size()))
+                                      feature_size))
 
         # Only predict if there is something to predict.
         # Elsewise, we just wait at the barrier down below.

@@ -58,3 +58,7 @@ class TestParallel:
                serial_shape[3] == parallel_shape[3]
         assert np.isclose(np.sum(snaps_serial), np.sum(snaps_parallel),
                           atol=accuracy_snaps)
+
+
+tester = TestParallel()
+tester.test_parallel_descriptors()

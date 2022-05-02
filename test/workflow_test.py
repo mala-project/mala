@@ -54,9 +54,9 @@ class TestFullWorkflow:
 
         # Create a DataConverter, and add snapshots to it.
         data_converter = mala.DataConverter(test_parameters)
-        data_converter.add_snapshot_qeout_cube("Be.pw.scf.out", data_path_ldos,
-                                               os.path.join("cubes", "tmp.pp*Be_ldos.cube"),
-                                               data_path_ldos,
+        data_converter.add_snapshot_qeout_cube("Be.pw.scf.out",
+                                               os.path.join("cubes",
+                                                            "tmp.pp*Be_ldos.cube"),
                                                output_units="1/Ry")
 
         data_converter.convert_snapshots("./", naming_scheme="Be_snapshot*")
