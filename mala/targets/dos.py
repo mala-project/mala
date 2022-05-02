@@ -508,21 +508,23 @@ class DOS(Target):
         """
         print("Calculating the band energy.")
         # Parse the parameters.
-        if dos_data is None:
-            dos_data = self.density_of_states
-            if dos_data is None:
+        # Parse the parameters.
+        if dos_data is None and self.density_of_states is None:
                 raise Exception("No DOS data provided, cannot calculate"
                                 " this quantity.")
 
-        if fermi_energy_eV is None:
-            if dos_data is None:
-                fermi_energy_eV = self.fermi_energy
+        # Here we check whether we will use our internal, cached
+        # DOS, or calculate everything from scratch.
+        if dos_data is not None:
             if fermi_energy_eV is None:
                 printout("Warning: No fermi energy was provided or could be "
                          "calculated from electronic structure data. "
                          "Using the DFT fermi energy, this may "
                          "yield unexpected results", min_verbosity=1)
-                fermi_energy_eV = self.fermi_energy_dft
+            fermi_energy_eV = self.fermi_energy_dft
+        else:
+            dos_data = self.density_of_states
+            fermi_energy_eV = self.fermi_energy
         if temperature_K is None:
             temperature_K = self.temperature_K
 
@@ -563,21 +565,23 @@ class DOS(Target):
         """
         print("Calculating the number of electrons.")
         # Parse the parameters.
-        if dos_data is None:
-            dos_data = self.density_of_states
-            if dos_data is None:
+        if dos_data is None and self.density_of_states is None:
                 raise Exception("No DOS data provided, cannot calculate"
                                 " this quantity.")
 
-        if fermi_energy_eV is None:
-            if dos_data is None:
-                fermi_energy_eV = self.fermi_energy
+        # Here we check whether we will use our internal, cached
+        # DOS, or calculate everything from scratch.
+        if dos_data is not None:
             if fermi_energy_eV is None:
                 printout("Warning: No fermi energy was provided or could be "
                          "calculated from electronic structure data. "
                          "Using the DFT fermi energy, this may "
                          "yield unexpected results", min_verbosity=1)
-                fermi_energy_eV = self.fermi_energy_dft
+            fermi_energy_eV = self.fermi_energy_dft
+        else:
+            dos_data = self.density_of_states
+            fermi_energy_eV = self.fermi_energy
+
         if temperature_K is None:
             temperature_K = self.temperature_K
         energy_grid = self.energy_grid
@@ -617,21 +621,22 @@ class DOS(Target):
             S/beta in eV.
         """
         # Parse the parameters.
-        if dos_data is None:
-            dos_data = self.density_of_states
-            if dos_data is None:
+        if dos_data is None and self.density_of_states is None:
                 raise Exception("No DOS data provided, cannot calculate"
                                 " this quantity.")
 
-        if fermi_energy_eV is None:
-            if dos_data is None:
-                fermi_energy_eV = self.fermi_energy
+        # Here we check whether we will use our internal, cached
+        # DOS, or calculate everything from scratch.
+        if dos_data is not None:
             if fermi_energy_eV is None:
                 printout("Warning: No fermi energy was provided or could be "
                          "calculated from electronic structure data. "
                          "Using the DFT fermi energy, this may "
                          "yield unexpected results", min_verbosity=1)
-                fermi_energy_eV = self.fermi_energy_dft
+            fermi_energy_eV = self.fermi_energy_dft
+        else:
+            dos_data = self.density_of_states
+            fermi_energy_eV = self.fermi_energy
         if temperature_K is None:
             temperature_K = self.temperature_K
 

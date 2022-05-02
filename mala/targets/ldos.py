@@ -58,6 +58,7 @@ class LDOS(Target):
         """
         return_ldos_object = LDOS(params)
         return_ldos_object.read_from_numpy(path, units=units)
+        return return_ldos_object
 
     @classmethod
     def from_numpy_array(cls, params, array, units="1/eV"):
@@ -85,6 +86,7 @@ class LDOS(Target):
         """
         return_ldos_object = LDOS(params)
         return_ldos_object.read_from_array(array, units=units)
+        return return_ldos_object
 
     @classmethod
     def from_cube_file(cls, params, path_name_scheme, units="1/eV",
@@ -115,6 +117,7 @@ class LDOS(Target):
         return_ldos_object = LDOS(params)
         return_ldos_object.read_from_cube(path_name_scheme, units=units,
                                           use_memmap=use_memmap)
+        return return_ldos_object
 
     ##############################
     # Properties
@@ -176,7 +179,7 @@ class LDOS(Target):
     def total_energy(self):
         """Total energy of the system, calculated via cached LDOS."""
         if self.local_density_of_states is not None:
-            return self.get_total_energy(ldos_data=self.local_density_of_states)
+            return self.get_total_energy()
         else:
             raise Exception("No cached LDOS available to calculate this "
                             "property.")
@@ -185,7 +188,7 @@ class LDOS(Target):
     def band_energy(self):
         """Band energy of the system, calculated via cached LDOS."""
         if self.local_density_of_states is not None:
-            return self.get_band_energy(ldos_data=self.local_density_of_states)
+            return self.get_band_energy()
         else:
             raise Exception("No cached LDOS available to calculate this "
                             "property.")
@@ -199,7 +202,7 @@ class LDOS(Target):
         due to discretization errors.
         """
         if self.local_density_of_states is not None:
-            return self.get_number_of_electrons(self.local_density_of_states)
+            return self.get_number_of_electrons()
         else:
             raise Exception("No cached LDOS available to calculate this "
                             "property.")
@@ -216,8 +219,7 @@ class LDOS(Target):
         """
         if self.local_density_of_states is not None:
             return self.\
-                get_self_consistent_fermi_energy_ev(
-                    self.local_density_of_states)
+                get_self_consistent_fermi_energy_ev()
         else:
             # The Fermi energy is set to None instead of creating an error.
             # This is because the Fermi energy is used a lot throughout
@@ -229,7 +231,7 @@ class LDOS(Target):
     def density(self):
         """Electronic density as calculated by the cached LDOS."""
         if self.local_density_of_states is not None:
-            return self.get_density(self.local_density_of_states)
+            return self.get_density()
         else:
             raise Exception("No cached LDOS available to calculate this "
                             "property.")
@@ -238,7 +240,7 @@ class LDOS(Target):
     def density_of_states(self):
         """DOS as calculated by the cached LDOS."""
         if self.local_density_of_states is not None:
-            return self.get_density_of_states(self.local_density_of_states)
+            return self.get_density_of_states()
         else:
             raise Exception("No cached LDOS available to calculate this "
                             "property.")
@@ -742,19 +744,17 @@ class LDOS(Target):
         band_energy : float
             Band energy in eV.
         """
-        if ldos_data is None:
-            ldos_data = self.local_density_of_states
-            if ldos_data is None:
-                raise Exception("No LDOS data provided, cannot calculate"
-                                " this quantity.")
-
-        # The band energy is calculated using the DOS.
-        if voxel_Bohr is None:
-            voxel_Bohr = self.voxel_Bohr
+        if ldos_data is None and self.local_density_of_states is None:
+            raise Exception("No LDOS data provided, cannot calculate"
+                            " this quantity.")
 
         # Here we check whether we will use our internal, cached
         # LDOS, or calculate everything from scratch.
         if ldos_data is not None:
+            # The band energy is calculated using the DOS.
+            if voxel_Bohr is None:
+                voxel_Bohr = self.voxel_Bohr
+
             dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
                                                   integration_method=
                                                   grid_integration_method)
@@ -813,11 +813,9 @@ class LDOS(Target):
         number_of_electrons : float
             Number of electrons.
         """
-        if ldos_data is None:
-            ldos_data = self.local_density_of_states
-            if ldos_data is None:
-                raise Exception("No LDOS data provided, cannot calculate"
-                                " this quantity.")
+        if ldos_data is None and self.local_density_of_states is None:
+            raise Exception("No LDOS data provided, cannot calculate"
+                            " this quantity.")
 
         # Here we check whether we will use our internal, cached
         # LDOS, or calculate everything from scratch.
@@ -889,11 +887,10 @@ class LDOS(Target):
         fermi_energy_self_consistent : float
             :math:`\epsilon_F` in eV.
         """
-        if ldos_data is None:
-            ldos_data = self.local_density_of_states
-            if ldos_data is None:
-                raise Exception("No LDOS data provided, cannot calculate"
-                                " this quantity.")
+        if ldos_data is None and self.local_density_of_states is None:
+            raise Exception("No LDOS data provided, cannot calculate"
+                            " this quantity.")
+
         if ldos_data is not None:
             # The Fermi energy is calculated using the DOS.
             if voxel_Bohr is None:

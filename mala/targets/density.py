@@ -132,7 +132,7 @@ class Density(Target):
         return_density_object.fermi_energy_dft = ldos_object.fermi_energy_dft
         return_density_object.temperature_K = ldos_object.temperature_K
         return_density_object.voxel_Bohr = ldos_object.voxel_Bohr
-        return_density_object.number_of_electrons = ldos_object.\
+        return_density_object.number_of_electrons_exact = ldos_object.\
             number_of_electrons_exact
         return_density_object.band_energy_dft_calculation = ldos_object.\
             band_energy_dft_calculation
@@ -193,7 +193,7 @@ class Density(Target):
         due to discretization errors.
         """
         if self.density is not None:
-            return self.get_number_of_electrons(density_data=self.density)
+            return self.get_number_of_electrons()
         else:
             raise Exception("No cached density available to "
                             "calculate this property.")
@@ -206,7 +206,7 @@ class Density(Target):
         Calculated via the cached density.
         """
         if self.density is not None:
-            return self.get_energy_contributions(density_data=self.density)
+            return self.get_energy_contributions()
         else:
             raise Exception("No cached density available to "
                             "calculate this property.")

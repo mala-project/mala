@@ -45,17 +45,16 @@ test_parameters.targets.pseudopotential_path = data_path
 # Create a target calculator to postprocess data.
 # Use this calculator to perform various operations.
 ####################
-ldos = mala.Target(test_parameters)
+# Read in LDOS data. For actual workflows, this part will come
+# from a network.
+ldos = mala.LDOS.from_numpy_file(test_parameters,
+                                 os.path.join(data_path, "Be_ldos.npy"))
 
 # Read additional information about the calculation.
 # By doing this, the calculator is able to know e.g. the temperature
 # at which the calculation took place or the lattice constant used.
 ldos.read_additional_calculation_data("qe.out", os.path.join(
                                       data_path, "Be.pw.scf.out"))
-
-# Read in LDOS data. For actual workflows, this part will come
-# from a network.
-ldos_data = np.load(os.path.join(data_path, "Be_ldos.npy"))
 
 # Get quantities of interest.
 # For better values in the post processing, it is recommended to
@@ -64,19 +63,12 @@ ldos_data = np.load(os.path.join(data_path, "Be_ldos.npy"))
 # This Fermi energy usually differs from the one outputted by the
 # QuantumEspresso calculation, due to numerical reasons. The difference
 # is usually very small.
-self_consistent_fermi_energy = ldos.\
-    get_self_consistent_fermi_energy_ev(ldos_data)
-number_of_electrons = ldos.\
-    get_number_of_electrons(ldos_data, fermi_energy_eV=
-                            self_consistent_fermi_energy)
-band_energy = ldos.get_band_energy(ldos_data,
-                                   fermi_energy_eV=
-                                   self_consistent_fermi_energy)
+self_consistent_fermi_energy = ldos.fermi_energy
+band_energy = ldos.band_energy
+number_of_electrons = ldos.number_of_electrons
 total_energy = 0.0
 if do_total_energy:
-    total_energy = ldos.get_total_energy(ldos_data,
-                                         fermi_energy_eV=
-                                         self_consistent_fermi_energy)
+    total_energy = ldos.total_energy
 
 ####################
 # RESULTS.
