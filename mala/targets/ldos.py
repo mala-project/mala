@@ -36,9 +36,14 @@ class LDOS(Target):
         self.local_density_of_states = None
 
     @classmethod
-    def from_numpy(cls, params, path, units="1/eV"):
+    def from_numpy_file(cls, params, path, units="1/eV"):
         return_ldos_object = LDOS(params)
         return_ldos_object.read_from_numpy(path, units=units)
+
+    @classmethod
+    def from_numpy_array(cls, params, array, units="1/eV"):
+        return_ldos_object = LDOS(params)
+        return_ldos_object.read_from_array(array, units=units)
 
     @classmethod
     def from_cube_file(cls, params, path_name_scheme, units="1/eV"):
@@ -81,6 +86,10 @@ class LDOS(Target):
             del self.density
         if self._is_property_cached("density_of_states"):
             del self.density_of_states
+        if self._is_property_cached("_density_calculator"):
+            del self._density_calculator
+        if self._is_property_cached("_density_of_states_calculator"):
+            del self._density_of_states_calculator
 
     @cached_property
     def energy_grid(self):
@@ -138,6 +147,24 @@ class LDOS(Target):
         else:
             raise Exception("No cached LDOS available to calculate this "
                             "property.")
+
+    @cached_property
+    def _density_calculator(self):
+        if self.local_density_of_states is not None:
+            return Density.from_ldos_calculator(self)
+        else:
+            raise Exception("No cached LDOS available to calculate this "
+                            "property.")
+
+    @cached_property
+    def _density_of_states_calculator(self):
+        if self.local_density_of_states is not None:
+            return DOS.from_ldos_calculator(self)
+        else:
+            raise Exception("No cached LDOS available to calculate this "
+                            "property.")
+
+
 
     ##############################
     # Methods
@@ -345,6 +372,21 @@ class LDOS(Target):
         self.local_density_of_states = np.load(path) * \
             self.convert_units(1, in_units=units)
 
+    def read_from_array(self, array, units="1/eV"):
+        """
+        Read the density data from a numpy file.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Numpy array containing the LDOS.
+
+        units : string
+            Units the density is saved in. Usually none.
+        """
+        self.local_density_of_states = np.load(array) * \
+            self.convert_units(1, in_units=units)
+
     # Calculations
     ##############
 
@@ -379,8 +421,8 @@ class LDOS(Target):
         """
         Calculate the total energy from LDOS or given DOS + density data.
 
-        EITHER LDOS OR Density+DOS data have to be specified. Elsewise
-        this function will raise an exception.
+        If neither LDOS nor DOS+Density data is provided, the cached LDOS will
+        be attempted to be used for the calculation.
 
 
 
@@ -454,7 +496,8 @@ class LDOS(Target):
         if voxel_Bohr is None:
             voxel_Bohr = self.voxel_Bohr
         if fermi_energy_eV is None:
-            fermi_energy_eV = self.fermi_energy
+            if ldos_data is None:
+                fermi_energy_eV = self.fermi_energy
             if fermi_energy_eV is None:
                 printout("Warning: No fermi energy was provided or could be "
                          "calculated from electronic structure data. "
@@ -464,58 +507,86 @@ class LDOS(Target):
         if temperature_K is None:
             temperature_K = self.temperature_K
 
-        # Check the input.
-        if ldos_data is None:
-            if dos_data is None or density_data is None:
-                raise Exception("No input data provided to caculate "
-                                "total energy. Provide EITHER LDOS"
-                                " OR DOS and density.")
+        # Here we check whether we will use our internal, cached
+        # LDOS, or calculate everything from scratch.
+        if ldos_data is not None or (dos_data is not None
+                                     and density_data is not None):
 
-        # Calculate DOS data if need be.
-        if dos_data is None:
-            dos_data = self.get_density_of_states(ldos_data,
-                                                  voxel_Bohr=
-                                                  voxel_Bohr,
-                                                  integration_method=
-                                                  grid_integration_method)
+            # In this case we calculate everything from scratch,
+            # because the user either provided LDOS data OR density +
+            # DOS data.
 
-        # Calculate density data if need be.
-        if density_data is None:
-            density_data = self.get_density(ldos_data,
-                                            fermi_energy_eV=fermi_energy_eV,
-                                            temperature_K=temperature_K,
-                                            integration_method=energy_integration_method)
+            # Calculate DOS data if need be.
+            if dos_data is None:
+                dos_data = self.get_density_of_states(ldos_data,
+                                                      voxel_Bohr=
+                                                      voxel_Bohr,
+                                                      integration_method=
+                                                      grid_integration_method)
 
-        # Now we can create calculation objects to get the necessary
-        # quantities.
-        dos_calculator = DOS.from_ldos_calculator(self)
-        density_calculator = Density.from_ldos_calculator(self)
-
-        # With these calculator objects we can calculate all the necessary
-        # quantities to construct the total energy.
-        # (According to Eq. 9 in [1])
-        # Band energy (kinetic energy)
-        e_band = dos_calculator.get_band_energy(dos_data,
-                                                fermi_energy_eV=
-                                                fermi_energy_eV,
+            # Calculate density data if need be.
+            if density_data is None:
+                density_data = self.get_density(ldos_data,
+                                                fermi_energy_eV=fermi_energy_eV,
                                                 temperature_K=temperature_K,
-                                                integration_method=
-                                                energy_integration_method)
+                                                integration_method=energy_integration_method)
 
-        # Smearing / Entropy contribution
-        e_entropy_contribution = dos_calculator.\
-            get_entropy_contribution(dos_data, fermi_energy_eV=fermi_energy_eV,
-                                     temperature_K=temperature_K,
-                                     integration_method=
-                                     energy_integration_method)
+            # Now we can create calculation objects to get the necessary
+            # quantities.
+            dos_calculator = DOS.from_ldos_calculator(self)
+            density_calculator = Density.from_ldos_calculator(self)
 
-        # Density based energy contributions (via QE)
-        density_contributions \
-            = density_calculator.\
-            get_energy_contributions(density_data, qe_input_data=qe_input_data,
-                                     atoms_Angstrom=atoms_Angstrom,
-                                     qe_pseudopotentials=qe_pseudopotentials,
-                                     create_file=create_qe_file)
+            # With these calculator objects we can calculate all the necessary
+            # quantities to construct the total energy.
+            # (According to Eq. 9 in [1])
+            # Band energy (kinetic energy)
+            e_band = dos_calculator.get_band_energy(dos_data,
+                                                    fermi_energy_eV=
+                                                    fermi_energy_eV,
+                                                    temperature_K=temperature_K,
+                                                    integration_method=
+                                                    energy_integration_method)
+
+            # Smearing / Entropy contribution
+            e_entropy_contribution = dos_calculator. \
+                get_entropy_contribution(dos_data,
+                                         fermi_energy_eV=fermi_energy_eV,
+                                         temperature_K=temperature_K,
+                                         integration_method=
+                                         energy_integration_method)
+
+            # Density based energy contributions (via QE)
+            density_contributions \
+                = density_calculator. \
+                get_energy_contributions(density_data,
+                                         qe_input_data=qe_input_data,
+                                         atoms_Angstrom=atoms_Angstrom,
+                                         qe_pseudopotentials=qe_pseudopotentials,
+                                         create_file=create_qe_file)
+        else:
+            # In this case, we use cached propeties wherever possible.
+            ldos_data = self.local_density_of_states
+            if ldos_data is None:
+                    raise Exception("No input data provided to caculate "
+                                    "total energy. Provide EITHER LDOS"
+                                    " OR DOS and density.")
+
+            # With these calculator objects we can calculate all the necessary
+            # quantities to construct the total energy.
+            # (According to Eq. 9 in [1])
+            # Band energy (kinetic energy)
+            e_band = self.band_energy
+
+            # Smearing / Entropy contribution
+            e_entropy_contribution = self._density_of_states_calculator.\
+                entropy_contribution
+
+            # Density based energy contributions (via QE)
+            density_contributions = self._density_calculator.\
+                total_energy_contributions
+
+
+
         e_total = e_band + density_contributions["e_rho_times_v_hxc"] + \
             density_contributions["e_hartree"] + \
             density_contributions["e_xc"] + \
@@ -533,7 +604,7 @@ class LDOS(Target):
         else:
             return e_total
 
-    def get_band_energy(self, ldos_data, fermi_energy_eV=None,
+    def get_band_energy(self, ldos_data=None, fermi_energy_eV=None,
                         temperature_K=None, voxel_Bohr=None,
                         grid_integration_method="summation",
                         energy_integration_method="analytical"):
@@ -544,7 +615,8 @@ class LDOS(Target):
         ----------
         ldos_data : numpy.array
             LDOS data, either as [gridsize, energygrid] or
-            [gridx,gridy,gridz,energygrid].
+            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
+            will be used for the calculation.
 
         fermi_energy_eV : float
             Fermi energy level in eV.
@@ -576,22 +648,34 @@ class LDOS(Target):
         band_energy : float
             Band energy in eV.
         """
+        if ldos_data is None:
+            ldos_data = self.local_density_of_states
+            if ldos_data is None:
+                raise Exception("No LDOS data provided, cannot calculate"
+                                " this quantity.")
+
         # The band energy is calculated using the DOS.
         if voxel_Bohr is None:
             voxel_Bohr = self.voxel_Bohr
-        dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
-                                              integration_method=
-                                              grid_integration_method)
 
-        # Once we have the DOS, we can use a DOS object to calculate t
-        # he band energy.
-        dos_calculator = DOS.from_ldos_calculator(self)
-        return dos_calculator.\
-            get_band_energy(dos_data, fermi_energy_eV=fermi_energy_eV,
-                            temperature_K=temperature_K,
-                            integration_method=energy_integration_method)
+        # Here we check whether we will use our internal, cached
+        # LDOS, or calculate everything from scratch.
+        if ldos_data is not None:
+            dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
+                                                  integration_method=
+                                                  grid_integration_method)
 
-    def get_number_of_electrons(self, ldos_data, voxel_Bohr=None,
+            # Once we have the DOS, we can use a DOS object to calculate t
+            # he band energy.
+            dos_calculator = DOS.from_ldos_calculator(self)
+            return dos_calculator.\
+                get_band_energy(dos_data, fermi_energy_eV=fermi_energy_eV,
+                                temperature_K=temperature_K,
+                                integration_method=energy_integration_method)
+        else:
+            return self._density_of_states_calculator.band_energy
+
+    def get_number_of_electrons(self, ldos_data=None, voxel_Bohr=None,
                                 fermi_energy_eV=None, temperature_K=None,
                                 grid_integration_method="summation",
                                 energy_integration_method="analytical"):
@@ -602,7 +686,8 @@ class LDOS(Target):
         ----------
         ldos_data : numpy.array
             LDOS data, either as [gridsize, energygrid] or
-            [gridx,gridy,gridz,energygrid].
+            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
+            will be used for the calculation.
 
         fermi_energy_eV : float
             Fermi energy level in eV.
@@ -634,23 +719,34 @@ class LDOS(Target):
         number_of_electrons : float
             Number of electrons.
         """
-        # The number of electrons is calculated using the DOS.
-        if voxel_Bohr is None:
-            voxel_Bohr = self.voxel_Bohr
-        dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
-                                              integration_method=
-                                              grid_integration_method)
+        if ldos_data is None:
+            ldos_data = self.local_density_of_states
+            if ldos_data is None:
+                raise Exception("No LDOS data provided, cannot calculate"
+                                " this quantity.")
 
-        # Once we have the DOS, we can use a DOS object to calculate the
-        # number of electrons.
-        dos_calculator = DOS.from_ldos_calculator(self)
-        return dos_calculator.\
-            get_number_of_electrons(dos_data, fermi_energy_eV=fermi_energy_eV,
-                                    temperature_K=temperature_K,
-                                    integration_method=
-                                    energy_integration_method)
+        # Here we check whether we will use our internal, cached
+        # LDOS, or calculate everything from scratch.
+        if ldos_data is not None:
+            # The number of electrons is calculated using the DOS.
+            if voxel_Bohr is None:
+                voxel_Bohr = self.voxel_Bohr
+            dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
+                                                  integration_method=
+                                                  grid_integration_method)
 
-    def get_self_consistent_fermi_energy_ev(self, ldos_data,
+            # Once we have the DOS, we can use a DOS object to calculate the
+            # number of electrons.
+            dos_calculator = DOS.from_ldos_calculator(self)
+            return dos_calculator.\
+                get_number_of_electrons(dos_data, fermi_energy_eV=fermi_energy_eV,
+                                        temperature_K=temperature_K,
+                                        integration_method=
+                                        energy_integration_method)
+        else:
+            return self._density_of_states_calculator.number_of_electrons
+
+    def get_self_consistent_fermi_energy_ev(self, ldos_data=None,
                                             voxel_Bohr=None,
                                             temperature_K=None,
                                             grid_integration_method=
@@ -669,7 +765,8 @@ class LDOS(Target):
         ----------
         ldos_data : numpy.array
             LDOS data, either as [gridsize, energygrid] or
-            [gridx,gridy,gridz,energygrid].
+            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
+            will be used for the calculation.
 
         temperature_K : float
             Temperature in K.
@@ -698,23 +795,31 @@ class LDOS(Target):
         fermi_energy_self_consistent : float
             :math:`\epsilon_F` in eV.
         """
-        # The Fermi energy is calculated using the DOS.
-        if voxel_Bohr is None:
-            voxel_Bohr = self.voxel_Bohr
-        dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
-                                              integration_method=
-                                              grid_integration_method)
+        if ldos_data is None:
+            ldos_data = self.local_density_of_states
+            if ldos_data is None:
+                raise Exception("No LDOS data provided, cannot calculate"
+                                " this quantity.")
+        if ldos_data is not None:
+            # The Fermi energy is calculated using the DOS.
+            if voxel_Bohr is None:
+                voxel_Bohr = self.voxel_Bohr
+            dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
+                                                  integration_method=
+                                                  grid_integration_method)
 
-        # Once we have the DOS, we can use a DOS object to calculate the
-        # number of electrons.
-        dos_calculator = DOS.from_ldos_calculator(self)
-        return dos_calculator.\
-            get_self_consistent_fermi_energy_ev(dos_data,
-                                                temperature_K=temperature_K,
-                                                integration_method=
-                                                energy_integration_method)
+            # Once we have the DOS, we can use a DOS object to calculate the
+            # number of electrons.
+            dos_calculator = DOS.from_ldos_calculator(self)
+            return dos_calculator.\
+                get_self_consistent_fermi_energy_ev(dos_data,
+                                                    temperature_K=temperature_K,
+                                                    integration_method=
+                                                    energy_integration_method)
+        else:
+            return self._density_of_states_calculator.fermi_energy
 
-    def get_density(self, ldos_data, fermi_energy_eV=None, temperature_K=None,
+    def get_density(self, ldos_data=None, fermi_energy_eV=None, temperature_K=None,
                     conserve_dimensions=False, integration_method="analytical",
                     gather_density=True):
         """
@@ -725,7 +830,9 @@ class LDOS(Target):
         conserve_dimensions : bool
             If True, the density is returned in the same dimensions as
             the LDOS was entered. If False, the density is always given
-            as [gridsize].
+            as [gridsize]. If None, the cached LDOS
+            will be used for the calculation.
+
 
         fermi_energy_eV : float
             Fermi energy level in eV.
@@ -765,11 +872,14 @@ class LDOS(Target):
             dimensions.
 
         """
-        if self.cached_density_exists:
-            return self.cached_density
-
+        if ldos_data is None:
+            ldos_data = self.local_density_of_states
+            if ldos_data is None:
+                raise Exception("No LDOS data provided, cannot calculate"
+                                " this quantity.")
         if fermi_energy_eV is None:
-            fermi_energy_eV = self.fermi_energy
+            if ldos_data is None:
+                fermi_energy_eV = self.fermi_energy
             if fermi_energy_eV is None:
                 printout("Warning: No fermi energy was provided or could be "
                          "calculated from electronic structure data. "
@@ -838,7 +948,7 @@ class LDOS(Target):
         else:
             return density_values
 
-    def get_density_of_states(self, ldos_data, voxel_Bohr=None,
+    def get_density_of_states(self, ldos_data=None, voxel_Bohr=None,
                               integration_method="summation",
                               gather_dos=True):
         """
@@ -848,7 +958,9 @@ class LDOS(Target):
         ----------
         ldos_data : numpy.array
             LDOS data, either as [gridsize, energygrid] or
-            [gridx,gridy,gridz,energygrid].
+            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS
+            will be used for the calculation.
+
 
         voxel_Bohr : ase.cell.Cell
             Voxel to be used for grid intergation. Needs to reflect the
@@ -873,8 +985,11 @@ class LDOS(Target):
         dos_values : np.array
             The DOS.
         """
-        if self.cached_dos_exists:
-            return self.cached_dos
+        if ldos_data is None:
+            ldos_data = self.local_density_of_states
+            if ldos_data is None:
+                raise Exception("No LDOS data provided, cannot calculate"
+                                " this quantity.")
 
         if voxel_Bohr is None:
             voxel_Bohr = self.voxel_Bohr

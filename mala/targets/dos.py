@@ -339,7 +339,7 @@ class DOS(Target):
         Parameters
         ----------
         array : numpy.ndarray
-            Name of the numpy file.
+            Numpy array containing the DOS..
 
         units : string
             Units the density is saved in. Usually none.
@@ -405,7 +405,8 @@ class DOS(Target):
                                 " this quantity.")
 
         if fermi_energy_eV is None:
-            fermi_energy_eV = self.fermi_energy
+            if dos_data is None:
+                fermi_energy_eV = self.fermi_energy
             if fermi_energy_eV is None:
                 printout("Warning: No fermi energy was provided or could be "
                          "calculated from electronic structure data. "
@@ -459,7 +460,8 @@ class DOS(Target):
                                 " this quantity.")
 
         if fermi_energy_eV is None:
-            fermi_energy_eV = self.fermi_energy
+            if dos_data is None:
+                fermi_energy_eV = self.fermi_energy
             if fermi_energy_eV is None:
                 printout("Warning: No fermi energy was provided or could be "
                          "calculated from electronic structure data. "
@@ -512,7 +514,8 @@ class DOS(Target):
                                 " this quantity.")
 
         if fermi_energy_eV is None:
-            fermi_energy_eV = self.fermi_energy
+            if dos_data is None:
+                fermi_energy_eV = self.fermi_energy
             if fermi_energy_eV is None:
                 printout("Warning: No fermi energy was provided or could be "
                          "calculated from electronic structure data. "

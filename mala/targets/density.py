@@ -183,14 +183,14 @@ class Density(Target):
         """
         self.density = np.load(path)
 
-    def read_from_array(self, array, units="1/eV"):
+    def read_from_array(self, array, units=None):
         """
         Read the density data from a numpy array.
 
         Parameters
         ----------
         array : numpy.ndarray
-            Name of the numpy file.
+            Numpy array containing the density..
 
         units : string
             Units the density is saved in. Usually none.
