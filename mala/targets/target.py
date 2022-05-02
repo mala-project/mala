@@ -9,6 +9,10 @@ import ase.io
 import numpy as np
 from scipy.spatial import distance
 from scipy.integrate import simps
+try:
+    from asap3.analysis.rdf import RadialDistributionFunction
+except ModuleNotFoundError:
+    pass
 
 from mala.common.parameters import Parameters, ParametersTargets
 from mala.common.parallelizer import printout
@@ -365,7 +369,8 @@ class Target(ABC):
     @staticmethod
     def radial_distribution_function_from_atoms(atoms: ase.Atoms,
                                                 number_of_bins,
-                                                rMax=None):
+                                                rMax=None,
+                                                method="mala"):
         """
         Calculate the radial distribution function (RDF).
 
@@ -392,6 +397,12 @@ class Target(ABC):
             e.g. for a Fourier transformation to calculate the static structure
             factor.
 
+        method : string
+            If "mala" the more flexible, yet less performant python based
+            RDF will be calculated. If "asap3", asap3's C++ implementation
+            will be used. In the latter case, rMax will be ignored and
+            automatically calculated.
+
         Returns
         -------
         rdf : numpy.ndarray
@@ -408,51 +419,61 @@ class Target(ABC):
 
         # This is quite a large RDF.
         # We may want a smaller one eventually.
-        if rMax is None:
+        if rMax is None or method == "asap3":
             rMax = Target._get_ideal_rmax_for_rdf(atoms)
 
         atoms = atoms
-        dr = float(rMax/number_of_bins)
-        rdf = np.zeros(number_of_bins + 1)
+        dr = float(rMax / number_of_bins)
 
-        cell = atoms.get_cell()
-        pbc = atoms.get_pbc()
-        for i in range(0, 3):
-            if pbc[i]:
-                if rMax > cell[i, i]:
-                    warnings.warn(
-                        "Calculating RDF with a radius larger then the unit"
-                        " cell. While this will work numerically, be cautious"
-                        " about the physicality of its results", stacklevel=3)
+        if method == "mala":
+            rdf = np.zeros(number_of_bins + 1)
 
-        # Calculate all the distances.
-        # rMax/2 because this is the radius around one atom, so half the
-        # distance to the next one.
-        # Using neighborlists grants us access to the PBC.
-        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms)) +
-                                                     [rMax/2.0],
-                                                     bothways=True)
-        neighborlist.update(atoms)
-        for i in range(0, len(atoms)):
-            indices, offsets = neighborlist.get_neighbors(i)
-            dm = distance.cdist([atoms.get_positions()[i]],
-                                atoms.positions[indices] + offsets @
-                                atoms.get_cell())
-            index = (np.ceil(dm / dr)).astype(int)
-            index = index.flatten()
-            out_of_scope = index > number_of_bins
-            index[out_of_scope] = 0
-            for idx in index:
-                rdf[idx] += 1
+            cell = atoms.get_cell()
+            pbc = atoms.get_pbc()
+            for i in range(0, 3):
+                if pbc[i]:
+                    if rMax > cell[i, i]:
+                        warnings.warn(
+                            "Calculating RDF with a radius larger then the unit"
+                            " cell. While this will work numerically, be cautious"
+                            " about the physicality of its results", stacklevel=3)
 
-        # Normalize the RDF and calculate the distances
-        rr = []
-        phi = len(atoms) / atoms.get_volume()
-        norm = 4.0 * np.pi * dr * phi * len(atoms)
-        for i in range(1, number_of_bins + 1):
-            rr.append((i - 0.5) * dr)
-            rdf[i] /= (norm * ((rr[-1] ** 2) + (dr ** 2) / 12.))
+            # Calculate all the distances.
+            # rMax/2 because this is the radius around one atom, so half the
+            # distance to the next one.
+            # Using neighborlists grants us access to the PBC.
+            neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms)) +
+                                                         [rMax/2.0],
+                                                         bothways=True)
+            neighborlist.update(atoms)
+            for i in range(0, len(atoms)):
+                indices, offsets = neighborlist.get_neighbors(i)
+                dm = distance.cdist([atoms.get_positions()[i]],
+                                    atoms.positions[indices] + offsets @
+                                    atoms.get_cell())
+                index = (np.ceil(dm / dr)).astype(int)
+                index = index.flatten()
+                out_of_scope = index > number_of_bins
+                index[out_of_scope] = 0
+                for idx in index:
+                    rdf[idx] += 1
 
+            # Normalize the RDF and calculate the distances
+            rr = []
+            phi = len(atoms) / atoms.get_volume()
+            norm = 4.0 * np.pi * dr * phi * len(atoms)
+            for i in range(1, number_of_bins + 1):
+                rr.append((i - 0.5) * dr)
+                rdf[i] /= (norm * ((rr[-1] ** 2) + (dr ** 2) / 12.))
+        elif method == "asap3":
+            rdf = RadialDistributionFunction(atoms, rMax,
+                                             number_of_bins).get_rdf()
+            rr = []
+            for i in range(1, number_of_bins + 1):
+                rr.append((i - 0.5) * dr)
+            return rdf, rr
+        else:
+            raise Exception("Unknown RDF method selected.")
         return rdf[1:], rr
         
     @staticmethod
@@ -716,7 +737,8 @@ class Target(ABC):
             raise Exception("Static structure factor calculation method "
                             "unsupported.")
 
-    def get_radial_distribution_function(self, atoms: ase.Atoms):
+    def get_radial_distribution_function(self, atoms: ase.Atoms,
+                                                method="mala"):
         """
         Calculate the radial distribution function (RDF).
 
@@ -735,6 +757,13 @@ class Target(ABC):
         radii : numpy.ndarray
             The radii  at which the RDF was calculated (for plotting),
             as [rMax] array.
+
+        method : string
+            If "mala" the more flexible, yet less performant python based
+            RDF will be calculated. If "asap3", asap3's C++ implementation
+            will be used. In the latter case, rMax will be ignored and
+            automatically calculated.
+
         """
         return Target.\
             radial_distribution_function_from_atoms(atoms,
@@ -743,7 +772,8 @@ class Target(ABC):
                                                     rdf_parameters
                                                     ["number_of_bins"],
                                                     rMax=self.parameters.
-                                                    rdf_parameters["rMax"])
+                                                    rdf_parameters["rMax"],
+                                                    method=method)
 
     def get_three_particle_correlation_function(self, atoms: ase.Atoms):
         """

@@ -19,6 +19,7 @@ extras = {
     'opt': ['oapackage', 'pqkmeans'],
     'test': ['pytest'],
     'doc': open('docs/requirements.txt').read().splitlines(),
+    'experimental': ['asap3']
 }
 
 setup(
