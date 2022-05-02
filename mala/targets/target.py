@@ -144,7 +144,12 @@ class Target(ABC):
 
     @abstractmethod
     def get_target(self):
-        """Generic interface for cached target quantities."""
+        """
+        Get the target quantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
         pass
 
     def read_additional_calculation_data(self, data_type, data=""):

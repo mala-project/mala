@@ -24,7 +24,7 @@ class LDOS(Target):
     Parameters
     ----------
     params : mala.common.parameters.Parameters
-        Parameters used to create this TargetBase object.
+        Parameters used to create this LDOS object.
     """
 
     ##############################
@@ -38,30 +38,83 @@ class LDOS(Target):
     @classmethod
     def from_numpy_file(cls, params, path, units="1/eV"):
         """
-        Create an LDOS calculator from a
+        Create an LDOS calculator from a numpy array saved in a file.
 
         Parameters
         ----------
-        params
-        path
-        units
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        path : string
+            Path to file that is being read.
+
+        units : string
+            Units the LDOS is saved in.
 
         Returns
         -------
-
+        ldos_calculator : mala.targets.ldos.LDOS
+            LDOS calculator object.
         """
         return_ldos_object = LDOS(params)
         return_ldos_object.read_from_numpy(path, units=units)
 
     @classmethod
     def from_numpy_array(cls, params, array, units="1/eV"):
+        """
+        Create an LDOS calculator from a numpy array in memory.
+
+        By using this function rather then setting the local_density_of_states
+        object directly, proper unit coversion is ensured.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        array : numpy.ndarray
+            Path to file that is being read.
+
+        units : string
+            Units the LDOS is saved in.
+
+        Returns
+        -------
+        ldos_calculator : mala.targets.ldos.LDOS
+            LDOS calculator object.
+        """
         return_ldos_object = LDOS(params)
         return_ldos_object.read_from_array(array, units=units)
 
     @classmethod
-    def from_cube_file(cls, params, path_name_scheme, units="1/eV"):
+    def from_cube_file(cls, params, path_name_scheme, units="1/eV",
+                       use_memmap=None):
+        """
+        Create an LDOS calculator from multiple cube files.
+
+        The files have to be located in the same directory.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        path_name_scheme : string
+            Naming scheme for the LDOS .cube files. Every asterisk will be
+            replaced with an appropriate number for the LDOS files. Before
+            the file name, please make sure to include the proper file path.
+
+        units : string
+            Units the LDOS is saved in.
+
+        use_memmap : string
+            If not None, a memory mapped file with this name will be used to
+            gather the LDOS.
+            If run in MPI parallel mode, such a file MUST be provided.
+        """
         return_ldos_object = LDOS(params)
-        return_ldos_object.read_from_cube(path_name_scheme, units=units)
+        return_ldos_object.read_from_cube(path_name_scheme, units=units,
+                                          use_memmap=use_memmap)
 
     ##############################
     # Properties
@@ -74,6 +127,7 @@ class LDOS(Target):
 
     @property
     def local_density_of_states(self):
+        """Local density of states as 1D or 3D array."""
         return self._local_density_of_states
 
     @local_density_of_states.setter
@@ -84,7 +138,12 @@ class LDOS(Target):
         self.uncache_properties()
 
     def get_target(self):
-        """Generic interface for cached target quantities."""
+        """
+        Get the target quantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
         return self.local_density_of_states
 
     def uncache_properties(self):
@@ -110,10 +169,12 @@ class LDOS(Target):
 
     @cached_property
     def energy_grid(self):
+        """Energy grid on which the LDOS is expressed."""
         return self.get_energy_grid()
 
     @cached_property
     def total_energy(self):
+        """Total energy of the system, calculated via cached LDOS."""
         if self.local_density_of_states is not None:
             return self.get_total_energy(ldos_data=self.local_density_of_states)
         else:
@@ -122,6 +183,7 @@ class LDOS(Target):
 
     @cached_property
     def band_energy(self):
+        """Band energy of the system, calculated via cached LDOS."""
         if self.local_density_of_states is not None:
             return self.get_band_energy(ldos_data=self.local_density_of_states)
         else:
@@ -130,6 +192,12 @@ class LDOS(Target):
 
     @cached_property
     def number_of_electrons(self):
+        """
+        Number of electrons in the system, calculated via cached LDOS.
+
+        Does not necessarily match up exactly with KS-DFT provided values,
+        due to discretization errors.
+        """
         if self.local_density_of_states is not None:
             return self.get_number_of_electrons(self.local_density_of_states)
         else:
@@ -138,6 +206,14 @@ class LDOS(Target):
 
     @cached_property
     def fermi_energy(self):
+        """
+        "Self-consistent" Fermi energy of the system.
+
+        "Self-consistent" does not mean self-consistent in the DFT sense,
+        but rather the Fermi energy, for which DOS integration reproduces
+        the exact number of electrons. The term "self-consistent" stems
+        from how this quantity is calculated. Calculated via cached LDOS
+        """
         if self.local_density_of_states is not None:
             return self.\
                 get_self_consistent_fermi_energy_ev(
@@ -151,6 +227,7 @@ class LDOS(Target):
 
     @cached_property
     def density(self):
+        """Electronic density as calculated by the cached LDOS."""
         if self.local_density_of_states is not None:
             return self.get_density(self.local_density_of_states)
         else:
@@ -159,6 +236,7 @@ class LDOS(Target):
 
     @cached_property
     def density_of_states(self):
+        """DOS as calculated by the cached LDOS."""
         if self.local_density_of_states is not None:
             return self.get_density_of_states(self.local_density_of_states)
         else:
@@ -264,8 +342,9 @@ class LDOS(Target):
 
         use_memmap : string
             If not None, a memory mapped file with this name will be used to
-            gather the LDOS.
-            If run in MPI parallel mode, such a file MUST be provided.
+            gather the LDOS. Only has an effect in MPI parallel mode.
+            Usage will reduce RAM footprint while SIGNIFICANTLY
+            impacting disk usage and
         """
         # First determine how many digits the last file in the list of
         # LDOS.cube files

@@ -26,6 +26,7 @@ class Density(Target):
     params : mala.common.parameters.Parameters
         Parameters used to create this Target object.
     """
+
     ##############################
     # Class attributes
     ##############################
@@ -42,18 +43,69 @@ class Density(Target):
 
     @classmethod
     def from_numpy_file(cls, params, path):
+        """
+        Create a Density calculator from a numpy array saved in a file.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        path : string
+            Path to file that is being read.
+
+        Returns
+        -------
+        dens_object : mala.targets.density.Density
+            Density calculator object.
+        """
         return_density_object = Density(params)
         return_density_object.density.read_from_numpy(path)
         return return_density_object
 
     @classmethod
     def from_numpy_array(cls, params, array):
+        """
+        Create a Density calculator from a numpy array in memory.
+
+        By using this function rather then setting the density
+        object directly, proper unit coversion is ensured.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        array : numpy.ndarray
+            Path to file that is being read.
+
+        Returns
+        -------
+        dens_object : mala.targets.density.Density
+            Density calculator object.
+        """
         return_dos = Density(params)
         return_dos.read_from_array(array)
         return return_dos
 
     @classmethod
     def from_cube_file(cls, params, path):
+        """
+        Create a Density calculator from a cube file.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this DOS object.
+
+        path : string
+            Name of the cube file.
+
+        Returns
+        -------
+        dens_object : mala.targets.density.Density
+            Density object created from LDOS object.
+        """
         return_density_object = Density(params)
         return_density_object.read_from_cube(path)
         return return_density_object
@@ -61,7 +113,10 @@ class Density(Target):
     @classmethod
     def from_ldos_calculator(cls, ldos_object):
         """
-        Create a density object from an LDOS object.
+        Create a Density calculator from an LDOS object.
+
+        If the LDOS object has data associated with it, this data will
+        be copied.
 
         Parameters
         ----------
@@ -70,10 +125,8 @@ class Density(Target):
 
         Returns
         -------
-        dos_object : Density
+        dens_object : mala.targets.density.Density
             Density object created from LDOS object.
-
-
         """
         return_density_object = Density(ldos_object.parameters)
         return_density_object.fermi_energy_dft = ldos_object.fermi_energy_dft
@@ -118,7 +171,12 @@ class Density(Target):
         self.uncache_properties()
 
     def get_target(self):
-        """Generic interface for cached target quantities."""
+        """
+        Get the target quantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
         return self.density
 
     @property
@@ -128,6 +186,12 @@ class Density(Target):
 
     @cached_property
     def number_of_electrons(self):
+        """
+        Number of electrons in the system, calculated via cached Density.
+
+        Does not necessarily match up exactly with KS-DFT provided values,
+        due to discretization errors.
+        """
         if self.density is not None:
             return self.get_number_of_electrons(density_data=self.density)
         else:
@@ -136,6 +200,11 @@ class Density(Target):
 
     @cached_property
     def total_energy_contributions(self):
+        """
+        All density based contributions to the total energy.
+
+        Calculated via the cached density.
+        """
         if self.density is not None:
             return self.get_energy_contributions(density_data=self.density)
         else:
@@ -163,7 +232,7 @@ class Density(Target):
 
         Parameters
         ----------
-        path :
+        path : string
             Name of the cube file.
 
         units : string

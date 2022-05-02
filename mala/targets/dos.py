@@ -12,7 +12,8 @@ from mala.common.parameters import printout
 
 
 class DOS(Target):
-    """Postprocessing / parsing functions for the density of states (DOS).
+    """
+    Postprocessing / parsing functions for the density of states (DOS).
 
     Parameters
     ----------
@@ -33,6 +34,9 @@ class DOS(Target):
         """
         Create a DOS object from an LDOS object.
 
+        If the LDOS object has data associated with it, this data will
+        be copied.
+
         Parameters
         ----------
         ldos_object : mala.targets.ldos.LDOS
@@ -40,10 +44,8 @@ class DOS(Target):
 
         Returns
         -------
-        dos_object : DOS
+        dos_object : mala.targets.dos.DOS
             DOS object created from LDOS object.
-
-
         """
         return_dos_object = DOS(ldos_object.parameters)
         return_dos_object.fermi_energy_dft = ldos_object.fermi_energy_dft
@@ -70,24 +72,105 @@ class DOS(Target):
 
     @classmethod
     def from_numpy_file(cls, params, path, units="1/eV"):
+        """
+        Create an DOS calculator from a numpy array saved in a file.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this DOS object.
+
+        path : string
+            Path to file that is being read.
+
+        units : string
+            Units the DOS is saved in.
+
+        Returns
+        -------
+        dos_calculator : mala.targets.dos.DOS
+            DOS calculator object.
+        """
         return_dos = DOS(params)
         return_dos.read_from_numpy(path, units=units)
         return return_dos
 
     @classmethod
     def from_numpy_array(cls, params, array, units="1/eV"):
+        """
+        Create an DOS calculator from a numpy array in memory.
+
+        By using this function rather then setting the local_density_of_states
+        object directly, proper
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this DOS object.
+
+        array : numpy.ndarray
+            Path to file that is being read.
+
+        units : string
+            Units the DOS is saved in.
+
+        Returns
+        -------
+        dos_calculator : mala.targets.dos.DOS
+            DOS calculator object.
+        """
         return_dos = DOS(params)
         return_dos.read_from_array(array, units=units)
         return return_dos
 
     @classmethod
     def from_qe_dos_txt(cls, params, path):
+        """
+        Create a DOS calculator from a Quantum Espresso generated file.
+
+        These files do not have a specified file ending, so I will call them
+        qe.dos.txt here. QE saves the DOS in 1/eV.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this DOS object.
+
+        path : string
+            Path of the file containing the DOS.
+
+        Returns
+        -------
+        dos_calculator : mala.targets.dos.DOS
+            DOS calculator object.
+        """
         return_dos = DOS(params)
         return_dos.read_from_qe_dos_txt(path)
         return return_dos
 
     @classmethod
     def from_qe_out(cls, params, path):
+        """
+        Create a DOS calculator from a Quantum Espresso output file.
+
+        This will only work if the QE calculation has been performed with
+        very verbose output and contains the bands at all k-points.
+        As much information will be read from the QE output files as possible.
+        There is no need to call read_additional_calculation_data afterwards.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this DOS object.
+
+        path : string
+            Path of the file containing the DOS.
+
+        Returns
+        -------
+        dos_calculator : mala.targets.dos.DOS
+            DOS calculator object.
+        """
         return_dos = DOS(params)
 
         # In this case, we may just read the entire qe.out file.
@@ -108,6 +191,7 @@ class DOS(Target):
 
     @property
     def density_of_states(self):
+        """Density of states as array."""
         return self._density_of_states
 
     @density_of_states.setter
@@ -118,15 +202,22 @@ class DOS(Target):
         self.uncache_properties()
 
     def get_target(self):
-        """Generic interface for cached target quantities."""
+        """
+        Get the target quantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
         return self.density_of_states
 
     @cached_property
     def energy_grid(self):
+        """Energy grid on which the DOS is expressed."""
         return self.get_energy_grid()
 
     @cached_property
     def band_energy(self):
+        """Band energy of the system, calculated via cached DOS."""
         if self.density_of_states is not None:
             return self.get_band_energy()
         else:
@@ -135,6 +226,12 @@ class DOS(Target):
 
     @cached_property
     def number_of_electrons(self):
+        """
+        Number of electrons in the system, calculated via cached DOS.
+
+        Does not necessarily match up exactly with KS-DFT provided values,
+        due to discretization errors.
+        """
         if self.density_of_states is not None:
             return self.get_number_of_electrons()
         else:
@@ -143,6 +240,14 @@ class DOS(Target):
 
     @cached_property
     def fermi_energy(self):
+        """
+        "Self-consistent" Fermi energy of the system.
+
+        "Self-consistent" does not mean self-consistent in the DFT sense,
+        but rather the Fermi energy, for which DOS integration reproduces
+        the exact number of electrons. The term "self-consistent" stems
+        from how this quantity is calculated. Calculated via cached DOS.
+        """
         if self.density_of_states is not None:
             return self.\
                 get_self_consistent_fermi_energy_ev()
@@ -155,6 +260,7 @@ class DOS(Target):
 
     @cached_property
     def entropy_contribution(self):
+        """Entropy contribution to the energy calculated via cached DOS."""
         if self.density_of_states is not None:
             return self.get_entropy_contribution()
         else:
