@@ -142,55 +142,6 @@ class Target(ABC):
     def _is_property_cached(self, property_name):
         return property_name in self.__dict__.keys()
 
-    def read_from_cube(self):
-        """Read the quantity from a .cube file."""
-        raise Exception("No function defined to read this quantity "
-                        "from a .cube file.")
-
-    def read_from_qe_dos_txt(self):
-        """Read the quantity from a Quantum Espresso .dos.txt file."""
-        raise Exception("No function defined to read this quantity "
-                        "from a qe.dos.txt file")
-
-    def write_as_cube(self):
-        """Write the quantity in a cube file."""
-        raise Exception("No function defined to write this quantity "
-                        "to a .cube file.")
-
-    def density(self):
-        """The electronic density."""
-        raise Exception("No function to calculate or provide the "
-                        "density has been implemented for this target type.")
-
-    def get_density(self):
-        """Get the electronic density."""
-        raise Exception("No function to calculate or provide the "
-                        "density has been implemented for this target type.")
-
-    def get_density_of_states(self):
-        """Get the density of states."""
-        raise Exception("No function to calculate or provide the"
-                        "density of states (DOS) has been implemented "
-                        "for this target type.")
-
-    def get_band_energy(self):
-        """Get the band energy."""
-        raise Exception("No function to calculate or provide the"
-                        "band energy has been implemented for this target "
-                        "type.")
-
-    def get_number_of_electrons(self):
-        """Get the number of electrons."""
-        raise Exception("No function to calculate or provide the number of"
-                        " electrons has been implemented for this target "
-                        "type.")
-
-    def get_total_energy(self):
-        """Get the total energy."""
-        raise Exception("No function to calculate or provide the number "
-                        "of electons has been implemented for this target "
-                        "type.")
-
     def read_additional_calculation_data(self, data_type, data=""):
         """
         Read in additional input about a calculation.
@@ -353,10 +304,6 @@ class Target(ABC):
 
         else:
             raise Exception("Unsupported auxiliary file type.")
-
-    def get_energy_grid(self):
-        """Get energy grid."""
-        raise Exception("No method implement to calculate an energy grid.")
 
     def get_real_space_grid(self):
         """Get the real space grid."""
