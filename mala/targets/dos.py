@@ -249,8 +249,15 @@ class DOS(Target):
         from how this quantity is calculated. Calculated via cached DOS.
         """
         if self.density_of_states is not None:
-            return self.\
+            fermi_energy = self.\
                 get_self_consistent_fermi_energy_ev()
+
+            # Now that we have a new Fermi energy, we should uncache the
+            # old number of electrons.
+            if self._is_property_cached("number_of_electrons"):
+                del self.number_of_electrons
+            return fermi_energy
+
         else:
             # The Fermi energy is set to None instead of creating an error.
             # This is because the Fermi energy is used a lot throughout
@@ -521,7 +528,7 @@ class DOS(Target):
                          "calculated from electronic structure data. "
                          "Using the DFT fermi energy, this may "
                          "yield unexpected results", min_verbosity=1)
-            fermi_energy_eV = self.fermi_energy_dft
+                fermi_energy_eV = self.fermi_energy_dft
         else:
             dos_data = self.density_of_states
             fermi_energy_eV = self.fermi_energy
@@ -577,7 +584,7 @@ class DOS(Target):
                          "calculated from electronic structure data. "
                          "Using the DFT fermi energy, this may "
                          "yield unexpected results", min_verbosity=1)
-            fermi_energy_eV = self.fermi_energy_dft
+                fermi_energy_eV = self.fermi_energy_dft
         else:
             dos_data = self.density_of_states
             fermi_energy_eV = self.fermi_energy
@@ -633,7 +640,7 @@ class DOS(Target):
                          "calculated from electronic structure data. "
                          "Using the DFT fermi energy, this may "
                          "yield unexpected results", min_verbosity=1)
-            fermi_energy_eV = self.fermi_energy_dft
+                fermi_energy_eV = self.fermi_energy_dft
         else:
             dos_data = self.density_of_states
             fermi_energy_eV = self.fermi_energy
