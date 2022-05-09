@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>datahandling &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>datageneration &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -20,8 +20,8 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="data_converter" href="mala.datahandling.data_converter.html" />
-    <link rel="prev" title="trajectory_analyzer" href="mala.datageneration.trajectory_analyzer.html" /> 
+    <link rel="next" title="ofdft_initializer" href="mala.datageneration.ofdft_initializer.html" />
+    <link rel="prev" title="parameters" href="mala.common.parameters.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,17 +47,12 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
-<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">datahandling</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_converter.html">data_converter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler.html">data_handler</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_repo.html">data_repo</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html">data_scaler</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html">lazy_load_dataset</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_clustered.html">lazy_load_dataset_clustered</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.snapshot.html">snapshot</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">datageneration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mala.datageneration.ofdft_initializer.html">ofdft_initializer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html">trajectory_analyzer</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
@@ -86,9 +81,9 @@
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="modules.html">API reference</a> &raquo;</li>
           <li><a href="mala.html">mala</a> &raquo;</li>
-      <li>datahandling</li>
+      <li>datageneration</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datahandling.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datageneration.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -96,18 +91,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <span class="target" id="module-mala.datahandling"></span><p>All functions for handling data.</p>
-<div class="section" id="datahandling">
-<h1>datahandling<a class="headerlink" href="#datahandling" title="Permalink to this headline"></a></h1>
+  <span class="target" id="module-mala.datageneration"></span><p>Tools for data generation. Currently highly experimental.</p>
+<div class="section" id="datageneration">
+<h1>datageneration<a class="headerlink" href="#datageneration" title="Permalink to this headline"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_converter.html">data_converter</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_handler.html">data_handler</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_repo.html">data_repo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.data_scaler.html">data_scaler</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html">lazy_load_dataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_clustered.html">lazy_load_dataset_clustered</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.datahandling.snapshot.html">snapshot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datageneration.ofdft_initializer.html">ofdft_initializer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html">trajectory_analyzer</a></li>
 </ul>
 </div>
 </div>
@@ -116,8 +106,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="mala.datageneration.trajectory_analyzer.html" class="btn btn-neutral float-left" title="trajectory_analyzer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.datahandling.data_converter.html" class="btn btn-neutral float-right" title="data_converter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.common.parameters.html" class="btn btn-neutral float-left" title="parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.datageneration.ofdft_initializer.html" class="btn btn-neutral float-right" title="ofdft_initializer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

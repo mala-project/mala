@@ -47,6 +47,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
@@ -193,7 +194,7 @@ format and performs postprocessing calculations on the quantity.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.get_radial_distribution_function">
-<span class="sig-name descname"><span class="pre">get_radial_distribution_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_radial_distribution_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_radial_distribution_function" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_radial_distribution_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mala'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_radial_distribution_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_radial_distribution_function" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the radial distribution function (RDF).</p>
 <p>Uses the values as given in the parameters object.</p>
 <dl class="field-list simple">
@@ -205,6 +206,10 @@ format and performs postprocessing calculations on the quantity.</p>
 <li><p><strong>rdf</strong> (<em>numpy.ndarray</em>) – The RDF as [rMax] array.</p></li>
 <li><p><strong>radii</strong> (<em>numpy.ndarray</em>) – The radii  at which the RDF was calculated (for plotting),
 as [rMax] array.</p></li>
+<li><p><strong>method</strong> (<em>string</em>) – If “mala” the more flexible, yet less performant python based
+RDF will be calculated. If “asap3”, asap3’s C++ implementation
+will be used. In the latter case, rMax will be ignored and
+automatically calculated.</p></li>
 </ul>
 </p>
 </dd>
@@ -265,7 +270,7 @@ as [kMax] array.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.radial_distribution_function_from_atoms">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">radial_distribution_function_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.radial_distribution_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.radial_distribution_function_from_atoms" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">radial_distribution_function_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mala'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.radial_distribution_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.radial_distribution_function_from_atoms" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the radial distribution function (RDF).</p>
 <p>In comparison with other python implementation, this function
 can handle arbitrary radii by incorporating a neighbor list.
@@ -284,6 +289,10 @@ the maximum radius up until which the calculation of the RDF is
 indisputably physically meaningful. Larger radii may be specified,
 e.g. for a Fourier transformation to calculate the static structure
 factor.</p></li>
+<li><p><strong>method</strong> (<em>string</em>) – If “mala” the more flexible, yet less performant python based
+RDF will be calculated. If “asap3”, asap3’s C++ implementation
+will be used. In the latter case, rMax will be ignored and
+automatically calculated.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

@@ -82,6 +82,10 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span>
 <span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">simps</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">asap3.analysis.rdf</span> <span class="kn">import</span> <span class="n">RadialDistributionFunction</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="k">pass</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">ParametersTargets</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
@@ -438,7 +442,8 @@
 <div class="viewcode-block" id="Target.radial_distribution_function_from_atoms"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.radial_distribution_function_from_atoms">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
                                                 <span class="n">number_of_bins</span><span class="p">,</span>
-                                                <span class="n">rMax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                                                <span class="n">rMax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                                <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mala&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the radial distribution function (RDF).</span>
 
@@ -465,6 +470,12 @@
 <span class="sd">            e.g. for a Fourier transformation to calculate the static structure</span>
 <span class="sd">            factor.</span>
 
+<span class="sd">        method : string</span>
+<span class="sd">            If &quot;mala&quot; the more flexible, yet less performant python based</span>
+<span class="sd">            RDF will be calculated. If &quot;asap3&quot;, asap3&#39;s C++ implementation</span>
+<span class="sd">            will be used. In the latter case, rMax will be ignored and</span>
+<span class="sd">            automatically calculated.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        rdf : numpy.ndarray</span>
@@ -481,51 +492,61 @@
 
         <span class="c1"># This is quite a large RDF.</span>
         <span class="c1"># We may want a smaller one eventually.</span>
-        <span class="k">if</span> <span class="n">rMax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">rMax</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;asap3&quot;</span><span class="p">:</span>
             <span class="n">rMax</span> <span class="o">=</span> <span class="n">Target</span><span class="o">.</span><span class="n">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 
         <span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span>
-        <span class="n">dr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">rMax</span><span class="o">/</span><span class="n">number_of_bins</span><span class="p">)</span>
-        <span class="n">rdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">rMax</span> <span class="o">/</span> <span class="n">number_of_bins</span><span class="p">)</span>
 
-        <span class="n">cell</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
-        <span class="n">pbc</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_pbc</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">pbc</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-                <span class="k">if</span> <span class="n">rMax</span> <span class="o">&gt;</span> <span class="n">cell</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]:</span>
-                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="s2">&quot;Calculating RDF with a radius larger then the unit&quot;</span>
-                        <span class="s2">&quot; cell. While this will work numerically, be cautious&quot;</span>
-                        <span class="s2">&quot; about the physicality of its results&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;mala&quot;</span><span class="p">:</span>
+            <span class="n">rdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
-        <span class="c1"># Calculate all the distances.</span>
-        <span class="c1"># rMax/2 because this is the radius around one atom, so half the</span>
-        <span class="c1"># distance to the next one.</span>
-        <span class="c1"># Using neighborlists grants us access to the PBC.</span>
-        <span class="n">neighborlist</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">NeighborList</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span> <span class="o">+</span>
-                                                     <span class="p">[</span><span class="n">rMax</span><span class="o">/</span><span class="mf">2.0</span><span class="p">],</span>
-                                                     <span class="n">bothways</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">neighborlist</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)):</span>
-            <span class="n">indices</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">neighborlist</span><span class="o">.</span><span class="n">get_neighbors</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-            <span class="n">dm</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">([</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()[</span><span class="n">i</span><span class="p">]],</span>
-                                <span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span> <span class="o">+</span> <span class="n">offsets</span> <span class="o">@</span>
-                                <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">())</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">dm</span> <span class="o">/</span> <span class="n">dr</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-            <span class="n">out_of_scope</span> <span class="o">=</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="n">number_of_bins</span>
-            <span class="n">index</span><span class="p">[</span><span class="n">out_of_scope</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">index</span><span class="p">:</span>
-                <span class="n">rdf</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">cell</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
+            <span class="n">pbc</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_pbc</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">pbc</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">rMax</span> <span class="o">&gt;</span> <span class="n">cell</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]:</span>
+                        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                            <span class="s2">&quot;Calculating RDF with a radius larger then the unit&quot;</span>
+                            <span class="s2">&quot; cell. While this will work numerically, be cautious&quot;</span>
+                            <span class="s2">&quot; about the physicality of its results&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
-        <span class="c1"># Normalize the RDF and calculate the distances</span>
-        <span class="n">rr</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">phi</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span> <span class="o">/</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">phi</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">rr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
-            <span class="n">rdf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/=</span> <span class="p">(</span><span class="n">norm</span> <span class="o">*</span> <span class="p">((</span><span class="n">rr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">dr</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span><span class="p">))</span>
+            <span class="c1"># Calculate all the distances.</span>
+            <span class="c1"># rMax/2 because this is the radius around one atom, so half the</span>
+            <span class="c1"># distance to the next one.</span>
+            <span class="c1"># Using neighborlists grants us access to the PBC.</span>
+            <span class="n">neighborlist</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">NeighborList</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span> <span class="o">+</span>
+                                                         <span class="p">[</span><span class="n">rMax</span><span class="o">/</span><span class="mf">2.0</span><span class="p">],</span>
+                                                         <span class="n">bothways</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">neighborlist</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)):</span>
+                <span class="n">indices</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">neighborlist</span><span class="o">.</span><span class="n">get_neighbors</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">dm</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">([</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()[</span><span class="n">i</span><span class="p">]],</span>
+                                    <span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span> <span class="o">+</span> <span class="n">offsets</span> <span class="o">@</span>
+                                    <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">())</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">dm</span> <span class="o">/</span> <span class="n">dr</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                <span class="n">out_of_scope</span> <span class="o">=</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="n">number_of_bins</span>
+                <span class="n">index</span><span class="p">[</span><span class="n">out_of_scope</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">index</span><span class="p">:</span>
+                    <span class="n">rdf</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
 
+            <span class="c1"># Normalize the RDF and calculate the distances</span>
+            <span class="n">rr</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">phi</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span> <span class="o">/</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">dr</span> <span class="o">*</span> <span class="n">phi</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">rr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
+                <span class="n">rdf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/=</span> <span class="p">(</span><span class="n">norm</span> <span class="o">*</span> <span class="p">((</span><span class="n">rr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">dr</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;asap3&quot;</span><span class="p">:</span>
+            <span class="n">rdf</span> <span class="o">=</span> <span class="n">RadialDistributionFunction</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">rMax</span><span class="p">,</span>
+                                             <span class="n">number_of_bins</span><span class="p">)</span><span class="o">.</span><span class="n">get_rdf</span><span class="p">()</span>
+            <span class="n">rr</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">rr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">rdf</span><span class="p">,</span> <span class="n">rr</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown RDF method selected.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">rdf</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">rr</span></div>
         
 <div class="viewcode-block" id="Target.three_particle_correlation_function_from_atoms"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.three_particle_correlation_function_from_atoms">[docs]</a>    <span class="nd">@staticmethod</span>
@@ -789,7 +810,8 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Static structure factor calculation method &quot;</span>
                             <span class="s2">&quot;unsupported.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.get_radial_distribution_function"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_radial_distribution_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_radial_distribution_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.get_radial_distribution_function"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_radial_distribution_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_radial_distribution_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
+                                                <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mala&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the radial distribution function (RDF).</span>
 
@@ -808,6 +830,13 @@
 <span class="sd">        radii : numpy.ndarray</span>
 <span class="sd">            The radii  at which the RDF was calculated (for plotting),</span>
 <span class="sd">            as [rMax] array.</span>
+
+<span class="sd">        method : string</span>
+<span class="sd">            If &quot;mala&quot; the more flexible, yet less performant python based</span>
+<span class="sd">            RDF will be calculated. If &quot;asap3&quot;, asap3&#39;s C++ implementation</span>
+<span class="sd">            will be used. In the latter case, rMax will be ignored and</span>
+<span class="sd">            automatically calculated.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Target</span><span class="o">.</span>\
             <span class="n">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
@@ -816,7 +845,8 @@
                                                     <span class="n">rdf_parameters</span>
                                                     <span class="p">[</span><span class="s2">&quot;number_of_bins&quot;</span><span class="p">],</span>
                                                     <span class="n">rMax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                    <span class="n">rdf_parameters</span><span class="p">[</span><span class="s2">&quot;rMax&quot;</span><span class="p">])</span></div>
+                                                    <span class="n">rdf_parameters</span><span class="p">[</span><span class="s2">&quot;rMax&quot;</span><span class="p">],</span>
+                                                    <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.get_three_particle_correlation_function"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_three_particle_correlation_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_three_particle_correlation_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

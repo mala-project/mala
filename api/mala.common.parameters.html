@@ -20,7 +20,7 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="datahandling" href="mala.datahandling.html" />
+    <link rel="next" title="datageneration" href="mala.datageneration.html" />
     <link rel="prev" title="parallelizer" href="mala.common.parallelizer.html" /> 
 </head>
 
@@ -53,6 +53,7 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">parameters</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
@@ -546,6 +547,110 @@ to train the encoder for the clustering.</p>
 for sampling per snapshot (according to clustering then, of course).</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParametersDataGeneration</span></span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersDataGeneration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
+<p>All parameters to help with data generation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration.trajectory_analysis_denoising_width">
+<span class="sig-name descname"><span class="pre">trajectory_analysis_denoising_width</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_denoising_width" title="Permalink to this definition"></a></dt>
+<dd><p>The distance metric is denoised prior to analysis using a certain
+width. This should be adjusted if there is reason to believe
+the trajectory will be noise for some reason.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration.trajectory_analysis_below_average_counter">
+<span class="sig-name descname"><span class="pre">trajectory_analysis_below_average_counter</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_below_average_counter" title="Permalink to this definition"></a></dt>
+<dd><p>Number of time steps that have to consecutively below the average
+of the distance metric curve, before we consider the trajectory
+to be equilibrated.
+Usually does not have to be changed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration.trajectory_analysis_estimated_equilibrium">
+<span class="sig-name descname"><span class="pre">trajectory_analysis_estimated_equilibrium</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_estimated_equilibrium" title="Permalink to this definition"></a></dt>
+<dd><p>The analysis of the trajectory builds on the assumption that at some
+point of the trajectory, the system is equilibrated.
+For this, we need to provide the fraction of the trajectory (counted
+from the end). Usually, 10% is a fine assumption. This value usually
+does not need to be changed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration.local_psp_path">
+<span class="sig-name descname"><span class="pre">local_psp_path</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration.local_psp_path" title="Permalink to this definition"></a></dt>
+<dd><p>Path to where the local pseudopotential is stored (for OF-DFT-MD).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration.local_psp_name">
+<span class="sig-name descname"><span class="pre">local_psp_name</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration.local_psp_name" title="Permalink to this definition"></a></dt>
+<dd><p>Name of the local pseudopotential (for OF-DFT-MD).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration.ofdft_timestep">
+<span class="sig-name descname"><span class="pre">ofdft_timestep</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration.ofdft_timestep" title="Permalink to this definition"></a></dt>
+<dd><p>Timestep of the OF-DFT-MD simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration.ofdft_number_of_timesteps">
+<span class="sig-name descname"><span class="pre">ofdft_number_of_timesteps</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration.ofdft_number_of_timesteps" title="Permalink to this definition"></a></dt>
+<dd><p>Number of timesteps for the OF-DFT-MD simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDataGeneration.ofdft_temperature">
+<span class="sig-name descname"><span class="pre">ofdft_temperature</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDataGeneration.ofdft_temperature" title="Permalink to this definition"></a></dt>
+<dd><p>Temperature at which to perform the OF-DFT-MD simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1297,7 +1402,7 @@ or “absolute_values”, i.e. all negative values are multiplied by -1.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="mala.common.parallelizer.html" class="btn btn-neutral float-left" title="parallelizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.datahandling.html" class="btn btn-neutral float-right" title="datahandling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.datageneration.html" class="btn btn-neutral float-right" title="datageneration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

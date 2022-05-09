@@ -938,6 +938,59 @@
                         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
 
 
+<div class="viewcode-block" id="ParametersDataGeneration"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration">[docs]</a><span class="k">class</span> <span class="nc">ParametersDataGeneration</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    All parameters to help with data generation.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    trajectory_analysis_denoising_width : int</span>
+<span class="sd">        The distance metric is denoised prior to analysis using a certain</span>
+<span class="sd">        width. This should be adjusted if there is reason to believe</span>
+<span class="sd">        the trajectory will be noise for some reason.</span>
+
+<span class="sd">    trajectory_analysis_below_average_counter : int</span>
+<span class="sd">        Number of time steps that have to consecutively below the average</span>
+<span class="sd">        of the distance metric curve, before we consider the trajectory</span>
+<span class="sd">        to be equilibrated.</span>
+<span class="sd">        Usually does not have to be changed.</span>
+
+<span class="sd">    trajectory_analysis_estimated_equilibrium : float</span>
+<span class="sd">        The analysis of the trajectory builds on the assumption that at some</span>
+<span class="sd">        point of the trajectory, the system is equilibrated.</span>
+<span class="sd">        For this, we need to provide the fraction of the trajectory (counted</span>
+<span class="sd">        from the end). Usually, 10% is a fine assumption. This value usually</span>
+<span class="sd">        does not need to be changed.</span>
+
+<span class="sd">    local_psp_path : string</span>
+<span class="sd">        Path to where the local pseudopotential is stored (for OF-DFT-MD).</span>
+
+<span class="sd">    local_psp_name : string</span>
+<span class="sd">        Name of the local pseudopotential (for OF-DFT-MD).</span>
+
+<span class="sd">    ofdft_timestep : int</span>
+<span class="sd">        Timestep of the OF-DFT-MD simulation.</span>
+
+<span class="sd">    ofdft_number_of_timesteps : int</span>
+<span class="sd">        Number of timesteps for the OF-DFT-MD simulation.</span>
+
+<span class="sd">    ofdft_temperature : float</span>
+<span class="sd">        Temperature at which to perform the OF-DFT-MD simulation.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParametersDataGeneration</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_analysis_below_average_counter</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_analysis_estimated_equilibrium</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_psp_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_psp_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ofdft_timestep</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ofdft_number_of_timesteps</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ofdft_temperature</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
 <div class="viewcode-block" id="ParametersDebug"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersDebug">[docs]</a><span class="k">class</span> <span class="nc">ParametersDebug</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    All debugging parameters.</span>
@@ -1001,6 +1054,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ParametersData</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="n">ParametersRunning</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span> <span class="o">=</span> <span class="n">ParametersHyperparameterOptimization</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datageneration</span> <span class="o">=</span> <span class="n">ParametersDataGeneration</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">ParametersDebug</span><span class="p">()</span>
 
         <span class="c1"># Attributes.</span>

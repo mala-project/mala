@@ -1,0 +1,21 @@
+
+.. automodule:: mala.datageneration
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+
+
+
+datageneration
+==============
+
+
+
+.. toctree::
+   :maxdepth: 6
+
+   mala.datageneration.ofdft_initializer
+   mala.datageneration.trajectory_analyzer
+

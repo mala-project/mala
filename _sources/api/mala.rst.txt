@@ -16,6 +16,7 @@ mala
    :maxdepth: 6
 
    mala.common
+   mala.datageneration
    mala.datahandling
    mala.descriptors
    mala.interfaces

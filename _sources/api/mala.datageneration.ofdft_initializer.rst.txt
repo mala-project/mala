@@ -1,0 +1,7 @@
+ofdft\_initializer
+==================
+
+.. automodule:: mala.datageneration.ofdft_initializer
+   :members:
+   :undoc-members:
+   :show-inheritance:

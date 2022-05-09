@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.datageneration.ofdft_initializer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mala.datageneration.ofdft_initializer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.datageneration.ofdft_initializer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Tools for initializing a (ML)-DFT trajectory with OF-DFT.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">dftpy.api.api4ase</span> <span class="kn">import</span> <span class="n">DFTpyCalculator</span>
+    <span class="kn">from</span> <span class="nn">dftpy.config</span> <span class="kn">import</span> <span class="n">DefaultOption</span><span class="p">,</span> <span class="n">OptionFormat</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">units</span>
+<span class="kn">import</span> <span class="nn">ase.io</span>
+<span class="kn">from</span> <span class="nn">ase.md</span> <span class="kn">import</span> <span class="n">MDLogger</span>
+<span class="kn">from</span> <span class="nn">ase.md.langevin</span> <span class="kn">import</span> <span class="n">Langevin</span>
+<span class="kn">from</span> <span class="nn">ase.io.trajectory</span> <span class="kn">import</span> <span class="n">Trajectory</span>
+<span class="kn">from</span> <span class="nn">ase.md.velocitydistribution</span> <span class="kn">import</span> <span class="n">MaxwellBoltzmannDistribution</span>
+
+
+<div class="viewcode-block" id="OFDFTInitializer"><a class="viewcode-back" href="../../../api/mala.datageneration.ofdft_initializer.html#mala.datageneration.ofdft_initializer.OFDFTInitializer">[docs]</a><span class="k">class</span> <span class="nc">OFDFTInitializer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes a trajectory using OF-DFT.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.common.parameters.Parameters</span>
+<span class="sd">        Parameters object used to create this instance.</span>
+
+<span class="sd">    atoms : ase.Atoms</span>
+<span class="sd">        Initial atomic configuration for which an equilibrated configuration</span>
+<span class="sd">        is to be created.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">atoms</span><span class="p">):</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The class OFDFTInitializer is experimental. The algorithms &quot;</span>
+             <span class="s2">&quot;within have been tested, but the API may still be subject to &quot;</span>
+             <span class="s2">&quot;large changes.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">datageneration</span>
+
+        <span class="c1"># Check that only one element is used in the atoms.</span>
+        <span class="n">number_of_elements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">number_of_elements</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;OF-DFT-MD initialization can only work with one&quot;</span>
+                            <span class="s2">&quot; element.&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="OFDFTInitializer.get_equilibrated_configuration"><a class="viewcode-back" href="../../../api/mala.datageneration.ofdft_initializer.html#mala.datageneration.ofdft_initializer.OFDFTInitializer.get_equilibrated_configuration">[docs]</a>    <span class="k">def</span> <span class="nf">get_equilibrated_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logging_period</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the (OF-DFT-MD) equilibrated atomic configuration.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        logging_period : int</span>
+<span class="sd">            If not None, a .log and .traj file will be filled with snapshot</span>
+<span class="sd">            information every logging_period steps.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set the DFTPy configuration.</span>
+        <span class="n">conf</span> <span class="o">=</span> <span class="n">DefaultOption</span><span class="p">()</span>
+        <span class="n">conf</span><span class="p">[</span><span class="s1">&#39;PATH&#39;</span><span class="p">][</span><span class="s1">&#39;pppath&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">local_psp_path</span>
+        <span class="n">conf</span><span class="p">[</span><span class="s1">&#39;PP&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">local_psp_name</span>
+        <span class="n">conf</span><span class="p">[</span><span class="s1">&#39;OPT&#39;</span><span class="p">][</span><span class="s1">&#39;method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;TN&#39;</span>
+        <span class="n">conf</span><span class="p">[</span><span class="s1">&#39;KEDF&#39;</span><span class="p">][</span><span class="s1">&#39;kedf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;WT&#39;</span>
+        <span class="n">conf</span><span class="p">[</span><span class="s1">&#39;JOB&#39;</span><span class="p">][</span><span class="s1">&#39;calctype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Energy Force&#39;</span>
+        <span class="n">conf</span> <span class="o">=</span> <span class="n">OptionFormat</span><span class="p">(</span><span class="n">conf</span><span class="p">)</span>
+        <span class="c1"># @Zhandos: Do we need this?</span>
+        <span class="c1"># temperature = self.params.self.ofdft_temperature * units.kB</span>
+
+        <span class="c1"># Create the DFTPy Calculator.</span>
+        <span class="n">calc</span> <span class="o">=</span> <span class="n">DFTpyCalculator</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">conf</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">set_calculator</span><span class="p">(</span><span class="n">calc</span><span class="p">)</span>
+
+        <span class="c1"># Create the initial velocities, and dynamics object.</span>
+        <span class="n">MaxwellBoltzmannDistribution</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
+                                     <span class="n">temperature_K</span><span class="o">=</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_temperature</span><span class="p">,</span>
+                                     <span class="n">force_temp</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">dyn</span> <span class="o">=</span> <span class="n">Langevin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_timestep</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span>
+                       <span class="n">temperature_K</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_temperature</span><span class="p">,</span>
+                       <span class="n">friction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="c1"># If logging is desired, do the logging.</span>
+        <span class="k">if</span> <span class="n">logging_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dyn</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">MDLogger</span><span class="p">(</span><span class="n">dyn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="s1">&#39;mala_of_dft_md.log&#39;</span><span class="p">,</span>
+                                <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">peratom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">),</span> <span class="n">interval</span><span class="o">=</span><span class="n">logging_period</span><span class="p">)</span>
+            <span class="n">traj</span> <span class="o">=</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;mala_of_dft_md.traj&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+
+            <span class="n">dyn</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">traj</span><span class="o">.</span><span class="n">write</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="n">logging_period</span><span class="p">)</span>
+
+        <span class="c1"># Let the OF-DFT-MD run.</span>
+        <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;POSCAR_initial&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="s2">&quot;vasp&quot;</span><span class="p">)</span>
+        <span class="n">dyn</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_number_of_timesteps</span><span class="p">)</span>
+        <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;POSCAR_equilibrated&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="s2">&quot;vasp&quot;</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.datageneration.trajectory_analyzer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mala.datageneration.trajectory_analyzer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.datageneration.trajectory_analyzer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Tools for analyzing a trajectory.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">from</span> <span class="nn">ase.io.trajectory</span> <span class="kn">import</span> <span class="n">TrajectoryReader</span><span class="p">,</span> <span class="n">Trajectory</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span>
+
+<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">ParametersDataGeneration</span>
+<span class="kn">from</span> <span class="nn">mala.targets</span> <span class="kn">import</span> <span class="n">Target</span>
+
+
+<div class="viewcode-block" id="TrajectoryAnalyzer"><a class="viewcode-back" href="../../../api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer">[docs]</a><span class="k">class</span> <span class="nc">TrajectoryAnalyzer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides useful functions to analyze a trajectory.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.common.parameters.Parameters</span>
+<span class="sd">        Parameters object used to create this instance.</span>
+
+<span class="sd">    trajectory : ase.io.Trajectory or string</span>
+<span class="sd">        Trajectory or path to trajectory to be analyzed.</span>
+
+<span class="sd">    target_calculator : mala.targets.target.Target</span>
+<span class="sd">        A target calculator to calculate e.g. the RDF. If None is provided,</span>
+<span class="sd">        one will be generated ad-hoc (recommended).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">,</span> <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The class TrajectoryAnalyzer is experimental. The algorithms &quot;</span>
+             <span class="s2">&quot;within have been tested, but the API may still be subject to &quot;</span>
+             <span class="s2">&quot;large changes.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span> <span class="n">ParametersDataGeneration</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">datageneration</span>
+
+        <span class="c1"># Save or read the trajectory</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">TrajectoryReader</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span> <span class="o">=</span> <span class="n">trajectory</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span> <span class="o">=</span> <span class="n">Trajectory</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Incompatible trajectory format provided.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create target calculator.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
+        <span class="k">if</span> <span class="n">target_calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">Target</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="c1"># Initialize variables.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__saved_rdf</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="TrajectoryAnalyzer.get_first_snapshot"><a class="viewcode-back" href="../../../api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_first_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">get_first_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">equilibrated_snapshot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">distance_threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate distance metrics/first equilibrated timestep on a trajectory.</span>
+
+<span class="sd">        For this step, the RDF+Cosine distance will be used as a distance</span>
+<span class="sd">        metric. Only the first snapshot is return, all the other quantities</span>
+<span class="sd">        can be accessed as member variables of the object calling this</span>
+<span class="sd">        function.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        equilibrated_snapshot : ase.Atoms</span>
+<span class="sd">            An equilibrated snapshot. Will usually be read from the trajectory</span>
+<span class="sd">            itself, but may be provided by the user if desired.</span>
+
+<span class="sd">        distance_threshold : float</span>
+<span class="sd">            Distance threshold to be used. Usually determined by analyzing</span>
+<span class="sd">            the end of the trajectory, but may be provided by user if</span>
+<span class="sd">            e.g. multiple trajectories are to be compared.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        first_snapshot : int</span>
+<span class="sd">            First snapshot for which the trajectory is equilibrated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First, we ned to calculate the reduced metrics for the trajectory.</span>
+        <span class="c1"># For this, we calculate the distance between all the snapshots</span>
+        <span class="c1"># and the last one.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">equilibrated_snapshot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">equilibrated_snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectory</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span>
+                                         <span class="n">_calculate_distance_between_snapshots</span>
+                                         <span class="p">(</span><span class="n">equilibrated_snapshot</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="s2">&quot;rdf&quot;</span><span class="p">,</span>
+                                          <span class="s2">&quot;cosine_distance&quot;</span><span class="p">,</span> <span class="n">save_rdf1</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+        <span class="c1"># Now, we denoise the distance metrics.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__denoise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics</span><span class="p">)</span>
+
+        <span class="c1"># Next, the average of the presumed equilibrated part is calculated,</span>
+        <span class="c1"># and then the first N number of times teps which are below this</span>
+        <span class="c1"># average is calculated.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span> <span class="o">=</span> <span class="n">distance_threshold</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_estimated_equilibrium</span> <span class="o">*</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):])</span>
+        <span class="n">is_below</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">first_snapshot</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distance_metrics_denoised</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">is_below</span><span class="p">:</span>
+                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span><span class="p">:</span>
+                <span class="n">is_below</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_distance_equilibrated</span><span class="p">:</span>
+                <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">is_below</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">counter</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_below_average_counter</span><span class="p">:</span>
+                <span class="n">first_snapshot</span> <span class="o">=</span> <span class="n">idx</span>
+                <span class="k">break</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;First equilibrated timestep of trajectory is&quot;</span><span class="p">,</span> <span class="n">first_snapshot</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">first_snapshot</span></div>
+
+    <span class="k">def</span> <span class="nf">_calculate_distance_between_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot1</span><span class="p">,</span> <span class="n">snapshot2</span><span class="p">,</span>
+                                              <span class="n">distance_metric</span><span class="p">,</span> <span class="n">reduction</span><span class="p">,</span>
+                                              <span class="n">save_rdf1</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">distance_metric</span> <span class="o">==</span> <span class="s2">&quot;realspace&quot;</span><span class="p">:</span>
+            <span class="n">positions1</span> <span class="o">=</span> <span class="n">snapshot1</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
+            <span class="n">positions2</span> <span class="o">=</span> <span class="n">snapshot2</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;minimal_distance&quot;</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="n">positions1</span><span class="p">,</span> <span class="n">positions2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;cosine_distance&quot;</span><span class="p">:</span>
+                <span class="n">number_of_atoms</span> <span class="o">=</span> <span class="n">snapshot1</span><span class="o">.</span><span class="n">get_number_of_atoms</span><span class="p">()</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cosine</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">positions1</span><span class="p">,</span>
+                                                    <span class="p">[</span><span class="n">number_of_atoms</span><span class="o">*</span><span class="mi">3</span><span class="p">]),</span>
+                                         <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">positions2</span><span class="p">,</span>
+                                                    <span class="p">[</span><span class="n">number_of_atoms</span><span class="o">*</span><span class="mi">3</span><span class="p">]))</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown distance metric reduction.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">distance_metric</span> <span class="o">==</span> <span class="s2">&quot;rdf&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">save_rdf1</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__saved_rdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__saved_rdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                        <span class="n">get_radial_distribution_function</span><span class="p">(</span><span class="n">snapshot1</span><span class="p">,</span>
+                                                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asap3&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">rdf1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__saved_rdf</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rdf1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                        <span class="n">get_radial_distribution_function</span><span class="p">(</span><span class="n">snapshot1</span><span class="p">,</span>
+                                                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asap3&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">rdf2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                <span class="n">get_radial_distribution_function</span><span class="p">(</span><span class="n">snapshot2</span><span class="p">,</span>
+                                                 <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asap3&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;minimal_distance&quot;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Combination of distance metric and reduction &quot;</span>
+                                <span class="s2">&quot;not supported.&quot;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;cosine_distance&quot;</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cosine</span><span class="p">(</span><span class="n">rdf1</span><span class="p">,</span> <span class="n">rdf2</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown distance metric reduction.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown distance metric selected.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">__denoise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">):</span>
+        <span class="n">denoised_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">trajectory_analysis_denoising_width</span><span class="p">)</span>
+                                      <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span>
+                                      <span class="n">trajectory_analysis_denoising_width</span><span class="p">,</span>
+                                      <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">denoised_signal</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

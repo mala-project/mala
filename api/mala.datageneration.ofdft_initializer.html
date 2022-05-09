@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>json_serializable &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>ofdft_initializer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -20,8 +20,8 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="parallelizer" href="mala.common.parallelizer.html" />
-    <link rel="prev" title="check_modules" href="mala.common.check_modules.html" /> 
+    <link rel="next" title="trajectory_analyzer" href="mala.datageneration.trajectory_analyzer.html" />
+    <link rel="prev" title="datageneration" href="mala.datageneration.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,14 +46,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="mala.common.html">common</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="mala.common.check_modules.html">check_modules</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">json_serializable</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.common.parallelizer.html">parallelizer</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.common.parameters.html">parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.datageneration.html">datageneration</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">ofdft_initializer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datageneration.trajectory_analyzer.html">trajectory_analyzer</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
@@ -83,10 +81,10 @@
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="modules.html">API reference</a> &raquo;</li>
           <li><a href="mala.html">mala</a> &raquo;</li>
-          <li><a href="mala.common.html">common</a> &raquo;</li>
-      <li>json_serializable</li>
+          <li><a href="mala.datageneration.html">datageneration</a> &raquo;</li>
+      <li>ofdft_initializer</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.common.json_serializable.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datageneration.ofdft_initializer.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -94,45 +92,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="module-mala.common.json_serializable">
-<span id="json-serializable"></span><h1>json_serializable<a class="headerlink" href="#module-mala.common.json_serializable" title="Permalink to this headline"></a></h1>
-<p>Base class for all objects that need to be JSON serializable.</p>
+  <div class="section" id="module-mala.datageneration.ofdft_initializer">
+<span id="ofdft-initializer"></span><h1>ofdft_initializer<a class="headerlink" href="#module-mala.datageneration.ofdft_initializer" title="Permalink to this headline"></a></h1>
+<p>Tools for initializing a (ML)-DFT trajectory with OF-DFT.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="mala.common.json_serializable.JSONSerializable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">JSONSerializable</span></span><a class="reference internal" href="../_modules/mala/common/json_serializable.html#JSONSerializable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.json_serializable.JSONSerializable" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.datageneration.ofdft_initializer.OFDFTInitializer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OFDFTInitializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/ofdft_initializer.html#OFDFTInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.ofdft_initializer.OFDFTInitializer" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Base class for all objects that need to be JSON serializable.</p>
-<p>Implements “to_json” and “from_json” for serialization and deserialization,
-respectively. Other classes that also need to be JSON serializable have
-to inherit from this class and reimplement these methods, if necessary.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.common.json_serializable.JSONSerializable.from_json">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/json_serializable.html#JSONSerializable.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.json_serializable.JSONSerializable.from_json" title="Permalink to this definition"></a></dt>
-<dd><p>Read this object from a dictionary saved in a JSON file.</p>
+<p>Initializes a trajectory using OF-DFT.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>json_dict</strong> (<em>dict</em>) – A dictionary containing all attributes, properties, etc. as saved
-in the json file.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>deserialized_object</strong> – The object as read from the JSON file.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#mala.common.json_serializable.JSONSerializable" title="mala.common.json_serializable.JSONSerializable">JSONSerializable</a></p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters object used to create this instance.</p></li>
+<li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Initial atomic configuration for which an equilibrated configuration
+is to be created.</p></li>
+</ul>
 </dd>
 </dl>
-</dd></dl>
-
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.common.json_serializable.JSONSerializable.to_json">
-<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/json_serializable.html#JSONSerializable.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.json_serializable.JSONSerializable.to_json" title="Permalink to this definition"></a></dt>
-<dd><p>Convert this object to a dictionary that can be saved in a JSON file.</p>
+<dt class="sig sig-object py" id="mala.datageneration.ofdft_initializer.OFDFTInitializer.get_equilibrated_configuration">
+<span class="sig-name descname"><span class="pre">get_equilibrated_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logging_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datageneration/ofdft_initializer.html#OFDFTInitializer.get_equilibrated_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datageneration.ofdft_initializer.OFDFTInitializer.get_equilibrated_configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the (OF-DFT-MD) equilibrated atomic configuration.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>json_dict</strong> – The object as dictionary for export to JSON.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logging_period</strong> (<em>int</em>) – If not None, a .log and .traj file will be filled with snapshot
+information every logging_period steps.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -145,8 +129,8 @@ in the json file.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="mala.common.check_modules.html" class="btn btn-neutral float-left" title="check_modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.common.parallelizer.html" class="btn btn-neutral float-right" title="parallelizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.datageneration.html" class="btn btn-neutral float-left" title="datageneration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.datageneration.trajectory_analyzer.html" class="btn btn-neutral float-right" title="trajectory_analyzer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

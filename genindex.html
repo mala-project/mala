@@ -403,6 +403,8 @@
       </ul></li>
       <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.get_entropy_contribution">get_entropy_contribution() (DOS method)</a>
 </li>
+      <li><a href="api/mala.datageneration.ofdft_initializer.html#mala.datageneration.ofdft_initializer.OFDFTInitializer.get_equilibrated_configuration">get_equilibrated_configuration() (OFDFTInitializer method)</a>
+</li>
       <li><a href="api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_f0_value">get_f0_value() (in module mala.targets.calculation_helpers)</a>
 </li>
       <li><a href="api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.get_f1_value">get_f1_value() (in module mala.targets.calculation_helpers)</a>
@@ -423,6 +425,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer.get_first_snapshot">get_first_snapshot() (TrajectoryAnalyzer method)</a>
+</li>
       <li><a href="api/mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_float">get_float() (HyperparameterOptuna method)</a>
 </li>
       <li><a href="api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.get_input_dimension">get_input_dimension() (DataHandler method)</a>
@@ -589,10 +593,10 @@
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.learning_rate_patience">learning_rate_patience (ParametersRunning attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.learning_rate_scheduler">learning_rate_scheduler (ParametersRunning attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.load_from_file">load_from_file() (DataScaler class method)</a>
 
       <ul>
@@ -610,6 +614,10 @@
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_json">load_from_json() (Parameters class method)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_pickle">load_from_pickle() (Parameters class method)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.local_psp_name">local_psp_name (ParametersDataGeneration attribute)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.local_psp_path">local_psp_path (ParametersDataGeneration attribute)</a>
 </li>
       <li><a href="api/mala.network.network.html#mala.network.network.LSTM">LSTM (class in mala.network.network)</a>
 </li>
@@ -661,6 +669,27 @@
 
       <ul>
         <li><a href="api/mala.common.parameters.html#module-mala.common.parameters">module</a>
+</li>
+      </ul></li>
+      <li>
+    mala.datageneration
+
+      <ul>
+        <li><a href="api/mala.datageneration.html#module-mala.datageneration">module</a>
+</li>
+      </ul></li>
+      <li>
+    mala.datageneration.ofdft_initializer
+
+      <ul>
+        <li><a href="api/mala.datageneration.ofdft_initializer.html#module-mala.datageneration.ofdft_initializer">module</a>
+</li>
+      </ul></li>
+      <li>
+    mala.datageneration.trajectory_analyzer
+
+      <ul>
+        <li><a href="api/mala.datageneration.trajectory_analyzer.html#module-mala.datageneration.trajectory_analyzer">module</a>
 </li>
       </ul></li>
       <li>
@@ -866,6 +895,8 @@
         <li><a href="api/mala.network.runner.html#module-mala.network.runner">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     mala.network.tester
 
@@ -873,8 +904,6 @@
         <li><a href="api/mala.network.tester.html#module-mala.network.tester">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     mala.network.trainer
 
@@ -974,6 +1003,12 @@
         <li><a href="api/mala.common.parallelizer.html#module-mala.common.parallelizer">mala.common.parallelizer</a>
 </li>
         <li><a href="api/mala.common.parameters.html#module-mala.common.parameters">mala.common.parameters</a>
+</li>
+        <li><a href="api/mala.datageneration.html#module-mala.datageneration">mala.datageneration</a>
+</li>
+        <li><a href="api/mala.datageneration.ofdft_initializer.html#module-mala.datageneration.ofdft_initializer">mala.datageneration.ofdft_initializer</a>
+</li>
+        <li><a href="api/mala.datageneration.trajectory_analyzer.html#module-mala.datageneration.trajectory_analyzer">mala.datageneration.trajectory_analyzer</a>
 </li>
         <li><a href="api/mala.datahandling.html#module-mala.datahandling">mala.datahandling</a>
 </li>
@@ -1092,9 +1127,17 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.objective_base.html#mala.network.objective_base.ObjectiveBase">ObjectiveBase (class in mala.network.objective_base)</a>
 </li>
+      <li><a href="api/mala.network.objective_naswot.html#mala.network.objective_naswot.ObjectiveNASWOT">ObjectiveNASWOT (class in mala.network.objective_naswot)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_number_of_timesteps">ofdft_number_of_timesteps (ParametersDataGeneration attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.network.objective_naswot.html#mala.network.objective_naswot.ObjectiveNASWOT">ObjectiveNASWOT (class in mala.network.objective_naswot)</a>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_temperature">ofdft_temperature (ParametersDataGeneration attribute)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_timestep">ofdft_timestep (ParametersDataGeneration attribute)</a>
+</li>
+      <li><a href="api/mala.datageneration.ofdft_initializer.html#mala.datageneration.ofdft_initializer.OFDFTInitializer">OFDFTInitializer (class in mala.datageneration.ofdft_initializer)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersData.output_rescaling_type">output_rescaling_type (ParametersData attribute)</a>
 </li>
@@ -1109,6 +1152,8 @@
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersBase">ParametersBase (class in mala.common.parameters)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersData">ParametersData (class in mala.common.parameters)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration">ParametersDataGeneration (class in mala.common.parameters)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDebug">ParametersDebug (class in mala.common.parameters)</a>
 </li>
@@ -1330,10 +1375,10 @@
         <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersBase.to_json">(ParametersBase method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersTargets.tpcf_parameters">tpcf_parameters (ParametersTargets attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.trainer.html#mala.network.trainer.Trainer.train_network">train_network() (Trainer method)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersData.train_ratio">train_ratio (ParametersData attribute)</a>
@@ -1345,6 +1390,14 @@
       <li><a href="api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.training_data_outputs">training_data_outputs (DataHandler attribute)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.trainingtype">trainingtype (ParametersRunning attribute)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_below_average_counter">trajectory_analysis_below_average_counter (ParametersDataGeneration attribute)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_denoising_width">trajectory_analysis_denoising_width (ParametersDataGeneration attribute)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.trajectory_analysis_estimated_equilibrium">trajectory_analysis_estimated_equilibrium (ParametersDataGeneration attribute)</a>
+</li>
+      <li><a href="api/mala.datageneration.trajectory_analyzer.html#mala.datageneration.trajectory_analyzer.TrajectoryAnalyzer">TrajectoryAnalyzer (class in mala.datageneration.trajectory_analyzer)</a>
 </li>
       <li><a href="api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.transform">transform() (DataScaler method)</a>
 </li>
