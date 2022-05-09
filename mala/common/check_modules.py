@@ -18,6 +18,10 @@ def check_modules():
             "Enables clustering of training data."},
         "total_energy" : {"available": False, "description":
             "Enables calculation of total energy."},
+        "asap3": {"available": False, "description":
+                  "Enables trajectory analysis."},
+        "dftpy": {"available": False, "description":
+                  "Enables OF-DFT-MD initialization."}
     }
 
     # Find out if libs are available.

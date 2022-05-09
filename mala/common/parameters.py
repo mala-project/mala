@@ -865,6 +865,59 @@ class ParametersHyperparameterOptimization(ParametersBase):
                         i += 1
 
 
+class ParametersDataGeneration(ParametersBase):
+    """
+    All parameters to help with data generation.
+
+    Attributes
+    ----------
+    trajectory_analysis_denoising_width : int
+        The distance metric is denoised prior to analysis using a certain
+        width. This should be adjusted if there is reason to believe
+        the trajectory will be noise for some reason.
+
+    trajectory_analysis_below_average_counter : int
+        Number of time steps that have to consecutively below the average
+        of the distance metric curve, before we consider the trajectory
+        to be equilibrated.
+        Usually does not have to be changed.
+
+    trajectory_analysis_estimated_equilibrium : float
+        The analysis of the trajectory builds on the assumption that at some
+        point of the trajectory, the system is equilibrated.
+        For this, we need to provide the fraction of the trajectory (counted
+        from the end). Usually, 10% is a fine assumption. This value usually
+        does not need to be changed.
+
+    local_psp_path : string
+        Path to where the local pseudopotential is stored (for OF-DFT-MD).
+
+    local_psp_name : string
+        Name of the local pseudopotential (for OF-DFT-MD).
+
+    ofdft_timestep : int
+        Timestep of the OF-DFT-MD simulation.
+
+    ofdft_number_of_timesteps : int
+        Number of timesteps for the OF-DFT-MD simulation.
+
+    ofdft_temperature : float
+        Temperature at which to perform the OF-DFT-MD simulation.
+
+    """
+
+    def __init__(self):
+        super(ParametersDataGeneration, self).__init__()
+        self.trajectory_analysis_denoising_width = 100
+        self.trajectory_analysis_below_average_counter = 50
+        self.trajectory_analysis_estimated_equilibrium = 0.1
+        self.local_psp_path = None
+        self.local_psp_name = None
+        self.ofdft_timestep = 0
+        self.ofdft_number_of_timesteps = 0
+        self.ofdft_temperature = 0
+
+
 class ParametersDebug(ParametersBase):
     """
     All debugging parameters.
@@ -928,6 +981,7 @@ class Parameters:
         self.data = ParametersData()
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
+        self.datageneration = ParametersDataGeneration()
         self.debug = ParametersDebug()
 
         # Attributes.
