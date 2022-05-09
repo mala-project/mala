@@ -1,8 +1,12 @@
 """Tools for initializing a (ML)-DFT trajectory with OF-DFT."""
 from warnings import warn
 
-from dftpy.api.api4ase import DFTpyCalculator
-from dftpy.config import DefaultOption, OptionFormat
+try:
+    from dftpy.api.api4ase import DFTpyCalculator
+    from dftpy.config import DefaultOption, OptionFormat
+except ModuleNotFoundError:
+    pass
+
 from ase import units
 import ase.io
 from ase.md import MDLogger
