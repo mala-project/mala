@@ -90,7 +90,7 @@ class Density(Target):
         """
         if out_units == "1/A^3":
             return array
-        elif out_units == "1/Bohr^3 ":
+        elif out_units == "1/Bohr^3":
             return array * Bohr * Bohr * Bohr
         else:
             raise Exception("Unsupported unit for density.")
@@ -477,10 +477,12 @@ class Density(Target):
             density_for_qe = self.get_density(density_data,
                                               convert_to_threedimensional=True)
 
-            # QE has the density in 1/Bohr^3
-            density_for_qe *= self.backconvert_units(1, "1/Bohr^3")
             density_for_qe = np.reshape(density_for_qe, [number_of_gridpoints,
                                                          1], order='F')
+
+        # QE has the density in 1/Bohr^3
+        density_for_qe *= self.backconvert_units(1, "1/Bohr^3")
+
         # Reset the positions. Some calculations (such as the Ewald sum)
         # is directly performed here, so it is not enough to simply
         # instantiate the process with the file.

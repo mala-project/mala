@@ -40,7 +40,7 @@ class LDOS(Target):
         return self.parameters.ldos_gridsize
 
     @staticmethod
-    def convert_units(array, in_units="1/(eV*A)"):
+    def convert_units(array, in_units="1/(eV*A^3)"):
         """
         Convert the units of an array into the MALA units.
 
