@@ -4,7 +4,7 @@ import itertools
 import warnings
 
 from ase.neighborlist import NeighborList
-from ase.units import Rydberg, Bohr, kB
+from ase.units import Rydberg, kB
 import ase.io
 import numpy as np
 from scipy.spatial import distance
@@ -81,7 +81,7 @@ class Target(ABC):
             raise Exception("Wrong type of parameters for Targets class.")
         self.fermi_energy_eV = None
         self.temperature_K = None
-        self.voxel_Bohr = None
+        self.voxel = None
         self.number_of_electrons = None
         self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
@@ -210,7 +210,7 @@ class Target(ABC):
             # Reset everything.
             self.fermi_energy_eV = None
             self.temperature_K = None
-            self.voxel_Bohr = None
+            self.voxel = None
             self.number_of_electrons = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
@@ -274,13 +274,13 @@ class Target(ABC):
                         bands_included = False
 
             # The voxel is needed for e.g. LDOS integration.
-            self.voxel_Bohr = self.atoms.cell.copy()
-            self.voxel_Bohr[0] = self.voxel_Bohr[0] / (
-                        self.grid_dimensions[0] * Bohr)
-            self.voxel_Bohr[1] = self.voxel_Bohr[1] / (
-                        self.grid_dimensions[1] * Bohr)
-            self.voxel_Bohr[2] = self.voxel_Bohr[2] / (
-                        self.grid_dimensions[2] * Bohr)
+            self.voxel = self.atoms.cell.copy()
+            self.voxel[0] = self.voxel[0] / (
+                        self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (
+                        self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (
+                        self.grid_dimensions[2])
 
             # This is especially important for size extrapolation.
             self.electrons_per_atom = self.number_of_electrons/len(self.atoms)
@@ -308,7 +308,7 @@ class Target(ABC):
 
         elif data_type == "atoms+grid":
             # Reset everything that we can get this way.
-            self.voxel_Bohr = None
+            self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
@@ -323,13 +323,13 @@ class Target(ABC):
             self.grid_dimensions[2] = data[1][2]
 
             # The voxel is needed for e.g. LDOS integration.
-            self.voxel_Bohr = self.atoms.cell.copy()
-            self.voxel_Bohr[0] = self.voxel_Bohr[0] / (
-                        self.grid_dimensions[0] * Bohr)
-            self.voxel_Bohr[1] = self.voxel_Bohr[1] / (
-                        self.grid_dimensions[1] * Bohr)
-            self.voxel_Bohr[2] = self.voxel_Bohr[2] / (
-                        self.grid_dimensions[2] * Bohr)
+            self.voxel = self.atoms.cell.copy()
+            self.voxel[0] = self.voxel[0] / (
+                        self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (
+                        self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (
+                        self.grid_dimensions[2])
 
             if self.electrons_per_atom is None:
                 printout("No number of electrons per atom provided, "
@@ -355,7 +355,7 @@ class Target(ABC):
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
                 for k in range(0, self.grid_dimensions[2]):
-                    grid3D[i, j, k, :] = np.matmul(self.voxel_Bohr, [i, j, k])
+                    grid3D[i, j, k, :] = np.matmul(self.voxel, [i, j, k])
         return grid3D
 
     @staticmethod

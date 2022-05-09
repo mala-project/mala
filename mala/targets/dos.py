@@ -379,7 +379,7 @@ class DOS(Target):
         return_dos_object = DOS(ldos_object.parameters)
         return_dos_object.fermi_energy_eV = ldos_object.fermi_energy_eV
         return_dos_object.temperature_K = ldos_object.temperature_K
-        return_dos_object.voxel_Bohr = ldos_object.voxel_Bohr
+        return_dos_object.voxel = ldos_object.voxel
         return_dos_object.number_of_electrons = ldos_object.number_of_electrons
         return_dos_object.band_energy_dft_calculation = \
             ldos_object.band_energy_dft_calculation

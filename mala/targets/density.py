@@ -35,6 +35,67 @@ class Density(Target):
         """Get dimension of this target if used as feature in ML."""
         return 1
 
+    @staticmethod
+    def convert_units(array, in_units="1/A^3"):
+        """
+        Convert the units of an array into the MALA units.
+
+        MALA units for the density means 1/A^3.
+
+        Parameters
+        ----------
+        array : numpy.array
+            Data for which the units should be converted.
+
+        in_units : string
+            Units of array. Currently supported are:
+
+                 - 1/A^3 (no conversion, MALA unit)
+                 - 1/Bohr^3
+
+        Returns
+        -------
+        converted_array : numpy.array
+            Data in 1/A^3.
+        """
+        if in_units == "1/A^3":
+            return array
+        elif in_units == "1/Bohr^3":
+            return array * (1/Bohr) * (1/Bohr) * (1/Bohr)
+        else:
+            raise Exception("Unsupported unit for density.")
+
+    @staticmethod
+    def backconvert_units(array, out_units):
+        """
+        Convert the units of an array from MALA units into desired units.
+
+        MALA units for the density means 1/A^3.
+
+        Parameters
+        ----------
+        array : numpy.array
+            Data in 1/A^3.
+
+        out_units : string
+            Desired units of output array. Currently supported are:
+
+                 - 1/A^3 (no conversion, MALA unit)
+                 - 1/Bohr^3
+
+        Returns
+        -------
+        converted_array : numpy.array
+            Data in out_units.
+        """
+        if out_units == "1/A^3":
+            return array
+        elif out_units == "1/Bohr^3 ":
+            return array * Bohr * Bohr * Bohr
+        else:
+            raise Exception("Unsupported unit for density.")
+
+
     def read_from_cube(self, file_name, directory, units=None):
         """
         Read the density data from a cube file.
@@ -93,9 +154,9 @@ class Density(Target):
 
         meta["atoms"] = atom_list
         meta["org"] = [0.0, 0.0, 0.0]
-        meta["xvec"] = self.voxel_Bohr[0]
-        meta["yvec"] = self.voxel_Bohr[1]
-        meta["zvec"] = self.voxel_Bohr[2]
+        meta["xvec"] = self.voxel[0]
+        meta["yvec"] = self.voxel[1]
+        meta["zvec"] = self.voxel[2]
         write_cube(density_data, meta, file_name)
 
 
@@ -123,7 +184,7 @@ class Density(Target):
             - "summation" for summation and scaling of the values (recommended)
         """
         if voxel_Bohr is None:
-            voxel_Bohr = self.voxel_Bohr
+            voxel_Bohr = self.voxel
 
         # Check input data for correctness.
         data_shape = np.shape(np.squeeze(density_data))
@@ -415,6 +476,9 @@ class Density(Target):
                           "he correct grid_dimensions.")
             density_for_qe = self.get_density(density_data,
                                               convert_to_threedimensional=True)
+
+            # QE has the density in 1/Bohr^3
+            density_for_qe *= self.backconvert_units(1, "1/Bohr^3")
             density_for_qe = np.reshape(density_for_qe, [number_of_gridpoints,
                                                          1], order='F')
         # Reset the positions. Some calculations (such as the Ewald sum)
@@ -471,7 +535,7 @@ class Density(Target):
         return_density_object = Density(ldos_object.parameters)
         return_density_object.fermi_energy_eV = ldos_object.fermi_energy_eV
         return_density_object.temperature_K = ldos_object.temperature_K
-        return_density_object.voxel_Bohr = ldos_object.voxel_Bohr
+        return_density_object.voxel = ldos_object.voxel
         return_density_object.number_of_electrons = ldos_object.\
             number_of_electrons
         return_density_object.band_energy_dft_calculation = ldos_object.\

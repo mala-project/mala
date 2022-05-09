@@ -1,9 +1,9 @@
 """LDOS calculation class."""
-from ase.units import Rydberg
-
-import numpy as np
 import math
 import os
+
+from ase.units import Rydberg, Bohr
+import numpy as np
 try:
     from mpi4py import MPI
 except ModuleNotFoundError:
@@ -40,7 +40,7 @@ class LDOS(Target):
         return self.parameters.ldos_gridsize
 
     @staticmethod
-    def convert_units(array, in_units="1/eV"):
+    def convert_units(array, in_units="1/(eV*A)"):
         """
         Convert the units of an array into the MALA units.
 
@@ -54,18 +54,22 @@ class LDOS(Target):
         in_units : string
             Units of array. Currently supported are:
 
-                 - 1/eV (no conversion, MALA unit)
-                 - 1/Ry
+                 - 1/(eV*A^3) (no conversion, MALA unit)
+                 - 1/(eV*Bohr^3)
+                 - 1/(Ry*Bohr^3)
+
 
         Returns
         -------
         converted_array : numpy.array
-            Data in 1/eV.
+            Data in 1/(eV*A^3).
         """
-        if in_units == "1/eV":
+        if in_units == "1/(eV*A^3)":
             return array
-        elif in_units == "1/Ry":
-            return array * (1/Rydberg)
+        elif in_units == "1/(eV*Bohr^3)":
+            return array * (1/Bohr) * (1/Bohr) * (1/Bohr)
+        elif in_units == "1/(Ry*Bohr^3)":
+            return array * (1/Rydberg) * (1/Bohr) * (1/Bohr) * (1/Bohr)
         else:
             raise Exception("Unsupported unit for LDOS.")
 
@@ -74,7 +78,7 @@ class LDOS(Target):
         """
         Convert the units of an array from MALA units into desired units.
 
-        MALA units for the LDOS means 1/eV.
+        MALA units for the LDOS means 1/(eV*A^3).
 
         Parameters
         ----------
@@ -82,17 +86,24 @@ class LDOS(Target):
             Data in 1/eV.
 
         out_units : string
-            Desired units of output array.
+            Desired units of output array. Currently supported are:
+
+                 - 1/(eV*A^3) (no conversion, MALA unit)
+                 - 1/(eV*Bohr^3)
+                 - 1/(Ry*Bohr^3)
+
 
         Returns
         -------
         converted_array : numpy.array
             Data in out_units.
         """
-        if out_units == "1/eV":
+        if out_units == "1/(eV*A^3)":
             return array
-        elif out_units == "1/Ry":
-            return array * Rydberg
+        elif out_units == "1/(eV*Bohr^3)":
+            return array * Bohr * Bohr * Bohr
+        elif out_units == "1/(Ry*Bohr^3)":
+            return array * Rydberg * Bohr * Bohr * Bohr
         else:
             raise Exception("Unsupported unit for LDOS.")
 
@@ -334,7 +345,7 @@ class LDOS(Target):
         """
         # Get relevant values from DFT calculation, if not otherwise specified.
         if voxel_Bohr is None:
-            voxel_Bohr = self.voxel_Bohr
+            voxel_Bohr = self.voxel
         if fermi_energy_eV is None:
             fermi_energy_eV = self.fermi_energy_eV
         if temperature_K is None:
@@ -452,7 +463,7 @@ class LDOS(Target):
         """
         # The band energy is calculated using the DOS.
         if voxel_Bohr is None:
-            voxel_Bohr = self.voxel_Bohr
+            voxel_Bohr = self.voxel
         dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
                                               integration_method=
                                               grid_integration_method)
@@ -510,7 +521,7 @@ class LDOS(Target):
         """
         # The number of electrons is calculated using the DOS.
         if voxel_Bohr is None:
-            voxel_Bohr = self.voxel_Bohr
+            voxel_Bohr = self.voxel
         dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
                                               integration_method=
                                               grid_integration_method)
@@ -574,7 +585,7 @@ class LDOS(Target):
         """
         # The Fermi energy is calculated using the DOS.
         if voxel_Bohr is None:
-            voxel_Bohr = self.voxel_Bohr
+            voxel_Bohr = self.voxel
         dos_data = self.get_density_of_states(ldos_data, voxel_Bohr,
                                               integration_method=
                                               grid_integration_method)
@@ -746,7 +757,7 @@ class LDOS(Target):
             return self.cached_dos
 
         if voxel_Bohr is None:
-            voxel_Bohr = self.voxel_Bohr
+            voxel_Bohr = self.voxel
 
         ldos_data_shape = np.shape(ldos_data)
         if len(ldos_data_shape) != 4:
