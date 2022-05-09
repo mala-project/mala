@@ -895,6 +895,11 @@ class ParametersDataGeneration(ParametersBase):
         self.trajectory_analysis_denoising_width = 100
         self.trajectory_analysis_below_average_counter = 50
         self.trajectory_analysis_estimated_equilibrium = 0.1
+        self.local_psp_path = None
+        self.local_psp_name = None
+        self.ofdft_timestep = 0
+        self.ofdft_number_of_timesteps = 0
+        self.ofdft_temperature = 0
 
 
 class ParametersDebug(ParametersBase):

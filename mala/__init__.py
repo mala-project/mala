@@ -15,4 +15,4 @@ from .network import Network, Tester, Trainer, HyperOpt, \
 from .targets import LDOS, DOS, Density, fermi_function, \
     AtomicForce, Target
 from .interfaces import MALA
-from .datageneration import TrajectoryAnalyzer
+from .datageneration import TrajectoryAnalyzer, OFDFTInitializer
