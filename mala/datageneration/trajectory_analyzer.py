@@ -1,3 +1,5 @@
+"""Tools for analyzing a trajectory."""
+
 from warnings import warn
 
 from ase.io.trajectory import TrajectoryReader, Trajectory
@@ -24,6 +26,7 @@ class TrajectoryAnalyzer:
         A target calculator to calculate e.g. the RDF. If None is provided,
         one will be generated ad-hoc (recommended).
     """
+
     def __init__(self, parameters, trajectory, target_calculator=None):
         warn("The class TrajectoryAnalyzer is experimental. The algorithms "
              "within have been tested, but the API may still be subject to "

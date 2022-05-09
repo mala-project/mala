@@ -1,3 +1,6 @@
+"""Tools for initializing a (ML)-DFT trajectory with OF-DFT."""
+from warnings import warn
+
 from dftpy.api.api4ase import DFTpyCalculator
 from dftpy.config import DefaultOption, OptionFormat
 from ase import units
@@ -16,9 +19,16 @@ class OFDFTInitializer:
     ----------
     parameters : mala.common.parameters.Parameters
         Parameters object used to create this instance.
+
+    atoms : ase.Atoms
+        Initial atomic configuration for which an equilibrated configuration
+        is to be created.
     """
 
     def __init__(self, parameters, atoms):
+        warn("The class OFDFTInitializer is experimental. The algorithms "
+             "within have been tested, but the API may still be subject to "
+             "large changes.")
         self.atoms = atoms
         self.params = parameters.datageneration
 
@@ -29,6 +39,15 @@ class OFDFTInitializer:
                             " element.")
 
     def get_equilibrated_configuration(self, logging_period=None):
+        """
+        Calculate the (OF-DFT-MD) equilibrated atomic configuration.
+
+        Parameters
+        ----------
+        logging_period : int
+            If not None, a .log and .traj file will be filled with snapshot
+            information every logging_period steps.
+        """
         # Set the DFTPy configuration.
         conf = DefaultOption()
         conf['PATH']['pppath'] = self.params.local_psp_path
@@ -57,7 +76,7 @@ class OFDFTInitializer:
         if logging_period is not None:
             dyn.attach(MDLogger(dyn, self.atoms, 'mala_of_dft_md.log',
                                 header=False, stress=False, peratom=True,
-                                mode="a"), interval=logging_period)
+                                mode="w"), interval=logging_period)
             traj = Trajectory('mala_of_dft_md.traj', 'w', self.atoms)
 
             dyn.attach(traj.write, interval=logging_period)

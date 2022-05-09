@@ -871,7 +871,6 @@ class ParametersDataGeneration(ParametersBase):
 
     Attributes
     ----------
-
     trajectory_analysis_denoising_width : int
         The distance metric is denoised prior to analysis using a certain
         width. This should be adjusted if there is reason to believe
@@ -889,7 +888,24 @@ class ParametersDataGeneration(ParametersBase):
         For this, we need to provide the fraction of the trajectory (counted
         from the end). Usually, 10% is a fine assumption. This value usually
         does not need to be changed.
+
+    local_psp_path : string
+        Path to where the local pseudopotential is stored (for OF-DFT-MD).
+
+    local_psp_name : string
+        Name of the local pseudopotential (for OF-DFT-MD).
+
+    ofdft_timestep : int
+        Timestep of the OF-DFT-MD simulation.
+
+    ofdft_number_of_timesteps : int
+        Number of timesteps for the OF-DFT-MD simulation.
+
+    ofdft_temperature : float
+        Temperature at which to perform the OF-DFT-MD simulation.
+
     """
+
     def __init__(self):
         super(ParametersDataGeneration, self).__init__()
         self.trajectory_analysis_denoising_width = 100
