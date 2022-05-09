@@ -291,7 +291,8 @@ class DOS(Target):
 
     def get_entropy_contribution(self, dos_data, fermi_energy_eV=None,
                                  temperature_K=None,
-                                 integration_method="analytical"):
+                                 integration_method="analytical",
+                                 broadcast_entropy=True):
         """
         Calculate the entropy contribution to the total energy.
 
@@ -323,15 +324,31 @@ class DOS(Target):
         if temperature_K is None:
             temperature_K = self.temperature_K
 
-        energy_grid = self.get_energy_grid()
-        return self.\
-            __entropy_contribution_from_dos(dos_data, energy_grid,
-                                            fermi_energy_eV, temperature_K,
-                                            integration_method)
+        if self.parameters._configuration["mpi"] and broadcast_entropy:
+            if get_rank() == 0:
+                energy_grid = self.get_energy_grid()
+                entropy = self. \
+                    __entropy_contribution_from_dos(dos_data, energy_grid,
+                                                    fermi_energy_eV,
+                                                    temperature_K,
+                                                    integration_method)
+            else:
+                entropy = None
+
+            entropy = get_comm().bcast(entropy, root=0)
+            barrier()
+            return entropy
+        else:
+            energy_grid = self.get_energy_grid()
+            return self.\
+                __entropy_contribution_from_dos(dos_data, energy_grid,
+                                                fermi_energy_eV, temperature_K,
+                                                integration_method)
 
     def get_self_consistent_fermi_energy_ev(self, dos_data,
                                             temperature_K=None,
-                                            integration_method="analytical"):
+                                            integration_method="analytical",
+                                            broadcast_fermi_energy=True):
         r"""
         Calculate the self-consistent Fermi energy.
 
@@ -363,17 +380,38 @@ class DOS(Target):
         # Parse the parameters.
         if temperature_K is None:
             temperature_K = self.temperature_K
-        energy_grid = self.get_energy_grid()
-        fermi_energy_sc = toms748(lambda fermi_sc:
-                                  (self.
-                                   __number_of_electrons_from_dos
-                                   (dos_data, energy_grid,
-                                    fermi_sc, temperature_K,
-                                    integration_method)
-                                   - self.number_of_electrons),
-                                  a=energy_grid[0],
-                                  b=energy_grid[-1])
-        return fermi_energy_sc
+
+
+        if self.parameters._configuration["mpi"] and broadcast_fermi_energy:
+            if get_rank() == 0:
+                energy_grid = self.get_energy_grid()
+                fermi_energy_sc = toms748(lambda fermi_sc:
+                                          (self.
+                                           __number_of_electrons_from_dos
+                                           (dos_data, energy_grid,
+                                            fermi_sc, temperature_K,
+                                            integration_method)
+                                           - self.number_of_electrons),
+                                          a=energy_grid[0],
+                                          b=energy_grid[-1])
+            else:
+                fermi_energy_sc = None
+
+            fermi_energy_sc = get_comm().bcast(fermi_energy_sc, root=0)
+            barrier()
+            return fermi_energy_sc
+        else:
+            energy_grid = self.get_energy_grid()
+            fermi_energy_sc = toms748(lambda fermi_sc:
+                                      (self.
+                                       __number_of_electrons_from_dos
+                                       (dos_data, energy_grid,
+                                        fermi_sc, temperature_K,
+                                        integration_method)
+                                       - self.number_of_electrons),
+                                      a=energy_grid[0],
+                                      b=energy_grid[-1])
+            return fermi_energy_sc
 
     def get_density_of_states(self, dos_data):
         """Get the density of states."""
