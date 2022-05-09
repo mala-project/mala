@@ -1,13 +1,16 @@
 """DOS calculation class."""
 import os
 
-from mala.targets.target import Target
-from mala.targets.calculation_helpers import *
+import ase.io
+from ase.units import Rydberg
 from scipy import integrate, interpolate
 from scipy.optimize import toms748
-from ase.units import Rydberg
-import ase.io
+
 from mala.common.parameters import printout
+from mala.common.parallelizer import get_rank, barrier, get_comm
+from mala.targets.target import Target
+from mala.targets.calculation_helpers import *
+
 
 
 class DOS(Target):
@@ -191,7 +194,8 @@ class DOS(Target):
         return linspace_array
 
     def get_band_energy(self, dos_data, fermi_energy_eV=None,
-                        temperature_K=None, integration_method="analytical"):
+                        temperature_K=None, integration_method="analytical",
+                        broadcast_band_energy=True):
         """
         Calculate the band energy from given DOS data.
 
@@ -224,10 +228,26 @@ class DOS(Target):
         if temperature_K is None:
             temperature_K = self.temperature_K
 
-        energy_grid = self.get_energy_grid()
-        return self.__band_energy_from_dos(dos_data, energy_grid,
-                                           fermi_energy_eV, temperature_K,
-                                           integration_method)
+        if self.parameters._configuration["mpi"] and broadcast_band_energy:
+            if get_rank() == 0:
+                energy_grid = self.get_energy_grid()
+                band_energy = self.__band_energy_from_dos(dos_data, energy_grid,
+                                                           fermi_energy_eV,
+                                                           temperature_K,
+                                                           integration_method)
+            else:
+                band_energy = None
+
+            band_energy = get_comm().bcast(band_energy, root=0)
+            barrier()
+            return band_energy
+        else:
+            energy_grid = self.get_energy_grid()
+            return self.__band_energy_from_dos(dos_data, energy_grid,
+                                               fermi_energy_eV, temperature_K,
+                                               integration_method)
+
+
 
     def get_number_of_electrons(self, dos_data, fermi_energy_eV=None,
                                 temperature_K=None,
