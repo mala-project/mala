@@ -303,6 +303,7 @@ class ParametersDescriptors(ParametersBase):
         self.lammps_compute_file = ""
         self.acsd_points = 100
         self.descriptors_contain_xyz = True
+        self.number_y_planes = 0
 
 
 class ParametersTargets(ParametersBase):

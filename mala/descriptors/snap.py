@@ -297,12 +297,162 @@ class SNAP(Descriptor):
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log", os.path.join(outdir,
                                                                "lammps_log.tmp")]
-        lammps_dict = {"ngridx": nx,
-                       "ngridy": ny,
-                       "ngridz": nz,
-                       "twojmax": self.parameters.twojmax,
-                       "rcutfac": self.parameters.rcutfac,
-                       "atom_config_fname": ase_out_path}
+
+        if self.parameters._configuration["mpi"]:
+            size = get_size()
+            # for parallel tem need to set lammps commands: processors and
+            # balance current implementation is to match lammps mpi processor
+            # grid to QE processor splitting QE distributes grid points in
+            # parallel as slices along z axis currently grid points fall on z
+            # axix plane cutoff values in lammps this leads to some ranks
+            # having 0 grid points and other having 2x gridpoints
+            # balance command in lammps aleviates this issue
+            # integers for plane cuts in z axis appear to be most important
+            #
+            # determine if nyfft flag is set so that QE also parallelizes
+            # along y axis if nyfft is true lammps mpi processor grid needs to
+            # be 1x{ny}x{nz} need to configure separate total_energy_module
+            # with nyfft enabled
+            if self.parameters.number_y_planes > 0:
+                # TODO automatically pass nyfft into QE from MALA
+                # if more processors thatn y*z grid dimensions requested
+                # send error. More processors than y*z grid dimensions reduces
+                # efficiency and scaling of QE.
+                nyfft = self.parameters.number_y_planes
+                # number of y processors is equal to nyfft
+                yprocs = nyfft
+                # number of z processors is equal to total processors/nyfft is
+                # nyfft is used else zprocs = size
+                zprocs = size/yprocs
+                # check if total number of processors is greater than number of
+                # grid sections produce error if number of processors is
+                # greater than grid partions - will cause mismatch later in QE
+                mpi_grid_sections = yprocs*zprocs
+                if mpi_grid_sections < size:
+                   raise ValueError("More processors than grid sections. "
+                                    "This will cause a crash further in the "
+                                    "calculation. Choose a total number of "
+                                    "processors equal to or less than the "
+                                    "total number of grid sections requsted "
+                                    "for the calculation (nyfft*nz).")
+                # TODO not sure what happens when size/nyfft is not integer -
+                #  further testing required
+
+                # set the mpi processor grid for lammps
+                lammps_procs = f"1 {yprocs} {zprocs}"
+                print("mpi grid with nyfft: ", lammps_procs)
+
+                # prepare y plane cuts for balance command in lammps if not
+                # integer value
+                if int(ny / yprocs) == (ny / yprocs):
+                    ycut = 1/yprocs
+                    yint = ''
+                    for i in range(0, yprocs-1):
+                        yvals = ((i+1)*ycut)-0.00000001
+                        yint += format(yvals,".8f")
+                        yint += ' '
+                else:
+                    # account for remainder with uneven number of
+                    # planes/processors
+                    ycut = 1/yprocs
+                    yrem = ny - (yprocs*int(ny/yprocs))
+                    yint = ''
+                    for i in range(0, yrem):
+                        yvals = (((i+1)*2)*ycut)-0.00000001
+                        yint += format(yvals,".8f")
+                        yint += ' '
+                    for i in range(yrem, yprocs-1):
+                        yvals = ((i+1+yrem)*ycut)-0.00000001
+                        yint += format(yvals,".8f")
+                        yint += ' '
+                # prepare z plane cuts for balance command in lammps
+                if int(nz / zprocs) == (nz / zprocs):
+                    zcut = 1/nz
+                    zint = ''
+                    for i in range(0, zprocs-1):
+                        zvals = ((i+1)*(nz/zprocs))-0.00000001
+                        zint += format(zvals,".8f")
+                        zint += ' '
+                else:
+                    # account for remainder with uneven number of
+                    # planes/processors
+                    zcut = 1/nz
+                    zrem = nz - (zprocs*int(nz/zprocs))
+                    zint = ''
+                    for i in range(0, zrem):
+                        zvals = (((i+1)*2)*zcut)-0.00000001
+                        zint += format(zvals,".8f")
+                        zint += ' '
+                    for i in range(zrem, zprocs-1):
+                        zvals = ((i+1+zrem)*zcut)-0.00000001
+                        zint += format(zvals,".8f")
+                        zint += ' '
+                lammps_dict = {"lammps_procs": f"processors {lammps_procs}",
+                               "zbal": f"balance 1.0 y {yint} z {zint}",
+                               "ngridx": nx,
+                               "ngridy": ny,
+                               "ngridz": nz,
+                               "twojmax": self.parameters.twojmax,
+                               "rcutfac": self.parameters.rcutfac,
+                               "atom_config_fname": ase_out_path}
+            else:
+                # when nyfft is not used only split processors along z axis
+                size = get_size()
+                zprocs = size
+                # check to make sure number of z planes is not less than
+                # processors. If more processors than planes calculation
+                # efficiency decreases
+                if nz < size:
+                    raise ValueError("More processors than grid sections. "
+                                     "This will cause a crash further in the "
+                                     "calculation. Choose a total number of "
+                                     "processors equal to or less than the "
+                                     "total number of grid sections requsted "
+                                     "for the calculation (nz).")
+
+                # match lammps mpi grid to be 1x1x{zprocs}
+                lammps_procs = f"1 1 {zprocs}"
+                # print("mpi grid z only: ", lammps_procs)
+
+                # prepare z plane cuts for balance command in lammps
+                if int(nz / zprocs) == (nz / zprocs):
+                    print("No remainder in z")
+                    zcut = 1/nz
+                    zint = ''
+                    for i in range(0, zprocs-1):
+                        zvals = ((i+1)*(nz/zprocs)*zcut)-0.00000001
+                        zint += format(zvals,".8f")
+                        zint += ' '
+                else:
+                    # account for remainder with uneven number of
+                    # planes/processors
+                    print("Remainder in z")
+                    zcut = 1/nz
+                    zrem = nz - (zprocs*int(nz/zprocs))
+                    zint = ''
+                    for i in range(0, zrem):
+                        zvals = (((i+1)*2)*(nz/zprocs)*zcut)-0.00000001
+                        zint += format(zvals, ".8f")
+                        zint += ' '
+                    for i in range(zrem, zprocs-1):
+                        zvals = ((i+1+zrem)*zcut)-0.00000001
+                        zint += format(zvals, ".8f")
+                        zint += ' '
+                lammps_dict = {"lammps_procs": f"processors {lammps_procs}",
+                               "zbal": f"balance 1.0 z {zint}",
+                               "ngridx": nx,
+                               "ngridy": ny,
+                               "ngridz": nz,
+                               "twojmax": self.parameters.twojmax,
+                               "rcutfac": self.parameters.rcutfac,
+                               "atom_config_fname": ase_out_path}
+        else:
+            lammps_dict = {"ngridx": nx,
+                           "ngridy": ny,
+                           "ngridz": nz,
+                           "twojmax": self.parameters.twojmax,
+                           "rcutfac": self.parameters.rcutfac,
+                           "atom_config_fname": ase_out_path}
         if self.parameters._configuration["mpi"]:
             lammps_dict["bgridglobalflag"] = False
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
