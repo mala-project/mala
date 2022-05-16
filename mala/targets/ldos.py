@@ -486,7 +486,7 @@ class LDOS(Target):
         units : string
             Units the density is saved in. Usually none.
         """
-        self.local_density_of_states = np.load(array) * \
+        self.local_density_of_states = array * \
             self.convert_units(1, in_units=units)
 
     # Calculations
