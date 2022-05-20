@@ -94,30 +94,36 @@ class TrajectoryAnalyzer:
         # Now, we denoise the distance metrics.
         self.distance_metrics_denoised = self.__denoise(self.distance_metrics)
 
+        # Which snapshots are considered depends on how we denoise the
+        # distance metrics.
+        self.first_considered_snapshot = self.params.trajectory_analysis_denoising_width
+        self.last_considered_snapshot = np.shape(self.distance_metrics_denoised)[0]-self.params.trajectory_analysis_denoising_width
+        considered_length = self.last_considered_snapshot-self.first_considered_snapshot
+
         # Next, the average of the presumed equilibrated part is calculated,
         # and then the first N number of times teps which are below this
         # average is calculated.
         self.average_distance_equilibrated = distance_threshold
         if self.average_distance_equilibrated is None:
             self.average_distance_equilibrated = np.mean(
-                self.distance_metrics_denoised[
-                    np.shape(self.distance_metrics_denoised)[0] -
-                    int(self.params.trajectory_analysis_estimated_equilibrium *
-                        np.shape(self.distance_metrics_denoised)[0]):])
+                self.distance_metrics_denoised[considered_length -
+                                               int(self.params.trajectory_analysis_estimated_equilibrium * considered_length):self.last_considered_snapshot])
         is_below = True
         counter = 0
         first_snapshot = None
         for idx, dist in enumerate(self.distance_metrics_denoised):
-            if is_below:
-                counter += 1
-            if dist < self.average_distance_equilibrated:
-                is_below = True
-            if dist >= self.average_distance_equilibrated:
-                counter = 0
-                is_below = False
-            if counter == self.params.trajectory_analysis_below_average_counter:
-                first_snapshot = idx
-                break
+            if idx >= self.first_considered_snapshot \
+                    and idx <= self.last_considered_snapshot:
+                if is_below:
+                    counter += 1
+                if dist < self.average_distance_equilibrated:
+                    is_below = True
+                if dist >= self.average_distance_equilibrated:
+                    counter = 0
+                    is_below = False
+                if counter == self.params.trajectory_analysis_below_average_counter:
+                    first_snapshot = idx
+                    break
 
         print("First equilibrated timestep of trajectory is", first_snapshot)
         return first_snapshot
