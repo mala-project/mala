@@ -416,7 +416,6 @@ class SNAP(Descriptor):
                                "atom_config_fname": ase_out_path}
             else:
                 if z_splitting:
-                    print("HERE!")
                     # when nyfft is not used only split processors along z axis
                     size = get_size()
                     zprocs = size
@@ -500,7 +499,6 @@ class SNAP(Descriptor):
                     self.parameters.lammps_compute_file = \
                         os.path.join(filepath, "in.bgridlocal.python")
                 else:
-                    print("HERE?!")
                     self.parameters.lammps_compute_file = \
                         os.path.join(filepath,
                                      "in.bgridlocal_defaultproc.python")
