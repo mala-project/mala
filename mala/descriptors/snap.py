@@ -39,6 +39,7 @@ class SNAP(Descriptor):
         super(SNAP, self).__init__(parameters)
         self.in_format_ase = ""
         self.grid_dimensions = []
+        self.verbosity = parameters.verbosity
 
     @staticmethod
     def convert_units(array, in_units="None"):
@@ -90,7 +91,8 @@ class SNAP(Descriptor):
         else:
             raise Exception("Unsupported unit for SNAP.")
 
-    def calculate_from_qe_out(self, qe_out_file, qe_out_directory):
+    def calculate_from_qe_out(self, qe_out_file, qe_out_directory,
+                              z_splitting=True):
         """
         Calculate the SNAP descriptors based on a Quantum Espresso outfile.
 
@@ -101,6 +103,13 @@ class SNAP(Descriptor):
 
         qe_out_directory : string
             Path to Quantum Espresso output file for snapshot.
+
+        z_splitting : bool
+            If True, the parallelization will exclusively done along the
+            z-axis. This is crucial for the parallel TEM inference to work,
+            but may be hindersome when just preprocessing some SNAP
+            descriptors. In that case False reverts the parallelization scheme
+            to the default LAMMPS scheme.
 
         Returns
         -------
@@ -135,10 +144,11 @@ class SNAP(Descriptor):
                 break
 
         return self.__calculate_snap(atoms,
-                                     qe_out_directory, [nx, ny, nz])
+                                     qe_out_directory, [nx, ny, nz],
+                                     z_splitting=z_splitting)
 
     def calculate_from_atoms(self, atoms, grid_dimensions,
-                             working_directory="."):
+                             working_directory=".", z_splitting=True):
         """
         Calculate the SNAP descriptors based on the atomic configurations.
 
@@ -153,6 +163,13 @@ class SNAP(Descriptor):
         working_directory : string
             A directory in which to perform the LAMMPS calculation.
 
+        z_splitting : bool
+            If True, the parallelization will exclusively done along the
+            z-axis. This is crucial for the parallel TEM inference to work,
+            but may be hindersome when just preprocessing some SNAP
+            descriptors. In that case False reverts the parallelization scheme
+            to the default LAMMPS scheme.
+
         Returns
         -------
         descriptors : numpy.array
@@ -161,7 +178,8 @@ class SNAP(Descriptor):
         """
         # Enforcing / Checking PBC on the input atoms.
         atoms = self.enforce_pbc(atoms)
-        return self.__calculate_snap(atoms, working_directory, grid_dimensions)
+        return self.__calculate_snap(atoms, working_directory,
+                                     grid_dimensions, z_splitting=True)
 
     def gather_descriptors(self, snap_descriptors_np, use_pickled_comm=False):
         """
@@ -272,7 +290,8 @@ class SNAP(Descriptor):
         else:
             return snap_descriptors_full[:, :, :, 3:]
 
-    def __calculate_snap(self, atoms, outdir, grid_dimensions):
+    def __calculate_snap(self, atoms, outdir, grid_dimensions,
+                         z_splitting=True):
         """Perform actual SNAP calculation."""
         from lammps import lammps
         lammps_format = "lammps-data"
@@ -396,56 +415,68 @@ class SNAP(Descriptor):
                                "rcutfac": self.parameters.rcutfac,
                                "atom_config_fname": ase_out_path}
             else:
-                # when nyfft is not used only split processors along z axis
-                size = get_size()
-                zprocs = size
-                # check to make sure number of z planes is not less than
-                # processors. If more processors than planes calculation
-                # efficiency decreases
-                if nz < size:
-                    raise ValueError("More processors than grid sections. "
-                                     "This will cause a crash further in the "
-                                     "calculation. Choose a total number of "
-                                     "processors equal to or less than the "
-                                     "total number of grid sections requsted "
-                                     "for the calculation (nz).")
+                if z_splitting:
+                    print("HERE!")
+                    # when nyfft is not used only split processors along z axis
+                    size = get_size()
+                    zprocs = size
+                    # check to make sure number of z planes is not less than
+                    # processors. If more processors than planes calculation
+                    # efficiency decreases
+                    if nz < size:
+                        raise ValueError("More processors than grid sections. "
+                                         "This will cause a crash further in the "
+                                         "calculatio. Choose a total number of "
+                                         "processors equal to or less than the "
+                                         "total number of grid sections requsted "
+                                         "for the calculation (nz).")
 
-                # match lammps mpi grid to be 1x1x{zprocs}
-                lammps_procs = f"1 1 {zprocs}"
-                # print("mpi grid z only: ", lammps_procs)
+                    # match lammps mpi grid to be 1x1x{zprocs}
+                    lammps_procs = f"1 1 {zprocs}"
+                    # print("mpi grid z only: ", lammps_procs)
 
-                # prepare z plane cuts for balance command in lammps
-                if int(nz / zprocs) == (nz / zprocs):
-                    print("No remainder in z")
-                    zcut = 1/nz
-                    zint = ''
-                    for i in range(0, zprocs-1):
-                        zvals = ((i+1)*(nz/zprocs)*zcut)-0.00000001
-                        zint += format(zvals,".8f")
-                        zint += ' '
+                    # prepare z plane cuts for balance command in lammps
+                    if int(nz / zprocs) == (nz / zprocs):
+                        if self.verbosity >= 0:
+                            print("No remainder in z")
+                        zcut = 1/nz
+                        zint = ''
+                        for i in range(0, zprocs-1):
+                            zvals = ((i+1)*(nz/zprocs)*zcut)-0.00000001
+                            zint += format(zvals,".8f")
+                            zint += ' '
+                    else:
+                        # account for remainder with uneven number of
+                        # planes/processors
+                        if self.verbosity >= 0:
+                            print("Remainder in z")
+                        zcut = 1/nz
+                        zrem = nz - (zprocs*int(nz/zprocs))
+                        zint = ''
+                        for i in range(0, zrem):
+                            zvals = (((i+1)*2)*(nz/zprocs)*zcut)-0.00000001
+                            zint += format(zvals, ".8f")
+                            zint += ' '
+                        for i in range(zrem, zprocs-1):
+                            zvals = ((i+1+zrem)*zcut)-0.00000001
+                            zint += format(zvals, ".8f")
+                            zint += ' '
+                    lammps_dict = {"lammps_procs": f"processors {lammps_procs}",
+                                   "zbal": f"balance 1.0 z {zint}",
+                                   "ngridx": nx,
+                                   "ngridy": ny,
+                                   "ngridz": nz,
+                                   "twojmax": self.parameters.twojmax,
+                                   "rcutfac": self.parameters.rcutfac,
+                                   "atom_config_fname": ase_out_path}
                 else:
-                    # account for remainder with uneven number of
-                    # planes/processors
-                    print("Remainder in z")
-                    zcut = 1/nz
-                    zrem = nz - (zprocs*int(nz/zprocs))
-                    zint = ''
-                    for i in range(0, zrem):
-                        zvals = (((i+1)*2)*(nz/zprocs)*zcut)-0.00000001
-                        zint += format(zvals, ".8f")
-                        zint += ' '
-                    for i in range(zrem, zprocs-1):
-                        zvals = ((i+1+zrem)*zcut)-0.00000001
-                        zint += format(zvals, ".8f")
-                        zint += ' '
-                lammps_dict = {"lammps_procs": f"processors {lammps_procs}",
-                               "zbal": f"balance 1.0 z {zint}",
-                               "ngridx": nx,
-                               "ngridy": ny,
-                               "ngridz": nz,
-                               "twojmax": self.parameters.twojmax,
-                               "rcutfac": self.parameters.rcutfac,
-                               "atom_config_fname": ase_out_path}
+                    lammps_dict = {"ngridx": nx,
+                                   "ngridy": ny,
+                                   "ngridz": nz,
+                                   "twojmax": self.parameters.twojmax,
+                                   "rcutfac": self.parameters.rcutfac,
+                                   "atom_config_fname": ase_out_path}
+
         else:
             lammps_dict = {"ngridx": nx,
                            "ngridy": ny,
@@ -465,8 +496,14 @@ class SNAP(Descriptor):
         if self.parameters.lammps_compute_file == "":
             filepath = __file__.split("snap")[0]
             if self.parameters._configuration["mpi"]:
-                self.parameters.lammps_compute_file = \
-                    os.path.join(filepath, "in.bgridlocal.python")
+                if z_splitting:
+                    self.parameters.lammps_compute_file = \
+                        os.path.join(filepath, "in.bgridlocal.python")
+                else:
+                    print("HERE?!")
+                    self.parameters.lammps_compute_file = \
+                        os.path.join(filepath,
+                                     "in.bgridlocal_defaultproc.python")
             else:
                 self.parameters.lammps_compute_file = \
                     os.path.join(filepath, "in.bgrid.python")

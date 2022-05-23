@@ -6,6 +6,7 @@ import numpy as np
 from mala.common.parallelizer import printout, get_rank
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor import Descriptor
+from mala.descriptors.snap import SNAP
 from mala.targets.target import Target
 
 
@@ -136,12 +137,24 @@ class DataConverter:
         # Parse and/or calculate the input descriptors.
         if description[0] == "qe.out":
             if original_units[0] is None:
-                tmp_input, local_size = self.descriptor_calculator. \
-                    calculate_from_qe_out(snapshot[0], snapshot[1])
+                if isinstance(self.descriptor_calculator, SNAP):
+                    tmp_input, local_size = self.descriptor_calculator. \
+                        calculate_from_qe_out(snapshot[0], snapshot[1],
+                                              z_splitting=False)
+                else:
+                    tmp_input, local_size = self.descriptor_calculator. \
+                        calculate_from_qe_out(snapshot[0], snapshot[1])
             else:
-                tmp_input, local_size = self.descriptor_calculator. \
-                    calculate_from_qe_out(snapshot[0], snapshot[1],
-                                          units=original_units[0])
+                if isinstance(self.descriptor_calculator, SNAP):
+                    tmp_input, local_size = self.descriptor_calculator. \
+                        calculate_from_qe_out(snapshot[0], snapshot[1],
+                                              units=original_units[0],
+                                              z_splitting=False)
+                else:
+                    tmp_input, local_size = self.descriptor_calculator. \
+                        calculate_from_qe_out(snapshot[0], snapshot[1],
+                                              units=original_units[0])
+
             if self.parameters._configuration["mpi"]:
                 tmp_input = self.descriptor_calculator.gather_descriptors(tmp_input)
 
