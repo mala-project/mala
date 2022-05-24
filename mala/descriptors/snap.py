@@ -179,7 +179,7 @@ class SNAP(Descriptor):
         # Enforcing / Checking PBC on the input atoms.
         atoms = self.enforce_pbc(atoms)
         return self.__calculate_snap(atoms, working_directory,
-                                     grid_dimensions, z_splitting=True)
+                                     grid_dimensions, z_splitting=z_splitting)
 
     def gather_descriptors(self, snap_descriptors_np, use_pickled_comm=False):
         """
