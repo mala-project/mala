@@ -53,7 +53,7 @@ def use_trained_network(network_path, params_path, input_scaler_path,
     # data_splitting_snapshots list is correct.
     inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                         "Al_debug_2k_nr2.out.npy", data_path,
-                                        "te", output_units="1/Ry")
+                                        "te", output_units="1/(Ry*Bohr^3)")
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 
     # The Tester class is the testing analogon to the training class.
@@ -120,13 +120,13 @@ def initial_training(network_path, params_path, input_scaler_path,
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                               "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                              output_units="1/Ry")
+                              output_units="1/(Ry*Bohr^3)")
     data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                               "Al_debug_2k_nr1.out.npy", data_path, "va",
-                              output_units="1/Ry")
+                              output_units="1/(Ry*Bohr^3)")
     data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                               "Al_debug_2k_nr2.out.npy", data_path, "te",
-                              output_units="1/Ry")
+                              output_units="1/(Ry*Bohr^3)")
     data_handler.prepare_data()
     printout("Read data: DONE.")
 

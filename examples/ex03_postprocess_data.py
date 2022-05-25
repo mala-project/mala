@@ -55,7 +55,7 @@ ldos.read_additional_calculation_data("qe.out", os.path.join(
 
 # Read in LDOS data. For actual workflows, this part will come
 # from a network.
-ldos_data = np.load(os.path.join(data_path, "Be_ldos.npy"))
+ldos_data = ldos.convert_units(np.load(os.path.join(data_path, "Be_ldos.npy")), in_units="1/(eV*Bohr^3)")
 
 # Get quantities of interest.
 # For better values in the post processing, it is recommended to

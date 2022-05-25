@@ -44,10 +44,10 @@ data_handler = mala.DataHandler(test_parameters)
 # Add a snapshot we want to use in to the list.
 data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                           "Al_debug_2k_nr0.out.npy", data_path,
-                          add_snapshot_as="tr", output_units="1/Ry")
+                          add_snapshot_as="tr", output_units="1/(Ry*Bohr^3)")
 data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                           "Al_debug_2k_nr1.out.npy", data_path,
-                          add_snapshot_as="va", output_units="1/Ry")
+                          add_snapshot_as="va", output_units="1/(Ry*Bohr^3)")
 data_handler.prepare_data()
 printout("Read data: DONE.")
 

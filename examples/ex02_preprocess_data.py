@@ -53,7 +53,7 @@ data_converter = mala.DataConverter(test_parameters)
 # the type of data you want to preprocess.
 data_converter.add_snapshot_qeout_cube("Be.pw.scf.out", data_path,
                                        "cubes/tmp.pp*Be_ldos.cube",
-                                       data_path, output_units="1/Ry")
+                                       data_path, output_units="1/(Ry*Bohr^3)")
 
 # Convert all the snapshots and save them in the current directory.
 data_converter.convert_snapshots("./", naming_scheme="Be_snapshot*")

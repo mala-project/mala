@@ -100,9 +100,11 @@ def initial_training():
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                              "Be_snapshot1.out.npy", data_path, "tr")
+                              "Be_snapshot1.out.npy", data_path, "tr",
+                              output_units="1/(eV*Bohr^3)")
     data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                              "Be_snapshot2.out.npy", data_path, "va")
+                              "Be_snapshot2.out.npy", data_path, "va",
+                              output_units="1/(eV*Bohr^3)")
     data_handler.prepare_data()
     printout("Read data: DONE.")
 
