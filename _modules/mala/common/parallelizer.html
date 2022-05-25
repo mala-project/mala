@@ -76,10 +76,6 @@
     <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="k">pass</span>
 <span class="kn">import</span> <span class="nn">platform</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">import</span> <span class="nn">torch</span>
@@ -145,6 +141,8 @@
     <span class="k">global</span> <span class="n">use_mpi</span>
     <span class="n">use_mpi</span> <span class="o">=</span> <span class="n">new_value</span>
     <span class="k">if</span> <span class="n">use_mpi</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
         <span class="k">global</span> <span class="n">comm</span>
         <span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span></div>
 

@@ -88,11 +88,6 @@
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="k">pass</span>
-
 <span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">mala.descriptors.descriptor</span> <span class="kn">import</span> <span class="n">Descriptor</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_size</span><span class="p">,</span> \

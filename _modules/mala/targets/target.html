@@ -82,10 +82,6 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span>
 <span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">simps</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">asap3.analysis.rdf</span> <span class="kn">import</span> <span class="n">RadialDistributionFunction</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="k">pass</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">ParametersTargets</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
@@ -539,6 +535,9 @@
                 <span class="n">rr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">dr</span><span class="p">)</span>
                 <span class="n">rdf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/=</span> <span class="p">(</span><span class="n">norm</span> <span class="o">*</span> <span class="p">((</span><span class="n">rr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">dr</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;asap3&quot;</span><span class="p">:</span>
+            <span class="c1"># ASAP3 loads MPI which takes a long time to import, so</span>
+            <span class="c1"># we&#39;ll only do that when absolutely needed.</span>
+            <span class="kn">from</span> <span class="nn">asap3.analysis.rdf</span> <span class="kn">import</span> <span class="n">RadialDistributionFunction</span>
             <span class="n">rdf</span> <span class="o">=</span> <span class="n">RadialDistributionFunction</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">rMax</span><span class="p">,</span>
                                              <span class="n">number_of_bins</span><span class="p">)</span><span class="o">.</span><span class="n">get_rdf</span><span class="p">()</span>
             <span class="n">rr</span> <span class="o">=</span> <span class="p">[]</span>

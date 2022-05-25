@@ -75,11 +75,6 @@
 
 <span class="kn">from</span> <span class="nn">ase.calculators.calculator</span> <span class="kn">import</span> <span class="n">Calculator</span><span class="p">,</span> <span class="n">all_changes</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
-<span class="k">except</span><span class="p">:</span>
-    <span class="c1"># Warning thrown in parameters.py</span>
-    <span class="k">pass</span>
 <span class="kn">from</span> <span class="nn">mala</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">DataHandler</span><span class="p">,</span> <span class="n">Predictor</span><span class="p">,</span> <span class="n">LDOS</span><span class="p">,</span> <span class="n">Density</span><span class="p">,</span> \
                  <span class="n">DOS</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">barrier</span>
@@ -207,6 +202,10 @@
                                                               <span class="n">create_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
+            <span class="c1"># I think we should refrain from top-level MPI imports; the first</span>
+            <span class="c1"># import triggers an MPI init, which can take quite long.</span>
+            <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
             <span class="n">energy</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">if</span> <span class="s2">&quot;forces&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
                 <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">Bcast</span><span class="p">([</span><span class="n">forces</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
