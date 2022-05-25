@@ -3,10 +3,6 @@ try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     pass
-try:
-    from mpi4py import MPI
-except ModuleNotFoundError:
-    pass
 import platform
 from collections import defaultdict
 import torch
@@ -72,6 +68,8 @@ def set_mpi_status(new_value):
     global use_mpi
     use_mpi = new_value
     if use_mpi:
+        from mpi4py import MPI
+
         global comm
         comm = MPI.COMM_WORLD
 

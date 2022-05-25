@@ -10,10 +10,6 @@ try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     pass
-try:
-    from mpi4py import MPI
-except ModuleNotFoundError:
-    pass
 
 import torch
 
