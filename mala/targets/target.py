@@ -152,6 +152,16 @@ class Target(ABC):
         """
         pass
 
+    @abstractmethod
+    def invalidate_target(self):
+        """
+        Invalidates the saved target wuantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        pass
+
     def read_additional_calculation_data(self, data_type, data=""):
         """
         Read in additional input about a calculation.

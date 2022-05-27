@@ -210,6 +210,15 @@ class DOS(Target):
         """
         return self.density_of_states
 
+    def invalidate_target(self):
+        """
+        Invalidates the saved target wuantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        self.density_of_states = None
+
     @cached_property
     def energy_grid(self):
         """Energy grid on which the DOS is expressed."""
@@ -461,7 +470,9 @@ class DOS(Target):
         units : string
             Units the density is saved in. Usually none.
         """
-        self.density_of_states = array*self.convert_units(1, in_units=units)
+        self.density_of_states = array
+        self.density_of_states *= \
+            self.convert_units(1, in_units=units)
 
     # Calculations
     ##############

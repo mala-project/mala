@@ -149,6 +149,15 @@ class LDOS(Target):
         """
         return self.local_density_of_states
 
+    def invalidate_target(self):
+        """
+        Invalidates the saved target wuantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        self.local_density_of_states = None
+
     def uncache_properties(self):
         """Uncache all cached properties of this calculator."""
         if self._is_property_cached("number_of_electrons"):
@@ -486,7 +495,8 @@ class LDOS(Target):
         units : string
             Units the density is saved in. Usually none.
         """
-        self.local_density_of_states = array * \
+        self.local_density_of_states = array
+        self.local_density_of_states *= \
             self.convert_units(1, in_units=units)
 
     # Calculations

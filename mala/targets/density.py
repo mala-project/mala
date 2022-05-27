@@ -179,6 +179,15 @@ class Density(Target):
         """
         return self.density
 
+    def invalidate_target(self):
+        """
+        Invalidates the saved target wuantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        self.density = None
+
     @property
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
