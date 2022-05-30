@@ -900,6 +900,8 @@ class ParametersDataGeneration(ParametersBase):
     ofdft_temperature : float
         Temperature at which to perform the OF-DFT-MD simulation.
 
+    ofdft_kedf : string
+        Kinetic energy functional to be used for the OF-DFT-MD simulation.
     """
 
     def __init__(self):
@@ -912,6 +914,7 @@ class ParametersDataGeneration(ParametersBase):
         self.ofdft_timestep = 0
         self.ofdft_number_of_timesteps = 0
         self.ofdft_temperature = 0
+        self.ofdft_kedf = "WT"
 
 
 class ParametersDebug(ParametersBase):
