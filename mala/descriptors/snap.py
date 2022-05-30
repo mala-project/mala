@@ -15,11 +15,6 @@ try:
 except ModuleNotFoundError:
     pass
 
-try:
-    from mpi4py import MPI
-except ModuleNotFoundError:
-    pass
-
 from mala.descriptors.lammps_utils import *
 from mala.descriptors.descriptor import Descriptor
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \

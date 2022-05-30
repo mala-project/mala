@@ -4,10 +4,7 @@ from functools import cached_property
 from ase.units import Rydberg
 import numpy as np
 import math
-try:
-    from mpi4py import MPI
-except ModuleNotFoundError:
-    pass
+import os
 
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier
@@ -1167,6 +1164,10 @@ class LDOS(Target):
                              voxel_Bohr.volume
 
         if self.parameters._configuration["mpi"] and gather_dos:
+            # I think we should refrain from top-level MPI imports; the first
+            # import triggers an MPI init, which can take quite long.
+            from mpi4py import MPI
+
             comm = get_comm()
             comm.Barrier()
             dos_values_full = np.zeros_like(dos_values)

@@ -10,10 +10,6 @@ import ase.io
 import numpy as np
 from scipy.spatial import distance
 from scipy.integrate import simps
-try:
-    from asap3.analysis.rdf import RadialDistributionFunction
-except ModuleNotFoundError:
-    pass
 
 from mala.common.parameters import Parameters, ParametersTargets
 from mala.common.parallelizer import printout
@@ -443,6 +439,9 @@ class Target(ABC):
                 rr.append((i - 0.5) * dr)
                 rdf[i] /= (norm * ((rr[-1] ** 2) + (dr ** 2) / 12.))
         elif method == "asap3":
+            # ASAP3 loads MPI which takes a long time to import, so
+            # we'll only do that when absolutely needed.
+            from asap3.analysis.rdf import RadialDistributionFunction
             rdf = RadialDistributionFunction(atoms, rMax,
                                              number_of_bins).get_rdf()
             rr = []
