@@ -101,6 +101,9 @@ class Predictor(Runner):
         predicted_ldos : numpy.array
             Precicted LDOS for these atomic positions.
         """
+        # Make sure no data lingers in the target calculator.
+        self.data.target_calculator.invalidate_target()
+
         # Calculate SNAP descriptors.
         snap_descriptors, local_size = self.data.descriptor_calculator.\
             calculate_from_atoms(atoms, self.data.grid_dimension)
@@ -175,7 +178,7 @@ class Predictor(Runner):
             local_data_size = self.data.grid_size
         predicted_outputs = np.zeros((local_data_size,
                                       self.data.target_calculator.\
-                                      get_feature_size()))
+                                      feature_size))
 
         # Only predict if there is something to predict.
         # Elsewise, we just wait at the barrier down below.

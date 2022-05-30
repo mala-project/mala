@@ -6,7 +6,10 @@ import numpy as np
 from mala.common.parallelizer import printout, get_rank
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor import Descriptor
+from mala.targets.density import Density
+from mala.targets.ldos import LDOS
 from mala.targets.target import Target
+
 
 
 class DataConverter:
@@ -54,8 +57,7 @@ class DataConverter:
         self.__snapshot_description = []
         self.__snapshot_units = []
 
-    def add_snapshot_qeout_cube(self, qe_out_file, qe_out_directory,
-                                cube_naming_scheme, cube_directory,
+    def add_snapshot_qeout_cube(self, qe_out_file, cube_files_scheme,
                                 input_units=None, output_units=None):
         """
         Add a Quantum Espresso snapshot to the list of conversion list.
@@ -70,14 +72,8 @@ class DataConverter:
         qe_out_file : string
             Name of Quantum Espresso output file for this snapshot.
 
-        qe_out_directory : string
-            Path to Quantum Espresso output file for this snapshot.
-
-        cube_naming_scheme : string
+        cube_files_scheme : string
             Naming scheme for the LDOS .cube files.
-
-        cube_directory : string
-            Directory containing the LDOS .cube files.
 
         input_units : string
             Unit of the input data.
@@ -85,9 +81,7 @@ class DataConverter:
         output_units : string
             Unit of the output data.
         """
-        self.__snapshots_to_convert.append([qe_out_file, qe_out_directory,
-                                            cube_naming_scheme,
-                                            cube_directory])
+        self.__snapshots_to_convert.append([qe_out_file, cube_files_scheme])
         self.__snapshot_description.append(["qe.out", ".cube"])
         self.__snapshot_units.append([input_units, output_units])
 
@@ -137,11 +131,10 @@ class DataConverter:
         if description[0] == "qe.out":
             if original_units[0] is None:
                 tmp_input, local_size = self.descriptor_calculator. \
-                    calculate_from_qe_out(snapshot[0], snapshot[1])
+                    calculate_from_qe_out(snapshot[0])
             else:
                 tmp_input, local_size = self.descriptor_calculator. \
-                    calculate_from_qe_out(snapshot[0], snapshot[1],
-                                          units=original_units[0])
+                    calculate_from_qe_out(snapshot[0])
             if self.parameters._configuration["mpi"]:
                 tmp_input = self.descriptor_calculator.gather_descriptors(tmp_input)
 
@@ -166,12 +159,13 @@ class DataConverter:
 
             # If no units are provided we just assume standard units.
             if original_units[1] is None:
-                tmp_output = self.target_calculator.read_from_cube(
-                    snapshot[2], snapshot[3], use_memmap=use_memmap)
+                self.target_calculator.\
+                    read_from_cube(snapshot[1], use_memmap=use_memmap)
             else:
-                tmp_output = self.target_calculator. \
-                    read_from_cube(snapshot[2], snapshot[3], units=
+                self.target_calculator. \
+                    read_from_cube(snapshot[1], units=
                 original_units[1], use_memmap=use_memmap)
+            tmp_output = self.target_calculator.get_target()
         else:
             raise Exception(
                 "Unknown file extension, cannot convert target"

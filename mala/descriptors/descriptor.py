@@ -144,7 +144,7 @@ class Descriptor(ABC):
         return new_atoms
 
     @abstractmethod
-    def calculate_from_qe_out(self, qe_out_file, qe_out_directory):
+    def calculate_from_qe_out(self, qe_out_file):
         """
         Calculate the descriptors based on a Quantum Espresso outfile.
 
@@ -153,8 +153,6 @@ class Descriptor(ABC):
         qe_out_file : string
             Name of Quantum Espresso output file for snapshot.
 
-        qe_out_directory : string
-            Path to Quantum Espresso output file for snapshot.
 
         Returns
         -------

@@ -73,10 +73,10 @@ class Runner:
 
         Returns
         -------
-        actual_outputs : torch.Tensor
+        actual_outputs : numpy.ndarray
             Actual outputs for snapshot.
 
-        predicted_outputs : torch.Tensor
+        predicted_outputs : numpy.ndarray
             Precicted outputs for snapshot.
         """
         if self.data.parameters.use_lazy_loading:
