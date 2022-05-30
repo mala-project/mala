@@ -68,7 +68,9 @@ autodoc_mock_imports = [
     'horovod',
     'lammps',
     'total_energy',
-    'pqkmeans'
+    'pqkmeans',
+    'dftpy',
+    'asap3'
 ]
 
 myst_heading_anchors = 3
