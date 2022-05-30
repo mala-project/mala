@@ -73,7 +73,7 @@ class OFDFTInitializer:
                                      force_temp=True)
         dyn = Langevin(self.atoms, self.params.ofdft_timestep * units.fs,
                        temperature_K=self.params.ofdft_temperature,
-                       friction=0.1)
+                       friction=self.params.ofdft_friction)
 
         # If logging is desired, do the logging.
         if logging_period is not None:

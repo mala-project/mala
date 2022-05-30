@@ -902,6 +902,9 @@ class ParametersDataGeneration(ParametersBase):
 
     ofdft_kedf : string
         Kinetic energy functional to be used for the OF-DFT-MD simulation.
+
+    ofdft_friction : float
+        Friction to be added for the Langevin dynamics in the OF-DFT-MD run.
     """
 
     def __init__(self):
@@ -915,6 +918,7 @@ class ParametersDataGeneration(ParametersBase):
         self.ofdft_number_of_timesteps = 0
         self.ofdft_temperature = 0
         self.ofdft_kedf = "WT"
+        self.ofdft_friction = 0.1
 
 
 class ParametersDebug(ParametersBase):
