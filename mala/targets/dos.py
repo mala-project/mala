@@ -524,12 +524,11 @@ class DOS(Target):
         band_energy : float
             Band energy in eV.
         """
-        print("Calculating the band energy.")
         # Parse the parameters.
         # Parse the parameters.
         if dos_data is None and self.density_of_states is None:
-                raise Exception("No DOS data provided, cannot calculate"
-                                " this quantity.")
+            raise Exception("No DOS data provided, cannot calculate"
+                            " this quantity.")
 
         # Here we check whether we will use our internal, cached
         # DOS, or calculate everything from scratch.
@@ -581,11 +580,10 @@ class DOS(Target):
         number_of_electrons : float
             Number of electrons.
         """
-        print("Calculating the number of electrons.")
         # Parse the parameters.
         if dos_data is None and self.density_of_states is None:
-                raise Exception("No DOS data provided, cannot calculate"
-                                " this quantity.")
+            raise Exception("No DOS data provided, cannot calculate"
+                            " this quantity.")
 
         # Here we check whether we will use our internal, cached
         # DOS, or calculate everything from scratch.
@@ -696,7 +694,6 @@ class DOS(Target):
         fermi_energy_self_consistent : float
             :math:`\epsilon_F` in eV.
         """
-        print("Calculating the fermi energy.")
         if dos_data is None:
             dos_data = self.density_of_states
             if dos_data is None:
