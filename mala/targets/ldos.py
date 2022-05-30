@@ -979,11 +979,6 @@ class LDOS(Target):
             dimensions.
 
         """
-        if ldos_data is None:
-            ldos_data = self.local_density_of_states
-            if ldos_data is None:
-                raise Exception("No LDOS data provided, cannot calculate"
-                                " this quantity.")
         if fermi_energy_eV is None:
             if ldos_data is None:
                 fermi_energy_eV = self.fermi_energy
@@ -995,6 +990,12 @@ class LDOS(Target):
                 fermi_energy_eV = self.fermi_energy_dft
         if temperature_K is None:
             temperature_K = self.temperature_K
+
+        if ldos_data is None:
+            ldos_data = self.local_density_of_states
+            if ldos_data is None:
+                raise Exception("No LDOS data provided, cannot calculate"
+                                " this quantity.")
 
         ldos_data_shape = np.shape(ldos_data)
         if len(ldos_data_shape) == 2:
