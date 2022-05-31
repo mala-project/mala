@@ -973,6 +973,11 @@
 <span class="sd">    ofdft_temperature : float</span>
 <span class="sd">        Temperature at which to perform the OF-DFT-MD simulation.</span>
 
+<span class="sd">    ofdft_kedf : string</span>
+<span class="sd">        Kinetic energy functional to be used for the OF-DFT-MD simulation.</span>
+
+<span class="sd">    ofdft_friction : float</span>
+<span class="sd">        Friction to be added for the Langevin dynamics in the OF-DFT-MD run.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -984,7 +989,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">local_psp_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ofdft_timestep</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ofdft_number_of_timesteps</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ofdft_temperature</span> <span class="o">=</span> <span class="mi">0</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ofdft_temperature</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ofdft_kedf</span> <span class="o">=</span> <span class="s2">&quot;WT&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ofdft_friction</span> <span class="o">=</span> <span class="mf">0.1</span></div>
 
 
 <div class="viewcode-block" id="ParametersDebug"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersDebug">[docs]</a><span class="k">class</span> <span class="nc">ParametersDebug</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>

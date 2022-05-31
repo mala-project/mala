@@ -114,6 +114,13 @@
         <span class="k">if</span> <span class="n">number_of_elements</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;OF-DFT-MD initialization can only work with one&quot;</span>
                             <span class="s2">&quot; element.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span> <span class="o">=</span> <span class="n">DefaultOption</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s1">&#39;PATH&#39;</span><span class="p">][</span><span class="s1">&#39;pppath&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">local_psp_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s1">&#39;PP&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">local_psp_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s1">&#39;OPT&#39;</span><span class="p">][</span><span class="s1">&#39;method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_kedf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s1">&#39;KEDF&#39;</span><span class="p">][</span><span class="s1">&#39;kedf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;WT&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s1">&#39;JOB&#39;</span><span class="p">][</span><span class="s1">&#39;calctype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Energy Force&#39;</span>
 
 <div class="viewcode-block" id="OFDFTInitializer.get_equilibrated_configuration"><a class="viewcode-back" href="../../../api/mala.datageneration.ofdft_initializer.html#mala.datageneration.ofdft_initializer.OFDFTInitializer.get_equilibrated_configuration">[docs]</a>    <span class="k">def</span> <span class="nf">get_equilibrated_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logging_period</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -126,15 +133,7 @@
 <span class="sd">            information every logging_period steps.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Set the DFTPy configuration.</span>
-        <span class="n">conf</span> <span class="o">=</span> <span class="n">DefaultOption</span><span class="p">()</span>
-        <span class="n">conf</span><span class="p">[</span><span class="s1">&#39;PATH&#39;</span><span class="p">][</span><span class="s1">&#39;pppath&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">local_psp_path</span>
-        <span class="n">conf</span><span class="p">[</span><span class="s1">&#39;PP&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">local_psp_name</span>
-        <span class="n">conf</span><span class="p">[</span><span class="s1">&#39;OPT&#39;</span><span class="p">][</span><span class="s1">&#39;method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;TN&#39;</span>
-        <span class="n">conf</span><span class="p">[</span><span class="s1">&#39;KEDF&#39;</span><span class="p">][</span><span class="s1">&#39;kedf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;WT&#39;</span>
-        <span class="n">conf</span><span class="p">[</span><span class="s1">&#39;JOB&#39;</span><span class="p">][</span><span class="s1">&#39;calctype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Energy Force&#39;</span>
-        <span class="n">conf</span> <span class="o">=</span> <span class="n">OptionFormat</span><span class="p">(</span><span class="n">conf</span><span class="p">)</span>
-        <span class="c1"># @Zhandos: Do we need this?</span>
-        <span class="c1"># temperature = self.params.self.ofdft_temperature * units.kB</span>
+        <span class="n">conf</span> <span class="o">=</span> <span class="n">OptionFormat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">)</span>
 
         <span class="c1"># Create the DFTPy Calculator.</span>
         <span class="n">calc</span> <span class="o">=</span> <span class="n">DFTpyCalculator</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">conf</span><span class="p">)</span>
@@ -147,7 +146,7 @@
                                      <span class="n">force_temp</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">dyn</span> <span class="o">=</span> <span class="n">Langevin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_timestep</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span>
                        <span class="n">temperature_K</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_temperature</span><span class="p">,</span>
-                       <span class="n">friction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+                       <span class="n">friction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_friction</span><span class="p">)</span>
 
         <span class="c1"># If logging is desired, do the logging.</span>
         <span class="k">if</span> <span class="n">logging_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
