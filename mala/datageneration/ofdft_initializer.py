@@ -41,6 +41,13 @@ class OFDFTInitializer:
         if number_of_elements > 1:
             raise Exception("OF-DFT-MD initialization can only work with one"
                             " element.")
+        self.dftpy_configuration = DefaultOption()
+
+        self.dftpy_configuration['PATH']['pppath'] = self.params.local_psp_path
+        self.dftpy_configuration['PP'][self.atoms[0].symbol] = self.params.local_psp_name
+        self.dftpy_configuration['OPT']['method'] = self.params.ofdft_kedf
+        self.dftpy_configuration['KEDF']['kedf'] = 'WT'
+        self.dftpy_configuration['JOB']['calctype'] = 'Energy Force'
 
     def get_equilibrated_configuration(self, logging_period=None):
         """
@@ -53,15 +60,7 @@ class OFDFTInitializer:
             information every logging_period steps.
         """
         # Set the DFTPy configuration.
-        conf = DefaultOption()
-        conf['PATH']['pppath'] = self.params.local_psp_path
-        conf['PP'][self.atoms[0].symbol] = self.params.local_psp_name
-        conf['OPT']['method'] = 'TN'
-        conf['KEDF']['kedf'] = 'WT'
-        conf['JOB']['calctype'] = 'Energy Force'
-        conf = OptionFormat(conf)
-        # @Zhandos: Do we need this?
-        # temperature = self.params.self.ofdft_temperature * units.kB
+        conf = OptionFormat(self.dftpy_configuration)
 
         # Create the DFTPy Calculator.
         calc = DFTpyCalculator(config=conf)
@@ -74,7 +73,7 @@ class OFDFTInitializer:
                                      force_temp=True)
         dyn = Langevin(self.atoms, self.params.ofdft_timestep * units.fs,
                        temperature_K=self.params.ofdft_temperature,
-                       friction=0.1)
+                       friction=self.params.ofdft_friction)
 
         # If logging is desired, do the logging.
         if logging_period is not None:
