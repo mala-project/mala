@@ -767,6 +767,11 @@ class ParametersHyperparameterOptimization(ParametersBase):
 
     naswot_pruner_batch_size : int
         Batch size for the NASWOT pruner
+
+    number_bad_trials_before_stopping : int
+        Only applies to optuna studies. If any integer above 0, then if no
+        new best trial is found within number_bad_trials_before trials after
+         the last one, the study will be stopped.
     """
 
     def __init__(self):
@@ -786,6 +791,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.naswot_pruner_cutoff = 0
         self.pruner = None
         self.naswot_pruner_batch_size = 0
+        self.number_bad_trials_before_stopping = None
 
     @property
     def rdb_storage_heartbeat(self):

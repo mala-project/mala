@@ -79,7 +79,7 @@ class HyperOptOptuna(HyperOpt):
         self.objective = ObjectiveBase(self.params, self.data_handler)
 
         # Fill callback list based on user checkpoint wishes.
-        callback_list = [self.__check_max_number_trials]
+        callback_list = [self.__check_stopping]
         if self.params.hyperparameters.checkpoints_each_trial != 0:
             callback_list.append(self.__create_checkpointing)
 
@@ -218,7 +218,7 @@ class HyperOptOptuna(HyperOpt):
                         t.state == optuna.trial.
                         TrialState.RUNNING])
 
-    def __check_max_number_trials(self, study, trial):
+    def __check_stopping(self, study, trial):
         """Check if this trial was already the maximum number of trials."""
         # How to check for this depends on whether or not a heartbeat was
         # used. If one was used, then both COMPLETE and RUNNING trials
@@ -232,6 +232,15 @@ class HyperOptOptuna(HyperOpt):
         if self.__get_number_of_completed_trials(study) >= \
                 self.params.hyperparameters.n_trials:
             self.study.stop()
+        if self.params.hyperparameters.number_bad_trials_before_stopping \
+            is not None and \
+            self.params.hyperparameters.number_bad_trials_before_stopping > 0:
+                if trial.number - self.study.best_trial.number >= \
+                    self.params.hyperparameters.number_bad_trials_before_stopping:
+                    printout("No new best trial found in",
+                             self.params.hyperparameters.number_bad_trials_before_stopping,
+                             "attempts, stopping the study.")
+                    self.study.stop()
 
     def __create_checkpointing(self, study, trial):
         """Create a checkpoint of optuna study, if necessary."""
