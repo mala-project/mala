@@ -835,11 +835,22 @@
 <span class="sd">        this cutoff determines which trials are neglected.</span>
 
 <span class="sd">    pruner: string</span>
-<span class="sd">        Pruner type to be used by optuna. Currently only &quot;naswot&quot; is</span>
-<span class="sd">        supported, which will use the NASWOT algorithm as pruner.</span>
+<span class="sd">        Pruner type to be used by optuna. Currently supported:</span>
+
+<span class="sd">            - &quot;multi_training&quot;: If multiple trainings are performed per</span>
+<span class="sd">              trial, and one returns &quot;inf&quot; for the loss,</span>
+<span class="sd">              no further training will be performed.</span>
+<span class="sd">              Especially useful if used in conjunction</span>
+<span class="sd">              with the band_energy metric.</span>
+<span class="sd">            - &quot;naswot&quot;: use the NASWOT algorithm as pruner</span>
 
 <span class="sd">    naswot_pruner_batch_size : int</span>
 <span class="sd">        Batch size for the NASWOT pruner</span>
+
+<span class="sd">    number_bad_trials_before_stopping : int</span>
+<span class="sd">        Only applies to optuna studies. If any integer above 0, then if no</span>
+<span class="sd">        new best trial is found within number_bad_trials_before trials after</span>
+<span class="sd">        the last one, the study will be stopped.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -859,6 +870,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">naswot_pruner_cutoff</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pruner</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">naswot_pruner_batch_size</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_bad_trials_before_stopping</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">rdb_storage_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

@@ -896,10 +896,23 @@ since v2.2.0, but reported to perform very well.
 <dt>naswot_pruner_cutoff<span class="classifier">float</span></dt><dd><p>If the surrogate loss algorithm is used as a pruner during a study,
 this cutoff determines which trials are neglected.</p>
 </dd>
-<dt>pruner: string</dt><dd><p>Pruner type to be used by optuna. Currently only “naswot” is
-supported, which will use the NASWOT algorithm as pruner.</p>
+<dt>pruner: string</dt><dd><p>Pruner type to be used by optuna. Currently supported:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“multi_training”: If multiple trainings are performed per
+trial, and one returns “inf” for the loss,
+no further training will be performed.
+Especially useful if used in conjunction
+with the band_energy metric.</p></li>
+<li><p>“naswot”: use the NASWOT algorithm as pruner</p></li>
+</ul>
+</div></blockquote>
 </dd>
 <dt>naswot_pruner_batch_size<span class="classifier">int</span></dt><dd><p>Batch size for the NASWOT pruner</p>
+</dd>
+<dt>number_bad_trials_before_stopping<span class="classifier">int</span></dt><dd><p>Only applies to optuna studies. If any integer above 0, then if no
+new best trial is found within number_bad_trials_before trials after
+the last one, the study will be stopped.</p>
 </dd>
 </dl>
 <dl class="py method">

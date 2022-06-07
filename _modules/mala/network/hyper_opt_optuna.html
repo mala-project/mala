@@ -81,6 +81,7 @@
 <span class="kn">from</span> <span class="nn">mala.network.hyper_opt</span> <span class="kn">import</span> <span class="n">HyperOpt</span>
 <span class="kn">from</span> <span class="nn">mala.network.objective_base</span> <span class="kn">import</span> <span class="n">ObjectiveBase</span>
 <span class="kn">from</span> <span class="nn">mala.network.naswot_pruner</span> <span class="kn">import</span> <span class="n">NASWOTPruner</span>
+<span class="kn">from</span> <span class="nn">mala.network.multi_training_pruner</span> <span class="kn">import</span> <span class="n">MultiTrainingPruner</span>
 
 
 <div class="viewcode-block" id="HyperOptOptuna"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna">[docs]</a><span class="k">class</span> <span class="nc">HyperOptOptuna</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
@@ -111,8 +112,17 @@
 
         <span class="c1"># See if the user specified a pruner.</span>
         <span class="n">pruner</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">pruner</span> <span class="o">==</span> <span class="s2">&quot;naswot&quot;</span><span class="p">:</span>
-            <span class="n">pruner</span> <span class="o">=</span> <span class="n">NASWOTPruner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">pruner</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">pruner</span> <span class="o">==</span> <span class="s2">&quot;naswot&quot;</span><span class="p">:</span>
+                <span class="n">pruner</span> <span class="o">=</span> <span class="n">NASWOTPruner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">pruner</span> <span class="o">==</span> <span class="s2">&quot;multi_training&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">number_training_per_trial</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">pruner</span> <span class="o">=</span> <span class="n">MultiTrainingPruner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;MultiTrainingPruner requested, but only one training&quot;</span>
+                             <span class="s2">&quot;per trial specified; Skipping pruner creation.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid pruner type selected.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Create the study.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -152,7 +162,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">ObjectiveBase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">)</span>
 
         <span class="c1"># Fill callback list based on user checkpoint wishes.</span>
-        <span class="n">callback_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__check_max_number_trials</span><span class="p">]</span>
+        <span class="n">callback_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__check_stopping</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoints_each_trial</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">callback_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__create_checkpointing</span><span class="p">)</span>
 
@@ -291,7 +301,7 @@
                         <span class="n">t</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span>
                         <span class="n">TrialState</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">__check_max_number_trials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__check_stopping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Check if this trial was already the maximum number of trials.&quot;&quot;&quot;</span>
         <span class="c1"># How to check for this depends on whether or not a heartbeat was</span>
         <span class="c1"># used. If one was used, then both COMPLETE and RUNNING trials</span>
@@ -302,9 +312,22 @@
         <span class="c1"># https://github.com/optuna/optuna/issues/1883#issuecomment-841844834</span>
         <span class="c1"># https://github.com/optuna/optuna/issues/1883#issuecomment-842106950</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_number_of_completed_trials</span><span class="p">(</span><span class="n">study</span><span class="p">)</span> <span class="o">&gt;=</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">n_trials</span><span class="p">:</span>
+        <span class="n">completed_trials</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_number_of_completed_trials</span><span class="p">(</span><span class="n">study</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">completed_trials</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">n_trials</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+        <span class="c1"># Only check if there are trials to be checked.</span>
+        <span class="k">if</span> <span class="n">completed_trials</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">number_bad_trials_before_stopping</span> <span class="ow">is</span> \
+                    <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>\
+                    <span class="n">number_bad_trials_before_stopping</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">trial</span><span class="o">.</span><span class="n">number</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">best_trial</span><span class="o">.</span><span class="n">number</span> <span class="o">&gt;=</span> \
+                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>\
+                                <span class="n">number_bad_trials_before_stopping</span><span class="p">:</span>
+                    <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;No new best trial found in&quot;</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">number_bad_trials_before_stopping</span><span class="p">,</span>
+                             <span class="s2">&quot;attempts, stopping the study.&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__create_checkpointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a checkpoint of optuna study, if necessary.&quot;&quot;&quot;</span>

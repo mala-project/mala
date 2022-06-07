@@ -24,6 +24,7 @@ network
    mala.network.hyperparameter_naswot
    mala.network.hyperparameter_oat
    mala.network.hyperparameter_optuna
+   mala.network.multi_training_pruner
    mala.network.naswot_pruner
    mala.network.network
    mala.network.objective_base

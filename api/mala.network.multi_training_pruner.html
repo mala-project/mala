@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tester &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>multi_training_pruner &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -20,8 +20,8 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="trainer" href="mala.network.trainer.html" />
-    <link rel="prev" title="runner" href="mala.network.runner.html" /> 
+    <link rel="next" title="naswot_pruner" href="mala.network.naswot_pruner.html" />
+    <link rel="prev" title="hyperparameter_optuna" href="mala.network.hyperparameter_optuna.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -60,14 +60,14 @@
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_naswot.html">hyperparameter_naswot</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_oat.html">hyperparameter_oat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_optuna.html">hyperparameter_optuna</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.multi_training_pruner.html">multi_training_pruner</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">multi_training_pruner</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.naswot_pruner.html">naswot_pruner</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.network.html">network</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.objective_base.html">objective_base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.objective_naswot.html">objective_naswot</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.predictor.html">predictor</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.runner.html">runner</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">tester</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.tester.html">tester</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.trainer.html">trainer</a></li>
 </ul>
 </li>
@@ -97,9 +97,9 @@
           <li><a href="modules.html">API reference</a> &raquo;</li>
           <li><a href="mala.html">mala</a> &raquo;</li>
           <li><a href="mala.network.html">network</a> &raquo;</li>
-      <li>tester</li>
+      <li>multi_training_pruner</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.network.tester.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.network.multi_training_pruner.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -107,38 +107,43 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="module-mala.network.tester">
-<span id="tester"></span><h1>tester<a class="headerlink" href="#module-mala.network.tester" title="Permalink to this headline"></a></h1>
-<p>Tester class for testing a network.</p>
+  <div class="section" id="module-mala.network.multi_training_pruner">
+<span id="multi-training-pruner"></span><h1>multi_training_pruner<a class="headerlink" href="#module-mala.network.multi_training_pruner" title="Permalink to this headline"></a></h1>
+<p>Prunes a trial when one of the trainings returns infinite band energy.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="mala.network.tester.Tester">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Tester</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/tester.html#Tester"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.tester.Tester" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="mala.network.runner.html#mala.network.runner.Runner" title="mala.network.runner.Runner"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.runner.Runner</span></code></a></p>
-<p>A class for testing a neural network.</p>
-<p>It enables easy inference throughout a test set.</p>
+<dt class="sig sig-object py" id="mala.network.multi_training_pruner.MultiTrainingPruner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultiTrainingPruner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/multi_training_pruner.html#MultiTrainingPruner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.multi_training_pruner.MultiTrainingPruner" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">optuna.pruners.BasePruner</span></code></p>
+<p>Implements the NASWOT method (first version of paper) as an optuna pruner.</p>
+<p>This means that before each training of a trial network the network will
+be tested against a user defined surrogate score (which has to be
+calibrated). If this score is good enough, the candidate will be trained.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>params</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this Tester object.</p></li>
-<li><p><strong>network</strong> (<a class="reference internal" href="mala.network.network.html#mala.network.network.Network" title="mala.network.network.Network"><em>mala.network.network.Network</em></a>) – Network which is being tested.</p></li>
-<li><p><strong>data</strong> (<a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – DataHandler holding the test data.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>search_parameters</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this objective.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.network.tester.Tester.test_snapshot">
-<span class="sig-name descname"><span class="pre">test_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/tester.html#Tester.test_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.tester.Tester.test_snapshot" title="Permalink to this definition"></a></dt>
-<dd><p>Get actual and predicted output for a snapshot.</p>
+<dt class="sig sig-object py" id="mala.network.multi_training_pruner.MultiTrainingPruner.prune">
+<span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">optuna.study.Study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">optuna.trial.FrozenTrial</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mala/network/multi_training_pruner.html#MultiTrainingPruner.prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.multi_training_pruner.MultiTrainingPruner.prune" title="Permalink to this definition"></a></dt>
+<dd><p>Judge whether the trial should be pruned based on the reported values.</p>
+<p>In this case, it is checked whether one of the multiple trainings
+reported an infinte loss (especially viable for the band_energy
+metric).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>snapshot_number</strong> (<em>int</em>) – Snapshot for which the prediction is done.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>study</strong> (<em>optuna.study.Study</em>) – Study object of the target study.</p></li>
+<li><p><strong>trial</strong> (<em>optuna.trial.FrozenTrial</em>) – FrozenTrial object of the target trial.
+Take a copy before modifying this object.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>actual_outputs</strong> (<em>torch.Tensor</em>) – Actual outputs for snapshot.</p></li>
-<li><p><strong>predicted_outputs</strong> (<em>torch.Tensor</em>) – Precicted outputs for snapshot.</p></li>
-</ul>
-</p>
+<dd class="field-even"><p><strong>should_prune</strong> – A boolean indicating whether this particular trial should be
+pruned.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -151,8 +156,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="mala.network.runner.html" class="btn btn-neutral float-left" title="runner" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.network.trainer.html" class="btn btn-neutral float-right" title="trainer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.network.hyperparameter_optuna.html" class="btn btn-neutral float-left" title="hyperparameter_optuna" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.network.naswot_pruner.html" class="btn btn-neutral float-right" title="naswot_pruner" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

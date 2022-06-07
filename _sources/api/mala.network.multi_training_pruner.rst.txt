@@ -1,0 +1,7 @@
+multi\_training\_pruner
+=======================
+
+.. automodule:: mala.network.multi_training_pruner
+   :members:
+   :undoc-members:
+   :show-inheritance:

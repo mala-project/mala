@@ -138,13 +138,14 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        trial</span>
+<span class="sd">        trial : optuna.trial.Trial</span>
 <span class="sd">            A trial is a set of hyperparameters; can be an optuna based</span>
 <span class="sd">            trial or simply a OAT compatible list.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Parse the parameters included in the trial.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parse_trial</span><span class="p">(</span><span class="n">trial</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">pruner</span>\
+                <span class="o">==</span> <span class="s2">&quot;naswot&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">trial</span><span class="o">.</span><span class="n">should_prune</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="n">TrialPruned</span><span class="p">()</span>
 
@@ -156,6 +157,16 @@
             <span class="n">test_trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">test_network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">)</span>
             <span class="n">test_trainer</span><span class="o">.</span><span class="n">train_network</span><span class="p">()</span>
             <span class="n">final_validation_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test_trainer</span><span class="o">.</span><span class="n">final_validation_loss</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_type</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">pruner</span> \
+                    <span class="o">==</span> <span class="s2">&quot;multi_training&quot;</span><span class="p">:</span>
+
+                <span class="c1"># This is a little bit hacky, since report is actually</span>
+                <span class="c1"># meant for values DURING training, but we instead</span>
+                <span class="c1"># use it for one of the losses during multiple trainings.</span>
+                <span class="c1"># It should not pose a problem though.</span>
+                <span class="n">trial</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">test_trainer</span><span class="o">.</span><span class="n">final_validation_loss</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">trial</span><span class="o">.</span><span class="n">should_prune</span><span class="p">():</span>
+                    <span class="k">raise</span> <span class="n">TrialPruned</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">number_training_per_trial</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Losses from multiple runs are: &quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
