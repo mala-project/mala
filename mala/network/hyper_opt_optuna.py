@@ -8,6 +8,7 @@ from mala.common.parameters import printout
 from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_base import ObjectiveBase
 from mala.network.naswot_pruner import NASWOTPruner
+from mala.network.multi_training_pruner import MultiTrainingPruner
 
 
 class HyperOptOptuna(HyperOpt):
@@ -38,8 +39,17 @@ class HyperOptOptuna(HyperOpt):
 
         # See if the user specified a pruner.
         pruner = None
-        if self.params.hyperparameters.pruner == "naswot":
-            pruner = NASWOTPruner(self.params, data)
+        if self.params.hyperparameters.pruner is not None:
+            if self.params.hyperparameters.pruner == "naswot":
+                pruner = NASWOTPruner(self.params, data)
+            elif self.params.hyperparameters.pruner == "multi_training":
+                if self.params.hyperparameters.number_training_per_trial > 1:
+                    pruner = MultiTrainingPruner(self.params)
+                else:
+                    printout("MultiTrainingPruner requested, but only one training"
+                             "per trial specified; Skipping pruner creation.")
+            else:
+                raise Exception("Invalid pruner type selected.")
 
         # Create the study.
         if self.params.hyperparameters.rdb_storage is None:
@@ -229,14 +239,18 @@ class HyperOptOptuna(HyperOpt):
         # https://github.com/optuna/optuna/issues/1883#issuecomment-841844834
         # https://github.com/optuna/optuna/issues/1883#issuecomment-842106950
 
-        if self.__get_number_of_completed_trials(study) >= \
-                self.params.hyperparameters.n_trials:
+        completed_trials = self.__get_number_of_completed_trials(study)
+        if completed_trials >= self.params.hyperparameters.n_trials:
             self.study.stop()
-        if self.params.hyperparameters.number_bad_trials_before_stopping \
-            is not None and \
-            self.params.hyperparameters.number_bad_trials_before_stopping > 0:
+
+        # Only check if there are trials to be checked.
+        if completed_trials > 0:
+            if self.params.hyperparameters.number_bad_trials_before_stopping is \
+                    not None and self.params.hyperparameters.\
+                    number_bad_trials_before_stopping > 0:
                 if trial.number - self.study.best_trial.number >= \
-                    self.params.hyperparameters.number_bad_trials_before_stopping:
+                        self.params.hyperparameters.\
+                                number_bad_trials_before_stopping:
                     printout("No new best trial found in",
                              self.params.hyperparameters.number_bad_trials_before_stopping,
                              "attempts, stopping the study.")

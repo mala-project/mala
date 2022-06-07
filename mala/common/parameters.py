@@ -762,8 +762,14 @@ class ParametersHyperparameterOptimization(ParametersBase):
         this cutoff determines which trials are neglected.
 
     pruner: string
-        Pruner type to be used by optuna. Currently only "naswot" is
-        supported, which will use the NASWOT algorithm as pruner.
+        Pruner type to be used by optuna. Currently supported:
+
+            - "multi_training": If multiple trainings are performed per
+              trial, and one returns "inf" for the loss,
+              no further training will be performed.
+              Especially useful if used in conjunction
+              with the band_energy metric.
+            - "naswot": use the NASWOT algorithm as pruner
 
     naswot_pruner_batch_size : int
         Batch size for the NASWOT pruner
@@ -771,7 +777,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
     number_bad_trials_before_stopping : int
         Only applies to optuna studies. If any integer above 0, then if no
         new best trial is found within number_bad_trials_before trials after
-         the last one, the study will be stopped.
+        the last one, the study will be stopped.
     """
 
     def __init__(self):
