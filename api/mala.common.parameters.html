@@ -269,6 +269,20 @@ performing inference/testing after training a network.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mala.common.parameters.Parameters.optuna_singlenode_setup">
+<span class="sig-name descname"><span class="pre">optuna_singlenode_setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.optuna_singlenode_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.optuna_singlenode_setup" title="Permalink to this definition"></a></dt>
+<dd><p>Set up device and parallelization parameters for Optuna+MPI.</p>
+<p>This only needs to be called if multiple MPI ranks are used on
+one node to run Optuna. Optuna itself does NOT communicate via MPI.
+Thus, if we allocate e.g. one node with 4 GPUs and start 4 jobs,
+3 of those jobs will fail, because currently, we instantiate the
+cuda devices based on MPI ranks. This functions sets everything
+up properly. This of course requires MPI.
+This may be a bit hacky, but it lets us use one script and one
+MPI command to launch x GPU backed jobs on any node with x GPUs.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.save" title="Permalink to this definition"></a></dt>
 <dd><p>Save the Parameters object to a file.</p>

@@ -1286,6 +1286,36 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="Parameters.optuna_singlenode_setup"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.optuna_singlenode_setup">[docs]</a>    <span class="k">def</span> <span class="nf">optuna_singlenode_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set up device and parallelization parameters for Optuna+MPI.</span>
+
+<span class="sd">        This only needs to be called if multiple MPI ranks are used on</span>
+<span class="sd">        one node to run Optuna. Optuna itself does NOT communicate via MPI.</span>
+<span class="sd">        Thus, if we allocate e.g. one node with 4 GPUs and start 4 jobs,</span>
+<span class="sd">        3 of those jobs will fail, because currently, we instantiate the</span>
+<span class="sd">        cuda devices based on MPI ranks. This functions sets everything</span>
+<span class="sd">        up properly. This of course requires MPI.</span>
+<span class="sd">        This may be a bit hacky, but it lets us use one script and one</span>
+<span class="sd">        MPI command to launch x GPU backed jobs on any node with x GPUs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We first &quot;trick&quot; the parameters object to assume MPI and GPUs</span>
+        <span class="c1"># are used. That way we get the right device.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_gpu</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">device_temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span>
+
+        <span class="c1"># Now we can turn of MPI and set the device manually.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="o">=</span> <span class="n">device_temp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_device</span><span class="p">(</span><span class="n">device_temp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_update_device</span><span class="p">(</span><span class="n">device_temp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">_update_device</span><span class="p">(</span><span class="n">device_temp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_update_device</span><span class="p">(</span><span class="n">device_temp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">_update_device</span><span class="p">(</span><span class="n">device_temp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_device</span><span class="p">(</span><span class="n">device_temp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="o">.</span><span class="n">_update_device</span><span class="p">(</span><span class="n">device_temp</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="Parameters.load_from_file"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
                        <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
