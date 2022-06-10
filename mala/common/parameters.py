@@ -1213,6 +1213,36 @@ class Parameters:
         """
         self.save(filename, save_format="json")
 
+    def optuna_singlenode_setup(self):
+        """
+        Set up device and parallelization parameters for Optuna+MPI.
+
+        This only needs to be called if multiple MPI ranks are used on
+        one node to run Optuna. Optuna itself does NOT communicate via MPI.
+        Thus, if we allocate e.g. one node with 4 GPUs and start 4 jobs,
+        3 of those jobs will fail, because currently, we instantiate the
+        cuda devices based on MPI ranks. This functions sets everything
+        up properly. This of course requires MPI.
+        This may be a bit hacky, but it lets us use one script and one
+        MPI command to launch x GPU backed jobs on any node with x GPUs.
+        """
+        # We first "trick" the parameters object to assume MPI and GPUs
+        # are used. That way we get the right device.
+        self.use_gpu = True
+        self.use_mpi = True
+        device_temp = self.device
+
+        # Now we can turn of MPI and set the device manually.
+        self.use_mpi = False
+        self._device = device_temp
+        self.network._update_device(device_temp)
+        self.descriptors._update_device(device_temp)
+        self.targets._update_device(device_temp)
+        self.data._update_device(device_temp)
+        self.running._update_device(device_temp)
+        self.hyperparameters._update_device(device_temp)
+        self.debug._update_device(device_temp)
+
     @classmethod
     def load_from_file(cls, filename, save_format="json",
                        no_snapshots=False):
