@@ -48,7 +48,8 @@ class TestParallel:
         test_parameters.use_mpi = True
         snap_calculator = mala.SNAP(test_parameters)
         snaps_parallel, snapsize = snap_calculator.calculate_from_atoms(atoms,
-                                                              [18, 18, 27])
+                                                              [18, 18, 27],
+                                                              z_splitting=False)
         snaps_parallel = snap_calculator.gather_descriptors(snaps_parallel)
         serial_shape = np.shape(snaps_serial)
         parallel_shape = np.shape(snaps_parallel)
