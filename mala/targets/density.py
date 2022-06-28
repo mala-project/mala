@@ -387,7 +387,10 @@ class Density(Target):
         if Density.te_mutex is False:
             printout("MALA: Starting QuantumEspresso to get density-based"
                      " energy contributions.", min_verbosity=0)
-            te.initialize()
+            use_small_mem = False
+            if self.parameters._configuration["mpi"]:
+                use_small_mem = True
+            te.initialize(use_small_mem)
             Density.te_mutex = True
             printout("MALA: QuantumEspresso setup done.", min_verbosity=0)
         else:
