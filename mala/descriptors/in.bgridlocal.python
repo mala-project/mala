@@ -46,9 +46,6 @@ variable 	switch equal 0
 
 #compute bgrid all sna/grid grid ${ngridx} ${ngridy} ${ngridz} ${snap_options}
 
-if "${bgridglobalflag}" then &
-   "compute bgrid all sna/grid grid ${ngridx} ${ngridy} ${ngridz} ${rcutfac} ${rfac0} ${twojmax} ${radelem} ${wj} rmin0 ${rmin0} bzeroflag ${bzero} quadraticflag ${quadratic} switchflag ${switch}"
-
 compute bgridlocal all sna/grid/local grid ${ngridx} ${ngridy} ${ngridz} ${rcutfac} ${rfac0} ${twojmax} ${radelem} ${wjlocal} rmin0 ${rmin0} bzeroflag ${bzero} quadraticflag ${quadratic} switchflag ${switch}
 
 #thermo_style	custom step temp ke pe vol c_bgrid[1][1]
