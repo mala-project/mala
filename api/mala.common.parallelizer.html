@@ -175,6 +175,22 @@ DEALINGS IN THE SOFTWARE.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="mala.common.parallelizer.parallel_warn">
+<span class="sig-name descname"><span class="pre">parallel_warn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">warning</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#parallel_warn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.parallel_warn" title="Permalink to this definition"></a></dt>
+<dd><p>Interface for warnings in parallel runs. Can be used like warnings.warn.</p>
+<p>Linked to the verbosity option in parameters. By default, all messages are
+treated as high level messages and will be printed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>warning</strong> – Warning to be printed.</p></li>
+<li><p><strong>min_verbosity</strong> (<em>int</em>) – Minimum number of verbosity for this output to still be printed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="mala.common.parallelizer.printout">
 <span class="sig-name descname"><span class="pre">printout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parallelizer.html#printout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parallelizer.printout" title="Permalink to this definition"></a></dt>
 <dd><p>Interface to built-in “print” for parallel runs. Can be used like print.</p>

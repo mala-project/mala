@@ -79,6 +79,7 @@
 <span class="kn">import</span> <span class="nn">platform</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="n">use_horovod</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">False</span>
@@ -282,6 +283,26 @@
         <span class="n">outstring</span> <span class="o">=</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">outstring</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="parallel_warn"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.parallel_warn">[docs]</a><span class="k">def</span> <span class="nf">parallel_warn</span><span class="p">(</span><span class="n">warning</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interface for warnings in parallel runs. Can be used like warnings.warn.</span>
+
+<span class="sd">    Linked to the verbosity option in parameters. By default, all messages are</span>
+<span class="sd">    treated as high level messages and will be printed.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    warning</span>
+<span class="sd">        Warning to be printed.</span>
+
+<span class="sd">    min_verbosity : int</span>
+<span class="sd">        Minimum number of verbosity for this output to still be printed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">current_verbosity</span> <span class="o">&gt;=</span> <span class="n">min_verbosity</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">warning</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

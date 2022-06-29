@@ -77,7 +77,6 @@
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
@@ -87,7 +86,8 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">set_horovod_status</span><span class="p">,</span> \
-    <span class="n">set_mpi_status</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_local_rank</span><span class="p">,</span> <span class="n">set_current_verbosity</span>
+    <span class="n">set_mpi_status</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_local_rank</span><span class="p">,</span> <span class="n">set_current_verbosity</span><span class="p">,</span> \
+    <span class="n">parallel_warn</span>
 <span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
 
 
@@ -1115,8 +1115,8 @@
             <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_use_gpu</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;GPU requested, but no GPU found. MALA will &quot;</span>
-                              <span class="s2">&quot;operate with CPU only.&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                <span class="n">parallel_warn</span><span class="p">(</span><span class="s2">&quot;GPU requested, but no GPU found. MALA will &quot;</span>
+                              <span class="s2">&quot;operate with CPU only.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Invalidate, will be updated in setter.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span>
