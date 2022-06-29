@@ -436,7 +436,7 @@ class SNAP(Descriptor):
 
                     # prepare z plane cuts for balance command in lammps
                     if int(nz / zprocs) == (nz / zprocs):
-                        if self.verbosity >= 0:
+                        if self.verbosity >= 2:
                             print("No remainder in z")
                         zcut = 1/nz
                         zint = ''
@@ -447,7 +447,7 @@ class SNAP(Descriptor):
                     else:
                         # account for remainder with uneven number of
                         # planes/processors
-                        if self.verbosity >= 0:
+                        if self.verbosity >= 2:
                             print("Remainder in z")
                         zcut = 1/nz
                         zrem = nz - (zprocs*int(nz/zprocs))
