@@ -1,7 +1,6 @@
 """Base class for all target calculators."""
 from abc import ABC, abstractmethod
 import itertools
-import warnings
 
 from ase.neighborlist import NeighborList
 from ase.units import Rydberg, Bohr, kB
@@ -11,7 +10,7 @@ from scipy.spatial import distance
 from scipy.integrate import simps
 
 from mala.common.parameters import Parameters, ParametersTargets
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, parallel_warn
 from mala.targets.calculation_helpers import fermi_function
 
 
@@ -447,7 +446,7 @@ class Target(ABC):
             for i in range(0, 3):
                 if pbc[i]:
                     if _rMax > cell[i, i]:
-                        warnings.warn(
+                        parallel_warn(
                             "Calculating RDF with a radius larger then the unit"
                             " cell. While this will work numerically, be cautious"
                             " about the physicality of its results", stacklevel=3)
