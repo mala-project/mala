@@ -379,8 +379,8 @@ class ParametersTargets(ParametersBase):
         self.ldos_gridoffset_ev = 0
         self.restrict_targets = "zero_out_negative"
         self.pseudopotential_path = None
-        self.rdf_parameters = {"number_of_bins": 500, "rMax": None}
-        self.tpcf_parameters = {"number_of_bins": 20, "rMax": 5.0}
+        self.rdf_parameters = {"number_of_bins": 500, "rMax": "mic"}
+        self.tpcf_parameters = {"number_of_bins": 20, "rMax": "mic"}
         self.ssf_parameters = {"number_of_bins": 100, "kMax": 12.0}
 
     @property
