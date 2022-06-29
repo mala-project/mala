@@ -270,7 +270,7 @@ as [kMax] array.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.radial_distribution_function_from_atoms">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">radial_distribution_function_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mala'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.radial_distribution_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.radial_distribution_function_from_atoms" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">radial_distribution_function_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mala'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.radial_distribution_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.radial_distribution_function_from_atoms" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the radial distribution function (RDF).</p>
 <p>In comparison with other python implementation, this function
 can handle arbitrary radii by incorporating a neighbor list.
@@ -283,16 +283,25 @@ but without the restriction for the radii.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p></li>
 <li><p><strong>number_of_bins</strong> (<em>int</em>) – Number of bins used to create the histogram.</p></li>
-<li><p><strong>rMax</strong> (<em>float</em>) – Radius up to which to calculate the RDF. None by default; this
-is the suggested behavior, as MALA will then on its own calculate
-the maximum radius up until which the calculation of the RDF is
-indisputably physically meaningful. Larger radii may be specified,
-e.g. for a Fourier transformation to calculate the static structure
-factor.</p></li>
+<li><p><strong>rMax</strong> (<em>float</em><em> or </em><em>string</em>) – <p>Radius up to which to calculate the RDF.
+Options are:</p>
+<blockquote>
+<div><ul>
+<li><p>”mic”: rMax according to minimum image convention.
+(see “The Minimum Image Convention in Non-Cubic MD Cells”
+by Smith,
+<a class="reference external" href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.57.1696">http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.57.1696</a>)
+Suggested value, as this leads to physically meaningful RDFs.</p></li>
+<li><p>”2mic”: rMax twice as big as for “mic”. Legacy option
+to reproduce some earlier trajectory results</p></li>
+<li><p>float: Input some float to use it directly as input.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 <li><p><strong>method</strong> (<em>string</em>) – If “mala” the more flexible, yet less performant python based
 RDF will be calculated. If “asap3”, asap3’s C++ implementation
-will be used. In the latter case, rMax will be ignored and
-automatically calculated.</p></li>
+will be used. In the latter case, rMax values larger then
+“2mic” will be ignored.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -405,7 +414,7 @@ as [kMax] array.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.three_particle_correlation_function_from_atoms">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">three_particle_correlation_function_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.three_particle_correlation_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.three_particle_correlation_function_from_atoms" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">three_particle_correlation_function_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rMax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mic'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.three_particle_correlation_function_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.three_particle_correlation_function_from_atoms" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the three particle correlation function (TPCF).</p>
 <p>The implementation was done as given by doi.org/10.1063/5.0048450,
 equation 17, with only small modifications. Pleas be aware that,
@@ -416,10 +425,21 @@ large radii or number of bins.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p></li>
 <li><p><strong>number_of_bins</strong> (<em>int</em>) – Number of bins used to create the histogram.</p></li>
-<li><p><strong>rMax</strong> (<em>float</em>) – Radius up to which to calculate the TPCF. If None, MALA will
-determine the maximum radius for which the TPCF is indisputably
-defined. Be advised - this may come at increased computational
-cost.</p></li>
+<li><p><strong>rMax</strong> (<em>float</em><em> or </em><em>string</em>) – <p>Radius up to which to calculate the RDF.
+Options are:</p>
+<blockquote>
+<div><ul>
+<li><p>”mic”: rMax according to minimum image convention.
+(see “The Minimum Image Convention in Non-Cubic MD Cells”
+by Smith,
+<a class="reference external" href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.57.1696">http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.57.1696</a>)
+Suggested value, as this leads to physically meaningful RDFs.</p></li>
+<li><p>”2mic : rMax twice as big as for “mic”. Legacy option
+to reproduce some earlier trajectory results</p></li>
+<li><p>float: Input some float to use it directly as input.</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
