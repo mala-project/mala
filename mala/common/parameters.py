@@ -4,7 +4,6 @@ import importlib
 import inspect
 import json
 import pickle
-import warnings
 
 try:
     import horovod.torch as hvd
@@ -14,7 +13,8 @@ except ModuleNotFoundError:
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
-    set_mpi_status, get_rank, get_local_rank, set_current_verbosity
+    set_mpi_status, get_rank, get_local_rank, set_current_verbosity, \
+    parallel_warn
 from mala.common.json_serializable import JSONSerializable
 
 
@@ -1042,8 +1042,8 @@ class Parameters:
             if torch.cuda.is_available():
                 self._use_gpu = True
             else:
-                warnings.warn("GPU requested, but no GPU found. MALA will "
-                              "operate with CPU only.", stacklevel=3)
+                parallel_warn("GPU requested, but no GPU found. MALA will "
+                              "operate with CPU only.")
 
         # Invalidate, will be updated in setter.
         self.device = None

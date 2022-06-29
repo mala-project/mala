@@ -9,13 +9,13 @@ https://github.com/mala-project/test-data.
 """
 
 import os
-import warnings
+from mala.common.parallelizer import parallel_warn
 
 name = "MALA_DATA_REPO"
 if name in os.environ:
     data_repo_path = os.environ[name]
 else:
-    warnings.warn(
+    parallel_warn(
         f"Environment variable {name} not set. You won't be able "
         "to run all examples and tests."
     )
