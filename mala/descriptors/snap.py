@@ -483,8 +483,6 @@ class SNAP(Descriptor):
                            "twojmax": self.parameters.twojmax,
                            "rcutfac": self.parameters.rcutfac,
                            "atom_config_fname": ase_out_path}
-        if self.parameters._configuration["mpi"]:
-            lammps_dict["bgridglobalflag"] = False
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
 
         # Build the LAMMPS object.
