@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overview &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>Publications &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -20,8 +20,8 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Theoretical Background" href="background.html" />
-    <link rel="prev" title="About" href="../about.html" /> 
+    <link rel="next" title="Installation" href="../installation.html" />
+    <link rel="prev" title="Theoretical Background" href="background.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,13 +42,13 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../about.html">About</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Overview</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#list-of-features">List of features</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="background.html">Theoretical Background</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Publications</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#published">Published</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pre-prints">Pre-Prints</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="background.html">Theoretical Background</a></li>
-<li class="toctree-l2"><a class="reference internal" href="publications.html">Publications</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -72,9 +72,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../about.html">About</a> &raquo;</li>
-      <li>Overview</li>
+      <li>Publications</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/about/overview.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/about/publications.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -82,59 +82,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="overview">
-<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline"></a></h1>
-<div class="section" id="list-of-features">
-<h2>List of features<a class="headerlink" href="#list-of-features" title="Permalink to this headline"></a></h2>
+  <div class="section" id="publications">
+<h1>Publications<a class="headerlink" href="#publications" title="Permalink to this headline"></a></h1>
+<p>Here’s an overview of publications that have used MALA in the past.</p>
+<div class="section" id="published">
+<h2>Published<a class="headerlink" href="#published" title="Permalink to this headline"></a></h2>
 <ul class="simple">
-<li><p>General features</p>
+<li><p><a class="reference external" href="https://www.doi.org/10.1103/PhysRevB.104.035120">Accelerating finite-temperature Kohn-Sham density functional theory with deep neural networks</a> (Phys. Rev. B)
+by J. A. Ellis, L. Fiedler, G. A. Popoola, N. A. Modine, J. A. Stephens, A. P. Thompson, A. Cangi, and S. Rajamanickam</p>
 <ul>
-<li><p>Central parameters class that holds all necessary parameters and allows for saving and loading for later use</p></li>
-<li><p>Interfaces to MPI and horovod for parallel training and inference</p></li>
-</ul>
-</li>
-<li><p>Preprocesing of simulation data</p>
-<ul>
-<li><p>Calculation of atomic descriptors from simulation data</p></li>
-<li><p>Parsing of LDOS data files</p></li>
-<li><p>Scaling and Conversion of data</p></li>
-</ul>
-</li>
-<li><p>Training of Surrogate models</p>
-<ul>
-<li><p>Creation, training and evaluation of feed-forward neural networks</p></li>
-<li><p>Training progress can be checkpointed, neural networks can be saved for later use</p></li>
-<li><p>Distributed training with horovod (experimental)</p></li>
-<li><p>(Distributed) hyperparameter optimization with optuna</p></li>
-<li><p>Hyperparameter optimization with orthogonal array tuning and neural architecure search without training</p></li>
-</ul>
-</li>
-<li><p>Postprocessing of surogate model output</p>
-<ul>
-<li><p>LDOS can be used to calculate DOS and/or density</p></li>
-<li><p>Different quantities of interest can be calculated</p>
-<ul>
-<li><p>Number of electrons (from LDOS, DOS or density)</p></li>
-<li><p>Band energy (from LDOS or DOS)</p></li>
-<li><p>Total energy (requires QE; from LDOS or DOS + density)</p></li>
-<li><p>Radial distribution function</p></li>
-<li><p>Three particle correlation function</p></li>
-<li><p>Static structure factor</p></li>
-</ul>
-</li>
+<li><p>Original publication detailling MALA workflow and application to aluminium data at room temperature and across the melting point</p></li>
 </ul>
 </li>
 </ul>
 </div>
-<div class="section" id="getting-started">
-<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h2>
+<div class="section" id="pre-prints">
+<h2>Pre-Prints<a class="headerlink" href="#pre-prints" title="Permalink to this headline"></a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="../installation.html"><span class="doc std std-doc">Installation instructions</span></a></p></li>
-<li><p><a class="reference external" href="https://github.com/mala-project/mala/tree/develop/examples">Examples</a></p></li>
-<li><p><a class="reference internal" href="../usage.html"><span class="doc std std-doc">Usage overview</span></a></p></li>
-<li><p>Further reading:</p>
+<li><p><a class="reference external" href="https://doi.org/10.48550/arXiv.2202.09186">Finding Machine-Learning Surrogates for Electronic Structures without Training</a>
+by L. Fiedler, N. Hoffmann, P. Mohammed, G. A. Popoola, T. Yovell, V. Oles, J. A. Ellis, S. Rajamanickam, A. Cangi</p>
 <ul>
-<li><p><a class="reference external" href="https://doi.org/10.1103/PhysRevB.104.035120">Accelerating finite-temperature Kohn-Sham density functional theory with deep neural networks</a></p></li>
+<li><p>This work details how different hyperparameter optimization techniques employed in MALA influence surrogate model accuracy and how training-free metrics can
+improve the perfomance of identifying models and calculation SNAP descriptors</p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://doi.org/10.48550/arXiv.2206.03754">Accelerating Equilibration in First-Principles Molecular Dynamics with Orbital-Free Density Functional Theory</a>
+by L. Fiedler, Z. A. Moldabekov, X. Shao, K. Jiang, T. Dornheim, M. Pavanello, A. Cangi</p>
+<ul>
+<li><p>This work shows how orbital-free DFT calculations can be used as input for MALA investigations to increase accuracy of predictions; further introduces
+a metric for determination of DFT-MD trajectory equilibration implemented in MALA</p></li>
 </ul>
 </li>
 </ul>
@@ -145,8 +121,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../about.html" class="btn btn-neutral float-left" title="About" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="background.html" class="btn btn-neutral float-right" title="Theoretical Background" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="background.html" class="btn btn-neutral float-left" title="Theoretical Background" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
