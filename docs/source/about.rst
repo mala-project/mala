@@ -6,3 +6,4 @@ About
 
    about/overview
    about/background
+   about/publications
