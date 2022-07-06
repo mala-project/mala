@@ -442,7 +442,7 @@ class SNAP(Descriptor):
                         zrem = nz - (zprocs*int(nz/zprocs))
                         zint = ''
                         for i in range(0, zrem):
-                            zvals = (((i+1)*2)*(nz/zprocs)*zcut)-0.00000001
+                            zvals = (((i+1)*2)*int(nz/zprocs)*zcut)-0.00000001
                             zint += format(zvals, ".8f")
                             zint += ' '
                         for i in range(zrem, zprocs-1):
