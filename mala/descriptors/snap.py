@@ -348,7 +348,8 @@ class SNAP(Descriptor):
 
                 # set the mpi processor grid for lammps
                 lammps_procs = f"1 {yprocs} {zprocs}"
-                print("mpi grid with nyfft: ", lammps_procs)
+                printout("mpi grid with nyfft: ", lammps_procs,
+                         min_verbosity=2)
 
                 # prepare y plane cuts for balance command in lammps if not
                 # integer value
