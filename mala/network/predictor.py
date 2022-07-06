@@ -115,6 +115,9 @@ class Predictor(Runner):
                 if self.data.descriptor_calculator.descriptors_contain_xyz:
                     self.data.target_calculator.local_grid = \
                         snap_descriptors[:, 0:3]
+                    self.data.target_calculator.y_planes = \
+                        self.data.descriptor_calculator.parameters.\
+                        use_y_splitting
                     snap_descriptors = snap_descriptors[:, 6:]
                     feature_length -= 3
                 else:

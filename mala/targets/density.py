@@ -390,7 +390,7 @@ class Density(Target):
             use_small_mem = False
             if self.parameters._configuration["mpi"]:
                 use_small_mem = True
-            te.initialize(use_small_mem)
+            te.initialize(use_small_mem, self.y_planes)
             Density.te_mutex = True
             printout("MALA: QuantumEspresso setup done.", min_verbosity=0)
         else:
@@ -423,6 +423,7 @@ class Density(Target):
         else:
             raise Exception("Density data has wrong dimensions. ")
         if number_of_gridpoints_mala != number_of_gridpoints:
+            print(get_rank(), number_of_gridpoints_mala, number_of_gridpoints)
             raise Exception("Grid is inconsistent between MALA and"
                             " Quantum Espresso")
 
@@ -510,4 +511,5 @@ class Density(Target):
         return_density_object.number_of_electrons_from_eigenvals = \
             ldos_object.number_of_electrons_from_eigenvals
         return_density_object.local_grid = ldos_object.local_grid
+        return_density_object.y_planes = ldos_object.y_planes
         return return_density_object

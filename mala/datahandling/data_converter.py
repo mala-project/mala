@@ -1,5 +1,6 @@
 """DataConverter class for converting snapshots into numpy arrays."""
 import os
+import warnings
 
 import numpy as np
 
@@ -50,6 +51,11 @@ class DataConverter:
         self.descriptor_calculator = descriptor_calculator
         if self.descriptor_calculator is None:
             self.descriptor_calculator = Descriptor(parameters)
+
+        if parameters.descriptors.use_z_splitting:
+            parameters.descriptors.use_z_splitting = True
+            printout("Disabling z-splitting for preprocessing.",
+                     min_verbosity=0)
 
         self.__snapshots_to_convert = []
         self.__snapshot_description = []
@@ -137,23 +143,12 @@ class DataConverter:
         # Parse and/or calculate the input descriptors.
         if description[0] == "qe.out":
             if original_units[0] is None:
-                if isinstance(self.descriptor_calculator, SNAP):
-                    tmp_input, local_size = self.descriptor_calculator. \
-                        calculate_from_qe_out(snapshot[0], snapshot[1],
-                                              z_splitting=False)
-                else:
-                    tmp_input, local_size = self.descriptor_calculator. \
-                        calculate_from_qe_out(snapshot[0], snapshot[1])
+                tmp_input, local_size = self.descriptor_calculator. \
+                    calculate_from_qe_out(snapshot[0], snapshot[1])
             else:
-                if isinstance(self.descriptor_calculator, SNAP):
-                    tmp_input, local_size = self.descriptor_calculator. \
-                        calculate_from_qe_out(snapshot[0], snapshot[1],
-                                              units=original_units[0],
-                                              z_splitting=False)
-                else:
-                    tmp_input, local_size = self.descriptor_calculator. \
-                        calculate_from_qe_out(snapshot[0], snapshot[1],
-                                              units=original_units[0])
+                tmp_input, local_size = self.descriptor_calculator. \
+                    calculate_from_qe_out(snapshot[0], snapshot[1],
+                                          units=original_units[0])
 
             if self.parameters._configuration["mpi"]:
                 tmp_input = self.descriptor_calculator.gather_descriptors(tmp_input)

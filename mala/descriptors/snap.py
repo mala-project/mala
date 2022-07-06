@@ -91,8 +91,7 @@ class SNAP(Descriptor):
         else:
             raise Exception("Unsupported unit for SNAP.")
 
-    def calculate_from_qe_out(self, qe_out_file, qe_out_directory,
-                              z_splitting=True):
+    def calculate_from_qe_out(self, qe_out_file, qe_out_directory):
         """
         Calculate the SNAP descriptors based on a Quantum Espresso outfile.
 
@@ -104,12 +103,6 @@ class SNAP(Descriptor):
         qe_out_directory : string
             Path to Quantum Espresso output file for snapshot.
 
-        z_splitting : bool
-            If True, the parallelization will exclusively done along the
-            z-axis. This is crucial for the parallel TEM inference to work,
-            but may be hindersome when just preprocessing some SNAP
-            descriptors. In that case False reverts the parallelization scheme
-            to the default LAMMPS scheme.
 
         Returns
         -------
@@ -144,11 +137,10 @@ class SNAP(Descriptor):
                 break
 
         return self.__calculate_snap(atoms,
-                                     qe_out_directory, [nx, ny, nz],
-                                     z_splitting=z_splitting)
+                                     qe_out_directory, [nx, ny, nz])
 
     def calculate_from_atoms(self, atoms, grid_dimensions,
-                             working_directory=".", z_splitting=True):
+                             working_directory="."):
         """
         Calculate the SNAP descriptors based on the atomic configurations.
 
@@ -163,13 +155,6 @@ class SNAP(Descriptor):
         working_directory : string
             A directory in which to perform the LAMMPS calculation.
 
-        z_splitting : bool
-            If True, the parallelization will exclusively done along the
-            z-axis. This is crucial for the parallel TEM inference to work,
-            but may be hindersome when just preprocessing some SNAP
-            descriptors. In that case False reverts the parallelization scheme
-            to the default LAMMPS scheme.
-
         Returns
         -------
         descriptors : numpy.array
@@ -179,7 +164,7 @@ class SNAP(Descriptor):
         # Enforcing / Checking PBC on the input atoms.
         atoms = self.enforce_pbc(atoms)
         return self.__calculate_snap(atoms, working_directory,
-                                     grid_dimensions, z_splitting=z_splitting)
+                                     grid_dimensions)
 
     def gather_descriptors(self, snap_descriptors_np, use_pickled_comm=False):
         """
@@ -290,8 +275,7 @@ class SNAP(Descriptor):
         else:
             return snap_descriptors_full[:, :, :, 3:]
 
-    def __calculate_snap(self, atoms, outdir, grid_dimensions,
-                         z_splitting=True):
+    def __calculate_snap(self, atoms, outdir, grid_dimensions):
         """Perform actual SNAP calculation."""
         from lammps import lammps
         lammps_format = "lammps-data"
@@ -332,17 +316,22 @@ class SNAP(Descriptor):
             # along y axis if nyfft is true lammps mpi processor grid needs to
             # be 1x{ny}x{nz} need to configure separate total_energy_module
             # with nyfft enabled
-            if self.parameters.number_y_planes > 0:
+            if self.parameters.use_y_splitting > 1:
                 # TODO automatically pass nyfft into QE from MALA
                 # if more processors thatn y*z grid dimensions requested
                 # send error. More processors than y*z grid dimensions reduces
                 # efficiency and scaling of QE.
-                nyfft = self.parameters.number_y_planes
+                nyfft = self.parameters.use_y_splitting
                 # number of y processors is equal to nyfft
                 yprocs = nyfft
                 # number of z processors is equal to total processors/nyfft is
                 # nyfft is used else zprocs = size
-                zprocs = size/yprocs
+                if size % yprocs == 0:
+                    zprocs = int(size/yprocs)
+                else:
+                    raise ValueError("Cannot evenly divide z-planes "
+                                     "in y-direction")
+
                 # check if total number of processors is greater than number of
                 # grid sections produce error if number of processors is
                 # greater than grid partions - will cause mismatch later in QE
@@ -389,7 +378,7 @@ class SNAP(Descriptor):
                     zcut = 1/nz
                     zint = ''
                     for i in range(0, zprocs-1):
-                        zvals = ((i+1)*(nz/zprocs))-0.00000001
+                        zvals = ((i + 1) * (nz / zprocs) * zcut) - 0.00000001
                         zint += format(zvals,".8f")
                         zint += ' '
                 else:
@@ -415,7 +404,7 @@ class SNAP(Descriptor):
                                "rcutfac": self.parameters.rcutfac,
                                "atom_config_fname": ase_out_path}
             else:
-                if z_splitting:
+                if self.parameters.use_z_splitting:
                     # when nyfft is not used only split processors along z axis
                     size = get_size()
                     zprocs = size
@@ -484,6 +473,7 @@ class SNAP(Descriptor):
                            "rcutfac": self.parameters.rcutfac,
                            "atom_config_fname": ase_out_path}
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
+        printout(lammps_dict["zbal"])
 
         # Build the LAMMPS object.
         lmp = lammps(cmdargs=lmp_cmdargs)
@@ -493,7 +483,7 @@ class SNAP(Descriptor):
         if self.parameters.lammps_compute_file == "":
             filepath = __file__.split("snap")[0]
             if self.parameters._configuration["mpi"]:
-                if z_splitting:
+                if self.parameters.use_z_splitting:
                     self.parameters.lammps_compute_file = \
                         os.path.join(filepath, "in.bgridlocal.python")
                 else:
