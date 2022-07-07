@@ -423,7 +423,6 @@ class Density(Target):
         else:
             raise Exception("Density data has wrong dimensions. ")
         if number_of_gridpoints_mala != number_of_gridpoints:
-            print(get_rank(), number_of_gridpoints_mala, number_of_gridpoints)
             raise Exception("Grid is inconsistent between MALA and"
                             " Quantum Espresso")
 
