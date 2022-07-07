@@ -97,13 +97,22 @@
 <h2>Data generation<a class="headerlink" href="#data-generation" title="Permalink to this headline"></a></h2>
 <p>Data generation for MALA is done by electronic structure calculations using
 appropriate simulation software. The raw outputs of such calculations
-are atomic positions and the LDOS, although often as separate cube files.
-Currently, only QuantumESPRESSO has been tested. More specifically, the MALA
-team maintains a special version of QuantumESPRESSO. It is both used as
-interface in MALA for the calculation of total energies, as well as for the
-DFT calculations. It contains a modification which allows flexible LDOS
-sampling, needed for this LDOS based workflow. It can be obtained at:</p>
-<p><a class="reference external" href="https://gitlab.com/casus/q-e/-/tree/tem_original_development">https://gitlab.com/casus/q-e/-/tree/tem_original_development</a></p>
+are atomic positions and the LDOS, the latter usually as multiple individual
+.cube files.</p>
+<p>Currently, only QuantumESPRESSO has been tested. Starting with version 7.2,
+any version of QuantumESPRESSO can be used to create data for MALA. In order
+to do so</p>
+<ol class="arabic simple">
+<li><p>Perform a regular DFT calculation using <code class="docutils literal notranslate"><span class="pre">pw.x</span></code></p></li>
+<li><p>Calculate the LDOS using <code class="docutils literal notranslate"><span class="pre">pp.x</span></code></p></li>
+</ol>
+<p>Make sure to use enough k-points in the DFT calculation (LDOS sampling
+requires denser k-grids then regular DFT calculations) and an appropriate
+energy grid when calculating the LDOS. See the
+<a class="reference internal" href="../about/publications.html"><span class="doc">MALA publications</span></a> for
+examples of such values for other materials. Lastly, when calculating
+the LDOS with <code class="docutils literal notranslate"><span class="pre">pp.x</span></code>, make sure to set <code class="docutils literal notranslate"><span class="pre">use_gauss_ldos=.true.</span></code> in the
+<code class="docutils literal notranslate"><span class="pre">inputpp</span></code> section.</p>
 </div>
 <div class="section" id="data-conversion">
 <h2>Data Conversion<a class="headerlink" href="#data-conversion" title="Permalink to this headline"></a></h2>
@@ -112,7 +121,7 @@ For this, the <code class="docutils literal notranslate"><span class="pre">DataC
 </div>
 <div class="section" id="using-input-and-output-data">
 <h2>Using input and output data<a class="headerlink" href="#using-input-and-output-data" title="Permalink to this headline"></a></h2>
-<p>MALA views divides provided data into two categories: <code class="docutils literal notranslate"><span class="pre">Descriptor</span></code> objects
+<p>MALA divides provided data into two categories: <code class="docutils literal notranslate"><span class="pre">Descriptor</span></code> objects
 and <code class="docutils literal notranslate"><span class="pre">Target</span></code> objects.</p>
 <div class="section" id="descriptors">
 <h3>Descriptors<a class="headerlink" href="#descriptors" title="Permalink to this headline"></a></h3>
