@@ -474,7 +474,6 @@ class SNAP(Descriptor):
                            "rcutfac": self.parameters.rcutfac,
                            "atom_config_fname": ase_out_path}
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
-        printout(lammps_dict["zbal"])
 
         # Build the LAMMPS object.
         lmp = lammps(cmdargs=lmp_cmdargs)
