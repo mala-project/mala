@@ -60,9 +60,12 @@ data_converter.convert_snapshots("./", naming_scheme="Be_snapshot*")
 
 # If parts of the data have already been processed, the DataConverter class can
 # also be used to convert the rest.
+# No matter which way you access the DataConvert, you can always specify
+# keywords (check API) for the calculators.
 data_converter = mala.DataConverter(test_parameters)
 data_converter.add_snapshot_qeout("Be.pw.scf.out", data_path)
-data_converter.convert_snapshots("./", naming_scheme="Be_snapshot_only_in*")
+data_converter.convert_snapshots("./", naming_scheme="Be_snapshot_only_in*",
+                                 descriptor_calculation_kwargs={"working_directory": data_path})
 
 data_converter = mala.DataConverter(test_parameters)
 data_converter.add_snapshot_cube("cubes/tmp.pp*Be_ldos.cube",

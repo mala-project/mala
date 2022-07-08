@@ -154,6 +154,8 @@ class DataConverter:
                                       "output": output_units})
 
     def convert_single_snapshot(self, snapshot_number,
+                                descriptor_calculation_kwargs,
+                                target_calculator_kwargs,
                                 input_path=None,
                                 output_path=None,
                                 use_memmap=None,
@@ -183,6 +185,14 @@ class DataConverter:
         return_data : bool
             If True, inputs and outputs will be returned directly.
 
+        target_calculator_kwargs : dict
+            Dictionary with additional keyword arguments for the calculation
+            or parsing of the target quantities.
+
+        descriptor_calculation_kwargs : dict
+            Dictionary with additional keyword arguments for the calculation
+            or parsing of the descriptor quantities.
+
         Returns
         -------
         inputs : numpy.array , optional
@@ -197,15 +207,11 @@ class DataConverter:
 
         # Parse and/or calculate the input descriptors.
         if description["input"] == "qe.out":
-            if original_units["input"] is None:
-                tmp_input, local_size = self.descriptor_calculator. \
-                    calculate_from_qe_out(snapshot["input"][0],
-                                          snapshot["input"][1])
-            else:
-                tmp_input, local_size = self.descriptor_calculator. \
-                    calculate_from_qe_out(snapshot["input"][0],
-                                          snapshot["input"][1],
-                                          units=original_units["input"])
+            descriptor_calculation_kwargs["units"] = original_units["input"]
+            tmp_input, local_size = self.descriptor_calculator. \
+                calculate_from_qe_out(snapshot["input"][0],
+                                      snapshot["input"][1],
+                                      **descriptor_calculation_kwargs)
             if self.parameters._configuration["mpi"]:
                 tmp_input = self.descriptor_calculator.gather_descriptors(tmp_input)
 
@@ -232,18 +238,12 @@ class DataConverter:
 
         # Parse and/or calculate the output descriptors.
         if description["output"] == ".cube":
-
+            target_calculator_kwargs["units"] = original_units["output"]
+            target_calculator_kwargs["use_memmap"] = use_memmap
             # If no units are provided we just assume standard units.
-            if original_units["output"] is None:
-                tmp_output = self.target_calculator.read_from_cube(
-                    snapshot["output"][0], snapshot["output"][1],
-                    use_memmap=use_memmap)
-            else:
-                tmp_output = self.target_calculator. \
-                    read_from_cube(snapshot["output"][0],
-                                   snapshot["output"][1], units=
-                                   original_units["output"],
-                                   use_memmap=use_memmap)
+            tmp_output = self.target_calculator.read_from_cube(
+                snapshot["output"][0], snapshot["output"][1],
+                **target_calculator_kwargs)
 
         elif description["output"] is None:
             # In this case, only the input is processed.
@@ -269,7 +269,9 @@ class DataConverter:
 
     def convert_snapshots(self, save_path="./",
                           naming_scheme="ELEM_snapshot*", starts_at=0,
-                          file_based_communication=False):
+                          file_based_communication=False,
+                          descriptor_calculation_kwargs=None,
+                          target_calculator_kwargs=None):
         """
         Convert the snapshots in the list to numpy arrays.
 
@@ -296,7 +298,21 @@ class DataConverter:
             This is drastically less performant then using MPI, but may be
             necessary when memory is scarce. Default is False, i.e., the faster
             MPI version will be used.
+
+        target_calculator_kwargs : dict
+            Dictionary with additional keyword arguments for the calculation
+            or parsing of the target quantities.
+
+        descriptor_calculation_kwargs : dict
+            Dictionary with additional keyword arguments for the calculation
+            or parsing of the descriptor quantities.
         """
+        if descriptor_calculation_kwargs is None:
+            descriptor_calculation_kwargs = {}
+
+        if target_calculator_kwargs is None:
+            target_calculator_kwargs = {}
+
         for i in range(0, len(self.__snapshots_to_convert)):
             snapshot_number = i + starts_at
             snapshot_name = naming_scheme
@@ -309,7 +325,10 @@ class DataConverter:
                 memmap = os.path.join(save_path, snapshot_name +
                                       ".out.npy_temp")
 
-            self.convert_single_snapshot(i, input_path=os.path.join(save_path,
+            self.convert_single_snapshot(i,
+                                         descriptor_calculation_kwargs,
+                                         target_calculator_kwargs,
+                                         input_path=os.path.join(save_path,
                                          snapshot_name+".in.npy"),
                                          output_path=os.path.join(save_path,
                                          snapshot_name+".out.npy"),

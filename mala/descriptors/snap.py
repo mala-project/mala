@@ -85,7 +85,9 @@ class SNAP(Descriptor):
         else:
             raise Exception("Unsupported unit for SNAP.")
 
-    def calculate_from_qe_out(self, qe_out_file, qe_out_directory):
+    def calculate_from_qe_out(self, qe_out_file, qe_out_directory,
+                              working_directory=None,
+                              **kwargs):
         """
         Calculate the SNAP descriptors based on a Quantum Espresso outfile.
 
@@ -96,6 +98,10 @@ class SNAP(Descriptor):
 
         qe_out_directory : string
             Path to Quantum Espresso output file for snapshot.
+
+        working_directory : string
+            A directory in which to perform the LAMMPS calculation.
+            Optional, if None, the QE out directory will be used.
 
         Returns
         -------
@@ -129,8 +135,11 @@ class SNAP(Descriptor):
                 nz = int(tmp.split(",")[2])
                 break
 
+        if working_directory is None:
+            working_directory = qe_out_directory
+
         return self.__calculate_snap(atoms,
-                                     qe_out_directory, [nx, ny, nz])
+                                     working_directory, [nx, ny, nz])
 
     def calculate_from_atoms(self, atoms, grid_dimensions,
                              working_directory="."):

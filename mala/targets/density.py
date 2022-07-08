@@ -33,7 +33,7 @@ class Density(Target):
         """Get dimension of this target if used as feature in ML."""
         return 1
 
-    def read_from_cube(self, file_name, directory, units=None):
+    def read_from_cube(self, file_name, directory, units=None, **kwargs):
         """
         Read the density data from a cube file.
 
