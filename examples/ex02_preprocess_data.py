@@ -58,11 +58,16 @@ data_converter.add_snapshot_qeout_cube("Be.pw.scf.out", data_path,
 # Convert all the snapshots and save them in the current directory.
 data_converter.convert_snapshots("./", naming_scheme="Be_snapshot*")
 
-####################
-# RESULTS.
-# Print the used parameters and check whether the preprocessed data
-# has the desired dimensions.
-####################
+# If parts of the data have already been processed, the DataConverter class can
+# also be used to convert the rest.
+data_converter = mala.DataConverter(test_parameters)
+data_converter.add_snapshot_qeout("Be.pw.scf.out", data_path)
+data_converter.convert_snapshots("./", naming_scheme="Be_snapshot_only_in*")
+
+data_converter = mala.DataConverter(test_parameters)
+data_converter.add_snapshot_cube("cubes/tmp.pp*Be_ldos.cube",
+                                 data_path, output_units="1/Ry")
+data_converter.convert_snapshots("./", naming_scheme="Be_snapshot_only_out*")
 
 printout("Parameters used for this experiment:")
 test_parameters.show()

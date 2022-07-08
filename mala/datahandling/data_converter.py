@@ -85,11 +85,73 @@ class DataConverter:
         output_units : string
             Unit of the output data.
         """
-        self.__snapshots_to_convert.append([qe_out_file, qe_out_directory,
-                                            cube_naming_scheme,
-                                            cube_directory])
-        self.__snapshot_description.append(["qe.out", ".cube"])
-        self.__snapshot_units.append([input_units, output_units])
+        self.__snapshots_to_convert.append({"input": [qe_out_file,
+                                                      qe_out_directory],
+                                            "output": [cube_naming_scheme,
+                                                       cube_directory]})
+        self.__snapshot_description.append({"input": "qe.out",
+                                            "output": ".cube"})
+        self.__snapshot_units.append({"input": input_units,
+                                      "output": output_units})
+
+    def add_snapshot_qeout(self, qe_out_file, qe_out_directory,
+                           input_units=None):
+        """
+        Add a Quantum Espresso snapshot to the list of conversion list.
+
+        This snapshot only contains a QE.out file, i.e., only the SNAP
+        descriptors will be calculated. Useful if the output data has already
+        been processed.
+
+        Parameters
+        ----------
+        qe_out_file : string
+            Name of Quantum Espresso output file for this snapshot.
+
+        qe_out_directory : string
+            Path to Quantum Espresso output file for this snapshot.
+
+        input_units : string
+            Unit of the input data.
+        """
+        self.__snapshots_to_convert.append({"input": [qe_out_file,
+                                                      qe_out_directory],
+                                            "output": None})
+        self.__snapshot_description.append({"input": "qe.out",
+                                            "output": None})
+        self.__snapshot_units.append({"input": input_units,
+                                      "output": None})
+
+    def add_snapshot_cube(self, cube_naming_scheme, cube_directory,
+                          input_units=None, output_units=None):
+        """
+        Add a Quantum Espresso snapshot to the list of conversion list.
+
+        This snapshot only contains the cube files for the output
+        quantity (LDOS/density), so only the output quantity will be
+        calculated. Useful if the input data has already been processed.
+
+        Parameters
+        ----------
+        cube_naming_scheme : string
+            Naming scheme for the LDOS .cube files.
+
+        cube_directory : string
+            Directory containing the LDOS .cube files.
+
+        input_units : string
+            Unit of the input data.
+
+        output_units : string
+            Unit of the output data.
+        """
+        self.__snapshots_to_convert.append({"input": None,
+                                            "output": [cube_naming_scheme,
+                                                       cube_directory]})
+        self.__snapshot_description.append({"input": None,
+                                            "output": ".cube"})
+        self.__snapshot_units.append({"input": None,
+                                      "output": output_units})
 
     def convert_single_snapshot(self, snapshot_number,
                                 input_path=None,
@@ -134,14 +196,16 @@ class DataConverter:
         original_units = self.__snapshot_units[snapshot_number]
 
         # Parse and/or calculate the input descriptors.
-        if description[0] == "qe.out":
-            if original_units[0] is None:
+        if description["input"] == "qe.out":
+            if original_units["input"] is None:
                 tmp_input, local_size = self.descriptor_calculator. \
-                    calculate_from_qe_out(snapshot[0], snapshot[1])
+                    calculate_from_qe_out(snapshot["input"][0],
+                                          snapshot["input"][1])
             else:
                 tmp_input, local_size = self.descriptor_calculator. \
-                    calculate_from_qe_out(snapshot[0], snapshot[1],
-                                          units=original_units[0])
+                    calculate_from_qe_out(snapshot["input"][0],
+                                          snapshot["input"][1],
+                                          units=original_units["input"])
             if self.parameters._configuration["mpi"]:
                 tmp_input = self.descriptor_calculator.gather_descriptors(tmp_input)
 
@@ -150,39 +214,58 @@ class DataConverter:
                 if self.descriptor_calculator.descriptors_contain_xyz is False:
                     tmp_input = tmp_input[:, :, :, 3:]
 
+        elif description["input"] is None:
+            # In this case, only the output is processed.
+            pass
+
         else:
             raise Exception("Unknown file extension, cannot convert target")
 
-        # Save data and delete, if not requested otherwise.
-        if get_rank() == 0:
-            if input_path is not None:
-                np.save(input_path, tmp_input)
+        if description["input"] is not None:
+            # Save data and delete, if not requested otherwise.
+            if get_rank() == 0:
+                if input_path is not None:
+                    np.save(input_path, tmp_input)
 
-        if not return_data:
-            del tmp_input
+            if not return_data:
+                del tmp_input
 
         # Parse and/or calculate the output descriptors.
-        if description[1] == ".cube":
+        if description["output"] == ".cube":
 
             # If no units are provided we just assume standard units.
-            if original_units[1] is None:
+            if original_units["output"] is None:
                 tmp_output = self.target_calculator.read_from_cube(
-                    snapshot[2], snapshot[3], use_memmap=use_memmap)
+                    snapshot["output"][0], snapshot["output"][1],
+                    use_memmap=use_memmap)
             else:
                 tmp_output = self.target_calculator. \
-                    read_from_cube(snapshot[2], snapshot[3], units=
-                original_units[1], use_memmap=use_memmap)
+                    read_from_cube(snapshot["output"][0],
+                                   snapshot["output"][1], units=
+                                   original_units["output"],
+                                   use_memmap=use_memmap)
+
+        elif description["output"] is None:
+            # In this case, only the input is processed.
+            pass
+
         else:
             raise Exception(
                 "Unknown file extension, cannot convert target"
                 "data.")
-
-        if get_rank() == 0:
-            if output_path is not None:
-                np.save(output_path, tmp_output)
+        if description["output"] is not None:
+            if get_rank() == 0:
+                if output_path is not None:
+                    np.save(output_path, tmp_output)
 
         if return_data:
-            return tmp_input, tmp_output
+            if description["input"] is not None and description["output"] \
+                    is not None:
+                return tmp_input, tmp_output
+            elif description["input"] is None:
+                return tmp_output
+            elif description["output"] is None:
+                return tmp_input
 
     def convert_snapshots(self, save_path="./",
                           naming_scheme="ELEM_snapshot*", starts_at=0,
