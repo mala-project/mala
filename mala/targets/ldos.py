@@ -93,7 +93,7 @@ class LDOS(Target):
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_cube(self, file_name_scheme, directory, units="1/eV",
-                       use_memmap=None):
+                       use_memmap=None, **kwargs):
         """
         Read the LDOS data from multiple cube files.
 
@@ -130,7 +130,6 @@ class LDOS(Target):
         # tmp.pp003ELEMENT_ldos.cube
         # ...
         # tmp.pp100ELEMENT_ldos.cube
-
         # Find out the number of digits that are needed to encode this
         # grid (by QE).
         digits = int(math.log10(self.parameters.ldos_gridsize)) + 1
