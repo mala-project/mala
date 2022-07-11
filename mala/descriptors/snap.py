@@ -390,13 +390,14 @@ class SNAP(Descriptor):
                     zint = ''
                     for i in range(0, zrem):
                         zvals = (((i+1)*2)*zcut)-0.00000001
-                        zint += format(zvals,".8f")
+                        zint += format(zvals, ".8f")
                         zint += ' '
                     for i in range(zrem, zprocs-1):
                         zvals = ((i+1+zrem)*zcut)-0.00000001
-                        zint += format(zvals,".8f")
+                        zint += format(zvals, ".8f")
                         zint += ' '
-                lammps_dict = {"lammps_procs": f"processors {lammps_procs}",
+                lammps_dict = {"lammps_procs": f"processors {lammps_procs} "
+                                               f"map xyz",
                                "zbal": f"balance 1.0 y {yint} z {zint}",
                                "ngridx": nx,
                                "ngridy": ny,
