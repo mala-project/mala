@@ -123,6 +123,10 @@ def evaluate_all(args, model, output_table_path=None, snapshot_results_dir=None,
     for i, snapshot in enumerate(test_data.snapshots):
         temp, density, ss_id, phase = snapshot
         temp = int(temp)
+        if temp == 0:
+            float_temp = 1e-6
+        else:
+            float_temp = float(temp)
         print(f"Temp: {temp}K, Density: {density}gcc, ID: {ss_id}")
         pred_ados = np.stack(pred_ados_by_config[snapshot])
         ref_ados = np.stack(ref_ados_by_config[snapshot])
@@ -140,13 +144,14 @@ def evaluate_all(args, model, output_table_path=None, snapshot_results_dir=None,
         total_rmse_dos += rmse_dos
 
         # fermi level and band energy
-        n_elec = DFT_calculators.dft_2_enum(test_data.dft_results[i], e_fermi='sc', temperature=temp)
-        fermi_pred = DFT_calculators.dos_2_efermi(pred_dos_calc, temp, n_electrons=n_elec)
-        fermi_ref = DFT_calculators.dos_2_efermi(ref_dos_calc, temp, n_electrons=n_elec)
+        n_elec = DFT_calculators.dft_2_enum(test_data.dft_results[i], e_fermi='sc', temperature=float_temp)
+        # problem in dos_2_efermi for 0K
+        fermi_pred = DFT_calculators.dos_2_efermi(pred_dos_calc, float_temp, n_electrons=n_elec)
+        fermi_ref = DFT_calculators.dos_2_efermi(ref_dos_calc, float_temp, n_electrons=n_elec)
         total_error_fermi += abs(fermi_ref-fermi_pred)
 
-        pred_eband = DFT_calculators.dos_2_eband(pred_dos_calc, e_fermi=fermi_pred, temperature=temp)
-        ref_eband = DFT_calculators.dos_2_eband(ref_dos_calc, e_fermi=fermi_ref, temperature=temp)
+        pred_eband = DFT_calculators.dos_2_eband(pred_dos_calc, e_fermi=fermi_pred, temperature=float_temp)
+        ref_eband = DFT_calculators.dos_2_eband(ref_dos_calc, e_fermi=fermi_ref, temperature=float_temp)
         band_energies[snapshot] = {
             "prediction": pred_eband,
             "reference": ref_eband
@@ -236,6 +241,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--test-out", default='test.csv', help="Name of test results file")
     parser.add_argument('-l', '--level', help='Level of mesh refinement', type=int, dest='l', default=3)
     parser.add_argument('-R', type=int, default=16, help='Number of radial levels')
+    parser.add_argument('--output-hidden-layers', type=int, default=2, help='Number of hidden layers in the output')
     parser.add_argument('-rcut', help='Neighborhood radius for molecular environment', type=float, default=7)
     parser.add_argument("-p", default="mean", help="Pooling type: [max, sum, mean]")
     parser.add_argument("-m", default="linear", choices=["linear"], help="Data mapping type")

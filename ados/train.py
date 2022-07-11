@@ -83,7 +83,7 @@ def model_setup(args, **kwargs):
     conv_radial_layers = [2, 2, 2, 1]
 
     output_h_dim = conv_radial_dims[-1]
-    output_hidden_dims = [output_h_dim, output_h_dim]
+    output_hidden_dims = [output_h_dim]*args.output_hidden_layers
     pad = int((args.k_radial-1)/2)
     out_dim = E_LVLS
     in_feat_dim = 1
@@ -258,6 +258,7 @@ if __name__ == "__main__":
     parser.add_argument("-x", "--results", default='', help="Name of experiment results file")
     parser.add_argument('-l', '--level', help='Level of mesh refinement', type=int, dest='l', default=3)
     parser.add_argument('-R', type=int, default=16, help='Number of radial levels')
+    parser.add_argument('--output-hidden-layers', type=int, default=2, help='Number of hidden layers in the output')
     parser.add_argument('-rcut', help='Neighborhood radius for molecular environment', type=float, default=7)
     parser.add_argument("-p", default="mean", help="Pooling type: [max, sum, mean]")
     parser.add_argument("-m", default="linear", choices=["linear"], help="Data mapping type")

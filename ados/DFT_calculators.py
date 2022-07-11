@@ -319,9 +319,12 @@ def get_Br2AA():
 #----------------------------------------------------------------------------------------#
 # Fermi-Dirac distribution function
 def fd_function(energies, e_fermi, temperature):
-    return 1.0 / (1.0 + np.exp((energies - e_fermi) / (kB * temperature)))
-
-
+    if temperature == 0.0:
+        n = np.ones_like(energies)
+        n[energies > e_fermi] = 0.0
+    else:
+        n = 1.0 / (1.0 + np.exp((energies - e_fermi) / (kB * temperature)))
+    return n
 
 #----------------------------------------------------------------------------------------#
 # Define the integral of the Fermi Function
