@@ -158,13 +158,77 @@
 <span class="sd">        output_units : string</span>
 <span class="sd">            Unit of the output data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">,</span>
-                                            <span class="n">cube_naming_scheme</span><span class="p">,</span>
-                                            <span class="n">cube_directory</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s2">&quot;qe.out&quot;</span><span class="p">,</span> <span class="s2">&quot;.cube&quot;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">input_units</span><span class="p">,</span> <span class="n">output_units</span><span class="p">])</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qe_out_file</span><span class="p">,</span>
+                                                      <span class="n">qe_out_directory</span><span class="p">],</span>
+                                            <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">cube_naming_scheme</span><span class="p">,</span>
+                                                       <span class="n">cube_directory</span><span class="p">]})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="s2">&quot;qe.out&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="s2">&quot;.cube&quot;</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">input_units</span><span class="p">,</span>
+                                      <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">output_units</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="DataConverter.add_snapshot_qeout"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot_qeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">,</span>
+                           <span class="n">input_units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a Quantum Espresso snapshot to the list of conversion list.</span>
+
+<span class="sd">        This snapshot only contains a QE.out file, i.e., only the SNAP</span>
+<span class="sd">        descriptors will be calculated. Useful if the output data has already</span>
+<span class="sd">        been processed.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        qe_out_file : string</span>
+<span class="sd">            Name of Quantum Espresso output file for this snapshot.</span>
+
+<span class="sd">        qe_out_directory : string</span>
+<span class="sd">            Path to Quantum Espresso output file for this snapshot.</span>
+
+<span class="sd">        input_units : string</span>
+<span class="sd">            Unit of the input data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qe_out_file</span><span class="p">,</span>
+                                                      <span class="n">qe_out_directory</span><span class="p">],</span>
+                                            <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="s2">&quot;qe.out&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">input_units</span><span class="p">,</span>
+                                      <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="DataConverter.add_snapshot_cube"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.add_snapshot_cube">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cube_naming_scheme</span><span class="p">,</span> <span class="n">cube_directory</span><span class="p">,</span>
+                          <span class="n">input_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a Quantum Espresso snapshot to the list of conversion list.</span>
+
+<span class="sd">        This snapshot only contains the cube files for the output</span>
+<span class="sd">        quantity (LDOS/density), so only the output quantity will be</span>
+<span class="sd">        calculated. Useful if the input data has already been processed.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cube_naming_scheme : string</span>
+<span class="sd">            Naming scheme for the LDOS .cube files.</span>
+
+<span class="sd">        cube_directory : string</span>
+<span class="sd">            Directory containing the LDOS .cube files.</span>
+
+<span class="sd">        input_units : string</span>
+<span class="sd">            Unit of the input data.</span>
+
+<span class="sd">        output_units : string</span>
+<span class="sd">            Unit of the output data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                                            <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">cube_naming_scheme</span><span class="p">,</span>
+                                                       <span class="n">cube_directory</span><span class="p">]})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                                            <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="s2">&quot;.cube&quot;</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                                      <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">output_units</span><span class="p">})</span></div>
 
 <div class="viewcode-block" id="DataConverter.convert_single_snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_single_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">convert_single_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">,</span>
+                                <span class="n">descriptor_calculation_kwargs</span><span class="p">,</span>
+                                <span class="n">target_calculator_kwargs</span><span class="p">,</span>
                                 <span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -194,6 +258,14 @@
 <span class="sd">        return_data : bool</span>
 <span class="sd">            If True, inputs and outputs will be returned directly.</span>
 
+<span class="sd">        target_calculator_kwargs : dict</span>
+<span class="sd">            Dictionary with additional keyword arguments for the calculation</span>
+<span class="sd">            or parsing of the target quantities.</span>
+
+<span class="sd">        descriptor_calculation_kwargs : dict</span>
+<span class="sd">            Dictionary with additional keyword arguments for the calculation</span>
+<span class="sd">            or parsing of the descriptor quantities.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        inputs : numpy.array , optional</span>
@@ -207,14 +279,12 @@
         <span class="n">original_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="p">[</span><span class="n">snapshot_number</span><span class="p">]</span>
 
         <span class="c1"># Parse and/or calculate the input descriptors.</span>
-        <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;qe.out&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">original_units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                    <span class="n">calculate_from_qe_out</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">snapshot</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
-                    <span class="n">calculate_from_qe_out</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">snapshot</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                          <span class="n">units</span><span class="o">=</span><span class="n">original_units</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;qe.out&quot;</span><span class="p">:</span>
+            <span class="n">descriptor_calculation_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span>
+            <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
+                <span class="n">calculate_from_qe_out</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                      <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                      <span class="o">**</span><span class="n">descriptor_calculation_kwargs</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
                 <span class="n">tmp_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">gather_descriptors</span><span class="p">(</span><span class="n">tmp_input</span><span class="p">)</span>
 
@@ -223,43 +293,58 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                     <span class="n">tmp_input</span> <span class="o">=</span> <span class="n">tmp_input</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span>
 
+        <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># In this case, only the output is processed.</span>
+            <span class="k">pass</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown file extension, cannot convert target&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Save data and delete, if not requested otherwise.</span>
-        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">input_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">tmp_input</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Save data and delete, if not requested otherwise.</span>
+            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">input_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">tmp_input</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">return_data</span><span class="p">:</span>
-            <span class="k">del</span> <span class="n">tmp_input</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">return_data</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">tmp_input</span>
 
         <span class="c1"># Parse and/or calculate the output descriptors.</span>
-        <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.cube&quot;</span><span class="p">:</span>
-
+        <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.cube&quot;</span><span class="p">:</span>
+            <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
+            <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_memmap</span>
             <span class="c1"># If no units are provided we just assume standard units.</span>
-            <span class="k">if</span> <span class="n">original_units</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span>
-                    <span class="n">snapshot</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">snapshot</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">use_memmap</span><span class="o">=</span><span class="n">use_memmap</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
-                    <span class="n">read_from_cube</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">snapshot</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">units</span><span class="o">=</span>
-                <span class="n">original_units</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">use_memmap</span><span class="o">=</span><span class="n">use_memmap</span><span class="p">)</span>
+            <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span>
+                <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                <span class="o">**</span><span class="n">target_calculator_kwargs</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># In this case, only the input is processed.</span>
+            <span class="k">pass</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;Unknown file extension, cannot convert target&quot;</span>
                 <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">tmp_output</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">tmp_output</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">return_data</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">tmp_input</span><span class="p">,</span> <span class="n">tmp_output</span></div>
+            <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> \
+                    <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">tmp_input</span><span class="p">,</span> <span class="n">tmp_output</span>
+            <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">tmp_output</span>
+            <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">tmp_input</span></div>
 
 <div class="viewcode-block" id="DataConverter.convert_snapshots"><a class="viewcode-back" href="../../../api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">[docs]</a>    <span class="k">def</span> <span class="nf">convert_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
                           <span class="n">naming_scheme</span><span class="o">=</span><span class="s2">&quot;ELEM_snapshot*&quot;</span><span class="p">,</span> <span class="n">starts_at</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                          <span class="n">file_based_communication</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                          <span class="n">file_based_communication</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">descriptor_calculation_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">target_calculator_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the snapshots in the list to numpy arrays.</span>
 
@@ -286,7 +371,21 @@
 <span class="sd">            This is drastically less performant then using MPI, but may be</span>
 <span class="sd">            necessary when memory is scarce. Default is False, i.e., the faster</span>
 <span class="sd">            MPI version will be used.</span>
+
+<span class="sd">        target_calculator_kwargs : dict</span>
+<span class="sd">            Dictionary with additional keyword arguments for the calculation</span>
+<span class="sd">            or parsing of the target quantities.</span>
+
+<span class="sd">        descriptor_calculation_kwargs : dict</span>
+<span class="sd">            Dictionary with additional keyword arguments for the calculation</span>
+<span class="sd">            or parsing of the descriptor quantities.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">descriptor_calculation_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">descriptor_calculation_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">target_calculator_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">target_calculator_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__snapshots_to_convert</span><span class="p">)):</span>
             <span class="n">snapshot_number</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">starts_at</span>
             <span class="n">snapshot_name</span> <span class="o">=</span> <span class="n">naming_scheme</span>
@@ -299,7 +398,10 @@
                 <span class="n">memmap</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">snapshot_name</span> <span class="o">+</span>
                                       <span class="s2">&quot;.out.npy_temp&quot;</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">convert_single_snapshot</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">input_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">convert_single_snapshot</span><span class="p">(</span><span class="n">i</span><span class="p">,</span>
+                                         <span class="n">descriptor_calculation_kwargs</span><span class="p">,</span>
+                                         <span class="n">target_calculator_kwargs</span><span class="p">,</span>
+                                         <span class="n">input_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span>
                                          <span class="n">snapshot_name</span><span class="o">+</span><span class="s2">&quot;.in.npy&quot;</span><span class="p">),</span>
                                          <span class="n">output_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span>
                                          <span class="n">snapshot_name</span><span class="o">+</span><span class="s2">&quot;.out.npy&quot;</span><span class="p">),</span>

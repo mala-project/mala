@@ -166,7 +166,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for LDOS.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="LDOS.read_from_cube"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_cube">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name_scheme</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">,</span>
-                       <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                       <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the LDOS data from multiple cube files.</span>
 
@@ -203,7 +203,6 @@
         <span class="c1"># tmp.pp003ELEMENT_ldos.cube</span>
         <span class="c1"># ...</span>
         <span class="c1"># tmp.pp100ELEMENT_ldos.cube</span>
-
         <span class="c1"># Find out the number of digits that are needed to encode this</span>
         <span class="c1"># grid (by QE).</span>
         <span class="n">digits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>

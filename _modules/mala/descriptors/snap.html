@@ -158,7 +158,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for SNAP.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SNAP.calculate_from_qe_out"><a class="viewcode-back" href="../../../api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP.calculate_from_qe_out">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">):</span>
+<div class="viewcode-block" id="SNAP.calculate_from_qe_out"><a class="viewcode-back" href="../../../api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP.calculate_from_qe_out">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">,</span>
+                              <span class="n">working_directory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the SNAP descriptors based on a Quantum Espresso outfile.</span>
 
@@ -169,6 +171,10 @@
 
 <span class="sd">        qe_out_directory : string</span>
 <span class="sd">            Path to Quantum Espresso output file for snapshot.</span>
+
+<span class="sd">        working_directory : string</span>
+<span class="sd">            A directory in which to perform the LAMMPS calculation.</span>
+<span class="sd">            Optional, if None, the QE out directory will be used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -202,8 +208,11 @@
                 <span class="n">nz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
                 <span class="k">break</span>
 
+        <span class="k">if</span> <span class="n">working_directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">working_directory</span> <span class="o">=</span> <span class="n">qe_out_directory</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_snap</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
-                                     <span class="n">qe_out_directory</span><span class="p">,</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">])</span></div>
+                                     <span class="n">working_directory</span><span class="p">,</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="SNAP.calculate_from_atoms"><a class="viewcode-back" href="../../../api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP.calculate_from_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_from_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span>
                              <span class="n">working_directory</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
