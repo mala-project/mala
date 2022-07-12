@@ -45,11 +45,11 @@ class TestParallel:
         test_parameters.descriptors.twojmax = 6
         test_parameters.descriptors.rcutfac = 4.67637
         test_parameters.descriptors.descriptors_contain_xyz = True
+        test_parameters.descriptors.use_z_splitting = False
         test_parameters.use_mpi = True
         snap_calculator = mala.SNAP(test_parameters)
         snaps_parallel, snapsize = snap_calculator.calculate_from_atoms(atoms,
-                                                              [18, 18, 27],
-                                                              z_splitting=False)
+                                                              [18, 18, 27])
         snaps_parallel = snap_calculator.gather_descriptors(snaps_parallel)
         serial_shape = np.shape(snaps_serial)
         parallel_shape = np.shape(snaps_parallel)
