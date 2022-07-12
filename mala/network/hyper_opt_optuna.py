@@ -8,6 +8,7 @@ from mala.common.parameters import printout
 from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_base import ObjectiveBase
 from mala.network.naswot_pruner import NASWOTPruner
+from mala.network.multi_training_pruner import MultiTrainingPruner
 
 
 class HyperOptOptuna(HyperOpt):
@@ -38,8 +39,17 @@ class HyperOptOptuna(HyperOpt):
 
         # See if the user specified a pruner.
         pruner = None
-        if self.params.hyperparameters.pruner == "naswot":
-            pruner = NASWOTPruner(self.params, data)
+        if self.params.hyperparameters.pruner is not None:
+            if self.params.hyperparameters.pruner == "naswot":
+                pruner = NASWOTPruner(self.params, data)
+            elif self.params.hyperparameters.pruner == "multi_training":
+                if self.params.hyperparameters.number_training_per_trial > 1:
+                    pruner = MultiTrainingPruner(self.params)
+                else:
+                    printout("MultiTrainingPruner requested, but only one training"
+                             "per trial specified; Skipping pruner creation.")
+            else:
+                raise Exception("Invalid pruner type selected.")
 
         # Create the study.
         if self.params.hyperparameters.rdb_storage is None:
@@ -79,7 +89,7 @@ class HyperOptOptuna(HyperOpt):
         self.objective = ObjectiveBase(self.params, self.data_handler)
 
         # Fill callback list based on user checkpoint wishes.
-        callback_list = [self.__check_max_number_trials]
+        callback_list = [self.__check_stopping]
         if self.params.hyperparameters.checkpoints_each_trial != 0:
             callback_list.append(self.__create_checkpointing)
 
@@ -218,7 +228,7 @@ class HyperOptOptuna(HyperOpt):
                         t.state == optuna.trial.
                         TrialState.RUNNING])
 
-    def __check_max_number_trials(self, study, trial):
+    def __check_stopping(self, study, trial):
         """Check if this trial was already the maximum number of trials."""
         # How to check for this depends on whether or not a heartbeat was
         # used. If one was used, then both COMPLETE and RUNNING trials
@@ -229,9 +239,22 @@ class HyperOptOptuna(HyperOpt):
         # https://github.com/optuna/optuna/issues/1883#issuecomment-841844834
         # https://github.com/optuna/optuna/issues/1883#issuecomment-842106950
 
-        if self.__get_number_of_completed_trials(study) >= \
-                self.params.hyperparameters.n_trials:
+        completed_trials = self.__get_number_of_completed_trials(study)
+        if completed_trials >= self.params.hyperparameters.n_trials:
             self.study.stop()
+
+        # Only check if there are trials to be checked.
+        if completed_trials > 0:
+            if self.params.hyperparameters.number_bad_trials_before_stopping is \
+                    not None and self.params.hyperparameters.\
+                    number_bad_trials_before_stopping > 0:
+                if trial.number - self.study.best_trial.number >= \
+                        self.params.hyperparameters.\
+                                number_bad_trials_before_stopping:
+                    printout("No new best trial found in",
+                             self.params.hyperparameters.number_bad_trials_before_stopping,
+                             "attempts, stopping the study.")
+                    self.study.stop()
 
     def __create_checkpointing(self, study, trial):
         """Create a checkpoint of optuna study, if necessary."""

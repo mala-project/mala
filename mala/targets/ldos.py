@@ -4,10 +4,6 @@ from ase.units import Rydberg
 import numpy as np
 import math
 import os
-try:
-    from mpi4py import MPI
-except ModuleNotFoundError:
-    pass
 
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier
@@ -97,7 +93,7 @@ class LDOS(Target):
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_cube(self, file_name_scheme, directory, units="1/eV",
-                       use_memmap=None):
+                       use_memmap=None, **kwargs):
         """
         Read the LDOS data from multiple cube files.
 
@@ -134,7 +130,6 @@ class LDOS(Target):
         # tmp.pp003ELEMENT_ldos.cube
         # ...
         # tmp.pp100ELEMENT_ldos.cube
-
         # Find out the number of digits that are needed to encode this
         # grid (by QE).
         digits = int(math.log10(self.parameters.ldos_gridsize)) + 1
@@ -818,6 +813,10 @@ class LDOS(Target):
                              voxel_Bohr.volume
 
         if self.parameters._configuration["mpi"] and gather_dos:
+            # I think we should refrain from top-level MPI imports; the first
+            # import triggers an MPI init, which can take quite long.
+            from mpi4py import MPI
+
             comm = get_comm()
             comm.Barrier()
             dos_values_full = np.zeros_like(dos_values)

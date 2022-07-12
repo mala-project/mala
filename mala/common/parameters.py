@@ -4,21 +4,17 @@ import importlib
 import inspect
 import json
 import pickle
-import warnings
 
 try:
     import horovod.torch as hvd
-except ModuleNotFoundError:
-    pass
-try:
-    from mpi4py import MPI
 except ModuleNotFoundError:
     pass
 
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
-    set_mpi_status, get_rank, get_local_rank, set_current_verbosity
+    set_mpi_status, get_rank, get_local_rank, set_current_verbosity, \
+    parallel_warn
 from mala.common.json_serializable import JSONSerializable
 
 
@@ -429,8 +425,8 @@ class ParametersTargets(ParametersBase):
         self.ldos_gridoffset_ev = 0
         self.restrict_targets = "zero_out_negative"
         self.pseudopotential_path = None
-        self.rdf_parameters = {"number_of_bins": 500, "rMax": None}
-        self.tpcf_parameters = {"number_of_bins": 20, "rMax": 5.0}
+        self.rdf_parameters = {"number_of_bins": 500, "rMax": "mic"}
+        self.tpcf_parameters = {"number_of_bins": 20, "rMax": "mic"}
         self.ssf_parameters = {"number_of_bins": 100, "kMax": 12.0}
 
     @property
@@ -812,11 +808,22 @@ class ParametersHyperparameterOptimization(ParametersBase):
         this cutoff determines which trials are neglected.
 
     pruner: string
-        Pruner type to be used by optuna. Currently only "naswot" is
-        supported, which will use the NASWOT algorithm as pruner.
+        Pruner type to be used by optuna. Currently supported:
+
+            - "multi_training": If multiple trainings are performed per
+              trial, and one returns "inf" for the loss,
+              no further training will be performed.
+              Especially useful if used in conjunction
+              with the band_energy metric.
+            - "naswot": use the NASWOT algorithm as pruner
 
     naswot_pruner_batch_size : int
         Batch size for the NASWOT pruner
+
+    number_bad_trials_before_stopping : int
+        Only applies to optuna studies. If any integer above 0, then if no
+        new best trial is found within number_bad_trials_before trials after
+        the last one, the study will be stopped.
     """
 
     def __init__(self):
@@ -836,6 +843,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.naswot_pruner_cutoff = 0
         self.pruner = None
         self.naswot_pruner_batch_size = 0
+        self.number_bad_trials_before_stopping = None
 
     @property
     def rdb_storage_heartbeat(self):
@@ -911,6 +919,66 @@ class ParametersHyperparameterOptimization(ParametersBase):
                         i += 1
 
 
+class ParametersDataGeneration(ParametersBase):
+    """
+    All parameters to help with data generation.
+
+    Attributes
+    ----------
+    trajectory_analysis_denoising_width : int
+        The distance metric is denoised prior to analysis using a certain
+        width. This should be adjusted if there is reason to believe
+        the trajectory will be noise for some reason.
+
+    trajectory_analysis_below_average_counter : int
+        Number of time steps that have to consecutively below the average
+        of the distance metric curve, before we consider the trajectory
+        to be equilibrated.
+        Usually does not have to be changed.
+
+    trajectory_analysis_estimated_equilibrium : float
+        The analysis of the trajectory builds on the assumption that at some
+        point of the trajectory, the system is equilibrated.
+        For this, we need to provide the fraction of the trajectory (counted
+        from the end). Usually, 10% is a fine assumption. This value usually
+        does not need to be changed.
+
+    local_psp_path : string
+        Path to where the local pseudopotential is stored (for OF-DFT-MD).
+
+    local_psp_name : string
+        Name of the local pseudopotential (for OF-DFT-MD).
+
+    ofdft_timestep : int
+        Timestep of the OF-DFT-MD simulation.
+
+    ofdft_number_of_timesteps : int
+        Number of timesteps for the OF-DFT-MD simulation.
+
+    ofdft_temperature : float
+        Temperature at which to perform the OF-DFT-MD simulation.
+
+    ofdft_kedf : string
+        Kinetic energy functional to be used for the OF-DFT-MD simulation.
+
+    ofdft_friction : float
+        Friction to be added for the Langevin dynamics in the OF-DFT-MD run.
+    """
+
+    def __init__(self):
+        super(ParametersDataGeneration, self).__init__()
+        self.trajectory_analysis_denoising_width = 100
+        self.trajectory_analysis_below_average_counter = 50
+        self.trajectory_analysis_estimated_equilibrium = 0.1
+        self.local_psp_path = None
+        self.local_psp_name = None
+        self.ofdft_timestep = 0
+        self.ofdft_number_of_timesteps = 0
+        self.ofdft_temperature = 0
+        self.ofdft_kedf = "WT"
+        self.ofdft_friction = 0.1
+
+
 class ParametersDebug(ParametersBase):
     """
     All debugging parameters.
@@ -974,6 +1042,7 @@ class Parameters:
         self.data = ParametersData()
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
+        self.datageneration = ParametersDataGeneration()
         self.debug = ParametersDebug()
 
         # Attributes.
@@ -1019,8 +1088,8 @@ class Parameters:
             if torch.cuda.is_available():
                 self._use_gpu = True
             else:
-                warnings.warn("GPU requested, but no GPU found. MALA will "
-                              "operate with CPU only.", stacklevel=3)
+                parallel_warn("GPU requested, but no GPU found. MALA will "
+                              "operate with CPU only.")
 
         # Invalidate, will be updated in setter.
         self.device = None
@@ -1189,6 +1258,36 @@ class Parameters:
 
         """
         self.save(filename, save_format="json")
+
+    def optuna_singlenode_setup(self):
+        """
+        Set up device and parallelization parameters for Optuna+MPI.
+
+        This only needs to be called if multiple MPI ranks are used on
+        one node to run Optuna. Optuna itself does NOT communicate via MPI.
+        Thus, if we allocate e.g. one node with 4 GPUs and start 4 jobs,
+        3 of those jobs will fail, because currently, we instantiate the
+        cuda devices based on MPI ranks. This functions sets everything
+        up properly. This of course requires MPI.
+        This may be a bit hacky, but it lets us use one script and one
+        MPI command to launch x GPU backed jobs on any node with x GPUs.
+        """
+        # We first "trick" the parameters object to assume MPI and GPUs
+        # are used. That way we get the right device.
+        self.use_gpu = True
+        self.use_mpi = True
+        device_temp = self.device
+
+        # Now we can turn of MPI and set the device manually.
+        self.use_mpi = False
+        self._device = device_temp
+        self.network._update_device(device_temp)
+        self.descriptors._update_device(device_temp)
+        self.targets._update_device(device_temp)
+        self.data._update_device(device_temp)
+        self.running._update_device(device_temp)
+        self.hyperparameters._update_device(device_temp)
+        self.debug._update_device(device_temp)
 
     @classmethod
     def load_from_file(cls, filename, save_format="json",

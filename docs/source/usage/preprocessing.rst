@@ -6,14 +6,24 @@ Data generation
 
 Data generation for MALA is done by electronic structure calculations using
 appropriate simulation software. The raw outputs of such calculations
-are atomic positions and the LDOS, although often as separate cube files.
-Currently, only QuantumESPRESSO has been tested. More specifically, the MALA
-team maintains a special version of QuantumESPRESSO. It is both used as
-interface in MALA for the calculation of total energies, as well as for the
-DFT calculations. It contains a modification which allows flexible LDOS
-sampling, needed for this LDOS based workflow. It can be obtained at:
+are atomic positions and the LDOS, the latter usually as multiple individual
+.cube files.
 
-https://gitlab.com/casus/q-e/-/tree/tem_original_development
+Currently, only QuantumESPRESSO has been tested. Starting with version 7.2,
+any version of QuantumESPRESSO can be used to create data for MALA. In order
+to do so
+
+1. Perform a regular DFT calculation using ``pw.x``
+2. Calculate the LDOS using ``pp.x``
+
+Make sure to use enough k-points in the DFT calculation (LDOS sampling
+requires denser k-grids then regular DFT calculations) and an appropriate
+energy grid when calculating the LDOS. See the
+:doc:`MALA publications <../about/publications>` for
+examples of such values for other materials. Lastly, when calculating
+the LDOS with ``pp.x``, make sure to set ``use_gauss_ldos=.true.`` in the
+``inputpp`` section.
+
 
 Data Conversion
 ###############
@@ -24,7 +34,7 @@ For this, the ``DataConverter`` class can be used; see example ``ex02_preprocess
 Using input and output data
 ###########################
 
-MALA views divides provided data into two categories: ``Descriptor`` objects
+MALA divides provided data into two categories: ``Descriptor`` objects
 and ``Target`` objects.
 
 Descriptors

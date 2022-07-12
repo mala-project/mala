@@ -19,10 +19,11 @@ extras = {
     'opt': ['oapackage', 'pqkmeans'],
     'test': ['pytest'],
     'doc': open('docs/requirements.txt').read().splitlines(),
+    'experimental': ['asap3', 'dftpy']
 }
 
 setup(
-    name="pymala",
+    name="materials-learning-algorithms",
     version=version["__version__"],
     description=("Materials Learning Algorithms. "
                  "A framework for machine learning materials properties from "
