@@ -1,6 +1,7 @@
 """Trainer class for training a network."""
 import os
 import time
+from datetime import datetime
 
 try:
     import horovod.torch as hvd
@@ -65,11 +66,23 @@ class Trainer(Runner):
         self.__prepare_to_train(optimizer_dict)
 
         self.tensor_board = None
+        self.full_visualization_path = None
         if self.parameters.visualisation:
             if not os.path.exists(self.parameters.visualisation_dir):
                 os.makedirs(self.parameters.visualisation_dir)
+            if self.parameters.visualisation_dir_append_date:
+                date_time = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                self.full_visualization_path = \
+                    os.path.join(self.parameters.visualisation_dir, date_time)
+                os.makedirs(self.full_visualization_path)
+            else:
+                self.full_visualization_path = \
+                    self.parameters.visualisation_dir
+
             # Set the path to log files
-            self.tensor_board = SummaryWriter(self.parameters.visualisation_dir)
+            self.tensor_board = SummaryWriter(self.full_visualization_path)
+            printout("Writing visualization output to",
+                     self.full_visualization_path, min_verbosity=1)
 
     @classmethod
     def checkpoint_exists(cls, checkpoint_name, use_pkl_checkpoints=False):
