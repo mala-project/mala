@@ -620,6 +620,14 @@ class ParametersRunning(ParametersBase):
         case 1: tensorboard activated with Loss and learning rate
         case 2; additonally weights and biases and gradient
 
+    visualisation_dir : string
+        Name of the folder that visualization files will be saved to.
+
+    visualisation_dir_append_date : bool
+        If True, then upon creating visualization files, these will be saved
+        in a subfolder of visualisation_dir labelled with the starting date
+        of the visualization, to avoid having to change input scripts often.
+
     inference_data_grid : list
         List holding the grid to be used for inference in the form of
         [x,y,z].
@@ -644,8 +652,8 @@ class ParametersRunning(ParametersBase):
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
         self.visualisation = 0
-        # default visualisation_dir= "~/log_dir"
-        self.visualisation_dir = os.path.join(os.path.expanduser("~"), "log_dir")
+        self.visualisation_dir = os.path.join(".", "mala_logging")
+        self.visualisation_dir_append_date = True
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
         self.inference_data_grid = [0, 0, 0]
