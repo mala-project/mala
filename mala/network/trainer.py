@@ -1,6 +1,7 @@
 """Trainer class for training a network."""
 import os
 import time
+from datetime import datetime
 
 try:
     import horovod.torch as hvd
@@ -65,11 +66,23 @@ class Trainer(Runner):
         self.__prepare_to_train(optimizer_dict)
 
         self.tensor_board = None
+        self.full_visualization_path = None
         if self.parameters.visualisation:
             if not os.path.exists(self.parameters.visualisation_dir):
                 os.makedirs(self.parameters.visualisation_dir)
+            if self.parameters.visualisation_dir_append_date:
+                date_time = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                self.full_visualization_path = \
+                    os.path.join(self.parameters.visualisation_dir, date_time)
+                os.makedirs(self.full_visualization_path)
+            else:
+                self.full_visualization_path = \
+                    self.parameters.visualisation_dir
+
             # Set the path to log files
-            self.tensor_board = SummaryWriter(self.parameters.visualisation_dir)
+            self.tensor_board = SummaryWriter(self.full_visualization_path)
+            printout("Writing visualization output to",
+                     self.full_visualization_path, min_verbosity=1)
 
     @classmethod
     def checkpoint_exists(cls, checkpoint_name, use_pkl_checkpoints=False):
@@ -254,7 +267,7 @@ class Trainer(Runner):
             self.network.train()
 
             # Process each mini batch and save the training loss.
-            training_loss = 0
+            training_loss = []
 
             # train sampler
             if self.parameters_full.use_horovod:
@@ -264,8 +277,9 @@ class Trainer(Runner):
                     enumerate(self.training_data_loader):
                 inputs = inputs.to(self.parameters._configuration["device"])
                 outputs = outputs.to(self.parameters._configuration["device"])
-                training_loss += self.__process_mini_batch(self.network,
-                                                           inputs, outputs)
+                training_loss.append(self.__process_mini_batch(self.network,
+                                                           inputs, outputs))
+            training_loss = np.mean(training_loss)
 
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(self.network,
@@ -275,12 +289,21 @@ class Trainer(Runner):
 
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
-            printout("Epoch: ", epoch, "validation data loss: ", vloss,
-                     min_verbosity=1)
+            if self.parameters_full.verbosity > 1:
+                printout("Epoch {0}: validation data loss: {1}, "
+                         "training data loss: {2}".format(epoch, vloss,
+                                                          training_loss),
+                         min_verbosity=2)
+            else:
+                printout("Epoch {0}: validation data loss: {1}".format(epoch,
+                                                                       vloss),
+                         min_verbosity=1)
 
             # summary_writer tensor board
             if self.parameters.visualisation:
-                self.tensor_board.add_scalar("Loss", vloss, epoch)
+                self.tensor_board.add_scalars('Loss', {'validation': vloss,
+                                              'training': training_loss},
+                                              epoch)
                 self.tensor_board.add_scalar("Learning rate",
                                              self.parameters.learning_rate,
                                              epoch)
