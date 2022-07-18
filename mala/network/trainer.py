@@ -254,7 +254,7 @@ class Trainer(Runner):
             self.network.train()
 
             # Process each mini batch and save the training loss.
-            training_loss = 0
+            training_loss = []
 
             # train sampler
             if self.parameters_full.use_horovod:
@@ -264,8 +264,9 @@ class Trainer(Runner):
                     enumerate(self.training_data_loader):
                 inputs = inputs.to(self.parameters._configuration["device"])
                 outputs = outputs.to(self.parameters._configuration["device"])
-                training_loss += self.__process_mini_batch(self.network,
-                                                           inputs, outputs)
+                training_loss.append(self.__process_mini_batch(self.network,
+                                                           inputs, outputs))
+            training_loss = np.mean(training_loss)
 
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(self.network,
@@ -275,12 +276,21 @@ class Trainer(Runner):
 
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
-            printout("Epoch: ", epoch, "validation data loss: ", vloss,
-                     min_verbosity=1)
+            if self.parameters_full.verbosity > 1:
+                printout("Epoch {0}: validation data loss: {1}, "
+                         "training data loss: {2}".format(epoch, vloss,
+                                                          training_loss),
+                         min_verbosity=2)
+            else:
+                printout("Epoch {0}: validation data loss: {1}".format(epoch,
+                                                                       vloss),
+                         min_verbosity=1)
 
             # summary_writer tensor board
             if self.parameters.visualisation:
-                self.tensor_board.add_scalar("Loss", vloss, epoch)
+                self.tensor_board.add_scalars('Loss', {'validation': vloss,
+                                              'training': training_loss},
+                                              epoch)
                 self.tensor_board.add_scalar("Learning rate",
                                              self.parameters.learning_rate,
                                              epoch)

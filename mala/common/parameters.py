@@ -599,7 +599,7 @@ class ParametersRunning(ParametersBase):
         self.checkpoint_name = "checkpoint_mala"
         self.visualisation = 0
         # default visualisation_dir= "~/log_dir"
-        self.visualisation_dir = os.path.join(os.path.expanduser("~"), "log_dir")
+        self.visualisation_dir = os.path.join(".", "mala_logging")
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
         self.inference_data_grid = [0, 0, 0]
