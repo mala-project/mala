@@ -9,6 +9,7 @@ from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_base import ObjectiveBase
 from mala.network.naswot_pruner import NASWOTPruner
 from mala.network.multi_training_pruner import MultiTrainingPruner
+from mala.common.parallelizer import parallel_warn
 
 
 class HyperOptOptuna(HyperOpt):
@@ -121,6 +122,45 @@ class HyperOptOptuna(HyperOpt):
         """
         return self.study.get_trials(states=(optuna.trial.
                                               TrialState.COMPLETE, ))
+
+    @staticmethod
+    def requeue_zombie_trials(study_name, rdb_storage):
+        """
+        Put zombie trials back into the queue to be investigated.
+
+        When using Optuna with scheduling systems in HPC infrastructure,
+        zombie trials can occur. These are trials that are still marked
+        as "RUNNING", but are, in actuality, dead, since the HPC job ended.
+        This function takes a saved hyperparameter study, and puts all
+        "RUNNING" trials als "WAITING". Upon the next execution from
+        checkpoint, they will be executed.
+
+        BE CAREFUL! DO NOT USE APPLY THIS TO A RUNNING STUDY, IT WILL MESS THE
+        STUDY UP! ONLY USE THIS ONCE ALL JOBS HAVE FINISHED, TO CLEAN UP,
+        AND THEN RESUBMIT!
+
+        Parameters
+        ----------
+        rdb_storage : string
+            Adress of the RDB storage to be cleaned.
+
+        study_name : string
+            Name of the study in the storage. Same as the checkpoint name.
+        """
+        study_to_clean = optuna.load_study(study_name=study_name,
+                                           storage=rdb_storage)
+        parallel_warn("WARNING: Your about to clean/requeue a study."
+                      " This operation should not be done to an already"
+                      " running study.")
+        trials = study_to_clean.get_trials()
+        cleaned_trials = []
+        for trial in trials:
+            if trial.state == optuna.trial.TrialState.RUNNING:
+                study_to_clean._storage.set_trial_state(trial._trial_id,
+                                                        optuna.trial.
+                                                        TrialState.WAITING)
+                cleaned_trials.append(trial.number)
+        printout("Cleaned trials: ", cleaned_trials, min_verbosity=0)
 
     @classmethod
     def resume_checkpoint(cls, checkpoint_name, alternative_storage_path=None,
