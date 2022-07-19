@@ -3,9 +3,6 @@
 # pass in values ngridx, ngridy, ngridz, sigma, atom_config_fname
 # using command-line -var option
 
-# set up processor grid to match QE
-${lammps_procs}
-
 # Initialize simulation
 
 units		metal

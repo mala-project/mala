@@ -14,6 +14,7 @@ from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.atomic_force import AtomicForce
 from mala.common.parallelizer import get_rank, barrier
+from mala.descriptors.gaussian import GaussianDescriptors
 
 
 class Density(Target):
@@ -443,6 +444,13 @@ class Density(Target):
         # is directly performed here, so it is not enough to simply
         # instantiate the process with the file.
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
+
+        # Calculate the Gaussian descriptors for the calculation of the
+        # structure factors.
+        # gaussian_descriptors = \
+        #     self._get_gaussian_descriptors_for_structure_factors(
+        #         atoms_Angstrom, self.grid_dimensions)
+
         te.set_positions(np.transpose(positions_for_qe), number_of_atoms)
         # Now we can set the new density.
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
@@ -473,6 +481,11 @@ class Density(Target):
         scaled_positions = atoms.get_positions()/principal_axis
         return scaled_positions
 
+    def _get_gaussian_descriptors_for_structure_factors(self, atoms, grid):
+        descriptor_calculator = GaussianDescriptors(self._parameters_full)
+        return descriptor_calculator.\
+            calculate_from_atoms(atoms, grid)[0][:, 6:].shape
+
     @classmethod
     def from_ldos(cls, ldos_object):
         """
@@ -491,6 +504,7 @@ class Density(Target):
 
         """
         return_density_object = Density(ldos_object.parameters)
+        return_density_object._parameters_full = ldos_object._parameters_full
         return_density_object.fermi_energy_eV = ldos_object.fermi_energy_eV
         return_density_object.temperature_K = ldos_object.temperature_K
         return_density_object.voxel_Bohr = ldos_object.voxel_Bohr

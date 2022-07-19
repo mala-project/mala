@@ -186,23 +186,30 @@ class GaussianDescriptors(Descriptor):
             nz = grid_dimensions[2]
 
         # Build LAMMPS arguments from the data we read.
-        lmp_cmdargs = ["-screen", "none", "-log", os.path.join(outdir,
-                                                               "lammps_log.tmp")]
+        lmp_cmdargs = ["-screen", "none", "-log",
+                       os.path.join(outdir, "lammps_ggrid_log.tmp")]
 
-        lammps_dict = {"ngridx": nx,
-                       "ngridy": ny,
-                       "ngridz": nz,
-                       "sigma": self.parameters.gaussian_descriptors_sigma,
-                       "rcutfac": self.parameters.gaussian_descriptors_cutoff,
-                       "atom_config_fname": ase_out_path}
+        # LAMMPS processor grid filled by parent class.
+        lammps_dict = self._setup_lammps_processors(nx, ny, nz)
+
+        # Set the values not already filled in the LAMMPS setup.
+        lammps_dict["sigma"] = self.parameters.gaussian_descriptors_sigma
+        lammps_dict["rcutfac"] = self.parameters.gaussian_descriptors_cutoff
+        lammps_dict["atom_config_fname"] = ase_out_path
+
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
 
         # Build the LAMMPS object.
         lmp = lammps(cmdargs=lmp_cmdargs)
 
-        # TODO: Find out whether there are other input scripts possible
+        # For now the file is chosen automatically, because this is used
+        # mostly under the hood anyway.
         filepath = __file__.split("gaussian")[0]
-        lmp.file(os.path.join(filepath, "in.ggrid.python"))
+        if self.parameters.use_z_splitting:
+            runfile = os.path.join(filepath, "in.ggrid.python")
+        else:
+            runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
+        lmp.file(runfile)
 
         # Extract the data.
         nrows_ggrid = extract_compute_np(lmp, "ggrid",
@@ -217,7 +224,9 @@ class GaussianDescriptors(Descriptor):
                                lammps_constants.LMP_STYLE_LOCAL, 2,
                                array_shape=(nrows_ggrid, ncols_ggrid))
 
-        # print(nrows_ggrid, ncols_ggrid, gaussian_descriptors_np)
-        print(gaussian_descriptors_np[100, 0:6])
+        if self.descriptors_contain_xyz:
+            return gaussian_descriptors_np.copy(), nrows_ggrid
+        else:
+            return gaussian_descriptors_np[:, 6:].copy(), nrows_ggrid
 
 
