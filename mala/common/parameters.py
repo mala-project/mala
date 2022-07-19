@@ -255,6 +255,7 @@ class ParametersNetwork(ParametersBase):
         self.dropout = 0.1
         self.num_heads = 10
 
+
 class ParametersDescriptors(ParametersBase):
     """
     Parameters necessary for calculating/parsing input descriptors.
@@ -289,6 +290,8 @@ class ParametersDescriptors(ParametersBase):
         the descriptor vector are the xyz coordinates and they are cut from the
         descriptor vector. If False, no such cutting is peformed.
 
+    gaussian_descriptors_sigma : float
+        Sigma used for the calculation of the Gaussian descriptors.
     """
 
     def __init__(self):
@@ -306,6 +309,8 @@ class ParametersDescriptors(ParametersBase):
         # this should be adressed.
         self.use_z_splitting = True
         self.use_y_splitting = 0
+        self.gaussian_descriptors_sigma = 0.1355
+        self.gaussian_descriptors_cutoff = 4.67637
 
     @property
     def use_z_splitting(self):

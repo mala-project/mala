@@ -72,8 +72,10 @@ class Target(ABC):
         return target
 
     def __init__(self, params):
+        self._parameters_full = None
         if isinstance(params, Parameters):
             self.parameters: ParametersTargets = params.targets
+            self._parameters_full = params
         elif isinstance(params, ParametersTargets):
             self.parameters: ParametersTargets = params
         else:
