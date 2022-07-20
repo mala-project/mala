@@ -786,6 +786,12 @@ class ParametersHyperparameterOptimization(ParametersBase):
         Only applies to optuna studies. If any integer above 0, then if no
         new best trial is found within number_bad_trials_before trials after
         the last one, the study will be stopped.
+
+    sqlite_timeout : int
+        Timeout for the SQLite backend of Optuna. This backend is officially
+        not recommended because it is file based and can lead to errors;
+        With a suitable timeout it can be used somewhat stable though and
+        help in HPC settings.
     """
 
     def __init__(self):
@@ -806,6 +812,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.pruner = None
         self.naswot_pruner_batch_size = 0
         self.number_bad_trials_before_stopping = None
+        self.sqlite_timeout = 600
 
     @property
     def rdb_storage_heartbeat(self):
