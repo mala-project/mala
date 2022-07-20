@@ -955,7 +955,7 @@ class ParametersDebug(ParametersBase):
 
     def __init__(self):
         super(ParametersDebug, self).__init__()
-        self.grid_dimensions = []
+        self.grid_dimensions = None
 
 
 class Parameters:

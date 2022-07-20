@@ -1,4 +1,7 @@
 """Represents an entire atomic snapshot (including descriptor/target data)."""
+from os.path import join
+
+import numpy as np
 
 from mala.common.json_serializable import JSONSerializable
 
@@ -69,6 +72,49 @@ class Snapshot(JSONSerializable):
 
         # Function of the snapshot.
         self.snapshot_function = snapshot_function
+
+        # All the dimensionalities of the snapshot.
+        self.grid_dimensions = None
+        self.grid_size = None
+        self.input_dimension = None
+        self.output_dimension = None
+
+    def load_dimensions(self, descriptors_contain_xyz,
+                        debug_dimensions=None):
+        # Load input and output data separately and see if they match.
+
+        # Input data.
+        file = join(self.input_npy_directory, self.input_npy_file)
+        loaded_array = np.load(file, mmap_mode="r")
+        if debug_dimensions is not None:
+            if len(debug_dimensions) == 3:
+                loaded_array = loaded_array[0:debug_dimensions[0],
+                                            0:debug_dimensions[1],
+                                            0:debug_dimensions[2], :]
+        input_dimensions = np.shape(loaded_array)[0:3]
+        self.input_dimension = np.shape(loaded_array)[3]
+        if descriptors_contain_xyz:
+            self.input_dimension -= 3
+
+        # Output data
+        file = join(self.output_npy_directory, self.output_npy_file)
+        loaded_array = np.load(file, mmap_mode="r")
+        if debug_dimensions is not None:
+            if len(debug_dimensions) == 3:
+                loaded_array = loaded_array[0:debug_dimensions[0],
+                                            0:debug_dimensions[1],
+                                            0:debug_dimensions[2], :]
+        output_dimensions = np.shape(loaded_array)[0:3]
+        self.output_dimension = np.shape(loaded_array)[3]
+
+        if input_dimensions[0] != output_dimensions[0] \
+                or input_dimensions[1] != output_dimensions[1] \
+                or input_dimensions[2] != output_dimensions[2]:
+            return False
+        else:
+            self.grid_dimensions = input_dimensions
+            self.grid_size = np.prod(self.grid_dimensions)
+            return True
 
     @classmethod
     def from_json(cls, json_dict):

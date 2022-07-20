@@ -80,8 +80,6 @@ class DataHandler:
             self.descriptor_calculator = Descriptor(parameters)
 
         self.nr_snapshots = 0
-        self.grid_dimension = [0, 0, 0]
-        self.grid_size = 0
 
         # Actual data points in the different categories.
         self.nr_training_data = 0
@@ -92,7 +90,6 @@ class DataHandler:
         self.nr_training_snapshots = 0
         self.nr_test_snapshots = 0
         self.nr_validation_snapshots = 0
-
 
         self.training_data_inputs = torch.empty(0)
         """
@@ -124,27 +121,8 @@ class DataHandler:
         Torch tensor holding all scaled testing data output.
         """
 
-    def get_input_dimension(self):
-        """
-        Get the dimension of the input vector.
-
-        Returns
-        -------
-        input_dimension : int
-            Dimension of the input vector.
-        """
-        return self.input_dimension
-
-    def get_output_dimension(self):
-        """
-        Get the dimension of the output vector.
-
-        Returns
-        -------
-        output_dimension : int
-            Dimension of the output vector.
-        """
-        return self.output_dimension
+        self.input_dimension = None
+        self.output_dimension = None
 
     def add_snapshot(self, input_npy_file, input_npy_directory,
                      output_npy_file, output_npy_directory, add_snapshot_as,
@@ -317,10 +295,12 @@ class DataHandler:
         # If desired, the dimensions can be changed.
         if convert3Dto1D:
             if data_type == "in":
-                data_dimension = self.get_input_dimension()
+                data_dimension = self.input_dimension
             else:
-                data_dimension = self.get_output_dimension()
-            desired_dimensions = [self.grid_size, data_dimension]
+                data_dimension = self.output_dimension
+            array_dimensions = np.shape(numpy_array)
+            desired_dimensions = [np.prod(array_dimensions[0:3]),
+                                  data_dimension]
         else:
             desired_dimensions = None
 
@@ -423,93 +403,58 @@ class DataHandler:
                                 "was lazily loaded.")
             return self.test_data_set.input_data.grad
         else:
+
             return self.test_data_inputs.\
-                       grad[self.grid_size*snapshot_number:
-                            self.grid_size*(snapshot_number+1)]
+                       grad[self.parameters.snapshot_directories_list[snapshot_number].grid_size*snapshot_number:
+                            self.parameters.snapshot_directories_list[snapshot_number].grid_size*(snapshot_number+1)]
 
     def __check_snapshots(self):
         """Check the snapshots for consistency."""
         self.nr_snapshots = len(self.parameters.snapshot_directories_list)
 
-        # Read the snapshots using a memorymap to see if there is consistency.
-        firstsnapshot = True
+        # Read the snapshots using a memorymap to see if the snapshot are
+        # consistent in terms of grid size within themselves.
+        first_snapshot = True
         for snapshot in self.parameters.snapshot_directories_list:
-            ####################
-            # Descriptors.
-            ####################
 
-            printout("Checking descriptor file ", snapshot.input_npy_file,
-                     "at", snapshot.input_npy_directory, min_verbosity=1)
-            tmp = self.__load_from_npy_file(os.path.join(snapshot.input_npy_directory,
-                                                         snapshot.input_npy_file),
-                                            mmapmode='r')
-
-            # We have to cut xyz information, if we have xyz information in
-            # the descriptors.
-            if self.descriptor_calculator.descriptors_contain_xyz:
-                # Remove first 3 elements of descriptors, as they correspond
-                # to the x,y and z information.
-                tmp = tmp[:, :, :, 3:]
-
-            # The first snapshot determines the data size to be used.
-            # We need to make sure that snapshot size is consistent.
-            tmp_input_dimension = np.shape(tmp)[-1]
-            tmp_grid_dim = np.shape(tmp)[0:3]
-            if firstsnapshot:
-                self.input_dimension = tmp_input_dimension
-                self.grid_dimension[0:3] = tmp_grid_dim[0:3]
+            printout("Checking snapshot with", snapshot.input_npy_file,
+                     "and", snapshot.output_npy_file, min_verbosity=1)
+            if not snapshot.load_dimensions(self.descriptor_calculator.
+                                            descriptors_contain_xyz,
+                                            debug_dimensions=
+                                            self.dbg_grid_dimensions):
+                raise Exception("Invalid snapshot entered at ",
+                                snapshot.input_npy_file,
+                                "and", snapshot.output_npy_file)
             else:
-                if (self.input_dimension != tmp_input_dimension
-                        or self.grid_dimension[0] != tmp_grid_dim[0]
-                        or self.grid_dimension[1] != tmp_grid_dim[1]
-                        or self.grid_dimension[2] != tmp_grid_dim[2]):
-                    raise Exception("Invalid snapshot entered at ", snapshot.
-                                    input_npy_file)
-
-            ####################
-            # Targets.
-            ####################
-
-            printout("Checking targets file ", snapshot.output_npy_file, "at",
-                     snapshot.output_npy_directory, min_verbosity=1)
-            tmp_out = self.__load_from_npy_file(os.path.join(snapshot.output_npy_directory,
-                                                             snapshot.output_npy_file),
-                                                mmapmode='r')
-
-            # The first snapshot determines the data size to be used.
-            # We need to make sure that snapshot size is consistent.
-            tmp_output_dimension = np.shape(tmp_out)[-1]
-            tmp_grid_dim = np.shape(tmp_out)[0:3]
-            if firstsnapshot:
-                self.output_dimension = tmp_output_dimension
-            else:
-                if self.output_dimension != tmp_output_dimension:
-                    raise Exception("Invalid snapshot entered at ", snapshot.
-                                    output_npy_file)
-            if (self.grid_dimension[0] != tmp_grid_dim[0]
-                    or self.grid_dimension[1] != tmp_grid_dim[1]
-                    or self.grid_dimension[2] != tmp_grid_dim[2]):
-                raise Exception("Invalid snapshot entered at ", snapshot.
-                                output_npy_file)
-
-            if firstsnapshot:
-                firstsnapshot = False
-
-        # Save the grid size.
-        self.grid_size = self.grid_dimension[0]\
-            * self.grid_dimension[1] * self.grid_dimension[2]
+                tmp_input_dimension = snapshot.input_dimension
+                tmp_output_dimension = snapshot.output_dimension
+                if first_snapshot:
+                    first_snapshot = False
+                    self.input_dimension = snapshot.input_dimension
+                    self.output_dimension = snapshot.output_dimension
+                if tmp_input_dimension != self.input_dimension or \
+                   tmp_output_dimension != self.output_dimension:
+                    raise Exception("Invalid snapshot entered at ",
+                                    snapshot.input_npy_file,
+                                    "and", snapshot.output_npy_file)
 
         # Now we need to confirm that the snapshot list has some inner
         # consistency.
         if self.parameters.data_splitting_type == "by_snapshot":
             snapshot: Snapshot
+            # As we are not actually interested in the number of snapshots,
+            # but in the number of datasets, we also need to multiply by that.
             for snapshot in self.parameters.snapshot_directories_list:
                 if snapshot.snapshot_function == "tr":
                     self.nr_training_snapshots += 1
+                    self.nr_training_data += snapshot.grid_size
                 elif snapshot.snapshot_function == "te":
                     self.nr_test_snapshots += 1
+                    self.nr_test_data += snapshot.grid_size
                 elif snapshot.snapshot_function == "va":
                     self.nr_validation_snapshots += 1
+                    self.nr_validation_data += snapshot.grid_size
                 else:
                     raise Exception("Unknown option for snapshot splitting "
                                     "selected.")
@@ -542,12 +487,6 @@ class DataHandler:
 
         else:
             raise Exception("Wrong parameter for data splitting provided.")
-
-        # As we are not actually interested in the number of snapshots, but in
-        # the number of datasets,we need to multiply by that.
-        self.nr_training_data = self.nr_training_snapshots*self.grid_size
-        self.nr_validation_data = self.nr_validation_snapshots*self.grid_size
-        self.nr_test_data = self.nr_test_snapshots*self.grid_size
 
         # Reordering the lists.
         snapshot_order = {'tr': 0, 'va': 1, 'te': 2}
@@ -601,8 +540,8 @@ class DataHandler:
                     tmp *= self.descriptor_calculator.\
                         convert_units(1, snapshot.input_units)
                     tmp = tmp.astype(np.float32)
-                    tmp = tmp.reshape([self.grid_size,
-                                       self.get_input_dimension()])
+                    tmp = tmp.reshape([snapshot.grid_size,
+                                       self.input_dimension])
                     tmp = torch.from_numpy(tmp).float()
                     self.input_data_scaler.incremental_fit(tmp)
 
@@ -646,8 +585,8 @@ class DataHandler:
                     tmp *= self.target_calculator.\
                         convert_units(1, snapshot.output_units)
                     tmp = tmp.astype(np.float32)
-                    tmp = tmp.reshape([self.grid_size,
-                                       self.get_output_dimension()])
+                    tmp = tmp.reshape([snapshot.grid_size,
+                                       self.output_dimension])
                     tmp = torch.from_numpy(tmp).float()
                     self.output_data_scaler.incremental_fit(tmp)
                 i += 1
@@ -691,7 +630,7 @@ class DataHandler:
             self.training_data_inputs.astype(np.float32)
         self.training_data_inputs = \
             self.training_data_inputs.reshape(
-                [self.nr_training_data, self.get_input_dimension()])
+                [self.nr_training_data, self.input_dimension])
         self.training_data_inputs = \
             torch.from_numpy(self.training_data_inputs).float()
 
@@ -722,7 +661,7 @@ class DataHandler:
         self.training_data_outputs = \
             self.training_data_outputs.astype(np.float32)
         self.training_data_outputs = self.training_data_outputs.reshape(
-            [self.nr_training_data, self.get_output_dimension()])
+            [self.nr_training_data, self.output_dimension])
         self.training_data_outputs = \
             torch.from_numpy(self.training_data_outputs).float()
 
@@ -733,7 +672,7 @@ class DataHandler:
             # Create the lazy loading data sets.
             if self.parameters.use_clustering:
                 self.training_data_set = LazyLoadDatasetClustered(
-                    self.get_input_dimension(), self.get_output_dimension(),
+                    self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
                     self.grid_dimension, self.grid_size,
@@ -849,7 +788,7 @@ class DataHandler:
                     self.test_data_inputs.astype(np.float32)
                 self.test_data_inputs = \
                     self.test_data_inputs.reshape(
-                        [self.nr_test_data, self.get_input_dimension()])
+                        [self.nr_test_data, self.input_dimension])
                 self.test_data_inputs = \
                     torch.from_numpy(self.test_data_inputs).float()
                 self.test_data_inputs = \
@@ -861,7 +800,7 @@ class DataHandler:
                 self.validation_data_inputs.astype(np.float32)
             self.validation_data_inputs = \
                 self.validation_data_inputs.reshape(
-                    [self.nr_validation_data, self.get_input_dimension()])
+                    [self.nr_validation_data, self.input_dimension])
             self.validation_data_inputs = \
                 torch.from_numpy(self.validation_data_inputs).float()
             self.validation_data_inputs = \
@@ -875,7 +814,7 @@ class DataHandler:
                     self.test_data_outputs.astype(np.float32)
                 self.test_data_outputs = \
                     self.test_data_outputs.reshape(
-                        [self.nr_test_data, self.get_output_dimension()])
+                        [self.nr_test_data, self.output_dimension])
                 self.test_data_outputs = \
                     torch.from_numpy(self.test_data_outputs).float()
                 self.test_data_outputs = \
@@ -887,7 +826,7 @@ class DataHandler:
                 self.validation_data_outputs.astype(np.float32)
             self.validation_data_outputs = \
                 self.validation_data_outputs.reshape(
-                    [self.nr_validation_data, self.get_output_dimension()])
+                    [self.nr_validation_data, self.output_dimension])
             self.validation_data_outputs = \
                 torch.from_numpy(self.validation_data_outputs).float()
             self.validation_data_outputs = \
