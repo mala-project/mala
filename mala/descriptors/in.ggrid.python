@@ -20,6 +20,10 @@ variable rcutneigh equal 2.0*${rcutfac}*${radelem}
 pair_style zero ${rcutneigh}
 pair_coeff * *
 
+# set up plane cutoff values to evenly distribute grid points
+${zbal}
+
+
 compute ggrid all gaussian/grid/local  grid ${ngridx} ${ngridy} ${ngridz}  ${rcutfac}  ${radelem}  ${sigma}
 
 thermo_modify norm yes
