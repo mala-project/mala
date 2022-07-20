@@ -4,6 +4,7 @@ import importlib
 import inspect
 import json
 import pickle
+from time import sleep
 
 try:
     import horovod.torch as hvd
@@ -1228,7 +1229,7 @@ class Parameters:
         """
         self.save(filename, save_format="json")
 
-    def optuna_singlenode_setup(self):
+    def optuna_singlenode_setup(self, wait_time=0):
         """
         Set up device and parallelization parameters for Optuna+MPI.
 
@@ -1240,12 +1241,20 @@ class Parameters:
         up properly. This of course requires MPI.
         This may be a bit hacky, but it lets us use one script and one
         MPI command to launch x GPU backed jobs on any node with x GPUs.
+
+        Parameters
+        ----------
+        wait_time : int
+            If larger than 0, then all processes will wait this many seconds
+            times their rank number after this routine before proceeding.
+            This can be useful when using a file based distribution algorithm.
         """
         # We first "trick" the parameters object to assume MPI and GPUs
         # are used. That way we get the right device.
         self.use_gpu = True
         self.use_mpi = True
         device_temp = self.device
+        sleep(get_rank()*wait_time)
 
         # Now we can turn of MPI and set the device manually.
         self.use_mpi = False
