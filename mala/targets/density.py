@@ -484,7 +484,7 @@ class Density(Target):
     def _get_gaussian_descriptors_for_structure_factors(self, atoms, grid):
         descriptor_calculator = GaussianDescriptors(self._parameters_full)
         return descriptor_calculator.\
-            calculate_from_atoms(atoms, grid)[0][:, 6:].shape
+            calculate_from_atoms(atoms, grid)[0][:, 6:]
 
     @classmethod
     def from_ldos(cls, ldos_object):
