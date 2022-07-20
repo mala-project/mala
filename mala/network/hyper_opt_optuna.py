@@ -69,7 +69,6 @@ class HyperOptOptuna(HyperOpt):
                                  hyperparameters.sqlite_timeout}}
             else:
                 engine_kwargs = None
-            print(engine_kwargs)
             rdb_storage = optuna.storages.RDBStorage(
                     url=self.params.hyperparameters.rdb_storage,
                     heartbeat_interval=self.params.hyperparameters.
