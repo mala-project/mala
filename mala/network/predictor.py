@@ -34,10 +34,10 @@ class Predictor(Runner):
     def __init__(self, params, network, data):
         # copy the parameters into the class.
         super(Predictor, self).__init__(params, network, data)
-        self.data.grid_dimension = self.parameters.inference_data_grid
-        self.data.grid_size = self.data.grid_dimension[0] * \
-                              self.data.grid_dimension[1] * \
-                              self.data.grid_dimension[2]
+        self.grid_dimension = self.parameters.inference_data_grid
+        self.grid_size = self.grid_dimension[0] * \
+                         self.grid_dimension[1] * \
+                         self.grid_dimension[2]
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
 
@@ -160,7 +160,7 @@ class Predictor(Runner):
                 snap_descriptors.astype(np.float32)
             snap_descriptors = \
                 snap_descriptors.reshape(
-                    [self.data.grid_size, feature_length])
+                    [self.grid_size, feature_length])
             snap_descriptors = \
                 torch.from_numpy(snap_descriptors).float()
             snap_descriptors = \
@@ -172,7 +172,7 @@ class Predictor(Runner):
                                   local_data_size=None):
         """Forward a scaled tensor of SNAP descriptors through the NN."""
         if local_data_size is None:
-            local_data_size = self.data.grid_size
+            local_data_size = self.grid_size
         predicted_outputs = np.zeros((local_data_size,
                                       self.data.target_calculator.\
                                       get_feature_size()))

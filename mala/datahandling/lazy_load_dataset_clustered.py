@@ -46,13 +46,6 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
     target_calculator : mala.targets.target.Target or derivative
         Used to do unit conversion on output data.
 
-    grid_dimensions : list
-        Dimensions of the grid (x,y,z).
-
-    grid_size : int
-        Size of the grid (x*y*z), i.e. the number of datapoints per
-        snapshot.
-
     use_horovod : bool
         If true, it is assumed that horovod is used.
 
@@ -64,7 +57,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
 
     def __init__(self, input_dimension, output_dimension, input_data_scaler,
                  output_data_scaler, descriptor_calculator,
-                 target_calculator, grid_dimensions, grid_size, use_horovod,
+                 target_calculator, use_horovod,
                  number_of_clusters, train_ratio, sample_ratio,
                  input_requires_grad=False):
         self.snapshot_list = []
@@ -74,8 +67,6 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         self.output_data_scaler = output_data_scaler
         self.descriptor_calculator = descriptor_calculator
         self.target_calculator = target_calculator
-        self.grid_dimensions = grid_dimensions
-        self.grid_size = grid_size
         self.number_of_snapshots = 0
         self.total_size = 0
         self.descriptors_contain_xyz = self.descriptor_calculator.\
@@ -96,6 +87,8 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         self.cluster_idxs = [None] * self.number_of_clusters
         self.sampling_idxs = [None] * self.number_of_clusters
         self.current_sampling_idx = [None] * self.number_of_clusters
+
+        self.grid_size = None
 
     @property
     def return_outputs_directly(self):
@@ -125,6 +118,11 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         """
         self.snapshot_list.append(snapshot)
         self.number_of_snapshots += 1
+        if self.grid_size is None:
+            self.grid_size = snapshot.grid_size
+        if self.grid_size != snapshot.grid_size:
+            raise Exception("Clustering currently only implemented for"
+                            " snapshots of equal grid sizes.")
         self.total_size = int(self.number_of_snapshots*self.grid_size *
                               self.sample_ratio)
 

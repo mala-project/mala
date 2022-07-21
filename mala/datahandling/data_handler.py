@@ -675,47 +675,42 @@ class DataHandler:
                     self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
+                    self.parameters.snapshot_directories_list,
                     self.use_horovod, self.parameters.number_of_clusters,
                     self.parameters.train_ratio,
                     self.parameters.sample_ratio)
                 self.validation_data_set = LazyLoadDataset(
-                    self.get_input_dimension(), self.get_output_dimension(),
+                    self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
                     self.use_horovod)
 
                 if self.nr_test_data != 0:
                     self.test_data_set = LazyLoadDataset(
-                        self.get_input_dimension(),
-                        self.get_output_dimension(),
+                        self.input_dimension,
+                        self.output_dimension,
                         self.input_data_scaler, self.output_data_scaler,
                         self.descriptor_calculator, self.target_calculator,
-                        self.grid_dimension, self.grid_size,
                         self.use_horovod,
                         input_requires_grad=True)
 
             else:
                 self.training_data_set = LazyLoadDataset(
-                    self.get_input_dimension(), self.get_output_dimension(),
+                    self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
                     self.use_horovod)
                 self.validation_data_set = LazyLoadDataset(
-                    self.get_input_dimension(), self.get_output_dimension(),
+                    self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
                     self.use_horovod)
 
                 if self.nr_test_data != 0:
                     self.test_data_set = LazyLoadDataset(
-                        self.get_input_dimension(), self.get_output_dimension(),
+                        self.input_dimension, self.output_dimension,
                         self.input_data_scaler, self.output_data_scaler,
                         self.descriptor_calculator, self.target_calculator,
-                        self.grid_dimension, self.grid_size,
                         self.use_horovod,
                         input_requires_grad=True)
 
