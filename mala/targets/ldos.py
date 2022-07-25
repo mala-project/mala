@@ -252,7 +252,8 @@ class LDOS(Target):
                          atoms_Angstrom=None,
                          qe_input_data=None, qe_pseudopotentials=None,
                          create_qe_file=True,
-                         return_energy_contributions=False):
+                         return_energy_contributions=False,
+                         ewald_energy_gaussian_formula=True):
         """
         Calculate the total energy from LDOS or given DOS + density data.
 
@@ -321,6 +322,14 @@ class LDOS(Target):
             If True, a dictionary of energy contributions will be provided
             alongside the total energy. The default is False.
 
+        ewald_energy_gaussian_formula : bool
+            If True, the custom implementation of the Ewald energy, based on
+            Gaussian descriptors will be used for the calculation of structure
+            factors and Ewald energy.
+            The alternative (with "False") would be the standard QE way.
+            The Gaussian descriptor approach is significantly more efficient,
+            but small inaccuracies have been observed.
+
         Returns
         -------
         total_energy : float
@@ -387,7 +396,9 @@ class LDOS(Target):
             get_energy_contributions(density_data, qe_input_data=qe_input_data,
                                      atoms_Angstrom=atoms_Angstrom,
                                      qe_pseudopotentials=qe_pseudopotentials,
-                                     create_file=create_qe_file)
+                                     create_file=create_qe_file,
+                                     ewald_energy_gaussian_formula=
+                                     ewald_energy_gaussian_formula)
         e_total = e_band + e_rho_times_v_hxc + e_hartree + e_xc + e_ewald +\
             e_entropy_contribution
         if return_energy_contributions:
@@ -586,7 +597,7 @@ class LDOS(Target):
     def get_density(self, ldos_data, fermi_energy_ev=None, temperature_K=None,
                     conserve_dimensions=False,
                     integration_method="analytical",
-                    gather_density=True):
+                    gather_density=False):
         """
         Calculate the density from given LDOS data.
 
@@ -681,9 +692,14 @@ class LDOS(Target):
             raise Exception("Unknown integration method.")
 
         if len(ldos_data_shape) == 4 and conserve_dimensions is True:
+            # This breaks in the distributed case currently,
+            # but I don't see an application where we would need it.
+            # It would mean that we load an LDOS in distributed 3D fashion,
+            # which is not implemented either.
             ldos_data_shape = list(ldos_data_shape)
             ldos_data_shape[-1] = 1
             density_values = density_values.reshape(ldos_data_shape)
+
 
         # Now we have the full density; We now need to collect it, in the
         # MPI case.

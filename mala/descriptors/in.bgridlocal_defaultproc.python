@@ -1,10 +1,7 @@
 # Calculate SNAP descriptors on a 3D grid
 
-# pass in values ngridx, ngridy, ngridz, twojmax, rcutfac, atom_config_fname 
+# pass in values ngridx, ngridy, ngridz, twojmax, rcutfac, atom_config_fname
 # using command-line -var option
-
-# set up processor grid to match QE
-${lammps_procs}
 
 # Initialize simulation
 
@@ -14,21 +11,6 @@ read_data ${atom_config_fname}
 
 mass * 1.0
 
-# create dummy potential for neighbor list
-
-
-# is this important? or does it just need to be big enough?
-variable	radelem equal 0.5
-variable rcutneigh equal 2.0*${rcutfac}*${radelem}
-# for water
-#variable rcutneigh equal 4.0*${rcutfac}*${radelem}
-
-pair_style zero ${rcutneigh}
-pair_coeff * *
-
-# set up plane cutoff values to evenly distribute grid points
-${zbal}
-
 # define grid compute and atom compute
 
 group 		snapgroup type 1
@@ -36,7 +18,7 @@ variable 	rfac0 equal 0.99363
 variable 	rmin0 equal 0
 variable 	wj equal 1
 variable 	wjlocal equal ${wj}-1.0e-15 # inject a bit of fuzz
-#variable 	radelem equal 0.5
+variable 	radelem equal 0.5
 variable 	bzero equal 0
 variable 	quadratic equal 0
 variable 	switch equal 0
@@ -47,6 +29,19 @@ variable 	switch equal 0
 #compute bgrid all sna/grid grid ${ngridx} ${ngridy} ${ngridz} ${snap_options}
 
 compute bgridlocal all sna/grid/local grid ${ngridx} ${ngridy} ${ngridz} ${rcutfac} ${rfac0} ${twojmax} ${radelem} ${wjlocal} rmin0 ${rmin0} bzeroflag ${bzero} quadraticflag ${quadratic} switchflag ${switch}
+
+# create dummy potential for neighbor list
+
+
+# is this important? or does it just need to be big enough?
+variable rcutneigh equal 2.0*${rcutfac}*${radelem}
+# for water
+#variable rcutneigh equal 4.0*${rcutfac}*${radelem}
+
+pair_style zero ${rcutneigh}
+pair_coeff * *
+
+# define output
 
 #thermo_style	custom step temp ke pe vol c_bgrid[1][1]
 thermo_modify norm yes

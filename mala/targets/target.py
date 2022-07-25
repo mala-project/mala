@@ -72,8 +72,10 @@ class Target(ABC):
         return target
 
     def __init__(self, params):
+        self._parameters_full = None
         if isinstance(params, Parameters):
             self.parameters: ParametersTargets = params.targets
+            self._parameters_full = params
         elif isinstance(params, ParametersTargets):
             self.parameters: ParametersTargets = params
         else:
@@ -116,8 +118,9 @@ class Target(ABC):
         self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
 
-        # Local grid for distributed inference.
+        # Local grid and parallelization info for distributed inference.
         self.local_grid = None
+        self.y_planes = None
 
     @abstractmethod
     def get_feature_size(self):
