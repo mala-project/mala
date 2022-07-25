@@ -252,7 +252,8 @@ class Density(Target):
 
     def get_energy_contributions(self, density_data, create_file=True,
                                  atoms_Angstrom=None, qe_input_data=None,
-                                 qe_pseudopotentials=None):
+                                 qe_pseudopotentials=None,
+                                 ewald_energy_gaussian_formula=True):
         r"""
         Extract density based energy contributions from Quantum Espresso.
 
@@ -281,6 +282,14 @@ class Density(Target):
             Quantum Espresso pseudopotential dictionaty for the ASE<->QE
             interface. If None (recommended), MALA will create one.
 
+        ewald_energy_gaussian_formula : bool
+            If True, the custom implementation of the Ewald energy, based on
+            Gaussian descriptors will be used for the calculation of structure
+            factors and Ewald energy.
+            The alternative (with "False") would be the standard QE way.
+            The Gaussian descriptor approach is significantly more efficient,
+            but small inaccuracies have been observed.
+
         Returns
         -------
         energies : list
@@ -297,7 +306,9 @@ class Density(Target):
                                          create_file=create_file,
                                          qe_input_data=qe_input_data,
                                          qe_pseudopotentials=
-                                         qe_pseudopotentials)
+                                         qe_pseudopotentials,
+                                         ewald_energy_gaussian_formula=
+                                         ewald_energy_gaussian_formula)
 
         # Get and return the energies.
         energies = np.array(te.get_energies())*Rydberg
@@ -364,7 +375,8 @@ class Density(Target):
 
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
                                     create_file=True, qe_input_data=None,
-                                    qe_pseudopotentials=None):
+                                    qe_pseudopotentials=None,
+                                    ewald_energy_gaussian_formula=True):
         if create_file:
             # If not otherwise specified, use values as read in.
             if qe_input_data is None:
@@ -452,69 +464,81 @@ class Density(Target):
         # instantiate the process with the file.
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
 
-        # Calculate the Gaussian descriptors for the calculation of the
-        # structure factors.
-        barrier()
-        t0 = time.perf_counter()
-        gaussian_descriptors = \
-            self._get_gaussian_descriptors_for_structure_factors(
-                atoms_Angstrom, self.grid_dimensions)
-        barrier()
-        t1 = time.perf_counter()
-        printout("time used by gaussian descriptors: ", t1 - t0)
+        if ewald_energy_gaussian_formula:
+            # Calculate the Gaussian descriptors for the calculation of the
+            # structure factors.
+            barrier()
+            t0 = time.perf_counter()
+            gaussian_descriptors = \
+                self._get_gaussian_descriptors_for_structure_factors(
+                    atoms_Angstrom, self.grid_dimensions)
+            barrier()
+            t1 = time.perf_counter()
+            printout("time used by gaussian descriptors: ", t1 - t0,
+                     min_verbosity=2)
 
-        #
-        # Check normalization of the Gaussian descriptors
-        #
-        #from mpi4py import MPI
-        #ggrid_sum = np.sum(gaussian_descriptors)
-        #full_ggrid_sum = np.array([0.0])
-        #comm = get_comm()
-        #comm.Barrier()
-        #comm.Reduce([ggrid_sum, MPI.DOUBLE], [full_ggrid_sum, MPI.DOUBLE], op=MPI.SUM, root=0)
-        #printout("full_ggrid_sum =", full_ggrid_sum)
+            #
+            # Check normalization of the Gaussian descriptors
+            #
+            #from mpi4py import MPI
+            #ggrid_sum = np.sum(gaussian_descriptors)
+            #full_ggrid_sum = np.array([0.0])
+            #comm = get_comm()
+            #comm.Barrier()
+            #comm.Reduce([ggrid_sum, MPI.DOUBLE], [full_ggrid_sum, MPI.DOUBLE], op=MPI.SUM, root=0)
+            #printout("full_ggrid_sum =", full_ggrid_sum)
 
-        # Calculate the Gaussian descriptors for a reference system consisting
-        # of one atom at position (0.0,0.0,0.0)
-        barrier()
-        t0 = time.perf_counter()
-        atoms_reference = atoms_Angstrom.copy()
-        del atoms_reference[1:]
-        atoms_reference.set_positions([(0.0,0.0,0.0)])
-        reference_gaussian_descriptors = \
-            self._get_gaussian_descriptors_for_structure_factors(
-                atoms_reference, self.grid_dimensions)
-        barrier()
-        t1 = time.perf_counter()
-        printout("time used by reference gaussian descriptors: ", t1 - t0)
+            # Calculate the Gaussian descriptors for a reference system consisting
+            # of one atom at position (0.0,0.0,0.0)
+            barrier()
+            t0 = time.perf_counter()
+            atoms_reference = atoms_Angstrom.copy()
+            del atoms_reference[1:]
+            atoms_reference.set_positions([(0.0,0.0,0.0)])
+            reference_gaussian_descriptors = \
+                self._get_gaussian_descriptors_for_structure_factors(
+                    atoms_reference, self.grid_dimensions)
+            barrier()
+            t1 = time.perf_counter()
+            printout("time used by reference gaussian descriptors: ", t1 - t0,
+                     min_verbosity=2)
 
-        #
-        # Check normalization of the reference Gaussian descriptors
-        #
-        #reference_ggrid_sum = np.sum(reference_gaussian_descriptors)
-        #full_reference_ggrid_sum = np.array([0.0])
-        #comm = get_comm()
-        #comm.Barrier()
-        #comm.Reduce([reference_ggrid_sum, MPI.DOUBLE], [full_reference_ggrid_sum, MPI.DOUBLE], op=MPI.SUM, root=0)
-        #printout("full_reference_ggrid_sum =", full_reference_ggrid_sum)
-
-        barrier()
-        t0 = time.perf_counter()
-        te.set_positions(np.transpose(positions_for_qe), number_of_atoms)
-        barrier()
-        t1 = time.perf_counter()
-        printout("time used by set_positions: ", t1 - t0)
+            #
+            # Check normalization of the reference Gaussian descriptors
+            #
+            #reference_ggrid_sum = np.sum(reference_gaussian_descriptors)
+            #full_reference_ggrid_sum = np.array([0.0])
+            #comm = get_comm()
+            #comm.Barrier()
+            #comm.Reduce([reference_ggrid_sum, MPI.DOUBLE], [full_reference_ggrid_sum, MPI.DOUBLE], op=MPI.SUM, root=0)
+            #printout("full_reference_ggrid_sum =", full_reference_ggrid_sum)
 
         barrier()
         t0 = time.perf_counter()
-        gaussian_descriptors = np.reshape(gaussian_descriptors, [number_of_gridpoints, 1], order='F')
-        reference_gaussian_descriptors = np.reshape(reference_gaussian_descriptors, [number_of_gridpoints, 1], order='F')
-        sigma = self._parameters_full.descriptors.gaussian_descriptors_sigma
-        sigma = sigma / Bohr
-        te.set_positions_gauss(gaussian_descriptors,reference_gaussian_descriptors,sigma,number_of_gridpoints,1)
+
+        # If the Gaussian formula is used, bot the calculation of the
+        # Ewald energy and the structure factor can be skipped.
+        te.set_positions(np.transpose(positions_for_qe), number_of_atoms,
+                         ewald_energy_gaussian_formula,
+                         ewald_energy_gaussian_formula)
         barrier()
         t1 = time.perf_counter()
-        printout("time used by set_positions_gauss: ", t1 - t0)
+        printout("time used by set_positions: ", t1 - t0,
+                 min_verbosity=2)
+
+        barrier()
+
+        if ewald_energy_gaussian_formula:
+            t0 = time.perf_counter()
+            gaussian_descriptors = np.reshape(gaussian_descriptors, [number_of_gridpoints, 1], order='F')
+            reference_gaussian_descriptors = np.reshape(reference_gaussian_descriptors, [number_of_gridpoints, 1], order='F')
+            sigma = self._parameters_full.descriptors.gaussian_descriptors_sigma
+            sigma = sigma / Bohr
+            te.set_positions_gauss(gaussian_descriptors,reference_gaussian_descriptors,sigma,number_of_gridpoints,1)
+            barrier()
+            t1 = time.perf_counter()
+            printout("time used by set_positions_gauss: ", t1 - t0,
+                     min_verbosity=2)
 
         # Now we can set the new density.
         barrier()
@@ -522,7 +546,8 @@ class Density(Target):
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
         barrier()
         t1 = time.perf_counter()
-        printout("time used by set_rho_of_r: ", t1 - t0)
+        printout("time used by set_rho_of_r: ", t1 - t0,
+                 min_verbosity=2)
 
         return atoms_Angstrom
 
