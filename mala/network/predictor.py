@@ -103,12 +103,12 @@ class Predictor(Runner):
         """
         # Calculate SNAP descriptors.
         snap_descriptors, local_size = self.data.descriptor_calculator.\
-            calculate_from_atoms(atoms, self.data.grid_dimension)
+            calculate_from_atoms(atoms, self.grid_dimension)
 
         # Provide info from current snapshot to target calculator.
         self.data.target_calculator.\
             read_additional_calculation_data("atoms+grid",
-                                             [atoms, self.data.grid_dimension])
+                                             [atoms, self.grid_dimension])
         feature_length = self.data.descriptor_calculator.fingerprint_length
 
         # The actual calculation of the LDOS from the SNAP descriptors depends

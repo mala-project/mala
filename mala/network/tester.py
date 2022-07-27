@@ -33,7 +33,6 @@ class Tester(Runner):
         super(Tester, self).__init__(params, network, data)
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
-        self.__prepare_to_test()
 
     def test_snapshot(self, snapshot_number):
         """
@@ -52,26 +51,39 @@ class Tester(Runner):
         predicted_outputs : torch.Tensor
             Precicted outputs for snapshot.
         """
+        # Adjust batch size and such.
+        self.__prepare_to_test(snapshot_number)
+
         # Forward through network.
         return self.\
             _forward_entire_snapshot(snapshot_number,
                                      self.data.test_data_set,
+                                     "te",
                                      self.number_of_batches_per_snapshot,
                                      self.parameters.mini_batch_size)
 
-    def __prepare_to_test(self):
+    def __prepare_to_test(self, snapshot_number):
         """Prepare the tester class to for test run."""
         # We will use the DataSet iterator to iterate over the test data.
         # But since we only want the data per snapshot,
         # we need to make sure the batch size is compatible with that.
+        test_snapshot = 0
+        grid_size = None
+        for snapshot in self.data.parameters.snapshot_directories_list:
+            if snapshot.snapshot_function == "te":
+                if snapshot_number == test_snapshot:
+                    grid_size = snapshot.grid_size
+                    break
+                test_snapshot += 1
+
         optimal_batch_size = self.\
-            _correct_batch_size_for_testing(self.data.grid_size,
+            _correct_batch_size_for_testing(grid_size,
                                             self.parameters.mini_batch_size)
         if optimal_batch_size != self.parameters.mini_batch_size:
             printout("Had to readjust batch size from",
                      self.parameters.mini_batch_size, "to",
                      optimal_batch_size, min_verbosity=0)
             self.parameters.mini_batch_size = optimal_batch_size
-        self.number_of_batches_per_snapshot = int(self.data.grid_size /
+        self.number_of_batches_per_snapshot = int(grid_size /
                                                   self.parameters.
                                                   mini_batch_size)

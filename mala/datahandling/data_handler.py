@@ -497,11 +497,14 @@ class DataHandler:
     def __load_from_npy_file(self, file, mmapmode=None):
         """Load a numpy array from a file."""
         loaded_array = np.load(file, mmap_mode=mmapmode)
-        if len(self.dbg_grid_dimensions) == 3:
-            return loaded_array[0:self.dbg_grid_dimensions[0],
-                                0:self.dbg_grid_dimensions[1],
-                                0:self.dbg_grid_dimensions[2], :]
+        if self.dbg_grid_dimensions is not None:
+            if len(self.dbg_grid_dimensions) == 3:
+                return loaded_array[0:self.dbg_grid_dimensions[0],
+                       0:self.dbg_grid_dimensions[1],
+                       0:self.dbg_grid_dimensions[2], :]
 
+            else:
+                return loaded_array
         else:
             return loaded_array
 

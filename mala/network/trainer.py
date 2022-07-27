@@ -218,13 +218,13 @@ class Trainer(Runner):
 
         tloss = float("inf")
         vloss = self.__validate_network(self.network,
-                                        "validation",
+                                        "va",
                                         self.parameters.
                                         after_before_training_metric)
 
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
-                                            "test",
+                                            "te",
                                             self.parameters.
                                             after_before_training_metric)
 
@@ -283,7 +283,7 @@ class Trainer(Runner):
 
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(self.network,
-                                            "validation",
+                                            "va",
                                             self.parameters.
                                             during_training_metric)
 
@@ -368,7 +368,7 @@ class Trainer(Runner):
         if self.parameters.after_before_training_metric != \
                 self.parameters.during_training_metric:
             vloss = self.__validate_network(self.network,
-                                            "validation",
+                                            "va",
                                             self.parameters.
                                             after_before_training_metric)
             if self.parameters_full.use_horovod:
@@ -381,7 +381,7 @@ class Trainer(Runner):
         tloss = float("inf")
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
-                                            "test",
+                                            "te",
                                             self.parameters.
                                             after_before_training_metric)
             if self.parameters_full.use_horovod:
@@ -535,14 +535,14 @@ class Trainer(Runner):
 
     def __validate_network(self, network, data_set_type, validation_type):
         """Validate a network, using test or validation data."""
-        if data_set_type == "test":
+        if data_set_type == "te":
             data_loader = self.test_data_loader
             data_set = self.data.test_data_set
             number_of_snapshots = self.data.nr_test_snapshots
             offset_snapshots = self.data.nr_validation_snapshots + \
                                self.data.nr_training_snapshots
 
-        elif data_set_type == "validation":
+        elif data_set_type == "va":
             data_loader = self.validation_data_loader
             data_set = self.data.validation_data_set
             number_of_snapshots = self.data.nr_validation_snapshots
@@ -564,20 +564,30 @@ class Trainer(Runner):
 
             return np.mean(validation_loss)
         elif validation_type == "band_energy":
-            # Get optimal batch size and number of batches per snapshots.
-            optimal_batch_size = self. \
-                _correct_batch_size_for_testing(self.data.grid_size,
-                                                self.parameters.
-                                                mini_batch_size)
-            number_of_batches_per_snapshot = int(self.data.grid_size /
-                                                 optimal_batch_size)
             errors = []
             for snapshot_number in range(offset_snapshots,
                                          number_of_snapshots+offset_snapshots):
+                # Get optimal batch size and number of batches per snapshotss
+                test_snapshot = 0
+                grid_size = None
+                for snapshot in self.data.parameters.snapshot_directories_list:
+                    if snapshot.snapshot_function == data_set_type:
+                        if snapshot_number == test_snapshot:
+                            grid_size = snapshot.grid_size
+                            break
+                        test_snapshot += 1
+
+                optimal_batch_size = self. \
+                    _correct_batch_size_for_testing(grid_size,
+                                                    self.parameters.
+                                                    mini_batch_size)
+                number_of_batches_per_snapshot = int(grid_size /
+                                                     optimal_batch_size)
+
                 actual_outputs, \
                 predicted_outputs = self.\
                     _forward_entire_snapshot(snapshot_number-offset_snapshots,
-                                             data_set,
+                                             data_set, data_set_type,
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)
                 calculator = self.data.target_calculator
@@ -608,19 +618,31 @@ class Trainer(Runner):
             return np.mean(errors)
         elif validation_type == "total_energy":
             # Get optimal batch size and number of batches per snapshots.
-            optimal_batch_size = self. \
-                _correct_batch_size_for_testing(self.data.grid_size,
-                                                self.parameters.
-                                                mini_batch_size)
-            number_of_batches_per_snapshot = int(self.data.grid_size /
-                                                 optimal_batch_size)
+
             errors = []
             for snapshot_number in range(offset_snapshots,
                                          number_of_snapshots+offset_snapshots):
+                # Get optimal batch size and number of batches per snapshotss
+                test_snapshot = 0
+                grid_size = None
+                for snapshot in self.data.parameters.snapshot_directories_list:
+                    if snapshot.snapshot_function == data_set_type:
+                        if snapshot_number == test_snapshot:
+                            grid_size = snapshot.grid_size
+                            break
+                        test_snapshot += 1
+
+                optimal_batch_size = self. \
+                    _correct_batch_size_for_testing(grid_size,
+                                                    self.parameters.
+                                                    mini_batch_size)
+                number_of_batches_per_snapshot = int(grid_size /
+                                                     optimal_batch_size)
+
                 actual_outputs, \
                 predicted_outputs = self.\
                     _forward_entire_snapshot(snapshot_number-offset_snapshots,
-                                             data_set,
+                                             data_set, data_set_type,
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)
                 calculator = self.data.target_calculator
