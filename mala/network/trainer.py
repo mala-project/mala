@@ -568,14 +568,8 @@ class Trainer(Runner):
             for snapshot_number in range(offset_snapshots,
                                          number_of_snapshots+offset_snapshots):
                 # Get optimal batch size and number of batches per snapshotss
-                test_snapshot = 0
-                grid_size = None
-                for snapshot in self.data.parameters.snapshot_directories_list:
-                    if snapshot.snapshot_function == data_set_type:
-                        if snapshot_number == test_snapshot:
-                            grid_size = snapshot.grid_size
-                            break
-                        test_snapshot += 1
+                grid_size = self.data.parameters.\
+                    snapshot_directories_list[snapshot_number].grid_size
 
                 optimal_batch_size = self. \
                     _correct_batch_size_for_testing(grid_size,
@@ -623,14 +617,8 @@ class Trainer(Runner):
             for snapshot_number in range(offset_snapshots,
                                          number_of_snapshots+offset_snapshots):
                 # Get optimal batch size and number of batches per snapshotss
-                test_snapshot = 0
-                grid_size = None
-                for snapshot in self.data.parameters.snapshot_directories_list:
-                    if snapshot.snapshot_function == data_set_type:
-                        if snapshot_number == test_snapshot:
-                            grid_size = snapshot.grid_size
-                            break
-                        test_snapshot += 1
+                grid_size = self.data.parameters.\
+                    snapshot_directories_list[snapshot_number].grid_size
 
                 optimal_batch_size = self. \
                     _correct_batch_size_for_testing(grid_size,

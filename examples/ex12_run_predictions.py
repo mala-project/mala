@@ -113,9 +113,9 @@ def initial_training():
     # but it is safer this way.
     ####################
 
-    test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),
+    test_parameters.network.layer_sizes = [data_handler.input_dimension,
                                            100,
-                                           data_handler.get_output_dimension()]
+                                           data_handler.output_dimension]
 
     # Setup network and trainer.
     test_network = mala.Network(test_parameters)

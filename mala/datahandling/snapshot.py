@@ -81,6 +81,21 @@ class Snapshot(JSONSerializable):
 
     def load_dimensions(self, descriptors_contain_xyz,
                         debug_dimensions=None):
+        """
+        Load the dimensions for a snapshot from the linked files.
+
+        Parameters
+        ----------
+        descriptors_contain_xyz :
+            If True, the first 3 entries in the feature dimension are
+            assumed to be xyz-coordinates and will be ignored for
+            the calculation of the feature dimension.
+
+        debug_dimensions :
+            If not None, these dimensions will be used as xyz-dimensions.
+            Useful for debugging.
+
+        """
         # Load input and output data separately and see if they match.
 
         # Input data.
@@ -113,7 +128,7 @@ class Snapshot(JSONSerializable):
             return False
         else:
             self.grid_dimensions = input_dimensions
-            self.grid_size = np.prod(self.grid_dimensions)
+            self.grid_size = int(np.prod(self.grid_dimensions))
             return True
 
     @classmethod

@@ -84,6 +84,8 @@ class Runner:
         from_index = 0
         to_index = None
         in_dataset_snapshot_number = 0
+
+        # TODO: Make this easier! 
         for snapshot in self.data.parameters.snapshot_directories_list:
             if snapshot.snapshot_function == data_set_type:
                 if in_dataset_snapshot_number == snapshot_number:

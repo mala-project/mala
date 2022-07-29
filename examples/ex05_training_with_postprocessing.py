@@ -137,9 +137,9 @@ def initial_training(network_path, params_path, input_scaler_path,
     # but it is safer this way.
     ####################
 
-    test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),
+    test_parameters.network.layer_sizes = [data_handler.input_dimension,
                                            100,
-                                           data_handler.get_output_dimension()]
+                                           data_handler.output_dimension]
 
     # Setup network and trainer.
     test_network = mala.Network(test_parameters)
@@ -171,8 +171,8 @@ params_path = "./ex05_params.json"
 network_path = "./ex05_network.pth"
 input_scaler_path = "./ex05_iscaler.pkl"
 output_scaler_path = "./ex05_oscaler.pkl"
-initial_training(network_path, params_path, input_scaler_path,
-                 output_scaler_path)
+# initial_training(network_path, params_path, input_scaler_path,
+#                  output_scaler_path)
 use_trained_network(network_path, params_path, input_scaler_path,
                     output_scaler_path)
 

@@ -166,16 +166,25 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         # Save which data we have currently loaded.
         self.currently_loaded_file = file_index
 
-    def _get_file_index(self, idx):
+    def _get_file_index(self, idx, is_slice=False):
         file_index = None
         index_in_file = idx
-        for i in range(len(self.snapshot_list)):
-            if index_in_file - self.snapshot_list[i].grid_size < 0:
-                file_index = i
-                break
-            else:
-                index_in_file -= self.snapshot_list[i].grid_size
-        return file_index, index_in_file
+        if is_slice:
+            for i in range(len(self.snapshot_list)):
+                if index_in_file - self.snapshot_list[i].grid_size <= 0:
+                    file_index = i
+                    break
+                else:
+                    index_in_file -= self.snapshot_list[i].grid_size
+            return file_index, index_in_file
+        else:
+            for i in range(len(self.snapshot_list)):
+                if index_in_file - self.snapshot_list[i].grid_size < 0:
+                    file_index = i
+                    break
+                else:
+                    index_in_file -= self.snapshot_list[i].grid_size
+            return file_index, index_in_file
 
     def __getitem__(self, idx):
         """
@@ -205,9 +214,9 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         elif isinstance(idx, slice):
             # If a slice is requested, we have to find out if it spans files.
             file_index_start, index_in_file_start = self.\
-                _get_file_index(idx.start)
+                _get_file_index(idx.start, is_slice=True)
             file_index_stop, index_in_file_stop = self.\
-                _get_file_index(idx.stop)
+                _get_file_index(idx.stop, is_slice=True)
 
             # If it does, we cannot deliver.
             # Take care though, if a full snapshot is requested,

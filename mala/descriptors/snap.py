@@ -289,10 +289,15 @@ class SNAP(Descriptor):
         nx = None
         ny = None
         nz = None
-        if len(self.dbg_grid_dimensions) == 3:
-            nx = self.dbg_grid_dimensions[0]
-            ny = self.dbg_grid_dimensions[1]
-            nz = self.dbg_grid_dimensions[2]
+        if self.dbg_grid_dimensions is not None:
+            if len(self.dbg_grid_dimensions) == 3:
+                nx = self.dbg_grid_dimensions[0]
+                ny = self.dbg_grid_dimensions[1]
+                nz = self.dbg_grid_dimensions[2]
+            else:
+                nx = grid_dimensions[0]
+                ny = grid_dimensions[1]
+                nz = grid_dimensions[2]
         else:
             nx = grid_dimensions[0]
             ny = grid_dimensions[1]

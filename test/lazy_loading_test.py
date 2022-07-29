@@ -116,8 +116,8 @@ class TestLazyLoading:
                                           (data_handler.training_data_set[4001])
                                           [0].sum())
                     test_parameters.network.layer_sizes = \
-                        [data_handler.get_input_dimension(), 100,
-                         data_handler.get_output_dimension()]
+                        [data_handler.input_dimension, 100,
+                         data_handler.output_dimension]
 
                     # Setup network and trainer.
                     test_network = Network(test_parameters)
@@ -133,13 +133,25 @@ class TestLazyLoading:
                     # I presume to be due to numerical constraints. To make a
                     # meaningful comparison it is wise to scale the value here.
                     this_result.append(torch.mean(data_handler.input_data_scaler.
-                                                  means)/data_handler.grid_size)
+                                                  means) /
+                                                  data_handler.parameters.
+                                                  snapshot_directories_list[0].
+                                                  grid_size)
                     this_result.append(torch.mean(data_handler.input_data_scaler.
-                                                  stds)/data_handler.grid_size)
+                                                  stds) /
+                                                  data_handler.parameters.
+                                                  snapshot_directories_list[0].
+                                                  grid_size)
                     this_result.append(torch.mean(data_handler.output_data_scaler.
-                                                  means)/data_handler.grid_size)
+                                                  means) /
+                                                  data_handler.parameters.
+                                                  snapshot_directories_list[0].
+                                                  grid_size)
                     this_result.append(torch.mean(data_handler.output_data_scaler.
-                                                  stds)/data_handler.grid_size)
+                                                  stds) /
+                                                  data_handler.parameters.
+                                                  snapshot_directories_list[0].
+                                                  grid_size)
                 elif scalingtype == "feature-wise-normal":
                     this_result.append(torch.mean(data_handler.input_data_scaler.
                                                   maxs))
@@ -219,8 +231,8 @@ class TestLazyLoading:
 
                 data_handler.prepare_data()
                 test_parameters.network.layer_sizes = \
-                    [data_handler.get_input_dimension(), 100,
-                     data_handler.get_output_dimension()]
+                    [data_handler.input_dimension, 100,
+                     data_handler.output_dimension]
 
                 # Setup network and trainer.
                 test_network = Network(test_parameters)
@@ -271,4 +283,3 @@ class TestLazyLoading:
 
         # The loss improvements should be comparable.
         assert np.std(diff) < accuracy_strict
-        
