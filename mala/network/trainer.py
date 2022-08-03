@@ -580,7 +580,7 @@ class Trainer(Runner):
 
                 actual_outputs, \
                 predicted_outputs = self.\
-                    _forward_entire_snapshot(snapshot_number-offset_snapshots,
+                    _forward_entire_snapshot(snapshot_number,
                                              data_set, data_set_type,
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)
@@ -629,7 +629,7 @@ class Trainer(Runner):
 
                 actual_outputs, \
                 predicted_outputs = self.\
-                    _forward_entire_snapshot(snapshot_number-offset_snapshots,
+                    _forward_entire_snapshot(snapshot_number,
                                              data_set, data_set_type,
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)

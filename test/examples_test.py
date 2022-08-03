@@ -34,6 +34,7 @@ class TestExamples:
         runpy.run_path("../examples/ex08_checkpoint_hyperopt.py")
 
     def test_ex09(self):
+
         runpy.run_path("../examples/ex09_distributed_hyperopt.py")
 
     def test_ex10(self):

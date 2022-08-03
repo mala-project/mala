@@ -55,8 +55,11 @@ class Tester(Runner):
         self.__prepare_to_test(snapshot_number)
 
         # Forward through network.
+        offset_snapshots = self.data.nr_validation_snapshots + \
+                           self.data.nr_training_snapshots
+
         return self.\
-            _forward_entire_snapshot(snapshot_number,
+            _forward_entire_snapshot(offset_snapshots+snapshot_number,
                                      self.data.test_data_set,
                                      "te",
                                      self.number_of_batches_per_snapshot,
