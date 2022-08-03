@@ -74,6 +74,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;Trainer class for training a network.&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
@@ -138,11 +139,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__prepare_to_train</span><span class="p">(</span><span class="n">optimizer_dict</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">tensor_board</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_visualization_path</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">visualisation</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">visualisation_dir</span><span class="p">):</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">visualisation_dir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">visualisation_dir_append_date</span><span class="p">:</span>
+                <span class="n">date_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">-%H-%M-%S&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">full_visualization_path</span> <span class="o">=</span> \
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">visualisation_dir</span><span class="p">,</span> <span class="n">date_time</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_visualization_path</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">full_visualization_path</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">visualisation_dir</span>
+
             <span class="c1"># Set the path to log files</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tensor_board</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">visualisation_dir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tensor_board</span> <span class="o">=</span> <span class="n">SummaryWriter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_visualization_path</span><span class="p">)</span>
+            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Writing visualization output to&quot;</span><span class="p">,</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">full_visualization_path</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Trainer.checkpoint_exists"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.checkpoint_exists">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">checkpoint_exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -327,7 +340,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
             <span class="c1"># Process each mini batch and save the training loss.</span>
-            <span class="n">training_loss</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">training_loss</span> <span class="o">=</span> <span class="p">[]</span>
 
             <span class="c1"># train sampler</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
@@ -337,8 +350,9 @@
                     <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_loader</span><span class="p">):</span>
                 <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
                 <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
-                <span class="n">training_loss</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
-                                                           <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+                <span class="n">training_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
+                                                           <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">))</span>
+            <span class="n">training_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">training_loss</span><span class="p">)</span>
 
             <span class="c1"># Calculate the validation loss. and output it.</span>
             <span class="n">vloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__validate_network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
@@ -348,12 +362,21 @@
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
                 <span class="n">vloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span><span class="n">vloss</span><span class="p">,</span> <span class="s1">&#39;average_loss&#39;</span><span class="p">)</span>
-            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Epoch: &quot;</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="s2">&quot;validation data loss: &quot;</span><span class="p">,</span> <span class="n">vloss</span><span class="p">,</span>
-                     <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Epoch </span><span class="si">{0}</span><span class="s2">: validation data loss: </span><span class="si">{1}</span><span class="s2">, &quot;</span>
+                         <span class="s2">&quot;training data loss: </span><span class="si">{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">vloss</span><span class="p">,</span>
+                                                          <span class="n">training_loss</span><span class="p">),</span>
+                         <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Epoch </span><span class="si">{0}</span><span class="s2">: validation data loss: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span>
+                                                                       <span class="n">vloss</span><span class="p">),</span>
+                         <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># summary_writer tensor board</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">visualisation</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">tensor_board</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s2">&quot;Loss&quot;</span><span class="p">,</span> <span class="n">vloss</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tensor_board</span><span class="o">.</span><span class="n">add_scalars</span><span class="p">(</span><span class="s1">&#39;Loss&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;validation&#39;</span><span class="p">:</span> <span class="n">vloss</span><span class="p">,</span>
+                                              <span class="s1">&#39;training&#39;</span><span class="p">:</span> <span class="n">training_loss</span><span class="p">},</span>
+                                              <span class="n">epoch</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">tensor_board</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s2">&quot;Learning rate&quot;</span><span class="p">,</span>
                                              <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
                                              <span class="n">epoch</span><span class="p">)</span>

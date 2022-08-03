@@ -647,6 +647,14 @@
 <span class="sd">        case 1: tensorboard activated with Loss and learning rate</span>
 <span class="sd">        case 2; additonally weights and biases and gradient</span>
 
+<span class="sd">    visualisation_dir : string</span>
+<span class="sd">        Name of the folder that visualization files will be saved to.</span>
+
+<span class="sd">    visualisation_dir_append_date : bool</span>
+<span class="sd">        If True, then upon creating visualization files, these will be saved</span>
+<span class="sd">        in a subfolder of visualisation_dir labelled with the starting date</span>
+<span class="sd">        of the visualization, to avoid having to change input scripts often.</span>
+
 <span class="sd">    inference_data_grid : list</span>
 <span class="sd">        List holding the grid to be used for inference in the form of</span>
 <span class="sd">        [x,y,z].</span>
@@ -671,8 +679,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoints_each_epoch</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_name</span> <span class="o">=</span> <span class="s2">&quot;checkpoint_mala&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">visualisation</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="c1"># default visualisation_dir= &quot;~/log_dir&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">visualisation_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">),</span> <span class="s2">&quot;log_dir&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualisation_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;mala_logging&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualisation_dir_append_date</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">during_training_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">after_before_training_metric</span> <span class="o">=</span> <span class="s2">&quot;ldos&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inference_data_grid</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>

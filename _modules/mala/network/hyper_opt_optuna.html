@@ -82,6 +82,7 @@
 <span class="kn">from</span> <span class="nn">mala.network.objective_base</span> <span class="kn">import</span> <span class="n">ObjectiveBase</span>
 <span class="kn">from</span> <span class="nn">mala.network.naswot_pruner</span> <span class="kn">import</span> <span class="n">NASWOTPruner</span>
 <span class="kn">from</span> <span class="nn">mala.network.multi_training_pruner</span> <span class="kn">import</span> <span class="n">MultiTrainingPruner</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">parallel_warn</span>
 
 
 <div class="viewcode-block" id="HyperOptOptuna"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna">[docs]</a><span class="k">class</span> <span class="nc">HyperOptOptuna</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
@@ -194,6 +195,45 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">get_trials</span><span class="p">(</span><span class="n">states</span><span class="o">=</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span>
                                               <span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,</span> <span class="p">))</span></div>
+
+<div class="viewcode-block" id="HyperOptOptuna.requeue_zombie_trials"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.requeue_zombie_trials">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">requeue_zombie_trials</span><span class="p">(</span><span class="n">study_name</span><span class="p">,</span> <span class="n">rdb_storage</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Put zombie trials back into the queue to be investigated.</span>
+
+<span class="sd">        When using Optuna with scheduling systems in HPC infrastructure,</span>
+<span class="sd">        zombie trials can occur. These are trials that are still marked</span>
+<span class="sd">        as &quot;RUNNING&quot;, but are, in actuality, dead, since the HPC job ended.</span>
+<span class="sd">        This function takes a saved hyperparameter study, and puts all</span>
+<span class="sd">        &quot;RUNNING&quot; trials als &quot;WAITING&quot;. Upon the next execution from</span>
+<span class="sd">        checkpoint, they will be executed.</span>
+
+<span class="sd">        BE CAREFUL! DO NOT USE APPLY THIS TO A RUNNING STUDY, IT WILL MESS THE</span>
+<span class="sd">        STUDY UP! ONLY USE THIS ONCE ALL JOBS HAVE FINISHED, TO CLEAN UP,</span>
+<span class="sd">        AND THEN RESUBMIT!</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        rdb_storage : string</span>
+<span class="sd">            Adress of the RDB storage to be cleaned.</span>
+
+<span class="sd">        study_name : string</span>
+<span class="sd">            Name of the study in the storage. Same as the checkpoint name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">study_to_clean</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">load_study</span><span class="p">(</span><span class="n">study_name</span><span class="o">=</span><span class="n">study_name</span><span class="p">,</span>
+                                           <span class="n">storage</span><span class="o">=</span><span class="n">rdb_storage</span><span class="p">)</span>
+        <span class="n">parallel_warn</span><span class="p">(</span><span class="s2">&quot;WARNING: Your about to clean/requeue a study.&quot;</span>
+                      <span class="s2">&quot; This operation should not be done to an already&quot;</span>
+                      <span class="s2">&quot; running study.&quot;</span><span class="p">)</span>
+        <span class="n">trials</span> <span class="o">=</span> <span class="n">study_to_clean</span><span class="o">.</span><span class="n">get_trials</span><span class="p">()</span>
+        <span class="n">cleaned_trials</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">trial</span> <span class="ow">in</span> <span class="n">trials</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">trial</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">TrialState</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">:</span>
+                <span class="n">study_to_clean</span><span class="o">.</span><span class="n">_storage</span><span class="o">.</span><span class="n">set_trial_state</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">_trial_id</span><span class="p">,</span>
+                                                        <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span>
+                                                        <span class="n">TrialState</span><span class="o">.</span><span class="n">WAITING</span><span class="p">)</span>
+                <span class="n">cleaned_trials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">number</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Cleaned trials: &quot;</span><span class="p">,</span> <span class="n">cleaned_trials</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="HyperOptOptuna.resume_checkpoint"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.resume_checkpoint">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">resume_checkpoint</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">alternative_storage_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
