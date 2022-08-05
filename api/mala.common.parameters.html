@@ -270,7 +270,7 @@ performing inference/testing after training a network.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.optuna_singlenode_setup">
-<span class="sig-name descname"><span class="pre">optuna_singlenode_setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.optuna_singlenode_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.optuna_singlenode_setup" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">optuna_singlenode_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wait_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/parameters.html#Parameters.optuna_singlenode_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.Parameters.optuna_singlenode_setup" title="Permalink to this definition"></a></dt>
 <dd><p>Set up device and parallelization parameters for Optuna+MPI.</p>
 <p>This only needs to be called if multiple MPI ranks are used on
 one node to run Optuna. Optuna itself does NOT communicate via MPI.
@@ -280,6 +280,13 @@ cuda devices based on MPI ranks. This functions sets everything
 up properly. This of course requires MPI.
 This may be a bit hacky, but it lets us use one script and one
 MPI command to launch x GPU backed jobs on any node with x GPUs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>wait_time</strong> (<em>int</em>) – If larger than 0, then all processes will wait this many seconds
+times their rank number after this routine before proceeding.
+This can be useful when using a file based distribution algorithm.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -927,6 +934,11 @@ with the band_energy metric.</p></li>
 <dt>number_bad_trials_before_stopping<span class="classifier">int</span></dt><dd><p>Only applies to optuna studies. If any integer above 0, then if no
 new best trial is found within number_bad_trials_before trials after
 the last one, the study will be stopped.</p>
+</dd>
+<dt>sqlite_timeout<span class="classifier">int</span></dt><dd><p>Timeout for the SQLite backend of Optuna. This backend is officially
+not recommended because it is file based and can lead to errors;
+With a suitable timeout it can be used somewhat stable though and
+help in HPC settings.</p>
 </dd>
 </dl>
 <dl class="py method">

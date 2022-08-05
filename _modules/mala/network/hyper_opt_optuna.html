@@ -137,10 +137,16 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">study_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;If RDB storage is used, a name for the study &quot;</span>
                                 <span class="s2">&quot;has to be provided.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;sqlite&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span><span class="p">:</span>
+                <span class="n">engine_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;connect_args&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span>
+                                 <span class="n">hyperparameters</span><span class="o">.</span><span class="n">sqlite_timeout</span><span class="p">}}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">engine_kwargs</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">rdb_storage</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">storages</span><span class="o">.</span><span class="n">RDBStorage</span><span class="p">(</span>
                     <span class="n">url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">rdb_storage</span><span class="p">,</span>
                     <span class="n">heartbeat_interval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>
-                    <span class="n">rdb_storage_heartbeat</span><span class="p">)</span>
+                    <span class="n">rdb_storage_heartbeat</span><span class="p">,</span>
+                    <span class="n">engine_kwargs</span><span class="o">=</span><span class="n">engine_kwargs</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span>\
                 <span class="n">create_study</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">direction</span><span class="p">,</span>
