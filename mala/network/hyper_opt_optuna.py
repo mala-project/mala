@@ -64,10 +64,16 @@ class HyperOptOptuna(HyperOpt):
             if self.params.hyperparameters.study_name is None:
                 raise Exception("If RDB storage is used, a name for the study "
                                 "has to be provided.")
+            if "sqlite" in self.params.hyperparameters.rdb_storage:
+                engine_kwargs = {"connect_args": {"timeout": self.params.
+                                 hyperparameters.sqlite_timeout}}
+            else:
+                engine_kwargs = None
             rdb_storage = optuna.storages.RDBStorage(
                     url=self.params.hyperparameters.rdb_storage,
                     heartbeat_interval=self.params.hyperparameters.
-                    rdb_storage_heartbeat)
+                    rdb_storage_heartbeat,
+                    engine_kwargs=engine_kwargs)
 
             self.study = optuna.\
                 create_study(direction=self.params.hyperparameters.direction,
