@@ -415,38 +415,39 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="n">unscaled</span> <span class="o">=</span> <span class="n">scaled</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cantransform</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Backtransformation cannot be done, this &quot;</span>
-                            <span class="s2">&quot;DataScaler was never initialized&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cantransform</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Backtransformation cannot be done, this &quot;</span>
+                                <span class="s2">&quot;DataScaler was never initialized&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Perform the actual scaling, but use no_grad to make sure</span>
-        <span class="c1"># that the next couple of iterations stay untracked.</span>
-        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_wise</span><span class="p">:</span>
+            <span class="c1"># Perform the actual scaling, but use no_grad to make sure</span>
+            <span class="c1"># that the next couple of iterations stay untracked.</span>
+            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_wise</span><span class="p">:</span>
 
-                <span class="c1">##########################</span>
-                <span class="c1"># Feature-wise-scaling</span>
-                <span class="c1">##########################</span>
+                    <span class="c1">##########################</span>
+                    <span class="c1"># Feature-wise-scaling</span>
+                    <span class="c1">##########################</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">:</span>
-                    <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">stds</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">:</span>
+                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">stds</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
-                    <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxs</span><span class="o">.</span><span class="n">values</span>
-                                        <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span><span class="o">.</span><span class="n">values</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span><span class="o">.</span><span class="n">values</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
+                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxs</span>
+                                            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span>
 
-            <span class="k">else</span><span class="p">:</span>
+                <span class="k">else</span><span class="p">:</span>
 
-                <span class="c1">##########################</span>
-                <span class="c1"># Total scaling</span>
-                <span class="c1">##########################</span>
+                    <span class="c1">##########################</span>
+                    <span class="c1"># Total scaling</span>
+                    <span class="c1">##########################</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">:</span>
-                    <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_standard</span><span class="p">:</span>
+                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_std</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_mean</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
-                    <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_max</span>
-                                        <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_normal</span><span class="p">:</span>
+                        <span class="n">unscaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">scaled</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_max</span>
+                                            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_min</span>
 <span class="c1">#</span>
         <span class="k">if</span> <span class="n">as_numpy</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">unscaled</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
