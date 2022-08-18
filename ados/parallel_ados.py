@@ -106,7 +106,7 @@ def ensemble_train(hidden_output_layers: int, param_factor: int, lr: float, epoc
     
     labels = [f"{i:03d}" for i in range(ensemble_size)]
     if resume:
-        labels = [label for label in labels if not model_exists(label)]
+        labels = [label for label in labels if not (pathlib.Path(label) / "training_validation_losses.text").exists()]
         
 
     for i in range(rank, len(labels), num_ranks):
@@ -125,7 +125,7 @@ def ensemble_train(hidden_output_layers: int, param_factor: int, lr: float, epoc
             f.write(f"Rank {rank} is running model {i} on {platform.node()} using gpu {gpu_id}")
         with open(model_dir / "stdout.txt", "w") as outf, open(model_dir / "stderr.txt", "w") as errf:
             subprocess.run(cmd, stdout=outf, stderr=errf, cwd=model_dir)
-
+        record_training_losses(model_dir / "stdout.txt", model_dir / "training_validation_losses.txt")
 
 
 def hyperparameter_opt(hidden_output_layers, param_factor, lr, epochs,
@@ -299,7 +299,7 @@ def get_training_cmd(gpu_id: int, seed: int, hidden_output_layers: int, param_fa
            str(param_factor),
            "--lr",
            str(lr)]
-    if dropout > 0.0:
+    if dropout is not None and dropout > 0.0:
         cmd += ["--dropout", str(dropout)]
     return cmd
 
@@ -414,7 +414,7 @@ def main():
                    args["dataset"], args["data_dir"], args["out"])
     elif args["command"] == 'single-infer':
         single_infer(args["hidden_output_layers"], args["param_factor"], args["dropout"],
-                   args["test_snaphots"], args["dataset"], args["data_dir"], args["out"],
+                   args["test_snapshots"], args["dataset"], args["data_dir"], args["out"],
                    args["model"])
 
 if __name__ == '__main__':
