@@ -205,8 +205,11 @@ class GaussianDescriptors(Descriptor):
         # For now the file is chosen automatically, because this is used
         # mostly under the hood anyway.
         filepath = __file__.split("gaussian")[0]
-        if self.parameters.use_z_splitting:
-            runfile = os.path.join(filepath, "in.ggrid.python")
+        if self.parameters._configuration["mpi"]:
+            if self.parameters.use_z_splitting:
+                runfile = os.path.join(filepath, "in.ggrid.python")
+            else:
+                runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
         else:
             runfile = os.path.join(filepath, "in.ggrid_defaultproc.python")
         lmp.file(runfile)
