@@ -400,12 +400,9 @@ class Density(Target):
         if Density.te_mutex is False:
             printout("MALA: Starting QuantumEspresso to get density-based"
                      " energy contributions.", min_verbosity=0)
-            use_small_mem = False
-            if self.parameters._configuration["mpi"]:
-                use_small_mem = True
             barrier()
             t0 = time.perf_counter()
-            te.initialize(use_small_mem, self.y_planes)
+            te.initialize(self.y_planes)
             barrier()
             t1 = time.perf_counter()
             printout("time used by total energy initialization: ", t1 - t0)
@@ -494,7 +491,7 @@ class Density(Target):
             t0 = time.perf_counter()
             atoms_reference = atoms_Angstrom.copy()
             del atoms_reference[1:]
-            atoms_reference.set_positions([(0.0,0.0,0.0)])
+            atoms_reference.set_positions([(0.0, 0.0, 0.0)])
             reference_gaussian_descriptors = \
                 self._get_gaussian_descriptors_for_structure_factors(
                     atoms_reference, self.grid_dimensions)
@@ -516,7 +513,7 @@ class Density(Target):
         barrier()
         t0 = time.perf_counter()
 
-        # If the Gaussian formula is used, bot the calculation of the
+        # If the Gaussian formula is used, both the calculation of the
         # Ewald energy and the structure factor can be skipped.
         te.set_positions(np.transpose(positions_for_qe), number_of_atoms,
                          ewald_energy_gaussian_formula,
@@ -534,7 +531,11 @@ class Density(Target):
             reference_gaussian_descriptors = np.reshape(reference_gaussian_descriptors, [number_of_gridpoints, 1], order='F')
             sigma = self._parameters_full.descriptors.gaussian_descriptors_sigma
             sigma = sigma / Bohr
-            te.set_positions_gauss(gaussian_descriptors,reference_gaussian_descriptors,sigma,number_of_gridpoints,1)
+            te.set_positions_gauss(self._parameters_full.verbosity,
+                                   gaussian_descriptors,
+                                   reference_gaussian_descriptors,
+                                   sigma,
+                                   number_of_gridpoints, 1)
             barrier()
             t1 = time.perf_counter()
             printout("time used by set_positions_gauss: ", t1 - t0,
