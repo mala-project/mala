@@ -299,22 +299,26 @@ class Descriptor(ABC):
                     zint = ''
                     for i in range(0, zprocs-1):
                         zvals = ((i + 1) * (nz / zprocs) * zcut) - 0.00000001
-                        zint += format(zvals,".8f")
+                        zint += format(zvals, ".8f")
                         zint += ' '
                 else:
                     # account for remainder with uneven number of
                     # planes/processors
-                    zcut = 1/nz
-                    zrem = nz - (zprocs*int(nz/zprocs))
-                    zint = ''
-                    for i in range(0, zrem):
-                        zvals = (((i+1)*2)*zcut)-0.00000001
-                        zint += format(zvals, ".8f")
-                        zint += ' '
-                    for i in range(zrem, zprocs-1):
-                        zvals = ((i+1+zrem)*zcut)-0.00000001
-                        zint += format(zvals, ".8f")
-                        zint += ' '
+                    raise ValueError("Cannot divide z-planes on processors"
+                                     " without remainder. "
+                                     "This is currently unsupported.")
+
+                    # zcut = 1/nz
+                    # zrem = nz - (zprocs*int(nz/zprocs))
+                    # zint = ''
+                    # for i in range(0, zrem):
+                    #     zvals = (((i+1)*2)*zcut)-0.00000001
+                    #     zint += format(zvals, ".8f")
+                    #     zint += ' '
+                    # for i in range(zrem, zprocs-1):
+                    #     zvals = ((i+1+zrem)*zcut)-0.00000001
+                    #     zint += format(zvals, ".8f")
+                    #     zint += ' '
                 lammps_dict = {"lammps_procs": f"processors {lammps_procs} "
                                                f"map xyz",
                                "zbal": f"balance 1.0 y {yint} z {zint}",
@@ -343,8 +347,7 @@ class Descriptor(ABC):
 
                     # prepare z plane cuts for balance command in lammps
                     if int(nz / zprocs) == (nz / zprocs):
-                        if self.verbosity >= 2:
-                            print("No remainder in z")
+                        printout("No remainder in z")
                         zcut = 1/nz
                         zint = ''
                         for i in range(0, zprocs-1):
@@ -352,21 +355,20 @@ class Descriptor(ABC):
                             zint += format(zvals,".8f")
                             zint += ' '
                     else:
-                        # account for remainder with uneven number of
-                        # planes/processors
-                        if self.verbosity >= 2:
-                            print("Remainder in z")
-                        zcut = 1/nz
-                        zrem = nz - (zprocs*int(nz/zprocs))
-                        zint = ''
-                        for i in range(0, zrem):
-                            zvals = (((i+1)*2)*int(nz/zprocs)*zcut)-0.00000001
-                            zint += format(zvals, ".8f")
-                            zint += ' '
-                        for i in range(zrem, zprocs-1):
-                            zvals = ((i+1+zrem)*zcut)-0.00000001
-                            zint += format(zvals, ".8f")
-                            zint += ' '
+                        raise ValueError("Cannot divide z-planes on processors"
+                                         " without remainder. "
+                                         "This is currently unsupported.")
+                    #     zcut = 1/nz
+                    #     zrem = nz - (zprocs*int(nz/zprocs))
+                    #     zint = ''
+                    #     for i in range(0, zrem):
+                    #         zvals = (((i+1)*2)*int(nz/zprocs)*zcut)-0.00000001
+                    #         zint += format(zvals, ".8f")
+                    #         zint += ' '
+                    #     for i in range(zrem, zprocs-1):
+                    #         zvals = ((i+1+zrem)*zcut)-0.00000001
+                    #         zint += format(zvals, ".8f")
+                    #         zint += ' '
                     lammps_dict = {"lammps_procs": f"processors {lammps_procs}",
                                    "zbal": f"balance 1.0 z {zint}",
                                    "ngridx": nx,
