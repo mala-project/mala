@@ -27,8 +27,8 @@ parameters:
       .. code-block:: python
 
             parameters.descriptors.use_gaussian_descriptors_energy_formula = True
-            parameters.descriptors.gaussian_descriptors_cutoff = ABC
-            parameters.descriptors.gaussian_descriptors_sigma = XYZ
+            parameters.descriptors.gaussian_descriptors_cutoff = ...
+            parameters.descriptors.gaussian_descriptors_sigma = ...
 
 The first parameter, ``use_gaussian_descriptors_energy_formula`` simply
 activates the usage of this algorithm. The second parameter
