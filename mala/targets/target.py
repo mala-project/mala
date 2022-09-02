@@ -452,7 +452,7 @@ class Target(ABC):
                         parallel_warn(
                             "Calculating RDF with a radius larger then the unit"
                             " cell. While this will work numerically, be cautious"
-                            " about the physicality of its results", stacklevel=3)
+                            " about the physicality of its results")
 
             # Calculate all the distances.
             # rMax/2 because this is the radius around one atom, so half the

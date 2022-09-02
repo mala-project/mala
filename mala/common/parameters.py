@@ -4,6 +4,7 @@ import importlib
 import inspect
 import json
 import pickle
+from time import sleep
 
 try:
     import horovod.torch as hvd
@@ -844,6 +845,12 @@ class ParametersHyperparameterOptimization(ParametersBase):
         Only applies to optuna studies. If any integer above 0, then if no
         new best trial is found within number_bad_trials_before trials after
         the last one, the study will be stopped.
+
+    sqlite_timeout : int
+        Timeout for the SQLite backend of Optuna. This backend is officially
+        not recommended because it is file based and can lead to errors;
+        With a suitable timeout it can be used somewhat stable though and
+        help in HPC settings.
     """
 
     def __init__(self):
@@ -864,6 +871,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.pruner = None
         self.naswot_pruner_batch_size = 0
         self.number_bad_trials_before_stopping = None
+        self.sqlite_timeout = 600
 
     @property
     def rdb_storage_heartbeat(self):
@@ -1279,7 +1287,7 @@ class Parameters:
         """
         self.save(filename, save_format="json")
 
-    def optuna_singlenode_setup(self):
+    def optuna_singlenode_setup(self, wait_time=0):
         """
         Set up device and parallelization parameters for Optuna+MPI.
 
@@ -1291,12 +1299,20 @@ class Parameters:
         up properly. This of course requires MPI.
         This may be a bit hacky, but it lets us use one script and one
         MPI command to launch x GPU backed jobs on any node with x GPUs.
+
+        Parameters
+        ----------
+        wait_time : int
+            If larger than 0, then all processes will wait this many seconds
+            times their rank number after this routine before proceeding.
+            This can be useful when using a file based distribution algorithm.
         """
         # We first "trick" the parameters object to assume MPI and GPUs
         # are used. That way we get the right device.
         self.use_gpu = True
         self.use_mpi = True
         device_temp = self.device
+        sleep(get_rank()*wait_time)
 
         # Now we can turn of MPI and set the device manually.
         self.use_mpi = False
