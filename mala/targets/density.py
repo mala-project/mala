@@ -252,8 +252,7 @@ class Density(Target):
 
     def get_energy_contributions(self, density_data, create_file=True,
                                  atoms_Angstrom=None, qe_input_data=None,
-                                 qe_pseudopotentials=None,
-                                 ewald_energy_gaussian_formula=True):
+                                 qe_pseudopotentials=None):
         r"""
         Extract density based energy contributions from Quantum Espresso.
 
@@ -282,14 +281,6 @@ class Density(Target):
             Quantum Espresso pseudopotential dictionaty for the ASE<->QE
             interface. If None (recommended), MALA will create one.
 
-        ewald_energy_gaussian_formula : bool
-            If True, the custom implementation of the Ewald energy, based on
-            Gaussian descriptors will be used for the calculation of structure
-            factors and Ewald energy.
-            The alternative (with "False") would be the standard QE way.
-            The Gaussian descriptor approach is significantly more efficient,
-            but small inaccuracies have been observed.
-
         Returns
         -------
         energies : list
@@ -306,9 +297,7 @@ class Density(Target):
                                          create_file=create_file,
                                          qe_input_data=qe_input_data,
                                          qe_pseudopotentials=
-                                         qe_pseudopotentials,
-                                         ewald_energy_gaussian_formula=
-                                         ewald_energy_gaussian_formula)
+                                         qe_pseudopotentials)
 
         # Get and return the energies.
         energies = np.array(te.get_energies())*Rydberg
@@ -375,8 +364,7 @@ class Density(Target):
 
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
                                     create_file=True, qe_input_data=None,
-                                    qe_pseudopotentials=None,
-                                    ewald_energy_gaussian_formula=True):
+                                    qe_pseudopotentials=None):
         if create_file:
             # If not otherwise specified, use values as read in.
             if qe_input_data is None:
@@ -461,7 +449,8 @@ class Density(Target):
         # instantiate the process with the file.
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
 
-        if ewald_energy_gaussian_formula:
+        if self._parameters_full.descriptors.\
+                use_gaussian_descriptors_energy_formula:
             # Calculate the Gaussian descriptors for the calculation of the
             # structure factors.
             barrier()
@@ -516,8 +505,10 @@ class Density(Target):
         # If the Gaussian formula is used, both the calculation of the
         # Ewald energy and the structure factor can be skipped.
         te.set_positions(np.transpose(positions_for_qe), number_of_atoms,
-                         ewald_energy_gaussian_formula,
-                         ewald_energy_gaussian_formula)
+                         self._parameters_full.descriptors. \
+                         use_gaussian_descriptors_energy_formula,
+                         self._parameters_full.descriptors. \
+                         use_gaussian_descriptors_energy_formula)
         barrier()
         t1 = time.perf_counter()
         printout("time used by set_positions: ", t1 - t0,
@@ -525,7 +516,8 @@ class Density(Target):
 
         barrier()
 
-        if ewald_energy_gaussian_formula:
+        if self._parameters_full.descriptors.\
+                use_gaussian_descriptors_energy_formula:
             t0 = time.perf_counter()
             gaussian_descriptors = np.reshape(gaussian_descriptors, [number_of_gridpoints, 1], order='F')
             reference_gaussian_descriptors = np.reshape(reference_gaussian_descriptors, [number_of_gridpoints, 1], order='F')

@@ -271,10 +271,6 @@ class ParametersDescriptors(ParametersBase):
         descriptors. Default value for jmax is 5, so default value for
         twojmax is 10.
 
-    rcutfac: float
-        SNAP calculation: radius cutoff factor for the fingerprint sphere in
-        Angstroms. Default value is 4.67637.
-
     lammps_compute_file: string
         SNAP calculation: LAMMPS input file that is used to calculate the
         SNAP descriptors. If this string is empty, the standard LAMMPS input
@@ -298,6 +294,9 @@ class ParametersDescriptors(ParametersBase):
         super(ParametersDescriptors, self).__init__()
         self.descriptor_type = "SNAP"
         self.twojmax = 10
+        self.use_gaussian_descriptors_energy_formula = False
+        self.gaussian_descriptors_sigma = None
+        self.gaussian_descriptors_cutoff = None
         self.rcutfac = 4.67637
         self.lammps_compute_file = ""
         self.acsd_points = 100
@@ -309,8 +308,6 @@ class ParametersDescriptors(ParametersBase):
         # this should be adressed.
         self.use_z_splitting = True
         self.use_y_splitting = 0
-        self.gaussian_descriptors_sigma = 0.1355
-        self.gaussian_descriptors_cutoff = 4.67637
 
     @property
     def use_z_splitting(self):
@@ -350,6 +347,16 @@ class ParametersDescriptors(ParametersBase):
                 self._number_y_planes = 0
             else:
                 self._number_y_planes = value
+
+    @property
+    def rcutfac(self):
+        """Cut off radius for SNAP calculation."""
+        return self._rcutfac
+
+    @rcutfac.setter
+    def rcutfac(self, value):
+        self._rcutfac = value
+        self.gaussian_descriptors_cutoff = value
 
 
 class ParametersTargets(ParametersBase):
