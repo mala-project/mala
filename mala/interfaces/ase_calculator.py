@@ -2,11 +2,6 @@
 
 from ase.calculators.calculator import Calculator, all_changes
 import numpy as np
-try:
-    from mpi4py import MPI
-except:
-    # Warning thrown in parameters.py
-    pass
 from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, \
                  DOS
 from mala.common.parallelizer import get_rank, get_comm, barrier
@@ -134,6 +129,10 @@ class MALA(Calculator):
                                                               create_file=False)
         barrier()
         if self.params.use_mpi:
+            # I think we should refrain from top-level MPI imports; the first
+            # import triggers an MPI init, which can take quite long.
+            from mpi4py import MPI
+
             energy = get_comm().bcast(energy, root=0)
             if "forces" in properties:
                 get_comm().Bcast([forces, MPI.DOUBLE], root=0)

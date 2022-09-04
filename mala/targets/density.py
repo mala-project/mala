@@ -1,6 +1,5 @@
 """Electronic density calculation class."""
 import os
-import warnings
 
 import ase.io
 from ase.units import Rydberg, Bohr
@@ -9,7 +8,7 @@ try:
 except ModuleNotFoundError:
     pass
 
-from mala.common.parameters import printout
+from mala.common.parallelizer import printout, get_rank, parallel_warn
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube, write_cube
@@ -94,7 +93,6 @@ class Density(Target):
             return array * Bohr * Bohr * Bohr
         else:
             raise Exception("Unsupported unit for density.")
-
 
     def read_from_cube(self, file_name, directory, units=None):
         """
@@ -470,7 +468,7 @@ class Density(Target):
             density_for_qe = np.reshape(density_data, [number_of_gridpoints,
                                                        1], order='F')
         elif len(density_data.shape) == 1:
-            warnings.warn("Using 1D density to calculate the total energy"
+            parallel_warn("Using 1D density to calculate the total energy"
                           " requires reshaping of this data. "
                           "This is unproblematic, as long as you provided t"
                           "he correct grid_dimensions.")

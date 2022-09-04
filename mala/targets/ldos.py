@@ -4,10 +4,6 @@ import os
 
 from ase.units import Rydberg, Bohr
 import numpy as np
-try:
-    from mpi4py import MPI
-except ModuleNotFoundError:
-    pass
 
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier
@@ -145,7 +141,6 @@ class LDOS(Target):
         # tmp.pp003ELEMENT_ldos.cube
         # ...
         # tmp.pp100ELEMENT_ldos.cube
-
         # Find out the number of digits that are needed to encode this
         # grid (by QE).
         digits = int(math.log10(self.parameters.ldos_gridsize)) + 1
@@ -824,6 +819,10 @@ class LDOS(Target):
                              voxel_Bohr.volume
 
         if self.parameters._configuration["mpi"] and gather_dos:
+            # I think we should refrain from top-level MPI imports; the first
+            # import triggers an MPI init, which can take quite long.
+            from mpi4py import MPI
+
             comm = get_comm()
             comm.Barrier()
             dos_values_full = np.zeros_like(dos_values)

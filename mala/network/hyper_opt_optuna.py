@@ -8,6 +8,8 @@ from mala.common.parameters import printout
 from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_base import ObjectiveBase
 from mala.network.naswot_pruner import NASWOTPruner
+from mala.network.multi_training_pruner import MultiTrainingPruner
+from mala.common.parallelizer import parallel_warn
 
 
 class HyperOptOptuna(HyperOpt):
@@ -38,8 +40,17 @@ class HyperOptOptuna(HyperOpt):
 
         # See if the user specified a pruner.
         pruner = None
-        if self.params.hyperparameters.pruner == "naswot":
-            pruner = NASWOTPruner(self.params, data)
+        if self.params.hyperparameters.pruner is not None:
+            if self.params.hyperparameters.pruner == "naswot":
+                pruner = NASWOTPruner(self.params, data)
+            elif self.params.hyperparameters.pruner == "multi_training":
+                if self.params.hyperparameters.number_training_per_trial > 1:
+                    pruner = MultiTrainingPruner(self.params)
+                else:
+                    printout("MultiTrainingPruner requested, but only one training"
+                             "per trial specified; Skipping pruner creation.")
+            else:
+                raise Exception("Invalid pruner type selected.")
 
         # Create the study.
         if self.params.hyperparameters.rdb_storage is None:
@@ -53,10 +64,16 @@ class HyperOptOptuna(HyperOpt):
             if self.params.hyperparameters.study_name is None:
                 raise Exception("If RDB storage is used, a name for the study "
                                 "has to be provided.")
+            if "sqlite" in self.params.hyperparameters.rdb_storage:
+                engine_kwargs = {"connect_args": {"timeout": self.params.
+                                 hyperparameters.sqlite_timeout}}
+            else:
+                engine_kwargs = None
             rdb_storage = optuna.storages.RDBStorage(
                     url=self.params.hyperparameters.rdb_storage,
                     heartbeat_interval=self.params.hyperparameters.
-                    rdb_storage_heartbeat)
+                    rdb_storage_heartbeat,
+                    engine_kwargs=engine_kwargs)
 
             self.study = optuna.\
                 create_study(direction=self.params.hyperparameters.direction,
@@ -79,7 +96,7 @@ class HyperOptOptuna(HyperOpt):
         self.objective = ObjectiveBase(self.params, self.data_handler)
 
         # Fill callback list based on user checkpoint wishes.
-        callback_list = [self.__check_max_number_trials]
+        callback_list = [self.__check_stopping]
         if self.params.hyperparameters.checkpoints_each_trial != 0:
             callback_list.append(self.__create_checkpointing)
 
@@ -111,6 +128,45 @@ class HyperOptOptuna(HyperOpt):
         """
         return self.study.get_trials(states=(optuna.trial.
                                               TrialState.COMPLETE, ))
+
+    @staticmethod
+    def requeue_zombie_trials(study_name, rdb_storage):
+        """
+        Put zombie trials back into the queue to be investigated.
+
+        When using Optuna with scheduling systems in HPC infrastructure,
+        zombie trials can occur. These are trials that are still marked
+        as "RUNNING", but are, in actuality, dead, since the HPC job ended.
+        This function takes a saved hyperparameter study, and puts all
+        "RUNNING" trials als "WAITING". Upon the next execution from
+        checkpoint, they will be executed.
+
+        BE CAREFUL! DO NOT USE APPLY THIS TO A RUNNING STUDY, IT WILL MESS THE
+        STUDY UP! ONLY USE THIS ONCE ALL JOBS HAVE FINISHED, TO CLEAN UP,
+        AND THEN RESUBMIT!
+
+        Parameters
+        ----------
+        rdb_storage : string
+            Adress of the RDB storage to be cleaned.
+
+        study_name : string
+            Name of the study in the storage. Same as the checkpoint name.
+        """
+        study_to_clean = optuna.load_study(study_name=study_name,
+                                           storage=rdb_storage)
+        parallel_warn("WARNING: Your about to clean/requeue a study."
+                      " This operation should not be done to an already"
+                      " running study.")
+        trials = study_to_clean.get_trials()
+        cleaned_trials = []
+        for trial in trials:
+            if trial.state == optuna.trial.TrialState.RUNNING:
+                study_to_clean._storage.set_trial_state(trial._trial_id,
+                                                        optuna.trial.
+                                                        TrialState.WAITING)
+                cleaned_trials.append(trial.number)
+        printout("Cleaned trials: ", cleaned_trials, min_verbosity=0)
 
     @classmethod
     def resume_checkpoint(cls, checkpoint_name, alternative_storage_path=None,
@@ -218,7 +274,7 @@ class HyperOptOptuna(HyperOpt):
                         t.state == optuna.trial.
                         TrialState.RUNNING])
 
-    def __check_max_number_trials(self, study, trial):
+    def __check_stopping(self, study, trial):
         """Check if this trial was already the maximum number of trials."""
         # How to check for this depends on whether or not a heartbeat was
         # used. If one was used, then both COMPLETE and RUNNING trials
@@ -229,9 +285,22 @@ class HyperOptOptuna(HyperOpt):
         # https://github.com/optuna/optuna/issues/1883#issuecomment-841844834
         # https://github.com/optuna/optuna/issues/1883#issuecomment-842106950
 
-        if self.__get_number_of_completed_trials(study) >= \
-                self.params.hyperparameters.n_trials:
+        completed_trials = self.__get_number_of_completed_trials(study)
+        if completed_trials >= self.params.hyperparameters.n_trials:
             self.study.stop()
+
+        # Only check if there are trials to be checked.
+        if completed_trials > 0:
+            if self.params.hyperparameters.number_bad_trials_before_stopping is \
+                    not None and self.params.hyperparameters.\
+                    number_bad_trials_before_stopping > 0:
+                if trial.number - self.study.best_trial.number >= \
+                        self.params.hyperparameters.\
+                                number_bad_trials_before_stopping:
+                    printout("No new best trial found in",
+                             self.params.hyperparameters.number_bad_trials_before_stopping,
+                             "attempts, stopping the study.")
+                    self.study.stop()
 
     def __create_checkpointing(self, study, trial):
         """Create a checkpoint of optuna study, if necessary."""
