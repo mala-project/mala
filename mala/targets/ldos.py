@@ -338,7 +338,7 @@ class LDOS(Target):
             raise Exception("Unsupported unit for LDOS.")
 
     def read_from_cube(self, path_scheme, units="1/eV",
-                       use_memmap=None):
+                       use_memmap=None, **kwargs):
         """
         Read the LDOS data from multiple cube files.
 
@@ -463,41 +463,7 @@ class LDOS(Target):
                 barrier()
                 self.local_density_of_states = ldos_data_full
         else:
-            self.local_density_of_states = ldos_data
-
-    def read_from_numpy(self, path, units="1/eV"):
-        """
-        Read the density data from a numpy file.
-
-        Parameters
-        ----------
-        path :
-            Name of the numpy file.
-
-        units : string
-            Units the density is saved in. Usually none.
-        """
-        self.local_density_of_states = np.load(path) * \
-            self.convert_units(1, in_units=units)
-
-    def read_from_array(self, array, units="1/eV"):
-        """
-        Read the density data from a numpy file.
-
-        Parameters
-        ----------
-        array : numpy.ndarray
-            Numpy array containing the LDOS.
-
-        units : string
-            Units the density is saved in. Usually none.
-        """
-        self.local_density_of_states = array
-        self.local_density_of_states *= \
-            self.convert_units(1, in_units=units)
-
-    # Calculations
-    ##############
+            return ldos_data
 
     def get_energy_grid(self):
         """

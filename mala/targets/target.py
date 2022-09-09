@@ -336,13 +336,18 @@ class Target(ABC):
         return grid3D
 
     @staticmethod
-    def _get_ideal_rmax_for_rdf(atoms: ase.Atoms):
-        return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+    def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):
+        if method == "mic":
+            return np.min(np.linalg.norm(atoms.get_cell(), axis=0))/2
+        elif method == "2mic":
+            return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+        else:
+            raise Exception("Unknown option to calculate rMax provided.")
 
     @staticmethod
     def radial_distribution_function_from_atoms(atoms: ase.Atoms,
                                                 number_of_bins,
-                                                rMax=None,
+                                                rMax="mic",
                                                 method="mala"):
         """
         Calculate the radial distribution function (RDF).
@@ -362,19 +367,24 @@ class Target(ABC):
         number_of_bins : int
             Number of bins used to create the histogram.
 
-        rMax : float
-            Radius up to which to calculate the RDF. None by default; this
-            is the suggested behavior, as MALA will then on its own calculate
-            the maximum radius up until which the calculation of the RDF is
-            indisputably physically meaningful. Larger radii may be specified,
-            e.g. for a Fourier transformation to calculate the static structure
-            factor.
+        rMax : float or string
+            Radius up to which to calculate the RDF.
+            Options are:
+
+                - "mic": rMax according to minimum image convention.
+                  (see "The Minimum Image Convention in Non-Cubic MD Cells"
+                  by Smith,
+                  http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.57.1696)
+                  Suggested value, as this leads to physically meaningful RDFs.
+                - "2mic": rMax twice as big as for "mic". Legacy option
+                  to reproduce some earlier trajectory results
+                - float: Input some float to use it directly as input.
 
         method : string
             If "mala" the more flexible, yet less performant python based
             RDF will be calculated. If "asap3", asap3's C++ implementation
-            will be used. In the latter case, rMax will be ignored and
-            automatically calculated.
+            will be used. In the latter case, rMax values larger then
+            "2mic" will be ignored.
 
         Returns
         -------
@@ -390,13 +400,21 @@ class Target(ABC):
         # from asap3.analysis.rdf import RadialDistributionFunction
         # (RadialDistributionFunction(atoms, rMax, 500)).get_rdf()
 
-        # This is quite a large RDF.
-        # We may want a smaller one eventually.
-        if rMax is None or method == "asap3":
-            rMax = Target._get_ideal_rmax_for_rdf(atoms)
+        if rMax == "mic":
+            _rMax = Target._get_ideal_rmax_for_rdf(atoms, method="mic")
+        elif rMax == "2mic":
+            _rMax = Target._get_ideal_rmax_for_rdf(atoms, method="2mic")
+        else:
+            if method == "asap3":
+                _rMax_possible = Target._get_ideal_rmax_for_rdf(atoms, method="2mic")
+                if rMax > _rMax_possible:
+                    raise Exception("ASAP3 calculation fo RDF cannot work "
+                                    "with radii that are bigger then the "
+                                    "cell.")
+            _rMax = rMax
 
         atoms = atoms
-        dr = float(rMax / number_of_bins)
+        dr = float(_rMax / number_of_bins)
 
         if method == "mala":
             rdf = np.zeros(number_of_bins + 1)
@@ -405,18 +423,18 @@ class Target(ABC):
             pbc = atoms.get_pbc()
             for i in range(0, 3):
                 if pbc[i]:
-                    if rMax > cell[i, i]:
-                        warnings.warn(
+                    if _rMax > cell[i, i]:
+                        parallel_warn(
                             "Calculating RDF with a radius larger then the unit"
                             " cell. While this will work numerically, be cautious"
-                            " about the physicality of its results", stacklevel=3)
+                            " about the physicality of its results")
 
             # Calculate all the distances.
             # rMax/2 because this is the radius around one atom, so half the
             # distance to the next one.
             # Using neighborlists grants us access to the PBC.
             neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms)) +
-                                                         [rMax/2.0],
+                                                         [_rMax/2.0],
                                                          bothways=True)
             neighborlist.update(atoms)
             for i in range(0, len(atoms)):
@@ -442,7 +460,7 @@ class Target(ABC):
             # ASAP3 loads MPI which takes a long time to import, so
             # we'll only do that when absolutely needed.
             from asap3.analysis.rdf import RadialDistributionFunction
-            rdf = RadialDistributionFunction(atoms, rMax,
+            rdf = RadialDistributionFunction(atoms, _rMax,
                                              number_of_bins).get_rdf()
             rr = []
             for i in range(1, number_of_bins + 1):
@@ -455,7 +473,7 @@ class Target(ABC):
     @staticmethod
     def three_particle_correlation_function_from_atoms(atoms: ase.Atoms,
                                                        number_of_bins,
-                                                       rMax=None):
+                                                       rMax="mic"):
         """
         Calculate the three particle correlation function (TPCF).
 
@@ -472,11 +490,18 @@ class Target(ABC):
         number_of_bins : int
             Number of bins used to create the histogram.
 
-        rMax : float
-            Radius up to which to calculate the TPCF. If None, MALA will
-            determine the maximum radius for which the TPCF is indisputably
-            defined. Be advised - this may come at increased computational
-            cost.
+        rMax : float or string
+            Radius up to which to calculate the RDF.
+            Options are:
+
+                - "mic": rMax according to minimum image convention.
+                  (see "The Minimum Image Convention in Non-Cubic MD Cells"
+                  by Smith,
+                  http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.57.1696)
+                  Suggested value, as this leads to physically meaningful RDFs.
+                - "2mic : rMax twice as big as for "mic". Legacy option
+                  to reproduce some earlier trajectory results
+                - float: Input some float to use it directly as input.
 
         Returns
         -------
@@ -487,26 +512,29 @@ class Target(ABC):
             The radii at which the TPCF was calculated (for plotting),
             [rMax, rMax, rMax].
         """
-        if rMax is None:
-            rMax = np.min(
-                    np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+        if rMax == "mic":
+            _rMax = Target._get_ideal_rmax_for_rdf(atoms, method="mic")
+        elif rMax == "2mic":
+            _rMax = Target._get_ideal_rmax_for_rdf(atoms, method="2mic")
+        else:
+            _rMax = rMax
 
         # TPCF is a function of three radii.
         atoms = atoms
-        dr = float(rMax/number_of_bins)
+        dr = float(_rMax/number_of_bins)
         tpcf = np.zeros([number_of_bins + 1, number_of_bins + 1,
                         number_of_bins + 1])
         cell = atoms.get_cell()
         pbc = atoms.get_pbc()
         for i in range(0, 3):
             if pbc[i]:
-                if rMax > cell[i, i]:
+                if _rMax > cell[i, i]:
                     raise Exception("Cannot calculate RDF with this radius. "
                                     "Please choose a smaller value.")
 
         # Construct a neighbor list for calculation of distances.
         # With this, the PBC are satisfied.
-        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms))+[rMax/2.0],
+        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms))+[_rMax/2.0],
                                                      bothways=True)
         neighborlist.update(atoms)
 
@@ -544,9 +572,9 @@ class Target(ABC):
 
                 # We don't need to do any calculation if either of the
                 # atoms are already out of range.
-                if r1 < rMax and r2 < rMax:
+                if r1 < _rMax and r2 < _rMax:
                     r3 = dists_between_atoms[idx]
-                    if r3 < rMax and np.abs(r1-r2) < r3 < (r1+r2):
+                    if r3 < _rMax and np.abs(r1-r2) < r3 < (r1+r2):
                         # print(r1, r2, r3)
                         id1 = (np.ceil(r1 / dr)).astype(int)
                         id2 = (np.ceil(r2 / dr)).astype(int)
@@ -620,7 +648,7 @@ class Target(ABC):
         """
         if calculation_type == "fourier_transform":
             if radial_distribution_function is None:
-                rMax = Target._get_ideal_rmax_for_rdf(atoms)*3
+                rMax = Target._get_ideal_rmax_for_rdf(atoms)*6
                 radial_distribution_function = Target.\
                     radial_distribution_function_from_atoms(atoms, rMax=rMax,
                                                             number_of_bins=

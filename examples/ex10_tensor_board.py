@@ -36,12 +36,15 @@ test_parameters.data.output_rescaling_type = "normal"
 test_parameters.network.layer_activations = ["ReLU"]
 
 # Specify the training parameters.
-test_parameters.running.max_number_epochs = 20
+test_parameters.running.max_number_epochs = 400
 test_parameters.running.mini_batch_size = 40
-test_parameters.running.learning_rate = 0.00001
+test_parameters.running.learning_rate = 0.001
 test_parameters.running.trainingtype = "Adam"
-test_parameters.running.visualisation = True
-# test_parameters.running.visualisation_dir = "~/log_dir"
+
+# Turn the visualization on and select a folder to save the visualization
+# files into.
+test_parameters.running.visualisation = 1
+test_parameters.running.visualisation_dir = "ex10_vis"
 
 ####################
 # DATA
@@ -95,50 +98,5 @@ printout("Training: DONE.")
 printout("Parameters used for this experiment:")
 test_parameters.show()
 
-####################
-# Using tensorboard and launching the link in webbrowser
-# Runs tensorboard with the given log_dir and wait for user
-# input to kill the app.
-####################
-
-
-class LaunchTensorboard:
-
-    """
-    Parameters necessary for Launching tensorboard.
-
-    Parameters
-    ----------
-    params : mala.Parameters
-        MALA parameters for this particular run.
-
-    clear_on_exit : bool
-        If True Clears the log_dir on exit and kills the tensorboard app.
-    """
-
-    def __init__(self, params, clear_on_exit= False):
-
-        params: mala.common.Parameters
-        self.tb = program.TensorBoard()
-        self.log_dir = params.running.visualisation_dir
-        self.clear_on_exit = clear_on_exit
-        self.url= None
-
-    def run(self):
-        self.tb.configure(argv=[None, '--logdir', self.log_dir])
-        print("Launching Tensorboard ")
-        self.url = self.tb.launch()
-        print(self.url)
-        webbrowser.open_new_tab(self.url)
-        try:
-            input("Enter any key to exit")
-        except:
-            pass
-        finally:
-            if self.clear_on_exit:
-                shutil.rmtree(self.log_dir, ignore_errors=True)
-            print("\nCleared Logdir")
-
-
-launch_tb = LaunchTensorboard(test_parameters)
-launch_tb.run()
+printout("Run finished, launch tensorboard with \"tensorboard --logdir " +
+         test_trainer.full_visualization_path+"\"")

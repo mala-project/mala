@@ -10,7 +10,7 @@ except ModuleNotFoundError:
     pass
 import numpy as np
 
-from mala.common.parameters import printout
+from mala.common.parallelizer import printout, get_rank, parallel_warn
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube, write_cube
@@ -235,7 +235,7 @@ class Density(Target):
     # File I/O
     ##########
 
-    def read_from_cube(self, path, units=None):
+    def read_from_cube(self, path, units=None, **kwargs):
         """
         Read the density data from a cube file.
 
@@ -696,7 +696,7 @@ class Density(Target):
             density_for_qe = np.reshape(density_data, [number_of_gridpoints,
                                                        1], order='F')
         elif len(density_data.shape) == 1:
-            warnings.warn("Using 1D density to calculate the total energy"
+            parallel_warn("Using 1D density to calculate the total energy"
                           " requires reshaping of this data. "
                           "This is unproblematic, as long as you provided t"
                           "he correct grid_dimensions.")
@@ -713,3 +713,64 @@ class Density(Target):
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
         return atoms_Angstrom
 
+    @staticmethod
+    def get_scaled_positions_for_qe(atoms):
+        """
+        Get the positions correctly scaled for QE.
+
+        QE (for ibrav=0) scales a little bit different then ASE would.
+        ASE uses all provided cell parameters, while QE simply sets the
+        first entry in the cell parameter matrix as reference and divides
+        all positions by this value.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            The atom objects for which the scaled positions should be
+            calculated.
+
+        Returns
+        -------
+        scaled_positions : numpy.array
+            The scaled positions.
+        """
+        principal_axis = atoms.get_cell()[0][0]
+        scaled_positions = atoms.get_positions()/principal_axis
+        return scaled_positions
+
+    @classmethod
+    def from_ldos(cls, ldos_object):
+        """
+        Create a density object from an LDOS object.
+
+        Parameters
+        ----------
+        ldos_object : mala.targets.ldos.LDOS
+            LDOS object used as input.
+
+        Returns
+        -------
+        dos_object : Density
+            Density object created from LDOS object.
+
+
+        """
+        return_density_object = Density(ldos_object.parameters)
+        return_density_object.fermi_energy_eV = ldos_object.fermi_energy_eV
+        return_density_object.temperature_K = ldos_object.temperature_K
+        return_density_object.voxel_Bohr = ldos_object.voxel_Bohr
+        return_density_object.number_of_electrons = ldos_object.\
+            number_of_electrons
+        return_density_object.band_energy_dft_calculation = ldos_object.\
+            band_energy_dft_calculation
+        return_density_object.grid_dimensions = ldos_object.grid_dimensions
+        return_density_object.atoms = ldos_object.atoms
+        return_density_object.qe_input_data = ldos_object.qe_input_data
+        return_density_object.qe_pseudopotentials = ldos_object.\
+            qe_pseudopotentials
+        return_density_object.total_energy_dft_calculation = \
+            ldos_object.total_energy_dft_calculation
+        return_density_object.kpoints = ldos_object.kpoints
+        return_density_object.number_of_electrons_from_eigenvals = \
+            ldos_object.number_of_electrons_from_eigenvals
+        return return_density_object

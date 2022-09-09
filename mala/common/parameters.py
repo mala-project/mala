@@ -4,7 +4,7 @@ import importlib
 import inspect
 import json
 import pickle
-import warnings
+from time import sleep
 
 try:
     import horovod.torch as hvd
@@ -14,7 +14,8 @@ except ModuleNotFoundError:
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
-    set_mpi_status, get_rank, get_local_rank, set_current_verbosity
+    set_mpi_status, get_rank, get_local_rank, set_current_verbosity, \
+    parallel_warn
 from mala.common.json_serializable import JSONSerializable
 
 
@@ -379,8 +380,8 @@ class ParametersTargets(ParametersBase):
         self.ldos_gridoffset_ev = 0
         self.restrict_targets = "zero_out_negative"
         self.pseudopotential_path = None
-        self.rdf_parameters = {"number_of_bins": 500, "rMax": None}
-        self.tpcf_parameters = {"number_of_bins": 20, "rMax": 5.0}
+        self.rdf_parameters = {"number_of_bins": 500, "rMax": "mic"}
+        self.tpcf_parameters = {"number_of_bins": 20, "rMax": "mic"}
         self.ssf_parameters = {"number_of_bins": 100, "kMax": 12.0}
 
     @property
@@ -574,6 +575,14 @@ class ParametersRunning(ParametersBase):
         case 1: tensorboard activated with Loss and learning rate
         case 2; additonally weights and biases and gradient
 
+    visualisation_dir : string
+        Name of the folder that visualization files will be saved to.
+
+    visualisation_dir_append_date : bool
+        If True, then upon creating visualization files, these will be saved
+        in a subfolder of visualisation_dir labelled with the starting date
+        of the visualization, to avoid having to change input scripts often.
+
     inference_data_grid : list
         List holding the grid to be used for inference in the form of
         [x,y,z].
@@ -598,8 +607,8 @@ class ParametersRunning(ParametersBase):
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
         self.visualisation = 0
-        # default visualisation_dir= "~/log_dir"
-        self.visualisation_dir = os.path.join(os.path.expanduser("~"), "log_dir")
+        self.visualisation_dir = os.path.join(".", "mala_logging")
+        self.visualisation_dir_append_date = True
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
         self.inference_data_grid = [0, 0, 0]
@@ -762,11 +771,28 @@ class ParametersHyperparameterOptimization(ParametersBase):
         this cutoff determines which trials are neglected.
 
     pruner: string
-        Pruner type to be used by optuna. Currently only "naswot" is
-        supported, which will use the NASWOT algorithm as pruner.
+        Pruner type to be used by optuna. Currently supported:
+
+            - "multi_training": If multiple trainings are performed per
+              trial, and one returns "inf" for the loss,
+              no further training will be performed.
+              Especially useful if used in conjunction
+              with the band_energy metric.
+            - "naswot": use the NASWOT algorithm as pruner
 
     naswot_pruner_batch_size : int
         Batch size for the NASWOT pruner
+
+    number_bad_trials_before_stopping : int
+        Only applies to optuna studies. If any integer above 0, then if no
+        new best trial is found within number_bad_trials_before trials after
+        the last one, the study will be stopped.
+
+    sqlite_timeout : int
+        Timeout for the SQLite backend of Optuna. This backend is officially
+        not recommended because it is file based and can lead to errors;
+        With a suitable timeout it can be used somewhat stable though and
+        help in HPC settings.
     """
 
     def __init__(self):
@@ -786,6 +812,8 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.naswot_pruner_cutoff = 0
         self.pruner = None
         self.naswot_pruner_batch_size = 0
+        self.number_bad_trials_before_stopping = None
+        self.sqlite_timeout = 600
 
     @property
     def rdb_storage_heartbeat(self):
@@ -900,6 +928,11 @@ class ParametersDataGeneration(ParametersBase):
     ofdft_temperature : float
         Temperature at which to perform the OF-DFT-MD simulation.
 
+    ofdft_kedf : string
+        Kinetic energy functional to be used for the OF-DFT-MD simulation.
+
+    ofdft_friction : float
+        Friction to be added for the Langevin dynamics in the OF-DFT-MD run.
     """
 
     def __init__(self):
@@ -912,6 +945,8 @@ class ParametersDataGeneration(ParametersBase):
         self.ofdft_timestep = 0
         self.ofdft_number_of_timesteps = 0
         self.ofdft_temperature = 0
+        self.ofdft_kedf = "WT"
+        self.ofdft_friction = 0.1
 
 
 class ParametersDebug(ParametersBase):
@@ -1023,8 +1058,8 @@ class Parameters:
             if torch.cuda.is_available():
                 self._use_gpu = True
             else:
-                warnings.warn("GPU requested, but no GPU found. MALA will "
-                              "operate with CPU only.", stacklevel=3)
+                parallel_warn("GPU requested, but no GPU found. MALA will "
+                              "operate with CPU only.")
 
         # Invalidate, will be updated in setter.
         self.device = None
@@ -1193,6 +1228,44 @@ class Parameters:
 
         """
         self.save(filename, save_format="json")
+
+    def optuna_singlenode_setup(self, wait_time=0):
+        """
+        Set up device and parallelization parameters for Optuna+MPI.
+
+        This only needs to be called if multiple MPI ranks are used on
+        one node to run Optuna. Optuna itself does NOT communicate via MPI.
+        Thus, if we allocate e.g. one node with 4 GPUs and start 4 jobs,
+        3 of those jobs will fail, because currently, we instantiate the
+        cuda devices based on MPI ranks. This functions sets everything
+        up properly. This of course requires MPI.
+        This may be a bit hacky, but it lets us use one script and one
+        MPI command to launch x GPU backed jobs on any node with x GPUs.
+
+        Parameters
+        ----------
+        wait_time : int
+            If larger than 0, then all processes will wait this many seconds
+            times their rank number after this routine before proceeding.
+            This can be useful when using a file based distribution algorithm.
+        """
+        # We first "trick" the parameters object to assume MPI and GPUs
+        # are used. That way we get the right device.
+        self.use_gpu = True
+        self.use_mpi = True
+        device_temp = self.device
+        sleep(get_rank()*wait_time)
+
+        # Now we can turn of MPI and set the device manually.
+        self.use_mpi = False
+        self._device = device_temp
+        self.network._update_device(device_temp)
+        self.descriptors._update_device(device_temp)
+        self.targets._update_device(device_temp)
+        self.data._update_device(device_temp)
+        self.running._update_device(device_temp)
+        self.hyperparameters._update_device(device_temp)
+        self.debug._update_device(device_temp)
 
     @classmethod
     def load_from_file(cls, filename, save_format="json",
