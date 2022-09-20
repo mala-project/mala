@@ -9,10 +9,8 @@ becomes crucial. Most parts of MALA are either designed in a way to run as
 efficient as possible by default. Enabling MPI and GPU accordingly naturally
 boost performance by giving MALA access to more computational power.
 
-There are however some settings that can help with performance but still
-require some user intuition to be set up correctly. We are working on solutions
-to automate these parts of the code as well, but for now, they still need to
-be manually adjusted.
+There are a few other options that can help with performance but need to be
+handled with care to avoid numerical inaccuracies.
 
 Gaussian descriptor based Ewald sum
 ------------------------------------
@@ -21,31 +19,19 @@ MALA by default employs Quantum ESPRESSO to evaluate the Ewald sum, i.e., the
 ion-ion interaction part of the DFT energy. The implementation of this
 algorithm in QE scales quadratically with the number of ions. Therefore MALA
 also provides a custom, linearly scaling version of this algorithm through
-the total energy module. This implementation can be used by setting three
-parameters:
+the total energy module. This implementation is based on a representation of
+atomic positions as Gaussians and can easily enabled:
 
       .. code-block:: python
 
             parameters.descriptors.use_gaussian_descriptors_energy_formula = True
-            parameters.descriptors.gaussian_descriptors_cutoff = ...
-            parameters.descriptors.gaussian_descriptors_sigma = ...
 
-The first parameter, ``use_gaussian_descriptors_energy_formula`` simply
-activates the usage of this algorithm. The second parameter
-``gaussian_descriptors_cutoff`` determines, as the name would suggest, the
-cutoff radius for the Gaussian descriptor calculation. It can safely be set to
-the same value that was used as SNAP cutoff radius during model training.
-The last parameter is the critical one. It determines the width of the
-Gaussian used for descriptor construction. It is different for different
-elements. Currently known values that will work well are:
-
-.. list-table::
-   :widths: 25 25
-   :header-rows: 1
-
-   * - Element
-     - Sigma
-   * - Beryllium
-     - 0.3
-   * - Aluminium
-     - 0.135
+It's numerical accuracy is governed by two parameters,
+``parameters.descriptors.gaussian_descriptors_cutoff`` and
+``parameters.descriptors.gaussian_descriptors_sigma``, the cutoff radius for
+the Gaussian descriptors and the width of the Gaussian, respectively. MALA
+automatically chooses reasonable default values that have been tested across
+multiple systems. When dealing with a new system it may still be wise to
+first test the automatically generated value against the default Quantum
+ESPRESSO implementation before doing a full production run, to avoid
+inaccuracies.

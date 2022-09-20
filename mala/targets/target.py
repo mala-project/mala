@@ -13,6 +13,13 @@ from mala.common.parameters import Parameters, ParametersTargets
 from mala.common.parallelizer import printout, parallel_warn
 from mala.targets.calculation_helpers import fermi_function
 
+# Empirical value for the Gaussian descriptor width, determined for an
+# aluminium system. Reasonable values for sigma can and will be calculated
+# automatically based on this value and the aluminium gridspacing
+# for other systems as well.
+optimal_sigma_aluminium = 0.2
+reference_grid_spacing_aluminium_bohr = 0.15304891936073586
+
 
 class Target(ABC):
     """
@@ -283,6 +290,9 @@ class Target(ABC):
                         self.grid_dimensions[1] * Bohr)
             self.voxel_Bohr[2] = self.voxel_Bohr[2] / (
                         self.grid_dimensions[2] * Bohr)
+            self._parameters_full.descriptors.gaussian_descriptors_sigma = \
+                (np.max(self.voxel_Bohr) / reference_grid_spacing_aluminium_bohr) * \
+                optimal_sigma_aluminium
 
             # This is especially important for size extrapolation.
             self.electrons_per_atom = self.number_of_electrons/len(self.atoms)
