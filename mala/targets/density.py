@@ -147,6 +147,8 @@ class Density(Target):
         return_density_object.kpoints = ldos_object.kpoints
         return_density_object.number_of_electrons_from_eigenvals = \
             ldos_object.number_of_electrons_from_eigenvals
+        return_density_object.local_grid = ldos_object.local_grid
+        return_density_object._parameters_full = ldos_object._parameters_full
 
         # If the source calculator has LDOS data, then this new object
         # can have DOS data.

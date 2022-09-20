@@ -273,7 +273,7 @@ class Target(ABC):
             self.voxel[2] = self.voxel[2] / (
                         self.grid_dimensions[2])
             self._parameters_full.descriptors.gaussian_descriptors_sigma = \
-                (np.max(self.voxel_Bohr) / reference_grid_spacing_aluminium_bohr) * \
+                (np.max(self.voxel) / reference_grid_spacing_aluminium_bohr) * \
                 optimal_sigma_aluminium
 
             # This is especially important for size extrapolation.
@@ -324,6 +324,9 @@ class Target(ABC):
                         self.grid_dimensions[1])
             self.voxel[2] = self.voxel[2] / (
                         self.grid_dimensions[2])
+            self._parameters_full.descriptors.gaussian_descriptors_sigma = \
+                (np.max(self.voxel) / reference_grid_spacing_aluminium_bohr) * \
+                optimal_sigma_aluminium
 
             if self.electrons_per_atom is None:
                 printout("No number of electrons per atom provided, "
