@@ -53,7 +53,7 @@ class DataConverter:
             self.descriptor_calculator = Descriptor(parameters)
 
         if parameters.descriptors.use_z_splitting:
-            parameters.descriptors.use_z_splitting = True
+            parameters.descriptors.use_z_splitting = False
             printout("Disabling z-splitting for preprocessing.",
                      min_verbosity=0)
 
