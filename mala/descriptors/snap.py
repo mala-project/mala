@@ -120,7 +120,7 @@ class SNAP(Descriptor):
         atoms = self.enforce_pbc(atoms)
 
         # Get the grid dimensions.
-        qe_outfile = open(infile, "r")
+        qe_outfile = open(qe_out_file, "r")
         lines = qe_outfile.readlines()
         nx = 0
         ny = 0

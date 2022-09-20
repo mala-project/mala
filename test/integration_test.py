@@ -131,7 +131,7 @@ class TestMALAIntegration:
         # Create a calculator.abs()
         ldos_calculator = LDOS(test_parameters)
         ldos_calculator.read_additional_calculation_data("qe.out", path_to_out)
-        dens_calculator = Density.from_ldos(ldos_calculator)
+        dens_calculator = Density.from_ldos_calculator(ldos_calculator)
 
         # Read the input data.
         density_dft = dens_calculator.convert_units(np.load(path_to_dens_npy),

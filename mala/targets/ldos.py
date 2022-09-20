@@ -33,7 +33,7 @@ class LDOS(Target):
         self.local_density_of_states = None
 
     @classmethod
-    def from_numpy_file(cls, params, path, units="1/eV"):
+    def from_numpy_file(cls, params, path, units="1/(eV*A^3)"):
         """
         Create an LDOS calculator from a numpy array saved in a file.
 
@@ -58,7 +58,7 @@ class LDOS(Target):
         return return_ldos_object
 
     @classmethod
-    def from_numpy_array(cls, params, array, units="1/eV"):
+    def from_numpy_array(cls, params, array, units="1/(eV*A^3)"):
         """
         Create an LDOS calculator from a numpy array in memory.
 
@@ -86,7 +86,7 @@ class LDOS(Target):
         return return_ldos_object
 
     @classmethod
-    def from_cube_file(cls, params, path_name_scheme, units="1/eV",
+    def from_cube_file(cls, params, path_name_scheme, units="1/(eV*A^3)",
                        use_memmap=None):
         """
         Create an LDOS calculator from multiple cube files.
@@ -476,6 +476,36 @@ class LDOS(Target):
         else:
             return ldos_data
 
+    def read_from_numpy(self, path, units="1/(eV*A^3)"):
+        """
+        Read the LDOS data from a numpy file.
+
+        Parameters
+        ----------
+        path :
+            Name of the numpy file.
+
+        units : string
+            Units the LDOS is saved in.
+        """
+        self.local_density_of_states = np.load(path)*\
+                                       self.convert_units(1, in_units=units)
+
+    def read_from_array(self, array, units="1/(eV*A^3)"):
+        """
+        Read the LDOS data from a numpy array.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Numpy array containing the density.
+
+        units : string
+            Units the LDOS is saved in.
+        """
+        self.local_density_of_states = array * \
+                                       self.convert_units(1, in_units=units)
+
     def get_energy_grid(self):
         """
         Get energy grid.
@@ -497,7 +527,7 @@ class LDOS(Target):
     def get_total_energy(self, ldos_data=None, dos_data=None,
                          density_data=None, fermi_energy_eV=None,
                          temperature_K=None,
-                         voxel_Bohr=None,
+                         voxel=None,
                          grid_integration_method="summation",
                          energy_integration_method="analytical",
                          atoms_Angstrom=None,
@@ -531,7 +561,7 @@ class LDOS(Target):
         temperature_K : float
             Temperature in K.
 
-        voxel_Bohr : ase.cell.Cell
+        voxel : ase.cell.Cell
             Voxel to be used for grid intergation. Needs to reflect the
             symmetry of the simulation cell. In Bohr.
 
@@ -579,8 +609,8 @@ class LDOS(Target):
 
         """
         # Get relevant values from DFT calculation, if not otherwise specified.
-        if voxel_Bohr is None:
-            voxel_Bohr = self.voxel
+        if voxel is None:
+            voxel = self.voxel
         if fermi_energy_eV is None:
             if ldos_data is None:
                 fermi_energy_eV = self.fermi_energy
@@ -605,8 +635,8 @@ class LDOS(Target):
             # Calculate DOS data if need be.
             if dos_data is None:
                 dos_data = self.get_density_of_states(ldos_data,
-                                                      voxel_Bohr=
-                                                      voxel_Bohr,
+                                                      voxel=
+                                                      voxel,
                                                       integration_method=
                                                       grid_integration_method)
 

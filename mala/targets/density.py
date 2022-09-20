@@ -130,7 +130,7 @@ class Density(Target):
         return_density_object = Density(ldos_object.parameters)
         return_density_object.fermi_energy_dft = ldos_object.fermi_energy_dft
         return_density_object.temperature_K = ldos_object.temperature_K
-        return_density_object.voxel_Bohr = ldos_object.voxel_Bohr
+        return_density_object.voxel = ldos_object.voxel
         return_density_object.number_of_electrons_exact = ldos_object.\
             number_of_electrons_exact
         return_density_object.band_energy_dft_calculation = ldos_object.\
@@ -247,7 +247,7 @@ class Density(Target):
             Data for which the units should be converted.
 
         in_units : string
-            Units of array. Currently supported are:
+            Units of array. Currently, supported are:
 
                  - 1/A^3 (no conversion, MALA unit)
                  - 1/Bohr^3
@@ -277,7 +277,7 @@ class Density(Target):
             Data in 1/A^3.
 
         out_units : string
-            Desired units of output array. Currently supported are:
+            Desired units of output array. Currently, supported are:
 
                  - 1/A^3 (no conversion, MALA unit)
                  - 1/Bohr^3
@@ -294,7 +294,7 @@ class Density(Target):
         else:
             raise Exception("Unsupported unit for density.")
 
-    def read_from_cube(self, path, units=None, **kwargs):
+    def read_from_cube(self, path, units="1/A^3", **kwargs):
         """
         Read the density data from a cube file.
 
@@ -307,10 +307,10 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
-        data, meta = read_cube(path)
+        data, meta = read_cube(path)*self.convert_units(1, in_units=units)
         self.density = data
 
-    def read_from_numpy(self, path, units=None):
+    def read_from_numpy(self, path, units="1/A^3"):
         """
         Read the density data from a numpy file.
 
@@ -322,21 +322,21 @@ class Density(Target):
         units : string
             Units the density is saved in. Usually none.
         """
-        self.density = np.load(path)
+        self.density = np.load(path)*self.convert_units(1, in_units=units)
 
-    def read_from_array(self, array, units=None):
+    def read_from_array(self, array, units="1/A^3"):
         """
         Read the density data from a numpy array.
 
         Parameters
         ----------
         array : numpy.ndarray
-            Numpy array containing the density..
+            Numpy array containing the density.
 
         units : string
             Units the density is saved in. Usually none.
         """
-        self.density = array
+        self.density = array*self.convert_units(1, in_units=units)
 
     def write_as_cube(self, file_name, density_data, atoms=None,
                       grid_dimensions=None):
@@ -385,7 +385,7 @@ class Density(Target):
     # Calculations
     ##############
 
-    def get_number_of_electrons(self, density_data=None, voxel_Bohr=None,
+    def get_number_of_electrons(self, density_data=None, voxel=None,
                                 integration_method="summation"):
         """
         Calculate the number of electrons from given density data.
@@ -398,7 +398,7 @@ class Density(Target):
             density will be used for the calculation.
 
 
-        voxel_Bohr : ase.cell.Cell
+        voxel : ase.cell.Cell
             Voxel to be used for grid intergation. Needs to reflect the
             symmetry of the simulation cell. In Bohr.
 
@@ -416,8 +416,8 @@ class Density(Target):
                 raise Exception("No density data provided, cannot calculate"
                                 " this quantity.")
 
-        if voxel_Bohr is None:
-            voxel_Bohr = self.voxel
+        if voxel is None:
+            voxel = self.voxel
 
         # Check input data for correctness.
         data_shape = np.shape(np.squeeze(density_data))
@@ -434,9 +434,9 @@ class Density(Target):
         # integrate, but rather reduce in this direction.
         # Integration over one point leads to zero.
 
-        grid_spacing_bohr_x = np.linalg.norm(voxel_Bohr[0])
-        grid_spacing_bohr_y = np.linalg.norm(voxel_Bohr[1])
-        grid_spacing_bohr_z = np.linalg.norm(voxel_Bohr[2])
+        grid_spacing_bohr_x = np.linalg.norm(voxel[0])
+        grid_spacing_bohr_y = np.linalg.norm(voxel[1])
+        grid_spacing_bohr_z = np.linalg.norm(voxel[2])
 
         number_of_electrons = None
         if integration_method != "summation":
@@ -476,10 +476,10 @@ class Density(Target):
         else:
             if len(data_shape) == 3:
                 number_of_electrons = np.sum(density_data, axis=(0, 1, 2)) \
-                                      * voxel_Bohr.volume
+                                      * voxel.volume
             if len(data_shape) == 1:
                 number_of_electrons = np.sum(density_data, axis=0) * \
-                                      voxel_Bohr.volume
+                                      voxel.volume
 
         return number_of_electrons
 
@@ -801,40 +801,3 @@ class Density(Target):
         principal_axis = atoms.get_cell()[0][0]
         scaled_positions = atoms.get_positions()/principal_axis
         return scaled_positions
-
-    @classmethod
-    def from_ldos(cls, ldos_object):
-        """
-        Create a density object from an LDOS object.
-
-        Parameters
-        ----------
-        ldos_object : mala.targets.ldos.LDOS
-            LDOS object used as input.
-
-        Returns
-        -------
-        dos_object : Density
-            Density object created from LDOS object.
-
-
-        """
-        return_density_object = Density(ldos_object.parameters)
-        return_density_object.fermi_energy_eV = ldos_object.fermi_energy_eV
-        return_density_object.temperature_K = ldos_object.temperature_K
-        return_density_object.voxel = ldos_object.voxel
-        return_density_object.number_of_electrons = ldos_object.\
-            number_of_electrons
-        return_density_object.band_energy_dft_calculation = ldos_object.\
-            band_energy_dft_calculation
-        return_density_object.grid_dimensions = ldos_object.grid_dimensions
-        return_density_object.atoms = ldos_object.atoms
-        return_density_object.qe_input_data = ldos_object.qe_input_data
-        return_density_object.qe_pseudopotentials = ldos_object.\
-            qe_pseudopotentials
-        return_density_object.total_energy_dft_calculation = \
-            ldos_object.total_energy_dft_calculation
-        return_density_object.kpoints = ldos_object.kpoints
-        return_density_object.number_of_electrons_from_eigenvals = \
-            ldos_object.number_of_electrons_from_eigenvals
-        return return_density_object

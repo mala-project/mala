@@ -74,9 +74,6 @@ class DataConverter:
         cube_files_scheme : string
             Naming scheme for the LDOS .cube files.
 
-        cube_directory : string
-            Directory containing the LDOS .cube files.
-
         input_units : string
             Unit of the input data.
 
@@ -90,8 +87,7 @@ class DataConverter:
         self.__snapshot_units.append({"input": input_units,
                                       "output": output_units})
 
-    def add_snapshot_qeout(self, qe_out_file, qe_out_directory,
-                           input_units=None):
+    def add_snapshot_qeout(self, qe_out_file, input_units=None):
         """
         Add a Quantum Espresso snapshot to the list of conversion list.
 
@@ -104,22 +100,17 @@ class DataConverter:
         qe_out_file : string
             Name of Quantum Espresso output file for this snapshot.
 
-        qe_out_directory : string
-            Path to Quantum Espresso output file for this snapshot.
-
         input_units : string
             Unit of the input data.
         """
-        self.__snapshots_to_convert.append({"input": [qe_out_file,
-                                                      qe_out_directory],
+        self.__snapshots_to_convert.append({"input": [qe_out_file],
                                             "output": None})
         self.__snapshot_description.append({"input": "qe.out",
                                             "output": None})
         self.__snapshot_units.append({"input": input_units,
                                       "output": None})
 
-    def add_snapshot_cube(self, cube_naming_scheme, cube_directory,
-                          input_units=None, output_units=None):
+    def add_snapshot_cube(self, cube_naming_scheme, output_units=None):
         """
         Add a Quantum Espresso snapshot to the list of conversion list.
 
@@ -132,18 +123,11 @@ class DataConverter:
         cube_naming_scheme : string
             Naming scheme for the LDOS .cube files.
 
-        cube_directory : string
-            Directory containing the LDOS .cube files.
-
-        input_units : string
-            Unit of the input data.
-
         output_units : string
             Unit of the output data.
         """
         self.__snapshots_to_convert.append({"input": None,
-                                            "output": [cube_naming_scheme,
-                                                       cube_directory]})
+                                            "output": [cube_naming_scheme]})
         self.__snapshot_description.append({"input": None,
                                             "output": ".cube"})
         self.__snapshot_units.append({"input": None,
@@ -237,7 +221,7 @@ class DataConverter:
             target_calculator_kwargs["use_memmap"] = use_memmap
             # If no units are provided we just assume standard units.
             tmp_output = self.target_calculator.read_from_cube(
-                snapshot["output"][0], snapshot["output"][1],
+                snapshot["output"][0],
                 **target_calculator_kwargs)
 
         elif description["output"] is None:

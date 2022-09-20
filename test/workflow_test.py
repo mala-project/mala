@@ -162,7 +162,7 @@ class TestFullWorkflow:
         test_parameters.targets.pseudopotential_path = data_path_ldos
         # Create a target calculator to perform postprocessing.
         ldos = mala.Target(test_parameters)
-        dens = mala.Density.from_ldos(ldos)
+        dens = mala.Density.from_ldos_calculator(ldos)
         ldos.read_additional_calculation_data("qe.out", os.path.join(
                                               data_path_ldos, "Be.pw.scf.out"))
         dos_data = np.load(os.path.join(data_path_ldos, "Be_dos.npy"))

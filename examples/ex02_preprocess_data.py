@@ -63,13 +63,14 @@ data_converter.convert_snapshots("./", naming_scheme="Be_snapshot*")
 # No matter which way you access the DataConvert, you can always specify
 # keywords (check API) for the calculators.
 data_converter = mala.DataConverter(test_parameters)
-data_converter.add_snapshot_qeout("Be.pw.scf.out", data_path)
+data_converter.add_snapshot_qeout(os.path.join(data_path, "Be.pw.scf.out"),)
 data_converter.convert_snapshots("./", naming_scheme="Be_snapshot_only_in*",
                                  descriptor_calculation_kwargs={"working_directory": data_path})
 
 data_converter = mala.DataConverter(test_parameters)
-data_converter.add_snapshot_cube("cubes/tmp.pp*Be_ldos.cube",
-                                 data_path, output_units="1/Ry")
+data_converter.add_snapshot_cube(os.path.join(data_path,
+                                              "cubes/tmp.pp*Be_ldos.cube"),
+                                 output_units="1/(Ry*Bohr^3)")
 data_converter.convert_snapshots("./", naming_scheme="Be_snapshot_only_out*")
 
 printout("Parameters used for this experiment:")
