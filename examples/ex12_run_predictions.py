@@ -52,7 +52,7 @@ def use_predictor(new_network, new_parameters, iscaler, oscaler):
     # Fermi energy has to be calculated self-consistently for predictions,
     # and for that we also have to tell the calculator how many electrons
     # the system has and at which temperature we perform calculations.
-    ldos_calculator.number_of_electrons = 4
+    ldos_calculator.number_of_electrons_exact = 4
     ldos_calculator.temperature_K = 298
 
     fermi_energy = ldos_calculator.get_self_consistent_fermi_energy_ev(ldos)
@@ -100,9 +100,11 @@ def initial_training():
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                              "Be_snapshot1.out.npy", data_path, "tr")
+                              "Be_snapshot1.out.npy", data_path, "tr",
+                              output_units="1/(eV*Bohr^3)")
     data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                              "Be_snapshot2.out.npy", data_path, "va")
+                              "Be_snapshot2.out.npy", data_path, "va",
+                              output_units="1/(eV*Bohr^3)")
     data_handler.prepare_data()
     printout("Read data: DONE.")
 

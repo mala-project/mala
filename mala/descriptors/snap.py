@@ -85,8 +85,7 @@ class SNAP(Descriptor):
         else:
             raise Exception("Unsupported unit for SNAP.")
 
-    def calculate_from_qe_out(self, qe_out_file, qe_out_directory,
-                              working_directory=None,
+    def calculate_from_qe_out(self, qe_out_file, working_directory=".",
                               **kwargs):
         """
         Calculate the SNAP descriptors based on a Quantum Espresso outfile.
@@ -96,8 +95,10 @@ class SNAP(Descriptor):
         qe_out_file : string
             Name of Quantum Espresso output file for snapshot.
 
-        qe_out_directory : string
-            Path to Quantum Espresso output file for snapshot.
+        working_directory : string
+            A directory in which to write the output of the LAMMPS calculation.
+            Usually the local directory should suffice, given that there
+            are no multiple instances running in the same directory.
 
         working_directory : string
             A directory in which to perform the LAMMPS calculation.
@@ -111,17 +112,15 @@ class SNAP(Descriptor):
 
         """
         self.in_format_ase = "espresso-out"
-        printout("Calculating SNAP descriptors from", qe_out_file, "at",
-                 qe_out_directory, min_verbosity=0)
+        printout("Calculating SNAP descriptors from", qe_out_file, min_verbosity=0)
         # We get the atomic information by using ASE.
-        infile = os.path.join(qe_out_directory, qe_out_file)
-        atoms = ase.io.read(infile, format=self.in_format_ase)
+        atoms = ase.io.read(qe_out_file, format=self.in_format_ase)
 
         # Enforcing / Checking PBC on the read atoms.
         atoms = self.enforce_pbc(atoms)
 
         # Get the grid dimensions.
-        qe_outfile = open(infile, "r")
+        qe_outfile = open(qe_out_file, "r")
         lines = qe_outfile.readlines()
         nx = 0
         ny = 0
@@ -134,9 +133,6 @@ class SNAP(Descriptor):
                 ny = int(tmp.split(",")[1])
                 nz = int(tmp.split(",")[2])
                 break
-
-        if working_directory is None:
-            working_directory = qe_out_directory
 
         return self.__calculate_snap(atoms,
                                      working_directory, [nx, ny, nz])
@@ -155,7 +151,9 @@ class SNAP(Descriptor):
             Grid dimensions to be used, in the format [x,y,z].
 
         working_directory : string
-            A directory in which to perform the LAMMPS calculation.
+            A directory in which to write the output of the LAMMPS calculation.
+            Usually the local directory should suffice, given that there
+            are no multiple instances running in the same directory.
 
         Returns
         -------
@@ -165,7 +163,8 @@ class SNAP(Descriptor):
         """
         # Enforcing / Checking PBC on the input atoms.
         atoms = self.enforce_pbc(atoms)
-        return self.__calculate_snap(atoms, working_directory, grid_dimensions)
+        return self.__calculate_snap(atoms, working_directory,
+                                     grid_dimensions)
 
     def gather_descriptors(self, snap_descriptors_np, use_pickled_comm=False):
         """
@@ -286,9 +285,6 @@ class SNAP(Descriptor):
         # We also need to know how big the grid is.
         # Iterating directly through the file is slow, but the
         # grid information is at the top (around line 200).
-        nx = None
-        ny = None
-        nz = None
         if len(self.dbg_grid_dimensions) == 3:
             nx = self.dbg_grid_dimensions[0]
             ny = self.dbg_grid_dimensions[1]
@@ -299,16 +295,17 @@ class SNAP(Descriptor):
             nz = grid_dimensions[2]
 
         # Build LAMMPS arguments from the data we read.
-        lmp_cmdargs = ["-screen", "none", "-log", os.path.join(outdir,
-                                                               "lammps_log.tmp")]
-        lammps_dict = {"ngridx": nx,
-                       "ngridy": ny,
-                       "ngridz": nz,
-                       "twojmax": self.parameters.twojmax,
-                       "rcutfac": self.parameters.rcutfac,
-                       "atom_config_fname": ase_out_path}
-        if self.parameters._configuration["mpi"]:
-            lammps_dict["bgridglobalflag"] = False
+        lmp_cmdargs = ["-screen", "none", "-log",
+                       os.path.join(outdir, "lammps_bgrid_log.tmp")]
+
+        # LAMMPS processor grid filled by parent class.
+        lammps_dict = self._setup_lammps_processors(nx, ny, nz)
+
+        # Set the values not already filled in the LAMMPS setup.
+        lammps_dict["twojmax"] = self.parameters.twojmax
+        lammps_dict["rcutfac"] = self.parameters.rcutfac
+        lammps_dict["atom_config_fname"] = ase_out_path
+
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
 
         # Build the LAMMPS object.
@@ -319,8 +316,13 @@ class SNAP(Descriptor):
         if self.parameters.lammps_compute_file == "":
             filepath = __file__.split("snap")[0]
             if self.parameters._configuration["mpi"]:
-                self.parameters.lammps_compute_file = \
-                    os.path.join(filepath, "in.bgridlocal.python")
+                if self.parameters.use_z_splitting:
+                    self.parameters.lammps_compute_file = \
+                        os.path.join(filepath, "in.bgridlocal.python")
+                else:
+                    self.parameters.lammps_compute_file = \
+                        os.path.join(filepath,
+                                     "in.bgridlocal_defaultproc.python")
             else:
                 self.parameters.lammps_compute_file = \
                     os.path.join(filepath, "in.bgrid.python")

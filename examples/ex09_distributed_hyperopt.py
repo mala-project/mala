@@ -72,11 +72,13 @@ data_handler = mala.DataHandler(test_parameters)
 data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
                           "Be_snapshot1.out.npy", data_path, "tr",
                           calculation_output_file=
-                          os.path.join(data_path, "Be_snapshot1.out"))
+                          os.path.join(data_path, "Be_snapshot1.out"),
+                          output_units="1/(eV*Bohr^3)")
 data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
                           "Be_snapshot2.out.npy", data_path, "va",
                           calculation_output_file=
-                          os.path.join(data_path, "Be_snapshot2.out"))
+                          os.path.join(data_path, "Be_snapshot2.out"),
+                          output_units="1/(eV*Bohr^3)")
 data_handler.prepare_data()
 printout("Read data: DONE.")
 

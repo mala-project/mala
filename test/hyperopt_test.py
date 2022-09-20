@@ -44,13 +44,13 @@ class TestHyperparameterOptimization:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                   "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                   "Al_debug_2k_nr1.out.npy", data_path, "va",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                   "Al_debug_2k_nr2.out.npy", data_path, "te",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.prepare_data()
 
         # Perform the hyperparameter optimization.
@@ -123,13 +123,13 @@ class TestHyperparameterOptimization:
         # Add all the snapshots we want to use in to the list.
         data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                   "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                   "Al_debug_2k_nr1.out.npy", data_path, "va",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                   "Al_debug_2k_nr2.out.npy", data_path, "te",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.prepare_data()
 
         # Create and perform hyperparameter optimization.
@@ -187,13 +187,13 @@ class TestHyperparameterOptimization:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                   "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                   "Al_debug_2k_nr1.out.npy", data_path, "va",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                   "Al_debug_2k_nr2.out.npy", data_path, "te",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.prepare_data()
 
         # Perform the actual hyperparameter optimization.

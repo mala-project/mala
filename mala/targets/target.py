@@ -1,6 +1,8 @@
 """Base class for all target calculators."""
 from abc import ABC, abstractmethod
 import itertools
+import warnings
+from functools import cached_property
 
 from ase.neighborlist import NeighborList
 from ase.units import Rydberg, Bohr, kB
@@ -12,6 +14,13 @@ from scipy.integrate import simps
 from mala.common.parameters import Parameters, ParametersTargets
 from mala.common.parallelizer import printout, parallel_warn
 from mala.targets.calculation_helpers import fermi_function
+
+# Empirical value for the Gaussian descriptor width, determined for an
+# aluminium system. Reasonable values for sigma can and will be calculated
+# automatically based on this value and the aluminium gridspacing
+# for other systems as well.
+optimal_sigma_aluminium = 0.2
+reference_grid_spacing_aluminium = 0.08099000022712448
 
 
 class Target(ABC):
@@ -72,16 +81,18 @@ class Target(ABC):
         return target
 
     def __init__(self, params):
+        self._parameters_full = None
         if isinstance(params, Parameters):
             self.parameters: ParametersTargets = params.targets
+            self._parameters_full = params
         elif isinstance(params, ParametersTargets):
             self.parameters: ParametersTargets = params
         else:
             raise Exception("Wrong type of parameters for Targets class.")
-        self.fermi_energy_eV = None
+        self.fermi_energy_dft = None
         self.temperature_K = None
-        self.voxel_Bohr = None
-        self.number_of_electrons = None
+        self.voxel = None
+        self.number_of_electrons_exact = None
         self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
@@ -116,11 +127,13 @@ class Target(ABC):
         self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
 
-        # Local grid for distributed inference.
+        # Local grid and parallelization info for distributed inference.
         self.local_grid = None
+        self.y_planes = None
 
+    @property
     @abstractmethod
-    def get_feature_size(self):
+    def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
         pass
 
@@ -136,49 +149,28 @@ class Target(ABC):
     def qe_input_data(self, value):
         self._qe_input_data = value
 
-    def read_from_cube(self):
-        """Read the quantity from a .cube file."""
-        raise Exception("No function defined to read this quantity "
-                        "from a .cube file.")
+    def _is_property_cached(self, property_name):
+        return property_name in self.__dict__.keys()
 
-    def read_from_qe_dos_txt(self):
-        """Read the quantity from a Quantum Espresso .dos.txt file."""
-        raise Exception("No function defined to read this quantity "
-                        "from a qe.dos.txt file")
+    @abstractmethod
+    def get_target(self):
+        """
+        Get the target quantity.
 
-    def write_as_cube(self):
-        """Write the quantity in a cube file."""
-        raise Exception("No function defined to write this quantity "
-                        "to a .cube file.")
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        pass
 
-    def get_density(self):
-        """Get the electronic density."""
-        raise Exception("No function to calculate or provide the "
-                        "density has been implemented for this target type.")
+    @abstractmethod
+    def invalidate_target(self):
+        """
+        Invalidates the saved target wuantity.
 
-    def get_density_of_states(self):
-        """Get the density of states."""
-        raise Exception("No function to calculate or provide the"
-                        "density of states (DOS) has been implemented "
-                        "for this target type.")
-
-    def get_band_energy(self):
-        """Get the band energy."""
-        raise Exception("No function to calculate or provide the"
-                        "band energy has been implemented for this target "
-                        "type.")
-
-    def get_number_of_electrons(self):
-        """Get the number of electrons."""
-        raise Exception("No function to calculate or provide the number of"
-                        " electrons has been implemented for this target "
-                        "type.")
-
-    def get_total_energy(self):
-        """Get the total energy."""
-        raise Exception("No function to calculate or provide the number "
-                        "of electons has been implemented for this target "
-                        "type.")
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        pass
 
     def read_additional_calculation_data(self, data_type, data=""):
         """
@@ -207,10 +199,10 @@ class Target(ABC):
         """
         if data_type == "qe.out":
             # Reset everything.
-            self.fermi_energy_eV = None
+            self.fermi_energy_dft = None
             self.temperature_K = None
-            self.voxel_Bohr = None
-            self.number_of_electrons = None
+            self.number_of_electrons_exact = None
+            self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
@@ -219,7 +211,7 @@ class Target(ABC):
             # Read the file.
             self.atoms = ase.io.read(data, format="espresso-out")
             vol = self.atoms.get_volume()
-            self.fermi_energy_eV = self.atoms.get_calculator().\
+            self.fermi_energy_dft = self.atoms.get_calculator().\
                 get_fermi_level()
 
             # Parse the file for energy values.
@@ -233,7 +225,7 @@ class Target(ABC):
                     if "End of self-consistent calculation" in line:
                         past_calculation_part = True
                     if "number of electrons       =" in line:
-                        self.number_of_electrons = np.float64(line.split('=')
+                        self.number_of_electrons_exact = np.float64(line.split('=')
                                                               [1])
                     if "Fermi-Dirac smearing, width (Ry)=" in line:
                         self.temperature_K = np.float64(line.split('=')[2]) * \
@@ -273,16 +265,19 @@ class Target(ABC):
                         bands_included = False
 
             # The voxel is needed for e.g. LDOS integration.
-            self.voxel_Bohr = self.atoms.cell.copy()
-            self.voxel_Bohr[0] = self.voxel_Bohr[0] / (
-                        self.grid_dimensions[0] * Bohr)
-            self.voxel_Bohr[1] = self.voxel_Bohr[1] / (
-                        self.grid_dimensions[1] * Bohr)
-            self.voxel_Bohr[2] = self.voxel_Bohr[2] / (
-                        self.grid_dimensions[2] * Bohr)
+            self.voxel = self.atoms.cell.copy()
+            self.voxel[0] = self.voxel[0] / (
+                        self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (
+                        self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (
+                        self.grid_dimensions[2])
+            self._parameters_full.descriptors.gaussian_descriptors_sigma = \
+                (np.max(self.voxel) / reference_grid_spacing_aluminium) * \
+                optimal_sigma_aluminium
 
             # This is especially important for size extrapolation.
-            self.electrons_per_atom = self.number_of_electrons/len(self.atoms)
+            self.electrons_per_atom = self.number_of_electrons_exact / len(self.atoms)
 
             # Unit conversion
             self.total_energy_dft_calculation = total_energy*Rydberg
@@ -295,19 +290,19 @@ class Target(ABC):
                     energies[0, :, :])
                 kweights = self.atoms.get_calculator().get_k_point_weights()
                 eband_per_band = eigs * fermi_function(eigs,
-                                                       self.fermi_energy_eV,
+                                                       self.fermi_energy_dft,
                                                        self.temperature_K)
                 eband_per_band = kweights[np.newaxis, :] * eband_per_band
                 self.band_energy_dft_calculation = np.sum(eband_per_band)
                 enum_per_band = fermi_function(eigs,
-                                               self.fermi_energy_eV,
+                                               self.fermi_energy_dft,
                                                self.temperature_K)
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
 
         elif data_type == "atoms+grid":
             # Reset everything that we can get this way.
-            self.voxel_Bohr = None
+            self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
@@ -322,13 +317,16 @@ class Target(ABC):
             self.grid_dimensions[2] = data[1][2]
 
             # The voxel is needed for e.g. LDOS integration.
-            self.voxel_Bohr = self.atoms.cell.copy()
-            self.voxel_Bohr[0] = self.voxel_Bohr[0] / (
-                        self.grid_dimensions[0] * Bohr)
-            self.voxel_Bohr[1] = self.voxel_Bohr[1] / (
-                        self.grid_dimensions[1] * Bohr)
-            self.voxel_Bohr[2] = self.voxel_Bohr[2] / (
-                        self.grid_dimensions[2] * Bohr)
+            self.voxel = self.atoms.cell.copy()
+            self.voxel[0] = self.voxel[0] / (
+                        self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (
+                        self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (
+                        self.grid_dimensions[2])
+            self._parameters_full.descriptors.gaussian_descriptors_sigma = \
+                (np.max(self.voxel) / reference_grid_spacing_aluminium) * \
+                optimal_sigma_aluminium
 
             if self.electrons_per_atom is None:
                 printout("No number of electrons per atom provided, "
@@ -337,8 +335,8 @@ class Target(ABC):
                          "wrong.")
 
             else:
-                self.number_of_electrons = self.electrons_per_atom *\
-                                           len(self.atoms)
+                self.number_of_electrons_exact = self.electrons_per_atom * \
+                                                 len(self.atoms)
 
         else:
             raise Exception("Unsupported auxiliary file type.")
@@ -354,7 +352,7 @@ class Target(ABC):
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
                 for k in range(0, self.grid_dimensions[2]):
-                    grid3D[i, j, k, :] = np.matmul(self.voxel_Bohr, [i, j, k])
+                    grid3D[i, j, k, :] = np.matmul(self.voxel, [i, j, k])
         return grid3D
 
     @staticmethod

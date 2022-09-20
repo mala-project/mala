@@ -54,10 +54,10 @@ class TestFullWorkflow:
 
         # Create a DataConverter, and add snapshots to it.
         data_converter = mala.DataConverter(test_parameters)
-        data_converter.add_snapshot_qeout_cube("Be.pw.scf.out", data_path_ldos,
-                                               os.path.join("cubes", "tmp.pp*Be_ldos.cube"),
-                                               data_path_ldos,
-                                               output_units="1/Ry")
+        data_converter.add_snapshot_qeout_cube(os.path.join(data_path_ldos,"Be.pw.scf.out"),
+                                               os.path.join(data_path_ldos, "cubes",
+                                                            "tmp.pp*Be_ldos.cube"),
+                                               output_units="1/(Ry*Bohr^3)")
 
         data_converter.convert_snapshots("./", naming_scheme="Be_snapshot*")
 
@@ -102,7 +102,7 @@ class TestFullWorkflow:
                                           fermi_energy_eV=
                                           self_consistent_fermi_energy)
 
-        assert np.isclose(number_of_electrons, dos.number_of_electrons,
+        assert np.isclose(number_of_electrons, dos.number_of_electrons_exact,
                           atol=accuracy_electrons)
         assert np.isclose(band_energy, dos.band_energy_dft_calculation,
                           atol=accuracy_band_energy)
@@ -126,7 +126,9 @@ class TestFullWorkflow:
         ldos.read_additional_calculation_data("qe.out", os.path.join(
                                               data_path_ldos,
                                                "Be.pw.scf.out"))
-        ldos_data = np.load(os.path.join(data_path_ldos, "Be_ldos.npy"))
+        ldos_data = ldos.convert_units(
+            np.load(os.path.join(data_path_ldos, "Be_ldos.npy")),
+            "1/(eV*Bohr^3)")
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
@@ -138,7 +140,7 @@ class TestFullWorkflow:
                                            fermi_energy_eV=
                                            self_consistent_fermi_energy)
 
-        assert np.isclose(number_of_electrons, ldos.number_of_electrons,
+        assert np.isclose(number_of_electrons, ldos.number_of_electrons_exact,
                           atol=accuracy_electrons)
         assert np.isclose(band_energy, ldos.band_energy_dft_calculation,
                           atol=accuracy_band_energy)
@@ -160,11 +162,14 @@ class TestFullWorkflow:
         test_parameters.targets.pseudopotential_path = data_path_ldos
         # Create a target calculator to perform postprocessing.
         ldos = mala.Target(test_parameters)
+        dens = mala.Density.from_ldos_calculator(ldos)
         ldos.read_additional_calculation_data("qe.out", os.path.join(
                                               data_path_ldos, "Be.pw.scf.out"))
         dos_data = np.load(os.path.join(data_path_ldos, "Be_dos.npy"))
-        dens_data = np.load(os.path.join(data_path_ldos, "Be_dens.npy"))
-        dos = mala.DOS.from_ldos(ldos)
+        dens_data = dens.convert_units(
+            np.load(os.path.join(data_path_ldos, "Be_dens.npy")),
+            "1/Bohr^3")
+        dos = mala.DOS.from_ldos_calculator(ldos)
 
         # Calculate energies
         self_consistent_fermi_energy = dos. \
@@ -198,7 +203,9 @@ class TestFullWorkflow:
         ldos.read_additional_calculation_data("qe.out", os.path.join(
                                               data_path_ldos,
                                               "Be.pw.scf.out"))
-        ldos_data = np.load(os.path.join(data_path_ldos, "Be_ldos.npy"))
+        ldos_data = ldos.convert_units(
+            np.load(os.path.join(data_path_ldos, "Be_ldos.npy")),
+            in_units="1/(eV*Bohr^3)")
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
@@ -244,13 +251,13 @@ class TestFullWorkflow:
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                   "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                   "Al_debug_2k_nr1.out.npy", data_path, "va",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                   "Al_debug_2k_nr2.out.npy", data_path, "te",
-                                  output_units="1/Ry")
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.prepare_data()
 
         # Train a network.
@@ -307,7 +314,7 @@ class TestFullWorkflow:
                                             data_path,
                                             "Al_debug_2k_nr2.out.npy",
                                             data_path, "te",
-                                            output_units="1/Ry")
+                                            output_units="1/(Ry*Bohr^3)")
         inference_data_handler.prepare_data(reparametrize_scaler=False)
 
         # Instantiate and use a Tester object.
