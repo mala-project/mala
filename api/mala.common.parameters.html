@@ -802,6 +802,16 @@ descriptor vector. If False, no such cutting is peformed.</p>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.snap_switchflag">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">snap_switchflag</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.snap_switchflag" title="Permalink to this definition"></a></dt>
+<dd><p>Switchflag for the SNAP calculation.</p>
+<p>Can only be 1 or 0. If 1 (default), a switching function will be used
+to ensure that atomic contributions smoothly go to zero after a
+certain cutoff. If 0 (old default, which can be problematic in some
+instances), this is not done, which can lead to discontinuities.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.use_y_splitting">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_y_splitting</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.use_y_splitting" title="Permalink to this definition"></a></dt>
 <dd><p>Control whether a splitting in y-axis is used.</p>

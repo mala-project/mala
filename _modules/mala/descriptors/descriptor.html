@@ -444,16 +444,19 @@
                                    <span class="s2">&quot;zbal&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;balance 1.0 z </span><span class="si">{</span><span class="n">zint</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                                    <span class="s2">&quot;ngridx&quot;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span>
                                    <span class="s2">&quot;ngridy&quot;</span><span class="p">:</span> <span class="n">ny</span><span class="p">,</span>
-                                   <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">}</span>
+                                   <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">,</span>
+                                   <span class="s2">&quot;switch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snap_switchflag</span><span class="p">}</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ngridx&quot;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span>
                                    <span class="s2">&quot;ngridy&quot;</span><span class="p">:</span> <span class="n">ny</span><span class="p">,</span>
-                                   <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">}</span>
+                                   <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">,</span>
+                                   <span class="s2">&quot;switch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snap_switchflag</span><span class="p">}</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ngridx&quot;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span>
                            <span class="s2">&quot;ngridy&quot;</span><span class="p">:</span> <span class="n">ny</span><span class="p">,</span>
-                           <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">}</span>
+                           <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">,</span>
+                           <span class="s2">&quot;switch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snap_switchflag</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">lammps_dict</span>
 
     <span class="nd">@staticmethod</span>

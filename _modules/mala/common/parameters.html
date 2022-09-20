@@ -373,6 +373,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">gaussian_descriptors_cutoff</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rcutfac</span> <span class="o">=</span> <span class="mf">4.67637</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snap_switchflag</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">acsd_points</span> <span class="o">=</span> <span class="mi">100</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="c1"># TODO: I would rather handle the parallelization info automatically</span>
@@ -430,7 +431,27 @@
     <span class="nd">@rcutfac</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">rcutfac</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rcutfac</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gaussian_descriptors_cutoff</span> <span class="o">=</span> <span class="n">value</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gaussian_descriptors_cutoff</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">snap_switchflag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Switchflag for the SNAP calculation.</span>
+
+<span class="sd">        Can only be 1 or 0. If 1 (default), a switching function will be used</span>
+<span class="sd">        to ensure that atomic contributions smoothly go to zero after a</span>
+<span class="sd">        certain cutoff. If 0 (old default, which can be problematic in some</span>
+<span class="sd">        instances), this is not done, which can lead to discontinuities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_snap_switchflag</span>
+
+    <span class="nd">@snap_switchflag</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">snap_switchflag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">_int_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_int_value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_snap_switchflag</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="n">_int_value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_snap_switchflag</span> <span class="o">=</span> <span class="mi">1</span></div>
 
 
 <div class="viewcode-block" id="ParametersTargets"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersTargets">[docs]</a><span class="k">class</span> <span class="nc">ParametersTargets</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
