@@ -362,7 +362,14 @@ class ParametersDescriptors(ParametersBase):
 
     @property
     def snap_switchflag(self):
-        """Cut off radius for SNAP calculation."""
+        """
+        Switchflag for the SNAP calculation.
+
+        Can only be 1 or 0. If 1 (default), a switching function will be used
+        to ensure that atomic contributions smoothly go to zero after a
+        certain cutoff. If 0 (old default, which can be problematic in some
+        instances), this is not done, which can lead to discontinuities.
+        """
         return self._snap_switchflag
 
     @snap_switchflag.setter
