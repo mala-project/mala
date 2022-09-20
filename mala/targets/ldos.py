@@ -474,7 +474,7 @@ class LDOS(Target):
                 barrier()
                 self.local_density_of_states = ldos_data_full
         else:
-            return ldos_data
+            self.local_density_of_states = ldos_data
 
     def read_from_numpy(self, path, units="1/(eV*A^3)"):
         """
