@@ -20,7 +20,7 @@ from mala.targets.calculation_helpers import fermi_function
 # automatically based on this value and the aluminium gridspacing
 # for other systems as well.
 optimal_sigma_aluminium = 0.2
-reference_grid_spacing_aluminium_bohr = 0.15304891936073586
+reference_grid_spacing_aluminium = 0.08099000022712448
 
 
 class Target(ABC):
@@ -273,7 +273,7 @@ class Target(ABC):
             self.voxel[2] = self.voxel[2] / (
                         self.grid_dimensions[2])
             self._parameters_full.descriptors.gaussian_descriptors_sigma = \
-                (np.max(self.voxel) / reference_grid_spacing_aluminium_bohr) * \
+                (np.max(self.voxel) / reference_grid_spacing_aluminium) * \
                 optimal_sigma_aluminium
 
             # This is especially important for size extrapolation.
@@ -325,7 +325,7 @@ class Target(ABC):
             self.voxel[2] = self.voxel[2] / (
                         self.grid_dimensions[2])
             self._parameters_full.descriptors.gaussian_descriptors_sigma = \
-                (np.max(self.voxel) / reference_grid_spacing_aluminium_bohr) * \
+                (np.max(self.voxel) / reference_grid_spacing_aluminium) * \
                 optimal_sigma_aluminium
 
             if self.electrons_per_atom is None:
