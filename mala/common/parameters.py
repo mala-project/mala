@@ -300,6 +300,7 @@ class ParametersDescriptors(ParametersBase):
         self.gaussian_descriptors_cutoff = None
         self.rcutfac = 4.67637
         self.lammps_compute_file = ""
+        self.snap_switchflag = 1
         self.acsd_points = 100
         self.descriptors_contain_xyz = True
         # TODO: I would rather handle the parallelization info automatically
@@ -358,6 +359,19 @@ class ParametersDescriptors(ParametersBase):
     def rcutfac(self, value):
         self._rcutfac = value
         self.gaussian_descriptors_cutoff = value
+
+    @property
+    def snap_switchflag(self):
+        """Cut off radius for SNAP calculation."""
+        return self._snap_switchflag
+
+    @snap_switchflag.setter
+    def snap_switchflag(self, value):
+        _int_value = int(value)
+        if _int_value == 0:
+            self._snap_switchflag = value
+        if _int_value > 0:
+            self._snap_switchflag = 1
 
 
 class ParametersTargets(ParametersBase):
