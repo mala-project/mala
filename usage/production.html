@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Training a model &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>MALA production runs &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -20,8 +20,8 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Postprocessing the LDOS" href="postprocessing.html" />
-    <link rel="prev" title="Data generation and preprocessing" href="preprocessing.html" /> 
+    <link rel="next" title="API reference" href="../api/modules.html" />
+    <link rel="prev" title="Predict electronic structures" href="predictions.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,11 +46,17 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../usage.html">Usage</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="basicconcepts.html">Basic concepts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Data generation and preprocessing</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Training a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trainingmodel.html">Training a model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Postprocessing the LDOS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hyperparameters.html">Tuning the hyperparameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="predictions.html">Predict electronic structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="production.html">MALA production runs</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">MALA production runs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#optimal-performance">Optimal performance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gaussian-descriptor-based-ewald-sum">Gaussian descriptor based Ewald sum</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API reference</a></li>
@@ -72,9 +78,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../usage.html">Usage</a> &raquo;</li>
-      <li>Training a model</li>
+      <li>MALA production runs</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/usage/trainingmodel.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/usage/production.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -82,20 +88,48 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="training-a-model">
-<h1>Training a model<a class="headerlink" href="#training-a-model" title="Permalink to this headline"></a></h1>
-<p>Neural networks are powerful machine learning tools in principle capable of
-approximating any function. In MALA, neural networks are built using PyTorch.
-Hyperparameter optimization can be done using optuna and custom routines.
-To see how a model is trained, refer to e.g. <code class="docutils literal notranslate"><span class="pre">ex01_singleshot</span></code>.</p>
+  <div class="section" id="mala-production-runs">
+<h1>MALA production runs<a class="headerlink" href="#mala-production-runs" title="Permalink to this headline"></a></h1>
+<div class="section" id="optimal-performance">
+<h2>Optimal performance<a class="headerlink" href="#optimal-performance" title="Permalink to this headline"></a></h2>
+<p>When running MALA for large systems or extended periods of time, performance
+becomes crucial. Most parts of MALA are either designed in a way to run as
+efficient as possible by default. Enabling MPI and GPU accordingly naturally
+boost performance by giving MALA access to more computational power.</p>
+<p>There are a few other options that can help with performance but need to be
+handled with care to avoid numerical inaccuracies.</p>
+<div class="section" id="gaussian-descriptor-based-ewald-sum">
+<h3>Gaussian descriptor based Ewald sum<a class="headerlink" href="#gaussian-descriptor-based-ewald-sum" title="Permalink to this headline"></a></h3>
+<p>MALA by default employs Quantum ESPRESSO to evaluate the Ewald sum, i.e., the
+ion-ion interaction part of the DFT energy. The implementation of this
+algorithm in QE scales quadratically with the number of ions. Therefore MALA
+also provides a custom, linearly scaling version of this algorithm through
+the total energy module. This implementation is based on a representation of
+atomic positions as Gaussians and can easily enabled:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_gaussian_descriptors_energy_formula</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>It’s numerical accuracy is governed by two parameters,
+<code class="docutils literal notranslate"><span class="pre">parameters.descriptors.gaussian_descriptors_cutoff</span></code> and
+<code class="docutils literal notranslate"><span class="pre">parameters.descriptors.gaussian_descriptors_sigma</span></code>, the cutoff radius for
+the Gaussian descriptors and the width of the Gaussian, respectively. MALA
+automatically chooses reasonable default values that have been tested across
+multiple systems. When dealing with a new system it may still be wise to
+first test the automatically generated value against the default Quantum
+ESPRESSO implementation before doing a full production run, to avoid
+inaccuracies.</p>
+</div>
+</div>
 </div>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="preprocessing.html" class="btn btn-neutral float-left" title="Data generation and preprocessing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="postprocessing.html" class="btn btn-neutral float-right" title="Postprocessing the LDOS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="predictions.html" class="btn btn-neutral float-left" title="Predict electronic structures" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/modules.html" class="btn btn-neutral float-right" title="API reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -72,8 +72,9 @@
              
   <h1>Source code for mala.targets.ldos</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;LDOS calculation class.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 
+<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">Bohr</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -93,20 +94,264 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    params : mala.common.parameters.Parameters</span>
-<span class="sd">        Parameters used to create this TargetBase object.</span>
+<span class="sd">        Parameters used to create this LDOS object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">##############################</span>
+    <span class="c1"># Constructors</span>
+    <span class="c1">##############################</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">LDOS</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos_exists</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density_exists</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="LDOS.get_feature_size"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_feature_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.from_numpy_file"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_numpy_file">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_numpy_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an LDOS calculator from a numpy array saved in a file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : mala.common.parameters.Parameters</span>
+<span class="sd">            Parameters used to create this LDOS object.</span>
+
+<span class="sd">        path : string</span>
+<span class="sd">            Path to file that is being read.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units the LDOS is saved in.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ldos_calculator : mala.targets.ldos.LDOS</span>
+<span class="sd">            LDOS calculator object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">return_ldos_object</span> <span class="o">=</span> <span class="n">LDOS</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">return_ldos_object</span><span class="o">.</span><span class="n">read_from_numpy</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_ldos_object</span></div>
+
+<div class="viewcode-block" id="LDOS.from_numpy_array"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_numpy_array">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_numpy_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an LDOS calculator from a numpy array in memory.</span>
+
+<span class="sd">        By using this function rather then setting the local_density_of_states</span>
+<span class="sd">        object directly, proper unit coversion is ensured.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : mala.common.parameters.Parameters</span>
+<span class="sd">            Parameters used to create this LDOS object.</span>
+
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">            Path to file that is being read.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units the LDOS is saved in.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ldos_calculator : mala.targets.ldos.LDOS</span>
+<span class="sd">            LDOS calculator object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">return_ldos_object</span> <span class="o">=</span> <span class="n">LDOS</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">return_ldos_object</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_ldos_object</span></div>
+
+<div class="viewcode-block" id="LDOS.from_cube_file"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_cube_file">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_cube_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span>
+                       <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an LDOS calculator from multiple cube files.</span>
+
+<span class="sd">        The files have to be located in the same directory.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        params : mala.common.parameters.Parameters</span>
+<span class="sd">            Parameters used to create this LDOS object.</span>
+
+<span class="sd">        path_name_scheme : string</span>
+<span class="sd">            Naming scheme for the LDOS .cube files. Every asterisk will be</span>
+<span class="sd">            replaced with an appropriate number for the LDOS files. Before</span>
+<span class="sd">            the file name, please make sure to include the proper file path.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units the LDOS is saved in.</span>
+
+<span class="sd">        use_memmap : string</span>
+<span class="sd">            If not None, a memory mapped file with this name will be used to</span>
+<span class="sd">            gather the LDOS.</span>
+<span class="sd">            If run in MPI parallel mode, such a file MUST be provided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">return_ldos_object</span> <span class="o">=</span> <span class="n">LDOS</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">return_ldos_object</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span><span class="n">path_name_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span>
+                                          <span class="n">use_memmap</span><span class="o">=</span><span class="n">use_memmap</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_ldos_object</span></div>
+
+    <span class="c1">##############################</span>
+    <span class="c1"># Properties</span>
+    <span class="c1">##############################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">local_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Local density of states as 1D or 3D array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_density_of_states</span>
+
+    <span class="nd">@local_density_of_states</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">local_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ldos</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_local_density_of_states</span> <span class="o">=</span> <span class="n">new_ldos</span>
+        <span class="c1"># Setting a new LDOS means we have to uncache priorly cached</span>
+        <span class="c1"># properties.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uncache_properties</span><span class="p">()</span>
+
+<div class="viewcode-block" id="LDOS.get_target"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_target">[docs]</a>    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the target quantity.</span>
+
+<span class="sd">        This is the generic interface for cached target quantities.</span>
+<span class="sd">        It should work for all implemented targets.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span></div>
+
+<div class="viewcode-block" id="LDOS.invalidate_target"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.invalidate_target">[docs]</a>    <span class="k">def</span> <span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Invalidates the saved target wuantity.</span>
+
+<span class="sd">        This is the generic interface for cached target quantities.</span>
+<span class="sd">        It should work for all implemented targets.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="LDOS.uncache_properties"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.uncache_properties">[docs]</a>    <span class="k">def</span> <span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Uncache all cached properties of this calculator.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;number_of_electrons&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;energy_grid&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;total_energy&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_energy</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;band_energy&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">band_energy</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;fermi_energy&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;density&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;density_of_states&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;_density_calculator&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_calculator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;_density_of_states_calculator&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span></div>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Energy grid on which the LDOS is expressed.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Total energy of the system, calculated via cached LDOS.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
+                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Band energy of the system, calculated via cached LDOS.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
+                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Number of electrons in the system, calculated via cached LDOS.</span>
+
+<span class="sd">        Does not necessarily match up exactly with KS-DFT provided values,</span>
+<span class="sd">        due to discretization errors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_number_of_electrons</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
+                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">fermi_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;Self-consistent&quot; Fermi energy of the system.</span>
+
+<span class="sd">        &quot;Self-consistent&quot; does not mean self-consistent in the DFT sense,</span>
+<span class="sd">        but rather the Fermi energy, for which DOS integration reproduces</span>
+<span class="sd">        the exact number of electrons. The term &quot;self-consistent&quot; stems</span>
+<span class="sd">        from how this quantity is calculated. Calculated via cached LDOS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
+                <span class="n">get_self_consistent_fermi_energy_ev</span><span class="p">()</span>
+
+            <span class="c1"># Now that we have a new Fermi energy, we should uncache the</span>
+            <span class="c1"># old number of electrons.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;number_of_electrons&quot;</span><span class="p">):</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons</span>
+            <span class="k">return</span> <span class="n">fermi_energy</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># The Fermi energy is set to None instead of creating an error.</span>
+            <span class="c1"># This is because the Fermi energy is used a lot throughout</span>
+            <span class="c1"># and it may be benificial not to throw an error directly</span>
+            <span class="c1"># but rather we need to revert to the DFT values.</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Electronic density as calculated by the cached LDOS.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
+                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;DOS as calculated by the cached LDOS.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
+                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">_density_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Density</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
+                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">_density_of_states_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No cached LDOS available to calculate this &quot;</span>
+                            <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
+
+    <span class="c1">##############################</span>
+    <span class="c1"># Methods</span>
+    <span class="c1">##############################</span>
+
+    <span class="c1"># File I/O</span>
+    <span class="c1">##########</span>
 
 <div class="viewcode-block" id="LDOS.convert_units"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
@@ -123,18 +368,22 @@
 <span class="sd">        in_units : string</span>
 <span class="sd">            Units of array. Currently supported are:</span>
 
-<span class="sd">                 - 1/eV (no conversion, MALA unit)</span>
-<span class="sd">                 - 1/Ry</span>
+<span class="sd">                 - 1/(eV*A^3) (no conversion, MALA unit)</span>
+<span class="sd">                 - 1/(eV*Bohr^3)</span>
+<span class="sd">                 - 1/(Ry*Bohr^3)</span>
+
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        converted_array : numpy.array</span>
-<span class="sd">            Data in 1/eV.</span>
+<span class="sd">            Data in 1/(eV*A^3).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/eV&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">array</span>
-        <span class="k">elif</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/Ry&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Rydberg</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/(eV*Bohr^3)&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Rydberg</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Bohr</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for LDOS.&quot;</span><span class="p">)</span></div>
 
@@ -143,7 +392,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array from MALA units into desired units.</span>
 
-<span class="sd">        MALA units for the LDOS means 1/eV.</span>
+<span class="sd">        MALA units for the LDOS means 1/(eV*A^3).</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -151,21 +400,28 @@
 <span class="sd">            Data in 1/eV.</span>
 
 <span class="sd">        out_units : string</span>
-<span class="sd">            Desired units of output array.</span>
+<span class="sd">            Desired units of output array. Currently supported are:</span>
+
+<span class="sd">                 - 1/(eV*A^3) (no conversion, MALA unit)</span>
+<span class="sd">                 - 1/(eV*Bohr^3)</span>
+<span class="sd">                 - 1/(Ry*Bohr^3)</span>
+
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        converted_array : numpy.array</span>
 <span class="sd">            Data in out_units.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;1/eV&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">array</span>
-        <span class="k">elif</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;1/Ry&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="n">Rydberg</span>
+        <span class="k">elif</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;1/(eV*Bohr^3)&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="n">Bohr</span> <span class="o">*</span> <span class="n">Bohr</span> <span class="o">*</span> <span class="n">Bohr</span>
+        <span class="k">elif</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;1/(Ry*Bohr^3)&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="n">Rydberg</span> <span class="o">*</span> <span class="n">Bohr</span> <span class="o">*</span> <span class="n">Bohr</span> <span class="o">*</span> <span class="n">Bohr</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for LDOS.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LDOS.read_from_cube"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_cube">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name_scheme</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">,</span>
+<div class="viewcode-block" id="LDOS.read_from_cube"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_cube">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_scheme</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">,</span>
                        <span class="n">use_memmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the LDOS data from multiple cube files.</span>
@@ -174,25 +430,19 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        file_name_scheme : string</span>
-<span class="sd">            Naming scheme for the LDOS .cube files.</span>
-
-<span class="sd">        directory : string</span>
-<span class="sd">            Directory containing the LDOS .cube files.</span>
+<span class="sd">        path_scheme : string</span>
+<span class="sd">            Naming scheme for the LDOS .cube files. Every asterisk will be</span>
+<span class="sd">            replaced with an appropriate number for the LDOS files. Before</span>
+<span class="sd">            the file name, please make sure to include the proper file path.</span>
 
 <span class="sd">        units : string</span>
 <span class="sd">            Units the LDOS is saved in.</span>
 
 <span class="sd">        use_memmap : string</span>
 <span class="sd">            If not None, a memory mapped file with this name will be used to</span>
-<span class="sd">            gather the LDOS.</span>
-<span class="sd">            If run in MPI parallel mode, such a file MUST be provided.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        ldos_data : numpy.array</span>
-<span class="sd">            Numpy array containing LDOS data.</span>
-
+<span class="sd">            gather the LDOS. Only has an effect in MPI parallel mode.</span>
+<span class="sd">            Usage will reduce RAM footprint while SIGNIFICANTLY</span>
+<span class="sd">            impacting disk usage and</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># First determine how many digits the last file in the list of</span>
         <span class="c1"># LDOS.cube files</span>
@@ -203,6 +453,7 @@
         <span class="c1"># tmp.pp003ELEMENT_ldos.cube</span>
         <span class="c1"># ...</span>
         <span class="c1"># tmp.pp100ELEMENT_ldos.cube</span>
+
         <span class="c1"># Find out the number of digits that are needed to encode this</span>
         <span class="c1"># grid (by QE).</span>
         <span class="n">digits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
@@ -210,7 +461,7 @@
         <span class="c1"># Iterate over the amount of specified LDOS input files.</span>
         <span class="c1"># QE is a Fortran code, so everything is 1 based.</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Reading &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">)</span> <span class="o">+</span>
-                 <span class="s2">&quot; LDOS files from&quot;</span><span class="o">+</span><span class="n">directory</span><span class="o">+</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                 <span class="s2">&quot; LDOS files from&quot;</span><span class="o">+</span><span class="n">path_scheme</span><span class="o">+</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">ldos_data</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
             <span class="n">local_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">/</span>
@@ -226,11 +477,11 @@
             <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span><span class="p">):</span>
-            <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">file_name_scheme</span>
+            <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">path_scheme</span>
             <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">tmp_file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">digits</span><span class="p">))</span>
 
             <span class="c1"># Open the cube file</span>
-            <span class="n">data</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">read_cube</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">tmp_file_name</span><span class="p">))</span>
+            <span class="n">data</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">read_cube</span><span class="p">(</span><span class="n">tmp_file_name</span><span class="p">)</span>
 
             <span class="c1"># Once we have read the first cube file, we know the dimensions</span>
             <span class="c1"># of the LDOS and can prepare the array</span>
@@ -265,7 +516,7 @@
                                                <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
                 <span class="n">barrier</span><span class="p">()</span>
                 <span class="n">ldos_data_full</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">start_index</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">end_index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ldos_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
-                <span class="k">return</span> <span class="n">ldos_data_full</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="n">ldos_data_full</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
 
@@ -294,9 +545,39 @@
                     <span class="n">comm</span><span class="o">.</span><span class="n">Send</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                               <span class="n">tag</span><span class="o">=</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">+</span> <span class="mi">100</span><span class="p">)</span>
                 <span class="n">barrier</span><span class="p">()</span>
-                <span class="k">return</span> <span class="n">ldos_data_full</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="n">ldos_data_full</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ldos_data</span></div>
+
+<div class="viewcode-block" id="LDOS.read_from_numpy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_numpy">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the LDOS data from a numpy file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path :</span>
+<span class="sd">            Name of the numpy file.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units the LDOS is saved in.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">*</span>\
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LDOS.read_from_array"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_array">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/(eV*A^3)&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the LDOS data from a numpy array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">            Numpy array containing the density.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units the LDOS is saved in.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="n">array</span> <span class="o">*</span> \
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="LDOS.get_energy_grid"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_energy_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -319,7 +600,7 @@
 <div class="viewcode-block" id="LDOS.get_total_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_total_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">voxel_Bohr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
                          <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
                          <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -329,8 +610,8 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the total energy from LDOS or given DOS + density data.</span>
 
-<span class="sd">        EITHER LDOS OR Density+DOS data have to be specified. Elsewise</span>
-<span class="sd">        this function will raise an exception.</span>
+<span class="sd">        If neither LDOS nor DOS+Density data is provided, the cached LDOS will</span>
+<span class="sd">        be attempted to be used for the calculation.</span>
 
 
 
@@ -353,7 +634,7 @@
 <span class="sd">        temperature_K : float</span>
 <span class="sd">            Temperature in K.</span>
 
-<span class="sd">        voxel_Bohr : ase.cell.Cell</span>
+<span class="sd">        voxel : ase.cell.Cell</span>
 <span class="sd">            Voxel to be used for grid intergation. Needs to reflect the</span>
 <span class="sd">            symmetry of the simulation cell. In Bohr.</span>
 
@@ -401,82 +682,119 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get relevant values from DFT calculation, if not otherwise specified.</span>
-        <span class="k">if</span> <span class="n">voxel_Bohr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">voxel_Bohr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_Bohr</span>
+        <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
         <span class="k">if</span> <span class="n">fermi_energy_eV</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_eV</span>
+            <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span>
+            <span class="k">if</span> <span class="n">fermi_energy_eV</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
+                         <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
+                         <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
+                         <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
         <span class="k">if</span> <span class="n">temperature_K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">temperature_K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span>
 
-        <span class="c1"># Check the input.</span>
-        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No input data provided to caculate &quot;</span>
-                                <span class="s2">&quot;total energy. Provide EITHER LDOS&quot;</span>
-                                <span class="s2">&quot; OR DOS and density.&quot;</span><span class="p">)</span>
+        <span class="c1"># Here we check whether we will use our internal, cached</span>
+        <span class="c1"># LDOS, or calculate everything from scratch.</span>
+        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">dos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                                     <span class="ow">and</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
 
-        <span class="c1"># Calculate DOS data if need be.</span>
-        <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span>
-                                                  <span class="n">voxel_Bohr</span><span class="o">=</span>
-                                                  <span class="n">voxel_Bohr</span><span class="p">,</span>
-                                                  <span class="n">integration_method</span><span class="o">=</span>
-                                                  <span class="n">grid_integration_method</span><span class="p">)</span>
+            <span class="c1"># In this case we calculate everything from scratch,</span>
+            <span class="c1"># because the user either provided LDOS data OR density +</span>
+            <span class="c1"># DOS data.</span>
 
-        <span class="c1"># Calculate density data if need be.</span>
-        <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">density_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span>
-                                            <span class="n">fermi_energy_ev</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">,</span>
-                                            <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
-                                            <span class="n">integration_method</span><span class="o">=</span>
-                                            <span class="n">energy_integration_method</span><span class="p">)</span>
+            <span class="c1"># Calculate DOS data if need be.</span>
+            <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span>
+                                                      <span class="n">voxel</span><span class="o">=</span>
+                                                      <span class="n">voxel</span><span class="p">,</span>
+                                                      <span class="n">integration_method</span><span class="o">=</span>
+                                                      <span class="n">grid_integration_method</span><span class="p">)</span>
 
-        <span class="c1"># Now we can create calculation objects to get the necessary</span>
-        <span class="c1"># quantities.</span>
-        <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">density_calculator</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">from_ldos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-        <span class="c1"># With these calculator objects we can calculate all the necessary</span>
-        <span class="c1"># quantities to construct the total energy.</span>
-        <span class="c1"># (According to Eq. 9 in [1])</span>
-        <span class="c1"># Band energy (kinetic energy)</span>
-        <span class="n">e_band</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
-                                                <span class="n">fermi_energy_eV</span><span class="o">=</span>
-                                                <span class="n">fermi_energy_eV</span><span class="p">,</span>
+            <span class="c1"># Calculate density data if need be.</span>
+            <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">density_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span>
+                                                <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">,</span>
                                                 <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
-                                                <span class="n">integration_method</span><span class="o">=</span>
-                                                <span class="n">energy_integration_method</span><span class="p">)</span>
+                                                <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
 
-        <span class="c1"># Smearing / Entropy contribution</span>
-        <span class="n">e_entropy_contribution</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span>\
-            <span class="n">get_entropy_contribution</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">,</span>
-                                     <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
-                                     <span class="n">integration_method</span><span class="o">=</span>
-                                     <span class="n">energy_integration_method</span><span class="p">)</span>
+            <span class="c1"># Now we can create calculation objects to get the necessary</span>
+            <span class="c1"># quantities.</span>
+            <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">density_calculator</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-        <span class="c1"># Density based energy contributions (via QE)</span>
-        <span class="n">e_rho_times_v_hxc</span><span class="p">,</span> <span class="n">e_hartree</span><span class="p">,</span>  <span class="n">e_xc</span><span class="p">,</span> <span class="n">e_ewald</span> \
-            <span class="o">=</span> <span class="n">density_calculator</span><span class="o">.</span>\
-            <span class="n">get_energy_contributions</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
-                                     <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="n">atoms_Angstrom</span><span class="p">,</span>
-                                     <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
-                                     <span class="n">create_file</span><span class="o">=</span><span class="n">create_qe_file</span><span class="p">)</span>
-        <span class="n">e_total</span> <span class="o">=</span> <span class="n">e_band</span> <span class="o">+</span> <span class="n">e_rho_times_v_hxc</span> <span class="o">+</span> <span class="n">e_hartree</span> <span class="o">+</span> <span class="n">e_xc</span> <span class="o">+</span> <span class="n">e_ewald</span> <span class="o">+</span>\
+            <span class="c1"># With these calculator objects we can calculate all the necessary</span>
+            <span class="c1"># quantities to construct the total energy.</span>
+            <span class="c1"># (According to Eq. 9 in [1])</span>
+            <span class="c1"># Band energy (kinetic energy)</span>
+            <span class="n">e_band</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
+                                                    <span class="n">fermi_energy_eV</span><span class="o">=</span>
+                                                    <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                                    <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
+                                                    <span class="n">integration_method</span><span class="o">=</span>
+                                                    <span class="n">energy_integration_method</span><span class="p">)</span>
+
+            <span class="c1"># Smearing / Entropy contribution</span>
+            <span class="n">e_entropy_contribution</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span> \
+                <span class="n">get_entropy_contribution</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
+                                         <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                         <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
+                                         <span class="n">integration_method</span><span class="o">=</span>
+                                         <span class="n">energy_integration_method</span><span class="p">)</span>
+
+            <span class="c1"># Density based energy contributions (via QE)</span>
+            <span class="n">density_contributions</span> \
+                <span class="o">=</span> <span class="n">density_calculator</span><span class="o">.</span> \
+                <span class="n">get_energy_contributions</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span>
+                                         <span class="n">qe_input_data</span><span class="o">=</span><span class="n">qe_input_data</span><span class="p">,</span>
+                                         <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="n">atoms_Angstrom</span><span class="p">,</span>
+                                         <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
+                                         <span class="n">create_file</span><span class="o">=</span><span class="n">create_qe_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># In this case, we use cached propeties wherever possible.</span>
+            <span class="n">ldos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span>
+            <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No input data provided to caculate &quot;</span>
+                                    <span class="s2">&quot;total energy. Provide EITHER LDOS&quot;</span>
+                                    <span class="s2">&quot; OR DOS and density.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># With these calculator objects we can calculate all the necessary</span>
+            <span class="c1"># quantities to construct the total energy.</span>
+            <span class="c1"># (According to Eq. 9 in [1])</span>
+            <span class="c1"># Band energy (kinetic energy)</span>
+            <span class="n">e_band</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">band_energy</span>
+
+            <span class="c1"># Smearing / Entropy contribution</span>
+            <span class="n">e_entropy_contribution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span><span class="o">.</span>\
+                <span class="n">entropy_contribution</span>
+
+            <span class="c1"># Density based energy contributions (via QE)</span>
+            <span class="n">density_contributions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_calculator</span><span class="o">.</span>\
+                <span class="n">total_energy_contributions</span>
+
+
+
+        <span class="n">e_total</span> <span class="o">=</span> <span class="n">e_band</span> <span class="o">+</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">]</span> <span class="o">+</span> \
+            <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_hartree&quot;</span><span class="p">]</span> <span class="o">+</span> \
+            <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_xc&quot;</span><span class="p">]</span> <span class="o">+</span> \
+            <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_ewald&quot;</span><span class="p">]</span> <span class="o">+</span>\
             <span class="n">e_entropy_contribution</span>
         <span class="k">if</span> <span class="n">return_energy_contributions</span><span class="p">:</span>
             <span class="n">energy_contribtuons</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;e_band&quot;</span><span class="p">:</span> <span class="n">e_band</span><span class="p">,</span>
-                                   <span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">:</span> <span class="n">e_rho_times_v_hxc</span><span class="p">,</span>
-                                   <span class="s2">&quot;e_hartree&quot;</span><span class="p">:</span> <span class="n">e_hartree</span><span class="p">,</span>
-                                   <span class="s2">&quot;e_xc&quot;</span><span class="p">:</span> <span class="n">e_xc</span><span class="p">,</span>
-                                   <span class="s2">&quot;e_ewald&quot;</span><span class="p">:</span> <span class="n">e_ewald</span><span class="p">,</span>
+                                   <span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">:</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_rho_times_v_hxc&quot;</span><span class="p">],</span>
+                                   <span class="s2">&quot;e_hartree&quot;</span><span class="p">:</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_hartree&quot;</span><span class="p">],</span>
+                                   <span class="s2">&quot;e_xc&quot;</span><span class="p">:</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_xc&quot;</span><span class="p">],</span>
+                                   <span class="s2">&quot;e_ewald&quot;</span><span class="p">:</span> <span class="n">density_contributions</span><span class="p">[</span><span class="s2">&quot;e_ewald&quot;</span><span class="p">],</span>
                                    <span class="s2">&quot;e_entropy_contribution&quot;</span><span class="p">:</span>
                                        <span class="n">e_entropy_contribution</span><span class="p">}</span>
             <span class="k">return</span> <span class="n">e_total</span><span class="p">,</span> <span class="n">energy_contribtuons</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">e_total</span></div>
 
-<div class="viewcode-block" id="LDOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel_Bohr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="LDOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
                         <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -486,7 +804,8 @@
 <span class="sd">        ----------</span>
 <span class="sd">        ldos_data : numpy.array</span>
 <span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
-<span class="sd">            [gridx,gridy,gridz,energygrid].</span>
+<span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
+<span class="sd">            will be used for the calculation.</span>
 
 <span class="sd">        fermi_energy_eV : float</span>
 <span class="sd">            Fermi energy level in eV.</span>
@@ -509,31 +828,40 @@
 <span class="sd">                - &quot;simps&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. (recommended)</span>
 
-<span class="sd">        voxel_Bohr : ase.cell.Cell</span>
-<span class="sd">            Voxel to be used for grid intergation. Needs to reflect the</span>
-<span class="sd">            symmetry of the simulation cell. In Bohr.</span>
+<span class="sd">        voxel : ase.cell.Cell</span>
+<span class="sd">            Voxel to be used for grid intergation.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        band_energy : float</span>
 <span class="sd">            Band energy in eV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># The band energy is calculated using the DOS.</span>
-        <span class="k">if</span> <span class="n">voxel_Bohr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">voxel_Bohr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_Bohr</span>
-        <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel_Bohr</span><span class="p">,</span>
-                                              <span class="n">integration_method</span><span class="o">=</span>
-                                              <span class="n">grid_integration_method</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No LDOS data provided, cannot calculate&quot;</span>
+                            <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Once we have the DOS, we can use a DOS object to calculate t</span>
-        <span class="c1"># he band energy.</span>
-        <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span>\
-            <span class="n">get_band_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">,</span>
-                            <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
-                            <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span></div>
+        <span class="c1"># Here we check whether we will use our internal, cached</span>
+        <span class="c1"># LDOS, or calculate everything from scratch.</span>
+        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># The band energy is calculated using the DOS.</span>
+            <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
 
-<div class="viewcode-block" id="LDOS.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel_Bohr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel</span><span class="p">,</span>
+                                                  <span class="n">integration_method</span><span class="o">=</span>
+                                                  <span class="n">grid_integration_method</span><span class="p">)</span>
+
+            <span class="c1"># Once we have the DOS, we can use a DOS object to calculate t</span>
+            <span class="c1"># he band energy.</span>
+            <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span>\
+                <span class="n">get_band_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
+                                <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span><span class="o">.</span><span class="n">band_energy</span></div>
+
+<div class="viewcode-block" id="LDOS.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
                                 <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
@@ -544,7 +872,8 @@
 <span class="sd">        ----------</span>
 <span class="sd">        ldos_data : numpy.array</span>
 <span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
-<span class="sd">            [gridx,gridy,gridz,energygrid].</span>
+<span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
+<span class="sd">            will be used for the calculation.</span>
 
 <span class="sd">        fermi_energy_eV : float</span>
 <span class="sd">            Fermi energy level in eV.</span>
@@ -567,33 +896,41 @@
 <span class="sd">                - &quot;simps&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. (recommended)</span>
 
-<span class="sd">        voxel_Bohr : ase.cell.Cell</span>
-<span class="sd">            Voxel to be used for grid intergation. Needs to reflect the</span>
-<span class="sd">            symmetry of the simulation cell. In Bohr.</span>
+<span class="sd">        voxel : ase.cell.Cell</span>
+<span class="sd">            Voxel to be used for grid intergation.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        number_of_electrons : float</span>
 <span class="sd">            Number of electrons.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># The number of electrons is calculated using the DOS.</span>
-        <span class="k">if</span> <span class="n">voxel_Bohr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">voxel_Bohr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_Bohr</span>
-        <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel_Bohr</span><span class="p">,</span>
-                                              <span class="n">integration_method</span><span class="o">=</span>
-                                              <span class="n">grid_integration_method</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No LDOS data provided, cannot calculate&quot;</span>
+                            <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Once we have the DOS, we can use a DOS object to calculate the</span>
-        <span class="c1"># number of electrons.</span>
-        <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span>\
-            <span class="n">get_number_of_electrons</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">,</span>
-                                    <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
-                                    <span class="n">integration_method</span><span class="o">=</span>
-                                    <span class="n">energy_integration_method</span><span class="p">)</span></div>
+        <span class="c1"># Here we check whether we will use our internal, cached</span>
+        <span class="c1"># LDOS, or calculate everything from scratch.</span>
+        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># The number of electrons is calculated using the DOS.</span>
+            <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
+            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel</span><span class="p">,</span>
+                                                  <span class="n">integration_method</span><span class="o">=</span>
+                                                  <span class="n">grid_integration_method</span><span class="p">)</span>
 
-<div class="viewcode-block" id="LDOS.get_self_consistent_fermi_energy_ev"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy_ev">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy_ev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span>
-                                            <span class="n">voxel_Bohr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="c1"># Once we have the DOS, we can use a DOS object to calculate the</span>
+            <span class="c1"># number of electrons.</span>
+            <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span>\
+                <span class="n">get_number_of_electrons</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                        <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
+                                        <span class="n">integration_method</span><span class="o">=</span>
+                                        <span class="n">energy_integration_method</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span><span class="o">.</span><span class="n">number_of_electrons</span></div>
+
+<div class="viewcode-block" id="LDOS.get_self_consistent_fermi_energy_ev"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy_ev">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy_ev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                             <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                             <span class="n">grid_integration_method</span><span class="o">=</span>
                                             <span class="s2">&quot;summation&quot;</span><span class="p">,</span>
@@ -611,7 +948,8 @@
 <span class="sd">        ----------</span>
 <span class="sd">        ldos_data : numpy.array</span>
 <span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
-<span class="sd">            [gridx,gridy,gridz,energygrid].</span>
+<span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
+<span class="sd">            will be used for the calculation.</span>
 
 <span class="sd">        temperature_K : float</span>
 <span class="sd">            Temperature in K.</span>
@@ -631,7 +969,7 @@
 <span class="sd">                - &quot;simps&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. (recommended)</span>
 
-<span class="sd">        voxel_Bohr : ase.cell.Cell</span>
+<span class="sd">        voxel : ase.cell.Cell</span>
 <span class="sd">            Voxel to be used for grid intergation. Needs to reflect the</span>
 <span class="sd">            symmetry of the simulation cell. In Bohr.</span>
 
@@ -640,26 +978,32 @@
 <span class="sd">        fermi_energy_self_consistent : float</span>
 <span class="sd">            :math:`\epsilon_F` in eV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># The Fermi energy is calculated using the DOS.</span>
-        <span class="k">if</span> <span class="n">voxel_Bohr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">voxel_Bohr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_Bohr</span>
-        <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel_Bohr</span><span class="p">,</span>
-                                              <span class="n">integration_method</span><span class="o">=</span>
-                                              <span class="n">grid_integration_method</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No LDOS data provided, cannot calculate&quot;</span>
+                            <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Once we have the DOS, we can use a DOS object to calculate the</span>
-        <span class="c1"># number of electrons.</span>
-        <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span>\
-            <span class="n">get_self_consistent_fermi_energy_ev</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
-                                                <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
-                                                <span class="n">integration_method</span><span class="o">=</span>
-                                                <span class="n">energy_integration_method</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># The Fermi energy is calculated using the DOS.</span>
+            <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
+            <span class="n">dos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel</span><span class="p">,</span>
+                                                  <span class="n">integration_method</span><span class="o">=</span>
+                                                  <span class="n">grid_integration_method</span><span class="p">)</span>
 
-<div class="viewcode-block" id="LDOS.get_density"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">fermi_energy_ev</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">conserve_dimensions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
-                    <span class="n">gather_density</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="c1"># Once we have the DOS, we can use a DOS object to calculate the</span>
+            <span class="c1"># number of electrons.</span>
+            <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span>\
+                <span class="n">get_self_consistent_fermi_energy_ev</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
+                                                    <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
+                                                    <span class="n">integration_method</span><span class="o">=</span>
+                                                    <span class="n">energy_integration_method</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span><span class="o">.</span><span class="n">fermi_energy</span></div>
+
+<div class="viewcode-block" id="LDOS.get_density"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">conserve_dimensions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+                    <span class="n">gather_density</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the density from given LDOS data.</span>
 
@@ -668,9 +1012,11 @@
 <span class="sd">        conserve_dimensions : bool</span>
 <span class="sd">            If True, the density is returned in the same dimensions as</span>
 <span class="sd">            the LDOS was entered. If False, the density is always given</span>
-<span class="sd">            as [gridsize].</span>
+<span class="sd">            as [gridsize]. If None, the cached LDOS</span>
+<span class="sd">            will be used for the calculation.</span>
 
-<span class="sd">        fermi_energy_ev : float</span>
+
+<span class="sd">        fermi_energy_eV : float</span>
 <span class="sd">            Fermi energy level in eV.</span>
 
 <span class="sd">        temperature_K : float</span>
@@ -708,13 +1054,23 @@
 <span class="sd">            dimensions.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_density_exists</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_density</span>
-
-        <span class="k">if</span> <span class="n">fermi_energy_ev</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fermi_energy_ev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_eV</span>
+        <span class="k">if</span> <span class="n">fermi_energy_eV</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span>
+            <span class="k">if</span> <span class="n">fermi_energy_eV</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
+                         <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
+                         <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
+                         <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
         <span class="k">if</span> <span class="n">temperature_K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">temperature_K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span>
+
+        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ldos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span>
+            <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No LDOS data provided, cannot calculate&quot;</span>
+                                <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
 
         <span class="n">ldos_data_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -735,7 +1091,7 @@
 
         <span class="c1"># Build the energy grid and calculate the fermi function.</span>
         <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
-        <span class="n">fermi_values</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy_ev</span><span class="p">,</span>
+        <span class="n">fermi_values</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="p">,</span>
                                       <span class="n">temperature_K</span><span class="p">,</span> <span class="n">energy_units</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">)</span>
 
         <span class="c1"># Calculate the number of electrons.</span>
@@ -747,16 +1103,21 @@
                                              <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
             <span class="n">density_values</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">ldos_data_used</span><span class="p">,</span> <span class="s2">&quot;F0&quot;</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span>
-                                                    <span class="n">fermi_energy_ev</span><span class="p">,</span>
+                                                    <span class="n">fermi_energy_eV</span><span class="p">,</span>
                                                     <span class="n">energy_grid</span><span class="p">,</span>
                                                     <span class="n">temperature_K</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">conserve_dimensions</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># This breaks in the distributed case currently,</span>
+            <span class="c1"># but I don&#39;t see an application where we would need it.</span>
+            <span class="c1"># It would mean that we load an LDOS in distributed 3D fashion,</span>
+            <span class="c1"># which is not implemented either.</span>
             <span class="n">ldos_data_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span>
             <span class="n">ldos_data_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">density_values</span> <span class="o">=</span> <span class="n">density_values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span>
+
 
         <span class="c1"># Now we have the full density; We now need to collect it, in the</span>
         <span class="c1"># MPI case.</span>
@@ -775,7 +1136,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">density_values</span></div>
 
-<div class="viewcode-block" id="LDOS.get_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">voxel_Bohr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="LDOS.get_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
                               <span class="n">gather_dos</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -785,9 +1146,11 @@
 <span class="sd">        ----------</span>
 <span class="sd">        ldos_data : numpy.array</span>
 <span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
-<span class="sd">            [gridx,gridy,gridz,energygrid].</span>
+<span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
+<span class="sd">            will be used for the calculation.</span>
 
-<span class="sd">        voxel_Bohr : ase.cell.Cell</span>
+
+<span class="sd">        voxel : ase.cell.Cell</span>
 <span class="sd">            Voxel to be used for grid intergation. Needs to reflect the</span>
 <span class="sd">            symmetry of the simulation cell. In Bohr.</span>
 
@@ -810,11 +1173,14 @@
 <span class="sd">        dos_values : np.array</span>
 <span class="sd">            The DOS.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos_exists</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos</span>
+        <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ldos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span>
+            <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No LDOS data provided, cannot calculate&quot;</span>
+                                <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">voxel_Bohr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">voxel_Bohr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel_Bohr</span>
+        <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
 
         <span class="n">ldos_data_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
@@ -832,15 +1198,15 @@
         <span class="c1"># If there is only one point in a certain direction we do not</span>
         <span class="c1"># integrate, but rather reduce in this direction.</span>
         <span class="c1"># Integration over one point leads to zero.</span>
-        <span class="n">grid_spacing_bohr_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">voxel_Bohr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">grid_spacing_bohr_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">voxel_Bohr</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">grid_spacing_bohr_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">voxel_Bohr</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">grid_spacing_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">grid_spacing_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">grid_spacing_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">!=</span> <span class="s2">&quot;summation&quot;</span><span class="p">:</span>
             <span class="c1"># X</span>
             <span class="k">if</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">dos_values</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span>
-                                                         <span class="n">grid_spacing_bohr_x</span><span class="p">,</span>
+                                                         <span class="n">grid_spacing_x</span><span class="p">,</span>
                                                          <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                                          <span class="n">method</span><span class="o">=</span>
                                                          <span class="n">integration_method</span><span class="p">)</span>
@@ -848,37 +1214,37 @@
                 <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span> <span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                                                      <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
                                                      <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
-                <span class="n">dos_values</span> <span class="o">*=</span> <span class="n">grid_spacing_bohr_x</span>
+                <span class="n">dos_values</span> <span class="o">*=</span> <span class="n">grid_spacing_x</span>
 
             <span class="c1"># Y</span>
             <span class="k">if</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">dos_values</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span>
-                                                         <span class="n">grid_spacing_bohr_y</span><span class="p">,</span>
+                                                         <span class="n">grid_spacing_y</span><span class="p">,</span>
                                                          <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                                          <span class="n">method</span><span class="o">=</span>
                                                          <span class="n">integration_method</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span> <span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
                                                      <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
-                <span class="n">dos_values</span> <span class="o">*=</span> <span class="n">grid_spacing_bohr_y</span>
+                <span class="n">dos_values</span> <span class="o">*=</span> <span class="n">grid_spacing_y</span>
 
             <span class="c1"># Z</span>
             <span class="k">if</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">dos_values</span> <span class="o">=</span> <span class="n">integrate_values_on_spacing</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span>
-                                                         <span class="n">grid_spacing_bohr_z</span><span class="p">,</span>
+                                                         <span class="n">grid_spacing_z</span><span class="p">,</span>
                                                          <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                                          <span class="n">method</span><span class="o">=</span>
                                                          <span class="n">integration_method</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dos_values</span><span class="p">,</span> <span class="n">ldos_data_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
-                <span class="n">dos_values</span> <span class="o">*=</span> <span class="n">grid_spacing_bohr_z</span>
+                <span class="n">dos_values</span> <span class="o">*=</span> <span class="n">grid_spacing_z</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
                 <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> \
-                             <span class="n">voxel_Bohr</span><span class="o">.</span><span class="n">volume</span>
+                             <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">dos_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> \
-                             <span class="n">voxel_Bohr</span><span class="o">.</span><span class="n">volume</span>
+                             <span class="n">voxel</span><span class="o">.</span><span class="n">volume</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">gather_dos</span><span class="p">:</span>
             <span class="c1"># I think we should refrain from top-level MPI imports; the first</span>
@@ -935,109 +1301,8 @@
         <span class="n">dd_dB</span> <span class="o">=</span> <span class="n">used_data_handler</span><span class="o">.</span><span class="n">get_test_input_gradient</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dd_dB</span></div>
 
-<div class="viewcode-block" id="LDOS.get_and_cache_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_and_cache_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_and_cache_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span>
-                                        <span class="n">voxel_Bohr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate a DOS from LDOS data and keep it in memory.</span>
-
-<span class="sd">        For all subsequent calculations involving the DOS, this cached</span>
-<span class="sd">        DOS will be used. Usage of this function is advised for time-critical</span>
-<span class="sd">        calculations.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        ldos_data : numpy.array</span>
-<span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
-<span class="sd">            [gridx,gridy,gridz,energygrid].</span>
-
-<span class="sd">        voxel_Bohr : ase.cell.Cell</span>
-<span class="sd">            Voxel to be used for grid intergation. Needs to reflect the</span>
-<span class="sd">            symmetry of the simulation cell. In Bohr.</span>
-
-<span class="sd">        integration_method : str</span>
-<span class="sd">            Integration method used to integrate LDOS on the grid.</span>
-<span class="sd">            Currently supported:</span>
-
-<span class="sd">            - &quot;trapz&quot; for trapezoid method (only for cubic grids).</span>
-<span class="sd">            - &quot;simps&quot; for Simpson method (only for cubic grids).</span>
-<span class="sd">            - &quot;summation&quot; for summation and scaling of the values (recommended)</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dos_values : np.array</span>
-<span class="sd">            The DOS.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">uncache_density_of_states</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-            <span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span>
-                                  <span class="n">voxel_Bohr</span><span class="o">=</span><span class="n">voxel_Bohr</span><span class="p">,</span>
-                                  <span class="n">integration_method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos_exists</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos</span></div>
-
-<div class="viewcode-block" id="LDOS.uncache_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.uncache_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">uncache_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Uncache a DOS, to calculate a new one in following steps.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_dos_exists</span> <span class="o">=</span> <span class="kc">False</span></div>
-
-<div class="viewcode-block" id="LDOS.get_and_cache_density_cached"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_and_cache_density_cached">[docs]</a>    <span class="k">def</span> <span class="nf">get_and_cache_density_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span>
-                                     <span class="n">fermi_energy_ev</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                     <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                     <span class="n">conserve_dimensions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                     <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate an electronic density from LDOS data and keep it in memory.</span>
-
-<span class="sd">        For all subsequent calculations involving the electronic density, this</span>
-<span class="sd">        cached density will be used. Usage of this function is advised for</span>
-<span class="sd">        time-critical calculations.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        conserve_dimensions : bool</span>
-<span class="sd">            If True, the density is returned in the same dimensions as</span>
-<span class="sd">            the LDOS was entered. If False, the density is always given</span>
-<span class="sd">            as [gridsize].</span>
-
-<span class="sd">        fermi_energy_ev : float</span>
-<span class="sd">            Fermi energy level in eV.</span>
-
-<span class="sd">        temperature_K : float</span>
-<span class="sd">            Temperature in K.</span>
-
-<span class="sd">        ldos_data : numpy.array</span>
-<span class="sd">            LDOS data, either as [gridsize, energygrid] or</span>
-<span class="sd">            [gridx,gridy,gridz,energygrid].</span>
-
-<span class="sd">        integration_method : string</span>
-<span class="sd">            Integration method to integrate LDOS on energygrid.</span>
-<span class="sd">            Currently supported:</span>
-
-<span class="sd">                - &quot;trapz&quot; for trapezoid method</span>
-<span class="sd">                - &quot;simps&quot; for Simpson method.</span>
-<span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        density_data : numpy.array</span>
-<span class="sd">            Density data, dimensions depend on conserve_dimensions and LDOS</span>
-<span class="sd">            dimensions.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">uncache_density</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-            <span class="n">get_density</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span>
-                        <span class="n">fermi_energy_ev</span><span class="o">=</span><span class="n">fermi_energy_ev</span><span class="p">,</span>
-                        <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
-                        <span class="n">conserve_dimensions</span><span class="o">=</span><span class="n">conserve_dimensions</span><span class="p">,</span>
-                        <span class="n">integration_method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density_exists</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_density</span></div>
-
-<div class="viewcode-block" id="LDOS.uncache_density"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.uncache_density">[docs]</a>    <span class="k">def</span> <span class="nf">uncache_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Uncache a density, to calculate a new one in following steps.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cached_density_exists</span> <span class="o">=</span> <span class="kc">False</span></div>
+    <span class="c1"># Private methods</span>
+    <span class="c1">#################</span>
 
     <span class="k">def</span> <span class="nf">_gather_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_values</span><span class="p">,</span> <span class="n">use_pickled_comm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

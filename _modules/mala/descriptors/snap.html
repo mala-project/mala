@@ -158,8 +158,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for SNAP.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SNAP.calculate_from_qe_out"><a class="viewcode-back" href="../../../api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP.calculate_from_qe_out">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">,</span>
-                              <span class="n">working_directory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="SNAP.calculate_from_qe_out"><a class="viewcode-back" href="../../../api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP.calculate_from_qe_out">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">working_directory</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>
                               <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the SNAP descriptors based on a Quantum Espresso outfile.</span>
@@ -169,8 +168,10 @@
 <span class="sd">        qe_out_file : string</span>
 <span class="sd">            Name of Quantum Espresso output file for snapshot.</span>
 
-<span class="sd">        qe_out_directory : string</span>
-<span class="sd">            Path to Quantum Espresso output file for snapshot.</span>
+<span class="sd">        working_directory : string</span>
+<span class="sd">            A directory in which to write the output of the LAMMPS calculation.</span>
+<span class="sd">            Usually the local directory should suffice, given that there</span>
+<span class="sd">            are no multiple instances running in the same directory.</span>
 
 <span class="sd">        working_directory : string</span>
 <span class="sd">            A directory in which to perform the LAMMPS calculation.</span>
@@ -184,17 +185,15 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span> <span class="o">=</span> <span class="s2">&quot;espresso-out&quot;</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Calculating SNAP descriptors from&quot;</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="s2">&quot;at&quot;</span><span class="p">,</span>
-                 <span class="n">qe_out_directory</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Calculating SNAP descriptors from&quot;</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="c1"># We get the atomic information by using ASE.</span>
-        <span class="n">infile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">qe_out_directory</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">)</span>
-        <span class="n">atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span><span class="p">)</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">qe_out_file</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span><span class="p">)</span>
 
         <span class="c1"># Enforcing / Checking PBC on the read atoms.</span>
         <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enforce_pbc</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 
         <span class="c1"># Get the grid dimensions.</span>
-        <span class="n">qe_outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">qe_outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">qe_out_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="n">qe_outfile</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
         <span class="n">nx</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">ny</span> <span class="o">=</span> <span class="mi">0</span>
@@ -207,9 +206,6 @@
                 <span class="n">ny</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="n">nz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
                 <span class="k">break</span>
-
-        <span class="k">if</span> <span class="n">working_directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">working_directory</span> <span class="o">=</span> <span class="n">qe_out_directory</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_snap</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
                                      <span class="n">working_directory</span><span class="p">,</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">])</span></div>
@@ -228,7 +224,9 @@
 <span class="sd">            Grid dimensions to be used, in the format [x,y,z].</span>
 
 <span class="sd">        working_directory : string</span>
-<span class="sd">            A directory in which to perform the LAMMPS calculation.</span>
+<span class="sd">            A directory in which to write the output of the LAMMPS calculation.</span>
+<span class="sd">            Usually the local directory should suffice, given that there</span>
+<span class="sd">            are no multiple instances running in the same directory.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -238,7 +236,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Enforcing / Checking PBC on the input atoms.</span>
         <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enforce_pbc</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_snap</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">working_directory</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_snap</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">working_directory</span><span class="p">,</span>
+                                     <span class="n">grid_dimensions</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SNAP.gather_descriptors"><a class="viewcode-back" href="../../../api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP.gather_descriptors">[docs]</a>    <span class="k">def</span> <span class="nf">gather_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snap_descriptors_np</span><span class="p">,</span> <span class="n">use_pickled_comm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -359,9 +358,6 @@
         <span class="c1"># We also need to know how big the grid is.</span>
         <span class="c1"># Iterating directly through the file is slow, but the</span>
         <span class="c1"># grid information is at the top (around line 200).</span>
-        <span class="n">nx</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">ny</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">nz</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="n">nx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">ny</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -372,16 +368,17 @@
             <span class="n">nz</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
         <span class="c1"># Build LAMMPS arguments from the data we read.</span>
-        <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;-screen&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;-log&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span>
-                                                               <span class="s2">&quot;lammps_log.tmp&quot;</span><span class="p">)]</span>
-        <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ngridx&quot;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span>
-                       <span class="s2">&quot;ngridy&quot;</span><span class="p">:</span> <span class="n">ny</span><span class="p">,</span>
-                       <span class="s2">&quot;ngridz&quot;</span><span class="p">:</span> <span class="n">nz</span><span class="p">,</span>
-                       <span class="s2">&quot;twojmax&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">twojmax</span><span class="p">,</span>
-                       <span class="s2">&quot;rcutfac&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">rcutfac</span><span class="p">,</span>
-                       <span class="s2">&quot;atom_config_fname&quot;</span><span class="p">:</span> <span class="n">ase_out_path</span><span class="p">}</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
-            <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;bgridglobalflag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;-screen&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;-log&quot;</span><span class="p">,</span>
+                       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_bgrid_log.tmp&quot;</span><span class="p">)]</span>
+
+        <span class="c1"># LAMMPS processor grid filled by parent class.</span>
+        <span class="n">lammps_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lammps_processors</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">)</span>
+
+        <span class="c1"># Set the values not already filled in the LAMMPS setup.</span>
+        <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;twojmax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">twojmax</span>
+        <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;rcutfac&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">rcutfac</span>
+        <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;atom_config_fname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ase_out_path</span>
+
         <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="n">set_cmdlinevars</span><span class="p">(</span><span class="n">lmp_cmdargs</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
 
         <span class="c1"># Build the LAMMPS object.</span>
@@ -392,8 +389,13 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="n">filepath</span> <span class="o">=</span> <span class="vm">__file__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;snap&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgridlocal.python&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_z_splitting</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgridlocal.python&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span>
+                                     <span class="s2">&quot;in.bgridlocal_defaultproc.python&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
                     <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgrid.python&quot;</span><span class="p">)</span>

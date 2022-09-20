@@ -143,7 +143,7 @@ parameters provided. Default: None</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.add_snapshot_cube">
-<span class="sig-name descname"><span class="pre">add_snapshot_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cube_naming_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_cube" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_snapshot_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cube_naming_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_cube" title="Permalink to this definition"></a></dt>
 <dd><p>Add a Quantum Espresso snapshot to the list of conversion list.</p>
 <p>This snapshot only contains the cube files for the output
 quantity (LDOS/density), so only the output quantity will be
@@ -152,8 +152,6 @@ calculated. Useful if the input data has already been processed.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cube_naming_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files.</p></li>
-<li><p><strong>cube_directory</strong> (<em>string</em>) – Directory containing the LDOS .cube files.</p></li>
-<li><p><strong>input_units</strong> (<em>string</em>) – Unit of the input data.</p></li>
 <li><p><strong>output_units</strong> (<em>string</em>) – Unit of the output data.</p></li>
 </ul>
 </dd>
@@ -162,7 +160,7 @@ calculated. Useful if the input data has already been processed.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.add_snapshot_qeout">
-<span class="sig-name descname"><span class="pre">add_snapshot_qeout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_qeout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_snapshot_qeout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_qeout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout" title="Permalink to this definition"></a></dt>
 <dd><p>Add a Quantum Espresso snapshot to the list of conversion list.</p>
 <p>This snapshot only contains a QE.out file, i.e., only the SNAP
 descriptors will be calculated. Useful if the output data has already
@@ -171,7 +169,6 @@ been processed.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>qe_out_file</strong> (<em>string</em>) – Name of Quantum Espresso output file for this snapshot.</p></li>
-<li><p><strong>qe_out_directory</strong> (<em>string</em>) – Path to Quantum Espresso output file for this snapshot.</p></li>
 <li><p><strong>input_units</strong> (<em>string</em>) – Unit of the input data.</p></li>
 </ul>
 </dd>
@@ -180,7 +177,7 @@ been processed.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube">
-<span class="sig-name descname"><span class="pre">add_snapshot_qeout_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_naming_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_qeout_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_snapshot_qeout_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_files_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_qeout_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube" title="Permalink to this definition"></a></dt>
 <dd><p>Add a Quantum Espresso snapshot to the list of conversion list.</p>
 <p>Please note that a Quantum Espresso snapshot consists of:</p>
 <blockquote>
@@ -193,9 +190,7 @@ been processed.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>qe_out_file</strong> (<em>string</em>) – Name of Quantum Espresso output file for this snapshot.</p></li>
-<li><p><strong>qe_out_directory</strong> (<em>string</em>) – Path to Quantum Espresso output file for this snapshot.</p></li>
-<li><p><strong>cube_naming_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files.</p></li>
-<li><p><strong>cube_directory</strong> (<em>string</em>) – Directory containing the LDOS .cube files.</p></li>
+<li><p><strong>cube_files_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files.</p></li>
 <li><p><strong>input_units</strong> (<em>string</em>) – Unit of the input data.</p></li>
 <li><p><strong>output_units</strong> (<em>string</em>) – Unit of the output data.</p></li>
 </ul>

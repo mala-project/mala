@@ -108,19 +108,27 @@
 <p>Postprocessing / parsing functions for the local density of states.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this TargetBase object.</p>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this LDOS object.</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.backconvert_units">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backconvert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.backconvert_units" title="Permalink to this definition"></a></dt>
 <dd><p>Convert the units of an array from MALA units into desired units.</p>
-<p>MALA units for the LDOS means 1/eV.</p>
+<p>MALA units for the LDOS means 1/(eV*A^3).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> (<em>numpy.array</em>) – Data in 1/eV.</p></li>
-<li><p><strong>out_units</strong> (<em>string</em>) – Desired units of output array.</p></li>
+<li><p><strong>out_units</strong> (<em>string</em>) – <p>Desired units of output array. Currently supported are:</p>
+<blockquote>
+<div><ul>
+<li><p>1/(eV*A^3) (no conversion, MALA unit)</p></li>
+<li><p>1/(eV*Bohr^3)</p></li>
+<li><p>1/(Ry*Bohr^3)</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -144,15 +152,16 @@
 <li><p><strong>in_units</strong> (<em>string</em>) – <p>Units of array. Currently supported are:</p>
 <blockquote>
 <div><ul>
-<li><p>1/eV (no conversion, MALA unit)</p></li>
-<li><p>1/Ry</p></li>
+<li><p>1/(eV*A^3) (no conversion, MALA unit)</p></li>
+<li><p>1/(eV*Bohr^3)</p></li>
+<li><p>1/(Ry*Bohr^3)</p></li>
 </ul>
 </div></blockquote>
 </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>converted_array</strong> – Data in 1/eV.</p>
+<dd class="field-even"><p><strong>converted_array</strong> – Data in 1/(eV*A^3).</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>numpy.array</p>
@@ -161,73 +170,66 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_and_cache_density_cached">
-<span class="sig-name descname"><span class="pre">get_and_cache_density_cached</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conserve_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_and_cache_density_cached"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_and_cache_density_cached" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate an electronic density from LDOS data and keep it in memory.</p>
-<p>For all subsequent calculations involving the electronic density, this
-cached density will be used. Usage of this function is advised for
-time-critical calculations.</p>
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.from_cube_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_cube_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_name_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/(eV*A^3)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.from_cube_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.from_cube_file" title="Permalink to this definition"></a></dt>
+<dd><p>Create an LDOS calculator from multiple cube files.</p>
+<p>The files have to be located in the same directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>conserve_dimensions</strong> (<em>bool</em>) – If True, the density is returned in the same dimensions as
-the LDOS was entered. If False, the density is always given
-as [gridsize].</p></li>
-<li><p><strong>fermi_energy_ev</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
-<li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
-<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
-[gridx,gridy,gridz,energygrid].</p></li>
-<li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to integrate LDOS on energygrid.
-Currently supported:</p>
-<blockquote>
-<div><ul>
-<li><p>”trapz” for trapezoid method</p></li>
-<li><p>”simps” for Simpson method.</p></li>
-<li><p>”analytical” for analytical integration. Recommended.</p></li>
+<li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this LDOS object.</p></li>
+<li><p><strong>path_name_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files. Every asterisk will be
+replaced with an appropriate number for the LDOS files. Before
+the file name, please make sure to include the proper file path.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the LDOS is saved in.</p></li>
+<li><p><strong>use_memmap</strong> (<em>string</em>) – If not None, a memory mapped file with this name will be used to
+gather the LDOS.
+If run in MPI parallel mode, such a file MUST be provided.</p></li>
 </ul>
-</div></blockquote>
-</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>density_data</strong> – Density data, dimensions depend on conserve_dimensions and LDOS
-dimensions.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_and_cache_density_of_states">
-<span class="sig-name descname"><span class="pre">get_and_cache_density_of_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_Bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_and_cache_density_of_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_and_cache_density_of_states" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate a DOS from LDOS data and keep it in memory.</p>
-<p>For all subsequent calculations involving the DOS, this cached
-DOS will be used. Usage of this function is advised for time-critical
-calculations.</p>
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.from_numpy_array">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_numpy_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/(eV*A^3)'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.from_numpy_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.from_numpy_array" title="Permalink to this definition"></a></dt>
+<dd><p>Create an LDOS calculator from a numpy array in memory.</p>
+<p>By using this function rather then setting the local_density_of_states
+object directly, proper unit coversion is ensured.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
-[gridx,gridy,gridz,energygrid].</p></li>
-<li><p><strong>voxel_Bohr</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation. Needs to reflect the
-symmetry of the simulation cell. In Bohr.</p></li>
-<li><p><strong>integration_method</strong> (<em>str</em>) – <p>Integration method used to integrate LDOS on the grid.
-Currently supported:</p>
-<ul>
-<li><p>”trapz” for trapezoid method (only for cubic grids).</p></li>
-<li><p>”simps” for Simpson method (only for cubic grids).</p></li>
-<li><p>”summation” for summation and scaling of the values (recommended)</p></li>
-</ul>
-</p></li>
+<li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this LDOS object.</p></li>
+<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Path to file that is being read.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the LDOS is saved in.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>dos_values</strong> – The DOS.</p>
+<dd class="field-even"><p><strong>ldos_calculator</strong> – LDOS calculator object.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array</p>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.ldos.LDOS" title="mala.targets.ldos.LDOS">mala.targets.ldos.LDOS</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.from_numpy_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_numpy_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/(eV*A^3)'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.from_numpy_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.from_numpy_file" title="Permalink to this definition"></a></dt>
+<dd><p>Create an LDOS calculator from a numpy array saved in a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this LDOS object.</p></li>
+<li><p><strong>path</strong> (<em>string</em>) – Path to file that is being read.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the LDOS is saved in.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ldos_calculator</strong> – LDOS calculator object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.ldos.LDOS" title="mala.targets.ldos.LDOS">mala.targets.ldos.LDOS</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -264,13 +266,14 @@ the SNAP descriptors.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_band_energy">
-<span class="sig-name descname"><span class="pre">get_band_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_Bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_band_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_band_energy" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_band_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_band_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_band_energy" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the band energy from given LDOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
-[gridx,gridy,gridz,energygrid].</p></li>
+[gridx,gridy,gridz,energygrid]. If None, the cached LDOS
+will be used for the calculation.</p></li>
 <li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
 <li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>grid_integration_method</strong> (<em>str</em>) – <p>Integration method used to integrate the LDOS on the grid.
@@ -290,8 +293,7 @@ Currently supported:</p>
 </ul>
 </div></blockquote>
 </p></li>
-<li><p><strong>voxel_Bohr</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation. Needs to reflect the
-symmetry of the simulation cell. In Bohr.</p></li>
+<li><p><strong>voxel</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -305,83 +307,95 @@ symmetry of the simulation cell. In Bohr.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_density">
-<span class="sig-name descname"><span class="pre">get_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_ev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conserve_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_density" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conserve_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_density" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the density from given LDOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>conserve_dimensions</strong> (<em>bool</em>) – If True, the density is returned in the same dimensions as
+<dd class="field-odd"><p><strong>conserve_dimensions</strong> (<em>bool</em>) – If True, the density is returned in the same dimensions as
 the LDOS was entered. If False, the density is always given
-as [gridsize].</p></li>
-<li><p><strong>fermi_energy_ev</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
-<li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
-<li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
+as [gridsize]. If None, the cached LDOS
+will be used for the calculation.</p>
+</dd>
+</dl>
+<dl>
+<dt>fermi_energy_eV<span class="classifier">float</span></dt><dd><p>Fermi energy level in eV.</p>
+</dd>
+<dt>temperature_K<span class="classifier">float</span></dt><dd><p>Temperature in K.</p>
+</dd>
+<dt>integration_method<span class="classifier">string</span></dt><dd><p>Integration method to be used. Currently supported:</p>
 <blockquote>
-<div><ul>
-<li><p>”trapz” for trapezoid method</p></li>
-<li><p>”simps” for Simpson method.</p></li>
-<li><p>”analytical” for analytical integration. Recommended.</p></li>
+<div><ul class="simple">
+<li><p>“trapz” for trapezoid method</p></li>
+<li><p>“simps” for Simpson method.</p></li>
+<li><p>“analytical” for analytical integration. Recommended.</p></li>
 </ul>
 </div></blockquote>
-</p></li>
-<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
-[gridx,gridy,gridz,energygrid].</p></li>
-<li><p><strong>integration_method</strong> – <p>Integration method to integrate LDOS on energygrid.
+</dd>
+<dt>ldos_data<span class="classifier">numpy.array</span></dt><dd><p>LDOS data, either as [gridsize, energygrid] or
+[gridx,gridy,gridz,energygrid].</p>
+</dd>
+<dt>integration_method<span class="classifier">string</span></dt><dd><p>Integration method to integrate LDOS on energygrid.
 Currently supported:</p>
 <blockquote>
-<div><ul>
-<li><p>”trapz” for trapezoid method</p></li>
-<li><p>”simps” for Simpson method.</p></li>
-<li><p>”analytical” for analytical integration. Recommended.</p></li>
+<div><ul class="simple">
+<li><p>“trapz” for trapezoid method</p></li>
+<li><p>“simps” for Simpson method.</p></li>
+<li><p>“analytical” for analytical integration. Recommended.</p></li>
 </ul>
 </div></blockquote>
-</p></li>
-<li><p><strong>gather_density</strong> (<em>bool</em>) – Only important if MPI is used. If True, the density will be
+</dd>
+<dt>gather_density<span class="classifier">bool</span></dt><dd><p>Only important if MPI is used. If True, the density will be
 gathered on rank 0.
 Helpful when using multiple CPUs for descriptor calculations
-and only one for network pass.</p></li>
-</ul>
+and only one for network pass.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>density_data</strong> – Density data, dimensions depend on conserve_dimensions and LDOS
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>density_data</strong> – Density data, dimensions depend on conserve_dimensions and LDOS
 dimensions.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.array</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy.array</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_density_of_states">
-<span class="sig-name descname"><span class="pre">get_density_of_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_Bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_dos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_density_of_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_density_of_states" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_density_of_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_dos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_density_of_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_density_of_states" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the density of states from given LDOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
-[gridx,gridy,gridz,energygrid].</p></li>
-<li><p><strong>voxel_Bohr</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation. Needs to reflect the
-symmetry of the simulation cell. In Bohr.</p></li>
-<li><p><strong>integration_method</strong> (<em>str</em>) – <p>Integration method used to integrate LDOS on the grid.
+<dd class="field-odd"><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
+[gridx,gridy,gridz,energygrid]. If None, the cached LDOS
+will be used for the calculation.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>voxel<span class="classifier">ase.cell.Cell</span></dt><dd><p>Voxel to be used for grid intergation. Needs to reflect the
+symmetry of the simulation cell. In Bohr.</p>
+</dd>
+<dt>integration_method<span class="classifier">str</span></dt><dd><p>Integration method used to integrate LDOS on the grid.
 Currently supported:</p>
-<ul>
-<li><p>”trapz” for trapezoid method (only for cubic grids).</p></li>
-<li><p>”simps” for Simpson method (only for cubic grids).</p></li>
-<li><p>”summation” for summation and scaling of the values (recommended)</p></li>
+<ul class="simple">
+<li><p>“trapz” for trapezoid method (only for cubic grids).</p></li>
+<li><p>“simps” for Simpson method (only for cubic grids).</p></li>
+<li><p>“summation” for summation and scaling of the values (recommended)</p></li>
 </ul>
-</p></li>
-<li><p><strong>gather_dos</strong> (<em>bool</em>) – Only important if MPI is used. If True, the DOS will be
+</dd>
+<dt>gather_dos<span class="classifier">bool</span></dt><dd><p>Only important if MPI is used. If True, the DOS will be
 are gathered on rank 0.
 Helpful when using multiple CPUs for descriptor calculations
-and only one for network pass.</p></li>
-</ul>
+and only one for network pass.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>dos_values</strong> – The DOS.</p>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>dos_values</strong> – The DOS.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -401,20 +415,15 @@ and only one for network pass.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_feature_size">
-<span class="sig-name descname"><span class="pre">get_feature_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_feature_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_feature_size" title="Permalink to this definition"></a></dt>
-<dd><p>Get dimension of this target if used as feature in ML.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_number_of_electrons">
-<span class="sig-name descname"><span class="pre">get_number_of_electrons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_Bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_number_of_electrons" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_number_of_electrons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_number_of_electrons" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the number of electrons from given LDOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
-[gridx,gridy,gridz,energygrid].</p></li>
+[gridx,gridy,gridz,energygrid]. If None, the cached LDOS
+will be used for the calculation.</p></li>
 <li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
 <li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>grid_integration_method</strong> (<em>str</em>) – <p>Integration method used to integrate the LDOS on the grid.
@@ -434,8 +443,7 @@ Currently supported:</p>
 </ul>
 </div></blockquote>
 </p></li>
-<li><p><strong>voxel_Bohr</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation. Needs to reflect the
-symmetry of the simulation cell. In Bohr.</p></li>
+<li><p><strong>voxel</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -449,7 +457,7 @@ symmetry of the simulation cell. In Bohr.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_self_consistent_fermi_energy_ev">
-<span class="sig-name descname"><span class="pre">get_self_consistent_fermi_energy_ev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_Bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_self_consistent_fermi_energy_ev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy_ev" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_self_consistent_fermi_energy_ev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_self_consistent_fermi_energy_ev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy_ev" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the self-consistent Fermi energy.</p>
 <p>“Self-consistent” does not mean self-consistent in the DFT sense,
 but rather the Fermi energy, for which DOS integration reproduces
@@ -459,7 +467,8 @@ from how this quantity is calculated.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ldos_data</strong> (<em>numpy.array</em>) – LDOS data, either as [gridsize, energygrid] or
-[gridx,gridy,gridz,energygrid].</p></li>
+[gridx,gridy,gridz,energygrid]. If None, the cached LDOS
+will be used for the calculation.</p></li>
 <li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>grid_integration_method</strong> (<em>str</em>) – <p>Integration method used to integrate the LDOS on the grid.
 Currently supported:</p>
@@ -478,7 +487,7 @@ Currently supported:</p>
 </ul>
 </div></blockquote>
 </p></li>
-<li><p><strong>voxel_Bohr</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation. Needs to reflect the
+<li><p><strong>voxel</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation. Needs to reflect the
 symmetry of the simulation cell. In Bohr.</p></li>
 </ul>
 </dd>
@@ -492,11 +501,19 @@ symmetry of the simulation cell. In Bohr.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_target">
+<span class="sig-name descname"><span class="pre">get_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_target" title="Permalink to this definition"></a></dt>
+<dd><p>Get the target quantity.</p>
+<p>This is the generic interface for cached target quantities.
+It should work for all implemented targets.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.ldos.LDOS.get_total_energy">
-<span class="sig-name descname"><span class="pre">get_total_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_Bohr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_qe_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_energy_contributions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_total_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_total_energy" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_total_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'summation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_qe_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_energy_contributions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.get_total_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.get_total_energy" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the total energy from LDOS or given DOS + density data.</p>
-<p>EITHER LDOS OR Density+DOS data have to be specified. Elsewise
-this function will raise an exception.</p>
+<p>If neither LDOS nor DOS+Density data is provided, the cached LDOS will
+be attempted to be used for the calculation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -507,7 +524,7 @@ cannot be None.</p></li>
 <li><p><strong>density_data</strong> (<em>numpy.array</em>) – Density data, either as [gridsize] or [gridx,gridy,gridz].</p></li>
 <li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
 <li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
-<li><p><strong>voxel_Bohr</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation. Needs to reflect the
+<li><p><strong>voxel</strong> (<em>ase.cell.Cell</em>) – Voxel to be used for grid intergation. Needs to reflect the
 symmetry of the simulation cell. In Bohr.</p></li>
 <li><p><strong>grid_integration_method</strong> (<em>str</em>) – <p>Integration method used to integrate the density on the grid.
 Currently supported:</p>
@@ -550,40 +567,126 @@ alongside the total energy. The default is False.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.read_from_cube">
-<span class="sig-name descname"><span class="pre">read_from_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.read_from_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.read_from_cube" title="Permalink to this definition"></a></dt>
-<dd><p>Read the LDOS data from multiple cube files.</p>
-<p>The files have to be located in the same directory.</p>
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.invalidate_target">
+<span class="sig-name descname"><span class="pre">invalidate_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.invalidate_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.invalidate_target" title="Permalink to this definition"></a></dt>
+<dd><p>Invalidates the saved target wuantity.</p>
+<p>This is the generic interface for cached target quantities.
+It should work for all implemented targets.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.read_from_array">
+<span class="sig-name descname"><span class="pre">read_from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/(eV*A^3)'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.read_from_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.read_from_array" title="Permalink to this definition"></a></dt>
+<dd><p>Read the LDOS data from a numpy array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>file_name_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files.</p></li>
-<li><p><strong>directory</strong> (<em>string</em>) – Directory containing the LDOS .cube files.</p></li>
+<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Numpy array containing the density.</p></li>
 <li><p><strong>units</strong> (<em>string</em>) – Units the LDOS is saved in.</p></li>
-<li><p><strong>use_memmap</strong> (<em>string</em>) – If not None, a memory mapped file with this name will be used to
-gather the LDOS.
-If run in MPI parallel mode, such a file MUST be provided.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>ldos_data</strong> – Numpy array containing LDOS data.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.uncache_density">
-<span class="sig-name descname"><span class="pre">uncache_density</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.uncache_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.uncache_density" title="Permalink to this definition"></a></dt>
-<dd><p>Uncache a density, to calculate a new one in following steps.</p>
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.read_from_cube">
+<span class="sig-name descname"><span class="pre">read_from_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/(eV*A^3)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.read_from_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.read_from_cube" title="Permalink to this definition"></a></dt>
+<dd><p>Read the LDOS data from multiple cube files.</p>
+<p>The files have to be located in the same directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files. Every asterisk will be
+replaced with an appropriate number for the LDOS files. Before
+the file name, please make sure to include the proper file path.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the LDOS is saved in.</p></li>
+<li><p><strong>use_memmap</strong> (<em>string</em>) – If not None, a memory mapped file with this name will be used to
+gather the LDOS. Only has an effect in MPI parallel mode.
+Usage will reduce RAM footprint while SIGNIFICANTLY
+impacting disk usage and</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.uncache_density_of_states">
-<span class="sig-name descname"><span class="pre">uncache_density_of_states</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.uncache_density_of_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.uncache_density_of_states" title="Permalink to this definition"></a></dt>
-<dd><p>Uncache a DOS, to calculate a new one in following steps.</p>
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.read_from_numpy">
+<span class="sig-name descname"><span class="pre">read_from_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/(eV*A^3)'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.read_from_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.read_from_numpy" title="Permalink to this definition"></a></dt>
+<dd><p>Read the LDOS data from a numpy file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Name of the numpy file.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the LDOS is saved in.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.uncache_properties">
+<span class="sig-name descname"><span class="pre">uncache_properties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/ldos.html#LDOS.uncache_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.ldos.LDOS.uncache_properties" title="Permalink to this definition"></a></dt>
+<dd><p>Uncache all cached properties of this calculator.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.band_energy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">band_energy</span></span><a class="headerlink" href="#mala.targets.ldos.LDOS.band_energy" title="Permalink to this definition"></a></dt>
+<dd><p>Band energy of the system, calculated via cached LDOS.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.density">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">density</span></span><a class="headerlink" href="#mala.targets.ldos.LDOS.density" title="Permalink to this definition"></a></dt>
+<dd><p>Electronic density as calculated by the cached LDOS.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.density_of_states">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">density_of_states</span></span><a class="headerlink" href="#mala.targets.ldos.LDOS.density_of_states" title="Permalink to this definition"></a></dt>
+<dd><p>DOS as calculated by the cached LDOS.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.energy_grid">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">energy_grid</span></span><a class="headerlink" href="#mala.targets.ldos.LDOS.energy_grid" title="Permalink to this definition"></a></dt>
+<dd><p>Energy grid on which the LDOS is expressed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.feature_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">feature_size</span></span><a class="headerlink" href="#mala.targets.ldos.LDOS.feature_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get dimension of this target if used as feature in ML.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.fermi_energy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fermi_energy</span></span><a class="headerlink" href="#mala.targets.ldos.LDOS.fermi_energy" title="Permalink to this definition"></a></dt>
+<dd><p>“Self-consistent” Fermi energy of the system.</p>
+<p>“Self-consistent” does not mean self-consistent in the DFT sense,
+but rather the Fermi energy, for which DOS integration reproduces
+the exact number of electrons. The term “self-consistent” stems
+from how this quantity is calculated. Calculated via cached LDOS</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.local_density_of_states">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_density_of_states</span></span><a class="headerlink" href="#mala.targets.ldos.LDOS.local_density_of_states" title="Permalink to this definition"></a></dt>
+<dd><p>Local density of states as 1D or 3D array.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.number_of_electrons">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_electrons</span></span><a class="headerlink" href="#mala.targets.ldos.LDOS.number_of_electrons" title="Permalink to this definition"></a></dt>
+<dd><p>Number of electrons in the system, calculated via cached LDOS.</p>
+<p>Does not necessarily match up exactly with KS-DFT provided values,
+due to discretization errors.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.ldos.LDOS.total_energy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_energy</span></span><a class="headerlink" href="#mala.targets.ldos.LDOS.total_energy" title="Permalink to this definition"></a></dt>
+<dd><p>Total energy of the system, calculated via cached LDOS.</p>
 </dd></dl>
 
 </dd></dl>

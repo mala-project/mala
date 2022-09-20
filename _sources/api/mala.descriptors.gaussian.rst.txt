@@ -1,0 +1,7 @@
+gaussian
+========
+
+.. automodule:: mala.descriptors.gaussian
+   :members:
+   :undoc-members:
+   :show-inheritance:

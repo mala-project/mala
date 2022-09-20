@@ -119,12 +119,15 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        actual_outputs : torch.Tensor</span>
+<span class="sd">        actual_outputs : numpy.ndarray</span>
 <span class="sd">            Actual outputs for snapshot.</span>
 
-<span class="sd">        predicted_outputs : torch.Tensor</span>
+<span class="sd">        predicted_outputs : numpy.ndarray</span>
 <span class="sd">            Precicted outputs for snapshot.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Make sure no data lingers in the target calculator.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">invalidate_target</span><span class="p">()</span>
+
         <span class="c1"># Forward through network.</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span>\
             <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">,</span>

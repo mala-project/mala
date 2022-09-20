@@ -161,9 +161,11 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.dos.DOS.from_ldos">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_ldos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.from_ldos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.from_ldos" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.from_ldos_calculator">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_ldos_calculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ldos_object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.from_ldos_calculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.from_ldos_calculator" title="Permalink to this definition"></a></dt>
 <dd><p>Create a DOS object from an LDOS object.</p>
+<p>If the LDOS object has data associated with it, this data will
+be copied.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>ldos_object</strong> (<a class="reference internal" href="mala.targets.ldos.html#mala.targets.ldos.LDOS" title="mala.targets.ldos.LDOS"><em>mala.targets.ldos.LDOS</em></a>) – LDOS object used as input.</p>
@@ -172,19 +174,110 @@
 <dd class="field-even"><p><strong>dos_object</strong> – DOS object created from LDOS object.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.dos.DOS" title="mala.targets.dos.DOS">DOS</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.dos.DOS" title="mala.targets.dos.DOS">mala.targets.dos.DOS</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.from_numpy_array">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_numpy_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.from_numpy_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.from_numpy_array" title="Permalink to this definition"></a></dt>
+<dd><p>Create an DOS calculator from a numpy array in memory.</p>
+<p>By using this function rather then setting the local_density_of_states
+object directly, proper</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this DOS object.</p></li>
+<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Path to file that is being read.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the DOS is saved in.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dos_calculator</strong> – DOS calculator object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.dos.DOS" title="mala.targets.dos.DOS">mala.targets.dos.DOS</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.from_numpy_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_numpy_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.from_numpy_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.from_numpy_file" title="Permalink to this definition"></a></dt>
+<dd><p>Create an DOS calculator from a numpy array saved in a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this DOS object.</p></li>
+<li><p><strong>path</strong> (<em>string</em>) – Path to file that is being read.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the DOS is saved in.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dos_calculator</strong> – DOS calculator object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.dos.DOS" title="mala.targets.dos.DOS">mala.targets.dos.DOS</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.from_qe_dos_txt">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_qe_dos_txt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.from_qe_dos_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.from_qe_dos_txt" title="Permalink to this definition"></a></dt>
+<dd><p>Create a DOS calculator from a Quantum Espresso generated file.</p>
+<p>These files do not have a specified file ending, so I will call them
+qe.dos.txt here. QE saves the DOS in 1/eV.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this DOS object.</p></li>
+<li><p><strong>path</strong> (<em>string</em>) – Path of the file containing the DOS.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dos_calculator</strong> – DOS calculator object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.dos.DOS" title="mala.targets.dos.DOS">mala.targets.dos.DOS</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.from_qe_out">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_qe_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.from_qe_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.from_qe_out" title="Permalink to this definition"></a></dt>
+<dd><p>Create a DOS calculator from a Quantum Espresso output file.</p>
+<p>This will only work if the QE calculation has been performed with
+very verbose output and contains the bands at all k-points.
+As much information will be read from the QE output files as possible.
+There is no need to call read_additional_calculation_data afterwards.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this DOS object.</p></li>
+<li><p><strong>path</strong> (<em>string</em>) – Path of the file containing the DOS.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dos_calculator</strong> – DOS calculator object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.dos.DOS" title="mala.targets.dos.DOS">mala.targets.dos.DOS</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.get_band_energy">
-<span class="sig-name descname"><span class="pre">get_band_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_band_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_band_energy" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_band_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">broadcast_band_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_band_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_band_energy" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the band energy from given DOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid].</p></li>
+<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid]. If None, then the cached
+DOS will be used for the calculation.</p></li>
 <li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
 <li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
@@ -209,8 +302,12 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.get_density_of_states">
-<span class="sig-name descname"><span class="pre">get_density_of_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_density_of_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_density_of_states" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_density_of_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_density_of_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_density_of_states" title="Permalink to this definition"></a></dt>
 <dd><p>Get the density of states.</p>
+<p>This function currently doesn’t do much. In the LDOS and
+density equivalents of it, certain dimensionality reorderings
+may happen, this function purely exists for consistency
+reasons. In the future, that may change.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -229,12 +326,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.get_entropy_contribution">
-<span class="sig-name descname"><span class="pre">get_entropy_contribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_entropy_contribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_entropy_contribution" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_entropy_contribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">broadcast_entropy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_entropy_contribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_entropy_contribution" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the entropy contribution to the total energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid].</p></li>
+<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid]. If None, then the cached
+DOS will be used for the calculation.</p></li>
 <li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
 <li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
@@ -258,19 +356,14 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.dos.DOS.get_feature_size">
-<span class="sig-name descname"><span class="pre">get_feature_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_feature_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_feature_size" title="Permalink to this definition"></a></dt>
-<dd><p>Get dimension of this target if used as feature in ML.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.get_number_of_electrons">
-<span class="sig-name descname"><span class="pre">get_number_of_electrons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_number_of_electrons" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_number_of_electrons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_number_of_electrons" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the number of electrons from given DOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid].</p></li>
+<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid]. If None, then the cached
+DOS will be used for the calculation.</p></li>
 <li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
 <li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
@@ -295,7 +388,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev">
-<span class="sig-name descname"><span class="pre">get_self_consistent_fermi_energy_ev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_self_consistent_fermi_energy_ev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_self_consistent_fermi_energy_ev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">broadcast_fermi_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_self_consistent_fermi_energy_ev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the self-consistent Fermi energy.</p>
 <p>“Self-consistent” does not mean self-consistent in the DFT sense,
 but rather the Fermi energy, for which DOS integration reproduces
@@ -304,7 +397,8 @@ from how this quantity is calculated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid].</p></li>
+<li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid]. If None, then the cached
+DOS will be used for the calculation.</p></li>
 <li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
 <blockquote>
@@ -327,17 +421,58 @@ from how this quantity is calculated.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.get_target">
+<span class="sig-name descname"><span class="pre">get_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_target" title="Permalink to this definition"></a></dt>
+<dd><p>Get the target quantity.</p>
+<p>This is the generic interface for cached target quantities.
+It should work for all implemented targets.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.invalidate_target">
+<span class="sig-name descname"><span class="pre">invalidate_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.invalidate_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.invalidate_target" title="Permalink to this definition"></a></dt>
+<dd><p>Invalidates the saved target wuantity.</p>
+<p>This is the generic interface for cached target quantities.
+It should work for all implemented targets.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.read_from_array">
+<span class="sig-name descname"><span class="pre">read_from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_array" title="Permalink to this definition"></a></dt>
+<dd><p>Read the density data from a numpy array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Numpy array containing the DOS..</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in. Usually none.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.read_from_numpy">
+<span class="sig-name descname"><span class="pre">read_from_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_numpy" title="Permalink to this definition"></a></dt>
+<dd><p>Read the density data from a numpy file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>string</em>) – Name of the numpy file.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in. Usually none.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.read_from_qe_dos_txt">
-<span class="sig-name descname"><span class="pre">read_from_qe_dos_txt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_qe_dos_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_qe_dos_txt" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read_from_qe_dos_txt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_qe_dos_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_qe_dos_txt" title="Permalink to this definition"></a></dt>
 <dd><p>Read the DOS from a Quantum Espresso generated file.</p>
 <p>These files do not have a specified file ending, so I will call them
 qe.dos.txt here. QE saves the DOS in 1/eV.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file_name</strong> (<em>string</em>) – Name of the file containing the DOS.</p></li>
-<li><p><strong>directory</strong> (<em>string</em>) – Directory containing the file file_name.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>path</strong> (<em>string</em>) – Path of the file containing the DOS.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>DOS data in 1/eV.</p>
@@ -350,7 +485,7 @@ qe.dos.txt here. QE saves the DOS in 1/eV.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.read_from_qe_out">
-<span class="sig-name descname"><span class="pre">read_from_qe_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_to_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smearing_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_qe_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_qe_out" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read_from_qe_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smearing_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_qe_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_qe_out" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the DOS from a Quantum Espresso DFT output file.</p>
 <p>The DOS will be read calculated via the eigenvalues and the equation</p>
 <div class="math notranslate nohighlight">
@@ -358,7 +493,7 @@ qe.dos.txt here. QE saves the DOS in 1/eV.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path_to_file</strong> (<em>string</em>) – Path to the QE out file. If None, the QE output that was loaded
+<li><p><strong>path</strong> (<em>string</em>) – Path to the QE out file. If None, the QE output that was loaded
 via read_additional_calculation_data will be used.</p></li>
 <li><p><strong>smearing_factor</strong> (<em>int</em>) – Smearing factor relative to the energy grid spacing. Default is 2.</p></li>
 </ul>
@@ -370,6 +505,60 @@ via read_additional_calculation_data will be used.</p></li>
 <dd class="field-odd"><p>dos_data</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.uncache_properties">
+<span class="sig-name descname"><span class="pre">uncache_properties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.uncache_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.uncache_properties" title="Permalink to this definition"></a></dt>
+<dd><p>Uncache all cached properties of this calculator.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.band_energy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">band_energy</span></span><a class="headerlink" href="#mala.targets.dos.DOS.band_energy" title="Permalink to this definition"></a></dt>
+<dd><p>Band energy of the system, calculated via cached DOS.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.density_of_states">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">density_of_states</span></span><a class="headerlink" href="#mala.targets.dos.DOS.density_of_states" title="Permalink to this definition"></a></dt>
+<dd><p>Density of states as array.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.energy_grid">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">energy_grid</span></span><a class="headerlink" href="#mala.targets.dos.DOS.energy_grid" title="Permalink to this definition"></a></dt>
+<dd><p>Energy grid on which the DOS is expressed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.entropy_contribution">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">entropy_contribution</span></span><a class="headerlink" href="#mala.targets.dos.DOS.entropy_contribution" title="Permalink to this definition"></a></dt>
+<dd><p>Entropy contribution to the energy calculated via cached DOS.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.feature_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">feature_size</span></span><a class="headerlink" href="#mala.targets.dos.DOS.feature_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get dimension of this target if used as feature in ML.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.fermi_energy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fermi_energy</span></span><a class="headerlink" href="#mala.targets.dos.DOS.fermi_energy" title="Permalink to this definition"></a></dt>
+<dd><p>“Self-consistent” Fermi energy of the system.</p>
+<p>“Self-consistent” does not mean self-consistent in the DFT sense,
+but rather the Fermi energy, for which DOS integration reproduces
+the exact number of electrons. The term “self-consistent” stems
+from how this quantity is calculated. Calculated via cached DOS.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.number_of_electrons">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_electrons</span></span><a class="headerlink" href="#mala.targets.dos.DOS.number_of_electrons" title="Permalink to this definition"></a></dt>
+<dd><p>Number of electrons in the system, calculated via cached DOS.</p>
+<p>Does not necessarily match up exactly with KS-DFT provided values,
+due to discretization errors.</p>
 </dd></dl>
 
 </dd></dl>

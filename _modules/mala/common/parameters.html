@@ -329,6 +329,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="mf">0.1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">=</span> <span class="mi">10</span></div>
 
+
 <div class="viewcode-block" id="ParametersDescriptors"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors">[docs]</a><span class="k">class</span> <span class="nc">ParametersDescriptors</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for calculating/parsing input descriptors.</span>
@@ -343,10 +344,6 @@
 <span class="sd">        SNAP calculation: 2*jmax-parameter used for calculation of SNAP</span>
 <span class="sd">        descriptors. Default value for jmax is 5, so default value for</span>
 <span class="sd">        twojmax is 10.</span>
-
-<span class="sd">    rcutfac: float</span>
-<span class="sd">        SNAP calculation: radius cutoff factor for the fingerprint sphere in</span>
-<span class="sd">        Angstroms. Default value is 4.67637.</span>
 
 <span class="sd">    lammps_compute_file: string</span>
 <span class="sd">        SNAP calculation: LAMMPS input file that is used to calculate the</span>
@@ -363,16 +360,77 @@
 <span class="sd">        the descriptor vector are the xyz coordinates and they are cut from the</span>
 <span class="sd">        descriptor vector. If False, no such cutting is peformed.</span>
 
+<span class="sd">    gaussian_descriptors_sigma : float</span>
+<span class="sd">        Sigma used for the calculation of the Gaussian descriptors.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersDescriptors</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">=</span> <span class="s2">&quot;SNAP&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">twojmax</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_gaussian_descriptors_energy_formula</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gaussian_descriptors_sigma</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gaussian_descriptors_cutoff</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rcutfac</span> <span class="o">=</span> <span class="mf">4.67637</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">acsd_points</span> <span class="o">=</span> <span class="mi">100</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="kc">True</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># TODO: I would rather handle the parallelization info automatically</span>
+        <span class="c1"># and more under the hood. At this stage of the project this would</span>
+        <span class="c1"># probably be overkill and hard to do, since there are many moving</span>
+        <span class="c1"># parts, so for now let&#39;s keep this here, but in the future,</span>
+        <span class="c1"># this should be adressed.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_z_splitting</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_y_splitting</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">use_z_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Control whether splitting across the z-axis is used.</span>
+
+<span class="sd">        Default is True, since this gives descriptors compatible with</span>
+<span class="sd">        QE, for total energy evaluation. However, setting this value to False</span>
+<span class="sd">        can, e.g. in the LAMMPS case, improve performance. This is relevant</span>
+<span class="sd">        for e.g. preprocessing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_z_splitting</span>
+
+    <span class="nd">@use_z_splitting</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">use_z_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">use_y_splitting</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_z_splitting</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">use_y_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Control whether a splitting in y-axis is used.</span>
+
+<span class="sd">        This can only be used in conjunction with a z-splitting, and</span>
+<span class="sd">        the option will ignored if z-splitting is disabled. Only has an</span>
+<span class="sd">        effect for values larger then 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_number_y_planes</span>
+
+    <span class="nd">@use_y_splitting</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">use_y_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_z_splitting</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_number_y_planes</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_number_y_planes</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_number_y_planes</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rcutfac</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Cut off radius for SNAP calculation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rcutfac</span>
+
+    <span class="nd">@rcutfac</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">rcutfac</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rcutfac</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gaussian_descriptors_cutoff</span> <span class="o">=</span> <span class="n">value</span></div>
 
 
 <div class="viewcode-block" id="ParametersTargets"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersTargets">[docs]</a><span class="k">class</span> <span class="nc">ParametersTargets</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>

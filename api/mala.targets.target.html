@@ -157,39 +157,9 @@ format and performs postprocessing calculations on the quantity.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.target.Target.get_band_energy">
-<span class="sig-name descname"><span class="pre">get_band_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_band_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_band_energy" title="Permalink to this definition"></a></dt>
-<dd><p>Get the band energy.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.target.Target.get_density">
-<span class="sig-name descname"><span class="pre">get_density</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_density" title="Permalink to this definition"></a></dt>
-<dd><p>Get the electronic density.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.target.Target.get_density_of_states">
-<span class="sig-name descname"><span class="pre">get_density_of_states</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_density_of_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_density_of_states" title="Permalink to this definition"></a></dt>
-<dd><p>Get the density of states.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.get_energy_grid">
 <span class="sig-name descname"><span class="pre">get_energy_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_energy_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_energy_grid" title="Permalink to this definition"></a></dt>
 <dd><p>Get energy grid.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.target.Target.get_feature_size">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_feature_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_feature_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_feature_size" title="Permalink to this definition"></a></dt>
-<dd><p>Get dimension of this target if used as feature in ML.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.target.Target.get_number_of_electrons">
-<span class="sig-name descname"><span class="pre">get_number_of_electrons</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_number_of_electrons" title="Permalink to this definition"></a></dt>
-<dd><p>Get the number of electrons.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -243,6 +213,14 @@ as [kMax] array.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.target.Target.get_target">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_target" title="Permalink to this definition"></a></dt>
+<dd><p>Get the target quantity.</p>
+<p>This is the generic interface for cached target quantities.
+It should work for all implemented targets.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.get_three_particle_correlation_function">
 <span class="sig-name descname"><span class="pre">get_three_particle_correlation_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_three_particle_correlation_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_three_particle_correlation_function" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the three particle correlation function (TPCF).</p>
@@ -263,9 +241,11 @@ as [kMax] array.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.target.Target.get_total_energy">
-<span class="sig-name descname"><span class="pre">get_total_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.get_total_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.get_total_energy" title="Permalink to this definition"></a></dt>
-<dd><p>Get the total energy.</p>
+<dt class="sig sig-object py" id="mala.targets.target.Target.invalidate_target">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">invalidate_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.invalidate_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.invalidate_target" title="Permalink to this definition"></a></dt>
+<dd><p>Invalidates the saved target wuantity.</p>
+<p>This is the generic interface for cached target quantities.
+It should work for all implemented targets.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -340,18 +320,6 @@ values have to be adjusted BEFORE.</p></li>
 </ul>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.target.Target.read_from_cube">
-<span class="sig-name descname"><span class="pre">read_from_cube</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.read_from_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.read_from_cube" title="Permalink to this definition"></a></dt>
-<dd><p>Read the quantity from a .cube file.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.target.Target.read_from_qe_dos_txt">
-<span class="sig-name descname"><span class="pre">read_from_qe_dos_txt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.read_from_qe_dos_txt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.read_from_qe_dos_txt" title="Permalink to this definition"></a></dt>
-<dd><p>Read the quantity from a Quantum Espresso .dos.txt file.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -454,12 +422,6 @@ to reproduce some earlier trajectory results</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.target.Target.write_as_cube">
-<span class="sig-name descname"><span class="pre">write_as_cube</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_as_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_as_cube" title="Permalink to this definition"></a></dt>
-<dd><p>Write the quantity in a cube file.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.write_tem_input_file">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write_tem_input_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_Angstrom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_pseudopotentials</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpoints</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_tem_input_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_tem_input_file" title="Permalink to this definition"></a></dt>
 <dd><p>Write a QE-style input file for the total energy module.</p>
@@ -480,6 +442,12 @@ interface. If None (recommended), MALA will create one.</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.target.Target.feature_size">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">feature_size</span></span><a class="headerlink" href="#mala.targets.target.Target.feature_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get dimension of this target if used as feature in ML.</p>
 </dd></dl>
 
 <dl class="py property">

@@ -17,6 +17,7 @@ descriptors
    :maxdepth: 6
 
    mala.descriptors.descriptor
+   mala.descriptors.gaussian
    mala.descriptors.lammps_utils
    mala.descriptors.snap
 

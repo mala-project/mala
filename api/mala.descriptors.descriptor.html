@@ -20,7 +20,7 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="lammps_utils" href="mala.descriptors.lammps_utils.html" />
+    <link rel="next" title="gaussian" href="mala.descriptors.gaussian.html" />
     <link rel="prev" title="descriptors" href="mala.descriptors.html" /> 
 </head>
 
@@ -51,6 +51,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mala.datahandling.html">datahandling</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="mala.descriptors.html">descriptors</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">descriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.descriptors.gaussian.html">gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.lammps_utils.html">lammps_utils</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.descriptors.snap.html">snap</a></li>
 </ul>
@@ -150,14 +151,11 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.descriptors.descriptor.Descriptor.calculate_from_qe_out">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_from_qe_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qe_out_directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor.html#Descriptor.calculate_from_qe_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.calculate_from_qe_out" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_from_qe_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor.html#Descriptor.calculate_from_qe_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.calculate_from_qe_out" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the descriptors based on a Quantum Espresso outfile.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>qe_out_file</strong> (<em>string</em>) – Name of Quantum Espresso output file for snapshot.</p></li>
-<li><p><strong>qe_out_directory</strong> (<em>string</em>) – Path to Quantum Espresso output file for snapshot.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>qe_out_file</strong> (<em>string</em>) – Name of Quantum Espresso output file for snapshot.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>descriptors</strong> – Numpy array containing the descriptors with the dimension
@@ -250,7 +248,7 @@ degree where similar vectors result in simlar LDOS vectors.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="mala.descriptors.html" class="btn btn-neutral float-left" title="descriptors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.descriptors.lammps_utils.html" class="btn btn-neutral float-right" title="lammps_utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.descriptors.gaussian.html" class="btn btn-neutral float-right" title="gaussian" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
