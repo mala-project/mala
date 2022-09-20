@@ -371,16 +371,19 @@ class Descriptor(ABC):
                                    "zbal": f"balance 1.0 z {zint}",
                                    "ngridx": nx,
                                    "ngridy": ny,
-                                   "ngridz": nz}
+                                   "ngridz": nz,
+                                   "switch": self.parameters.snap_switchflag}
                 else:
                     lammps_dict = {"ngridx": nx,
                                    "ngridy": ny,
-                                   "ngridz": nz}
+                                   "ngridz": nz,
+                                   "switch": self.parameters.snap_switchflag}
 
         else:
             lammps_dict = {"ngridx": nx,
                            "ngridy": ny,
-                           "ngridz": nz}
+                           "ngridz": nz,
+                           "switch": self.parameters.snap_switchflag}
         return lammps_dict
 
     @staticmethod

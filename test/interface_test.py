@@ -80,6 +80,7 @@ class TestInterfaces:
         test_parameters.descriptors.descriptor_type = "SNAP"
         test_parameters.descriptors.twojmax = 10
         test_parameters.descriptors.rcutfac = 4.67637
+        test_parameters.descriptors.snap_switchflag = 0
         test_parameters.targets.pseudopotential_path = os.path.join(
             data_repo_path,
             "Be2")

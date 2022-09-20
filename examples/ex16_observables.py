@@ -17,7 +17,7 @@ band energy, as these have been showcased in the other examples.
 """
 
 
-def plot_radial_distribution_function():
+def plot_radial_distribution_function(show_plots=False):
     atoms = read(atoms_path, format="espresso-out")
 
     # Any target can be used.
@@ -28,10 +28,11 @@ def plot_radial_distribution_function():
     fig = plt.figure()
     ax = fig.add_subplot()
     ax.plot(radii, rdf)
-    plt.show()
+    if show_plots:
+        plt.show()
 
 
-def plot_three_particle_correlation_function():
+def plot_three_particle_correlation_function(show_plots=False):
     atoms = read(atoms_path, format="espresso-out")
 
     # Any target can be used.
@@ -56,10 +57,11 @@ def plot_three_particle_correlation_function():
                     cmap=viridis_transparent)
     ax.set_zlim3d(tpcf[1][2, 0, 0, minval]-0.01,
                   tpcf[1][2, 0, 0, nbins-1]+0.01)
-    plt.show()
+    if show_plots:
+        plt.show()
 
 
-def plot_static_structure_factor():
+def plot_static_structure_factor(show_plots=False):
     atoms = read(atoms_path, format="espresso-out")
 
     # Any target can be used.
@@ -70,9 +72,11 @@ def plot_static_structure_factor():
     fig = plt.figure()
     ax = fig.add_subplot()
     ax.plot(kpoints, static_structure)
-    plt.show()
+    if show_plots:
+        plt.show()
 
 
-plot_radial_distribution_function()
-plot_three_particle_correlation_function()
-plot_static_structure_factor()
+# Activate the plots to be shown as required.
+plot_radial_distribution_function(show_plots=False)
+plot_three_particle_correlation_function(show_plots=False)
+plot_static_structure_factor(show_plots=False)

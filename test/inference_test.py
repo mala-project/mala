@@ -126,6 +126,7 @@ class TestInference:
         test_parameters.descriptors.descriptor_type = "SNAP"
         test_parameters.descriptors.twojmax = 10
         test_parameters.descriptors.rcutfac = 4.67637
+        test_parameters.descriptors.snap_switchflag = 0
 
         data_handler = DataHandler(test_parameters)
         data_handler.add_snapshot("Be_snapshot1.in.npy", beryllium_path,
