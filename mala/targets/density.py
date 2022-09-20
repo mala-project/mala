@@ -7,13 +7,14 @@ try:
     import total_energy as te
 except ModuleNotFoundError:
     pass
+import numpy as np
 
 from mala.common.parallelizer import printout, get_rank, parallel_warn
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.atomic_force import AtomicForce
-from mala.common.parallelizer import get_rank
+from functools import cached_property
 
 
 class Density(Target):
@@ -25,14 +26,213 @@ class Density(Target):
         Parameters used to create this Target object.
     """
 
+    ##############################
+    # Class attributes
+    ##############################
+
     te_mutex = False
+
+    ##############################
+    # Constructors
+    ##############################
 
     def __init__(self, params):
         super(Density, self).__init__(params)
+        self.density = None
 
-    def get_feature_size(self):
+    @classmethod
+    def from_numpy_file(cls, params, path):
+        """
+        Create a Density calculator from a numpy array saved in a file.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        path : string
+            Path to file that is being read.
+
+        Returns
+        -------
+        dens_object : mala.targets.density.Density
+            Density calculator object.
+        """
+        return_density_object = Density(params)
+        return_density_object.density.read_from_numpy(path)
+        return return_density_object
+
+    @classmethod
+    def from_numpy_array(cls, params, array):
+        """
+        Create a Density calculator from a numpy array in memory.
+
+        By using this function rather then setting the density
+        object directly, proper unit coversion is ensured.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        array : numpy.ndarray
+            Path to file that is being read.
+
+        Returns
+        -------
+        dens_object : mala.targets.density.Density
+            Density calculator object.
+        """
+        return_dos = Density(params)
+        return_dos.read_from_array(array)
+        return return_dos
+
+    @classmethod
+    def from_cube_file(cls, params, path):
+        """
+        Create a Density calculator from a cube file.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this DOS object.
+
+        path : string
+            Name of the cube file.
+
+        Returns
+        -------
+        dens_object : mala.targets.density.Density
+            Density object created from LDOS object.
+        """
+        return_density_object = Density(params)
+        return_density_object.read_from_cube(path)
+        return return_density_object
+
+    @classmethod
+    def from_ldos_calculator(cls, ldos_object):
+        """
+        Create a Density calculator from an LDOS object.
+
+        If the LDOS object has data associated with it, this data will
+        be copied.
+
+        Parameters
+        ----------
+        ldos_object : mala.targets.ldos.LDOS
+            LDOS object used as input.
+
+        Returns
+        -------
+        dens_object : mala.targets.density.Density
+            Density object created from LDOS object.
+        """
+        return_density_object = Density(ldos_object.parameters)
+        return_density_object.fermi_energy_dft = ldos_object.fermi_energy_dft
+        return_density_object.temperature_K = ldos_object.temperature_K
+        return_density_object.voxel_Bohr = ldos_object.voxel_Bohr
+        return_density_object.number_of_electrons_exact = ldos_object.\
+            number_of_electrons_exact
+        return_density_object.band_energy_dft_calculation = ldos_object.\
+            band_energy_dft_calculation
+        return_density_object.grid_dimensions = ldos_object.grid_dimensions
+        return_density_object.atoms = ldos_object.atoms
+        return_density_object.qe_input_data = ldos_object.qe_input_data
+        return_density_object.qe_pseudopotentials = ldos_object.\
+            qe_pseudopotentials
+        return_density_object.total_energy_dft_calculation = \
+            ldos_object.total_energy_dft_calculation
+        return_density_object.kpoints = ldos_object.kpoints
+        return_density_object.number_of_electrons_from_eigenvals = \
+            ldos_object.number_of_electrons_from_eigenvals
+
+        # If the source calculator has LDOS data, then this new object
+        # can have DOS data.
+        if ldos_object.local_density_of_states is not None:
+            return_density_object.density = ldos_object.density
+
+        return return_density_object
+
+    ##############################
+    # Properties
+    ##############################
+
+    @property
+    def density(self):
+        """Electronic density."""
+        return self._density
+
+    @density.setter
+    def density(self, new_density):
+        self._density = new_density
+        # Setting a new density means we have to uncache priorly cached
+        # properties.
+        self.uncache_properties()
+
+    def get_target(self):
+        """
+        Get the target quantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        return self.density
+
+    def invalidate_target(self):
+        """
+        Invalidates the saved target wuantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        self.density = None
+
+    @property
+    def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
         return 1
+
+    @cached_property
+    def number_of_electrons(self):
+        """
+        Number of electrons in the system, calculated via cached Density.
+
+        Does not necessarily match up exactly with KS-DFT provided values,
+        due to discretization errors.
+        """
+        if self.density is not None:
+            return self.get_number_of_electrons()
+        else:
+            raise Exception("No cached density available to "
+                            "calculate this property.")
+
+    @cached_property
+    def total_energy_contributions(self):
+        """
+        All density based contributions to the total energy.
+
+        Calculated via the cached density.
+        """
+        if self.density is not None:
+            return self.get_energy_contributions()
+        else:
+            raise Exception("No cached density available to "
+                            "calculate this property.")
+
+    def uncache_properties(self):
+        """Uncache all cached properties of this calculator."""
+        if self._is_property_cached("number_of_electrons"):
+            del self.number_of_electrons
+
+        if self._is_property_cached("total_energy_contributions"):
+            del self.total_energy_contributions
+
+    ##############################
+    # Methods
+    ##############################
+
+    # File I/O
+    ##########
 
     @staticmethod
     def convert_units(array, in_units="1/A^3"):
@@ -94,24 +294,49 @@ class Density(Target):
         else:
             raise Exception("Unsupported unit for density.")
 
-    def read_from_cube(self, file_name, directory, units=None):
+    def read_from_cube(self, path, units=None, **kwargs):
         """
         Read the density data from a cube file.
 
         Parameters
         ----------
-        file_name :
+        path : string
             Name of the cube file.
-
-        directory :
-            Directory containing the cube file.
 
         units : string
             Units the density is saved in. Usually none.
         """
-        printout("Reading density from .cube file in ", directory, min_verbosity=0)
-        data, meta = read_cube(os.path.join(directory, file_name))
-        return data
+        printout("Reading density from .cube file ", path, min_verbosity=0)
+        data, meta = read_cube(path)
+        self.density = data
+
+    def read_from_numpy(self, path, units=None):
+        """
+        Read the density data from a numpy file.
+
+        Parameters
+        ----------
+        path :
+            Name of the numpy file.
+
+        units : string
+            Units the density is saved in. Usually none.
+        """
+        self.density = np.load(path)
+
+    def read_from_array(self, array, units=None):
+        """
+        Read the density data from a numpy array.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Numpy array containing the density..
+
+        units : string
+            Units the density is saved in. Usually none.
+        """
+        self.density = array
 
     def write_as_cube(self, file_name, density_data, atoms=None,
                       grid_dimensions=None):
@@ -157,8 +382,10 @@ class Density(Target):
         meta["zvec"] = self.voxel[2]
         write_cube(density_data, meta, file_name)
 
+    # Calculations
+    ##############
 
-    def get_number_of_electrons(self, density_data, voxel_Bohr=None,
+    def get_number_of_electrons(self, density_data=None, voxel_Bohr=None,
                                 integration_method="summation"):
         """
         Calculate the number of electrons from given density data.
@@ -167,7 +394,9 @@ class Density(Target):
         ----------
         density_data : numpy.array
             Electronic density on the given grid. Has to either be of the form
-            gridpoints or (gridx, gridy, gridz).
+            gridpoints or (gridx, gridy, gridz). If None, then the cached
+            density will be used for the calculation.
+
 
         voxel_Bohr : ase.cell.Cell
             Voxel to be used for grid intergation. Needs to reflect the
@@ -181,6 +410,12 @@ class Density(Target):
             - "simps" for Simpson method (only for cubic grids).
             - "summation" for summation and scaling of the values (recommended)
         """
+        if density_data is None:
+            density_data = self.density
+            if density_data is None:
+                raise Exception("No density data provided, cannot calculate"
+                                " this quantity.")
+
         if voxel_Bohr is None:
             voxel_Bohr = self.voxel
 
@@ -248,7 +483,7 @@ class Density(Target):
 
         return number_of_electrons
 
-    def get_density(self, density_data, convert_to_threedimensional=False,
+    def get_density(self, density_data=None, convert_to_threedimensional=False,
                     grid_dimensions=None):
         """
         Get the electronic density, based on density data.
@@ -259,7 +494,8 @@ class Density(Target):
         ----------
         density_data : numpy.array
             Electronic density data, this array will be returned unchanged
-            depending on the other parameters.
+            depending on the other parameters. If None, then the cached
+            density will be used for the calculation.
 
         convert_to_threedimensional : bool
             If True, then a density saved as a 1D array will be converted to
@@ -276,6 +512,12 @@ class Density(Target):
         density_data : numpy.array
             Electronic density data in the desired shape.
         """
+        if density_data is None:
+            density_data = self.density
+            if density_data is None:
+                raise Exception("No density data provided, cannot calculate"
+                                " this quantity.")
+
         if len(density_data.shape) == 3:
             return density_data
         elif len(density_data.shape) == 1:
@@ -288,7 +530,7 @@ class Density(Target):
         else:
             raise Exception("Unknown density data shape.")
 
-    def get_energy_contributions(self, density_data, create_file=True,
+    def get_energy_contributions(self, density_data=None, create_file=True,
                                  atoms_Angstrom=None, qe_input_data=None,
                                  qe_pseudopotentials=None):
         r"""
@@ -300,7 +542,8 @@ class Density(Target):
         Parameters
         ----------
         density_data : numpy.array
-            Density data on a grid.
+            Density data on a grid. If None, then the cached
+            density will be used for the calculation.
 
         create_file : bool
             If False, the last mala.pw.scf.in file will be used as input for
@@ -321,14 +564,20 @@ class Density(Target):
 
         Returns
         -------
-        energies : list
-            A list containing, in order, the following energy contributions:
+        energies : dict
+            A dict containing the following entries:
 
                 - :math:`n\,V_\mathrm{xc}`
                 - :math:`E_\mathrm{H}`
                 - :math:`E_\mathrm{xc}`
                 - :math:`E_\mathrm{Ewald}`
         """
+        if density_data is None:
+            density_data = self.density
+            if density_data is None:
+                raise Exception("No density data provided, cannot calculate"
+                                " this quantity.")
+
         if atoms_Angstrom is None:
             atoms_Angstrom = self.atoms
         self.__setup_total_energy_module(density_data, atoms_Angstrom,
@@ -339,9 +588,12 @@ class Density(Target):
 
         # Get and return the energies.
         energies = np.array(te.get_energies())*Rydberg
-        return energies
+        energies_dict = {"e_rho_times_v_hxc": energies[0],
+                         "e_hartree": energies[1], "e_xc": energies[2],
+                         "e_ewald": energies[3]}
+        return energies_dict
 
-    def get_atomic_forces(self, density_data, create_file=True,
+    def get_atomic_forces(self, density_data=None, create_file=True,
                           atoms_Angstrom=None, qe_input_data=None,
                           qe_pseudopotentials=None):
         """
@@ -357,7 +609,8 @@ class Density(Target):
         Parameters
         ----------
         density_data : numpy.array
-            Density data on a grid.
+            Density data on a grid. If None, then the cached
+            density will be used for the calculation.
 
         create_file : bool
             If False, the last mala.pw.scf.in file will be used as input for
@@ -383,6 +636,12 @@ class Density(Target):
             in eV/Ang.
 
         """
+        if density_data is None:
+            density_data = self.density
+            if density_data is None:
+                raise Exception("No density data provided, cannot calculate"
+                                " this quantity.")
+
         # First, set up the total energy module for calculation.
         if atoms_Angstrom is None:
             atoms_Angstrom = self.atoms
@@ -399,6 +658,34 @@ class Density(Target):
         atomic_forces = AtomicForce.convert_units(atomic_forces,
                                                   in_units="Ry/Bohr")
         return atomic_forces
+
+    @staticmethod
+    def get_scaled_positions_for_qe(atoms):
+        """
+        Get the positions correctly scaled for QE.
+
+        QE (for ibrav=0) scales a little bit different then ASE would.
+        ASE uses all provided cell parameters, while QE simply sets the
+        first entry in the cell parameter matrix as reference and divides
+        all positions by this value.
+
+        Parameters
+        ----------
+        atoms : ase.Atoms
+            The atom objects for which the scaled positions should be
+            calculated.
+
+        Returns
+        -------
+        scaled_positions : numpy.array
+            The scaled positions.
+        """
+        principal_axis = atoms.get_cell()[0][0]
+        scaled_positions = atoms.get_positions()/principal_axis
+        return scaled_positions
+
+    # Private methods
+    #################
 
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
                                     create_file=True, qe_input_data=None,

@@ -6,6 +6,8 @@ import numpy as np
 from mala.common.parallelizer import printout, get_rank
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor import Descriptor
+from mala.targets.density import Density
+from mala.targets.ldos import LDOS
 from mala.targets.target import Target
 
 
@@ -54,8 +56,7 @@ class DataConverter:
         self.__snapshot_description = []
         self.__snapshot_units = []
 
-    def add_snapshot_qeout_cube(self, qe_out_file, qe_out_directory,
-                                cube_naming_scheme, cube_directory,
+    def add_snapshot_qeout_cube(self, qe_out_file, cube_files_scheme,
                                 input_units=None, output_units=None):
         """
         Add a Quantum Espresso snapshot to the list of conversion list.
@@ -70,10 +71,7 @@ class DataConverter:
         qe_out_file : string
             Name of Quantum Espresso output file for this snapshot.
 
-        qe_out_directory : string
-            Path to Quantum Espresso output file for this snapshot.
-
-        cube_naming_scheme : string
+        cube_files_scheme : string
             Naming scheme for the LDOS .cube files.
 
         cube_directory : string
@@ -85,10 +83,8 @@ class DataConverter:
         output_units : string
             Unit of the output data.
         """
-        self.__snapshots_to_convert.append({"input": [qe_out_file,
-                                                      qe_out_directory],
-                                            "output": [cube_naming_scheme,
-                                                       cube_directory]})
+        self.__snapshots_to_convert.append({"input": [qe_out_file],
+                                            "output": [cube_files_scheme]})
         self.__snapshot_description.append({"input": "qe.out",
                                             "output": ".cube"})
         self.__snapshot_units.append({"input": input_units,
@@ -210,7 +206,6 @@ class DataConverter:
             descriptor_calculation_kwargs["units"] = original_units["input"]
             tmp_input, local_size = self.descriptor_calculator. \
                 calculate_from_qe_out(snapshot["input"][0],
-                                      snapshot["input"][1],
                                       **descriptor_calculation_kwargs)
             if self.parameters._configuration["mpi"]:
                 tmp_input = self.descriptor_calculator.gather_descriptors(tmp_input)

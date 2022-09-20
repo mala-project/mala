@@ -110,7 +110,7 @@ class TestMALAIntegration:
 
         # Calculate the quantities we want to compare.
         nr_mala = dens_calculator.get_number_of_electrons(density_dft)
-        nr_dft = dens_calculator.number_of_electrons
+        nr_dft = dens_calculator.number_of_electrons_exact
 
         # Calculate relative error.
         rel_error = np.abs(nr_mala-nr_dft) / nr_dft
@@ -143,8 +143,8 @@ class TestMALAIntegration:
         # Calculate the quantities we want to compare.
         self_consistent_fermi_energy = ldos_calculator.\
             get_self_consistent_fermi_energy_ev(ldos_dft)
-        density_mala = ldos_calculator.\
-            get_density(ldos_dft, fermi_energy_ev=self_consistent_fermi_energy)
+        density_mala = ldos_calculator. \
+            get_density(ldos_dft, fermi_energy_eV=self_consistent_fermi_energy)
         density_mala_sum = density_mala.sum()
         density_dft_sum = density_dft.sum()
 
@@ -193,7 +193,8 @@ class TestMALAIntegration:
         dos_from_pp = np.load(path_to_dos_npy)
 
         # Calculate the quantities we want to compare.
-        dos_from_dft = dos_calculator.read_from_qe_out()
+        dos_calculator.read_from_qe_out()
+        dos_from_dft = dos_calculator.density_of_states
         dos_pp_sum = dos_from_pp.sum()
         dos_dft_sum = dos_from_dft.sum()
         rel_error = np.abs(dos_dft_sum-dos_pp_sum) / dos_pp_sum

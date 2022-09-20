@@ -54,9 +54,9 @@ class TestFullWorkflow:
 
         # Create a DataConverter, and add snapshots to it.
         data_converter = mala.DataConverter(test_parameters)
-        data_converter.add_snapshot_qeout_cube("Be.pw.scf.out", data_path_ldos,
-                                               os.path.join("cubes", "tmp.pp*Be_ldos.cube"),
-                                               data_path_ldos,
+        data_converter.add_snapshot_qeout_cube(os.path.join(data_path_ldos,"Be.pw.scf.out"),
+                                               os.path.join(data_path_ldos, "cubes",
+                                                            "tmp.pp*Be_ldos.cube"),
                                                output_units="1/(Ry*Bohr^3)")
 
         data_converter.convert_snapshots("./", naming_scheme="Be_snapshot*")
@@ -102,7 +102,7 @@ class TestFullWorkflow:
                                           fermi_energy_eV=
                                           self_consistent_fermi_energy)
 
-        assert np.isclose(number_of_electrons, dos.number_of_electrons,
+        assert np.isclose(number_of_electrons, dos.number_of_electrons_exact,
                           atol=accuracy_electrons)
         assert np.isclose(band_energy, dos.band_energy_dft_calculation,
                           atol=accuracy_band_energy)
@@ -140,7 +140,7 @@ class TestFullWorkflow:
                                            fermi_energy_eV=
                                            self_consistent_fermi_energy)
 
-        assert np.isclose(number_of_electrons, ldos.number_of_electrons,
+        assert np.isclose(number_of_electrons, ldos.number_of_electrons_exact,
                           atol=accuracy_electrons)
         assert np.isclose(band_energy, ldos.band_energy_dft_calculation,
                           atol=accuracy_band_energy)
@@ -169,7 +169,7 @@ class TestFullWorkflow:
         dens_data = dens.convert_units(
             np.load(os.path.join(data_path_ldos, "Be_dens.npy")),
             "1/Bohr^3")
-        dos = mala.DOS.from_ldos(ldos)
+        dos = mala.DOS.from_ldos_calculator(ldos)
 
         # Calculate energies
         self_consistent_fermi_energy = dos. \
