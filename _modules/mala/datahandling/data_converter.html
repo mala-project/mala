@@ -298,9 +298,10 @@
             <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
             <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_memmap</span>
             <span class="c1"># If no units are provided we just assume standard units.</span>
-            <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span>
-                <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
-                <span class="o">**</span><span class="n">target_calculator_kwargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                <span class="n">read_from_cube</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                               <span class="o">**</span><span class="n">target_calculator_kwargs</span><span class="p">)</span>
+            <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">get_target</span><span class="p">()</span>
 
         <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># In this case, only the input is processed.</span>
