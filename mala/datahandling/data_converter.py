@@ -52,6 +52,11 @@ class DataConverter:
         if self.descriptor_calculator is None:
             self.descriptor_calculator = Descriptor(parameters)
 
+        if parameters.descriptors.use_z_splitting:
+            parameters.descriptors.use_z_splitting = True
+            printout("Disabling z-splitting for preprocessing.",
+                     min_verbosity=0)
+
         self.__snapshots_to_convert = []
         self.__snapshot_description = []
         self.__snapshot_units = []

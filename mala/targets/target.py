@@ -12,8 +12,15 @@ from scipy.spatial import distance
 from scipy.integrate import simps
 
 from mala.common.parameters import Parameters, ParametersTargets
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, parallel_warn
 from mala.targets.calculation_helpers import fermi_function
+
+# Empirical value for the Gaussian descriptor width, determined for an
+# aluminium system. Reasonable values for sigma can and will be calculated
+# automatically based on this value and the aluminium gridspacing
+# for other systems as well.
+optimal_sigma_aluminium = 0.2
+reference_grid_spacing_aluminium_bohr = 0.15304891936073586
 
 
 class Target(ABC):
@@ -74,8 +81,10 @@ class Target(ABC):
         return target
 
     def __init__(self, params):
+        self._parameters_full = None
         if isinstance(params, Parameters):
             self.parameters: ParametersTargets = params.targets
+            self._parameters_full = params
         elif isinstance(params, ParametersTargets):
             self.parameters: ParametersTargets = params
         else:
@@ -118,8 +127,9 @@ class Target(ABC):
         self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
 
-        # Local grid for distributed inference.
+        # Local grid and parallelization info for distributed inference.
         self.local_grid = None
+        self.y_planes = None
 
     @property
     @abstractmethod
@@ -262,6 +272,9 @@ class Target(ABC):
                         self.grid_dimensions[1])
             self.voxel[2] = self.voxel[2] / (
                         self.grid_dimensions[2])
+            self._parameters_full.descriptors.gaussian_descriptors_sigma = \
+                (np.max(self.voxel_Bohr) / reference_grid_spacing_aluminium_bohr) * \
+                optimal_sigma_aluminium
 
             # This is especially important for size extrapolation.
             self.electrons_per_atom = self.number_of_electrons_exact / len(self.atoms)
@@ -324,6 +337,10 @@ class Target(ABC):
 
         else:
             raise Exception("Unsupported auxiliary file type.")
+
+    def get_energy_grid(self):
+        """Get energy grid."""
+        raise Exception("No method implement to calculate an energy grid.")
 
     def get_real_space_grid(self):
         """Get the real space grid."""

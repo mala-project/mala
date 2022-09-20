@@ -163,7 +163,8 @@ class SNAP(Descriptor):
         """
         # Enforcing / Checking PBC on the input atoms.
         atoms = self.enforce_pbc(atoms)
-        return self.__calculate_snap(atoms, working_directory, grid_dimensions)
+        return self.__calculate_snap(atoms, working_directory,
+                                     grid_dimensions)
 
     def gather_descriptors(self, snap_descriptors_np, use_pickled_comm=False):
         """
@@ -284,9 +285,6 @@ class SNAP(Descriptor):
         # We also need to know how big the grid is.
         # Iterating directly through the file is slow, but the
         # grid information is at the top (around line 200).
-        nx = None
-        ny = None
-        nz = None
         if len(self.dbg_grid_dimensions) == 3:
             nx = self.dbg_grid_dimensions[0]
             ny = self.dbg_grid_dimensions[1]
@@ -297,16 +295,17 @@ class SNAP(Descriptor):
             nz = grid_dimensions[2]
 
         # Build LAMMPS arguments from the data we read.
-        lmp_cmdargs = ["-screen", "none", "-log", os.path.join(outdir,
-                                                               "lammps_log.tmp")]
-        lammps_dict = {"ngridx": nx,
-                       "ngridy": ny,
-                       "ngridz": nz,
-                       "twojmax": self.parameters.twojmax,
-                       "rcutfac": self.parameters.rcutfac,
-                       "atom_config_fname": ase_out_path}
-        if self.parameters._configuration["mpi"]:
-            lammps_dict["bgridglobalflag"] = False
+        lmp_cmdargs = ["-screen", "none", "-log",
+                       os.path.join(outdir, "lammps_bgrid_log.tmp")]
+
+        # LAMMPS processor grid filled by parent class.
+        lammps_dict = self._setup_lammps_processors(nx, ny, nz)
+
+        # Set the values not already filled in the LAMMPS setup.
+        lammps_dict["twojmax"] = self.parameters.twojmax
+        lammps_dict["rcutfac"] = self.parameters.rcutfac
+        lammps_dict["atom_config_fname"] = ase_out_path
+
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
 
         # Build the LAMMPS object.
@@ -317,8 +316,13 @@ class SNAP(Descriptor):
         if self.parameters.lammps_compute_file == "":
             filepath = __file__.split("snap")[0]
             if self.parameters._configuration["mpi"]:
-                self.parameters.lammps_compute_file = \
-                    os.path.join(filepath, "in.bgridlocal.python")
+                if self.parameters.use_z_splitting:
+                    self.parameters.lammps_compute_file = \
+                        os.path.join(filepath, "in.bgridlocal.python")
+                else:
+                    self.parameters.lammps_compute_file = \
+                        os.path.join(filepath,
+                                     "in.bgridlocal_defaultproc.python")
             else:
                 self.parameters.lammps_compute_file = \
                     os.path.join(filepath, "in.bgrid.python")

@@ -1,20 +1,22 @@
 """Electronic density calculation class."""
 import os
+import time
 
 import ase.io
 from ase.units import Rydberg, Bohr
+from functools import cached_property
 try:
     import total_energy as te
 except ModuleNotFoundError:
     pass
 import numpy as np
 
-from mala.common.parallelizer import printout, get_rank, parallel_warn
+from mala.common.parallelizer import printout, get_rank, parallel_warn, get_comm, barrier
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.atomic_force import AtomicForce
-from functools import cached_property
+from mala.descriptors.gaussian import GaussianDescriptors
 
 
 class Density(Target):
@@ -512,19 +514,33 @@ class Density(Target):
         density_data : numpy.array
             Electronic density data in the desired shape.
         """
-        if density_data is None:
-            density_data = self.density
-            if density_data is None:
-                raise Exception("No density data provided, cannot calculate"
-                                " this quantity.")
-
         if len(density_data.shape) == 3:
             return density_data
         elif len(density_data.shape) == 1:
             if convert_to_threedimensional:
-                if grid_dimensions is None:
-                    grid_dimensions = self.grid_dimensions
-                return density_data.reshape(grid_dimensions)
+                if self.parameters._configuration["mpi"]:
+                    # In the MPI case we have to use the local grid to
+                    # reshape the density properly.
+
+                    first_x = int(self.local_grid[0][0])
+                    first_y = int(self.local_grid[0][1])
+                    first_z = int(self.local_grid[0][2])
+                    last_x = int(self.local_grid[-1][0]) + 1
+                    last_y = int(self.local_grid[-1][1]) + 1
+                    last_z = int(self.local_grid[-1][2]) + 1
+                    # density_data_reshaped = np.zeros([last_x-first_x,
+                    #                                   last_y-first_y,
+                    #                                   last_z-first_z],
+                    #                                  dtype=np.float64)
+                    density_data = \
+                        np.reshape(density_data,
+                                   [last_z - first_z, last_y - first_y,
+                                    last_x - first_x]).transpose([2, 1, 0])
+                    return density_data
+                else:
+                    if grid_dimensions is None:
+                        grid_dimensions = self.grid_dimensions
+                    return density_data.reshape(grid_dimensions)
             else:
                 return density_data
         else:
@@ -713,7 +729,13 @@ class Density(Target):
         if Density.te_mutex is False:
             printout("MALA: Starting QuantumEspresso to get density-based"
                      " energy contributions.", min_verbosity=0)
-            te.initialize()
+            barrier()
+            t0 = time.perf_counter()
+            te.initialize(self.y_planes)
+            barrier()
+            t1 = time.perf_counter()
+            printout("time used by total energy initialization: ", t1 - t0)
+
             Density.te_mutex = True
             printout("MALA: QuantumEspresso setup done.", min_verbosity=0)
         else:
@@ -772,9 +794,100 @@ class Density(Target):
         # is directly performed here, so it is not enough to simply
         # instantiate the process with the file.
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
-        te.set_positions(np.transpose(positions_for_qe), number_of_atoms)
+
+        if self._parameters_full.descriptors.\
+                use_gaussian_descriptors_energy_formula:
+            # Calculate the Gaussian descriptors for the calculation of the
+            # structure factors.
+            barrier()
+            t0 = time.perf_counter()
+            gaussian_descriptors = \
+                self._get_gaussian_descriptors_for_structure_factors(
+                    atoms_Angstrom, self.grid_dimensions)
+            barrier()
+            t1 = time.perf_counter()
+            printout("time used by gaussian descriptors: ", t1 - t0,
+                     min_verbosity=2)
+
+            #
+            # Check normalization of the Gaussian descriptors
+            #
+            #from mpi4py import MPI
+            #ggrid_sum = np.sum(gaussian_descriptors)
+            #full_ggrid_sum = np.array([0.0])
+            #comm = get_comm()
+            #comm.Barrier()
+            #comm.Reduce([ggrid_sum, MPI.DOUBLE], [full_ggrid_sum, MPI.DOUBLE], op=MPI.SUM, root=0)
+            #printout("full_ggrid_sum =", full_ggrid_sum)
+
+            # Calculate the Gaussian descriptors for a reference system consisting
+            # of one atom at position (0.0,0.0,0.0)
+            barrier()
+            t0 = time.perf_counter()
+            atoms_reference = atoms_Angstrom.copy()
+            del atoms_reference[1:]
+            atoms_reference.set_positions([(0.0, 0.0, 0.0)])
+            reference_gaussian_descriptors = \
+                self._get_gaussian_descriptors_for_structure_factors(
+                    atoms_reference, self.grid_dimensions)
+            barrier()
+            t1 = time.perf_counter()
+            printout("time used by reference gaussian descriptors: ", t1 - t0,
+                     min_verbosity=2)
+
+            #
+            # Check normalization of the reference Gaussian descriptors
+            #
+            #reference_ggrid_sum = np.sum(reference_gaussian_descriptors)
+            #full_reference_ggrid_sum = np.array([0.0])
+            #comm = get_comm()
+            #comm.Barrier()
+            #comm.Reduce([reference_ggrid_sum, MPI.DOUBLE], [full_reference_ggrid_sum, MPI.DOUBLE], op=MPI.SUM, root=0)
+            #printout("full_reference_ggrid_sum =", full_reference_ggrid_sum)
+
+        barrier()
+        t0 = time.perf_counter()
+
+        # If the Gaussian formula is used, both the calculation of the
+        # Ewald energy and the structure factor can be skipped.
+        te.set_positions(np.transpose(positions_for_qe), number_of_atoms,
+                         self._parameters_full.descriptors. \
+                         use_gaussian_descriptors_energy_formula,
+                         self._parameters_full.descriptors. \
+                         use_gaussian_descriptors_energy_formula)
+        barrier()
+        t1 = time.perf_counter()
+        printout("time used by set_positions: ", t1 - t0,
+                 min_verbosity=2)
+
+        barrier()
+
+        if self._parameters_full.descriptors.\
+                use_gaussian_descriptors_energy_formula:
+            t0 = time.perf_counter()
+            gaussian_descriptors = np.reshape(gaussian_descriptors, [number_of_gridpoints, 1], order='F')
+            reference_gaussian_descriptors = np.reshape(reference_gaussian_descriptors, [number_of_gridpoints, 1], order='F')
+            sigma = self._parameters_full.descriptors.gaussian_descriptors_sigma
+            sigma = sigma / Bohr
+            te.set_positions_gauss(self._parameters_full.verbosity,
+                                   gaussian_descriptors,
+                                   reference_gaussian_descriptors,
+                                   sigma,
+                                   number_of_gridpoints, 1)
+            barrier()
+            t1 = time.perf_counter()
+            printout("time used by set_positions_gauss: ", t1 - t0,
+                     min_verbosity=2)
+
         # Now we can set the new density.
+        barrier()
+        t0 = time.perf_counter()
         te.set_rho_of_r(density_for_qe, number_of_gridpoints, nr_spin_channels)
+        barrier()
+        t1 = time.perf_counter()
+        printout("time used by set_rho_of_r: ", t1 - t0,
+                 min_verbosity=2)
+
         return atoms_Angstrom
 
     @staticmethod
@@ -801,3 +914,8 @@ class Density(Target):
         principal_axis = atoms.get_cell()[0][0]
         scaled_positions = atoms.get_positions()/principal_axis
         return scaled_positions
+
+    def _get_gaussian_descriptors_for_structure_factors(self, atoms, grid):
+        descriptor_calculator = GaussianDescriptors(self._parameters_full)
+        return descriptor_calculator.\
+            calculate_from_atoms(atoms, grid)[0][:, 6:]

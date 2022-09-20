@@ -256,6 +256,7 @@ class ParametersNetwork(ParametersBase):
         self.dropout = 0.1
         self.num_heads = 10
 
+
 class ParametersDescriptors(ParametersBase):
     """
     Parameters necessary for calculating/parsing input descriptors.
@@ -270,10 +271,6 @@ class ParametersDescriptors(ParametersBase):
         SNAP calculation: 2*jmax-parameter used for calculation of SNAP
         descriptors. Default value for jmax is 5, so default value for
         twojmax is 10.
-
-    rcutfac: float
-        SNAP calculation: radius cutoff factor for the fingerprint sphere in
-        Angstroms. Default value is 4.67637.
 
     lammps_compute_file: string
         SNAP calculation: LAMMPS input file that is used to calculate the
@@ -290,16 +287,77 @@ class ParametersDescriptors(ParametersBase):
         the descriptor vector are the xyz coordinates and they are cut from the
         descriptor vector. If False, no such cutting is peformed.
 
+    gaussian_descriptors_sigma : float
+        Sigma used for the calculation of the Gaussian descriptors.
     """
 
     def __init__(self):
         super(ParametersDescriptors, self).__init__()
         self.descriptor_type = "SNAP"
         self.twojmax = 10
+        self.use_gaussian_descriptors_energy_formula = False
+        self.gaussian_descriptors_sigma = None
+        self.gaussian_descriptors_cutoff = None
         self.rcutfac = 4.67637
         self.lammps_compute_file = ""
         self.acsd_points = 100
         self.descriptors_contain_xyz = True
+        # TODO: I would rather handle the parallelization info automatically
+        # and more under the hood. At this stage of the project this would
+        # probably be overkill and hard to do, since there are many moving
+        # parts, so for now let's keep this here, but in the future,
+        # this should be adressed.
+        self.use_z_splitting = True
+        self.use_y_splitting = 0
+
+    @property
+    def use_z_splitting(self):
+        """
+        Control whether splitting across the z-axis is used.
+
+        Default is True, since this gives descriptors compatible with
+        QE, for total energy evaluation. However, setting this value to False
+        can, e.g. in the LAMMPS case, improve performance. This is relevant
+        for e.g. preprocessing.
+        """
+        return self._use_z_splitting
+
+    @use_z_splitting.setter
+    def use_z_splitting(self, value):
+        if value is False:
+            self.use_y_splitting = 0
+        self._use_z_splitting = value
+
+    @property
+    def use_y_splitting(self):
+        """
+        Control whether a splitting in y-axis is used.
+
+        This can only be used in conjunction with a z-splitting, and
+        the option will ignored if z-splitting is disabled. Only has an
+        effect for values larger then 1.
+        """
+        return self._number_y_planes
+
+    @use_y_splitting.setter
+    def use_y_splitting(self, value):
+        if self.use_z_splitting is False:
+            self._number_y_planes = 0
+        else:
+            if value == 1:
+                self._number_y_planes = 0
+            else:
+                self._number_y_planes = value
+
+    @property
+    def rcutfac(self):
+        """Cut off radius for SNAP calculation."""
+        return self._rcutfac
+
+    @rcutfac.setter
+    def rcutfac(self, value):
+        self._rcutfac = value
+        self.gaussian_descriptors_cutoff = value
 
 
 class ParametersTargets(ParametersBase):
