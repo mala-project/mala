@@ -148,7 +148,7 @@ class DataHandler:
 
     def add_snapshot(self, input_npy_file, input_npy_directory,
                      output_npy_file, output_npy_directory, add_snapshot_as,
-                     output_units="1/eV", input_units="None",
+                     output_units="1/(eV*A^3)", input_units="None",
                      calculation_output_file=""):
         """
         Add a snapshot to the data pipeline.
