@@ -1,12 +1,13 @@
 """Functions for operating MALA in parallel."""
+from collections import defaultdict
+import platform
+import warnings
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     pass
-import platform
-from collections import defaultdict
 import torch
-import warnings
 
 use_horovod = False
 use_mpi = False

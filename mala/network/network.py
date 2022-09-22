@@ -12,9 +12,6 @@ try:
 except ModuleNotFoundError:
     # Warning is thrown by parameters class
     pass
-import torch
-import torch.nn as nn
-import torch.nn.functional as functional
 
 
 class Network(nn.Module):
@@ -206,10 +203,6 @@ class Network(nn.Module):
 class FeedForwardNet(Network):
     """Initialize this network as a feed-forward network."""
 
-        # Check if multiple types of activations were selected or only one
-        # was passed to be used in the entire network.#
-        # If multiple layers have been passed, their size needs to be correct.
-
     def __init__(self, params):
         super(FeedForwardNet, self).__init__(params)
 
@@ -271,6 +264,7 @@ class FeedForwardNet(Network):
             inputs = layer(inputs)
         return inputs
 
+
 class LSTM(Network):
     """Initialize this network as a LSTM network."""
 
@@ -279,29 +273,34 @@ class LSTM(Network):
         super(LSTM, self).__init__(params)
 
         self.hidden_dim = self.params.layer_sizes[-1]
-        self.hidden = self.init_hidden()# check for size for validate and train
+
+        # check for size for validate and train
+        self.hidden = self.init_hidden()
 
         print("initialising LSTM network")
 
         # First Layer
-        self.first_layer = nn.Linear(self.params.layer_sizes[0], self.params.layer_sizes[1])
+        self.first_layer = nn.Linear(self.params.layer_sizes[0],
+                                     self.params.layer_sizes[1])
 
         # size of lstm based on bidirectional or not:
         # https://en.wikipedia.org/wiki/Bidirectional_recurrent_neural_networks
-        if (self.params.bidirection):
+        if self.params.bidirection:
             self.lstm_gru_layer = nn.LSTM(self.params.layer_sizes[1],
-                                        int(self.hidden_dim / 2),
-                                        self.params.num_hidden_layers,
-                                        batch_first=True,
-                                        bidirectional=True)
+                                          int(self.hidden_dim / 2),
+                                          self.params.num_hidden_layers,
+                                          batch_first=True,
+                                          bidirectional=True)
         else:
 
             self.lstm_gru_layer = nn.LSTM(self.params.layer_sizes[1],
-                                        self.hidden_dim,
-                                        self.params.num_hidden_layers,
-                                        batch_first=True)
-        self.activation = self.activation_mappings[self.params.layer_activations[0]]()
+                                          self.hidden_dim,
+                                          self.params.num_hidden_layers,
+                                          batch_first=True)
+        self.activation = \
+            self.activation_mappings[self.params.layer_activations[0]]()
 
+        self.batch_size = None
         # Once everything is done, we can move the Network on the target
         # device.
         self.to(self.params._configuration["device"])
@@ -313,7 +312,7 @@ class LSTM(Network):
 
         Parameters
         ----------
-        inputs : torch.Tensor
+        x : torch.Tensor
             Input array for which the forward pass is to be performed.
 
         Returns
@@ -323,41 +322,41 @@ class LSTM(Network):
         """
         self.batch_size = x.shape[0]
 
-        if (self.params.no_hidden_state):
-            self.hidden = (self.hidden[0].fill_(0.0), self.hidden[1].fill_(0.0))
-
+        if self.params.no_hidden_state:
+            self.hidden =\
+                (self.hidden[0].fill_(0.0), self.hidden[1].fill_(0.0))
 
         self.hidden = (self.hidden[0].detach(), self.hidden[1].detach())
-
         x = self.activation(self.first_layer(x))
 
-        if (self.params.bidirection):
+        if self.params.bidirection:
             x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size,
-                                                self.params.num_hidden_layers,
-                                                self.params.layer_sizes[1]),
-                                            self.hidden)
+                                                 self.params.num_hidden_layers,
+                                                 self.params.layer_sizes[1]),
+                                                 self.hidden)
         else:
             x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size,
-                                                self.params.num_hidden_layers,
-                                                self.params.layer_sizes[1]),
-                                            self.hidden)
+                                                 self.params.num_hidden_layers,
+                                                 self.params.layer_sizes[1]),
+                                                 self.hidden)
 
         x = x[:, -1, :]
         x = self.activation(x)
 
         return (x)
 
-    # Initialize hidden and cell states
     def init_hidden(self):
         """
-        Initialize hidden state and cell state to zero when called and assigns specific sizes.
+        Initialize hidden state and cell state to zero when called.
+
+         Also assigns specific sizes.
 
         Returns
         -------
         Hidden state and cell state : torch.Tensor
             initialised to zeros.
         """
-        if (self.params.bidirection):
+        if self.params.bidirection:
             h0 = torch.empty(self.params.num_hidden_layers * 2,
                              self.mini_batch_size,
                              self.hidden_dim // 2)
@@ -376,44 +375,50 @@ class LSTM(Network):
 
         return (h0, c0)
 
+
 class GRU(LSTM):
     """Initialize this network as a GRU network."""
 
-    # was passed to be used similar to LSTM but with small tweek for the layer as GRU.
+    # was passed to be used similar to LSTM but with small tweek for the
+    # layer as GRU.
     def __init__(self, params):
         Network.__init__(self, params)
 
         self.hidden_dim = self.params.layer_sizes[-1]
-        self.hidden = self.init_hidden()# check for size for validate and train
+
+        # check for size for validate and train
+        self.hidden = self.init_hidden()
 
         # First Layer
-        self.first_layer = nn.Linear(self.params.layer_sizes[0], self.params.layer_sizes[1])
+        self.first_layer = nn.Linear(self.params.layer_sizes[0],
+                                     self.params.layer_sizes[1])
 
         # Similar to LSTM class replaced with nn.GRU
-        if (self.params.bidirection):
+        if self.params.bidirection:
             self.lstm_gru_layer = nn.GRU(self.params.layer_sizes[1],
-                                        int(self.hidden_dim / 2),
-                                        self.params.num_hidden_layers,
-                                        batch_first=True,
-                                        bidirectional=True)
+                                         int(self.hidden_dim / 2),
+                                         self.params.num_hidden_layers,
+                                         batch_first=True,
+                                         bidirectional=True)
         else:
 
             self.lstm_gru_layer = nn.GRU(self.params.layer_sizes[1],
-                                        self.hidden_dim,
-                                        self.params.num_hidden_layers,
-                                        batch_first=True)
-        self.activation = self.activation_mappings[self.params.layer_activations[0]]()
+                                         self.hidden_dim,
+                                         self.params.num_hidden_layers,
+                                         batch_first=True)
+        self.activation = \
+            self.activation_mappings[self.params.layer_activations[0]]()
 
         if params.use_gpu:
             self.to('cuda')
-     # Apply Network
+
     def forward(self, x):
         """
         Perform a forward pass through the network.
 
         Parameters
         ----------
-        inputs : torch.Tensor
+        x : torch.Tensor
             Input array for which the forward pass is to be performed.
 
         Returns
@@ -423,31 +428,29 @@ class GRU(LSTM):
         """
         self.batch_size = x.shape[0]
 
-        if (self.params.no_hidden_state):
+        if self.params.no_hidden_state:
             self.hidden = self.hidden[0].fill_(0.0)
-
 
         self.hidden = self.hidden.detach()
 
         x = self.activation(self.first_layer(x))
 
-        if (self.params.bidirection):
+        if self.params.bidirection:
             x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size,
-                                                self.params.num_hidden_layers,
-                                                self.params.layer_sizes[1]),
-                                            self.hidden)
+                                                 self.params.num_hidden_layers,
+                                                 self.params.layer_sizes[1]),
+                                                 self.hidden)
         else:
             x, self.hidden = self.lstm_gru_layer(x.view(self.batch_size,
-                                                self.params.num_hidden_layers,
-                                                self.params.layer_sizes[1]),
-                                            self.hidden)
+                                                 self.params.num_hidden_layers,
+                                                 self.params.layer_sizes[1]),
+                                                 self.hidden)
 
         x = x[:, -1, :]
         x = self.activation(x)
 
         return (x)
 
-       # Initialize hidden states
     def init_hidden(self):
         """
         Initialize hidden state to zero when called and assigns specific sizes.
@@ -457,7 +460,7 @@ class GRU(LSTM):
         Hidden state : torch.Tensor
             initialised to zeros.
         """
-        if (self.params.bidirection):
+        if self.params.bidirection:
             h0 = torch.empty(self.params.num_hidden_layers * 2,
                              self.mini_batch_size,
                              self.hidden_dim // 2)
@@ -468,6 +471,7 @@ class GRU(LSTM):
         h0.zero_()
 
         return h0
+
 
 class TransformerNet(Network):
     """Initialize this network as the transformer net.
@@ -488,15 +492,22 @@ class TransformerNet(Network):
                 self.params.num_heads += 1
 
             printout("Adjusting number of heads from", old_num_heads,
-            "to", self.params.num_heads, min_verbosity=1)
+                     "to", self.params.num_heads, min_verbosity=1)
 
         self.src_mask = None
-        self.pos_encoder = PositionalEncoding(self.params.layer_sizes[0], self.params.dropout)
+        self.pos_encoder = PositionalEncoding(self.params.layer_sizes[0],
+                                              self.params.dropout)
 
-        encoder_layers = nn.TransformerEncoderLayer(self.params.layer_sizes[0], self.params.num_heads, self.params.layer_sizes[1], self.params.dropout)
-        self.transformer_encoder = nn.TransformerEncoder(encoder_layers, self.params.num_hidden_layers)
+        encoder_layers = nn.TransformerEncoderLayer(self.params.layer_sizes[0],
+                                                    self.params.num_heads,
+                                                    self.params.layer_sizes[1],
+                                                    self.params.dropout)
+        self.transformer_encoder =\
+            nn.TransformerEncoder(encoder_layers,
+                                  self.params.num_hidden_layers)
 
-        self.decoder = nn.Linear(self.params.layer_sizes[0], self.params.layer_sizes[-1])
+        self.decoder = nn.Linear(self.params.layer_sizes[0],
+                                 self.params.layer_sizes[-1])
 
         self.init_weights()
 
@@ -504,10 +515,10 @@ class TransformerNet(Network):
         # device.
         self.to(self.params._configuration["device"])
 
-
-    def generate_square_subsequent_mask(self, size):
+    @staticmethod
+    def generate_square_subsequent_mask(size):
         """
-        Generate a mask so that only the current and previous tokens are visible to the transformer.
+        Generate a mask so that only the current / previous tokens are visible.
 
         Parameters
         ----------
@@ -515,17 +526,20 @@ class TransformerNet(Network):
             size of the mask
         """
         mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
-        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+        mask = mask.float().masked_fill(mask == 0, float('-inf')).\
+            masked_fill(mask == 1, float(0.0))
 
         return mask
 
     def init_weights(self):
-        """Initialise weights with a uniform random distribution in the range (-initrange, initrange)."""
+        """
+        Initialise weights with a uniform random distribution.
+
+        Distribution will be in the range (-initrange, initrange).
+        """
         initrange = 0.1
-    #        self.encoder.weight.data.uniform_(-initrange, initrange)
         self.decoder.bias.data.zero_()
         self.decoder.weight.data.uniform_(-initrange, initrange)
-
 
     def forward(self, x):
         """Perform a forward pass through the network."""
@@ -538,11 +552,13 @@ class TransformerNet(Network):
         x = self.pos_encoder(x)
         output = self.transformer_encoder(x, self.src_mask)
         output = self.decoder(output)
-        output= output.squeeze(dim=1)
+        output = output.squeeze(dim=1)
         return output
 
+
 class PositionalEncoding(nn.Module):
-    """Injects some information of relative/absolute position of token in a sequence.
+    """
+    Injects some information of relative/absolute position of a token.
 
     Parameters
     ----------
@@ -564,8 +580,10 @@ class PositionalEncoding(nn.Module):
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
 
         # Need to develop better form here.
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-np.log(10000.0) / d_model))
-        div_term2 = torch.exp(torch.arange(0, d_model - 1 , 2).float() * (-np.log(10000.0) / d_model))
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() *
+                             (-np.log(10000.0) / d_model))
+        div_term2 = torch.exp(torch.arange(0, d_model - 1 , 2).float() *
+                              (-np.log(10000.0) / d_model))
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term2)
         pe = pe.unsqueeze(0).transpose(0, 1)
@@ -573,6 +591,7 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         """Perform a forward pass through the network."""
-        x= x.unsqueeze(dim=1) #add extra dimension for batch_size
+        # add extra dimension for batch_size
+        x = x.unsqueeze(dim=1)
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)

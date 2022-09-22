@@ -1,18 +1,17 @@
 """Tools for initializing a (ML)-DFT trajectory with OF-DFT."""
 from warnings import warn
 
-try:
-    from dftpy.api.api4ase import DFTpyCalculator
-    from dftpy.config import DefaultOption, OptionFormat
-except ModuleNotFoundError:
-    pass
-
 from ase import units
 import ase.io
 from ase.md import MDLogger
 from ase.md.langevin import Langevin
 from ase.io.trajectory import Trajectory
 from ase.md.velocitydistribution import MaxwellBoltzmannDistribution
+try:
+    from dftpy.api.api4ase import DFTpyCalculator
+    from dftpy.config import DefaultOption, OptionFormat
+except ModuleNotFoundError:
+    pass
 
 
 class OFDFTInitializer:
@@ -44,7 +43,8 @@ class OFDFTInitializer:
         self.dftpy_configuration = DefaultOption()
 
         self.dftpy_configuration['PATH']['pppath'] = self.params.local_psp_path
-        self.dftpy_configuration['PP'][self.atoms[0].symbol] = self.params.local_psp_name
+        self.dftpy_configuration['PP'][self.atoms[0].symbol] = \
+            self.params.local_psp_name
         self.dftpy_configuration['OPT']['method'] = self.params.ofdft_kedf
         self.dftpy_configuration['KEDF']['kedf'] = 'WT'
         self.dftpy_configuration['JOB']['calctype'] = 'Energy Force'
@@ -88,4 +88,3 @@ class OFDFTInitializer:
         ase.io.write("POSCAR_initial", self.atoms, "vasp")
         dyn.run(self.params.ofdft_number_of_timesteps)
         ase.io.write("POSCAR_equilibrated", self.atoms, "vasp")
-

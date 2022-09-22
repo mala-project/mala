@@ -1,11 +1,9 @@
 """Base class for all target calculators."""
 from abc import ABC, abstractmethod
 import itertools
-import warnings
-from functools import cached_property
 
 from ase.neighborlist import NeighborList
-from ase.units import Rydberg, Bohr, kB
+from ase.units import Rydberg, kB
 import ase.io
 import numpy as np
 from scipy.spatial import distance
@@ -225,8 +223,8 @@ class Target(ABC):
                     if "End of self-consistent calculation" in line:
                         past_calculation_part = True
                     if "number of electrons       =" in line:
-                        self.number_of_electrons_exact = np.float64(line.split('=')
-                                                              [1])
+                        self.number_of_electrons_exact = \
+                            np.float64(line.split('=')[1])
                     if "Fermi-Dirac smearing, width (Ry)=" in line:
                         self.temperature_K = np.float64(line.split('=')[2]) * \
                                              Rydberg / kB
@@ -277,7 +275,8 @@ class Target(ABC):
                 optimal_sigma_aluminium
 
             # This is especially important for size extrapolation.
-            self.electrons_per_atom = self.number_of_electrons_exact / len(self.atoms)
+            self.electrons_per_atom = self.number_of_electrons_exact / \
+                len(self.atoms)
 
             # Unit conversion
             self.total_energy_dft_calculation = total_energy*Rydberg
@@ -426,7 +425,8 @@ class Target(ABC):
             _rMax = Target._get_ideal_rmax_for_rdf(atoms, method="2mic")
         else:
             if method == "asap3":
-                _rMax_possible = Target._get_ideal_rmax_for_rdf(atoms, method="2mic")
+                _rMax_possible = Target._get_ideal_rmax_for_rdf(atoms,
+                                                                method="2mic")
                 if rMax > _rMax_possible:
                     raise Exception("ASAP3 calculation fo RDF cannot work "
                                     "with radii that are bigger then the "
@@ -445,9 +445,9 @@ class Target(ABC):
                 if pbc[i]:
                     if _rMax > cell[i, i]:
                         parallel_warn(
-                            "Calculating RDF with a radius larger then the unit"
-                            " cell. While this will work numerically, be cautious"
-                            " about the physicality of its results")
+                            "Calculating RDF with a radius larger then the "
+                            "unit cell. While this will work numerically, be "
+                            "cautious about the physicality of its results")
 
             # Calculate all the distances.
             # rMax/2 because this is the radius around one atom, so half the
@@ -554,7 +554,8 @@ class Target(ABC):
 
         # Construct a neighbor list for calculation of distances.
         # With this, the PBC are satisfied.
-        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms))+[_rMax/2.0],
+        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms)) +
+                                                     [_rMax/2.0],
                                                      bothways=True)
         neighborlist.update(atoms)
 
@@ -621,7 +622,8 @@ class Target(ABC):
         return tpcf[1:, 1:, 1:], rr[:, 1:, 1:, 1:]
 
     @staticmethod
-    def static_structure_factor_from_atoms(atoms: ase.Atoms, number_of_bins, kMax,
+    def static_structure_factor_from_atoms(atoms: ase.Atoms, number_of_bins,
+                                           kMax,
                                            radial_distribution_function=None,
                                            calculation_type="direct"):
         """
@@ -762,7 +764,7 @@ class Target(ABC):
                             "unsupported.")
 
     def get_radial_distribution_function(self, atoms: ase.Atoms,
-                                                method="mala"):
+                                         method="mala"):
         """
         Calculate the radial distribution function (RDF).
 
@@ -772,6 +774,11 @@ class Target(ABC):
         ----------
         atoms : ase.Atoms
             Atoms for which to construct the RDF.
+
+        method : string
+            If "mala" the more flexible, yet less performant python based
+            RDF will be calculated. If "asap3", asap3's C++ implementation
+            will be used.
 
         Returns
         -------
@@ -849,10 +856,10 @@ class Target(ABC):
             as [kMax] array.
         """
         return Target.static_structure_factor_from_atoms(atoms,
-                                                             self.parameters.
-                                                             ssf_parameters["number_of_bins"],
-                                                             self.parameters.
-                                                             ssf_parameters["number_of_bins"])
+                                                         self.parameters.
+                                                         ssf_parameters["number_of_bins"],
+                                                         self.parameters.
+                                                         ssf_parameters["number_of_bins"])
 
     @staticmethod
     def write_tem_input_file(atoms_Angstrom, qe_input_data,

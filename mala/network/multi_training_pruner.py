@@ -30,7 +30,8 @@ class MultiTrainingPruner(BasePruner):
             parallel_warn("This pruner has no effect if only one training per "
                           "trial is performed.")
 
-    def prune(self, study: "optuna.study.Study", trial: "optuna.trial.FrozenTrial") -> bool:
+    def prune(self, study: "optuna.study.Study",
+              trial: "optuna.trial.FrozenTrial") -> bool:
         """
         Judge whether the trial should be pruned based on the reported values.
 

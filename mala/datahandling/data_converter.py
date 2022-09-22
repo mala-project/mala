@@ -6,8 +6,6 @@ import numpy as np
 from mala.common.parallelizer import printout, get_rank
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor import Descriptor
-from mala.targets.density import Density
-from mala.targets.ldos import LDOS
 from mala.targets.target import Target
 
 

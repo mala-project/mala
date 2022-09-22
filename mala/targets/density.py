@@ -11,7 +11,7 @@ except ModuleNotFoundError:
     pass
 import numpy as np
 
-from mala.common.parallelizer import printout, get_rank, parallel_warn, get_comm, barrier
+from mala.common.parallelizer import printout, parallel_warn, barrier
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube, write_cube
@@ -814,16 +814,17 @@ class Density(Target):
             #
             # Check normalization of the Gaussian descriptors
             #
-            #from mpi4py import MPI
-            #ggrid_sum = np.sum(gaussian_descriptors)
-            #full_ggrid_sum = np.array([0.0])
-            #comm = get_comm()
-            #comm.Barrier()
-            #comm.Reduce([ggrid_sum, MPI.DOUBLE], [full_ggrid_sum, MPI.DOUBLE], op=MPI.SUM, root=0)
-            #printout("full_ggrid_sum =", full_ggrid_sum)
+            # from mpi4py import MPI
+            # ggrid_sum = np.sum(gaussian_descriptors)
+            # full_ggrid_sum = np.array([0.0])
+            # comm = get_comm()
+            # comm.Barrier()
+            # comm.Reduce([ggrid_sum, MPI.DOUBLE],
+            # [full_ggrid_sum, MPI.DOUBLE], op=MPI.SUM, root=0)
+            # printout("full_ggrid_sum =", full_ggrid_sum)
 
-            # Calculate the Gaussian descriptors for a reference system consisting
-            # of one atom at position (0.0,0.0,0.0)
+            # Calculate the Gaussian descriptors for a reference system
+            # consisting of one atom at position (0.0,0.0,0.0)
             barrier()
             t0 = time.perf_counter()
             atoms_reference = atoms_Angstrom.copy()
@@ -840,12 +841,13 @@ class Density(Target):
             #
             # Check normalization of the reference Gaussian descriptors
             #
-            #reference_ggrid_sum = np.sum(reference_gaussian_descriptors)
-            #full_reference_ggrid_sum = np.array([0.0])
-            #comm = get_comm()
-            #comm.Barrier()
-            #comm.Reduce([reference_ggrid_sum, MPI.DOUBLE], [full_reference_ggrid_sum, MPI.DOUBLE], op=MPI.SUM, root=0)
-            #printout("full_reference_ggrid_sum =", full_reference_ggrid_sum)
+            # reference_ggrid_sum = np.sum(reference_gaussian_descriptors)
+            # full_reference_ggrid_sum = np.array([0.0])
+            # comm = get_comm()
+            # comm.Barrier()
+            # comm.Reduce([reference_ggrid_sum, MPI.DOUBLE],
+            # [full_reference_ggrid_sum, MPI.DOUBLE], op=MPI.SUM, root=0)
+            # printout("full_reference_ggrid_sum =", full_reference_ggrid_sum)
 
         barrier()
         t0 = time.perf_counter()
@@ -867,9 +869,14 @@ class Density(Target):
         if self._parameters_full.descriptors.\
                 use_gaussian_descriptors_energy_formula:
             t0 = time.perf_counter()
-            gaussian_descriptors = np.reshape(gaussian_descriptors, [number_of_gridpoints, 1], order='F')
-            reference_gaussian_descriptors = np.reshape(reference_gaussian_descriptors, [number_of_gridpoints, 1], order='F')
-            sigma = self._parameters_full.descriptors.gaussian_descriptors_sigma
+            gaussian_descriptors = \
+                np.reshape(gaussian_descriptors,
+                           [number_of_gridpoints, 1], order='F')
+            reference_gaussian_descriptors = \
+                np.reshape(reference_gaussian_descriptors,
+                           [number_of_gridpoints, 1], order='F')
+            sigma = self._parameters_full.descriptors.\
+                gaussian_descriptors_sigma
             sigma = sigma / Bohr
             te.set_positions_gauss(self._parameters_full.verbosity,
                                    gaussian_descriptors,
@@ -891,31 +898,6 @@ class Density(Target):
                  min_verbosity=2)
 
         return atoms_Angstrom
-
-    @staticmethod
-    def get_scaled_positions_for_qe(atoms):
-        """
-        Get the positions correctly scaled for QE.
-
-        QE (for ibrav=0) scales a little bit different then ASE would.
-        ASE uses all provided cell parameters, while QE simply sets the
-        first entry in the cell parameter matrix as reference and divides
-        all positions by this value.
-
-        Parameters
-        ----------
-        atoms : ase.Atoms
-            The atom objects for which the scaled positions should be
-            calculated.
-
-        Returns
-        -------
-        scaled_positions : numpy.array
-            The scaled positions.
-        """
-        principal_axis = atoms.get_cell()[0][0]
-        scaled_positions = atoms.get_positions()/principal_axis
-        return scaled_positions
 
     def _get_gaussian_descriptors_for_structure_factors(self, atoms, grid):
         descriptor_calculator = GaussianDescriptors(self._parameters_full)

@@ -1,17 +1,17 @@
 """DOS calculation class."""
-import os
 from functools import cached_property
 
-from scipy import integrate, interpolate
-from scipy.optimize import toms748
-from ase.units import Rydberg
 import ase.io
+from ase.units import Rydberg
+import numpy as np
+from scipy import interpolate, integrate
+from scipy.optimize import toms748
 
 from mala.common.parameters import printout
 from mala.common.parallelizer import get_rank, barrier, get_comm
 from mala.targets.target import Target
-from mala.targets.calculation_helpers import *
-
+from mala.targets.calculation_helpers import fermi_function, gaussians, \
+    analytical_integration, get_beta, entropy_multiplicator
 
 
 class DOS(Target):
@@ -54,7 +54,8 @@ class DOS(Target):
         return_dos_object.fermi_energy_dft = ldos_object.fermi_energy_dft
         return_dos_object.temperature_K = ldos_object.temperature_K
         return_dos_object.voxel = ldos_object.voxel
-        return_dos_object.number_of_electrons_exact = ldos_object.number_of_electrons_exact
+        return_dos_object.number_of_electrons_exact = \
+            ldos_object.number_of_electrons_exact
         return_dos_object.band_energy_dft_calculation = \
             ldos_object.band_energy_dft_calculation
         return_dos_object.atoms = ldos_object.atoms
@@ -525,6 +526,10 @@ class DOS(Target):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
+        broadcast_band_energy : bool
+            If True then the band energy will only be calculated on one
+            rank and thereafter be distributed to all other ranks.
+
         Returns
         -------
         band_energy : float
@@ -554,10 +559,11 @@ class DOS(Target):
         if self.parameters._configuration["mpi"] and broadcast_band_energy:
             if get_rank() == 0:
                 energy_grid = self.energy_grid
-                band_energy = self.__band_energy_from_dos(dos_data, energy_grid,
-                                                           fermi_energy_eV,
-                                                           temperature_K,
-                                                           integration_method)
+                band_energy = self.__band_energy_from_dos(dos_data,
+                                                          energy_grid,
+                                                          fermi_energy_eV,
+                                                          temperature_K,
+                                                          integration_method)
             else:
                 band_energy = None
 
@@ -657,6 +663,10 @@ class DOS(Target):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
+        broadcast_entropy : bool
+            If True then the entropy will only be calculated on one
+            rank and thereafter be distributed to all other ranks.
+
         Returns
         -------
         entropy_contribution : float
@@ -664,8 +674,8 @@ class DOS(Target):
         """
         # Parse the parameters.
         if dos_data is None and self.density_of_states is None:
-                raise Exception("No DOS data provided, cannot calculate"
-                                " this quantity.")
+            raise Exception("No DOS data provided, cannot calculate"
+                            " this quantity.")
 
         # Here we check whether we will use our internal, cached
         # DOS, or calculate everything from scratch.
@@ -731,6 +741,10 @@ class DOS(Target):
                 - "simps" for Simpson method.
                 - "analytical" for analytical integration. Recommended.
 
+        broadcast_fermi_energy : bool
+            If True then the Fermi energy will only be calculated on one
+            rank and thereafter be distributed to all other ranks.
+
         Returns
         -------
         fermi_energy_self_consistent : float
@@ -744,7 +758,6 @@ class DOS(Target):
 
         if temperature_K is None:
             temperature_K = self.temperature_K
-
 
         if self.parameters._configuration["mpi"] and broadcast_fermi_energy:
             if get_rank() == 0:

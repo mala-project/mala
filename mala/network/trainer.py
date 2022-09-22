@@ -278,7 +278,8 @@ class Trainer(Runner):
                 inputs = inputs.to(self.parameters._configuration["device"])
                 outputs = outputs.to(self.parameters._configuration["device"])
                 training_loss.append(self.__process_mini_batch(self.network,
-                                                           inputs, outputs))
+                                                               inputs,
+                                                               outputs))
             training_loss = np.mean(training_loss)
 
             # Calculate the validation loss. and output it.
@@ -514,7 +515,8 @@ class Trainer(Runner):
         self.validation_data_loader = DataLoader(self.data.validation_data_set,
                                                  batch_size=self.parameters.
                                                  mini_batch_size * 1,
-                                                 sampler=self.validation_sampler,
+                                                 sampler=
+                                                 self.validation_sampler,
                                                  **kwargs)
 
         if self.data.test_data_set is not None:
@@ -586,8 +588,7 @@ class Trainer(Runner):
                 # ordered.
                 calculator.\
                     read_additional_calculation_data("qe.out",
-                                         self.data.
-                                         get_snapshot_calculation_output(snapshot_number))
+                                                     self.data.get_snapshot_calculation_output(snapshot_number))
                 fe_actual = calculator.\
                     get_self_consistent_fermi_energy_ev(actual_outputs)
                 be_actual = calculator.\
@@ -597,14 +598,16 @@ class Trainer(Runner):
                     fe_predicted = calculator.\
                         get_self_consistent_fermi_energy_ev(predicted_outputs)
                     be_predicted = calculator.\
-                        get_band_energy(predicted_outputs, fermi_energy_eV=fe_predicted)
+                        get_band_energy(predicted_outputs,
+                                        fermi_energy_eV=fe_predicted)
                 except ValueError:
                     # If the training went badly, it might be that the above
                     # code results in an error, due to the LDOS being so wrong
                     # that the estimation of the self consistent Fermi energy
                     # fails.
                     be_predicted = float("inf")
-                errors.append(np.abs(be_predicted-be_actual)*(1000/len(calculator.atoms)))
+                errors.append(np.abs(be_predicted-be_actual) *
+                              (1000/len(calculator.atoms)))
             return np.mean(errors)
         elif validation_type == "total_energy":
             # Get optimal batch size and number of batches per snapshots.
@@ -617,8 +620,7 @@ class Trainer(Runner):
             errors = []
             for snapshot_number in range(offset_snapshots,
                                          number_of_snapshots+offset_snapshots):
-                actual_outputs, \
-                predicted_outputs = self.\
+                actual_outputs, predicted_outputs = self.\
                     _forward_entire_snapshot(snapshot_number-offset_snapshots,
                                              data_set,
                                              number_of_batches_per_snapshot,
@@ -629,8 +631,7 @@ class Trainer(Runner):
                 # ordered.
                 calculator.\
                     read_additional_calculation_data("qe.out",
-                                         self.data.
-                                         get_snapshot_calculation_output(snapshot_number))
+                                                     self.data.get_snapshot_calculation_output(snapshot_number))
                 fe_actual = calculator.\
                     get_self_consistent_fermi_energy_ev(actual_outputs)
                 te_actual = calculator.\
@@ -649,7 +650,8 @@ class Trainer(Runner):
                     # that the estimation of the self consistent Fermi energy
                     # fails.
                     te_predicted = float("inf")
-                errors.append(np.abs(te_predicted-te_actual)*(1000/len(calculator.atoms)))
+                errors.append(np.abs(te_predicted-te_actual) *
+                              (1000/len(calculator.atoms)))
             return np.mean(errors)
 
         else:
@@ -715,4 +717,3 @@ class Trainer(Runner):
         tensor = torch.tensor(val)
         avg_loss = hvd.allreduce(tensor, name=name, op=hvd.Average)
         return avg_loss.item()
-
