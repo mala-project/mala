@@ -2,6 +2,7 @@
 
 from ase.calculators.calculator import Calculator, all_changes
 import numpy as np
+
 from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, \
                  DOS
 from mala.common.parallelizer import get_rank, get_comm, barrier

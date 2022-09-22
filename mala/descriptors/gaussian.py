@@ -1,13 +1,12 @@
 """Gaussian descriptor class."""
 import os
-import time
 
 import ase
 import ase.io
 try:
     from lammps import lammps
     # For version compatibility; older lammps versions (the serial version
-    # we still use on some machines) do not have this constants.
+    # we still use on some machines) do not have these constants.
     try:
         from lammps import constants as lammps_constants
     except ImportError:
@@ -15,10 +14,9 @@ try:
 except ModuleNotFoundError:
     pass
 
-from mala.descriptors.lammps_utils import *
+from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
 from mala.descriptors.descriptor import Descriptor
-from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
-    barrier
+from mala.common.parallelizer import printout
 
 
 class GaussianDescriptors(Descriptor):
@@ -140,7 +138,8 @@ class GaussianDescriptors(Descriptor):
             working_directory = qe_out_directory
 
         return self.__calculate_gaussian_descriptors(atoms,
-                                                     working_directory, [nx, ny, nz])
+                                                     working_directory,
+                                                     [nx, ny, nz])
 
     def calculate_from_atoms(self, atoms, grid_dimensions,
                              working_directory="."):
@@ -231,5 +230,3 @@ class GaussianDescriptors(Descriptor):
             return gaussian_descriptors_np.copy(), nrows_ggrid
         else:
             return gaussian_descriptors_np[:, 6:].copy(), nrows_ggrid
-
-

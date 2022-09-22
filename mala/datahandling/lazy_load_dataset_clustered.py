@@ -133,7 +133,6 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         # needed, I'll make this import per-demand.
         import pqkmeans
 
-
         # Load the data into memory, and transform it as necessary.
         # I know, the here-and-there transform via torch is ugly, but
         # currently, the MALA scalers only support torch tensors.

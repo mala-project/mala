@@ -2,15 +2,16 @@
 from functools import cached_property
 
 from ase.units import Rydberg, Bohr
-import numpy as np
 import math
-import os
+import numpy as np
+from scipy import integrate
 
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier
 from mala.targets.cube_parser import read_cube
 from mala.targets.target import Target
-from mala.targets.calculation_helpers import *
+from mala.targets.calculation_helpers import fermi_function, \
+    analytical_integration, integrate_values_on_spacing
 from mala.targets.dos import DOS
 from mala.targets.density import Density
 
@@ -392,7 +393,7 @@ class LDOS(Target):
         ldos_data = None
         if self.parameters._configuration["mpi"]:
             local_size = int(np.floor(self.parameters.ldos_gridsize /
-                                     get_size()))
+                                      get_size()))
             start_index = get_rank()*local_size + 1
             if get_rank()+1 == get_size():
                 local_size += self.parameters.ldos_gridsize % \
@@ -430,19 +431,26 @@ class LDOS(Target):
             if use_memmap is not None:
                 if get_rank() == 0:
                     ldos_data_full = np.memmap(use_memmap,
-                                               shape=(data_shape[0], data_shape[1],
-                                                     data_shape[2], self.parameters.
-                                                     ldos_gridsize), mode="w+",
+                                               shape=(data_shape[0],
+                                                      data_shape[1],
+                                                      data_shape[2],
+                                                      self.parameters.
+                                                      ldos_gridsize),
+                                               mode="w+",
                                                dtype=np.float64)
                 barrier()
                 if get_rank() != 0:
                     ldos_data_full = np.memmap(use_memmap,
-                                               shape=(data_shape[0], data_shape[1],
-                                                      data_shape[2], self.parameters.
-                                                      ldos_gridsize), mode="r+",
+                                               shape=(data_shape[0],
+                                                      data_shape[1],
+                                                      data_shape[2],
+                                                      self.parameters.
+                                                      ldos_gridsize),
+                                               mode="r+",
                                                dtype=np.float64)
                 barrier()
-                ldos_data_full[:, :, :, start_index-1:end_index-1] = ldos_data[:, :, :, :]
+                ldos_data_full[:, :, :, start_index-1:end_index-1] = \
+                    ldos_data[:, :, :, :]
                 self.local_density_of_states = ldos_data_full
             else:
                 comm = get_comm()
@@ -465,9 +473,15 @@ class LDOS(Target):
                         local_start = indices[i][1]
                         local_end = indices[i][2]
                         local_size = local_end-local_start
-                        ldos_local = np.empty(local_size*data_shape[0]*data_shape[1]*data_shape[2], dtype=np.float64)
+                        ldos_local = np.empty(local_size*data_shape[0] *
+                                              data_shape[1]*data_shape[2],
+                                              dtype=np.float64)
                         comm.Recv(ldos_local, source=i, tag=100 + i)
-                        ldos_data_full[:, :, :, local_start-1:local_end-1] = np.reshape(ldos_local, (data_shape[0], data_shape[1], data_shape[2], local_size))[:,:,:,:]
+                        ldos_data_full[:, :, :, local_start-1:local_end-1] = \
+                            np.reshape(ldos_local, (data_shape[0],
+                                                    data_shape[1],
+                                                    data_shape[2],
+                                                    local_size))[:, :, :, :]
                 else:
                     comm.Send(ldos_data, dest=0,
                               tag=get_rank() + 100)
@@ -488,7 +502,7 @@ class LDOS(Target):
         units : string
             Units the LDOS is saved in.
         """
-        self.local_density_of_states = np.load(path)*\
+        self.local_density_of_states = np.load(path) * \
                                        self.convert_units(1, in_units=units)
 
     def read_from_array(self, array, units="1/(eV*A^3)"):
@@ -643,9 +657,11 @@ class LDOS(Target):
             # Calculate density data if need be.
             if density_data is None:
                 density_data = self.get_density(ldos_data,
-                                                fermi_energy_eV=fermi_energy_eV,
+                                                fermi_energy_eV=
+                                                fermi_energy_eV,
                                                 temperature_K=temperature_K,
-                                                integration_method=energy_integration_method)
+                                                integration_method=
+                                                energy_integration_method)
 
             # Now we can create calculation objects to get the necessary
             # quantities.
@@ -659,7 +675,8 @@ class LDOS(Target):
             e_band = dos_calculator.get_band_energy(dos_data,
                                                     fermi_energy_eV=
                                                     fermi_energy_eV,
-                                                    temperature_K=temperature_K,
+                                                    temperature_K=
+                                                    temperature_K,
                                                     integration_method=
                                                     energy_integration_method)
 
@@ -677,15 +694,16 @@ class LDOS(Target):
                 get_energy_contributions(density_data,
                                          qe_input_data=qe_input_data,
                                          atoms_Angstrom=atoms_Angstrom,
-                                         qe_pseudopotentials=qe_pseudopotentials,
+                                         qe_pseudopotentials=
+                                         qe_pseudopotentials,
                                          create_file=create_qe_file)
         else:
             # In this case, we use cached propeties wherever possible.
             ldos_data = self.local_density_of_states
             if ldos_data is None:
-                    raise Exception("No input data provided to caculate "
-                                    "total energy. Provide EITHER LDOS"
-                                    " OR DOS and density.")
+                raise Exception("No input data provided to caculate "
+                                "total energy. Provide EITHER LDOS"
+                                " OR DOS and density.")
 
             # With these calculator objects we can calculate all the necessary
             # quantities to construct the total energy.
@@ -701,8 +719,6 @@ class LDOS(Target):
             density_contributions = self._density_calculator.\
                 total_energy_contributions
 
-
-
         e_total = e_band + density_contributions["e_rho_times_v_hxc"] + \
             density_contributions["e_hartree"] + \
             density_contributions["e_xc"] + \
@@ -710,9 +726,12 @@ class LDOS(Target):
             e_entropy_contribution
         if return_energy_contributions:
             energy_contribtuons = {"e_band": e_band,
-                                   "e_rho_times_v_hxc": density_contributions["e_rho_times_v_hxc"],
-                                   "e_hartree": density_contributions["e_hartree"],
-                                   "e_xc": density_contributions["e_xc"],
+                                   "e_rho_times_v_hxc":
+                                       density_contributions["e_rho_times_v_hxc"],
+                                   "e_hartree":
+                                       density_contributions["e_hartree"],
+                                   "e_xc":
+                                       density_contributions["e_xc"],
                                    "e_ewald": density_contributions["e_ewald"],
                                    "e_entropy_contribution":
                                        e_entropy_contribution}
@@ -778,8 +797,8 @@ class LDOS(Target):
                                                   integration_method=
                                                   grid_integration_method)
 
-            # Once we have the DOS, we can use a DOS object to calculate t
-            # he band energy.
+            # Once we have the DOS, we can use a DOS object to calculate
+            # the band energy.
             dos_calculator = DOS.from_ldos_calculator(self)
             return dos_calculator.\
                 get_band_energy(dos_data, fermi_energy_eV=fermi_energy_eV,
@@ -849,7 +868,8 @@ class LDOS(Target):
             # number of electrons.
             dos_calculator = DOS.from_ldos_calculator(self)
             return dos_calculator.\
-                get_number_of_electrons(dos_data, fermi_energy_eV=fermi_energy_eV,
+                get_number_of_electrons(dos_data,
+                                        fermi_energy_eV=fermi_energy_eV,
                                         temperature_K=temperature_K,
                                         integration_method=
                                         energy_integration_method)
@@ -922,15 +942,16 @@ class LDOS(Target):
             dos_calculator = DOS.from_ldos_calculator(self)
             return dos_calculator.\
                 get_self_consistent_fermi_energy_ev(dos_data,
-                                                    temperature_K=temperature_K,
+                                                    temperature_K=
+                                                    temperature_K,
                                                     integration_method=
                                                     energy_integration_method)
         else:
             return self._density_of_states_calculator.fermi_energy
 
-    def get_density(self, ldos_data=None, fermi_energy_eV=None, temperature_K=None,
-                    conserve_dimensions=False, integration_method="analytical",
-                    gather_density=False):
+    def get_density(self, ldos_data=None, fermi_energy_eV=None,
+                    temperature_K=None,  conserve_dimensions=False,
+                    integration_method="analytical", gather_density=False):
         """
         Calculate the density from given LDOS data.
 
@@ -1045,14 +1066,13 @@ class LDOS(Target):
             ldos_data_shape[-1] = 1
             density_values = density_values.reshape(ldos_data_shape)
 
-
         # Now we have the full density; We now need to collect it, in the
         # MPI case.
         if self.parameters._configuration["mpi"] and gather_density:
             density_values = np.reshape(density_values,
                                         [np.shape(density_values)[0], 1])
             density_values = np.concatenate((self.local_grid, density_values),
-                                          axis=1)
+                                            axis=1)
             full_density = self._gather_density(density_values)
             if len(ldos_data_shape) == 2:
                 ldos_shape = np.shape(full_density)
@@ -1188,6 +1208,7 @@ class LDOS(Target):
         else:
             return dos_values
 
+
     def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
                           snapshot_number=0):
         r"""
@@ -1318,9 +1339,8 @@ class LDOS(Target):
                 full_density[first_x:last_x,
                              first_y:last_y,
                              first_z:last_z] = \
-                    np.reshape(local_density[:,3],[last_z-first_z,
-                                                    last_y-first_y,
-                                                    last_x-first_x,1]).transpose([2, 1, 0, 3])
+                    np.reshape(local_density[:, 3],
+                               [last_z-first_z, last_y-first_y,
+                                last_x-first_x, 1]).transpose([2, 1, 0, 3])
 
         return full_density
-

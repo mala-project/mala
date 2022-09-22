@@ -1,21 +1,21 @@
 """SNAP descriptor class."""
 import os
-import time
 
 import ase
 import ase.io
 try:
     from lammps import lammps
     # For version compatibility; older lammps versions (the serial version
-    # we still use on some machines) do not have this constants.
+    # we still use on some machines) do not have these constants.
     try:
         from lammps import constants as lammps_constants
     except ImportError:
         pass
 except ModuleNotFoundError:
     pass
+import numpy as np
 
-from mala.descriptors.lammps_utils import *
+from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
 from mala.descriptors.descriptor import Descriptor
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier
@@ -112,7 +112,8 @@ class SNAP(Descriptor):
 
         """
         self.in_format_ase = "espresso-out"
-        printout("Calculating SNAP descriptors from", qe_out_file, min_verbosity=0)
+        printout("Calculating SNAP descriptors from", qe_out_file,
+                 min_verbosity=0)
         # We get the atomic information by using ASE.
         atoms = ase.io.read(qe_out_file, format=self.in_format_ase)
 
@@ -198,7 +199,8 @@ class SNAP(Descriptor):
 
         # Gather the SNAP descriptors into a list.
         if use_pickled_comm:
-            all_snap_descriptors_list = comm.gather(snap_descriptors_np, root=0)
+            all_snap_descriptors_list = comm.gather(snap_descriptors_np,
+                                                    root=0)
         else:
             sendcounts = np.array(comm.gather(np.shape(snap_descriptors_np)[0],
                                               root=0))
@@ -211,9 +213,9 @@ class SNAP(Descriptor):
                 # Preparing the list of buffers.
                 all_snap_descriptors_list = []
                 for i in range(0, get_size()):
-                    all_snap_descriptors_list.append(np.empty(sendcounts[i] *
-                                                              raw_feature_length,
-                                                              dtype=np.float64))
+                    all_snap_descriptors_list.append(
+                        np.empty(sendcounts[i] * raw_feature_length,
+                                 dtype=np.float64))
 
                 # No MPI necessary for first rank. For all the others,
                 # collect the buffers.
@@ -258,10 +260,10 @@ class SNAP(Descriptor):
                 snap_descriptors_full[first_x:last_x,
                                       first_y:last_y,
                                       first_z:last_z] = \
-                    np.reshape(local_snap_grid[:,3:],[last_z-first_z,
-                                                      last_y-first_y,
-                                                      last_x-first_x,
-                                                      self.fingerprint_length]).transpose([2, 1, 0, 3])
+                    np.reshape(local_snap_grid[:, 3:],
+                               [last_z-first_z, last_y-first_y, last_x-first_x,
+                                self.fingerprint_length]).\
+                    transpose([2, 1, 0, 3])
 
                 # Leaving this in here for debugging purposes.
                 # This is the slow way to reshape the descriptors.

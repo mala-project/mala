@@ -1,8 +1,8 @@
 """Collection of all parameter related classes and functions."""
-import os
 import importlib
 import inspect
 import json
+import os
 import pickle
 from time import sleep
 
@@ -159,7 +159,8 @@ class ParametersBase(JSONSerializable):
                     if len(json_dict[key]) > 0:
                         _member = []
                         for m in json_dict[key]:
-                            _member.append(deserialized_object._json_to_member(m))
+                            _member.append(deserialized_object.
+                                           _json_to_member(m))
                         setattr(deserialized_object, key, _member)
                     else:
                         setattr(deserialized_object, key, json_dict[key])
@@ -168,14 +169,16 @@ class ParametersBase(JSONSerializable):
                     if len(json_dict[key]) > 0:
                         _member = {}
                         for m in json_dict[key].keys():
-                            _member[m] = deserialized_object._json_to_member(json_dict[key][m])
+                            _member[m] = deserialized_object.\
+                                _json_to_member(json_dict[key][m])
                         setattr(deserialized_object, key, _member)
 
                     else:
                         setattr(deserialized_object, key, json_dict[key])
 
                 else:
-                    setattr(deserialized_object, key, deserialized_object._json_to_member(json_dict[key]))
+                    setattr(deserialized_object, key, deserialized_object.
+                            _json_to_member(json_dict[key]))
         return deserialized_object
 
 
@@ -632,9 +635,6 @@ class ParametersRunning(ParametersBase):
     num_workers : int
         Number of workers to be used for data loading.
 
-    sampler : dict
-        Dictionary with samplers.
-
     use_shuffling_for_samplers :
         If True, the training data will be shuffled in between epochs.
         If lazy loading is selected, then this shuffling will be done on
@@ -953,8 +953,8 @@ class ParametersHyperparameterOptimization(ParametersBase):
             if v != "_configuration":
                 if v != "hlist":
                     if v[0] == "_":
-                        printout(indent + '%-15s: %s' % (
-                        v[1:], getattr(self, v)), min_verbosity=0)
+                        printout(indent + '%-15s: %s' %
+                                 (v[1:], getattr(self, v)), min_verbosity=0)
                     else:
                         printout(
                             indent + '%-15s: %s' % (v, getattr(self, v)),
@@ -1179,10 +1179,10 @@ class Parameters:
 
     @device.setter
     def device(self, value):
-        id = get_local_rank()
+        device_id = get_local_rank()
         if self.use_gpu:
             self._device = "cuda:"\
-                           f"{id}"
+                           f"{device_id}"
         else:
             self._device = "cpu"
         self.network._update_device(self._device)
@@ -1214,7 +1214,8 @@ class Parameters:
 
     def show(self):
         """Print name and values of all attributes of this object."""
-        printout("--- " + self.__doc__.split("\n")[1] + " ---", min_verbosity=0)
+        printout("--- " + self.__doc__.split("\n")[1] + " ---",
+                 min_verbosity=0)
 
         # Two for-statements so that global parameters are shown on top.
         for v in vars(self):
@@ -1383,7 +1384,9 @@ class Parameters:
             for key in json_dict:
                 if isinstance(json_dict[key], dict):
                     # These are the other parameter classes.
-                    sub_parameters = globals()[json_dict[key]["_parameters_type"]].from_json(json_dict[key])
+                    sub_parameters =\
+                        globals()[json_dict[key]["_parameters_type"]].\
+                        from_json(json_dict[key])
                     setattr(loaded_parameters, key, sub_parameters)
 
             # We iterate a second time, to set global values, so that they
@@ -1419,7 +1422,7 @@ class Parameters:
 
         """
         return Parameters.load_from_file(filename, save_format="pickle",
-                                  no_snapshots=no_snapshots)
+                                         no_snapshots=no_snapshots)
 
     @classmethod
     def load_from_json(cls, filename, no_snapshots=False):
@@ -1442,4 +1445,4 @@ class Parameters:
 
         """
         return Parameters.load_from_file(filename, save_format="json",
-                                  no_snapshots=no_snapshots)
+                                         no_snapshots=no_snapshots)

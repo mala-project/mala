@@ -1,14 +1,14 @@
 """Tester class for testing a network."""
+import ase.io
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
-import ase.io
 import numpy as np
 import torch
 
-from mala.common.parallelizer import printout, get_rank, get_comm, barrier
+from mala.common.parallelizer import printout, get_rank, barrier
 from mala.network.runner import Runner
 
 
@@ -153,17 +153,16 @@ class Predictor(Runner):
                 torch.from_numpy(snap_descriptors).float()
             snap_descriptors = \
                 self.data.input_data_scaler.transform(snap_descriptors)
-            return self.\
-                        _forward_snap_descriptors(snap_descriptors)
+            return self._forward_snap_descriptors(snap_descriptors)
 
     def _forward_snap_descriptors(self, snap_descriptors,
                                   local_data_size=None):
         """Forward a scaled tensor of SNAP descriptors through the NN."""
         if local_data_size is None:
             local_data_size = self.data.grid_size
-        predicted_outputs = np.zeros((local_data_size,
-                                      self.data.target_calculator.\
-                                      feature_size))
+        predicted_outputs = \
+            np.zeros((local_data_size,
+                      self.data.target_calculator.feature_size))
 
         # Only predict if there is something to predict.
         # Elsewise, we just wait at the barrier down below.

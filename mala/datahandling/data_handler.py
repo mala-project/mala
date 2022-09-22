@@ -93,7 +93,6 @@ class DataHandler:
         self.nr_test_snapshots = 0
         self.nr_validation_snapshots = 0
 
-
         self.training_data_inputs = torch.empty(0)
         """
         Torch tensor holding all scaled training data inputs.
@@ -353,14 +352,16 @@ class DataHandler:
         i = 0
         snapshot: Snapshot
         for snapshot in self.parameters.snapshot_directories_list:
-            tmp_array = self.__load_from_npy_file(os.path.join(snapshot.input_npy_directory,
-                                                               snapshot.input_npy_file))
+            tmp_array = self.__load_from_npy_file(
+                os.path.join(snapshot.input_npy_directory,
+                             snapshot.input_npy_file))
             tmp_file_name = naming_scheme_input
             tmp_file_name = tmp_file_name.replace("*", str(i))
-            np.save(os.path.join(directory, tmp_file_name) +".npy", tmp_array)
+            np.save(os.path.join(directory, tmp_file_name) + ".npy", tmp_array)
 
-            tmp_array = self.__load_from_npy_file(os.path.join(snapshot.output_npy_directory,
-                                                               snapshot.output_npy_file))
+            tmp_array = self.__load_from_npy_file(
+                os.path.join(snapshot.output_npy_directory,
+                             snapshot.output_npy_file))
             tmp_file_name = naming_scheme_output
             tmp_file_name = tmp_file_name.replace("*", str(i))
             np.save(os.path.join(directory, tmp_file_name + ".npy"), tmp_array)
@@ -440,9 +441,9 @@ class DataHandler:
 
             printout("Checking descriptor file ", snapshot.input_npy_file,
                      "at", snapshot.input_npy_directory, min_verbosity=1)
-            tmp = self.__load_from_npy_file(os.path.join(snapshot.input_npy_directory,
-                                                         snapshot.input_npy_file),
-                                            mmapmode='r')
+            tmp = self.__load_from_npy_file(
+                os.path.join(snapshot.input_npy_directory,
+                             snapshot.input_npy_file), mmapmode='r')
 
             # We have to cut xyz information, if we have xyz information in
             # the descriptors.
@@ -472,9 +473,9 @@ class DataHandler:
 
             printout("Checking targets file ", snapshot.output_npy_file, "at",
                      snapshot.output_npy_directory, min_verbosity=1)
-            tmp_out = self.__load_from_npy_file(os.path.join(snapshot.output_npy_directory,
-                                                             snapshot.output_npy_file),
-                                                mmapmode='r')
+            tmp_out = self.__load_from_npy_file(
+                os.path.join(snapshot.output_npy_directory,
+                             snapshot.output_npy_file), mmapmode='r')
 
             # The first snapshot determines the data size to be used.
             # We need to make sure that snapshot size is consistent.
@@ -524,7 +525,8 @@ class DataHandler:
                                 "too few or too many options selected")
             if self.nr_training_snapshots == 0 and self.nr_test_snapshots == 0:
                 raise Exception("No training snapshots provided.")
-            if self.nr_validation_snapshots == 0 and self.nr_test_snapshots == 0:
+            if self.nr_validation_snapshots == 0 and \
+                    self.nr_test_snapshots == 0:
                 raise Exception("No validation snapshots provided.")
             if self.nr_training_snapshots == 0 and self.nr_test_snapshots != 0:
                 printout("DataHandler prepared for inference. No training "
@@ -773,7 +775,8 @@ class DataHandler:
 
                 if self.nr_test_data != 0:
                     self.test_data_set = LazyLoadDataset(
-                        self.get_input_dimension(), self.get_output_dimension(),
+                        self.get_input_dimension(),
+                        self.get_output_dimension(),
                         self.input_data_scaler, self.output_data_scaler,
                         self.descriptor_calculator, self.target_calculator,
                         self.grid_dimension, self.grid_size,
@@ -813,10 +816,9 @@ class DataHandler:
                 # Data scaling is only performed on the training data sets.
                 if snapshot.snapshot_function == "va" \
                         or snapshot.snapshot_function == "te":
-                    tmp = self.\
-                        __load_from_npy_file(os.path.join(snapshot.input_npy_directory,
-                                                          snapshot.input_npy_file),
-                                             mmapmode='r')
+                    tmp = self.__load_from_npy_file(
+                        os.path.join(snapshot.input_npy_directory,
+                                     snapshot.input_npy_file), mmapmode='r')
                     if self.descriptor_calculator.descriptors_contain_xyz:
                         tmp = tmp[:, :, :, 3:]
                     tmp = np.array(tmp)
@@ -826,10 +828,9 @@ class DataHandler:
                         self.validation_data_inputs.append(tmp)
                     if snapshot.snapshot_function == "te":
                         self.test_data_inputs.append(tmp)
-                    tmp = self.\
-                        __load_from_npy_file(os.path.join(snapshot.output_npy_directory,
-                                                          snapshot.output_npy_file),
-                                             mmapmode='r')
+                    tmp = self.__load_from_npy_file(
+                        os.path.join(snapshot.output_npy_directory,
+                                     snapshot.output_npy_file), mmapmode='r')
                     tmp = np.array(tmp)
                     tmp *= self.target_calculator.\
                         convert_units(1, snapshot.output_units)

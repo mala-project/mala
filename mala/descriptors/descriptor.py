@@ -1,7 +1,8 @@
 """Base class for all descriptor calculators."""
+from abc import ABC, abstractmethod
+
 import ase
 import numpy as np
-from abc import ABC, abstractmethod
 
 from mala.common.parameters import ParametersDescriptors, Parameters
 from mala.common.parallelizer import printout, get_size
@@ -145,7 +146,7 @@ class Descriptor(ABC):
         return new_atoms
 
     @abstractmethod
-    def calculate_from_qe_out(self, qe_out_file):
+    def calculate_from_qe_out(self, qe_out_file, **kwargs):
         """
         Calculate the descriptors based on a Quantum Espresso outfile.
 
@@ -254,12 +255,12 @@ class Descriptor(ABC):
                 # greater than grid partions - will cause mismatch later in QE
                 mpi_grid_sections = yprocs*zprocs
                 if mpi_grid_sections < size:
-                   raise ValueError("More processors than grid sections. "
-                                    "This will cause a crash further in the "
-                                    "calculation. Choose a total number of "
-                                    "processors equal to or less than the "
-                                    "total number of grid sections requsted "
-                                    "for the calculation (nyfft*nz).")
+                    raise ValueError("More processors than grid sections. "
+                                     "This will cause a crash further in the "
+                                     "calculation. Choose a total number of "
+                                     "processors equal to or less than the "
+                                     "total number of grid sections requsted "
+                                     "for the calculation (nyfft*nz).")
                 # TODO not sure what happens when size/nyfft is not integer -
                 #  further testing required
 
@@ -275,7 +276,7 @@ class Descriptor(ABC):
                     yint = ''
                     for i in range(0, yprocs-1):
                         yvals = ((i+1)*ycut)-0.00000001
-                        yint += format(yvals,".8f")
+                        yint += format(yvals, ".8f")
                         yint += ' '
                 else:
                     # account for remainder with uneven number of
@@ -285,11 +286,11 @@ class Descriptor(ABC):
                     yint = ''
                     for i in range(0, yrem):
                         yvals = (((i+1)*2)*ycut)-0.00000001
-                        yint += format(yvals,".8f")
+                        yint += format(yvals, ".8f")
                         yint += ' '
                     for i in range(yrem, yprocs-1):
                         yvals = ((i+1+yrem)*ycut)-0.00000001
-                        yint += format(yvals,".8f")
+                        yint += format(yvals, ".8f")
                         yint += ' '
                 # prepare z plane cuts for balance command in lammps
                 if int(nz / zprocs) == (nz / zprocs):
@@ -333,11 +334,12 @@ class Descriptor(ABC):
                     # efficiency decreases
                     if nz < size:
                         raise ValueError("More processors than grid sections. "
-                                         "This will cause a crash further in the "
-                                         "calculatio. Choose a total number of "
-                                         "processors equal to or less than the "
-                                         "total number of grid sections requsted "
-                                         "for the calculation (nz).")
+                                         "This will cause a crash further in "
+                                         "the calculation. Choose a total "
+                                         "number of processors equal to or "
+                                         "less than the total number of grid "
+                                         "sections requsted for the "
+                                         "calculation (nz).")
 
                     # match lammps mpi grid to be 1x1x{zprocs}
                     lammps_procs = f"1 1 {zprocs}"
@@ -350,7 +352,7 @@ class Descriptor(ABC):
                         zint = ''
                         for i in range(0, zprocs-1):
                             zvals = ((i+1)*(nz/zprocs)*zcut)-0.00000001
-                            zint += format(zvals,".8f")
+                            zint += format(zvals, ".8f")
                             zint += ' '
                     else:
                         raise ValueError("Cannot divide z-planes on processors"
@@ -360,14 +362,16 @@ class Descriptor(ABC):
                     #     zrem = nz - (zprocs*int(nz/zprocs))
                     #     zint = ''
                     #     for i in range(0, zrem):
-                    #         zvals = (((i+1)*2)*int(nz/zprocs)*zcut)-0.00000001
+                    #         zvals = (((i+1)*2)*int(nz/zprocs)*zcut)-
+                    #         0.00000001
                     #         zint += format(zvals, ".8f")
                     #         zint += ' '
                     #     for i in range(zrem, zprocs-1):
                     #         zvals = ((i+1+zrem)*zcut)-0.00000001
                     #         zint += format(zvals, ".8f")
                     #         zint += ' '
-                    lammps_dict = {"lammps_procs": f"processors {lammps_procs}",
+                    lammps_dict = {"lammps_procs":
+                                   f"processors {lammps_procs}",
                                    "zbal": f"balance 1.0 z {zint}",
                                    "ngridx": nx,
                                    "ngridy": ny,
@@ -423,8 +427,11 @@ class Descriptor(ABC):
         descriptor_dim = np.shape(descriptor_data)
         ldos_dim = np.shape(ldos_data)
         if len(descriptor_dim) == 4:
-            descriptor_data = np.reshape(descriptor_data, (descriptor_dim[0] * descriptor_dim[1] *
-                                               descriptor_dim[2], descriptor_dim[3]))
+            descriptor_data = np.reshape(descriptor_data,
+                                         (descriptor_dim[0] *
+                                          descriptor_dim[1] *
+                                          descriptor_dim[2],
+                                          descriptor_dim[3]))
             if descriptor_vectors_contain_xyz:
                 descriptor_data = descriptor_data[:, 3:]
         elif len(descriptor_dim) != 2:
@@ -451,8 +458,10 @@ class Descriptor(ABC):
 
             for j in range(0, nr_points):
                 # Calculate similarities between these two pairs.
-                descriptor_distance = calc_cosine_similarity(descriptor_data[points_i[i]],
-                                                       descriptor_data[points_j[j]])
+                descriptor_distance = \
+                    calc_cosine_similarity(
+                        descriptor_data[points_i[i]],
+                        descriptor_data[points_j[j]])
                 ldos_distance = calc_cosine_similarity(ldos_data[points_i[i]],
                                                        ldos_data[points_j[j]])
                 similarity_array.append([descriptor_distance, ldos_distance])
@@ -496,9 +505,10 @@ class Descriptor(ABC):
             return np.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 
         similarity_data = Descriptor.\
-            _calculate_cosine_similarities(descriptor_data, ldos_data, acsd_points,
+            _calculate_cosine_similarities(descriptor_data, ldos_data,
+                                           acsd_points,
                                            descriptor_vectors_contain_xyz=
-                                          descriptor_vectors_contain_xyz)
+                                           descriptor_vectors_contain_xyz)
         data_size = np.shape(similarity_data)[0]
         distances = []
         for i in range(0, data_size):

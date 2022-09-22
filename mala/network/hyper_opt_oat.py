@@ -14,9 +14,6 @@ from mala.network.hyper_opt import HyperOpt
 from mala.network.objective_base import ObjectiveBase
 from mala.network.hyperparameter_oat import HyperparameterOAT
 from mala.common.parallelizer import printout
-from mala.common.parameters import Parameters
-from mala.datahandling.data_handler import DataHandler
-from mala.datahandling.data_scaler import DataScaler
 
 
 class HyperOptOAT(HyperOpt):
@@ -38,7 +35,8 @@ class HyperOptOAT(HyperOpt):
 
     def __init__(self, params, data, use_pkl_checkpoints=False):
         super(HyperOptOAT, self).__init__(params, data,
-                                          use_pkl_checkpoints=use_pkl_checkpoints)
+                                          use_pkl_checkpoints=
+                                          use_pkl_checkpoints)
         self.objective = None
         self.optimal_params = None
         self.checkpoint_counter = 0
@@ -56,9 +54,13 @@ class HyperOptOAT(HyperOpt):
         self.current_trial = 0
         self.trial_losses = None
 
-    def add_hyperparameter(self, opttype="categorical", name="", choices=None, **kwargs):
+    def add_hyperparameter(self, opttype="categorical",
+                           name="", choices=None, **kwargs):
         """
-        Add hyperparameter such that the hyperparameter list is sorted w.r.t the number of choices.
+        Add hyperparameter.
+
+        Hyperparameter list will automatically sorted w.r.t the number of
+        choices.
 
         Parameters
         ----------
@@ -75,7 +77,8 @@ class HyperOptOAT(HyperOpt):
             index = bisect(self.sorted_num_choices, len(choices))
             self.sorted_num_choices.insert(index, len(choices))
             self.params.hyperparameters.hlist.insert(
-                index, HyperparameterOAT(opttype=opttype, name=name, choices=choices))
+                index, HyperparameterOAT(opttype=opttype, name=name,
+                                         choices=choices))
 
     def perform_study(self):
         """
@@ -133,7 +136,7 @@ class HyperOptOAT(HyperOpt):
         self.importance = np.argsort([max(i)-min(i) for i in A])
 
     def show_order_of_importance(self):
-        """Print the order of importance of the hyperparameters that are being optimised."""
+        """Print the order of importance of the hyperparameters."""
         printout("Order of Importance: ", min_verbosity=0)
         printout(
             *[self.params.hyperparameters.hlist[idx].name for idx in self.importance], sep=" < ", min_verbosity=0)
@@ -175,7 +178,8 @@ class HyperOptOAT(HyperOpt):
             self.N_runs = self.number_of_runs()*i
             print("Trying run size:", self.N_runs)
             print("Generating Suitable Orthogonal Array.")
-            arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs, self.strength,
+            arrayclass = oa.arraydata_t(self.factor_levels, self.N_runs,
+                                        self.strength,
                                         self.n_factors)
             arraylist = [arrayclass.create_root()]
 
@@ -184,8 +188,9 @@ class HyperOptOAT(HyperOpt):
             options.setAlgorithmAuto(arrayclass)
 
             for _ in range(self.strength + 1, self.n_factors + 1):
-                arraylist_extensions = oa.extend_arraylist(arraylist, arrayclass,
-                                                            options)
+                arraylist_extensions = oa.extend_arraylist(arraylist,
+                                                           arrayclass,
+                                                           options)
                 dd = np.array([a.Defficiency() for a in arraylist_extensions])
                 idxs = np.argsort(dd)
                 arraylist = [arraylist_extensions[ii] for ii in idxs]
@@ -193,7 +198,8 @@ class HyperOptOAT(HyperOpt):
                 break
 
         if not arraylist:
-            raise Exception("No orthogonal array exists with such a parameter combination.")
+            raise Exception("No orthogonal array exists with such a "
+                            "parameter combination.")
             
         else:
             return np.unique(np.array(arraylist[0]), axis=0)
@@ -305,12 +311,16 @@ class HyperOptOAT(HyperOpt):
         with open(file_path, 'rb') as handle:
             loaded_tracking_data = pickle.load(handle)
             loaded_hyperopt = HyperOptOAT(params, data)
-            loaded_hyperopt.sorted_num_choices = loaded_tracking_data["sorted_num_choices"]
-            loaded_hyperopt.current_trial = loaded_tracking_data["current_trial"]
-            loaded_hyperopt.trial_losses = loaded_tracking_data["trial_losses"]
+            loaded_hyperopt.sorted_num_choices = \
+                loaded_tracking_data["sorted_num_choices"]
+            loaded_hyperopt.current_trial = \
+                loaded_tracking_data["current_trial"]
+            loaded_hyperopt.trial_losses = \
+                loaded_tracking_data["trial_losses"]
             loaded_hyperopt.importance = loaded_tracking_data["importance"]
             loaded_hyperopt.n_factors = loaded_tracking_data["n_factors"]
-            loaded_hyperopt.factor_levels = loaded_tracking_data["factor_levels"]
+            loaded_hyperopt.factor_levels = \
+                loaded_tracking_data["factor_levels"]
             loaded_hyperopt.strength = loaded_tracking_data["strength"]
             loaded_hyperopt.N_runs = loaded_tracking_data["N_runs"]
             loaded_hyperopt.__OA = loaded_tracking_data["OA"]

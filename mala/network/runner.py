@@ -49,8 +49,8 @@ class Runner:
                 # to happen on every rank.
                 if self.parameters_full.verbosity >= 2:
                     print("size=", hvd.size(), "global_rank=", hvd.rank(),
-                             "local_rank=", hvd.local_rank(), "device=",
-                             torch.cuda.get_device_name(hvd.local_rank()))
+                          "local_rank=", hvd.local_rank(), "device=",
+                          torch.cuda.get_device_name(hvd.local_rank()))
                 # pin GPU to local rank
                 torch.cuda.set_device(hvd.local_rank())
 
@@ -89,10 +89,8 @@ class Runner:
             actual_outputs = \
                 self.data.output_data_scaler.\
                 inverse_transform(
-                    (data_set[snapshot_number *
-                                             self.data.grid_size:
-                                             (snapshot_number + 1) *
-                                             self.data.grid_size])[1],
+                    (data_set[snapshot_number * self.data.grid_size:
+                              (snapshot_number + 1) * self.data.grid_size])[1],
                     as_numpy=True)
 
         predicted_outputs = np.zeros((self.data.grid_size,
