@@ -74,7 +74,6 @@
 <span></span><span class="sd">&quot;&quot;&quot;Prunes a network when the score is above a user defined limit.&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">optuna</span>
 <span class="kn">from</span> <span class="nn">optuna.pruners</span> <span class="kn">import</span> <span class="n">BasePruner</span>
-<span class="kn">from</span> <span class="nn">optuna.trial._state</span> <span class="kn">import</span> <span class="n">TrialState</span>
 
 <span class="kn">from</span> <span class="nn">mala</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">DataHandler</span>
 <span class="kn">from</span> <span class="nn">mala.network.objective_naswot</span> <span class="kn">import</span> <span class="n">ObjectiveNASWOT</span>
@@ -111,9 +110,11 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Judge whether the trial should be pruned based on the reported values.</span>
 
-<span class="sd">        Note that this method is not supposed to be called by library users. Instead,</span>
-<span class="sd">        :func:`optuna.trial.Trial.report` and :func:`optuna.trial.Trial.should_prune` provide</span>
-<span class="sd">        user interfaces to implement pruning mechanism in an objective function.</span>
+<span class="sd">        Note that this method is not supposed to be called by library users. </span>
+<span class="sd">        Instead, :func:`optuna.trial.Trial.report` and </span>
+<span class="sd">        :func:`optuna.trial.Trial.should_prune` provide</span>
+<span class="sd">        user interfaces to implement pruning mechanism in an objective </span>
+<span class="sd">        function.</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>

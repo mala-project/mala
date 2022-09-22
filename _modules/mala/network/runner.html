@@ -122,8 +122,8 @@
                 <span class="c1"># to happen on every rank.</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;size=&quot;</span><span class="p">,</span> <span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span> <span class="s2">&quot;global_rank=&quot;</span><span class="p">,</span> <span class="n">hvd</span><span class="o">.</span><span class="n">rank</span><span class="p">(),</span>
-                             <span class="s2">&quot;local_rank=&quot;</span><span class="p">,</span> <span class="n">hvd</span><span class="o">.</span><span class="n">local_rank</span><span class="p">(),</span> <span class="s2">&quot;device=&quot;</span><span class="p">,</span>
-                             <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_name</span><span class="p">(</span><span class="n">hvd</span><span class="o">.</span><span class="n">local_rank</span><span class="p">()))</span>
+                          <span class="s2">&quot;local_rank=&quot;</span><span class="p">,</span> <span class="n">hvd</span><span class="o">.</span><span class="n">local_rank</span><span class="p">(),</span> <span class="s2">&quot;device=&quot;</span><span class="p">,</span>
+                          <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_name</span><span class="p">(</span><span class="n">hvd</span><span class="o">.</span><span class="n">local_rank</span><span class="p">()))</span>
                 <span class="c1"># pin GPU to local rank</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">set_device</span><span class="p">(</span><span class="n">hvd</span><span class="o">.</span><span class="n">local_rank</span><span class="p">())</span>
 
@@ -162,10 +162,8 @@
             <span class="n">actual_outputs</span> <span class="o">=</span> \
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span>\
                 <span class="n">inverse_transform</span><span class="p">(</span>
-                    <span class="p">(</span><span class="n">data_set</span><span class="p">[</span><span class="n">snapshot_number</span> <span class="o">*</span>
-                                             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span><span class="p">:</span>
-                                             <span class="p">(</span><span class="n">snapshot_number</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span>
-                                             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span><span class="p">])[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="p">(</span><span class="n">data_set</span><span class="p">[</span><span class="n">snapshot_number</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span><span class="p">:</span>
+                              <span class="p">(</span><span class="n">snapshot_number</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span><span class="p">])[</span><span class="mi">1</span><span class="p">],</span>
                     <span class="n">as_numpy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>

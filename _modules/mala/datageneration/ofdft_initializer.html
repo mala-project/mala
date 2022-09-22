@@ -74,18 +74,17 @@
 <span></span><span class="sd">&quot;&quot;&quot;Tools for initializing a (ML)-DFT trajectory with OF-DFT.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">dftpy.api.api4ase</span> <span class="kn">import</span> <span class="n">DFTpyCalculator</span>
-    <span class="kn">from</span> <span class="nn">dftpy.config</span> <span class="kn">import</span> <span class="n">DefaultOption</span><span class="p">,</span> <span class="n">OptionFormat</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-    <span class="k">pass</span>
-
 <span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">units</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="kn">from</span> <span class="nn">ase.md</span> <span class="kn">import</span> <span class="n">MDLogger</span>
 <span class="kn">from</span> <span class="nn">ase.md.langevin</span> <span class="kn">import</span> <span class="n">Langevin</span>
 <span class="kn">from</span> <span class="nn">ase.io.trajectory</span> <span class="kn">import</span> <span class="n">Trajectory</span>
 <span class="kn">from</span> <span class="nn">ase.md.velocitydistribution</span> <span class="kn">import</span> <span class="n">MaxwellBoltzmannDistribution</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">dftpy.api.api4ase</span> <span class="kn">import</span> <span class="n">DFTpyCalculator</span>
+    <span class="kn">from</span> <span class="nn">dftpy.config</span> <span class="kn">import</span> <span class="n">DefaultOption</span><span class="p">,</span> <span class="n">OptionFormat</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="k">pass</span>
 
 
 <div class="viewcode-block" id="OFDFTInitializer"><a class="viewcode-back" href="../../../api/mala.datageneration.ofdft_initializer.html#mala.datageneration.ofdft_initializer.OFDFTInitializer">[docs]</a><span class="k">class</span> <span class="nc">OFDFTInitializer</span><span class="p">:</span>
@@ -117,7 +116,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span> <span class="o">=</span> <span class="n">DefaultOption</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s1">&#39;PATH&#39;</span><span class="p">][</span><span class="s1">&#39;pppath&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">local_psp_path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s1">&#39;PP&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">local_psp_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s1">&#39;PP&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">local_psp_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s1">&#39;OPT&#39;</span><span class="p">][</span><span class="s1">&#39;method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_kedf</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s1">&#39;KEDF&#39;</span><span class="p">][</span><span class="s1">&#39;kedf&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;WT&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dftpy_configuration</span><span class="p">[</span><span class="s1">&#39;JOB&#39;</span><span class="p">][</span><span class="s1">&#39;calctype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Energy Force&#39;</span>
@@ -161,7 +161,6 @@
         <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;POSCAR_initial&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="s2">&quot;vasp&quot;</span><span class="p">)</span>
         <span class="n">dyn</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">ofdft_number_of_timesteps</span><span class="p">)</span>
         <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;POSCAR_equilibrated&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="s2">&quot;vasp&quot;</span><span class="p">)</span></div></div>
-
 </pre></div>
 
            </div>

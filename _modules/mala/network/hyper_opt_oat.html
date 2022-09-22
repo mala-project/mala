@@ -87,9 +87,6 @@
 <span class="kn">from</span> <span class="nn">mala.network.objective_base</span> <span class="kn">import</span> <span class="n">ObjectiveBase</span>
 <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_oat</span> <span class="kn">import</span> <span class="n">HyperparameterOAT</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
-<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.data_handler</span> <span class="kn">import</span> <span class="n">DataHandler</span>
-<span class="kn">from</span> <span class="nn">mala.datahandling.data_scaler</span> <span class="kn">import</span> <span class="n">DataScaler</span>
 
 
 <div class="viewcode-block" id="HyperOptOAT"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT">[docs]</a><span class="k">class</span> <span class="nc">HyperOptOAT</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
@@ -111,7 +108,8 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">HyperOptOAT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span>
-                                          <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="n">use_pkl_checkpoints</span><span class="p">)</span>
+                                          <span class="n">use_pkl_checkpoints</span><span class="o">=</span>
+                                          <span class="n">use_pkl_checkpoints</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">optimal_params</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -129,9 +127,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_trial</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="HyperOptOAT.add_hyperparameter"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter">[docs]</a>    <span class="k">def</span> <span class="nf">add_hyperparameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperOptOAT.add_hyperparameter"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.add_hyperparameter">[docs]</a>    <span class="k">def</span> <span class="nf">add_hyperparameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span>
+                           <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add hyperparameter such that the hyperparameter list is sorted w.r.t the number of choices.</span>
+<span class="sd">        Add hyperparameter.</span>
+
+<span class="sd">        Hyperparameter list will automatically sorted w.r.t the number of</span>
+<span class="sd">        choices.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -148,7 +150,8 @@
             <span class="n">index</span> <span class="o">=</span> <span class="n">bisect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sorted_num_choices</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">choices</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sorted_num_choices</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">choices</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                <span class="n">index</span><span class="p">,</span> <span class="n">HyperparameterOAT</span><span class="p">(</span><span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">))</span></div>
+                <span class="n">index</span><span class="p">,</span> <span class="n">HyperparameterOAT</span><span class="p">(</span><span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                         <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="HyperOptOAT.perform_study"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.perform_study">[docs]</a>    <span class="k">def</span> <span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -206,7 +209,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">importance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">([</span><span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">A</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="HyperOptOAT.show_order_of_importance"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance">[docs]</a>    <span class="k">def</span> <span class="nf">show_order_of_importance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Print the order of importance of the hyperparameters that are being optimised.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Print the order of importance of the hyperparameters.&quot;&quot;&quot;</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Order of Importance: &quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">printout</span><span class="p">(</span>
             <span class="o">*</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">importance</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &lt; &quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
@@ -248,7 +251,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">N_runs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_runs</span><span class="p">()</span><span class="o">*</span><span class="n">i</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying run size:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N_runs</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating Suitable Orthogonal Array.&quot;</span><span class="p">)</span>
-            <span class="n">arrayclass</span> <span class="o">=</span> <span class="n">oa</span><span class="o">.</span><span class="n">arraydata_t</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factor_levels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N_runs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strength</span><span class="p">,</span>
+            <span class="n">arrayclass</span> <span class="o">=</span> <span class="n">oa</span><span class="o">.</span><span class="n">arraydata_t</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factor_levels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N_runs</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">strength</span><span class="p">,</span>
                                         <span class="bp">self</span><span class="o">.</span><span class="n">n_factors</span><span class="p">)</span>
             <span class="n">arraylist</span> <span class="o">=</span> <span class="p">[</span><span class="n">arrayclass</span><span class="o">.</span><span class="n">create_root</span><span class="p">()]</span>
 
@@ -257,8 +261,9 @@
             <span class="n">options</span><span class="o">.</span><span class="n">setAlgorithmAuto</span><span class="p">(</span><span class="n">arrayclass</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strength</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_factors</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="n">arraylist_extensions</span> <span class="o">=</span> <span class="n">oa</span><span class="o">.</span><span class="n">extend_arraylist</span><span class="p">(</span><span class="n">arraylist</span><span class="p">,</span> <span class="n">arrayclass</span><span class="p">,</span>
-                                                            <span class="n">options</span><span class="p">)</span>
+                <span class="n">arraylist_extensions</span> <span class="o">=</span> <span class="n">oa</span><span class="o">.</span><span class="n">extend_arraylist</span><span class="p">(</span><span class="n">arraylist</span><span class="p">,</span>
+                                                           <span class="n">arrayclass</span><span class="p">,</span>
+                                                           <span class="n">options</span><span class="p">)</span>
                 <span class="n">dd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">Defficiency</span><span class="p">()</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arraylist_extensions</span><span class="p">])</span>
                 <span class="n">idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">dd</span><span class="p">)</span>
                 <span class="n">arraylist</span> <span class="o">=</span> <span class="p">[</span><span class="n">arraylist_extensions</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">idxs</span><span class="p">]</span>
@@ -266,7 +271,8 @@
                 <span class="k">break</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">arraylist</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No orthogonal array exists with such a parameter combination.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No orthogonal array exists with such a &quot;</span>
+                            <span class="s2">&quot;parameter combination.&quot;</span><span class="p">)</span>
             
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arraylist</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
@@ -378,12 +384,16 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
             <span class="n">loaded_tracking_data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
             <span class="n">loaded_hyperopt</span> <span class="o">=</span> <span class="n">HyperOptOAT</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-            <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">sorted_num_choices</span> <span class="o">=</span> <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;sorted_num_choices&quot;</span><span class="p">]</span>
-            <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">current_trial</span> <span class="o">=</span> <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;current_trial&quot;</span><span class="p">]</span>
-            <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">trial_losses</span> <span class="o">=</span> <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;trial_losses&quot;</span><span class="p">]</span>
+            <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">sorted_num_choices</span> <span class="o">=</span> \
+                <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;sorted_num_choices&quot;</span><span class="p">]</span>
+            <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">current_trial</span> <span class="o">=</span> \
+                <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;current_trial&quot;</span><span class="p">]</span>
+            <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">trial_losses</span> <span class="o">=</span> \
+                <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;trial_losses&quot;</span><span class="p">]</span>
             <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">importance</span> <span class="o">=</span> <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;importance&quot;</span><span class="p">]</span>
             <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">n_factors</span> <span class="o">=</span> <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;n_factors&quot;</span><span class="p">]</span>
-            <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">factor_levels</span> <span class="o">=</span> <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;factor_levels&quot;</span><span class="p">]</span>
+            <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">factor_levels</span> <span class="o">=</span> \
+                <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;factor_levels&quot;</span><span class="p">]</span>
             <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">strength</span> <span class="o">=</span> <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;strength&quot;</span><span class="p">]</span>
             <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">N_runs</span> <span class="o">=</span> <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;N_runs&quot;</span><span class="p">]</span>
             <span class="n">loaded_hyperopt</span><span class="o">.</span><span class="n">__OA</span> <span class="o">=</span> <span class="n">loaded_tracking_data</span><span class="p">[</span><span class="s2">&quot;OA&quot;</span><span class="p">]</span>

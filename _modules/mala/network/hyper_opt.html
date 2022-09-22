@@ -119,13 +119,16 @@
         <span class="k">if</span> <span class="bp">cls</span> <span class="o">==</span> <span class="n">HyperOpt</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">mala.network.hyper_opt_optuna</span> <span class="kn">import</span> <span class="n">HyperOptOptuna</span>
-                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptOptuna</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptOptuna</span><span class="p">)</span>
+                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptOptuna</span><span class="p">)</span><span class="o">.</span>\
+                    <span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptOptuna</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">==</span> <span class="s2">&quot;oat&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">mala.network.hyper_opt_oat</span> <span class="kn">import</span> <span class="n">HyperOptOAT</span>
-                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptOAT</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptOAT</span><span class="p">)</span>
+                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptOAT</span><span class="p">)</span><span class="o">.</span>\
+                    <span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptOAT</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hyper_opt_method</span> <span class="o">==</span> <span class="s2">&quot;naswot&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">mala.network.hyper_opt_naswot</span> <span class="kn">import</span> <span class="n">HyperOptNASWOT</span>
-                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptNASWOT</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptNASWOT</span><span class="p">)</span>
+                <span class="n">hoptimizer</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">,</span> <span class="n">HyperOptNASWOT</span><span class="p">)</span><span class="o">.</span>\
+                    <span class="fm">__new__</span><span class="p">(</span><span class="n">HyperOptNASWOT</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">hoptimizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown hyperparameter optimizer requested.&quot;</span><span class="p">)</span>
@@ -219,9 +222,9 @@
     <span class="k">def</span> <span class="nf">_save_params_and_scaler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Saving the Scalers is straight forward.</span>
         <span class="n">iscaler_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> \
-                       <span class="o">+</span> <span class="s2">&quot;_iscaler.pkl&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;_iscaler.pkl&quot;</span>
         <span class="n">oscaler_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">checkpoint_name</span> \
-                       <span class="o">+</span> <span class="s2">&quot;_oscaler.pkl&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;_oscaler.pkl&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">iscaler_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">oscaler_name</span><span class="p">)</span>
 

@@ -72,7 +72,6 @@
              
   <h1>Source code for mala.network.hyper_opt_optuna</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Hyperparameter optimizer using optuna.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
 
 <span class="kn">import</span> <span class="nn">optuna</span>
@@ -102,13 +101,14 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">HyperOptOptuna</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span>
-                                             <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="n">use_pkl_checkpoints</span><span class="p">)</span>
+                                             <span class="n">use_pkl_checkpoints</span><span class="o">=</span>
+                                             <span class="n">use_pkl_checkpoints</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
 
         <span class="c1"># Make the sample behave in a reproducible way, if so specified by</span>
         <span class="c1"># the user.</span>
         <span class="n">sampler</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">TPESampler</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">,</span>
-                                             <span class="n">multivariate</span><span class="o">=</span><span class="n">params</span><span class="o">.</span> \
+                                             <span class="n">multivariate</span><span class="o">=</span><span class="n">params</span><span class="o">.</span>
                                              <span class="n">hyperparameters</span><span class="o">.</span><span class="n">use_multivariate</span><span class="p">)</span>
 
         <span class="c1"># See if the user specified a pruner.</span>
@@ -120,7 +120,8 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">number_training_per_trial</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">pruner</span> <span class="o">=</span> <span class="n">MultiTrainingPruner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;MultiTrainingPruner requested, but only one training&quot;</span>
+                    <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;MultiTrainingPruner requested, but only one &quot;</span>
+                             <span class="s2">&quot;training&quot;</span>
                              <span class="s2">&quot;per trial specified; Skipping pruner creation.&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid pruner type selected.&quot;</span><span class="p">)</span>
@@ -200,7 +201,7 @@
 <span class="sd">            A list of optuna.FrozenTrial objects.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">get_trials</span><span class="p">(</span><span class="n">states</span><span class="o">=</span><span class="p">(</span><span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span>
-                                              <span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,</span> <span class="p">))</span></div>
+                                             <span class="n">TrialState</span><span class="o">.</span><span class="n">COMPLETE</span><span class="p">,</span> <span class="p">))</span></div>
 
 <div class="viewcode-block" id="HyperOptOptuna.requeue_zombie_trials"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.requeue_zombie_trials">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">requeue_zombie_trials</span><span class="p">(</span><span class="n">study_name</span><span class="p">,</span> <span class="n">rdb_storage</span><span class="p">):</span>
@@ -369,9 +370,10 @@
                     <span class="n">number_bad_trials_before_stopping</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">trial</span><span class="o">.</span><span class="n">number</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">best_trial</span><span class="o">.</span><span class="n">number</span> <span class="o">&gt;=</span> \
                         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>\
-                                <span class="n">number_bad_trials_before_stopping</span><span class="p">:</span>
+                        <span class="n">number_bad_trials_before_stopping</span><span class="p">:</span>
                     <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;No new best trial found in&quot;</span><span class="p">,</span>
-                             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">number_bad_trials_before_stopping</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span>
+                             <span class="n">number_bad_trials_before_stopping</span><span class="p">,</span>
                              <span class="s2">&quot;attempts, stopping the study.&quot;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 

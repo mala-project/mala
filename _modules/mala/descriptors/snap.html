@@ -73,22 +73,22 @@
   <h1>Source code for mala.descriptors.snap</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;SNAP descriptor class.&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">time</span>
 
 <span class="kn">import</span> <span class="nn">ase</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
     <span class="c1"># For version compatibility; older lammps versions (the serial version</span>
-    <span class="c1"># we still use on some machines) do not have this constants.</span>
+    <span class="c1"># we still use on some machines) do not have these constants.</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">lammps_constants</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="k">pass</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="n">set_cmdlinevars</span><span class="p">,</span> <span class="n">extract_compute_np</span>
 <span class="kn">from</span> <span class="nn">mala.descriptors.descriptor</span> <span class="kn">import</span> <span class="n">Descriptor</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_size</span><span class="p">,</span> \
     <span class="n">barrier</span>
@@ -185,7 +185,8 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span> <span class="o">=</span> <span class="s2">&quot;espresso-out&quot;</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Calculating SNAP descriptors from&quot;</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Calculating SNAP descriptors from&quot;</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span>
+                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="c1"># We get the atomic information by using ASE.</span>
         <span class="n">atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">qe_out_file</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span><span class="p">)</span>
 
@@ -271,7 +272,8 @@
 
         <span class="c1"># Gather the SNAP descriptors into a list.</span>
         <span class="k">if</span> <span class="n">use_pickled_comm</span><span class="p">:</span>
-            <span class="n">all_snap_descriptors_list</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">snap_descriptors_np</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">all_snap_descriptors_list</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">snap_descriptors_np</span><span class="p">,</span>
+                                                    <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sendcounts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">snap_descriptors_np</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
                                               <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
@@ -284,9 +286,9 @@
                 <span class="c1"># Preparing the list of buffers.</span>
                 <span class="n">all_snap_descriptors_list</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">get_size</span><span class="p">()):</span>
-                    <span class="n">all_snap_descriptors_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">sendcounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span>
-                                                              <span class="n">raw_feature_length</span><span class="p">,</span>
-                                                              <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+                    <span class="n">all_snap_descriptors_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">sendcounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">raw_feature_length</span><span class="p">,</span>
+                                 <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
 
                 <span class="c1"># No MPI necessary for first rank. For all the others,</span>
                 <span class="c1"># collect the buffers.</span>
@@ -331,10 +333,10 @@
                 <span class="n">snap_descriptors_full</span><span class="p">[</span><span class="n">first_x</span><span class="p">:</span><span class="n">last_x</span><span class="p">,</span>
                                       <span class="n">first_y</span><span class="p">:</span><span class="n">last_y</span><span class="p">,</span>
                                       <span class="n">first_z</span><span class="p">:</span><span class="n">last_z</span><span class="p">]</span> <span class="o">=</span> \
-                    <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">local_snap_grid</span><span class="p">[:,</span><span class="mi">3</span><span class="p">:],[</span><span class="n">last_z</span><span class="o">-</span><span class="n">first_z</span><span class="p">,</span>
-                                                      <span class="n">last_y</span><span class="o">-</span><span class="n">first_y</span><span class="p">,</span>
-                                                      <span class="n">last_x</span><span class="o">-</span><span class="n">first_x</span><span class="p">,</span>
-                                                      <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">local_snap_grid</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:],</span>
+                               <span class="p">[</span><span class="n">last_z</span><span class="o">-</span><span class="n">first_z</span><span class="p">,</span> <span class="n">last_y</span><span class="o">-</span><span class="n">first_y</span><span class="p">,</span> <span class="n">last_x</span><span class="o">-</span><span class="n">first_x</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">])</span><span class="o">.</span>\
+                    <span class="n">transpose</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
 
                 <span class="c1"># Leaving this in here for debugging purposes.</span>
                 <span class="c1"># This is the slow way to reshape the descriptors.</span>

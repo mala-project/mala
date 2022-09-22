@@ -72,14 +72,15 @@
              
   <h1>Source code for mala.common.parallelizer</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Functions for operating MALA in parallel.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
-<span class="kn">import</span> <span class="nn">platform</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="n">use_horovod</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">False</span>

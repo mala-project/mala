@@ -130,9 +130,11 @@ calibrated). If this score is good enough, the candidate will be trained.</p>
 <dt class="sig sig-object py" id="mala.network.naswot_pruner.NASWOTPruner.prune">
 <span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">optuna.study.Study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">optuna.trial.FrozenTrial</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mala/network/naswot_pruner.html#NASWOTPruner.prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.naswot_pruner.NASWOTPruner.prune" title="Permalink to this definition"></a></dt>
 <dd><p>Judge whether the trial should be pruned based on the reported values.</p>
-<p>Note that this method is not supposed to be called by library users. Instead,
-<code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.report()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.should_prune()</span></code> provide
-user interfaces to implement pruning mechanism in an objective function.</p>
+<p>Note that this method is not supposed to be called by library users.
+Instead, <code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.report()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.should_prune()</span></code> provide
+user interfaces to implement pruning mechanism in an objective
+function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

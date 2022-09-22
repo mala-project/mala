@@ -351,7 +351,8 @@
                 <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
                 <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
                 <span class="n">training_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
-                                                           <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">))</span>
+                                                               <span class="n">inputs</span><span class="p">,</span>
+                                                               <span class="n">outputs</span><span class="p">))</span>
             <span class="n">training_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">training_loss</span><span class="p">)</span>
 
             <span class="c1"># Calculate the validation loss. and output it.</span>
@@ -587,7 +588,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">validation_data_set</span><span class="p">,</span>
                                                  <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
                                                  <span class="n">mini_batch_size</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span>
-                                                 <span class="n">sampler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span><span class="p">,</span>
+                                                 <span class="n">sampler</span><span class="o">=</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">validation_sampler</span><span class="p">,</span>
                                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -659,8 +661,7 @@
                 <span class="c1"># ordered.</span>
                 <span class="n">calculator</span><span class="o">.</span>\
                     <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="s2">&quot;qe.out&quot;</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span>
-                                         <span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
+                                                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
                 <span class="n">fe_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
                     <span class="n">get_self_consistent_fermi_energy_ev</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
                 <span class="n">be_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
@@ -670,14 +671,16 @@
                     <span class="n">fe_predicted</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
                         <span class="n">get_self_consistent_fermi_energy_ev</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
                     <span class="n">be_predicted</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
-                        <span class="n">get_band_energy</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fe_predicted</span><span class="p">)</span>
+                        <span class="n">get_band_energy</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">,</span>
+                                        <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fe_predicted</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                     <span class="c1"># If the training went badly, it might be that the above</span>
                     <span class="c1"># code results in an error, due to the LDOS being so wrong</span>
                     <span class="c1"># that the estimation of the self consistent Fermi energy</span>
                     <span class="c1"># fails.</span>
                     <span class="n">be_predicted</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">be_predicted</span><span class="o">-</span><span class="n">be_actual</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)))</span>
+                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">be_predicted</span><span class="o">-</span><span class="n">be_actual</span><span class="p">)</span> <span class="o">*</span>
+                              <span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)))</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">validation_type</span> <span class="o">==</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">:</span>
             <span class="c1"># Get optimal batch size and number of batches per snapshots.</span>
@@ -690,8 +693,7 @@
             <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">snapshot_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">offset_snapshots</span><span class="p">,</span>
                                          <span class="n">number_of_snapshots</span><span class="o">+</span><span class="n">offset_snapshots</span><span class="p">):</span>
-                <span class="n">actual_outputs</span><span class="p">,</span> \
-                <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
+                <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
                     <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">snapshot_number</span><span class="o">-</span><span class="n">offset_snapshots</span><span class="p">,</span>
                                              <span class="n">data_set</span><span class="p">,</span>
                                              <span class="n">number_of_batches_per_snapshot</span><span class="p">,</span>
@@ -702,8 +704,7 @@
                 <span class="c1"># ordered.</span>
                 <span class="n">calculator</span><span class="o">.</span>\
                     <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="s2">&quot;qe.out&quot;</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span>
-                                         <span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
+                                                     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
                 <span class="n">fe_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
                     <span class="n">get_self_consistent_fermi_energy_ev</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
                 <span class="n">te_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
@@ -722,7 +723,8 @@
                     <span class="c1"># that the estimation of the self consistent Fermi energy</span>
                     <span class="c1"># fails.</span>
                     <span class="n">te_predicted</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">te_predicted</span><span class="o">-</span><span class="n">te_actual</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)))</span>
+                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">te_predicted</span><span class="o">-</span><span class="n">te_actual</span><span class="p">)</span> <span class="o">*</span>
+                              <span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)))</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -788,7 +790,6 @@
         <span class="n">tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
         <span class="n">avg_loss</span> <span class="o">=</span> <span class="n">hvd</span><span class="o">.</span><span class="n">allreduce</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">Average</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">avg_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span></div>
-
 </pre></div>
 
            </div>

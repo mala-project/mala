@@ -72,16 +72,16 @@
              
   <h1>Source code for mala.network.predictor</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Tester class for testing a network.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">horovod.torch</span> <span class="k">as</span> <span class="nn">hvd</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="c1"># Warning is thrown by Parameters class</span>
     <span class="k">pass</span>
-<span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">barrier</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">barrier</span>
 <span class="kn">from</span> <span class="nn">mala.network.runner</span> <span class="kn">import</span> <span class="n">Runner</span>
 
 
@@ -226,17 +226,16 @@
                 <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
             <span class="n">snap_descriptors</span> <span class="o">=</span> \
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span>\
-                        <span class="n">_forward_snap_descriptors</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_snap_descriptors</span><span class="p">(</span><span class="n">snap_descriptors</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_forward_snap_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snap_descriptors</span><span class="p">,</span>
                                   <span class="n">local_data_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Forward a scaled tensor of SNAP descriptors through the NN.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">local_data_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">local_data_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span>
-        <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">local_data_size</span><span class="p">,</span>
-                                      <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-                                      <span class="n">feature_size</span><span class="p">))</span>
+        <span class="n">predicted_outputs</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">local_data_size</span><span class="p">,</span>
+                      <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">feature_size</span><span class="p">))</span>
 
         <span class="c1"># Only predict if there is something to predict.</span>
         <span class="c1"># Elsewise, we just wait at the barrier down below.</span>

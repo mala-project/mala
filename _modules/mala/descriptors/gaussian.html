@@ -73,14 +73,13 @@
   <h1>Source code for mala.descriptors.gaussian</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Gaussian descriptor class.&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">time</span>
 
 <span class="kn">import</span> <span class="nn">ase</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
     <span class="c1"># For version compatibility; older lammps versions (the serial version</span>
-    <span class="c1"># we still use on some machines) do not have this constants.</span>
+    <span class="c1"># we still use on some machines) do not have these constants.</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">lammps_constants</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
@@ -88,10 +87,9 @@
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
 
-<span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="n">set_cmdlinevars</span><span class="p">,</span> <span class="n">extract_compute_np</span>
 <span class="kn">from</span> <span class="nn">mala.descriptors.descriptor</span> <span class="kn">import</span> <span class="n">Descriptor</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_size</span><span class="p">,</span> \
-    <span class="n">barrier</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
 
 
 <div class="viewcode-block" id="GaussianDescriptors"><a class="viewcode-back" href="../../../api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors">[docs]</a><span class="k">class</span> <span class="nc">GaussianDescriptors</span><span class="p">(</span><span class="n">Descriptor</span><span class="p">):</span>
@@ -213,7 +211,8 @@
             <span class="n">working_directory</span> <span class="o">=</span> <span class="n">qe_out_directory</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_gaussian_descriptors</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
-                                                     <span class="n">working_directory</span><span class="p">,</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">])</span></div>
+                                                     <span class="n">working_directory</span><span class="p">,</span>
+                                                     <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="GaussianDescriptors.calculate_from_atoms"><a class="viewcode-back" href="../../../api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors.calculate_from_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_from_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span>
                              <span class="n">working_directory</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
@@ -304,8 +303,6 @@
             <span class="k">return</span> <span class="n">gaussian_descriptors_np</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">nrows_ggrid</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">gaussian_descriptors_np</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">nrows_ggrid</span></div>
-
-
 </pre></div>
 
            </div>

@@ -169,7 +169,12 @@ format and performs postprocessing calculations on the quantity.</p>
 <p>Uses the values as given in the parameters object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms for which to construct the RDF.</p></li>
+<li><p><strong>method</strong> (<em>string</em>) – If “mala” the more flexible, yet less performant python based
+RDF will be calculated. If “asap3”, asap3’s C++ implementation
+will be used.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">

@@ -145,7 +145,7 @@
 <dd><p>Perform a forward pass through the network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>inputs</strong> (<em>torch.Tensor</em>) – Input array for which the forward pass is to be performed.</p>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input array for which the forward pass is to be performed.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>predicted_array</strong> – Predicted outputs of array.</p>
@@ -183,7 +183,7 @@
 <dd><p>Perform a forward pass through the network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>inputs</strong> (<em>torch.Tensor</em>) – Input array for which the forward pass is to be performed.</p>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input array for which the forward pass is to be performed.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>predicted_array</strong> – Predicted outputs of array.</p>
@@ -197,7 +197,10 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.network.LSTM.init_hidden">
 <span class="sig-name descname"><span class="pre">init_hidden</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#LSTM.init_hidden"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.LSTM.init_hidden" title="Permalink to this definition"></a></dt>
-<dd><p>Initialize hidden state and cell state to zero when called and assigns specific sizes.</p>
+<dd><p>Initialize hidden state and cell state to zero when called.</p>
+<blockquote>
+<div><p>Also assigns specific sizes.</p>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><strong>Hidden state and cell state</strong> – initialised to zeros.</p>
@@ -312,7 +315,7 @@ functionalities AND possibly own saving needs.</p>
 <dt class="sig sig-object py" id="mala.network.network.PositionalEncoding">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PositionalEncoding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#PositionalEncoding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.PositionalEncoding" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></p>
-<p>Injects some information of relative/absolute position of token in a sequence.</p>
+<p>Injects some information of relative/absolute position of a token.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -348,8 +351,8 @@ functionalities AND possibly own saving needs.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.network.TransformerNet.generate_square_subsequent_mask">
-<span class="sig-name descname"><span class="pre">generate_square_subsequent_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#TransformerNet.generate_square_subsequent_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.TransformerNet.generate_square_subsequent_mask" title="Permalink to this definition"></a></dt>
-<dd><p>Generate a mask so that only the current and previous tokens are visible to the transformer.</p>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_square_subsequent_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#TransformerNet.generate_square_subsequent_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.TransformerNet.generate_square_subsequent_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a mask so that only the current / previous tokens are visible.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>size</strong> (<em>int</em>) – size of the mask</p>
@@ -360,7 +363,8 @@ functionalities AND possibly own saving needs.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.network.TransformerNet.init_weights">
 <span class="sig-name descname"><span class="pre">init_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/network.html#TransformerNet.init_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.network.TransformerNet.init_weights" title="Permalink to this definition"></a></dt>
-<dd><p>Initialise weights with a uniform random distribution in the range (-initrange, initrange).</p>
+<dd><p>Initialise weights with a uniform random distribution.</p>
+<p>Distribution will be in the range (-initrange, initrange).</p>
 </dd></dl>
 
 </dd></dl>

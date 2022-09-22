@@ -72,10 +72,10 @@
              
   <h1>Source code for mala.common.parameters</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Collection of all parameter related classes and functions.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
 
@@ -232,7 +232,8 @@
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">_member</span> <span class="o">=</span> <span class="p">[]</span>
                         <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
-                            <span class="n">_member</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deserialized_object</span><span class="o">.</span><span class="n">_json_to_member</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+                            <span class="n">_member</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deserialized_object</span><span class="o">.</span>
+                                           <span class="n">_json_to_member</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
                         <span class="nb">setattr</span><span class="p">(</span><span class="n">deserialized_object</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">_member</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="nb">setattr</span><span class="p">(</span><span class="n">deserialized_object</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
@@ -241,14 +242,16 @@
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">_member</span> <span class="o">=</span> <span class="p">{}</span>
                         <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                            <span class="n">_member</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">deserialized_object</span><span class="o">.</span><span class="n">_json_to_member</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">m</span><span class="p">])</span>
+                            <span class="n">_member</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">deserialized_object</span><span class="o">.</span>\
+                                <span class="n">_json_to_member</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">m</span><span class="p">])</span>
                         <span class="nb">setattr</span><span class="p">(</span><span class="n">deserialized_object</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">_member</span><span class="p">)</span>
 
                     <span class="k">else</span><span class="p">:</span>
                         <span class="nb">setattr</span><span class="p">(</span><span class="n">deserialized_object</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
 
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">setattr</span><span class="p">(</span><span class="n">deserialized_object</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">deserialized_object</span><span class="o">.</span><span class="n">_json_to_member</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">deserialized_object</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">deserialized_object</span><span class="o">.</span>
+                            <span class="n">_json_to_member</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
         <span class="k">return</span> <span class="n">deserialized_object</span></div></div>
 
 
@@ -705,9 +708,6 @@
 <span class="sd">    num_workers : int</span>
 <span class="sd">        Number of workers to be used for data loading.</span>
 
-<span class="sd">    sampler : dict</span>
-<span class="sd">        Dictionary with samplers.</span>
-
 <span class="sd">    use_shuffling_for_samplers :</span>
 <span class="sd">        If True, the training data will be shuffled in between epochs.</span>
 <span class="sd">        If lazy loading is selected, then this shuffling will be done on</span>
@@ -1026,8 +1026,8 @@
             <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="s2">&quot;_configuration&quot;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="s2">&quot;hlist&quot;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span><span class="p">:</span>
-                        <span class="n">printout</span><span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%-15s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">)),</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                        <span class="n">printout</span><span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%-15s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                                 <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">)),</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">printout</span><span class="p">(</span>
                             <span class="n">indent</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%-15s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">)),</span>
@@ -1252,10 +1252,10 @@
 
     <span class="nd">@device</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="nb">id</span> <span class="o">=</span> <span class="n">get_local_rank</span><span class="p">()</span>
+        <span class="n">device_id</span> <span class="o">=</span> <span class="n">get_local_rank</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_gpu</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="o">=</span> <span class="s2">&quot;cuda:&quot;</span>\
-                           <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span>
+                           <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device_id</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">_update_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="p">)</span>
@@ -1287,7 +1287,8 @@
 
 <div class="viewcode-block" id="Parameters.show"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Print name and values of all attributes of this object.&quot;&quot;&quot;</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;--- &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; ---&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;--- &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; ---&quot;</span><span class="p">,</span>
+                 <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># Two for-statements so that global parameters are shown on top.</span>
         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1456,7 +1457,9 @@
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
                     <span class="c1"># These are the other parameter classes.</span>
-                    <span class="n">sub_parameters</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;_parameters_type&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="n">sub_parameters</span> <span class="o">=</span>\
+                        <span class="nb">globals</span><span class="p">()[</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;_parameters_type&quot;</span><span class="p">]]</span><span class="o">.</span>\
+                        <span class="n">from_json</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="n">loaded_parameters</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">sub_parameters</span><span class="p">)</span>
 
             <span class="c1"># We iterate a second time, to set global values, so that they</span>
@@ -1492,7 +1495,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">,</span>
-                                  <span class="n">no_snapshots</span><span class="o">=</span><span class="n">no_snapshots</span><span class="p">)</span></div>
+                                         <span class="n">no_snapshots</span><span class="o">=</span><span class="n">no_snapshots</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parameters.load_from_json"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_json">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -1515,7 +1518,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
-                                  <span class="n">no_snapshots</span><span class="o">=</span><span class="n">no_snapshots</span><span class="p">)</span></div></div>
+                                         <span class="n">no_snapshots</span><span class="o">=</span><span class="n">no_snapshots</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

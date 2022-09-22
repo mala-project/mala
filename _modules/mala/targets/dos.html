@@ -72,19 +72,19 @@
              
   <h1>Source code for mala.targets.dos</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;DOS calculation class.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span><span class="p">,</span> <span class="n">interpolate</span>
-<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">toms748</span>
-<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
+<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">integrate</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">toms748</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">printout</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">barrier</span><span class="p">,</span> <span class="n">get_comm</span>
 <span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
-<span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="o">*</span>
-
+<span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="n">fermi_function</span><span class="p">,</span> <span class="n">gaussians</span><span class="p">,</span> \
+    <span class="n">analytical_integration</span><span class="p">,</span> <span class="n">get_beta</span><span class="p">,</span> <span class="n">entropy_multiplicator</span>
 
 
 <div class="viewcode-block" id="DOS"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS">[docs]</a><span class="k">class</span> <span class="nc">DOS</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
@@ -127,7 +127,8 @@
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">temperature_K</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">temperature_K</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">voxel</span>
-        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">number_of_electrons_exact</span>
+        <span class="n">return_dos_object</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> \
+            <span class="n">ldos_object</span><span class="o">.</span><span class="n">number_of_electrons_exact</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> \
             <span class="n">ldos_object</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span>
         <span class="n">return_dos_object</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">ldos_object</span><span class="o">.</span><span class="n">atoms</span>
@@ -598,6 +599,10 @@
 <span class="sd">                - &quot;simps&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
 
+<span class="sd">        broadcast_band_energy : bool</span>
+<span class="sd">            If True then the band energy will only be calculated on one</span>
+<span class="sd">            rank and thereafter be distributed to all other ranks.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        band_energy : float</span>
@@ -627,10 +632,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">broadcast_band_energy</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_grid</span>
-                <span class="n">band_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__band_energy_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
-                                                           <span class="n">fermi_energy_eV</span><span class="p">,</span>
-                                                           <span class="n">temperature_K</span><span class="p">,</span>
-                                                           <span class="n">integration_method</span><span class="p">)</span>
+                <span class="n">band_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__band_energy_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
+                                                          <span class="n">energy_grid</span><span class="p">,</span>
+                                                          <span class="n">fermi_energy_eV</span><span class="p">,</span>
+                                                          <span class="n">temperature_K</span><span class="p">,</span>
+                                                          <span class="n">integration_method</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">band_energy</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -730,6 +736,10 @@
 <span class="sd">                - &quot;simps&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
 
+<span class="sd">        broadcast_entropy : bool</span>
+<span class="sd">            If True then the entropy will only be calculated on one</span>
+<span class="sd">            rank and thereafter be distributed to all other ranks.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        entropy_contribution : float</span>
@@ -737,8 +747,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Parse the parameters.</span>
         <span class="k">if</span> <span class="n">dos_data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No DOS data provided, cannot calculate&quot;</span>
-                                <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No DOS data provided, cannot calculate&quot;</span>
+                            <span class="s2">&quot; this quantity.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Here we check whether we will use our internal, cached</span>
         <span class="c1"># DOS, or calculate everything from scratch.</span>
@@ -804,6 +814,10 @@
 <span class="sd">                - &quot;simps&quot; for Simpson method.</span>
 <span class="sd">                - &quot;analytical&quot; for analytical integration. Recommended.</span>
 
+<span class="sd">        broadcast_fermi_energy : bool</span>
+<span class="sd">            If True then the Fermi energy will only be calculated on one</span>
+<span class="sd">            rank and thereafter be distributed to all other ranks.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        fermi_energy_self_consistent : float</span>
@@ -817,7 +831,6 @@
 
         <span class="k">if</span> <span class="n">temperature_K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">temperature_K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span>
-
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">broadcast_fermi_energy</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>

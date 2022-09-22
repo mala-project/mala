@@ -72,9 +72,10 @@
              
   <h1>Source code for mala.descriptors.descriptor</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Base class for all descriptor calculators.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
 <span class="kn">import</span> <span class="nn">ase</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">ParametersDescriptors</span><span class="p">,</span> <span class="n">Parameters</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_size</span>
@@ -218,7 +219,7 @@
         <span class="k">return</span> <span class="n">new_atoms</span></div>
 
 <div class="viewcode-block" id="Descriptor.calculate_from_qe_out"><a class="viewcode-back" href="../../../api/mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.calculate_from_qe_out">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">calculate_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calculate_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the descriptors based on a Quantum Espresso outfile.</span>
 
@@ -327,12 +328,12 @@
                 <span class="c1"># greater than grid partions - will cause mismatch later in QE</span>
                 <span class="n">mpi_grid_sections</span> <span class="o">=</span> <span class="n">yprocs</span><span class="o">*</span><span class="n">zprocs</span>
                 <span class="k">if</span> <span class="n">mpi_grid_sections</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
-                   <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;More processors than grid sections. &quot;</span>
-                                    <span class="s2">&quot;This will cause a crash further in the &quot;</span>
-                                    <span class="s2">&quot;calculation. Choose a total number of &quot;</span>
-                                    <span class="s2">&quot;processors equal to or less than the &quot;</span>
-                                    <span class="s2">&quot;total number of grid sections requsted &quot;</span>
-                                    <span class="s2">&quot;for the calculation (nyfft*nz).&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;More processors than grid sections. &quot;</span>
+                                     <span class="s2">&quot;This will cause a crash further in the &quot;</span>
+                                     <span class="s2">&quot;calculation. Choose a total number of &quot;</span>
+                                     <span class="s2">&quot;processors equal to or less than the &quot;</span>
+                                     <span class="s2">&quot;total number of grid sections requsted &quot;</span>
+                                     <span class="s2">&quot;for the calculation (nyfft*nz).&quot;</span><span class="p">)</span>
                 <span class="c1"># TODO not sure what happens when size/nyfft is not integer -</span>
                 <span class="c1">#  further testing required</span>
 
@@ -348,7 +349,7 @@
                     <span class="n">yint</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">yprocs</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
                         <span class="n">yvals</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">ycut</span><span class="p">)</span><span class="o">-</span><span class="mf">0.00000001</span>
-                        <span class="n">yint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">yvals</span><span class="p">,</span><span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
+                        <span class="n">yint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">yvals</span><span class="p">,</span> <span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
                         <span class="n">yint</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># account for remainder with uneven number of</span>
@@ -358,11 +359,11 @@
                     <span class="n">yint</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">yrem</span><span class="p">):</span>
                         <span class="n">yvals</span> <span class="o">=</span> <span class="p">(((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">ycut</span><span class="p">)</span><span class="o">-</span><span class="mf">0.00000001</span>
-                        <span class="n">yint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">yvals</span><span class="p">,</span><span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
+                        <span class="n">yint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">yvals</span><span class="p">,</span> <span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
                         <span class="n">yint</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">yrem</span><span class="p">,</span> <span class="n">yprocs</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
                         <span class="n">yvals</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">yrem</span><span class="p">)</span><span class="o">*</span><span class="n">ycut</span><span class="p">)</span><span class="o">-</span><span class="mf">0.00000001</span>
-                        <span class="n">yint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">yvals</span><span class="p">,</span><span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
+                        <span class="n">yint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">yvals</span><span class="p">,</span> <span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
                         <span class="n">yint</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
                 <span class="c1"># prepare z plane cuts for balance command in lammps</span>
                 <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">nz</span> <span class="o">/</span> <span class="n">zprocs</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">nz</span> <span class="o">/</span> <span class="n">zprocs</span><span class="p">):</span>
@@ -406,11 +407,12 @@
                     <span class="c1"># efficiency decreases</span>
                     <span class="k">if</span> <span class="n">nz</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;More processors than grid sections. &quot;</span>
-                                         <span class="s2">&quot;This will cause a crash further in the &quot;</span>
-                                         <span class="s2">&quot;calculatio. Choose a total number of &quot;</span>
-                                         <span class="s2">&quot;processors equal to or less than the &quot;</span>
-                                         <span class="s2">&quot;total number of grid sections requsted &quot;</span>
-                                         <span class="s2">&quot;for the calculation (nz).&quot;</span><span class="p">)</span>
+                                         <span class="s2">&quot;This will cause a crash further in &quot;</span>
+                                         <span class="s2">&quot;the calculation. Choose a total &quot;</span>
+                                         <span class="s2">&quot;number of processors equal to or &quot;</span>
+                                         <span class="s2">&quot;less than the total number of grid &quot;</span>
+                                         <span class="s2">&quot;sections requsted for the &quot;</span>
+                                         <span class="s2">&quot;calculation (nz).&quot;</span><span class="p">)</span>
 
                     <span class="c1"># match lammps mpi grid to be 1x1x{zprocs}</span>
                     <span class="n">lammps_procs</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;1 1 </span><span class="si">{</span><span class="n">zprocs</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -423,7 +425,7 @@
                         <span class="n">zint</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">zprocs</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
                             <span class="n">zvals</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nz</span><span class="o">/</span><span class="n">zprocs</span><span class="p">)</span><span class="o">*</span><span class="n">zcut</span><span class="p">)</span><span class="o">-</span><span class="mf">0.00000001</span>
-                            <span class="n">zint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">zvals</span><span class="p">,</span><span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
+                            <span class="n">zint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">zvals</span><span class="p">,</span> <span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
                             <span class="n">zint</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot divide z-planes on processors&quot;</span>
@@ -433,14 +435,16 @@
                     <span class="c1">#     zrem = nz - (zprocs*int(nz/zprocs))</span>
                     <span class="c1">#     zint = &#39;&#39;</span>
                     <span class="c1">#     for i in range(0, zrem):</span>
-                    <span class="c1">#         zvals = (((i+1)*2)*int(nz/zprocs)*zcut)-0.00000001</span>
+                    <span class="c1">#         zvals = (((i+1)*2)*int(nz/zprocs)*zcut)-</span>
+                    <span class="c1">#         0.00000001</span>
                     <span class="c1">#         zint += format(zvals, &quot;.8f&quot;)</span>
                     <span class="c1">#         zint += &#39; &#39;</span>
                     <span class="c1">#     for i in range(zrem, zprocs-1):</span>
                     <span class="c1">#         zvals = ((i+1+zrem)*zcut)-0.00000001</span>
                     <span class="c1">#         zint += format(zvals, &quot;.8f&quot;)</span>
                     <span class="c1">#         zint += &#39; &#39;</span>
-                    <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lammps_procs&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;processors </span><span class="si">{</span><span class="n">lammps_procs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lammps_procs&quot;</span><span class="p">:</span>
+                                   <span class="sa">f</span><span class="s2">&quot;processors </span><span class="si">{</span><span class="n">lammps_procs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                                    <span class="s2">&quot;zbal&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;balance 1.0 z </span><span class="si">{</span><span class="n">zint</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                                    <span class="s2">&quot;ngridx&quot;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span>
                                    <span class="s2">&quot;ngridy&quot;</span><span class="p">:</span> <span class="n">ny</span><span class="p">,</span>
@@ -496,8 +500,11 @@
         <span class="n">descriptor_dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">)</span>
         <span class="n">ldos_dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptor_dim</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="n">descriptor_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span> <span class="p">(</span><span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span>
-                                               <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+            <span class="n">descriptor_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span>
+                                         <span class="p">(</span><span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span>
+                                          <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span>
+                                          <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                          <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
             <span class="k">if</span> <span class="n">descriptor_vectors_contain_xyz</span><span class="p">:</span>
                 <span class="n">descriptor_data</span> <span class="o">=</span> <span class="n">descriptor_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:]</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptor_dim</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
@@ -524,8 +531,10 @@
 
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nr_points</span><span class="p">):</span>
                 <span class="c1"># Calculate similarities between these two pairs.</span>
-                <span class="n">descriptor_distance</span> <span class="o">=</span> <span class="n">calc_cosine_similarity</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">[</span><span class="n">points_i</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
-                                                       <span class="n">descriptor_data</span><span class="p">[</span><span class="n">points_j</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
+                <span class="n">descriptor_distance</span> <span class="o">=</span> \
+                    <span class="n">calc_cosine_similarity</span><span class="p">(</span>
+                        <span class="n">descriptor_data</span><span class="p">[</span><span class="n">points_i</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
+                        <span class="n">descriptor_data</span><span class="p">[</span><span class="n">points_j</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
                 <span class="n">ldos_distance</span> <span class="o">=</span> <span class="n">calc_cosine_similarity</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">[</span><span class="n">points_i</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
                                                        <span class="n">ldos_data</span><span class="p">[</span><span class="n">points_j</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
                 <span class="n">similarity_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">descriptor_distance</span><span class="p">,</span> <span class="n">ldos_distance</span><span class="p">])</span>
@@ -569,9 +578,10 @@
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y2</span><span class="p">))</span>
 
         <span class="n">similarity_data</span> <span class="o">=</span> <span class="n">Descriptor</span><span class="o">.</span>\
-            <span class="n">_calculate_cosine_similarities</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">acsd_points</span><span class="p">,</span>
+            <span class="n">_calculate_cosine_similarities</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span>
+                                           <span class="n">acsd_points</span><span class="p">,</span>
                                            <span class="n">descriptor_vectors_contain_xyz</span><span class="o">=</span>
-                                          <span class="n">descriptor_vectors_contain_xyz</span><span class="p">)</span>
+                                           <span class="n">descriptor_vectors_contain_xyz</span><span class="p">)</span>
         <span class="n">data_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">similarity_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">distances</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data_size</span><span class="p">):</span>
