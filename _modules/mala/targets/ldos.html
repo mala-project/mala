@@ -299,7 +299,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
-                <span class="n">get_self_consistent_fermi_energy_ev</span><span class="p">()</span>
+                <span class="n">get_self_consistent_fermi_energy</span><span class="p">()</span>
 
             <span class="c1"># Now that we have a new Fermi energy, we should uncache the</span>
             <span class="c1"># old number of electrons.</span>
@@ -612,14 +612,12 @@
         <span class="k">return</span> <span class="n">linspace_array</span></div>
 
 <div class="viewcode-block" id="LDOS.get_total_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_total_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
                          <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
-                         <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                         <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                         <span class="n">atoms_Angstrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                          <span class="n">return_energy_contributions</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the total energy from LDOS or given DOS + density data.</span>
@@ -642,10 +640,10 @@
 <span class="sd">        density_data : numpy.array</span>
 <span class="sd">            Density data, either as [gridsize] or [gridx,gridy,gridz].</span>
 
-<span class="sd">        fermi_energy_eV : float</span>
+<span class="sd">        fermi_energy : float</span>
 <span class="sd">            Fermi energy level in eV.</span>
 
-<span class="sd">        temperature_K : float</span>
+<span class="sd">        temperature : float</span>
 <span class="sd">            Temperature in K.</span>
 
 <span class="sd">        voxel : ase.cell.Cell</span>
@@ -698,17 +696,17 @@
         <span class="c1"># Get relevant values from DFT calculation, if not otherwise specified.</span>
         <span class="k">if</span> <span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span>
-        <span class="k">if</span> <span class="n">fermi_energy_eV</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fermi_energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span>
-            <span class="k">if</span> <span class="n">fermi_energy_eV</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span>
+            <span class="k">if</span> <span class="n">fermi_energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
                          <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
                          <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
                          <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
-        <span class="k">if</span> <span class="n">temperature_K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">temperature_K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span>
+                <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
+        <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
 
         <span class="c1"># Here we check whether we will use our internal, cached</span>
         <span class="c1"># LDOS, or calculate everything from scratch.</span>
@@ -730,11 +728,8 @@
             <span class="c1"># Calculate density data if need be.</span>
             <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">density_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span>
-                                                <span class="n">fermi_energy_eV</span><span class="o">=</span>
-                                                <span class="n">fermi_energy_eV</span><span class="p">,</span>
-                                                <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
-                                                <span class="n">integration_method</span><span class="o">=</span>
-                                                <span class="n">energy_integration_method</span><span class="p">)</span>
+                                                <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                                                <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
 
             <span class="c1"># Now we can create calculation objects to get the necessary</span>
             <span class="c1"># quantities.</span>
@@ -746,20 +741,15 @@
             <span class="c1"># (According to Eq. 9 in [1])</span>
             <span class="c1"># Band energy (kinetic energy)</span>
             <span class="n">e_band</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
-                                                    <span class="n">fermi_energy_eV</span><span class="o">=</span>
-                                                    <span class="n">fermi_energy_eV</span><span class="p">,</span>
-                                                    <span class="n">temperature_K</span><span class="o">=</span>
-                                                    <span class="n">temperature_K</span><span class="p">,</span>
-                                                    <span class="n">integration_method</span><span class="o">=</span>
-                                                    <span class="n">energy_integration_method</span><span class="p">)</span>
+                                                    <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                                                    <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+                                                    <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
 
             <span class="c1"># Smearing / Entropy contribution</span>
             <span class="n">e_entropy_contribution</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span> \
-                <span class="n">get_entropy_contribution</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
-                                         <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">,</span>
-                                         <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
-                                         <span class="n">integration_method</span><span class="o">=</span>
-                                         <span class="n">energy_integration_method</span><span class="p">)</span>
+                <span class="n">get_entropy_contribution</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                                         <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+                                         <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
 
             <span class="c1"># Density based energy contributions (via QE)</span>
             <span class="n">density_contributions</span> \
@@ -812,8 +802,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">e_total</span></div>
 
-<div class="viewcode-block" id="LDOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="LDOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
                         <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -826,10 +816,10 @@
 <span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
 <span class="sd">            will be used for the calculation.</span>
 
-<span class="sd">        fermi_energy_eV : float</span>
+<span class="sd">        fermi_energy : float</span>
 <span class="sd">            Fermi energy level in eV.</span>
 
-<span class="sd">        temperature_K : float</span>
+<span class="sd">        temperature : float</span>
 <span class="sd">            Temperature in K.</span>
 
 <span class="sd">        grid_integration_method : str</span>
@@ -873,15 +863,15 @@
             <span class="c1"># Once we have the DOS, we can use a DOS object to calculate</span>
             <span class="c1"># the band energy.</span>
             <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span>\
-                <span class="n">get_band_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">,</span>
-                                <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
+            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span> \
+                <span class="n">get_band_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                                <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
                                 <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span><span class="o">.</span><span class="n">band_energy</span></div>
 
 <div class="viewcode-block" id="LDOS.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
                                 <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -894,10 +884,10 @@
 <span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
 <span class="sd">            will be used for the calculation.</span>
 
-<span class="sd">        fermi_energy_eV : float</span>
+<span class="sd">        fermi_energy : float</span>
 <span class="sd">            Fermi energy level in eV.</span>
 
-<span class="sd">        temperature_K : float</span>
+<span class="sd">        temperature : float</span>
 <span class="sd">            Temperature in K.</span>
 
 <span class="sd">        grid_integration_method : str</span>
@@ -940,22 +930,17 @@
             <span class="c1"># Once we have the DOS, we can use a DOS object to calculate the</span>
             <span class="c1"># number of electrons.</span>
             <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span>\
-                <span class="n">get_number_of_electrons</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
-                                        <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_eV</span><span class="p">,</span>
-                                        <span class="n">temperature_K</span><span class="o">=</span><span class="n">temperature_K</span><span class="p">,</span>
-                                        <span class="n">integration_method</span><span class="o">=</span>
-                                        <span class="n">energy_integration_method</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span> \
+                <span class="n">get_number_of_electrons</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                                        <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+                                        <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span><span class="o">.</span><span class="n">number_of_electrons</span></div>
 
-<div class="viewcode-block" id="LDOS.get_self_consistent_fermi_energy_ev"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy_ev">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy_ev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                            <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                            <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                            <span class="n">grid_integration_method</span><span class="o">=</span>
-                                            <span class="s2">&quot;summation&quot;</span><span class="p">,</span>
-                                            <span class="n">energy_integration_method</span><span class="o">=</span>
-                                            <span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.get_self_consistent_fermi_energy"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_self_consistent_fermi_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">voxel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">grid_integration_method</span><span class="o">=</span><span class="s2">&quot;summation&quot;</span><span class="p">,</span>
+                                         <span class="n">energy_integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the self-consistent Fermi energy.</span>
 
@@ -971,7 +956,7 @@
 <span class="sd">            [gridx,gridy,gridz,energygrid]. If None, the cached LDOS</span>
 <span class="sd">            will be used for the calculation.</span>
 
-<span class="sd">        temperature_K : float</span>
+<span class="sd">        temperature : float</span>
 <span class="sd">            Temperature in K.</span>
 
 <span class="sd">        grid_integration_method : str</span>
@@ -1013,18 +998,16 @@
             <span class="c1"># Once we have the DOS, we can use a DOS object to calculate the</span>
             <span class="c1"># number of electrons.</span>
             <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span>\
-                <span class="n">get_self_consistent_fermi_energy_ev</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
-                                                    <span class="n">temperature_K</span><span class="o">=</span>
-                                                    <span class="n">temperature_K</span><span class="p">,</span>
-                                                    <span class="n">integration_method</span><span class="o">=</span>
-                                                    <span class="n">energy_integration_method</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dos_calculator</span><span class="o">.</span> \
+                <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span>
+                                                 <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+                                                 <span class="n">integration_method</span><span class="o">=</span><span class="n">energy_integration_method</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states_calculator</span><span class="o">.</span><span class="n">fermi_energy</span></div>
 
-<div class="viewcode-block" id="LDOS.get_density"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">temperature_K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">conserve_dimensions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span> <span class="n">gather_density</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="LDOS.get_density"><a class="viewcode-back" href="../../../api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_density">[docs]</a>    <span class="k">def</span> <span class="nf">get_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">conserve_dimensions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
+                    <span class="n">gather_density</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the density from given LDOS data.</span>
 
@@ -1037,10 +1020,10 @@
 <span class="sd">            will be used for the calculation.</span>
 
 
-<span class="sd">        fermi_energy_eV : float</span>
+<span class="sd">        fermi_energy : float</span>
 <span class="sd">            Fermi energy level in eV.</span>
 
-<span class="sd">        temperature_K : float</span>
+<span class="sd">        temperature : float</span>
 <span class="sd">            Temperature in K.</span>
 
 <span class="sd">        integration_method : string</span>
@@ -1075,17 +1058,17 @@
 <span class="sd">            dimensions.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">fermi_energy_eV</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fermi_energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span>
-            <span class="k">if</span> <span class="n">fermi_energy_eV</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy</span>
+            <span class="k">if</span> <span class="n">fermi_energy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Warning: No fermi energy was provided or could be &quot;</span>
                          <span class="s2">&quot;calculated from electronic structure data. &quot;</span>
                          <span class="s2">&quot;Using the DFT fermi energy, this may &quot;</span>
                          <span class="s2">&quot;yield unexpected results&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">fermi_energy_eV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
-        <span class="k">if</span> <span class="n">temperature_K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">temperature_K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span>
+                <span class="n">fermi_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span>
+        <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
 
         <span class="k">if</span> <span class="n">ldos_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ldos_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span>
@@ -1112,8 +1095,7 @@
 
         <span class="c1"># Build the energy grid and calculate the fermi function.</span>
         <span class="n">energy_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
-        <span class="n">fermi_values</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy_eV</span><span class="p">,</span>
-                                      <span class="n">temperature_K</span><span class="p">,</span> <span class="n">energy_units</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">)</span>
+        <span class="n">fermi_values</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
 
         <span class="c1"># Calculate the number of electrons.</span>
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
@@ -1124,9 +1106,8 @@
                                              <span class="n">energy_grid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
             <span class="n">density_values</span> <span class="o">=</span> <span class="n">analytical_integration</span><span class="p">(</span><span class="n">ldos_data_used</span><span class="p">,</span> <span class="s2">&quot;F0&quot;</span><span class="p">,</span> <span class="s2">&quot;F1&quot;</span><span class="p">,</span>
-                                                    <span class="n">fermi_energy_eV</span><span class="p">,</span>
-                                                    <span class="n">energy_grid</span><span class="p">,</span>
-                                                    <span class="n">temperature_K</span><span class="p">)</span>
+                                                    <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span>
+                                                    <span class="n">temperature</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span>
 

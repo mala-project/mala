@@ -161,7 +161,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Wrong type of parameters for Targets class.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span> <span class="o">=</span> <span class="kc">None</span>
@@ -271,7 +271,7 @@
         <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;qe.out&quot;</span><span class="p">:</span>
             <span class="c1"># Reset everything.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> <span class="kc">None</span>
@@ -299,8 +299,8 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> \
                             <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
                     <span class="k">if</span> <span class="s2">&quot;Fermi-Dirac smearing, width (Ry)=&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> \
-                                             <span class="n">Rydberg</span> <span class="o">/</span> <span class="n">kB</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> \
+                                           <span class="n">Rydberg</span> <span class="o">/</span> <span class="n">kB</span>
                     <span class="k">if</span> <span class="s2">&quot;xc contribution&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                         <span class="k">break</span>
                     <span class="k">if</span> <span class="s2">&quot;FFT dimensions&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
@@ -363,12 +363,11 @@
                 <span class="n">kweights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_calculator</span><span class="p">()</span><span class="o">.</span><span class="n">get_k_point_weights</span><span class="p">()</span>
                 <span class="n">eband_per_band</span> <span class="o">=</span> <span class="n">eigs</span> <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">eigs</span><span class="p">,</span>
                                                        <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span><span class="p">,</span>
-                                                       <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span><span class="p">)</span>
+                                                       <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span>
                 <span class="n">eband_per_band</span> <span class="o">=</span> <span class="n">kweights</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">eband_per_band</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">eband_per_band</span><span class="p">)</span>
-                <span class="n">enum_per_band</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">eigs</span><span class="p">,</span>
-                                               <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span><span class="p">,</span>
-                                               <span class="bp">self</span><span class="o">.</span><span class="n">temperature_K</span><span class="p">)</span>
+                <span class="n">enum_per_band</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">eigs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span><span class="p">,</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span>
                 <span class="n">enum_per_band</span> <span class="o">=</span> <span class="n">kweights</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">enum_per_band</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">enum_per_band</span><span class="p">)</span>
 

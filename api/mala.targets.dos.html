@@ -271,15 +271,15 @@ There is no need to call read_additional_calculation_data afterwards.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.get_band_energy">
-<span class="sig-name descname"><span class="pre">get_band_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">broadcast_band_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_band_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_band_energy" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_band_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">broadcast_band_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_band_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_band_energy" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the band energy from given DOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid]. If None, then the cached
 DOS will be used for the calculation.</p></li>
-<li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
-<li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
+<li><p><strong>fermi_energy</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
 <blockquote>
 <div><ul>
@@ -328,15 +328,15 @@ reasons. In the future, that may change.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.get_entropy_contribution">
-<span class="sig-name descname"><span class="pre">get_entropy_contribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">broadcast_entropy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_entropy_contribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_entropy_contribution" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_entropy_contribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">broadcast_entropy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_entropy_contribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_entropy_contribution" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the entropy contribution to the total energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid]. If None, then the cached
 DOS will be used for the calculation.</p></li>
-<li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
-<li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
+<li><p><strong>fermi_energy</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
 <blockquote>
 <div><ul>
@@ -361,15 +361,15 @@ rank and thereafter be distributed to all other ranks.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.get_number_of_electrons">
-<span class="sig-name descname"><span class="pre">get_number_of_electrons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy_eV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_number_of_electrons" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_number_of_electrons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_number_of_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_number_of_electrons" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the number of electrons from given DOS data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid]. If None, then the cached
 DOS will be used for the calculation.</p></li>
-<li><p><strong>fermi_energy_eV</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
-<li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
+<li><p><strong>fermi_energy</strong> (<em>float</em>) – Fermi energy level in eV.</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
 <blockquote>
 <div><ul>
@@ -391,8 +391,8 @@ DOS will be used for the calculation.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev">
-<span class="sig-name descname"><span class="pre">get_self_consistent_fermi_energy_ev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">broadcast_fermi_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_self_consistent_fermi_energy_ev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_self_consistent_fermi_energy_ev" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.get_self_consistent_fermi_energy">
+<span class="sig-name descname"><span class="pre">get_self_consistent_fermi_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dos_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'analytical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">broadcast_fermi_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.get_self_consistent_fermi_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.get_self_consistent_fermi_energy" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the self-consistent Fermi energy.</p>
 <p>“Self-consistent” does not mean self-consistent in the DFT sense,
 but rather the Fermi energy, for which DOS integration reproduces
@@ -403,7 +403,7 @@ from how this quantity is calculated.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dos_data</strong> (<em>numpy.array</em>) – DOS data with dimension [energygrid]. If None, then the cached
 DOS will be used for the calculation.</p></li>
-<li><p><strong>temperature_K</strong> (<em>float</em>) – Temperature in K.</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
 <li><p><strong>integration_method</strong> (<em>string</em>) – <p>Integration method to be used. Currently supported:</p>
 <blockquote>
 <div><ul>

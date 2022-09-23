@@ -189,15 +189,14 @@
 
             <span class="c1"># Get DOS and density.</span>
             <span class="n">dos</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos</span><span class="p">,</span> <span class="n">gather_dos</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">fermi_energy_ev</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy_ev</span><span class="p">(</span>
-                <span class="n">dos</span><span class="p">)</span>
+            <span class="n">fermi_energy</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">dos</span><span class="p">)</span>
             <span class="n">density</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="n">ldos</span><span class="p">,</span>
-                                                  <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_ev</span><span class="p">)</span>
-            <span class="n">energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span>\
-            <span class="n">get_total_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="o">=</span><span class="n">dos</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
-                             <span class="n">fermi_energy_eV</span><span class="o">=</span><span class="n">fermi_energy_ev</span><span class="p">,</span>
-                             <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                             <span class="n">return_energy_contributions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                                                  <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">)</span>
+            <span class="n">energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span> \
+                <span class="n">get_total_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="o">=</span><span class="n">dos</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
+                                 <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
+                                 <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                 <span class="n">return_energy_contributions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">if</span> <span class="s2">&quot;forces&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
                 <span class="n">forces</span> <span class="o">=</span> <span class="n">density_calculator</span><span class="o">.</span><span class="n">get_atomic_forces</span><span class="p">(</span><span class="n">density</span><span class="p">,</span>
                                                               <span class="n">create_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
