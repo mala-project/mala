@@ -38,7 +38,7 @@ def integrate_values_on_spacing(values, spacing, method, axis=0):
         raise Exception("Unknown integration method.")
 
 
-def fermi_function(energy, fermi_energy, temperature_K, energy_units="eV"):
+def fermi_function(energy, fermi_energy, temperature):
     r"""
     Calculate the Fermi function.
 
@@ -53,24 +53,20 @@ def fermi_function(energy, fermi_energy, temperature_K, energy_units="eV"):
         energy_units.
     fermi_energy : float
         Fermi energy level in energy_units.
-    temperature_K : float
+    temperature : float
         Temperature in K.
-    energy_units : string
-        Currently supported:
 
-            - eV
     Returns
     -------
     fermi_val : float
         Value of the Fermi function.
 
     """
-    if energy_units == "eV":
-        return fermi_function_eV(energy, fermi_energy, temperature_K)
+    return 1.0 / (1.0 + np.exp((energy - fermi_energy) /
+                               (kB * temperature)))
 
 
-def entropy_multiplicator(energy, fermi_energy, temperature_K,
-                          energy_units="eV"):
+def entropy_multiplicator(energy, fermi_energy, temperature):
     r"""
     Calculate the multiplicator function for the entropy integral.
 
@@ -83,14 +79,12 @@ def entropy_multiplicator(energy, fermi_energy, temperature_K,
     energy : float or numpy.array
         Energy for which the Fermi function is supposed to be calculated in
         energy_units.
+
     fermi_energy : float
         Fermi energy level in energy_units.
-    temperature_K : float
-        Temperature in K.
-    energy_units : string
-        Currently supported:
 
-            - eV
+    temperature : float
+        Temperature in K.
 
     Returns
     -------
@@ -101,8 +95,7 @@ def entropy_multiplicator(energy, fermi_energy, temperature_K,
         dim = np.shape(energy)[0]
         multiplicator = np.zeros(dim, dtype=np.float64)
         for i in range(0, np.shape(energy)[0]):
-            fermi_val = fermi_function(energy[i], fermi_energy, temperature_K,
-                                       energy_units=energy_units)
+            fermi_val = fermi_function(energy[i], fermi_energy, temperature)
             if fermi_val == 1.0:
                 secondterm = 0.0
             else:
@@ -113,8 +106,7 @@ def entropy_multiplicator(energy, fermi_energy, temperature_K,
                 firsterm = fermi_val * np.log(fermi_val)
             multiplicator[i] = firsterm + secondterm
     else:
-        fermi_val = fermi_function(energy, fermi_energy, temperature_K,
-                                   energy_units=energy_units)
+        fermi_val = fermi_function(energy, fermi_energy, temperature)
         if fermi_val == 1.0:
             secondterm = 0.0
         else:
@@ -128,39 +120,13 @@ def entropy_multiplicator(energy, fermi_energy, temperature_K,
     return multiplicator
 
 
-def fermi_function_eV(energy_ev, fermi_energy_ev, temperature_K):
-    r"""
-    Calculate the Fermi function.
-
-    The Fermi function reads
-
-    .. math:: f(\epsilon) = 1/(1 + e^{\frac{\epsilon-\epsilon_F}{k_\mathrm{B} T}})
-
-    Parameters
-    ----------
-    energy_ev : float
-        Energy in eV.
-    fermi_energy_ev : float
-        Fermi energy level in eV.
-    temperature_K : float
-        Temperature in K.
-
-    Returns
-    -------
-    fermi_val : float
-        Value of the Fermi function.
-    """
-    return 1.0 / (1.0 + np.exp((energy_ev - fermi_energy_ev) /
-                               (kB * temperature_K)))
-
-
-def get_beta(temperature_K):
+def get_beta(temperature):
     r"""
     Calculate :math:`\beta = {(k_\mathrm{B}T)}^{-1}`.
 
     Parameters
     ----------
-    temperature_K : float
+    temperature : float
         Temperature in K
 
     Returns
@@ -168,7 +134,7 @@ def get_beta(temperature_K):
     beta : float
         Thermodynamic beta.
     """
-    return 1 / (kB * temperature_K)
+    return 1 / (kB * temperature)
 
 
 def get_f0_value(x, beta):
@@ -282,8 +248,7 @@ def get_s1_value(x, beta):
     return results
 
 
-def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
-                           temperature_k):
+def analytical_integration(D, I0, I1, fermi_energy, energy_grid, temperature):
     """
     Perform analytical integration following the outline given by [1].
 
@@ -315,13 +280,13 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
             - S0
             - S1
 
-    fermi_energy_ev : float
+    fermi_energy : float
         The fermi energy in eV.
 
     energy_grid : numpy.array
         Energy grid on which the integration should be performed.
 
-    temperature_k : float
+    temperature : float
         Temperature in K.
 
     Returns
@@ -357,7 +322,7 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
     # It is not really possible to express this as a vector operation,
     # since mp.polylog (which is called in function_mappings) does not support
     # that.
-    beta = 1 / (kB * temperature_k)
+    beta = 1 / (kB * temperature)
     for i in range(0, gridsize):
         # Some aliases for readibility
         ei = energy_grid_edges[i+1]
@@ -365,9 +330,9 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
         ei_minus = energy_grid_edges[i]
 
         # Calculate x
-        x = beta*(ei-fermi_energy_ev)
-        x_plus = beta*(ei_plus-fermi_energy_ev)
-        x_minus = beta*(ei_minus-fermi_energy_ev)
+        x = beta*(ei - fermi_energy)
+        x_plus = beta*(ei_plus - fermi_energy)
+        x_minus = beta*(ei_minus - fermi_energy)
 
         # Calculate the I0 value
         i0 = function_mappings[I0](x, beta)
@@ -379,9 +344,9 @@ def analytical_integration(D, I0, I1, fermi_energy_ev, energy_grid,
         i1_plus = function_mappings[I1](x_plus, beta)
         i1_minus = function_mappings[I1](x_minus, beta)
 
-        weights_vector[i] = (i0_plus-i0)*(1 +
-                                          ((ei-fermi_energy_ev)/(ei_plus-ei)))\
-            + (i0-i0_minus)*(1-((ei-fermi_energy_ev)/(ei-ei_minus))) - \
+        weights_vector[i] = (i0_plus-i0) * (1 +
+                                            ((ei - fermi_energy) / (ei_plus - ei))) \
+                            + (i0-i0_minus) * (1 - ((ei - fermi_energy) / (ei - ei_minus))) - \
                             ((i1_plus-i1) / (ei_plus-ei)) + ((i1 - i1_minus)
                                                              / (ei - ei_minus))
 

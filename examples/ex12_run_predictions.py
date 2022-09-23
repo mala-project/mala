@@ -53,14 +53,14 @@ def use_predictor(new_network, new_parameters, iscaler, oscaler):
     # and for that we also have to tell the calculator how many electrons
     # the system has and at which temperature we perform calculations.
     ldos_calculator.number_of_electrons_exact = 4
-    ldos_calculator.temperature_K = 298
+    ldos_calculator.temperature = 298
 
-    fermi_energy = ldos_calculator.get_self_consistent_fermi_energy_ev(ldos)
+    fermi_energy = ldos_calculator.get_self_consistent_fermi_energy(ldos)
 
-    number_of_electrons = ldos_calculator.\
-        get_number_of_electrons(ldos, fermi_energy_eV=fermi_energy)
+    number_of_electrons = ldos_calculator. \
+        get_number_of_electrons(ldos, fermi_energy=fermi_energy)
     band_energy = ldos_calculator. \
-        get_band_energy(ldos, fermi_energy_eV=fermi_energy)
+        get_band_energy(ldos, fermi_energy=fermi_energy)
     printout("Predicted number of electrons: ", number_of_electrons)
     printout("Predicted band energy: ", band_energy)
 

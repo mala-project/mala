@@ -74,13 +74,13 @@ class TestMALAIntegration:
 
         # Calculate the numerically approximated values.
         qint_0, abserr = sp.integrate.quad(
-            lambda e: fermi_function_eV(e, e_fermi, temp),
+            lambda e: fermi_function(e, e_fermi, temp),
             energies[0], energies[-1])
         qint_1, abserr = sp.integrate.quad(
-            lambda e: (e - e_fermi) * fermi_function_eV(e, e_fermi, temp),
+            lambda e: (e - e_fermi) * fermi_function(e, e_fermi, temp),
             energies[0], energies[-1])
         qint_2, abserr = sp.integrate.quad(
-            lambda e: (e - e_fermi) ** 2 * fermi_function_eV(e, e_fermi, temp),
+            lambda e: (e - e_fermi) ** 2 * fermi_function(e, e_fermi, temp),
             energies[0], energies[-1])
 
         # Calculate the errors.
@@ -141,10 +141,10 @@ class TestMALAIntegration:
                                                  "1/(eV*Bohr^3)")
 
         # Calculate the quantities we want to compare.
-        self_consistent_fermi_energy = ldos_calculator.\
-            get_self_consistent_fermi_energy_ev(ldos_dft)
+        self_consistent_fermi_energy = ldos_calculator. \
+            get_self_consistent_fermi_energy(ldos_dft)
         density_mala = ldos_calculator. \
-            get_density(ldos_dft, fermi_energy_eV=self_consistent_fermi_energy)
+            get_density(ldos_dft, fermi_energy=self_consistent_fermi_energy)
         density_mala_sum = density_mala.sum()
         density_dft_sum = density_dft.sum()
 
