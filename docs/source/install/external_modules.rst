@@ -7,8 +7,8 @@ contributions to the total energy, while the LAMMPS code is used to calculate
 SNAP descriptors on the real space grid of a simulation cell, either for
 training or inference.
 
-QuantumESPRESSO (total energy module)
-*************************************
+Quantum ESPRESSO (total energy module)
+***************************************
 
 The total energy module has been moved to its own fork of QE.
 You can find it at
@@ -21,8 +21,8 @@ instructions described therein.
 LAMMPS (descriptor calculation)
 *******************************
 
-* Checkout https://github.com/athomps/lammps/tree/compute-grid-new
-* Make sure the compute-grid tree is checked out!
+* Checkout https://github.com/athomps/lammps/tree/mala
+* Make sure the ``mala`` tree is checked out locally via ``git branch``!
 * Compile the LAMMPS shared library with the SNAP package installed
 
   - cd into ``/path/to/lammps/src`` folder of LAMMPS
@@ -30,4 +30,4 @@ LAMMPS (descriptor calculation)
   - (optional: check with ``make ps`` that ``ml-snap`` was correctly added)
   - ``make mode=shlib mpi``
 
-* Make the LAMMPS library visible via ``python3 install.py -p lammps -l ../src/liblammps.so -v ../src/version.h``
+* Make the LAMMPS library visible via ``python3 install.py -p lammps -l ../src/liblammps.so``
