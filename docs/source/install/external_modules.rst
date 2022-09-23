@@ -8,7 +8,7 @@ SNAP descriptors on the real space grid of a simulation cell, either for
 training or inference.
 
 Quantum ESPRESSO (total energy module)
-*************************************
+***************************************
 
 The total energy module has been moved to its own fork of QE.
 You can find it at
