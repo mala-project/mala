@@ -45,7 +45,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../installation.html">Installation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="README.html">Installation of MALA</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">External modules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#quantumespresso-total-energy-module">QuantumESPRESSO (total energy module)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quantum-espresso-total-energy-module">Quantum ESPRESSO (total energy module)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#lammps-descriptor-calculation">LAMMPS (descriptor calculation)</a></li>
 </ul>
 </li>
@@ -90,8 +90,8 @@ The DFT code QuantumESPRESSO is used for the calculation of the density
 contributions to the total energy, while the LAMMPS code is used to calculate
 SNAP descriptors on the real space grid of a simulation cell, either for
 training or inference.</p>
-<div class="section" id="quantumespresso-total-energy-module">
-<h2>QuantumESPRESSO (total energy module)<a class="headerlink" href="#quantumespresso-total-energy-module" title="Permalink to this headline"></a></h2>
+<div class="section" id="quantum-espresso-total-energy-module">
+<h2>Quantum ESPRESSO (total energy module)<a class="headerlink" href="#quantum-espresso-total-energy-module" title="Permalink to this headline"></a></h2>
 <p>The total energy module has been moved to its own fork of QE.
 You can find it at
 <a class="reference external" href="https://gitlab.com/casus/q-e/-/tree/tem_original_development">https://gitlab.com/casus/q-e/-/tree/tem_original_development</a> after
@@ -102,8 +102,8 @@ instructions described therein.</p>
 <div class="section" id="lammps-descriptor-calculation">
 <h2>LAMMPS (descriptor calculation)<a class="headerlink" href="#lammps-descriptor-calculation" title="Permalink to this headline"></a></h2>
 <ul class="simple">
-<li><p>Checkout <a class="reference external" href="https://github.com/athomps/lammps/tree/compute-grid-new">https://github.com/athomps/lammps/tree/compute-grid-new</a></p></li>
-<li><p>Make sure the compute-grid tree is checked out!</p></li>
+<li><p>Checkout <a class="reference external" href="https://github.com/athomps/lammps/tree/mala">https://github.com/athomps/lammps/tree/mala</a></p></li>
+<li><p>Make sure the <code class="docutils literal notranslate"><span class="pre">mala</span></code> tree is checked out locally via <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">branch</span></code>!</p></li>
 <li><p>Compile the LAMMPS shared library with the SNAP package installed</p>
 <ul>
 <li><p>cd into <code class="docutils literal notranslate"><span class="pre">/path/to/lammps/src</span></code> folder of LAMMPS</p></li>
@@ -112,7 +112,7 @@ instructions described therein.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">mode=shlib</span> <span class="pre">mpi</span></code></p></li>
 </ul>
 </li>
-<li><p>Make the LAMMPS library visible via <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">install.py</span> <span class="pre">-p</span> <span class="pre">lammps</span> <span class="pre">-l</span> <span class="pre">../src/liblammps.so</span> <span class="pre">-v</span> <span class="pre">../src/version.h</span></code></p></li>
+<li><p>Make the LAMMPS library visible via <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">install.py</span> <span class="pre">-p</span> <span class="pre">lammps</span> <span class="pre">-l</span> <span class="pre">../src/liblammps.so</span></code></p></li>
 </ul>
 </div>
 </div>
