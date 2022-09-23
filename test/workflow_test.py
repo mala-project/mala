@@ -94,12 +94,12 @@ class TestFullWorkflow:
 
         # Calculate energies
         self_consistent_fermi_energy = dos. \
-            get_self_consistent_fermi_energy_ev(dos_data)
+            get_self_consistent_fermi_energy(dos_data)
         number_of_electrons = dos. \
-            get_number_of_electrons(dos_data, fermi_energy_eV=
+            get_number_of_electrons(dos_data, fermi_energy=
                                     self_consistent_fermi_energy)
         band_energy = dos.get_band_energy(dos_data,
-                                          fermi_energy_eV=
+                                          fermi_energy=
                                           self_consistent_fermi_energy)
 
         assert np.isclose(number_of_electrons, dos.number_of_electrons_exact,
@@ -132,12 +132,12 @@ class TestFullWorkflow:
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
-            get_self_consistent_fermi_energy_ev(ldos_data)
+            get_self_consistent_fermi_energy(ldos_data)
         number_of_electrons = ldos. \
-            get_number_of_electrons(ldos_data, fermi_energy_eV=
+            get_number_of_electrons(ldos_data, fermi_energy=
                                     self_consistent_fermi_energy)
         band_energy = ldos.get_band_energy(ldos_data,
-                                           fermi_energy_eV=
+                                           fermi_energy=
                                            self_consistent_fermi_energy)
 
         assert np.isclose(number_of_electrons, ldos.number_of_electrons_exact,
@@ -173,11 +173,11 @@ class TestFullWorkflow:
 
         # Calculate energies
         self_consistent_fermi_energy = dos. \
-            get_self_consistent_fermi_energy_ev(dos_data)
+            get_self_consistent_fermi_energy(dos_data)
 
         total_energy = ldos.get_total_energy(dos_data=dos_data,
                                              density_data=dens_data,
-                                             fermi_energy_eV=
+                                             fermi_energy=
                                              self_consistent_fermi_energy)
         assert np.isclose(total_energy, ldos.total_energy_dft_calculation,
                           atol=accuracy_total_energy)
@@ -209,9 +209,9 @@ class TestFullWorkflow:
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
-            get_self_consistent_fermi_energy_ev(ldos_data)
+            get_self_consistent_fermi_energy(ldos_data)
         total_energy = ldos.get_total_energy(ldos_data,
-                                             fermi_energy_eV=
+                                             fermi_energy=
                                              self_consistent_fermi_energy)
         assert np.isclose(total_energy, ldos.total_energy_dft_calculation,
                           atol=accuracy_total_energy)

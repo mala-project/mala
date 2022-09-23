@@ -88,7 +88,7 @@ class Target(ABC):
         else:
             raise Exception("Wrong type of parameters for Targets class.")
         self.fermi_energy_dft = None
-        self.temperature_K = None
+        self.temperature = None
         self.voxel = None
         self.number_of_electrons_exact = None
         self.number_of_electrons_from_eigenvals = None
@@ -198,7 +198,7 @@ class Target(ABC):
         if data_type == "qe.out":
             # Reset everything.
             self.fermi_energy_dft = None
-            self.temperature_K = None
+            self.temperature = None
             self.number_of_electrons_exact = None
             self.voxel = None
             self.band_energy_dft_calculation = None
@@ -226,8 +226,8 @@ class Target(ABC):
                         self.number_of_electrons_exact = \
                             np.float64(line.split('=')[1])
                     if "Fermi-Dirac smearing, width (Ry)=" in line:
-                        self.temperature_K = np.float64(line.split('=')[2]) * \
-                                             Rydberg / kB
+                        self.temperature = np.float64(line.split('=')[2]) * \
+                                           Rydberg / kB
                     if "xc contribution" in line:
                         break
                     if "FFT dimensions" in line:
@@ -290,12 +290,11 @@ class Target(ABC):
                 kweights = self.atoms.get_calculator().get_k_point_weights()
                 eband_per_band = eigs * fermi_function(eigs,
                                                        self.fermi_energy_dft,
-                                                       self.temperature_K)
+                                                       self.temperature)
                 eband_per_band = kweights[np.newaxis, :] * eband_per_band
                 self.band_energy_dft_calculation = np.sum(eband_per_band)
-                enum_per_band = fermi_function(eigs,
-                                               self.fermi_energy_dft,
-                                               self.temperature_K)
+                enum_per_band = fermi_function(eigs, self.fermi_energy_dft,
+                                               self.temperature)
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
 

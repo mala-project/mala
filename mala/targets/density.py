@@ -131,7 +131,7 @@ class Density(Target):
         """
         return_density_object = Density(ldos_object.parameters)
         return_density_object.fermi_energy_dft = ldos_object.fermi_energy_dft
-        return_density_object.temperature_K = ldos_object.temperature_K
+        return_density_object.temperature = ldos_object.temperature
         return_density_object.voxel = ldos_object.voxel
         return_density_object.number_of_electrons_exact = ldos_object.\
             number_of_electrons_exact

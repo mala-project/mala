@@ -116,15 +116,14 @@ class MALA(Calculator):
 
             # Get DOS and density.
             dos = ldos_calculator.get_density_of_states(ldos, gather_dos=False)
-            fermi_energy_ev = dos_calculator.get_self_consistent_fermi_energy_ev(
-                dos)
+            fermi_energy = dos_calculator.get_self_consistent_fermi_energy(dos)
             density = ldos_calculator.get_density(ldos,
-                                                  fermi_energy_eV=fermi_energy_ev)
-            energy, self.last_energy_contributions = ldos_calculator.\
-            get_total_energy(dos_data=dos, density_data=density,
-                             fermi_energy_eV=fermi_energy_ev,
-                             create_qe_file=False,
-                             return_energy_contributions=True)
+                                                  fermi_energy=fermi_energy)
+            energy, self.last_energy_contributions = ldos_calculator. \
+                get_total_energy(dos_data=dos, density_data=density,
+                                 fermi_energy=fermi_energy,
+                                 create_qe_file=False,
+                                 return_energy_contributions=True)
             if "forces" in properties:
                 forces = density_calculator.get_atomic_forces(density,
                                                               create_file=False)
