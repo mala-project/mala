@@ -43,7 +43,7 @@ class Density(Target):
         self.density = None
 
     @classmethod
-    def from_numpy_file(cls, params, path):
+    def from_numpy_file(cls, params, path, units="1/A^3"):
         """
         Create a Density calculator from a numpy array saved in a file.
 
@@ -55,17 +55,20 @@ class Density(Target):
         path : string
             Path to file that is being read.
 
+        units : string
+            Units the density is saved in.
+
         Returns
         -------
         dens_object : mala.targets.density.Density
             Density calculator object.
         """
         return_density_object = Density(params)
-        return_density_object.density.read_from_numpy(path)
+        return_density_object.read_from_numpy(path, units=units)
         return return_density_object
 
     @classmethod
-    def from_numpy_array(cls, params, array):
+    def from_numpy_array(cls, params, array, units="1/A^3"):
         """
         Create a Density calculator from a numpy array in memory.
 
@@ -80,17 +83,20 @@ class Density(Target):
         array : numpy.ndarray
             Path to file that is being read.
 
+        units : string
+            Units the density is saved in.
+
         Returns
         -------
         dens_object : mala.targets.density.Density
             Density calculator object.
         """
         return_dos = Density(params)
-        return_dos.read_from_array(array)
+        return_dos.read_from_array(array, units=units)
         return return_dos
 
     @classmethod
-    def from_cube_file(cls, params, path):
+    def from_cube_file(cls, params, path, units="1/A^3"):
         """
         Create a Density calculator from a cube file.
 
@@ -102,13 +108,16 @@ class Density(Target):
         path : string
             Name of the cube file.
 
+        units : string
+            Units the density is saved in.
+
         Returns
         -------
         dens_object : mala.targets.density.Density
             Density object created from LDOS object.
         """
         return_density_object = Density(params)
-        return_density_object.read_from_cube(path)
+        return_density_object.read_from_cube(path, units=units)
         return return_density_object
 
     @classmethod
