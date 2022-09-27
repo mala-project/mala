@@ -21,11 +21,8 @@ Build Quantum ESPRESSO
   (the total energy module is based on version 6.4.1): ``git checkout qe-6.4.1``
 * Make sure you have an (MPI-aware) F90 compiler such as ``mpif90`` (e.g.
   Debian-ish machine: ``apt install openmpi-bin``, on an HPC cluster something
-  like ``module load openmpi gcc``). In fact the extension module that we build
-  doesn't use MPI at the moment, so a non-MPI compiler should also work (e.g.
-  ``gfortran`` or ``ifort``). In any case, make sure to use the same compiler
-  for QE and the extension (``--f90exec=`` in
-  ``build_total_energy_energy_module.sh``).
+  like ``module load openmpi gcc``). Make sure to use the same compiler
+  for QE and the extension (``--f90exec=`` in ``build_total_energy_energy_module.sh``).
 * We assume that QE's ``configure`` script will find your system libs, e.g. use
   ``-lblas``, ``-llapack`` and ``-lfftw3``. We use those by default in
   ``build_total_energy_energy_module.sh``. If you have, say, the MKL library,
@@ -41,7 +38,7 @@ Build Quantum ESPRESSO
 * Change to the ``q-e`` directory
 
   * If you already have a build of QE, go into the ``q-e`` folder and run ``make veryclean``.
-* Run ``./configure CFLAGS="-fPIC" CPPFLAGS="-fPIC" FFLAGS="-fPIC -fallow-argument-mismatch" foxflags="-fPIC"``
+* Run ``./configure CFLAGS="-fPIC" CPPFLAGS="-fPIC" FFLAGS="-fPIC -fallow-argument-mismatch"``
 * Run ``make all`` (use ``make -j<your number of cores> all`` for a faster
   compilation process).
 * Change back to the  ``external_modules/total_energy_module`` directory of the
