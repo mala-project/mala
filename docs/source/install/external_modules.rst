@@ -33,7 +33,7 @@ Build Quantum ESPRESSO
   * GNU compiler specific: we use ``-fallow-argument-mismatch``
 * Change to the ``external_modules/total_energy_module`` directory of the
   MALA repository
-* Run the script ``prepare_qe.sh -q /path/to/your/q-e`` with ``/path/to/your/qe``
+* Run the script ``prepare_qe.sh /path/to/your/q-e`` with ``/path/to/your/qe``
   being the path to the ``q-e`` directory
 * Change to the ``q-e`` directory
 
@@ -43,7 +43,7 @@ Build Quantum ESPRESSO
   compilation process).
 * Change back to the  ``external_modules/total_energy_module`` directory of the
   MALA repository
-* Run ``build_total_energy_energy_module.sh -q /path/to/your/q-e``.
+* Run ``build_total_energy_energy_module.sh /path/to/your/q-e``.
 
   * If the build is successful, a file named something like
     ``total_energy.cpython-39m-x86_64-linux-gnu.so`` will be generated. This is

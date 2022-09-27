@@ -6,25 +6,16 @@
 # or
 #   $ F2PY=/usr/bin/f2py3 ./this.sh
 
-while getopts q flag
-do
-    case "${flag}" in
-        q) root_dir=${OPTARG};;
-    esac
-done
-if [ ! "$root_dir" ]; then
-  echo "Error: no path to QE provided (missing argument -q)"
-  exit 1
-fi
-
-set -euxo pipefail
-
+set -euo pipefail
 
 err(){
     echo "error $@"
     exit 1
 }
 
+[ $# -eq 1 ] || err "Please provide exactly one argument (the path to the QE directory)" && root_dir=$1
+
+echo $root_dir
 
 # base dir of QE distribution
 #root_dir=$(readlink -f ../)
