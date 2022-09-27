@@ -169,13 +169,14 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.density.Density.from_cube_file">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_cube_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.from_cube_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.from_cube_file" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_cube_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/A^3'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.from_cube_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.from_cube_file" title="Permalink to this definition"></a></dt>
 <dd><p>Create a Density calculator from a cube file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this DOS object.</p></li>
 <li><p><strong>path</strong> (<em>string</em>) – Name of the cube file.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -208,7 +209,7 @@ be copied.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.density.Density.from_numpy_array">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_numpy_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.from_numpy_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.from_numpy_array" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_numpy_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/A^3'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.from_numpy_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.from_numpy_array" title="Permalink to this definition"></a></dt>
 <dd><p>Create a Density calculator from a numpy array in memory.</p>
 <p>By using this function rather then setting the density
 object directly, proper unit coversion is ensured.</p>
@@ -217,6 +218,7 @@ object directly, proper unit coversion is ensured.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this LDOS object.</p></li>
 <li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Path to file that is being read.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -230,13 +232,14 @@ object directly, proper unit coversion is ensured.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.density.Density.from_numpy_file">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_numpy_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.from_numpy_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.from_numpy_file" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_numpy_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/A^3'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.from_numpy_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.from_numpy_file" title="Permalink to this definition"></a></dt>
 <dd><p>Create a Density calculator from a numpy array saved in a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this LDOS object.</p></li>
 <li><p><strong>path</strong> (<em>string</em>) – Path to file that is being read.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

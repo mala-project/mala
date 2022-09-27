@@ -116,7 +116,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Density.from_numpy_file"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.from_numpy_file">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_numpy_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_numpy_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Density calculator from a numpy array saved in a file.</span>
 
@@ -128,17 +128,20 @@
 <span class="sd">        path : string</span>
 <span class="sd">            Path to file that is being read.</span>
 
+<span class="sd">        units : string</span>
+<span class="sd">            Units the density is saved in.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dens_object : mala.targets.density.Density</span>
 <span class="sd">            Density calculator object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">return_density_object</span> <span class="o">=</span> <span class="n">Density</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-        <span class="n">return_density_object</span><span class="o">.</span><span class="n">density</span><span class="o">.</span><span class="n">read_from_numpy</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">return_density_object</span><span class="o">.</span><span class="n">read_from_numpy</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">return_density_object</span></div>
 
 <div class="viewcode-block" id="Density.from_numpy_array"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.from_numpy_array">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_numpy_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_numpy_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Density calculator from a numpy array in memory.</span>
 
@@ -153,17 +156,20 @@
 <span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Path to file that is being read.</span>
 
+<span class="sd">        units : string</span>
+<span class="sd">            Units the density is saved in.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dens_object : mala.targets.density.Density</span>
 <span class="sd">            Density calculator object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">return_dos</span> <span class="o">=</span> <span class="n">Density</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-        <span class="n">return_dos</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+        <span class="n">return_dos</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">return_dos</span></div>
 
 <div class="viewcode-block" id="Density.from_cube_file"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.from_cube_file">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_cube_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_cube_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/A^3&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Density calculator from a cube file.</span>
 
@@ -175,13 +181,16 @@
 <span class="sd">        path : string</span>
 <span class="sd">            Name of the cube file.</span>
 
+<span class="sd">        units : string</span>
+<span class="sd">            Units the density is saved in.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dens_object : mala.targets.density.Density</span>
 <span class="sd">            Density object created from LDOS object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">return_density_object</span> <span class="o">=</span> <span class="n">Density</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-        <span class="n">return_density_object</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">return_density_object</span><span class="o">.</span><span class="n">read_from_cube</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">return_density_object</span></div>
 
 <div class="viewcode-block" id="Density.from_ldos_calculator"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.from_ldos_calculator">[docs]</a>    <span class="nd">@classmethod</span>
