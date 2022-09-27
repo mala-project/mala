@@ -6,12 +6,16 @@
 # or
 #   $ F2PY=/usr/bin/f2py3 ./this.sh
 
-while getopts q: flag
+while getopts q flag
 do
     case "${flag}" in
         q) root_dir=${OPTARG};;
     esac
 done
+if [ ! "$root_dir" ]; then
+  echo "Error: no path to QE provided (missing argument -q)"
+  exit 1
+fi
 
 set -euxo pipefail
 
