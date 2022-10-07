@@ -346,30 +346,17 @@ class Descriptor(ABC):
                     # print("mpi grid z only: ", lammps_procs)
 
                     # prepare z plane cuts for balance command in lammps
-                    if int(nz / zprocs) == (nz / zprocs):
-                        printout("No remainder in z")
-                        zcut = 1/nz
-                        zint = ''
-                        for i in range(0, zprocs-1):
-                            zvals = ((i+1)*(nz/zprocs)*zcut)-0.00000001
-                            zint += format(zvals, ".8f")
-                            zint += ' '
-                    else:
-                        raise ValueError("Cannot divide z-planes on processors"
-                                         " without remainder. "
-                                         "This is currently unsupported.")
-                    #     zcut = 1/nz
-                    #     zrem = nz - (zprocs*int(nz/zprocs))
-                    #     zint = ''
-                    #     for i in range(0, zrem):
-                    #         zvals = (((i+1)*2)*int(nz/zprocs)*zcut)-
-                    #         0.00000001
-                    #         zint += format(zvals, ".8f")
-                    #         zint += ' '
-                    #     for i in range(zrem, zprocs-1):
-                    #         zvals = ((i+1+zrem)*zcut)-0.00000001
-                    #         zint += format(zvals, ".8f")
-                    #         zint += ' '
+                    zcut = 1/nz
+                    zrem = nz - (zprocs*int(nz/zprocs))
+                    zint = ''
+                    for i in range(0, zrem):
+                        zvals = (((i+1)*(int(nz/zprocs)+1)*zcut)-0.00000001
+                        zint += format(zvals, ".8f")
+                        zint += ' '
+                    for i in range(zrem, zprocs-1):
+                        zvals = (((i+1)*int(nz/zprocs)+zrem)*zcut)-0.00000001
+                        zint += format(zvals, ".8f")
+                        zint += ' '
                     lammps_dict = {"lammps_procs":
                                    f"processors {lammps_procs}",
                                    "zbal": f"balance 1.0 z {zint}",
