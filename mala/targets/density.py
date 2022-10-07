@@ -797,6 +797,9 @@ class Density(Target):
 
             density_for_qe = np.reshape(density_for_qe, [number_of_gridpoints,
                                                          1], order='F')
+            if density_for_qe.shape[0] < number_of_gridpoints:
+                grid_diff = number_of_gridpoints - number_of_gridpoints_mala
+                density_for_qe = np.pad(density_for_qe, pad_width=((0, grid_diff),(0,0)))
 
         # QE has the density in 1/Bohr^3
         density_for_qe *= self.backconvert_units(1, "1/Bohr^3")
