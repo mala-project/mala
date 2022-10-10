@@ -420,9 +420,16 @@ class Descriptor(ABC):
 
         """
         def calc_cosine_similarity(vector1, vector2, norm=2):
-            return np.dot(vector1, vector2) / \
-                   (np.linalg.norm(vector1, ord=norm) *
-                    np.linalg.norm(vector2, ord=norm))
+            if np.shape(vector1)[0] != np.shape(vector2)[0]:
+                raise Exception("Cannot calculate similarity between vectors "
+                                "of different dimenstions.")
+            if np.shape(vector1)[0] == 1:
+                return np.min([vector1[0], vector2[0]]) / \
+                       np.max([vector1[0], vector2[0]])
+            else:
+                return np.dot(vector1, vector2) / \
+                       (np.linalg.norm(vector1, ord=norm) *
+                        np.linalg.norm(vector2, ord=norm))
 
         descriptor_dim = np.shape(descriptor_data)
         ldos_dim = np.shape(ldos_data)
