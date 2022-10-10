@@ -45,7 +45,11 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../installation.html">Installation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="README.html">Installation of MALA</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">External modules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#quantum-espresso-total-energy-module">Quantum ESPRESSO (total energy module)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quantum-espresso-total-energy-module">Quantum ESPRESSO (total energy module)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#build-quantum-espresso">Build Quantum ESPRESSO</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#use-and-test-the-python-extension-module">Use and test the Python extension module</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#lammps-descriptor-calculation">LAMMPS (descriptor calculation)</a></li>
 </ul>
 </li>
@@ -86,18 +90,66 @@
   <div class="section" id="external-modules">
 <h1>External modules<a class="headerlink" href="#external-modules" title="Permalink to this headline"></a></h1>
 <p>MALA can be coupled to external libraries for data pre- and postprocesing.
-The DFT code QuantumESPRESSO is used for the calculation of the density
+The DFT code Quantum ESPRESSO is used for the calculation of the density
 contributions to the total energy, while the LAMMPS code is used to calculate
 SNAP descriptors on the real space grid of a simulation cell, either for
 training or inference.</p>
 <div class="section" id="quantum-espresso-total-energy-module">
 <h2>Quantum ESPRESSO (total energy module)<a class="headerlink" href="#quantum-espresso-total-energy-module" title="Permalink to this headline"></a></h2>
-<p>The total energy module has been moved to its own fork of QE.
-You can find it at
-<a class="reference external" href="https://gitlab.com/casus/q-e/-/tree/tem_original_development">https://gitlab.com/casus/q-e/-/tree/tem_original_development</a> after
-gaining access from the MALA development team. After checking out this
-fork and branch, go to <code class="docutils literal notranslate"><span class="pre">total_energy_module/</span></code> and follow the installation
-instructions described therein.</p>
+<p>To run the total energy module, you need a full Quantum ESPRESSO (version
+6.4.1.) and install the python bindings for it.</p>
+<div class="section" id="build-quantum-espresso">
+<h3>Build Quantum ESPRESSO<a class="headerlink" href="#build-quantum-espresso" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Clone QE source code: <code class="docutils literal notranslate"><span class="pre">git&#64;gitlab.com:QEF/q-e.git</span></code></p></li>
+<li><p>Chage into the <code class="docutils literal notranslate"><span class="pre">q-e</span></code> directory and check out the correct branch
+(the total energy module is based on version 6.4.1): <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">qe-6.4.1</span></code></p></li>
+<li><p>Make sure you have an (MPI-aware) F90 compiler such as <code class="docutils literal notranslate"><span class="pre">mpif90</span></code> (e.g.
+Debian-ish machine: <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">install</span> <span class="pre">openmpi-bin</span></code>, on an HPC cluster something
+like <code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">openmpi</span> <span class="pre">gcc</span></code>). Make sure to use the same compiler
+for QE and the extension (<code class="docutils literal notranslate"><span class="pre">--f90exec=</span></code> in <code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span></code>).</p></li>
+<li><p>We assume that QE’s <code class="docutils literal notranslate"><span class="pre">configure</span></code> script will find your system libs, e.g. use
+<code class="docutils literal notranslate"><span class="pre">-lblas</span></code>, <code class="docutils literal notranslate"><span class="pre">-llapack</span></code> and <code class="docutils literal notranslate"><span class="pre">-lfftw3</span></code>. We use those by default in
+<code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span></code>. If you have, say, the MKL library,
+you may see <code class="docutils literal notranslate"><span class="pre">configure</span></code> use something like <code class="docutils literal notranslate"><span class="pre">-lmkl_intel_lp64</span> <span class="pre">-lmkl_sequential</span> <span class="pre">-lmkl_core</span></code>
+when building QE. In this case you have to modify
+<code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span></code> to use the same libraries!</p>
+<ul>
+<li><p>GNU compiler specific: we use <code class="docutils literal notranslate"><span class="pre">-fallow-argument-mismatch</span></code></p></li>
+</ul>
+</li>
+<li><p>Change to the <code class="docutils literal notranslate"><span class="pre">external_modules/total_energy_module</span></code> directory of the
+MALA repository</p></li>
+<li><p>Run the script <code class="docutils literal notranslate"><span class="pre">prepare_qe.sh</span> <span class="pre">/path/to/your/q-e</span></code> with <code class="docutils literal notranslate"><span class="pre">/path/to/your/qe</span></code>
+being the path to the <code class="docutils literal notranslate"><span class="pre">q-e</span></code> directory</p></li>
+<li><p>Change to the <code class="docutils literal notranslate"><span class="pre">q-e</span></code> directory</p>
+<ul>
+<li><p>If you already have a build of QE, go into the <code class="docutils literal notranslate"><span class="pre">q-e</span></code> folder and run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">veryclean</span></code>.</p></li>
+</ul>
+</li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">./configure</span> <span class="pre">CFLAGS=&quot;-fPIC&quot;</span> <span class="pre">CPPFLAGS=&quot;-fPIC&quot;</span> <span class="pre">FFLAGS=&quot;-fPIC</span> <span class="pre">-fallow-argument-mismatch&quot;</span></code></p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">all</span></code> (use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">-j&lt;your</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">cores&gt;</span> <span class="pre">all</span></code> for a faster
+compilation process).</p></li>
+<li><p>Change back to the  <code class="docutils literal notranslate"><span class="pre">external_modules/total_energy_module</span></code> directory of the
+MALA repository</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">build_total_energy_energy_module.sh</span> <span class="pre">/path/to/your/q-e</span></code>.</p>
+<ul>
+<li><p>If the build is successful, a file named something like
+<code class="docutils literal notranslate"><span class="pre">total_energy.cpython-39m-x86_64-linux-gnu.so</span></code> will be generated. This is
+the Python extension module.</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="use-and-test-the-python-extension-module">
+<h3>Use and test the Python extension module<a class="headerlink" href="#use-and-test-the-python-extension-module" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Add the <code class="docutils literal notranslate"><span class="pre">external_modules/total_energy_module</span></code> directory to your python
+path, e.g. via <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">PYTHONPATH=/path/to/mala/external_modules/total_energy_module:$PYTHONPATH</span></code></p></li>
+<li><p>Now you can use <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">total_energy</span></code> to access the total energy module</p></li>
+<li><p>The MALA test suite will test the total energy module</p></li>
+</ul>
+</div>
 </div>
 <div class="section" id="lammps-descriptor-calculation">
 <h2>LAMMPS (descriptor calculation)<a class="headerlink" href="#lammps-descriptor-calculation" title="Permalink to this headline"></a></h2>
