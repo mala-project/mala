@@ -162,10 +162,9 @@
         <span class="n">Calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">system_changes</span><span class="p">)</span>
 
         <span class="c1"># Get the LDOS from the NN.</span>
-        <span class="n">ldos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ldos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 
-        <span class="n">energy</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">),</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="c1"># forces = np.zeros([len(atoms), 3], dtype=np.float64)</span>
 
         <span class="c1"># If an MPI environment is detected, ASE will use it for writing.</span>
         <span class="c1"># Therefore we have to do this before forking.</span>
@@ -181,39 +180,18 @@
                                  <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span>
                                  <span class="n">target_calculator</span><span class="o">.</span><span class="n">kpoints</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># Define calculator objects.</span>
-            <span class="n">ldos_calculator</span><span class="p">:</span> <span class="n">LDOS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span>
-            <span class="n">density_calculator</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="n">ldos_calculator</span><span class="p">)</span>
-            <span class="n">dos_calculator</span> <span class="o">=</span> <span class="n">DOS</span><span class="o">.</span><span class="n">from_ldos_calculator</span><span class="p">(</span><span class="n">ldos_calculator</span><span class="p">)</span>
+        <span class="n">ldos_calculator</span><span class="p">:</span> <span class="n">LDOS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span>
 
-            <span class="c1"># Get DOS and density.</span>
-            <span class="n">dos</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_density_of_states</span><span class="p">(</span><span class="n">ldos</span><span class="p">,</span> <span class="n">gather_dos</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">fermi_energy</span> <span class="o">=</span> <span class="n">dos_calculator</span><span class="o">.</span><span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">dos</span><span class="p">)</span>
-            <span class="n">density</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="n">ldos</span><span class="p">,</span>
-                                                  <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">)</span>
-            <span class="n">energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span> <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span> \
-                <span class="n">get_total_energy</span><span class="p">(</span><span class="n">dos_data</span><span class="o">=</span><span class="n">dos</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
-                                 <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">,</span>
-                                 <span class="n">create_qe_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                 <span class="n">return_energy_contributions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s2">&quot;forces&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
-                <span class="n">forces</span> <span class="o">=</span> <span class="n">density_calculator</span><span class="o">.</span><span class="n">get_atomic_forces</span><span class="p">(</span><span class="n">density</span><span class="p">,</span>
-                                                              <span class="n">create_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">read_from_array</span><span class="p">(</span><span class="n">ldos</span><span class="p">)</span>
+        <span class="n">energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span> \
+            <span class="o">=</span> <span class="n">ldos_calculator</span><span class="o">.</span><span class="n">get_total_energy</span><span class="p">(</span><span class="n">return_energy_contributions</span><span class="o">=</span>
+                                               <span class="kc">True</span><span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
-            <span class="c1"># I think we should refrain from top-level MPI imports; the first</span>
-            <span class="c1"># import triggers an MPI init, which can take quite long.</span>
-            <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
-
-            <span class="n">energy</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s2">&quot;forces&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
-                <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">Bcast</span><span class="p">([</span><span class="n">forces</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># Use the LDOS determined DOS and density to get energy and forces.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy</span>
-        <span class="k">if</span> <span class="s2">&quot;forces&quot;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">forces</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy</span></div>
+        <span class="c1"># if &quot;forces&quot; in properties:</span>
+        <span class="c1">#     self.results[&quot;forces&quot;] = forces</span>
 
 <div class="viewcode-block" id="MALA.calculate_properties"><a class="viewcode-back" href="../../../api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.calculate_properties">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
