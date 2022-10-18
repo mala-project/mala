@@ -4,6 +4,7 @@ from functools import cached_property
 from ase.units import Rydberg, Bohr
 import math
 import numpy as np
+import openpmd_api as io
 from scipy import integrate
 
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
@@ -115,6 +116,12 @@ class LDOS(Target):
         return_ldos_object = LDOS(params)
         return_ldos_object.read_from_cube(path_name_scheme, units=units,
                                           use_memmap=use_memmap)
+        return return_ldos_object
+
+    @classmethod
+    def from_hdf5_file(cls, params, path):
+        return_ldos_object = LDOS(params)
+        return_ldos_object.read_from_hdf5(path)
         return return_ldos_object
 
     ##############################
@@ -519,6 +526,25 @@ class LDOS(Target):
         """
         self.local_density_of_states = array * \
                                        self.convert_units(1, in_units=units)
+
+    def read_from_hdf5(self, path):
+        series = io.Series(path, io.Access.read_only)
+        print(series.get_attribute("is_mala_data"))
+        current_iteration = series.iterations[0]
+        ldos_mesh = current_iteration.meshes["LDOS"]
+        self.local_density_of_states = \
+            np.zeros((ldos_mesh["0"].shape[0], ldos_mesh["0"].shape[1],
+                     ldos_mesh["0"].shape[2], len(ldos_mesh)),
+                     dtype=ldos_mesh["0"].dtype)
+
+        # TODO: This is currently inefficient.
+        # But if I register the chunks to individual indices i of the
+        # actual LDOS object, then something goes wrong during the flushing,
+        # so I flush multiple times...
+        for i in range(0, len(ldos_mesh)):
+            temp_ldos = ldos_mesh[str(i)].load_chunk()
+            series.flush()
+            self.local_density_of_states[:, :, :, i] = temp_ldos.copy()
 
     def get_energy_grid(self):
         """

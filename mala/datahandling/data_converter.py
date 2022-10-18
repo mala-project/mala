@@ -143,7 +143,8 @@ class DataConverter:
                                 input_path=None,
                                 output_path=None,
                                 use_memmap=None,
-                                return_data=False):
+                                return_data=False,
+                                io_iteration=None):
         """
         Convert single snapshot from the conversion lists.
 
@@ -188,11 +189,6 @@ class DataConverter:
         snapshot = self.__snapshots_to_convert[snapshot_number]
         description = self.__snapshot_description[snapshot_number]
         original_units = self.__snapshot_units[snapshot_number]
-
-        series = io.Series("test_openpmd_output%05.h5",
-                           io.Access.create)
-        series.set_attribute("is_mala_data", True)
-        series.set_attribute("units", "some_units")
 
         # Parse and/or calculate the input descriptors.
         if description["input"] == "qe.out":
@@ -245,10 +241,17 @@ class DataConverter:
         if description["output"] is not None:
             if get_rank() == 0:
                 if output_path is not None:
-                    current_iteration = series.iterations[0]
-                    output_mesh = current_iteration.meshes["LDOS"]
-                    output_mesh_component_0 = output_mesh["0"]
-                    output_mesh_component_1 = output_mesh["1"]
+                    output_mesh = io_iteration.meshes["LDOS"]
+                    dataset = io.Dataset(tmp_output.dtype,
+                                         tmp_output[:, :, :, 0].shape)
+                    for i in range(0, tmp_output.shape[3]):
+                        output_mesh_component = output_mesh[str(i)]
+                        output_mesh_component.reset_dataset(dataset)
+
+                        # TODO: Remove this copy?
+                        output_mesh_component.\
+                            store_chunk(tmp_output[:, :, :, i].copy())
+                    io_iteration.close(flush=True)
                     np.save(output_path, tmp_output)
 
         if return_data:
@@ -306,10 +309,16 @@ class DataConverter:
         if target_calculator_kwargs is None:
             target_calculator_kwargs = {}
 
+        series = io.Series("test_openpmd_output%01T.h5",
+                           io.Access.create)
+        series.set_attribute("is_mala_data", 1)
+        series.set_attribute("units", "some_units")
+
         for i in range(0, len(self.__snapshots_to_convert)):
             snapshot_number = i + starts_at
             snapshot_name = naming_scheme
             snapshot_name = snapshot_name.replace("*", str(snapshot_number))
+            io_iteration = series.iterations[i]
 
             # A memory mapped file is used as buffer for distributed cases.
             memmap = None
@@ -325,7 +334,8 @@ class DataConverter:
                                          snapshot_name+".in.npy"),
                                          output_path=os.path.join(save_path,
                                          snapshot_name+".out.npy"),
-                                         use_memmap=memmap)
+                                         use_memmap=memmap,
+                                         io_iteration=io_iteration)
             printout("Saved snapshot", snapshot_number, "at ", save_path,
                      min_verbosity=0)
 
