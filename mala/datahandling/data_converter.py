@@ -2,6 +2,7 @@
 import os
 
 import numpy as np
+import openpmd_api as io
 
 from mala.common.parallelizer import printout, get_rank
 from mala.common.parameters import ParametersData
@@ -188,6 +189,11 @@ class DataConverter:
         description = self.__snapshot_description[snapshot_number]
         original_units = self.__snapshot_units[snapshot_number]
 
+        series = io.Series("test_openpmd_output%05.h5",
+                           io.Access.create)
+        series.set_attribute("is_mala_data", True)
+        series.set_attribute("units", "some_units")
+
         # Parse and/or calculate the input descriptors.
         if description["input"] == "qe.out":
             descriptor_calculation_kwargs["units"] = original_units["input"]
@@ -239,6 +245,10 @@ class DataConverter:
         if description["output"] is not None:
             if get_rank() == 0:
                 if output_path is not None:
+                    current_iteration = series.iterations[0]
+                    output_mesh = current_iteration.meshes["LDOS"]
+                    output_mesh_component_0 = output_mesh["0"]
+                    output_mesh_component_1 = output_mesh["1"]
                     np.save(output_path, tmp_output)
 
         if return_data:
