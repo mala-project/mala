@@ -45,6 +45,7 @@ class TestParallel:
         test_parameters.descriptors.twojmax = 6
         test_parameters.descriptors.rcutfac = 4.67637
         test_parameters.descriptors.descriptors_contain_xyz = True
+        test_parameters.descriptors.use_z_splitting = False
         test_parameters.use_mpi = True
         snap_calculator = mala.SNAP(test_parameters)
         snaps_parallel, snapsize = snap_calculator.calculate_from_atoms(atoms,

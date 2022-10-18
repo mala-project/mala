@@ -42,7 +42,7 @@ class TestInference:
                                             data_path,
                                             "Al_debug_2k_nr0.out.npy",
                                             data_path, "te",
-                                            output_units="1/Ry")
+                                            output_units="1/(Ry*Bohr^3)")
 
         inference_data_handler.prepare_data()
 
@@ -50,9 +50,9 @@ class TestInference:
 
         from_file_1 = inference_data_handler.target_calculator.\
             convert_units(np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0) + ".out.npy")),
-                          in_units="1/Ry")
+                          in_units="1/(Ry*Bohr^3)")
         from_file_2 = np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0) + ".out.npy"))\
-            * inference_data_handler.target_calculator.convert_units(1, in_units="1/Ry")
+            * inference_data_handler.target_calculator.convert_units(1, in_units="1/(Ry*Bohr^3)")
 
         assert from_file_1.sum() == from_file_2.sum()
 
@@ -126,12 +126,15 @@ class TestInference:
         test_parameters.descriptors.descriptor_type = "SNAP"
         test_parameters.descriptors.twojmax = 10
         test_parameters.descriptors.rcutfac = 4.67637
+        test_parameters.descriptors.snap_switchflag = 0
 
         data_handler = DataHandler(test_parameters)
         data_handler.add_snapshot("Be_snapshot1.in.npy", beryllium_path,
-                                  "Be_snapshot1.out.npy", beryllium_path, "tr")
+                                  "Be_snapshot1.out.npy", beryllium_path, "tr",
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.add_snapshot("Be_snapshot2.in.npy", beryllium_path,
-                                  "Be_snapshot2.out.npy", beryllium_path, "va")
+                                  "Be_snapshot2.out.npy", beryllium_path, "va",
+                                  output_units="1/(Ry*Bohr^3)")
         data_handler.prepare_data()
 
         test_parameters.network.layer_sizes = [
@@ -157,7 +160,8 @@ class TestInference:
         inference_data_handler.add_snapshot("Be_snapshot3.in.npy",
                                             beryllium_path,
                                             "Be_snapshot3.out.npy",
-                                            beryllium_path, "te")
+                                            beryllium_path, "te",
+                                            output_units="1/(Ry*Bohr^3)")
         inference_data_handler.prepare_data(reparametrize_scaler=False)
 
         tester = Tester(test_parameters, test_network, inference_data_handler)
@@ -222,7 +226,7 @@ class TestInference:
                                             data_path,
                                             "Al_debug_2k_nr0.out.npy",
                                             data_path, "te",
-                                            output_units="1/Ry")
+                                            output_units="1/(Ry*Bohr^3)")
 
         inference_data_handler.prepare_data()
 
@@ -235,7 +239,7 @@ class TestInference:
         # This is the only comparison that counts.
         from_file = inference_data_handler.target_calculator.\
             convert_units(np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0)+".out.npy")),
-                          in_units="1/Ry")
+                          in_units="1/(Ry*Bohr^3)")
 
         # Test if prediction still works.
         raw_predicted_outputs = np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0) + ".in.npy"))

@@ -65,13 +65,14 @@ class ObjectiveBase:
 
         Parameters
         ----------
-        trial
+        trial : optuna.trial.Trial
             A trial is a set of hyperparameters; can be an optuna based
             trial or simply a OAT compatible list.
         """
         # Parse the parameters included in the trial.
         self.parse_trial(trial)
-        if self.trial_type == "optuna":
+        if self.trial_type == "optuna" and self.params.hyperparameters.pruner\
+                == "naswot":
             if trial.should_prune():
                 raise TrialPruned()
 
@@ -80,9 +81,21 @@ class ObjectiveBase:
         for i in range(0, self.params.hyperparameters.
                        number_training_per_trial):
             test_network = Network(self.params)
-            test_trainer = Trainer(self.params, test_network, self.data_handler)
+            test_trainer = Trainer(self.params, test_network,
+                                   self.data_handler)
             test_trainer.train_network()
             final_validation_loss.append(test_trainer.final_validation_loss)
+            if self.trial_type == "optuna" and \
+                    self.params.hyperparameters.pruner \
+                    == "multi_training":
+
+                # This is a little bit hacky, since report is actually
+                # meant for values DURING training, but we instead
+                # use it for one of the losses during multiple trainings.
+                # It should not pose a problem though.
+                trial.report(test_trainer.final_validation_loss, i)
+                if trial.should_prune():
+                    raise TrialPruned()
 
         if self.params.hyperparameters.number_training_per_trial > 1:
             printout("Losses from multiple runs are: ", min_verbosity=2)
@@ -310,8 +323,8 @@ class ObjectiveBase:
                 self.params.running.trainingtype = par.\
                     get_parameter(trial, factor_idx)
             elif "mini_batch_size" == par.name:
-                self.params.running.mini_batch_size = par.get_parameter(trial,
-                                                                        factor_idx)
+                self.params.running.mini_batch_size = \
+                    par.get_parameter(trial, factor_idx)
             elif "early_stopping_epochs" == par.name:
                 self.params.running.early_stopping_epochs = par.\
                     get_parameter(trial, factor_idx)

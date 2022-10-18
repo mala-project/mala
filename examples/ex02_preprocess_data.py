@@ -51,18 +51,27 @@ data_converter = mala.DataConverter(test_parameters)
 
 # Take care to choose the "add_snapshot" function correct for
 # the type of data you want to preprocess.
-data_converter.add_snapshot_qeout_cube("Be.pw.scf.out", data_path,
-                                       "cubes/tmp.pp*Be_ldos.cube",
-                                       data_path, output_units="1/Ry")
+data_converter.add_snapshot_qeout_cube(os.path.join(data_path, "Be.pw.scf.out"),
+                                       os.path.join(data_path, "cubes/tmp.pp*Be_ldos.cube"),
+                                       output_units="1/(Ry*Bohr^3)")
 
 # Convert all the snapshots and save them in the current directory.
 data_converter.convert_snapshots("./", naming_scheme="Be_snapshot*")
 
-####################
-# RESULTS.
-# Print the used parameters and check whether the preprocessed data
-# has the desired dimensions.
-####################
+# If parts of the data have already been processed, the DataConverter class can
+# also be used to convert the rest.
+# No matter which way you access the DataConvert, you can always specify
+# keywords (check API) for the calculators.
+data_converter = mala.DataConverter(test_parameters)
+data_converter.add_snapshot_qeout(os.path.join(data_path, "Be.pw.scf.out"),)
+data_converter.convert_snapshots("./", naming_scheme="Be_snapshot_only_in*",
+                                 descriptor_calculation_kwargs={"working_directory": data_path})
+
+data_converter = mala.DataConverter(test_parameters)
+data_converter.add_snapshot_cube(os.path.join(data_path,
+                                              "cubes/tmp.pp*Be_ldos.cube"),
+                                 output_units="1/(Ry*Bohr^3)")
+data_converter.convert_snapshots("./", naming_scheme="Be_snapshot_only_out*")
 
 printout("Parameters used for this experiment:")
 test_parameters.show()

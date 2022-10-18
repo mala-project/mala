@@ -1,5 +1,6 @@
 """Collection of useful functions for working with LAMMPS."""
 import ctypes
+
 import numpy as np
 
 
@@ -62,9 +63,11 @@ def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None):
     if result_type == 2:
         ptr = ptr.contents
         total_size = np.prod(array_shape)
-        buffer_ptr = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double * total_size))
+        buffer_ptr = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double *
+                                                     total_size))
         array_np = np.frombuffer(buffer_ptr.contents, dtype=float)
         array_np.shape = array_shape
         return array_np
     if result_type == 4 or result_type == 5:
-        return ptr #ptr is an int
+        # ptr is an int
+        return ptr

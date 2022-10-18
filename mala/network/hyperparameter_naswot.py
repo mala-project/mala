@@ -1,6 +1,4 @@
 """Hyperparameter to use with optuna."""
-from optuna.trial import Trial
-
 from mala.network.hyperparameter_optuna import HyperparameterOptuna
 
 
@@ -38,7 +36,8 @@ class HyperparameterNASWOT(HyperparameterOptuna):
         List of possible choices (for categorical parameter).
     """
 
-    def __init__(self, opttype="categorical", name="", low=0, high=0, choices=None):
+    def __init__(self, opttype="categorical", name="", low=0, high=0,
+                 choices=None):
         super(HyperparameterNASWOT, self).__init__(opttype=opttype,
                                                    name=name,
                                                    low=low,

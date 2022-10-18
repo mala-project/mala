@@ -1,18 +1,24 @@
 """Base class for all target calculators."""
 from abc import ABC, abstractmethod
 import itertools
-import warnings
 
 from ase.neighborlist import NeighborList
-from ase.units import Rydberg, Bohr, kB
+from ase.units import Rydberg, kB
 import ase.io
 import numpy as np
 from scipy.spatial import distance
 from scipy.integrate import simps
 
 from mala.common.parameters import Parameters, ParametersTargets
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, parallel_warn
 from mala.targets.calculation_helpers import fermi_function
+
+# Empirical value for the Gaussian descriptor width, determined for an
+# aluminium system. Reasonable values for sigma can and will be calculated
+# automatically based on this value and the aluminium gridspacing
+# for other systems as well.
+optimal_sigma_aluminium = 0.2
+reference_grid_spacing_aluminium = 0.08099000022712448
 
 
 class Target(ABC):
@@ -73,16 +79,18 @@ class Target(ABC):
         return target
 
     def __init__(self, params):
+        self._parameters_full = None
         if isinstance(params, Parameters):
             self.parameters: ParametersTargets = params.targets
+            self._parameters_full = params
         elif isinstance(params, ParametersTargets):
             self.parameters: ParametersTargets = params
         else:
             raise Exception("Wrong type of parameters for Targets class.")
-        self.fermi_energy_eV = None
-        self.temperature_K = None
-        self.voxel_Bohr = None
-        self.number_of_electrons = None
+        self.fermi_energy_dft = None
+        self.temperature = None
+        self.voxel = None
+        self.number_of_electrons_exact = None
         self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
@@ -117,11 +125,13 @@ class Target(ABC):
         self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
 
-        # Local grid for distributed inference.
+        # Local grid and parallelization info for distributed inference.
         self.local_grid = None
+        self.y_planes = None
 
+    @property
     @abstractmethod
-    def get_feature_size(self):
+    def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
         pass
 
@@ -137,49 +147,28 @@ class Target(ABC):
     def qe_input_data(self, value):
         self._qe_input_data = value
 
-    def read_from_cube(self):
-        """Read the quantity from a .cube file."""
-        raise Exception("No function defined to read this quantity "
-                        "from a .cube file.")
+    def _is_property_cached(self, property_name):
+        return property_name in self.__dict__.keys()
 
-    def read_from_qe_dos_txt(self):
-        """Read the quantity from a Quantum Espresso .dos.txt file."""
-        raise Exception("No function defined to read this quantity "
-                        "from a qe.dos.txt file")
+    @abstractmethod
+    def get_target(self):
+        """
+        Get the target quantity.
 
-    def write_as_cube(self):
-        """Write the quantity in a cube file."""
-        raise Exception("No function defined to write this quantity "
-                        "to a .cube file.")
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        pass
 
-    def get_density(self):
-        """Get the electronic density."""
-        raise Exception("No function to calculate or provide the "
-                        "density has been implemented for this target type.")
+    @abstractmethod
+    def invalidate_target(self):
+        """
+        Invalidates the saved target wuantity.
 
-    def get_density_of_states(self):
-        """Get the density of states."""
-        raise Exception("No function to calculate or provide the"
-                        "density of states (DOS) has been implemented "
-                        "for this target type.")
-
-    def get_band_energy(self):
-        """Get the band energy."""
-        raise Exception("No function to calculate or provide the"
-                        "band energy has been implemented for this target "
-                        "type.")
-
-    def get_number_of_electrons(self):
-        """Get the number of electrons."""
-        raise Exception("No function to calculate or provide the number of"
-                        " electrons has been implemented for this target "
-                        "type.")
-
-    def get_total_energy(self):
-        """Get the total energy."""
-        raise Exception("No function to calculate or provide the number "
-                        "of electons has been implemented for this target "
-                        "type.")
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        pass
 
     def read_additional_calculation_data(self, data_type, data=""):
         """
@@ -208,10 +197,10 @@ class Target(ABC):
         """
         if data_type == "qe.out":
             # Reset everything.
-            self.fermi_energy_eV = None
-            self.temperature_K = None
-            self.voxel_Bohr = None
-            self.number_of_electrons = None
+            self.fermi_energy_dft = None
+            self.temperature = None
+            self.number_of_electrons_exact = None
+            self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
@@ -220,7 +209,7 @@ class Target(ABC):
             # Read the file.
             self.atoms = ase.io.read(data, format="espresso-out")
             vol = self.atoms.get_volume()
-            self.fermi_energy_eV = self.atoms.get_calculator().\
+            self.fermi_energy_dft = self.atoms.get_calculator().\
                 get_fermi_level()
 
             # Parse the file for energy values.
@@ -234,11 +223,11 @@ class Target(ABC):
                     if "End of self-consistent calculation" in line:
                         past_calculation_part = True
                     if "number of electrons       =" in line:
-                        self.number_of_electrons = np.float64(line.split('=')
-                                                              [1])
+                        self.number_of_electrons_exact = \
+                            np.float64(line.split('=')[1])
                     if "Fermi-Dirac smearing, width (Ry)=" in line:
-                        self.temperature_K = np.float64(line.split('=')[2]) * \
-                                             Rydberg / kB
+                        self.temperature = np.float64(line.split('=')[2]) * \
+                                           Rydberg / kB
                     if "xc contribution" in line:
                         break
                     if "FFT dimensions" in line:
@@ -274,16 +263,20 @@ class Target(ABC):
                         bands_included = False
 
             # The voxel is needed for e.g. LDOS integration.
-            self.voxel_Bohr = self.atoms.cell.copy()
-            self.voxel_Bohr[0] = self.voxel_Bohr[0] / (
-                        self.grid_dimensions[0] * Bohr)
-            self.voxel_Bohr[1] = self.voxel_Bohr[1] / (
-                        self.grid_dimensions[1] * Bohr)
-            self.voxel_Bohr[2] = self.voxel_Bohr[2] / (
-                        self.grid_dimensions[2] * Bohr)
+            self.voxel = self.atoms.cell.copy()
+            self.voxel[0] = self.voxel[0] / (
+                        self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (
+                        self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (
+                        self.grid_dimensions[2])
+            self._parameters_full.descriptors.gaussian_descriptors_sigma = \
+                (np.max(self.voxel) / reference_grid_spacing_aluminium) * \
+                optimal_sigma_aluminium
 
             # This is especially important for size extrapolation.
-            self.electrons_per_atom = self.number_of_electrons/len(self.atoms)
+            self.electrons_per_atom = self.number_of_electrons_exact / \
+                len(self.atoms)
 
             # Unit conversion
             self.total_energy_dft_calculation = total_energy*Rydberg
@@ -296,19 +289,18 @@ class Target(ABC):
                     energies[0, :, :])
                 kweights = self.atoms.get_calculator().get_k_point_weights()
                 eband_per_band = eigs * fermi_function(eigs,
-                                                       self.fermi_energy_eV,
-                                                       self.temperature_K)
+                                                       self.fermi_energy_dft,
+                                                       self.temperature)
                 eband_per_band = kweights[np.newaxis, :] * eband_per_band
                 self.band_energy_dft_calculation = np.sum(eband_per_band)
-                enum_per_band = fermi_function(eigs,
-                                               self.fermi_energy_eV,
-                                               self.temperature_K)
+                enum_per_band = fermi_function(eigs, self.fermi_energy_dft,
+                                               self.temperature)
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
 
         elif data_type == "atoms+grid":
             # Reset everything that we can get this way.
-            self.voxel_Bohr = None
+            self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
@@ -323,13 +315,16 @@ class Target(ABC):
             self.grid_dimensions[2] = data[1][2]
 
             # The voxel is needed for e.g. LDOS integration.
-            self.voxel_Bohr = self.atoms.cell.copy()
-            self.voxel_Bohr[0] = self.voxel_Bohr[0] / (
-                        self.grid_dimensions[0] * Bohr)
-            self.voxel_Bohr[1] = self.voxel_Bohr[1] / (
-                        self.grid_dimensions[1] * Bohr)
-            self.voxel_Bohr[2] = self.voxel_Bohr[2] / (
-                        self.grid_dimensions[2] * Bohr)
+            self.voxel = self.atoms.cell.copy()
+            self.voxel[0] = self.voxel[0] / (
+                        self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (
+                        self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (
+                        self.grid_dimensions[2])
+            self._parameters_full.descriptors.gaussian_descriptors_sigma = \
+                (np.max(self.voxel) / reference_grid_spacing_aluminium) * \
+                optimal_sigma_aluminium
 
             if self.electrons_per_atom is None:
                 printout("No number of electrons per atom provided, "
@@ -338,8 +333,8 @@ class Target(ABC):
                          "wrong.")
 
             else:
-                self.number_of_electrons = self.electrons_per_atom *\
-                                           len(self.atoms)
+                self.number_of_electrons_exact = self.electrons_per_atom * \
+                                                 len(self.atoms)
 
         else:
             raise Exception("Unsupported auxiliary file type.")
@@ -355,17 +350,23 @@ class Target(ABC):
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
                 for k in range(0, self.grid_dimensions[2]):
-                    grid3D[i, j, k, :] = np.matmul(self.voxel_Bohr, [i, j, k])
+                    grid3D[i, j, k, :] = np.matmul(self.voxel, [i, j, k])
         return grid3D
 
     @staticmethod
-    def _get_ideal_rmax_for_rdf(atoms: ase.Atoms):
-        return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+    def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):
+        if method == "mic":
+            return np.min(np.linalg.norm(atoms.get_cell(), axis=0))/2
+        elif method == "2mic":
+            return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+        else:
+            raise Exception("Unknown option to calculate rMax provided.")
 
     @staticmethod
     def radial_distribution_function_from_atoms(atoms: ase.Atoms,
                                                 number_of_bins,
-                                                rMax=None):
+                                                rMax="mic",
+                                                method="mala"):
         """
         Calculate the radial distribution function (RDF).
 
@@ -384,13 +385,24 @@ class Target(ABC):
         number_of_bins : int
             Number of bins used to create the histogram.
 
-        rMax : float
-            Radius up to which to calculate the RDF. None by default; this
-            is the suggested behavior, as MALA will then on its own calculate
-            the maximum radius up until which the calculation of the RDF is
-            indisputably physically meaningful. Larger radii may be specified,
-            e.g. for a Fourier transformation to calculate the static structure
-            factor.
+        rMax : float or string
+            Radius up to which to calculate the RDF.
+            Options are:
+
+                - "mic": rMax according to minimum image convention.
+                  (see "The Minimum Image Convention in Non-Cubic MD Cells"
+                  by Smith,
+                  http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.57.1696)
+                  Suggested value, as this leads to physically meaningful RDFs.
+                - "2mic": rMax twice as big as for "mic". Legacy option
+                  to reproduce some earlier trajectory results
+                - float: Input some float to use it directly as input.
+
+        method : string
+            If "mala" the more flexible, yet less performant python based
+            RDF will be calculated. If "asap3", asap3's C++ implementation
+            will be used. In the latter case, rMax values larger then
+            "2mic" will be ignored.
 
         Returns
         -------
@@ -406,59 +418,81 @@ class Target(ABC):
         # from asap3.analysis.rdf import RadialDistributionFunction
         # (RadialDistributionFunction(atoms, rMax, 500)).get_rdf()
 
-        # This is quite a large RDF.
-        # We may want a smaller one eventually.
-        if rMax is None:
-            rMax = Target._get_ideal_rmax_for_rdf(atoms)
+        if rMax == "mic":
+            _rMax = Target._get_ideal_rmax_for_rdf(atoms, method="mic")
+        elif rMax == "2mic":
+            _rMax = Target._get_ideal_rmax_for_rdf(atoms, method="2mic")
+        else:
+            if method == "asap3":
+                _rMax_possible = Target._get_ideal_rmax_for_rdf(atoms,
+                                                                method="2mic")
+                if rMax > _rMax_possible:
+                    raise Exception("ASAP3 calculation fo RDF cannot work "
+                                    "with radii that are bigger then the "
+                                    "cell.")
+            _rMax = rMax
 
         atoms = atoms
-        dr = float(rMax/number_of_bins)
-        rdf = np.zeros(number_of_bins + 1)
+        dr = float(_rMax / number_of_bins)
 
-        cell = atoms.get_cell()
-        pbc = atoms.get_pbc()
-        for i in range(0, 3):
-            if pbc[i]:
-                if rMax > cell[i, i]:
-                    warnings.warn(
-                        "Calculating RDF with a radius larger then the unit"
-                        " cell. While this will work numerically, be cautious"
-                        " about the physicality of its results", stacklevel=3)
+        if method == "mala":
+            rdf = np.zeros(number_of_bins + 1)
 
-        # Calculate all the distances.
-        # rMax/2 because this is the radius around one atom, so half the
-        # distance to the next one.
-        # Using neighborlists grants us access to the PBC.
-        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms)) +
-                                                     [rMax/2.0],
-                                                     bothways=True)
-        neighborlist.update(atoms)
-        for i in range(0, len(atoms)):
-            indices, offsets = neighborlist.get_neighbors(i)
-            dm = distance.cdist([atoms.get_positions()[i]],
-                                atoms.positions[indices] + offsets @
-                                atoms.get_cell())
-            index = (np.ceil(dm / dr)).astype(int)
-            index = index.flatten()
-            out_of_scope = index > number_of_bins
-            index[out_of_scope] = 0
-            for idx in index:
-                rdf[idx] += 1
+            cell = atoms.get_cell()
+            pbc = atoms.get_pbc()
+            for i in range(0, 3):
+                if pbc[i]:
+                    if _rMax > cell[i, i]:
+                        parallel_warn(
+                            "Calculating RDF with a radius larger then the "
+                            "unit cell. While this will work numerically, be "
+                            "cautious about the physicality of its results")
 
-        # Normalize the RDF and calculate the distances
-        rr = []
-        phi = len(atoms) / atoms.get_volume()
-        norm = 4.0 * np.pi * dr * phi * len(atoms)
-        for i in range(1, number_of_bins + 1):
-            rr.append((i - 0.5) * dr)
-            rdf[i] /= (norm * ((rr[-1] ** 2) + (dr ** 2) / 12.))
+            # Calculate all the distances.
+            # rMax/2 because this is the radius around one atom, so half the
+            # distance to the next one.
+            # Using neighborlists grants us access to the PBC.
+            neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms)) +
+                                                         [_rMax/2.0],
+                                                         bothways=True)
+            neighborlist.update(atoms)
+            for i in range(0, len(atoms)):
+                indices, offsets = neighborlist.get_neighbors(i)
+                dm = distance.cdist([atoms.get_positions()[i]],
+                                    atoms.positions[indices] + offsets @
+                                    atoms.get_cell())
+                index = (np.ceil(dm / dr)).astype(int)
+                index = index.flatten()
+                out_of_scope = index > number_of_bins
+                index[out_of_scope] = 0
+                for idx in index:
+                    rdf[idx] += 1
 
+            # Normalize the RDF and calculate the distances
+            rr = []
+            phi = len(atoms) / atoms.get_volume()
+            norm = 4.0 * np.pi * dr * phi * len(atoms)
+            for i in range(1, number_of_bins + 1):
+                rr.append((i - 0.5) * dr)
+                rdf[i] /= (norm * ((rr[-1] ** 2) + (dr ** 2) / 12.))
+        elif method == "asap3":
+            # ASAP3 loads MPI which takes a long time to import, so
+            # we'll only do that when absolutely needed.
+            from asap3.analysis.rdf import RadialDistributionFunction
+            rdf = RadialDistributionFunction(atoms, _rMax,
+                                             number_of_bins).get_rdf()
+            rr = []
+            for i in range(1, number_of_bins + 1):
+                rr.append((i - 0.5) * dr)
+            return rdf, rr
+        else:
+            raise Exception("Unknown RDF method selected.")
         return rdf[1:], rr
         
     @staticmethod
     def three_particle_correlation_function_from_atoms(atoms: ase.Atoms,
                                                        number_of_bins,
-                                                       rMax=None):
+                                                       rMax="mic"):
         """
         Calculate the three particle correlation function (TPCF).
 
@@ -475,11 +509,18 @@ class Target(ABC):
         number_of_bins : int
             Number of bins used to create the histogram.
 
-        rMax : float
-            Radius up to which to calculate the TPCF. If None, MALA will
-            determine the maximum radius for which the TPCF is indisputably
-            defined. Be advised - this may come at increased computational
-            cost.
+        rMax : float or string
+            Radius up to which to calculate the RDF.
+            Options are:
+
+                - "mic": rMax according to minimum image convention.
+                  (see "The Minimum Image Convention in Non-Cubic MD Cells"
+                  by Smith,
+                  http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.57.1696)
+                  Suggested value, as this leads to physically meaningful RDFs.
+                - "2mic : rMax twice as big as for "mic". Legacy option
+                  to reproduce some earlier trajectory results
+                - float: Input some float to use it directly as input.
 
         Returns
         -------
@@ -490,26 +531,30 @@ class Target(ABC):
             The radii at which the TPCF was calculated (for plotting),
             [rMax, rMax, rMax].
         """
-        if rMax is None:
-            rMax = np.min(
-                    np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+        if rMax == "mic":
+            _rMax = Target._get_ideal_rmax_for_rdf(atoms, method="mic")
+        elif rMax == "2mic":
+            _rMax = Target._get_ideal_rmax_for_rdf(atoms, method="2mic")
+        else:
+            _rMax = rMax
 
         # TPCF is a function of three radii.
         atoms = atoms
-        dr = float(rMax/number_of_bins)
+        dr = float(_rMax/number_of_bins)
         tpcf = np.zeros([number_of_bins + 1, number_of_bins + 1,
                         number_of_bins + 1])
         cell = atoms.get_cell()
         pbc = atoms.get_pbc()
         for i in range(0, 3):
             if pbc[i]:
-                if rMax > cell[i, i]:
+                if _rMax > cell[i, i]:
                     raise Exception("Cannot calculate RDF with this radius. "
                                     "Please choose a smaller value.")
 
         # Construct a neighbor list for calculation of distances.
         # With this, the PBC are satisfied.
-        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms))+[rMax/2.0],
+        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms)) +
+                                                     [_rMax/2.0],
                                                      bothways=True)
         neighborlist.update(atoms)
 
@@ -547,9 +592,9 @@ class Target(ABC):
 
                 # We don't need to do any calculation if either of the
                 # atoms are already out of range.
-                if r1 < rMax and r2 < rMax:
+                if r1 < _rMax and r2 < _rMax:
                     r3 = dists_between_atoms[idx]
-                    if r3 < rMax and np.abs(r1-r2) < r3 < (r1+r2):
+                    if r3 < _rMax and np.abs(r1-r2) < r3 < (r1+r2):
                         # print(r1, r2, r3)
                         id1 = (np.ceil(r1 / dr)).astype(int)
                         id2 = (np.ceil(r2 / dr)).astype(int)
@@ -576,7 +621,8 @@ class Target(ABC):
         return tpcf[1:, 1:, 1:], rr[:, 1:, 1:, 1:]
 
     @staticmethod
-    def static_structure_factor_from_atoms(atoms: ase.Atoms, number_of_bins, kMax,
+    def static_structure_factor_from_atoms(atoms: ase.Atoms, number_of_bins,
+                                           kMax,
                                            radial_distribution_function=None,
                                            calculation_type="direct"):
         """
@@ -623,7 +669,7 @@ class Target(ABC):
         """
         if calculation_type == "fourier_transform":
             if radial_distribution_function is None:
-                rMax = Target._get_ideal_rmax_for_rdf(atoms)*3
+                rMax = Target._get_ideal_rmax_for_rdf(atoms)*6
                 radial_distribution_function = Target.\
                     radial_distribution_function_from_atoms(atoms, rMax=rMax,
                                                             number_of_bins=
@@ -716,7 +762,8 @@ class Target(ABC):
             raise Exception("Static structure factor calculation method "
                             "unsupported.")
 
-    def get_radial_distribution_function(self, atoms: ase.Atoms):
+    def get_radial_distribution_function(self, atoms: ase.Atoms,
+                                         method="mala"):
         """
         Calculate the radial distribution function (RDF).
 
@@ -727,6 +774,11 @@ class Target(ABC):
         atoms : ase.Atoms
             Atoms for which to construct the RDF.
 
+        method : string
+            If "mala" the more flexible, yet less performant python based
+            RDF will be calculated. If "asap3", asap3's C++ implementation
+            will be used.
+
         Returns
         -------
         rdf : numpy.ndarray
@@ -735,6 +787,13 @@ class Target(ABC):
         radii : numpy.ndarray
             The radii  at which the RDF was calculated (for plotting),
             as [rMax] array.
+
+        method : string
+            If "mala" the more flexible, yet less performant python based
+            RDF will be calculated. If "asap3", asap3's C++ implementation
+            will be used. In the latter case, rMax will be ignored and
+            automatically calculated.
+
         """
         return Target.\
             radial_distribution_function_from_atoms(atoms,
@@ -743,7 +802,8 @@ class Target(ABC):
                                                     rdf_parameters
                                                     ["number_of_bins"],
                                                     rMax=self.parameters.
-                                                    rdf_parameters["rMax"])
+                                                    rdf_parameters["rMax"],
+                                                    method=method)
 
     def get_three_particle_correlation_function(self, atoms: ase.Atoms):
         """
@@ -795,10 +855,10 @@ class Target(ABC):
             as [kMax] array.
         """
         return Target.static_structure_factor_from_atoms(atoms,
-                                                             self.parameters.
-                                                             ssf_parameters["number_of_bins"],
-                                                             self.parameters.
-                                                             ssf_parameters["number_of_bins"])
+                                                         self.parameters.
+                                                         ssf_parameters["number_of_bins"],
+                                                         self.parameters.
+                                                         ssf_parameters["number_of_bins"])
 
     @staticmethod
     def write_tem_input_file(atoms_Angstrom, qe_input_data,

@@ -80,6 +80,7 @@ class TestInterfaces:
         test_parameters.descriptors.descriptor_type = "SNAP"
         test_parameters.descriptors.twojmax = 10
         test_parameters.descriptors.rcutfac = 4.67637
+        test_parameters.descriptors.snap_switchflag = 0
         test_parameters.targets.pseudopotential_path = os.path.join(
             data_repo_path,
             "Be2")
@@ -90,9 +91,11 @@ class TestInterfaces:
 
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "tr")
+                                  "Be_snapshot1.out.npy", data_path, "tr",
+                                  output_units="1/(eV*Bohr^3)")
         data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "va")
+                                  "Be_snapshot2.out.npy", data_path, "va",
+                                  output_units="1/(eV*Bohr^3)")
         data_handler.prepare_data()
 
         ####################

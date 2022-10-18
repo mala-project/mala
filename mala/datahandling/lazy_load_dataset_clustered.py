@@ -7,11 +7,6 @@ except ModuleNotFoundError:
     # Warning is thrown by Parameters class.
     pass
 
-try:
-    import pqkmeans
-except ModuleNotFoundError:
-    pass
-
 import numpy as np
 import torch
 from torch.utils.data import Dataset
@@ -134,6 +129,9 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
                               self.sample_ratio)
 
     def __cluster_snapshot(self, snapshot_idx):
+        # Since pgkmeans is taking a while to load and is only rarely
+        # needed, I'll make this import per-demand.
+        import pqkmeans
 
         # Load the data into memory, and transform it as necessary.
         # I know, the here-and-there transform via torch is ugly, but

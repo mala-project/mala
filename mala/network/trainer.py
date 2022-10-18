@@ -1,6 +1,7 @@
 """Trainer class for training a network."""
 import os
 import time
+from datetime import datetime
 
 try:
     import horovod.torch as hvd
@@ -65,11 +66,23 @@ class Trainer(Runner):
         self.__prepare_to_train(optimizer_dict)
 
         self.tensor_board = None
+        self.full_visualization_path = None
         if self.parameters.visualisation:
             if not os.path.exists(self.parameters.visualisation_dir):
                 os.makedirs(self.parameters.visualisation_dir)
+            if self.parameters.visualisation_dir_append_date:
+                date_time = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                self.full_visualization_path = \
+                    os.path.join(self.parameters.visualisation_dir, date_time)
+                os.makedirs(self.full_visualization_path)
+            else:
+                self.full_visualization_path = \
+                    self.parameters.visualisation_dir
+
             # Set the path to log files
-            self.tensor_board = SummaryWriter(self.parameters.visualisation_dir)
+            self.tensor_board = SummaryWriter(self.full_visualization_path)
+            printout("Writing visualization output to",
+                     self.full_visualization_path, min_verbosity=1)
 
     @classmethod
     def checkpoint_exists(cls, checkpoint_name, use_pkl_checkpoints=False):
@@ -254,7 +267,7 @@ class Trainer(Runner):
             self.network.train()
 
             # Process each mini batch and save the training loss.
-            training_loss = 0
+            training_loss = []
 
             # train sampler
             if self.parameters_full.use_horovod:
@@ -264,8 +277,10 @@ class Trainer(Runner):
                     enumerate(self.training_data_loader):
                 inputs = inputs.to(self.parameters._configuration["device"])
                 outputs = outputs.to(self.parameters._configuration["device"])
-                training_loss += self.__process_mini_batch(self.network,
-                                                           inputs, outputs)
+                training_loss.append(self.__process_mini_batch(self.network,
+                                                               inputs,
+                                                               outputs))
+            training_loss = np.mean(training_loss)
 
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(self.network,
@@ -275,12 +290,21 @@ class Trainer(Runner):
 
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
-            printout("Epoch: ", epoch, "validation data loss: ", vloss,
-                     min_verbosity=1)
+            if self.parameters_full.verbosity > 1:
+                printout("Epoch {0}: validation data loss: {1}, "
+                         "training data loss: {2}".format(epoch, vloss,
+                                                          training_loss),
+                         min_verbosity=2)
+            else:
+                printout("Epoch {0}: validation data loss: {1}".format(epoch,
+                                                                       vloss),
+                         min_verbosity=1)
 
             # summary_writer tensor board
             if self.parameters.visualisation:
-                self.tensor_board.add_scalar("Loss", vloss, epoch)
+                self.tensor_board.add_scalars('Loss', {'validation': vloss,
+                                              'training': training_loss},
+                                              epoch)
                 self.tensor_board.add_scalar("Learning rate",
                                              self.parameters.learning_rate,
                                              epoch)
@@ -491,7 +515,8 @@ class Trainer(Runner):
         self.validation_data_loader = DataLoader(self.data.validation_data_set,
                                                  batch_size=self.parameters.
                                                  mini_batch_size * 1,
-                                                 sampler=self.validation_sampler,
+                                                 sampler=
+                                                 self.validation_sampler,
                                                  **kwargs)
 
         if self.data.test_data_set is not None:
@@ -563,25 +588,26 @@ class Trainer(Runner):
                 # ordered.
                 calculator.\
                     read_additional_calculation_data("qe.out",
-                                         self.data.
-                                         get_snapshot_calculation_output(snapshot_number))
+                                                     self.data.get_snapshot_calculation_output(snapshot_number))
                 fe_actual = calculator.\
-                    get_self_consistent_fermi_energy_ev(actual_outputs)
+                    get_self_consistent_fermi_energy(actual_outputs)
                 be_actual = calculator.\
-                    get_band_energy(actual_outputs, fermi_energy_eV=fe_actual)
+                    get_band_energy(actual_outputs, fermi_energy=fe_actual)
 
                 try:
                     fe_predicted = calculator.\
-                        get_self_consistent_fermi_energy_ev(predicted_outputs)
+                        get_self_consistent_fermi_energy(predicted_outputs)
                     be_predicted = calculator.\
-                        get_band_energy(predicted_outputs, fermi_energy_eV=fe_predicted)
+                        get_band_energy(predicted_outputs,
+                                        fermi_energy=fe_predicted)
                 except ValueError:
                     # If the training went badly, it might be that the above
                     # code results in an error, due to the LDOS being so wrong
                     # that the estimation of the self consistent Fermi energy
                     # fails.
                     be_predicted = float("inf")
-                errors.append(np.abs(be_predicted-be_actual)*(1000/len(calculator.atoms)))
+                errors.append(np.abs(be_predicted-be_actual) *
+                              (1000/len(calculator.atoms)))
             return np.mean(errors)
         elif validation_type == "total_energy":
             # Get optimal batch size and number of batches per snapshots.
@@ -594,8 +620,7 @@ class Trainer(Runner):
             errors = []
             for snapshot_number in range(offset_snapshots,
                                          number_of_snapshots+offset_snapshots):
-                actual_outputs, \
-                predicted_outputs = self.\
+                actual_outputs, predicted_outputs = self.\
                     _forward_entire_snapshot(snapshot_number-offset_snapshots,
                                              data_set,
                                              number_of_batches_per_snapshot,
@@ -606,27 +631,27 @@ class Trainer(Runner):
                 # ordered.
                 calculator.\
                     read_additional_calculation_data("qe.out",
-                                         self.data.
-                                         get_snapshot_calculation_output(snapshot_number))
+                                                     self.data.get_snapshot_calculation_output(snapshot_number))
                 fe_actual = calculator.\
-                    get_self_consistent_fermi_energy_ev(actual_outputs)
+                    get_self_consistent_fermi_energy(actual_outputs)
                 te_actual = calculator.\
                     get_total_energy(ldos_data=actual_outputs,
-                                     fermi_energy_eV=fe_actual)
+                                     fermi_energy=fe_actual)
 
                 try:
                     fe_predicted = calculator.\
-                        get_self_consistent_fermi_energy_ev(predicted_outputs)
+                        get_self_consistent_fermi_energy(predicted_outputs)
                     te_predicted = calculator.\
                         get_total_energy(ldos_data=actual_outputs,
-                                         fermi_energy_eV=fe_predicted)
+                                         fermi_energy=fe_predicted)
                 except ValueError:
                     # If the training went badly, it might be that the above
                     # code results in an error, due to the LDOS being so wrong
                     # that the estimation of the self consistent Fermi energy
                     # fails.
                     te_predicted = float("inf")
-                errors.append(np.abs(te_predicted-te_actual)*(1000/len(calculator.atoms)))
+                errors.append(np.abs(te_predicted-te_actual) *
+                              (1000/len(calculator.atoms)))
             return np.mean(errors)
 
         else:
@@ -692,4 +717,3 @@ class Trainer(Runner):
         tensor = torch.tensor(val)
         avg_loss = hvd.allreduce(tensor, name=name, op=hvd.Average)
         return avg_loss.item()
-

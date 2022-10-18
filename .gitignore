@@ -165,3 +165,11 @@ cython_debug/
 # LAMMPS
 *.tmp
 
+# Tensorflow
+*.tfevents.*
+
+# Volumetric output files
+*.cube
+
+# Git files
+.gitconfig

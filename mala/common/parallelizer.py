@@ -1,14 +1,12 @@
 """Functions for operating MALA in parallel."""
+from collections import defaultdict
+import platform
+import warnings
+
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     pass
-try:
-    from mpi4py import MPI
-except ModuleNotFoundError:
-    pass
-import platform
-from collections import defaultdict
 import torch
 
 use_horovod = False
@@ -72,6 +70,8 @@ def set_mpi_status(new_value):
     global use_mpi
     use_mpi = new_value
     if use_mpi:
+        from mpi4py import MPI
+
         global comm
         comm = MPI.COMM_WORLD
 
@@ -211,3 +211,23 @@ def printout(*values, sep=' ', min_verbosity=0):
         outstring = sep.join([str(v) for v in values])
         if get_rank() == 0:
             print(outstring)
+
+
+def parallel_warn(warning, min_verbosity=0):
+    """
+    Interface for warnings in parallel runs. Can be used like warnings.warn.
+
+    Linked to the verbosity option in parameters. By default, all messages are
+    treated as high level messages and will be printed.
+
+    Parameters
+    ----------
+    warning
+        Warning to be printed.
+
+    min_verbosity : int
+        Minimum number of verbosity for this output to still be printed.
+    """
+    if current_verbosity >= min_verbosity:
+        if get_rank() == 0:
+            warnings.warn(warning)

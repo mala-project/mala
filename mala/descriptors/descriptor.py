@@ -1,10 +1,11 @@
 """Base class for all descriptor calculators."""
-import ase
-import numpy as np
 from abc import ABC, abstractmethod
 
+import ase
+import numpy as np
+
 from mala.common.parameters import ParametersDescriptors, Parameters
-from mala.common.parallelizer import printout
+from mala.common.parallelizer import printout, get_size
 
 
 class Descriptor(ABC):
@@ -52,6 +53,7 @@ class Descriptor(ABC):
         self.parameters: ParametersDescriptors = parameters.descriptors
         self.fingerprint_length = -1  # so iterations will fail
         self.dbg_grid_dimensions = parameters.debug.grid_dimensions
+        self.verbosity = parameters.verbosity
 
     @property
     def descriptors_contain_xyz(self):
@@ -144,7 +146,7 @@ class Descriptor(ABC):
         return new_atoms
 
     @abstractmethod
-    def calculate_from_qe_out(self, qe_out_file, qe_out_directory):
+    def calculate_from_qe_out(self, qe_out_file, **kwargs):
         """
         Calculate the descriptors based on a Quantum Espresso outfile.
 
@@ -153,8 +155,6 @@ class Descriptor(ABC):
         qe_out_file : string
             Name of Quantum Espresso output file for snapshot.
 
-        qe_out_directory : string
-            Path to Quantum Espresso output file for snapshot.
 
         Returns
         -------
@@ -213,6 +213,183 @@ class Descriptor(ABC):
                                     descriptor_vectors_contain_xyz=
                                     self.descriptors_contain_xyz)
 
+    def _setup_lammps_processors(self, nx, ny, nz):
+        """
+        Set up the lammps processor grid.
+
+        Takes into account y/z-splitting.
+        """
+        if self.parameters._configuration["mpi"]:
+            size = get_size()
+            # for parallel tem need to set lammps commands: processors and
+            # balance current implementation is to match lammps mpi processor
+            # grid to QE processor splitting QE distributes grid points in
+            # parallel as slices along z axis currently grid points fall on z
+            # axix plane cutoff values in lammps this leads to some ranks
+            # having 0 grid points and other having 2x gridpoints
+            # balance command in lammps aleviates this issue
+            # integers for plane cuts in z axis appear to be most important
+            #
+            # determine if nyfft flag is set so that QE also parallelizes
+            # along y axis if nyfft is true lammps mpi processor grid needs to
+            # be 1x{ny}x{nz} need to configure separate total_energy_module
+            # with nyfft enabled
+            if self.parameters.use_y_splitting > 1:
+                # TODO automatically pass nyfft into QE from MALA
+                # if more processors thatn y*z grid dimensions requested
+                # send error. More processors than y*z grid dimensions reduces
+                # efficiency and scaling of QE.
+                nyfft = self.parameters.use_y_splitting
+                # number of y processors is equal to nyfft
+                yprocs = nyfft
+                # number of z processors is equal to total processors/nyfft is
+                # nyfft is used else zprocs = size
+                if size % yprocs == 0:
+                    zprocs = int(size/yprocs)
+                else:
+                    raise ValueError("Cannot evenly divide z-planes "
+                                     "in y-direction")
+
+                # check if total number of processors is greater than number of
+                # grid sections produce error if number of processors is
+                # greater than grid partions - will cause mismatch later in QE
+                mpi_grid_sections = yprocs*zprocs
+                if mpi_grid_sections < size:
+                    raise ValueError("More processors than grid sections. "
+                                     "This will cause a crash further in the "
+                                     "calculation. Choose a total number of "
+                                     "processors equal to or less than the "
+                                     "total number of grid sections requsted "
+                                     "for the calculation (nyfft*nz).")
+                # TODO not sure what happens when size/nyfft is not integer -
+                #  further testing required
+
+                # set the mpi processor grid for lammps
+                lammps_procs = f"1 {yprocs} {zprocs}"
+                printout("mpi grid with nyfft: ", lammps_procs,
+                         min_verbosity=2)
+
+                # prepare y plane cuts for balance command in lammps if not
+                # integer value
+                if int(ny / yprocs) == (ny / yprocs):
+                    ycut = 1/yprocs
+                    yint = ''
+                    for i in range(0, yprocs-1):
+                        yvals = ((i+1)*ycut)-0.00000001
+                        yint += format(yvals, ".8f")
+                        yint += ' '
+                else:
+                    # account for remainder with uneven number of
+                    # planes/processors
+                    ycut = 1/yprocs
+                    yrem = ny - (yprocs*int(ny/yprocs))
+                    yint = ''
+                    for i in range(0, yrem):
+                        yvals = (((i+1)*2)*ycut)-0.00000001
+                        yint += format(yvals, ".8f")
+                        yint += ' '
+                    for i in range(yrem, yprocs-1):
+                        yvals = ((i+1+yrem)*ycut)-0.00000001
+                        yint += format(yvals, ".8f")
+                        yint += ' '
+                # prepare z plane cuts for balance command in lammps
+                if int(nz / zprocs) == (nz / zprocs):
+                    zcut = 1/nz
+                    zint = ''
+                    for i in range(0, zprocs-1):
+                        zvals = ((i + 1) * (nz / zprocs) * zcut) - 0.00000001
+                        zint += format(zvals, ".8f")
+                        zint += ' '
+                else:
+                    # account for remainder with uneven number of
+                    # planes/processors
+                    raise ValueError("Cannot divide z-planes on processors"
+                                     " without remainder. "
+                                     "This is currently unsupported.")
+
+                    # zcut = 1/nz
+                    # zrem = nz - (zprocs*int(nz/zprocs))
+                    # zint = ''
+                    # for i in range(0, zrem):
+                    #     zvals = (((i+1)*2)*zcut)-0.00000001
+                    #     zint += format(zvals, ".8f")
+                    #     zint += ' '
+                    # for i in range(zrem, zprocs-1):
+                    #     zvals = ((i+1+zrem)*zcut)-0.00000001
+                    #     zint += format(zvals, ".8f")
+                    #     zint += ' '
+                lammps_dict = {"lammps_procs": f"processors {lammps_procs} "
+                                               f"map xyz",
+                               "zbal": f"balance 1.0 y {yint} z {zint}",
+                               "ngridx": nx,
+                               "ngridy": ny,
+                               "ngridz": nz}
+            else:
+                if self.parameters.use_z_splitting:
+                    # when nyfft is not used only split processors along z axis
+                    size = get_size()
+                    zprocs = size
+                    # check to make sure number of z planes is not less than
+                    # processors. If more processors than planes calculation
+                    # efficiency decreases
+                    if nz < size:
+                        raise ValueError("More processors than grid sections. "
+                                         "This will cause a crash further in "
+                                         "the calculation. Choose a total "
+                                         "number of processors equal to or "
+                                         "less than the total number of grid "
+                                         "sections requsted for the "
+                                         "calculation (nz).")
+
+                    # match lammps mpi grid to be 1x1x{zprocs}
+                    lammps_procs = f"1 1 {zprocs}"
+                    # print("mpi grid z only: ", lammps_procs)
+
+                    # prepare z plane cuts for balance command in lammps
+                    if int(nz / zprocs) == (nz / zprocs):
+                        printout("No remainder in z")
+                        zcut = 1/nz
+                        zint = ''
+                        for i in range(0, zprocs-1):
+                            zvals = ((i+1)*(nz/zprocs)*zcut)-0.00000001
+                            zint += format(zvals, ".8f")
+                            zint += ' '
+                    else:
+                        raise ValueError("Cannot divide z-planes on processors"
+                                         " without remainder. "
+                                         "This is currently unsupported.")
+                    #     zcut = 1/nz
+                    #     zrem = nz - (zprocs*int(nz/zprocs))
+                    #     zint = ''
+                    #     for i in range(0, zrem):
+                    #         zvals = (((i+1)*2)*int(nz/zprocs)*zcut)-
+                    #         0.00000001
+                    #         zint += format(zvals, ".8f")
+                    #         zint += ' '
+                    #     for i in range(zrem, zprocs-1):
+                    #         zvals = ((i+1+zrem)*zcut)-0.00000001
+                    #         zint += format(zvals, ".8f")
+                    #         zint += ' '
+                    lammps_dict = {"lammps_procs":
+                                   f"processors {lammps_procs}",
+                                   "zbal": f"balance 1.0 z {zint}",
+                                   "ngridx": nx,
+                                   "ngridy": ny,
+                                   "ngridz": nz,
+                                   "switch": self.parameters.snap_switchflag}
+                else:
+                    lammps_dict = {"ngridx": nx,
+                                   "ngridy": ny,
+                                   "ngridz": nz,
+                                   "switch": self.parameters.snap_switchflag}
+
+        else:
+            lammps_dict = {"ngridx": nx,
+                           "ngridy": ny,
+                           "ngridz": nz,
+                           "switch": self.parameters.snap_switchflag}
+        return lammps_dict
+
     @staticmethod
     def _calculate_cosine_similarities(descriptor_data, ldos_data, nr_points,
                                        descriptor_vectors_contain_xyz=True):
@@ -243,15 +420,25 @@ class Descriptor(ABC):
 
         """
         def calc_cosine_similarity(vector1, vector2, norm=2):
-            return np.dot(vector1, vector2) / \
-                   (np.linalg.norm(vector1, ord=norm) *
-                    np.linalg.norm(vector2, ord=norm))
+            if np.shape(vector1)[0] != np.shape(vector2)[0]:
+                raise Exception("Cannot calculate similarity between vectors "
+                                "of different dimenstions.")
+            if np.shape(vector1)[0] == 1:
+                return np.min([vector1[0], vector2[0]]) / \
+                       np.max([vector1[0], vector2[0]])
+            else:
+                return np.dot(vector1, vector2) / \
+                       (np.linalg.norm(vector1, ord=norm) *
+                        np.linalg.norm(vector2, ord=norm))
 
         descriptor_dim = np.shape(descriptor_data)
         ldos_dim = np.shape(ldos_data)
         if len(descriptor_dim) == 4:
-            descriptor_data = np.reshape(descriptor_data, (descriptor_dim[0] * descriptor_dim[1] *
-                                               descriptor_dim[2], descriptor_dim[3]))
+            descriptor_data = np.reshape(descriptor_data,
+                                         (descriptor_dim[0] *
+                                          descriptor_dim[1] *
+                                          descriptor_dim[2],
+                                          descriptor_dim[3]))
             if descriptor_vectors_contain_xyz:
                 descriptor_data = descriptor_data[:, 3:]
         elif len(descriptor_dim) != 2:
@@ -278,8 +465,10 @@ class Descriptor(ABC):
 
             for j in range(0, nr_points):
                 # Calculate similarities between these two pairs.
-                descriptor_distance = calc_cosine_similarity(descriptor_data[points_i[i]],
-                                                       descriptor_data[points_j[j]])
+                descriptor_distance = \
+                    calc_cosine_similarity(
+                        descriptor_data[points_i[i]],
+                        descriptor_data[points_j[j]])
                 ldos_distance = calc_cosine_similarity(ldos_data[points_i[i]],
                                                        ldos_data[points_j[j]])
                 similarity_array.append([descriptor_distance, ldos_distance])
@@ -323,9 +512,10 @@ class Descriptor(ABC):
             return np.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 
         similarity_data = Descriptor.\
-            _calculate_cosine_similarities(descriptor_data, ldos_data, acsd_points,
+            _calculate_cosine_similarities(descriptor_data, ldos_data,
+                                           acsd_points,
                                            descriptor_vectors_contain_xyz=
-                                          descriptor_vectors_contain_xyz)
+                                           descriptor_vectors_contain_xyz)
         data_size = np.shape(similarity_data)[0]
         distances = []
         for i in range(0, data_size):

@@ -1,24 +1,21 @@
 """Collection of all parameter related classes and functions."""
-import os
 import importlib
 import inspect
 import json
+import os
 import pickle
-import warnings
+from time import sleep
 
 try:
     import horovod.torch as hvd
-except ModuleNotFoundError:
-    pass
-try:
-    from mpi4py import MPI
 except ModuleNotFoundError:
     pass
 
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
-    set_mpi_status, get_rank, get_local_rank, set_current_verbosity
+    set_mpi_status, get_rank, get_local_rank, set_current_verbosity, \
+    parallel_warn
 from mala.common.json_serializable import JSONSerializable
 
 
@@ -162,7 +159,8 @@ class ParametersBase(JSONSerializable):
                     if len(json_dict[key]) > 0:
                         _member = []
                         for m in json_dict[key]:
-                            _member.append(deserialized_object._json_to_member(m))
+                            _member.append(deserialized_object.
+                                           _json_to_member(m))
                         setattr(deserialized_object, key, _member)
                     else:
                         setattr(deserialized_object, key, json_dict[key])
@@ -171,14 +169,16 @@ class ParametersBase(JSONSerializable):
                     if len(json_dict[key]) > 0:
                         _member = {}
                         for m in json_dict[key].keys():
-                            _member[m] = deserialized_object._json_to_member(json_dict[key][m])
+                            _member[m] = deserialized_object.\
+                                _json_to_member(json_dict[key][m])
                         setattr(deserialized_object, key, _member)
 
                     else:
                         setattr(deserialized_object, key, json_dict[key])
 
                 else:
-                    setattr(deserialized_object, key, deserialized_object._json_to_member(json_dict[key]))
+                    setattr(deserialized_object, key, deserialized_object.
+                            _json_to_member(json_dict[key]))
         return deserialized_object
 
 
@@ -259,6 +259,7 @@ class ParametersNetwork(ParametersBase):
         self.dropout = 0.1
         self.num_heads = 10
 
+
 class ParametersDescriptors(ParametersBase):
     """
     Parameters necessary for calculating/parsing input descriptors.
@@ -273,10 +274,6 @@ class ParametersDescriptors(ParametersBase):
         SNAP calculation: 2*jmax-parameter used for calculation of SNAP
         descriptors. Default value for jmax is 5, so default value for
         twojmax is 10.
-
-    rcutfac: float
-        SNAP calculation: radius cutoff factor for the fingerprint sphere in
-        Angstroms. Default value is 4.67637.
 
     lammps_compute_file: string
         SNAP calculation: LAMMPS input file that is used to calculate the
@@ -293,16 +290,98 @@ class ParametersDescriptors(ParametersBase):
         the descriptor vector are the xyz coordinates and they are cut from the
         descriptor vector. If False, no such cutting is peformed.
 
+    gaussian_descriptors_sigma : float
+        Sigma used for the calculation of the Gaussian descriptors.
     """
 
     def __init__(self):
         super(ParametersDescriptors, self).__init__()
         self.descriptor_type = "SNAP"
         self.twojmax = 10
+        self.use_gaussian_descriptors_energy_formula = False
+        self.gaussian_descriptors_sigma = None
+        self.gaussian_descriptors_cutoff = None
         self.rcutfac = 4.67637
         self.lammps_compute_file = ""
+        self.snap_switchflag = 1
         self.acsd_points = 100
         self.descriptors_contain_xyz = True
+        # TODO: I would rather handle the parallelization info automatically
+        # and more under the hood. At this stage of the project this would
+        # probably be overkill and hard to do, since there are many moving
+        # parts, so for now let's keep this here, but in the future,
+        # this should be adressed.
+        self.use_z_splitting = True
+        self.use_y_splitting = 0
+
+    @property
+    def use_z_splitting(self):
+        """
+        Control whether splitting across the z-axis is used.
+
+        Default is True, since this gives descriptors compatible with
+        QE, for total energy evaluation. However, setting this value to False
+        can, e.g. in the LAMMPS case, improve performance. This is relevant
+        for e.g. preprocessing.
+        """
+        return self._use_z_splitting
+
+    @use_z_splitting.setter
+    def use_z_splitting(self, value):
+        if value is False:
+            self.use_y_splitting = 0
+        self._use_z_splitting = value
+
+    @property
+    def use_y_splitting(self):
+        """
+        Control whether a splitting in y-axis is used.
+
+        This can only be used in conjunction with a z-splitting, and
+        the option will ignored if z-splitting is disabled. Only has an
+        effect for values larger then 1.
+        """
+        return self._number_y_planes
+
+    @use_y_splitting.setter
+    def use_y_splitting(self, value):
+        if self.use_z_splitting is False:
+            self._number_y_planes = 0
+        else:
+            if value == 1:
+                self._number_y_planes = 0
+            else:
+                self._number_y_planes = value
+
+    @property
+    def rcutfac(self):
+        """Cut off radius for SNAP calculation."""
+        return self._rcutfac
+
+    @rcutfac.setter
+    def rcutfac(self, value):
+        self._rcutfac = value
+        self.gaussian_descriptors_cutoff = value
+
+    @property
+    def snap_switchflag(self):
+        """
+        Switchflag for the SNAP calculation.
+
+        Can only be 1 or 0. If 1 (default), a switching function will be used
+        to ensure that atomic contributions smoothly go to zero after a
+        certain cutoff. If 0 (old default, which can be problematic in some
+        instances), this is not done, which can lead to discontinuities.
+        """
+        return self._snap_switchflag
+
+    @snap_switchflag.setter
+    def snap_switchflag(self, value):
+        _int_value = int(value)
+        if _int_value == 0:
+            self._snap_switchflag = value
+        if _int_value > 0:
+            self._snap_switchflag = 1
 
 
 class ParametersTargets(ParametersBase):
@@ -383,8 +462,8 @@ class ParametersTargets(ParametersBase):
         self.ldos_gridoffset_ev = 0
         self.restrict_targets = "zero_out_negative"
         self.pseudopotential_path = None
-        self.rdf_parameters = {"number_of_bins": 500, "rMax": None}
-        self.tpcf_parameters = {"number_of_bins": 20, "rMax": 5.0}
+        self.rdf_parameters = {"number_of_bins": 500, "rMax": "mic"}
+        self.tpcf_parameters = {"number_of_bins": 20, "rMax": "mic"}
         self.ssf_parameters = {"number_of_bins": 100, "kMax": 12.0}
 
     @property
@@ -556,9 +635,6 @@ class ParametersRunning(ParametersBase):
     num_workers : int
         Number of workers to be used for data loading.
 
-    sampler : dict
-        Dictionary with samplers.
-
     use_shuffling_for_samplers :
         If True, the training data will be shuffled in between epochs.
         If lazy loading is selected, then this shuffling will be done on
@@ -577,6 +653,14 @@ class ParametersRunning(ParametersBase):
         case 0: No tensorboard activated
         case 1: tensorboard activated with Loss and learning rate
         case 2; additonally weights and biases and gradient
+
+    visualisation_dir : string
+        Name of the folder that visualization files will be saved to.
+
+    visualisation_dir_append_date : bool
+        If True, then upon creating visualization files, these will be saved
+        in a subfolder of visualisation_dir labelled with the starting date
+        of the visualization, to avoid having to change input scripts often.
 
     inference_data_grid : list
         List holding the grid to be used for inference in the form of
@@ -602,8 +686,8 @@ class ParametersRunning(ParametersBase):
         self.checkpoints_each_epoch = 0
         self.checkpoint_name = "checkpoint_mala"
         self.visualisation = 0
-        # default visualisation_dir= "~/log_dir"
-        self.visualisation_dir = os.path.join(os.path.expanduser("~"), "log_dir")
+        self.visualisation_dir = os.path.join(".", "mala_logging")
+        self.visualisation_dir_append_date = True
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
         self.inference_data_grid = [0, 0, 0]
@@ -766,11 +850,28 @@ class ParametersHyperparameterOptimization(ParametersBase):
         this cutoff determines which trials are neglected.
 
     pruner: string
-        Pruner type to be used by optuna. Currently only "naswot" is
-        supported, which will use the NASWOT algorithm as pruner.
+        Pruner type to be used by optuna. Currently supported:
+
+            - "multi_training": If multiple trainings are performed per
+              trial, and one returns "inf" for the loss,
+              no further training will be performed.
+              Especially useful if used in conjunction
+              with the band_energy metric.
+            - "naswot": use the NASWOT algorithm as pruner
 
     naswot_pruner_batch_size : int
         Batch size for the NASWOT pruner
+
+    number_bad_trials_before_stopping : int
+        Only applies to optuna studies. If any integer above 0, then if no
+        new best trial is found within number_bad_trials_before trials after
+        the last one, the study will be stopped.
+
+    sqlite_timeout : int
+        Timeout for the SQLite backend of Optuna. This backend is officially
+        not recommended because it is file based and can lead to errors;
+        With a suitable timeout it can be used somewhat stable though and
+        help in HPC settings.
     """
 
     def __init__(self):
@@ -790,6 +891,8 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.naswot_pruner_cutoff = 0
         self.pruner = None
         self.naswot_pruner_batch_size = 0
+        self.number_bad_trials_before_stopping = None
+        self.sqlite_timeout = 600
 
     @property
     def rdb_storage_heartbeat(self):
@@ -850,8 +953,8 @@ class ParametersHyperparameterOptimization(ParametersBase):
             if v != "_configuration":
                 if v != "hlist":
                     if v[0] == "_":
-                        printout(indent + '%-15s: %s' % (
-                        v[1:], getattr(self, v)), min_verbosity=0)
+                        printout(indent + '%-15s: %s' %
+                                 (v[1:], getattr(self, v)), min_verbosity=0)
                     else:
                         printout(
                             indent + '%-15s: %s' % (v, getattr(self, v)),
@@ -863,6 +966,66 @@ class ParametersHyperparameterOptimization(ParametersBase):
                                  ("hyperparameter #"+str(i), hyp.name),
                                  min_verbosity=0)
                         i += 1
+
+
+class ParametersDataGeneration(ParametersBase):
+    """
+    All parameters to help with data generation.
+
+    Attributes
+    ----------
+    trajectory_analysis_denoising_width : int
+        The distance metric is denoised prior to analysis using a certain
+        width. This should be adjusted if there is reason to believe
+        the trajectory will be noise for some reason.
+
+    trajectory_analysis_below_average_counter : int
+        Number of time steps that have to consecutively below the average
+        of the distance metric curve, before we consider the trajectory
+        to be equilibrated.
+        Usually does not have to be changed.
+
+    trajectory_analysis_estimated_equilibrium : float
+        The analysis of the trajectory builds on the assumption that at some
+        point of the trajectory, the system is equilibrated.
+        For this, we need to provide the fraction of the trajectory (counted
+        from the end). Usually, 10% is a fine assumption. This value usually
+        does not need to be changed.
+
+    local_psp_path : string
+        Path to where the local pseudopotential is stored (for OF-DFT-MD).
+
+    local_psp_name : string
+        Name of the local pseudopotential (for OF-DFT-MD).
+
+    ofdft_timestep : int
+        Timestep of the OF-DFT-MD simulation.
+
+    ofdft_number_of_timesteps : int
+        Number of timesteps for the OF-DFT-MD simulation.
+
+    ofdft_temperature : float
+        Temperature at which to perform the OF-DFT-MD simulation.
+
+    ofdft_kedf : string
+        Kinetic energy functional to be used for the OF-DFT-MD simulation.
+
+    ofdft_friction : float
+        Friction to be added for the Langevin dynamics in the OF-DFT-MD run.
+    """
+
+    def __init__(self):
+        super(ParametersDataGeneration, self).__init__()
+        self.trajectory_analysis_denoising_width = 100
+        self.trajectory_analysis_below_average_counter = 50
+        self.trajectory_analysis_estimated_equilibrium = 0.1
+        self.local_psp_path = None
+        self.local_psp_name = None
+        self.ofdft_timestep = 0
+        self.ofdft_number_of_timesteps = 0
+        self.ofdft_temperature = 0
+        self.ofdft_kedf = "WT"
+        self.ofdft_friction = 0.1
 
 
 class ParametersDebug(ParametersBase):
@@ -928,6 +1091,7 @@ class Parameters:
         self.data = ParametersData()
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
+        self.datageneration = ParametersDataGeneration()
         self.debug = ParametersDebug()
 
         # Attributes.
@@ -973,8 +1137,8 @@ class Parameters:
             if torch.cuda.is_available():
                 self._use_gpu = True
             else:
-                warnings.warn("GPU requested, but no GPU found. MALA will "
-                              "operate with CPU only.", stacklevel=3)
+                parallel_warn("GPU requested, but no GPU found. MALA will "
+                              "operate with CPU only.")
 
         # Invalidate, will be updated in setter.
         self.device = None
@@ -1015,10 +1179,10 @@ class Parameters:
 
     @device.setter
     def device(self, value):
-        id = get_local_rank()
+        device_id = get_local_rank()
         if self.use_gpu:
             self._device = "cuda:"\
-                           f"{id}"
+                           f"{device_id}"
         else:
             self._device = "cpu"
         self.network._update_device(self._device)
@@ -1050,7 +1214,8 @@ class Parameters:
 
     def show(self):
         """Print name and values of all attributes of this object."""
-        printout("--- " + self.__doc__.split("\n")[1] + " ---", min_verbosity=0)
+        printout("--- " + self.__doc__.split("\n")[1] + " ---",
+                 min_verbosity=0)
 
         # Two for-statements so that global parameters are shown on top.
         for v in vars(self):
@@ -1144,6 +1309,44 @@ class Parameters:
         """
         self.save(filename, save_format="json")
 
+    def optuna_singlenode_setup(self, wait_time=0):
+        """
+        Set up device and parallelization parameters for Optuna+MPI.
+
+        This only needs to be called if multiple MPI ranks are used on
+        one node to run Optuna. Optuna itself does NOT communicate via MPI.
+        Thus, if we allocate e.g. one node with 4 GPUs and start 4 jobs,
+        3 of those jobs will fail, because currently, we instantiate the
+        cuda devices based on MPI ranks. This functions sets everything
+        up properly. This of course requires MPI.
+        This may be a bit hacky, but it lets us use one script and one
+        MPI command to launch x GPU backed jobs on any node with x GPUs.
+
+        Parameters
+        ----------
+        wait_time : int
+            If larger than 0, then all processes will wait this many seconds
+            times their rank number after this routine before proceeding.
+            This can be useful when using a file based distribution algorithm.
+        """
+        # We first "trick" the parameters object to assume MPI and GPUs
+        # are used. That way we get the right device.
+        self.use_gpu = True
+        self.use_mpi = True
+        device_temp = self.device
+        sleep(get_rank()*wait_time)
+
+        # Now we can turn of MPI and set the device manually.
+        self.use_mpi = False
+        self._device = device_temp
+        self.network._update_device(device_temp)
+        self.descriptors._update_device(device_temp)
+        self.targets._update_device(device_temp)
+        self.data._update_device(device_temp)
+        self.running._update_device(device_temp)
+        self.hyperparameters._update_device(device_temp)
+        self.debug._update_device(device_temp)
+
     @classmethod
     def load_from_file(cls, filename, save_format="json",
                        no_snapshots=False):
@@ -1181,7 +1384,9 @@ class Parameters:
             for key in json_dict:
                 if isinstance(json_dict[key], dict):
                     # These are the other parameter classes.
-                    sub_parameters = globals()[json_dict[key]["_parameters_type"]].from_json(json_dict[key])
+                    sub_parameters =\
+                        globals()[json_dict[key]["_parameters_type"]].\
+                        from_json(json_dict[key])
                     setattr(loaded_parameters, key, sub_parameters)
 
             # We iterate a second time, to set global values, so that they
@@ -1217,7 +1422,7 @@ class Parameters:
 
         """
         return Parameters.load_from_file(filename, save_format="pickle",
-                                  no_snapshots=no_snapshots)
+                                         no_snapshots=no_snapshots)
 
     @classmethod
     def load_from_json(cls, filename, no_snapshots=False):
@@ -1240,4 +1445,4 @@ class Parameters:
 
         """
         return Parameters.load_from_file(filename, save_format="json",
-                                  no_snapshots=no_snapshots)
+                                         no_snapshots=no_snapshots)

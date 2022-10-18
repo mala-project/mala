@@ -1,14 +1,14 @@
 """Tester class for testing a network."""
+import ase.io
 try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
-import ase.io
 import numpy as np
 import torch
 
-from mala.common.parallelizer import printout, get_rank, get_comm, barrier
+from mala.common.parallelizer import printout, get_rank, barrier
 from mala.network.runner import Runner
 
 
@@ -41,8 +41,7 @@ class Predictor(Runner):
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
 
-    def predict_from_qeout(self, path_to_file, gather_ldos=False,
-                           save_local_grid=False):
+    def predict_from_qeout(self, path_to_file, gather_ldos=False):
         """
         Get predicted LDOS for the atomic configuration of a QE.out file.
 
@@ -57,12 +56,6 @@ class Predictor(Runner):
             Helpful for using multiple CPUs for descriptor calculations
             and only one for network pass.
 
-        save_local_grid : bool
-            Only important if MPI is used. If True, the info about which
-            portion of the grid this rank is used is forwarded to the target
-            calculator for further post processing (e.g. density calculation).
-            Default is False. Has no effect if gather_ldos is True.
-
         Returns
         -------
         predicted_ldos : numpy.array
@@ -71,11 +64,9 @@ class Predictor(Runner):
         self.data.target_calculator.\
             read_additional_calculation_data("qe.out", path_to_file)
         return self.predict_for_atoms(self.data.target_calculator.atoms,
-                                      gather_ldos=gather_ldos,
-                                      save_local_grid=save_local_grid)
+                                      gather_ldos=gather_ldos)
 
-    def predict_for_atoms(self, atoms, gather_ldos=False,
-                          save_local_grid=False):
+    def predict_for_atoms(self, atoms, gather_ldos=False):
         """
         Get predicted LDOS for an atomic configuration.
 
@@ -90,17 +81,14 @@ class Predictor(Runner):
             Helpful for using multiple CPUs for descriptor calculations
             and only one for network pass.
 
-        save_local_grid : bool
-            Only important if MPI is used. If True, the info about which
-            portion of the grid this rank is used is forwarded to the target
-            calculator for further post processing (e.g. density calculation).
-            Default is False. Has no effect if gather_ldos is True.
-
         Returns
         -------
         predicted_ldos : numpy.array
             Precicted LDOS for these atomic positions.
         """
+        # Make sure no data lingers in the target calculator.
+        self.data.target_calculator.invalidate_target()
+
         # Calculate SNAP descriptors.
         snap_descriptors, local_size = self.data.descriptor_calculator.\
             calculate_from_atoms(atoms, self.data.grid_dimension)
@@ -127,20 +115,20 @@ class Predictor(Runner):
                     return None
 
             else:
-                if save_local_grid and \
-                    not self.data.descriptor_calculator.\
-                        descriptors_contain_xyz:
+                if self.data.descriptor_calculator.descriptors_contain_xyz:
+                    self.data.target_calculator.local_grid = \
+                        snap_descriptors[:, 0:3].copy()
+                    self.data.target_calculator.y_planes = \
+                        self.data.descriptor_calculator.parameters.\
+                        use_y_splitting
+                    snap_descriptors = snap_descriptors[:, 6:]
+                    feature_length -= 3
+                else:
                     raise Exception("Cannot calculate the local grid without "
                                     "calculating the xyz positions of the "
                                     "descriptors. Please revise your "
-                                    "script.")
-
-                if self.data.descriptor_calculator.descriptors_contain_xyz:
-                    if save_local_grid:
-                        self.data.target_calculator.local_grid = \
-                            snap_descriptors[:, 0:3]
-                    snap_descriptors = snap_descriptors[:, 6:]
-                    feature_length -= 3
+                                    "script. The local grid is crucial"
+                                    " for parallel inference")
 
                 snap_descriptors = \
                     snap_descriptors.astype(np.float32)
@@ -165,17 +153,16 @@ class Predictor(Runner):
                 torch.from_numpy(snap_descriptors).float()
             snap_descriptors = \
                 self.data.input_data_scaler.transform(snap_descriptors)
-            return self.\
-                        _forward_snap_descriptors(snap_descriptors)
+            return self._forward_snap_descriptors(snap_descriptors)
 
     def _forward_snap_descriptors(self, snap_descriptors,
                                   local_data_size=None):
         """Forward a scaled tensor of SNAP descriptors through the NN."""
         if local_data_size is None:
             local_data_size = self.data.grid_size
-        predicted_outputs = np.zeros((local_data_size,
-                                      self.data.target_calculator.\
-                                      get_feature_size()))
+        predicted_outputs = \
+            np.zeros((local_data_size,
+                      self.data.target_calculator.feature_size))
 
         # Only predict if there is something to predict.
         # Elsewise, we just wait at the barrier down below.
@@ -184,10 +171,11 @@ class Predictor(Runner):
                 _correct_batch_size_for_testing(local_data_size,
                                                 self.parameters.mini_batch_size)
             if optimal_batch_size != self.parameters.mini_batch_size:
-                self.parameters.mini_batch_size = optimal_batch_size
                 printout("Had to readjust batch size from",
                          self.parameters.mini_batch_size, "to",
                          optimal_batch_size, min_verbosity=0)
+                self.parameters.mini_batch_size = optimal_batch_size
+
             self.number_of_batches_per_snapshot = int(local_data_size /
                                                       self.parameters.
                                                       mini_batch_size)

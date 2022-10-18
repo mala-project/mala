@@ -77,7 +77,8 @@ class HyperOptNASWOT(HyperOpt):
             self.trial_list = self.__all_combinations()
 
         if self.params.use_mpi:
-            trials_per_rank = int(np.floor((len(self.trial_list) / get_size())))
+            trials_per_rank = int(np.floor((len(self.trial_list) /
+                                            get_size())))
             self.first_trial = get_rank()*trials_per_rank
             self.last_trial = (get_rank()+1)*trials_per_rank
             if get_size() == get_rank()+1:
@@ -115,7 +116,7 @@ class HyperOptNASWOT(HyperOpt):
             # Output diagnostic information.
             if self.params.use_mpi:
                 print("Trial number", idx+self.first_trial,
-                         "finished with:", self.trial_losses[idx])
+                      "finished with:", self.trial_losses[idx])
             else:
                 best_trial = self.get_best_trial_results()
                 printout("Trial number", idx,
@@ -132,12 +133,13 @@ class HyperOptNASWOT(HyperOpt):
         """Get the best trial out of the list, including the value."""
         if self.params.use_mpi:
             comm = get_comm()
-            local_result = np.array([float(np.argmax(self.trial_losses) +
-                                           self.first_trial),
-                           np.max(self.trial_losses)])
+            local_result = \
+                np.array([float(np.argmax(self.trial_losses) +
+                                self.first_trial), np.max(self.trial_losses)])
             all_results = comm.allgather(local_result)
             max_on_node = np.argmax(np.array(all_results)[:, 1])
-            return [int(all_results[max_on_node][0]), all_results[max_on_node][1]]
+            return [int(all_results[max_on_node][0]),
+                    all_results[max_on_node][1]]
         else:
             return [np.argmax(self.trial_losses), np.max(self.trial_losses)]
 
@@ -151,9 +153,9 @@ class HyperOptNASWOT(HyperOpt):
         # Getting the best trial based on the test errors
         if self.params.use_mpi:
             comm = get_comm()
-            local_result = np.array([float(np.argmax(self.trial_losses)
-                                           + self.first_trial),
-                            np.max(self.trial_losses)])
+            local_result = \
+                np.array([float(np.argmax(self.trial_losses) +
+                                self.first_trial), np.max(self.trial_losses)])
             all_results = comm.allgather(local_result)
             max_on_node = np.argmax(np.array(all_results)[:, 1])
             idx = int(all_results[max_on_node][0])
@@ -178,14 +180,16 @@ class HyperOptNASWOT(HyperOpt):
             all_hyperparameters_choices.append(par.choices)
 
         # Calculate all possible combinations.
-        all_combinations = list(itertools.product(*all_hyperparameters_choices))
+        all_combinations = \
+            list(itertools.product(*all_hyperparameters_choices))
 
         # Now we use these combination to fill a list of FixedTrials.
         trial_list = []
         for combination in all_combinations:
             params_dict = {}
             for idx, value in enumerate(combination):
-                params_dict[self.params.hyperparameters.hlist[idx].name] = value
+                params_dict[self.params.hyperparameters.hlist[idx].name] = \
+                    value
             new_trial = optuna.trial.FixedTrial(params_dict)
             trial_list.append(new_trial)
 
