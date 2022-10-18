@@ -44,7 +44,7 @@ authors:
     orcid: https://orcid.org/0000-0002-0324-9114
 
 
-date-released: 2022-04-12
+date-released: 2022-10-18
 keywords:
   - "machine-learning"
   - "dft"
@@ -52,4 +52,4 @@ license: "BSD-3-Clause"
 repository-code: "https://github.com/mala-project/mala"
 title: MALA
 doi: 10.5281/zenodo.5557254 # This DOI represents all versions, and will always resolve to the latest one.
-version: 1.0.0
+version: 1.1.0
