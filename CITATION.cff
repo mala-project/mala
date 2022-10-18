@@ -52,4 +52,4 @@ license: "BSD-3-Clause"
 repository-code: "https://github.com/mala-project/mala"
 title: MALA
 doi: 10.5281/zenodo.5557254 # This DOI represents all versions, and will always resolve to the latest one.
-version: 1.0.0
+version: 1.1.0
