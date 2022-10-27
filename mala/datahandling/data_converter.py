@@ -346,17 +346,12 @@ class DataConverter:
                     if output_iteration is None:
                         np.save(output_path, tmp_output)
                     else:
-                        output_mesh = output_iteration.meshes["LDOS"]
-                        B.unit_dimension = {
+                        output_mesh = output_iteration.meshes[self.target_calculator.target_name]
+                        output_mesh.unit_dimension = {
                             io.Unit_Dimension.M: 1,
-                            io.Unit_Dimension.I: -1,
+                            io.Unit_Dimension.L: -1,
                             io.Unit_Dimension.T: -2
                         }
-
-                        # conversion to SI
-                        B_x.unit_SI = 1.e-4
-                        B_y.unit_SI = 1.e-4
-                        B_z.unit_SI = 1.e-4
 
                         dataset = io.Dataset(tmp_output.dtype,
                                              tmp_output[:, :, :, 0].shape)
@@ -367,6 +362,12 @@ class DataConverter:
                             # TODO: Remove this copy?
                             output_mesh_component.\
                                 store_chunk(tmp_output[:, :, :, i].copy())
+
+                            # All data is assumed to be saved in
+                            # MALA units, so the SI conversion factor we save
+                            # here is the one for eV/A^3
+                            output_mesh_component.unit_SI = self.target_calculator.si_unit_conversion
+
                         output_iteration.close(flush=True)
 
         if return_data:

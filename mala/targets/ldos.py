@@ -1,7 +1,7 @@
 """LDOS calculation class."""
 from functools import cached_property
 
-from ase.units import Rydberg, Bohr
+from ase.units import Rydberg, Bohr, J, m
 import math
 import numpy as np
 import openpmd_api as io
@@ -132,6 +132,25 @@ class LDOS(Target):
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
         return self.parameters.ldos_gridsize
+
+    @property
+    def target_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        return "LDOS"
+
+    @property
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        return (m**3)/J
+
+    @property
+    def si_dimension(self):
+        """Dictionary containing the SI unit dimensions in OpenPMD format"""
+        return {"I": 0, "J": 0, "L": -1, "M": 1, "N": 0, "T": -2}
 
     @property
     def local_density_of_states(self):

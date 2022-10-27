@@ -136,6 +136,32 @@ class Target(ABC):
         pass
 
     @property
+    @abstractmethod
+    def target_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        pass
+
+    @property
+    @abstractmethod
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def si_dimension(self):
+        """
+        Dictionary containing the SI unit dimensions in OpenPMD format
+
+        Needed for OpenPMD interface.
+        """
+        pass
+
+    @property
     def qe_input_data(self):
         """Input data for QE TEM calls."""
         # Update the pseudopotential path from Parameters.

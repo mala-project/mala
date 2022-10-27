@@ -171,6 +171,16 @@ class Density(Target):
     ##############################
 
     @property
+    def feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return 1
+
+    @property
+    def target_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        return "Density"
+
+    @property
     def density(self):
         """Electronic density."""
         return self._density
@@ -199,11 +209,6 @@ class Density(Target):
         It should work for all implemented targets.
         """
         self.density = None
-
-    @property
-    def feature_size(self):
-        """Get dimension of this target if used as feature in ML."""
-        return 1
 
     @cached_property
     def number_of_electrons(self):
