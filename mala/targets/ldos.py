@@ -529,7 +529,11 @@ class LDOS(Target):
 
     def read_from_hdf5(self, path):
         series = io.Series(path, io.Access.read_only)
-        print(series.get_attribute("is_mala_data"))
+
+        # Check if this actually MALA compatible data.
+        if series.get_attribute("is_mala_data") != 1:
+            raise Exception("Non-MALA data detected, cannot work with this "
+                            "data.")
         current_iteration = series.iterations[0]
         ldos_mesh = current_iteration.meshes["LDOS"]
         self.local_density_of_states = \

@@ -4,7 +4,7 @@ import os
 import numpy as np
 import openpmd_api as io
 
-from mala.common.parallelizer import printout, get_rank
+from mala.common.parallelizer import printout, get_rank, parallel_warn
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
@@ -137,14 +137,112 @@ class DataConverter:
         self.__snapshot_units.append({"input": None,
                                       "output": output_units})
 
-    def convert_single_snapshot(self, snapshot_number,
-                                descriptor_calculation_kwargs,
-                                target_calculator_kwargs,
-                                input_path=None,
-                                output_path=None,
-                                use_memmap=None,
-                                return_data=False,
-                                io_iteration=None):
+    def convert_snapshots(self, save_path="./",
+                          naming_scheme="ELEM_snapshot*", starts_at=0,
+                          file_based_communication=False,
+                          descriptor_calculation_kwargs=None,
+                          target_calculator_kwargs=None,
+                          use_numpy=False):
+        """
+        Convert the snapshots in the list to numpy arrays.
+
+        These can then be used by MALA.
+
+        Parameters
+        ----------
+        save_path : string
+            Directory in which the snapshots will be saved.
+
+        naming_scheme : string
+            String detailing the naming scheme for the snapshots. * symbols
+            will be replaced with the snapshot number.
+
+        starts_at : int
+            Number of the first snapshot generated using this approach.
+            Default is 0, but may be set to any integer. This is to ensure
+            consistency in naming when converting e.g. only a certain portion
+            of all available snapshots. If set to e.g. 4,
+            the first snapshot generated will be called snapshot4.
+
+        file_based_communication : bool
+            If True, the LDOS will be gathered using a file based mechanism.
+            This is drastically less performant then using MPI, but may be
+            necessary when memory is scarce. Default is False, i.e., the faster
+            MPI version will be used.
+
+        target_calculator_kwargs : dict
+            Dictionary with additional keyword arguments for the calculation
+            or parsing of the target quantities.
+
+        descriptor_calculation_kwargs : dict
+            Dictionary with additional keyword arguments for the calculation
+            or parsing of the descriptor quantities.
+
+        use_numpy : bool
+            Use the old numpy saving algorithm. This is discouraged and will
+            be deprecated in the future.
+        """
+        if use_numpy:
+            parallel_warn("NumPy array based file saving will be deprecated"
+                          "starting in MALA v1.3.0.", min_verbosity=0,
+                          category=FutureWarning)
+        else:
+            file_based_communication = False
+
+        if descriptor_calculation_kwargs is None:
+            descriptor_calculation_kwargs = {}
+
+        if target_calculator_kwargs is None:
+            target_calculator_kwargs = {}
+
+        if not use_numpy:
+            snapshot_name = naming_scheme
+            series_name = snapshot_name.replace("*", str("%01T"))
+            output_series = io.Series(series_name+".out.h5",
+                                      io.Access.create)
+            output_series.set_attribute("is_mala_data", 1)
+
+        for i in range(0, len(self.__snapshots_to_convert)):
+            snapshot_number = i + starts_at
+            snapshot_name = naming_scheme
+            snapshot_name = snapshot_name.replace("*", str(snapshot_number))
+
+            if use_numpy:
+                output_iteration = None
+            else:
+                output_iteration = output_series.iterations[i + starts_at]
+
+            # A memory mapped file is used as buffer for distributed cases.
+            memmap = None
+            if self.parameters._configuration["mpi"] and \
+                    file_based_communication:
+                memmap = os.path.join(save_path, snapshot_name +
+                                      ".out.npy_temp")
+
+            self.__convert_single_snapshot(i, descriptor_calculation_kwargs,
+                                           target_calculator_kwargs,
+                                           input_path=os.path.join(save_path,
+                                           snapshot_name+".in.npy"),
+                                           output_path=os.path.join(save_path,
+                                           snapshot_name+".out.npy"),
+                                           use_memmap=memmap,
+                                           output_iteration=output_iteration)
+            printout("Saved snapshot", snapshot_number, "at ", save_path,
+                     min_verbosity=0)
+
+            if get_rank() == 0:
+                if self.parameters._configuration["mpi"] \
+                        and file_based_communication:
+                    os.remove(memmap)
+
+    def __convert_single_snapshot(self, snapshot_number,
+                                  descriptor_calculation_kwargs,
+                                  target_calculator_kwargs,
+                                  input_path=None,
+                                  output_path=None,
+                                  use_memmap=None,
+                                  return_data=False,
+                                  output_iteration=None):
         """
         Convert single snapshot from the conversion lists.
 
@@ -177,6 +275,10 @@ class DataConverter:
         descriptor_calculation_kwargs : dict
             Dictionary with additional keyword arguments for the calculation
             or parsing of the descriptor quantities.
+
+        output_iteration : OpenPMD iteration
+            OpenPMD iteration to be used to save current snapshot, as part
+            of an OpenPMD Series.
 
         Returns
         -------
@@ -241,18 +343,31 @@ class DataConverter:
         if description["output"] is not None:
             if get_rank() == 0:
                 if output_path is not None:
-                    output_mesh = io_iteration.meshes["LDOS"]
-                    dataset = io.Dataset(tmp_output.dtype,
-                                         tmp_output[:, :, :, 0].shape)
-                    for i in range(0, tmp_output.shape[3]):
-                        output_mesh_component = output_mesh[str(i)]
-                        output_mesh_component.reset_dataset(dataset)
+                    if output_iteration is None:
+                        np.save(output_path, tmp_output)
+                    else:
+                        output_mesh = output_iteration.meshes["LDOS"]
+                        B.unit_dimension = {
+                            io.Unit_Dimension.M: 1,
+                            io.Unit_Dimension.I: -1,
+                            io.Unit_Dimension.T: -2
+                        }
 
-                        # TODO: Remove this copy?
-                        output_mesh_component.\
-                            store_chunk(tmp_output[:, :, :, i].copy())
-                    io_iteration.close(flush=True)
-                    np.save(output_path, tmp_output)
+                        # conversion to SI
+                        B_x.unit_SI = 1.e-4
+                        B_y.unit_SI = 1.e-4
+                        B_z.unit_SI = 1.e-4
+
+                        dataset = io.Dataset(tmp_output.dtype,
+                                             tmp_output[:, :, :, 0].shape)
+                        for i in range(0, tmp_output.shape[3]):
+                            output_mesh_component = output_mesh[str(i)]
+                            output_mesh_component.reset_dataset(dataset)
+
+                            # TODO: Remove this copy?
+                            output_mesh_component.\
+                                store_chunk(tmp_output[:, :, :, i].copy())
+                        output_iteration.close(flush=True)
 
         if return_data:
             if description["input"] is not None and description["output"] \
@@ -262,84 +377,3 @@ class DataConverter:
                 return tmp_output
             elif description["output"] is None:
                 return tmp_input
-
-    def convert_snapshots(self, save_path="./",
-                          naming_scheme="ELEM_snapshot*", starts_at=0,
-                          file_based_communication=False,
-                          descriptor_calculation_kwargs=None,
-                          target_calculator_kwargs=None):
-        """
-        Convert the snapshots in the list to numpy arrays.
-
-        These can then be used by MALA.
-
-        Parameters
-        ----------
-        save_path : string
-            Directory in which the snapshots will be saved.
-
-        naming_scheme : string
-            String detailing the naming scheme for the snapshots. * symbols
-            will be replaced with the snapshot number.
-
-        starts_at : int
-            Number of the first snapshot generated using this approach.
-            Default is 0, but may be set to any integer. This is to ensure
-            consistency in naming when converting e.g. only a certain portion
-            of all available snapshots. If set to e.g. 4,
-            the first snapshot generated will be called snapshot4.
-
-        file_based_communication : bool
-            If True, the LDOS will be gathered using a file based mechanism.
-            This is drastically less performant then using MPI, but may be
-            necessary when memory is scarce. Default is False, i.e., the faster
-            MPI version will be used.
-
-        target_calculator_kwargs : dict
-            Dictionary with additional keyword arguments for the calculation
-            or parsing of the target quantities.
-
-        descriptor_calculation_kwargs : dict
-            Dictionary with additional keyword arguments for the calculation
-            or parsing of the descriptor quantities.
-        """
-        if descriptor_calculation_kwargs is None:
-            descriptor_calculation_kwargs = {}
-
-        if target_calculator_kwargs is None:
-            target_calculator_kwargs = {}
-
-        series = io.Series("test_openpmd_output%01T.h5",
-                           io.Access.create)
-        series.set_attribute("is_mala_data", 1)
-        series.set_attribute("units", "some_units")
-
-        for i in range(0, len(self.__snapshots_to_convert)):
-            snapshot_number = i + starts_at
-            snapshot_name = naming_scheme
-            snapshot_name = snapshot_name.replace("*", str(snapshot_number))
-            io_iteration = series.iterations[i]
-
-            # A memory mapped file is used as buffer for distributed cases.
-            memmap = None
-            if self.parameters._configuration["mpi"] and \
-                    file_based_communication:
-                memmap = os.path.join(save_path, snapshot_name +
-                                      ".out.npy_temp")
-
-            self.convert_single_snapshot(i,
-                                         descriptor_calculation_kwargs,
-                                         target_calculator_kwargs,
-                                         input_path=os.path.join(save_path,
-                                         snapshot_name+".in.npy"),
-                                         output_path=os.path.join(save_path,
-                                         snapshot_name+".out.npy"),
-                                         use_memmap=memmap,
-                                         io_iteration=io_iteration)
-            printout("Saved snapshot", snapshot_number, "at ", save_path,
-                     min_verbosity=0)
-
-            if get_rank() == 0:
-                if self.parameters._configuration["mpi"] \
-                        and file_based_communication:
-                    os.remove(memmap)
