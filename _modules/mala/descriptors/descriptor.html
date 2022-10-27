@@ -428,21 +428,20 @@
                             <span class="n">zint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">zvals</span><span class="p">,</span> <span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
                             <span class="n">zint</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot divide z-planes on processors&quot;</span>
-                                         <span class="s2">&quot; without remainder. &quot;</span>
-                                         <span class="s2">&quot;This is currently unsupported.&quot;</span><span class="p">)</span>
-                    <span class="c1">#     zcut = 1/nz</span>
-                    <span class="c1">#     zrem = nz - (zprocs*int(nz/zprocs))</span>
-                    <span class="c1">#     zint = &#39;&#39;</span>
-                    <span class="c1">#     for i in range(0, zrem):</span>
-                    <span class="c1">#         zvals = (((i+1)*2)*int(nz/zprocs)*zcut)-</span>
-                    <span class="c1">#         0.00000001</span>
-                    <span class="c1">#         zint += format(zvals, &quot;.8f&quot;)</span>
-                    <span class="c1">#         zint += &#39; &#39;</span>
-                    <span class="c1">#     for i in range(zrem, zprocs-1):</span>
-                    <span class="c1">#         zvals = ((i+1+zrem)*zcut)-0.00000001</span>
-                    <span class="c1">#         zint += format(zvals, &quot;.8f&quot;)</span>
-                    <span class="c1">#         zint += &#39; &#39;</span>
+                        <span class="c1">#raise ValueError(&quot;Cannot divide z-planes on processors&quot;</span>
+                        <span class="c1">#                 &quot; without remainder. &quot;</span>
+                        <span class="c1">#                 &quot;This is currently unsupported.&quot;)</span>
+                        <span class="n">zcut</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">nz</span>
+                        <span class="n">zrem</span> <span class="o">=</span> <span class="n">nz</span> <span class="o">-</span> <span class="p">(</span><span class="n">zprocs</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">nz</span><span class="o">/</span><span class="n">zprocs</span><span class="p">))</span>
+                        <span class="n">zint</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">zrem</span><span class="p">):</span>
+                            <span class="n">zvals</span> <span class="o">=</span> <span class="p">(((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nz</span><span class="o">/</span><span class="n">zprocs</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">zcut</span><span class="p">)</span><span class="o">-</span><span class="mf">0.00000001</span>
+                            <span class="n">zint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">zvals</span><span class="p">,</span> <span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
+                            <span class="n">zint</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">zrem</span><span class="p">,</span> <span class="n">zprocs</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                            <span class="n">zvals</span> <span class="o">=</span> <span class="p">(((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">nz</span><span class="o">/</span><span class="n">zprocs</span><span class="p">)</span><span class="o">+</span><span class="n">zrem</span><span class="p">)</span><span class="o">*</span><span class="n">zcut</span><span class="p">)</span><span class="o">-</span><span class="mf">0.00000001</span>
+                            <span class="n">zint</span> <span class="o">+=</span> <span class="nb">format</span><span class="p">(</span><span class="n">zvals</span><span class="p">,</span> <span class="s2">&quot;.8f&quot;</span><span class="p">)</span>
+                            <span class="n">zint</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
                     <span class="n">lammps_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lammps_procs&quot;</span><span class="p">:</span>
                                    <span class="sa">f</span><span class="s2">&quot;processors </span><span class="si">{</span><span class="n">lammps_procs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                                    <span class="s2">&quot;zbal&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;balance 1.0 z </span><span class="si">{</span><span class="n">zint</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>

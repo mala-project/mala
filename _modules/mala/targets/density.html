@@ -72,7 +72,6 @@
              
   <h1>Source code for mala.targets.density</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Electronic density calculation class.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
 
 <span class="kn">import</span> <span class="nn">ase.io</span>
@@ -82,14 +81,14 @@
     <span class="kn">import</span> <span class="nn">total_energy</span> <span class="k">as</span> <span class="nn">te</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">parallel_warn</span><span class="p">,</span> <span class="n">barrier</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">parallel_warn</span><span class="p">,</span> <span class="n">barrier</span><span class="p">,</span> <span class="n">get_size</span>
 <span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
 <span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">mala.targets.cube_parser</span> <span class="kn">import</span> <span class="n">read_cube</span><span class="p">,</span> <span class="n">write_cube</span>
 <span class="kn">from</span> <span class="nn">mala.targets.atomic_force</span> <span class="kn">import</span> <span class="n">AtomicForce</span>
 <span class="kn">from</span> <span class="nn">mala.descriptors.gaussian</span> <span class="kn">import</span> <span class="n">GaussianDescriptors</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_rank</span>
 
 
 <div class="viewcode-block" id="Density"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density">[docs]</a><span class="k">class</span> <span class="nc">Density</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
@@ -851,9 +850,28 @@
             <span class="n">number_of_gridpoints_mala</span> <span class="o">=</span> <span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Density data has wrong dimensions. &quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">number_of_gridpoints_mala</span> <span class="o">!=</span> <span class="n">number_of_gridpoints</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Grid is inconsistent between MALA and&quot;</span>
-                            <span class="s2">&quot; Quantum Espresso&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If MPI is enabled, we NEED z-splitting for this to work.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">use_mpi</span> <span class="ow">and</span> \
+                <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_z_splitting</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate the total energy if &quot;</span>
+                            <span class="s2">&quot;the real space grid was not split in &quot;</span>
+                            <span class="s2">&quot;z-direction.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check if we need to test the grid points.</span>
+        <span class="c1"># We skip the check only if z-splitting is enabled and unequal</span>
+        <span class="c1"># z-splits are to be expected, and no</span>
+        <span class="c1"># y-splitting is enabled (since y-splitting currently works</span>
+        <span class="c1"># for equal z-splitting anyway).</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">use_mpi</span> <span class="ow">and</span> \
+           <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">use_y_splitting</span> <span class="o">==</span> <span class="mi">0</span> \
+           <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">get_size</span><span class="p">())</span> <span class="o">!=</span> \
+                  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">get_size</span><span class="p">()):</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">number_of_gridpoints_mala</span> <span class="o">!=</span> <span class="n">number_of_gridpoints</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Grid is inconsistent between MALA and&quot;</span>
+                                <span class="s2">&quot; Quantum Espresso&quot;</span><span class="p">)</span>
 
         <span class="c1"># Now we need to reshape the density.</span>
         <span class="n">density_for_qe</span> <span class="o">=</span> <span class="kc">None</span>
@@ -868,8 +886,17 @@
             <span class="n">density_for_qe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_density</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span>
                                               <span class="n">convert_to_threedimensional</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-            <span class="n">density_for_qe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">density_for_qe</span><span class="p">,</span> <span class="p">[</span><span class="n">number_of_gridpoints</span><span class="p">,</span>
-                                                         <span class="mi">1</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+            <span class="n">density_for_qe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">density_for_qe</span><span class="p">,</span>
+                                        <span class="p">[</span><span class="n">number_of_gridpoints_mala</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                        <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+
+            <span class="c1"># If there is an inconsistency between MALA and QE (which</span>
+            <span class="c1"># can only happen in the uneven z-splitting case at the moment)</span>
+            <span class="c1"># we need to pad the density array.</span>
+            <span class="k">if</span> <span class="n">density_for_qe</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">number_of_gridpoints</span><span class="p">:</span>
+                <span class="n">grid_diff</span> <span class="o">=</span> <span class="n">number_of_gridpoints</span> <span class="o">-</span> <span class="n">number_of_gridpoints_mala</span>
+                <span class="n">density_for_qe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">density_for_qe</span><span class="p">,</span>
+                                        <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">grid_diff</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
 
         <span class="c1"># QE has the density in 1/Bohr^3</span>
         <span class="n">density_for_qe</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backconvert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;1/Bohr^3&quot;</span><span class="p">)</span>
