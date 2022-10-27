@@ -1,5 +1,4 @@
 """Electronic density calculation class."""
-import os
 import time
 
 import ase.io
@@ -9,14 +8,14 @@ try:
     import total_energy as te
 except ModuleNotFoundError:
     pass
-import numpy as np
 
-from mala.common.parallelizer import printout, parallel_warn, barrier
+from mala.common.parallelizer import printout, parallel_warn, barrier, get_size
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.atomic_force import AtomicForce
 from mala.descriptors.gaussian import GaussianDescriptors
+from mala.common.parallelizer import get_rank
 
 
 class Density(Target):
@@ -778,9 +777,28 @@ class Density(Target):
             number_of_gridpoints_mala = density_data.shape[0]
         else:
             raise Exception("Density data has wrong dimensions. ")
-        if number_of_gridpoints_mala != number_of_gridpoints:
-            raise Exception("Grid is inconsistent between MALA and"
-                            " Quantum Espresso")
+
+        # If MPI is enabled, we NEED z-splitting for this to work.
+        if self._parameters_full.use_mpi and \
+                not self._parameters_full.descriptors.use_z_splitting:
+            raise Exception("Cannot calculate the total energy if "
+                            "the real space grid was not split in "
+                            "z-direction.")
+
+        # Check if we need to test the grid points.
+        # We skip the check only if z-splitting is enabled and unequal
+        # z-splits are to be expected, and no
+        # y-splitting is enabled (since y-splitting currently works
+        # for equal z-splitting anyway).
+        if self._parameters_full.use_mpi and \
+           self._parameters_full.descriptors.use_y_splitting == 0 \
+           and int(self.grid_dimensions[2] / get_size()) != \
+                  (self.grid_dimensions[2] / get_size()):
+            pass
+        else:
+            if number_of_gridpoints_mala != number_of_gridpoints:
+                raise Exception("Grid is inconsistent between MALA and"
+                                " Quantum Espresso")
 
         # Now we need to reshape the density.
         density_for_qe = None
@@ -795,8 +813,17 @@ class Density(Target):
             density_for_qe = self.get_density(density_data,
                                               convert_to_threedimensional=True)
 
-            density_for_qe = np.reshape(density_for_qe, [number_of_gridpoints,
-                                                         1], order='F')
+            density_for_qe = np.reshape(density_for_qe,
+                                        [number_of_gridpoints_mala, 1],
+                                        order='F')
+
+            # If there is an inconsistency between MALA and QE (which
+            # can only happen in the uneven z-splitting case at the moment)
+            # we need to pad the density array.
+            if density_for_qe.shape[0] < number_of_gridpoints:
+                grid_diff = number_of_gridpoints - number_of_gridpoints_mala
+                density_for_qe = np.pad(density_for_qe,
+                                        pad_width=((0, grid_diff), (0, 0)))
 
         # QE has the density in 1/Bohr^3
         density_for_qe *= self.backconvert_units(1, "1/Bohr^3")
