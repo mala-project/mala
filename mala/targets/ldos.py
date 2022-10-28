@@ -1253,7 +1253,6 @@ class LDOS(Target):
         else:
             return dos_values
 
-
     def get_atomic_forces(self, ldos_data, dE_dd, used_data_handler,
                           snapshot_number=0):
         r"""

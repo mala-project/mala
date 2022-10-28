@@ -1028,23 +1028,6 @@ class ParametersDataGeneration(ParametersBase):
         self.ofdft_friction = 0.1
 
 
-class ParametersDebug(ParametersBase):
-    """
-    All debugging parameters.
-
-    Attributes
-    ----------
-    grid_dimensions : list
-        A list containing three elements. It enforces a smaller grid size
-        globally when it is not empty.. Default : []
-
-    """
-
-    def __init__(self):
-        super(ParametersDebug, self).__init__()
-        self.grid_dimensions = []
-
-
 class Parameters:
     """
     All parameter MALA needs to perform its various tasks.

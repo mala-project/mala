@@ -36,6 +36,10 @@ class Target(ABC):
         Parameters used to create this Target object.
     """
 
+    ##############################
+    # Constructors
+    ##############################
+
     def __new__(cls, params: Parameters):
         """
         Create a Target instance.
@@ -129,6 +133,10 @@ class Target(ABC):
         self.local_grid = None
         self.y_planes = None
 
+    ##############################
+    # Properties
+    ##############################
+
     @property
     @abstractmethod
     def feature_size(self):
@@ -176,25 +184,58 @@ class Target(ABC):
     def _is_property_cached(self, property_name):
         return property_name in self.__dict__.keys()
 
+    ##############################
+    # Methods
+    ##############################
+
+    # File I/O
+    ##########
+
+    @staticmethod
     @abstractmethod
-    def get_target(self):
+    def convert_units(array, in_units="eV"):
         """
-        Get the target quantity.
+        Convert the units of an array into the MALA units.
 
-        This is the generic interface for cached target quantities.
-        It should work for all implemented targets.
+        Parameters
+        ----------
+        array : numpy.array
+            Data for which the units should be converted.
+
+        in_units : string
+            Units of array.
+
+        Returns
+        -------
+        converted_array : numpy.array
+            Data in MALA units.
+
         """
-        pass
+        raise Exception("No unit conversion method implemented for"
+                        " this target type.")
 
+    @staticmethod
     @abstractmethod
-    def invalidate_target(self):
+    def backconvert_units(array, out_units):
         """
-        Invalidates the saved target wuantity.
+        Convert the units of an array from MALA units into desired units.
 
-        This is the generic interface for cached target quantities.
-        It should work for all implemented targets.
+        Parameters
+        ----------
+        array : numpy.array
+            Data in MALA units.
+
+        out_units : string
+            Desired units of output array.
+
+        Returns
+        -------
+        converted_array : numpy.array
+            Data in out_units.
+
         """
-        pass
+        raise Exception("No unit back conversion method implemented "
+                        "for this target type.")
 
     def read_additional_calculation_data(self, data_type, data=""):
         """
@@ -365,6 +406,32 @@ class Target(ABC):
         else:
             raise Exception("Unsupported auxiliary file type.")
 
+    # Accessing target data
+    ########################
+
+    @abstractmethod
+    def get_target(self):
+        """
+        Get the target quantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        pass
+
+    @abstractmethod
+    def invalidate_target(self):
+        """
+        Invalidates the saved target wuantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        pass
+
+    # Calculations
+    ##############
+
     def get_energy_grid(self):
         """Get energy grid."""
         raise Exception("No method implement to calculate an energy grid.")
@@ -378,15 +445,6 @@ class Target(ABC):
                 for k in range(0, self.grid_dimensions[2]):
                     grid3D[i, j, k, :] = np.matmul(self.voxel, [i, j, k])
         return grid3D
-
-    @staticmethod
-    def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):
-        if method == "mic":
-            return np.min(np.linalg.norm(atoms.get_cell(), axis=0))/2
-        elif method == "2mic":
-            return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
-        else:
-            raise Exception("Unknown option to calculate rMax provided.")
 
     @staticmethod
     def radial_distribution_function_from_atoms(atoms: ase.Atoms,
@@ -938,50 +996,6 @@ class Target(ABC):
                      pseudopotentials=qe_pseudopotentials,
                      kpts=kpoints)
 
-    @staticmethod
-    def convert_units(array, in_units="eV"):
-        """
-        Convert the units of an array into the MALA units.
-
-        Parameters
-        ----------
-        array : numpy.array
-            Data for which the units should be converted.
-
-        in_units : string
-            Units of array.
-
-        Returns
-        -------
-        converted_array : numpy.array
-            Data in MALA units.
-
-        """
-        raise Exception("No unit conversion method implemented for"
-                        " this target type.")
-
-    @staticmethod
-    def backconvert_units(array, out_units):
-        """
-        Convert the units of an array from MALA units into desired units.
-
-        Parameters
-        ----------
-        array : numpy.array
-            Data in MALA units.
-
-        out_units : string
-            Desired units of output array.
-
-        Returns
-        -------
-        converted_array : numpy.array
-            Data in out_units.
-
-        """
-        raise Exception("No unit back conversion method implemented "
-                        "for this target type.")
-
     def restrict_data(self, array):
         """
         Restrict target data to only contain physically meaningful values.
@@ -1010,4 +1024,14 @@ class Target(ABC):
         else:
             raise Exception("Wrong data restriction.")
 
+    # Private methods
+    #################
 
+    @staticmethod
+    def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):
+        if method == "mic":
+            return np.min(np.linalg.norm(atoms.get_cell(), axis=0))/2
+        elif method == "2mic":
+            return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+        else:
+            raise Exception("Unknown option to calculate rMax provided.")

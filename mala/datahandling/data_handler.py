@@ -557,17 +557,6 @@ class DataHandler:
                                                        snapshot_order
                                                        [d.snapshot_function])
 
-    def __load_from_npy_file(self, file, mmapmode=None):
-        """Load a numpy array from a file."""
-        loaded_array = np.load(file, mmap_mode=mmapmode)
-        if len(self.dbg_grid_dimensions) == 3:
-            return loaded_array[0:self.dbg_grid_dimensions[0],
-                                0:self.dbg_grid_dimensions[1],
-                                0:self.dbg_grid_dimensions[2], :]
-
-        else:
-            return loaded_array
-
     def __parametrize_scalers(self):
         """Use the training data to parametrize the DataScalers."""
         ##################
