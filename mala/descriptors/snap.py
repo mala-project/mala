@@ -35,6 +35,11 @@ class SNAP(Descriptor):
         self.in_format_ase = ""
         self.grid_dimensions = []
 
+    @property
+    def descriptor_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        return "SNAP"
+
     @staticmethod
     def convert_units(array, in_units="None"):
         """

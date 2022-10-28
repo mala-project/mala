@@ -4,6 +4,7 @@ from functools import cached_property
 import ase.io
 from ase.units import Rydberg, J
 import numpy as np
+import openpmd_api as io
 from scipy import interpolate, integrate
 from scipy.optimize import toms748
 
@@ -207,12 +208,13 @@ class DOS(Target):
 
         Needed for OpenPMD interface.
         """
-        return 1/J
+        return J
 
     @property
     def si_dimension(self):
         """Dictionary containing the SI unit dimensions in OpenPMD format"""
-        return {"I": 0, "J": 0, "L": -1, "M": 1, "N": 0, "T": -2}
+        return {io.Unit_Dimension.M: -1, io.Unit_Dimension.L: -2,
+                io.Unit_Dimension.T: 2}
 
     @property
     def density_of_states(self):

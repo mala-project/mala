@@ -2,7 +2,9 @@
 from abc import ABC, abstractmethod
 
 import ase
+from ase.units import m
 import numpy as np
+import openpmd_api as io
 
 from mala.common.parameters import ParametersDescriptors, Parameters
 from mala.common.parallelizer import printout, get_size
@@ -54,6 +56,30 @@ class Descriptor(ABC):
         self.fingerprint_length = -1  # so iterations will fail
         self.dbg_grid_dimensions = parameters.debug.grid_dimensions
         self.verbosity = parameters.verbosity
+
+    @property
+    @abstractmethod
+    def descriptor_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        pass
+
+    @property
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        return m**3
+
+    @property
+    def si_dimension(self):
+        """
+        Dictionary containing the SI unit dimensions in OpenPMD format
+
+        Needed for OpenPMD interface.
+        """
+        return {io.Unit_Dimension.L: -3}
 
     @property
     def descriptors_contain_xyz(self):

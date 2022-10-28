@@ -3,17 +3,18 @@ import os
 import time
 
 import ase.io
-from ase.units import Rydberg, Bohr
+from ase.units import Rydberg, Bohr, m
 from functools import cached_property
 try:
     import total_energy as te
 except ModuleNotFoundError:
     pass
 import numpy as np
+import openpmd_api as io
 
 from mala.common.parallelizer import printout, parallel_warn, barrier
 from mala.targets.target import Target
-from mala.targets.calculation_helpers import *
+from mala.targets.calculation_helpers import integrate_values_on_spacing
 from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.atomic_force import AtomicForce
 from mala.descriptors.gaussian import GaussianDescriptors
@@ -179,6 +180,20 @@ class Density(Target):
     def target_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
         return "Density"
+
+    @property
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        return m**3
+
+    @property
+    def si_dimension(self):
+        """Dictionary containing the SI unit dimensions in OpenPMD format"""
+        return {io.Unit_Dimension.L: -3}
 
     @property
     def density(self):

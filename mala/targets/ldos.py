@@ -145,12 +145,13 @@ class LDOS(Target):
 
         Needed for OpenPMD interface.
         """
-        return (m**3)/J
+        return (m**3)*J
 
     @property
     def si_dimension(self):
         """Dictionary containing the SI unit dimensions in OpenPMD format"""
-        return {"I": 0, "J": 0, "L": -1, "M": 1, "N": 0, "T": -2}
+        return {io.Unit_Dimension.M: -1, io.Unit_Dimension.L: -5,
+                io.Unit_Dimension.T: 2}
 
     @property
     def local_density_of_states(self):
@@ -565,6 +566,20 @@ class LDOS(Target):
         # actual LDOS object, then something goes wrong during the flushing,
         # so I flush multiple times...
         for i in range(0, len(ldos_mesh)):
+
+            # TODO: Fix this check.
+            # This check checks whether the correct units have been used.
+            # It's not entirely trivial to check this, since OpenPMD works
+            # in SI units, but MALA in eV/Ang units. So the correct factor
+            # is not going to be 1.0 - it's going to be (m**3)*J, and due to
+            # machine precision, any test to this effect may be slightly off.
+            # Since there is no sensible reason to not save new MALA data
+            # with the wrong units, for now we just check and complain.
+            # Eventually we may have to implement unit conversion, I guess.
+            if not np.isclose(ldos_mesh[str(i)].unit_SI, ((m**3)*J)):
+                raise Exception("MALA currently cannot operate with HDF5 "
+                                "files with non-MALA units.")
+
             temp_ldos = ldos_mesh[str(i)].load_chunk()
             series.flush()
             self.local_density_of_states[:, :, :, i] = temp_ldos.copy()

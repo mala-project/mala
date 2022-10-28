@@ -34,6 +34,11 @@ class GaussianDescriptors(Descriptor):
         self.grid_dimensions = []
         self.verbosity = parameters.verbosity
 
+    @property
+    def descriptor_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        return "Gaussian"
+
     @staticmethod
     def convert_units(array, in_units="None"):
         """

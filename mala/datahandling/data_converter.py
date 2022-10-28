@@ -198,6 +198,11 @@ class DataConverter:
         if not use_numpy:
             snapshot_name = naming_scheme
             series_name = snapshot_name.replace("*", str("%01T"))
+
+            input_series = io.Series(series_name+".in.h5",
+                                     io.Access.create)
+            input_series.set_attribute("is_mala_data", 1)
+
             output_series = io.Series(series_name+".out.h5",
                                       io.Access.create)
             output_series.set_attribute("is_mala_data", 1)
@@ -208,8 +213,10 @@ class DataConverter:
             snapshot_name = snapshot_name.replace("*", str(snapshot_number))
 
             if use_numpy:
+                input_iteration = None
                 output_iteration = None
             else:
+                input_iteration = input_series.iterations[i + starts_at]
                 output_iteration = output_series.iterations[i + starts_at]
 
             # A memory mapped file is used as buffer for distributed cases.
@@ -226,6 +233,7 @@ class DataConverter:
                                            output_path=os.path.join(save_path,
                                            snapshot_name+".out.npy"),
                                            use_memmap=memmap,
+                                           input_iteration=input_iteration,
                                            output_iteration=output_iteration)
             printout("Saved snapshot", snapshot_number, "at ", save_path,
                      min_verbosity=0)
@@ -241,8 +249,8 @@ class DataConverter:
                                   input_path=None,
                                   output_path=None,
                                   use_memmap=None,
-                                  return_data=False,
-                                  output_iteration=None):
+                                  output_iteration=None,
+                                  input_iteration=None):
         """
         Convert single snapshot from the conversion lists.
 
@@ -265,9 +273,6 @@ class DataConverter:
         output_path : string
             If not None, outputs will be saved in this file.
 
-        return_data : bool
-            If True, inputs and outputs will be returned directly.
-
         target_calculator_kwargs : dict
             Dictionary with additional keyword arguments for the calculation
             or parsing of the target quantities.
@@ -277,8 +282,12 @@ class DataConverter:
             or parsing of the descriptor quantities.
 
         output_iteration : OpenPMD iteration
-            OpenPMD iteration to be used to save current snapshot, as part
-            of an OpenPMD Series.
+            OpenPMD iteration to be used to save the output data of the current
+            snapshot, as part of an OpenPMD Series.
+
+        input_iteration : OpenPMD iteration
+            OpenPMD iteration to be used to save the input data of the current
+            snapshot, as part of an OpenPMD Series.
 
         Returns
         -------
@@ -291,6 +300,10 @@ class DataConverter:
         snapshot = self.__snapshots_to_convert[snapshot_number]
         description = self.__snapshot_description[snapshot_number]
         original_units = self.__snapshot_units[snapshot_number]
+
+        ##########
+        # Inputs #
+        ##########
 
         # Parse and/or calculate the input descriptors.
         if description["input"] == "qe.out":
@@ -317,10 +330,36 @@ class DataConverter:
             # Save data and delete, if not requested otherwise.
             if get_rank() == 0:
                 if input_path is not None:
-                    np.save(input_path, tmp_input)
+                    if input_iteration is None:
+                        np.save(input_path, tmp_input)
+                    else:
+                        input_mesh = input_iteration.meshes[self.descriptor_calculator.descriptor_name]
+                        input_mesh.unit_dimension = self.descriptor_calculator.si_dimension
 
-            if not return_data:
-                del tmp_input
+                        dataset = io.Dataset(tmp_input.dtype,
+                                             tmp_input[:, :, :, 0].shape)
+
+                        for i in range(0, tmp_input.shape[3]):
+                            input_mesh_component = input_mesh[str(i)]
+                            input_mesh_component.reset_dataset(dataset)
+
+                            # TODO: Remove this copy?
+                            input_mesh_component.\
+                                store_chunk(tmp_input[:, :, :, i].copy())
+
+                            # All data is assumed to be saved in
+                            # MALA units, so the SI conversion factor we save
+                            # here is the one for MALA (ASE) units
+                            input_mesh_component.unit_SI = \
+                                self.descriptor_calculator.si_unit_conversion
+
+                        input_iteration.close(flush=True)
+
+            del tmp_input
+
+        ###########
+        # Outputs #
+        ###########
 
         # Parse and/or calculate the output descriptors.
         if description["output"] == ".cube":
@@ -347,11 +386,7 @@ class DataConverter:
                         np.save(output_path, tmp_output)
                     else:
                         output_mesh = output_iteration.meshes[self.target_calculator.target_name]
-                        output_mesh.unit_dimension = {
-                            io.Unit_Dimension.M: 1,
-                            io.Unit_Dimension.L: -1,
-                            io.Unit_Dimension.T: -2
-                        }
+                        output_mesh.unit_dimension = self.target_calculator.si_dimension
 
                         dataset = io.Dataset(tmp_output.dtype,
                                              tmp_output[:, :, :, 0].shape)
@@ -365,16 +400,9 @@ class DataConverter:
 
                             # All data is assumed to be saved in
                             # MALA units, so the SI conversion factor we save
-                            # here is the one for eV/A^3
-                            output_mesh_component.unit_SI = self.target_calculator.si_unit_conversion
+                            # here is the one for MALA (ASE) units
+                            output_mesh_component.unit_SI = \
+                                self.target_calculator.si_unit_conversion
 
                         output_iteration.close(flush=True)
-
-        if return_data:
-            if description["input"] is not None and description["output"] \
-                    is not None:
-                return tmp_input, tmp_output
-            elif description["input"] is None:
-                return tmp_output
-            elif description["output"] is None:
-                return tmp_input
+            del tmp_output
