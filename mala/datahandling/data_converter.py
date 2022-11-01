@@ -199,11 +199,13 @@ class DataConverter:
             snapshot_name = naming_scheme
             series_name = snapshot_name.replace("*", str("%01T"))
 
-            input_series = io.Series(series_name+".in.h5",
+            input_series = io.Series(os.path.join(save_path,
+                                                  series_name+".in.h5"),
                                      io.Access.create)
             input_series.set_attribute("is_mala_data", 1)
 
-            output_series = io.Series(series_name+".out.h5",
+            output_series = io.Series(os.path.join(save_path,
+                                                   series_name+".out.h5"),
                                       io.Access.create)
             output_series.set_attribute("is_mala_data", 1)
 
