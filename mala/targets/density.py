@@ -371,6 +371,10 @@ class Density(Target):
         """
         self.density = array*self.convert_units(1, in_units=units)
 
+    def read_from_hdf5(self, path, units=None):
+        # TODO: Implement this!
+        pass
+
     def write_as_cube(self, file_name, density_data, atoms=None,
                       grid_dimensions=None):
         """

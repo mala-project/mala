@@ -492,7 +492,7 @@ class DOS(Target):
         Parameters
         ----------
         array : numpy.ndarray
-            Numpy array containing the DOS..
+            Numpy array containing the DOS.
 
         units : string
             Units the density is saved in. Usually none.
@@ -500,6 +500,10 @@ class DOS(Target):
         self.density_of_states = array
         self.density_of_states *= \
             self.convert_units(1, in_units=units)
+
+    def read_from_hdf5(self, path, units=None):
+        # TODO: Implement this!
+        pass
 
     # Calculations
     ##############

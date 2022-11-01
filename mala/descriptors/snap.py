@@ -289,17 +289,9 @@ class SNAP(Descriptor):
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")
         ase.io.write(ase_out_path, atoms, format=lammps_format)
 
-        # We also need to know how big the grid is.
-        # Iterating directly through the file is slow, but the
-        # grid information is at the top (around line 200).
-        if len(self.dbg_grid_dimensions) == 3:
-            nx = self.dbg_grid_dimensions[0]
-            ny = self.dbg_grid_dimensions[1]
-            nz = self.dbg_grid_dimensions[2]
-        else:
-            nx = grid_dimensions[0]
-            ny = grid_dimensions[1]
-            nz = grid_dimensions[2]
+        nx = grid_dimensions[0]
+        ny = grid_dimensions[1]
+        nz = grid_dimensions[2]
 
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log",

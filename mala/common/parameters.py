@@ -1075,7 +1075,6 @@ class Parameters:
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
         self.datageneration = ParametersDataGeneration()
-        self.debug = ParametersDebug()
 
         # Attributes.
         self.manual_seed = None
@@ -1131,7 +1130,6 @@ class Parameters:
         self.data._update_gpu(self.use_gpu)
         self.running._update_gpu(self.use_gpu)
         self.hyperparameters._update_gpu(self.use_gpu)
-        self.debug._update_gpu(self.use_gpu)
 
     @property
     def use_horovod(self):
@@ -1153,7 +1151,6 @@ class Parameters:
         self.data._update_horovod(self.use_horovod)
         self.running._update_horovod(self.use_horovod)
         self.hyperparameters._update_horovod(self.use_horovod)
-        self.debug._update_horovod(self.use_horovod)
 
     @property
     def device(self):
@@ -1174,7 +1171,6 @@ class Parameters:
         self.data._update_device(self._device)
         self.running._update_device(self._device)
         self.hyperparameters._update_device(self._device)
-        self.debug._update_device(self._device)
 
     @property
     def use_mpi(self):
@@ -1193,7 +1189,6 @@ class Parameters:
         self.data._update_mpi(self.use_mpi)
         self.running._update_mpi(self.use_mpi)
         self.hyperparameters._update_mpi(self.use_mpi)
-        self.debug._update_mpi(self.use_mpi)
 
     def show(self):
         """Print name and values of all attributes of this object."""
@@ -1328,7 +1323,6 @@ class Parameters:
         self.data._update_device(device_temp)
         self.running._update_device(device_temp)
         self.hyperparameters._update_device(device_temp)
-        self.debug._update_device(device_temp)
 
     @classmethod
     def load_from_file(cls, filename, save_format="json",

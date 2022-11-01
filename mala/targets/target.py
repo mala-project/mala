@@ -237,6 +237,16 @@ class Target(ABC):
         raise Exception("No unit back conversion method implemented "
                         "for this target type.")
 
+    @abstractmethod
+    def read_from_numpy(self, path, units=None):
+        """Read the target from a numpy file."""
+        pass
+
+    @abstractmethod
+    def read_from_hdf5(self, path, units=None):
+        """Read the target from an OpenPMD HDF5 file."""
+        pass
+
     def read_additional_calculation_data(self, data_type, data=""):
         """
         Read in additional input about a calculation.

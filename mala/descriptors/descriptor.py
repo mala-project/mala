@@ -23,6 +23,10 @@ class Descriptor(ABC):
 
     """
 
+    ##############################
+    # Constructors
+    ##############################
+
     def __new__(cls, params: Parameters):
         """
         Create a Descriptor instance.
@@ -54,8 +58,11 @@ class Descriptor(ABC):
     def __init__(self, parameters):
         self.parameters: ParametersDescriptors = parameters.descriptors
         self.fingerprint_length = -1  # so iterations will fail
-        self.dbg_grid_dimensions = parameters.debug.grid_dimensions
         self.verbosity = parameters.verbosity
+
+    ##############################
+    # Properties
+    ##############################
 
     @property
     @abstractmethod
@@ -89,6 +96,13 @@ class Descriptor(ABC):
     @descriptors_contain_xyz.setter
     def descriptors_contain_xyz(self, value):
         self.parameters.descriptors_contain_xyz = value
+
+    ##############################
+    # Methods
+    ##############################
+
+    # File I/O
+    ##########
 
     @staticmethod
     def convert_units(array, in_units="1/eV"):
@@ -133,6 +147,76 @@ class Descriptor(ABC):
         """
         raise Exception("No unit back conversion method implemented for "
                         "this descriptor type.")
+
+    def read_from_numpy(self, path, units="None"):
+        """
+        Read the descriptor data from a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            Name of the numpy file.
+
+        units : string
+            Units the descriptor data is saved in.
+
+        Returns
+        -------
+        descriptor_data : numpy.ndarray
+            A numpy array containing the descriptors.
+
+        """
+        return np.load(path)*self.convert_units(1, in_units=units)
+
+    def read_from_hdf5(self, path, units=None):
+        """
+        Read the descriptor data from an OpenPMD HDF5 file.
+
+        Parameters
+        ----------
+        path : string
+            Name of the HDF5 file.
+
+        units : string
+            Units the descriptor data is saved in. Currently ignored
+            in the OpenPMD formalism.
+
+        Returns
+        -------
+        descriptor_data : numpy.ndarray
+            A numpy array containing the descriptors.
+        """
+        series = io.Series(path, io.Access.read_only)
+
+        # Check if this actually MALA compatible data.
+        if series.get_attribute("is_mala_data") != 1:
+            raise Exception("Non-MALA data detected, cannot work with this "
+                            "data.")
+        current_iteration = series.iterations[0]
+        descriptor_mesh = current_iteration.meshes[self.descriptor_name]
+        descriptor_data = \
+            np.zeros((descriptor_mesh["0"].shape[0],
+                      descriptor_mesh["0"].shape[1],
+                      descriptor_mesh["0"].shape[2],
+                      len(descriptor_mesh)),
+                      dtype=descriptor_mesh["0"].dtype)
+
+        # TODO: This is currently inefficient.
+        # But if I register the chunks to individual indices i of the
+        # actual LDOS object, then something goes wrong during the flushing,
+        # so I flush multiple times...
+        for i in range(0, len(descriptor_mesh)):
+
+            # TODO: Investigate if some kind of unit check is needed here?
+
+            temp_descriptors = descriptor_mesh[str(i)].load_chunk()
+            series.flush()
+            descriptor_data[:, :, :, i] = temp_descriptors.copy()
+
+        return descriptor_data
+
+    # Calculations
+    ##############
 
     @staticmethod
     def enforce_pbc(atoms):
@@ -238,6 +322,9 @@ class Descriptor(ABC):
                                     self.parameters.acsd_points,
                                     descriptor_vectors_contain_xyz=
                                     self.descriptors_contain_xyz)
+
+    # Private methods
+    #################
 
     def _setup_lammps_processors(self, nx, ny, nz):
         """

@@ -51,7 +51,6 @@ class DataHandler:
                  descriptor_calculator=None, input_data_scaler=None,
                  output_data_scaler=None):
         self.parameters: ParametersData = parameters.data
-        self.dbg_grid_dimensions = parameters.debug.grid_dimensions
         self.use_horovod = parameters.use_horovod
         self.training_data_set = None
 

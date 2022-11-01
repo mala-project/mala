@@ -547,7 +547,21 @@ class LDOS(Target):
         self.local_density_of_states = array * \
                                        self.convert_units(1, in_units=units)
 
-    def read_from_hdf5(self, path):
+    def read_from_hdf5(self, path, units=None):
+        """
+        Read the LDOS data from an OpenPMD HDF5 file.
+
+        The LDOS data will be saved within the LDOS object.
+
+        Parameters
+        ----------
+        path : string
+            Name of the HDF5 file.
+
+        units : string
+            Units the LDOS data is saved in. Currently ignored
+            in the OpenPMD formalism.
+        """
         series = io.Series(path, io.Access.read_only)
 
         # Check if this actually MALA compatible data.
