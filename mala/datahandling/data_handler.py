@@ -148,7 +148,7 @@ class DataHandler:
     def add_snapshot(self, input_npy_file, input_npy_directory,
                      output_npy_file, output_npy_directory, add_snapshot_as,
                      output_units="1/(eV*A^3)", input_units="None",
-                     calculation_output_file=""):
+                     calculation_output_file="", snapshot_type="numpy"):
         """
         Add a snapshot to the data pipeline.
 
@@ -182,13 +182,18 @@ class DataHandler:
             Must be "tr", "va" or "te", the snapshot will be added to the
             snapshot list as training, validation or testing snapshot,
             respectively.
+
+        snapshot_type : string
+            Either "numpy" or "hdf5" based on what kind of files you
+            want to operate on.
         """
         snapshot = Snapshot(input_npy_file, input_npy_directory,
                             output_npy_file, output_npy_directory,
                             add_snapshot_as,
                             input_units=input_units,
                             output_units=output_units,
-                            calculation_output=calculation_output_file)
+                            calculation_output=calculation_output_file,
+                            snapshot_type=snapshot_type)
         self.parameters.snapshot_directories_list.append(snapshot)
 
     def clear_data(self):
