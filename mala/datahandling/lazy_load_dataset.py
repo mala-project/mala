@@ -136,23 +136,33 @@ class LazyLoadDataset(torch.utils.data.Dataset):
             File to be read.
         """
         # Load the data into RAM.
-        self.input_data = \
-            np.load(os.path.join(
-                    self.snapshot_list[file_index].input_npy_directory,
-                    self.snapshot_list[file_index].input_npy_file))
-        self.output_data = \
-            np.load(os.path.join(
-                    self.snapshot_list[file_index].output_npy_directory,
-                    self.snapshot_list[file_index].output_npy_file))
+        if self.snapshot_list[file_index].snapshot_type == "numpy":
+            self.input_data = self.descriptor_calculator. \
+                read_from_numpy(
+                os.path.join(self.snapshot_list[file_index].input_npy_directory,
+                             self.snapshot_list[file_index].input_npy_file),
+                                units=self.snapshot_list[file_index].input_units)
+            self.target_calculator. \
+                read_from_numpy(
+                os.path.join(self.snapshot_list[file_index].output_npy_directory,
+                             self.snapshot_list[file_index].output_npy_file),
+                             units=self.snapshot_list[file_index].output_units)
+            self.output_data = self.target_calculator.get_target()
+
+        elif self.snapshot_list[file_index].snapshot_type == "hdf5":
+            self.input_data = self.descriptor_calculator. \
+                read_from_hdf5(
+                os.path.join(self.snapshot_list[file_index].input_npy_directory,
+                             self.snapshot_list[file_index].input_npy_file))
+            self.target_calculator. \
+                read_from_hdf5(
+                os.path.join(self.snapshot_list[file_index].output_npy_directory,
+                             self.snapshot_list[file_index].output_npy_file))
+            self.output_data = self.target_calculator.get_target()
 
         # Transform the data.
-        if self.descriptors_contain_xyz:
-            self.input_data = self.input_data[:, :, :, 3:]
         self.input_data = \
             self.input_data.reshape([self.grid_size, self.input_dimension])
-        self.input_data *= \
-            self.descriptor_calculator.\
-            convert_units(1, self.snapshot_list[file_index].input_units)
         self.input_data = self.input_data.astype(np.float32)
         self.input_data = torch.from_numpy(self.input_data).float()
         self.input_data = self.input_data_scaler.transform(self.input_data)
@@ -160,9 +170,6 @@ class LazyLoadDataset(torch.utils.data.Dataset):
 
         self.output_data = \
             self.output_data.reshape([self.grid_size, self.output_dimension])
-        self.output_data *= \
-            self.target_calculator.\
-            convert_units(1, self.snapshot_list[file_index].output_units)
         if self.return_outputs_directly is False:
             self.output_data = np.array(self.output_data)
             self.output_data = self.output_data.astype(np.float32)

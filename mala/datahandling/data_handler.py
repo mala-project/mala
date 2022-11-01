@@ -15,7 +15,8 @@ from mala.common.parameters import Parameters, ParametersData
 from mala.datahandling.data_scaler import DataScaler
 from mala.datahandling.snapshot import Snapshot
 from mala.datahandling.lazy_load_dataset import LazyLoadDataset
-from mala.datahandling.lazy_load_dataset_clustered import LazyLoadDatasetClustered
+from mala.datahandling.lazy_load_dataset_clustered import \
+    LazyLoadDatasetClustered
 from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 
@@ -353,14 +354,16 @@ class DataHandler:
         for snapshot in self.parameters.snapshot_directories_list:
             tmp_array = self.descriptor_calculator.\
                 read_from_numpy(os.path.join(snapshot.input_npy_directory,
-                                             snapshot.input_npy_file))
+                                             snapshot.input_npy_file),
+                                units=snapshot.input_units)
             tmp_file_name = naming_scheme_input
             tmp_file_name = tmp_file_name.replace("*", str(i))
             np.save(os.path.join(directory, tmp_file_name) + ".npy", tmp_array)
 
             self.target_calculator.\
                 read_from_numpy(os.path.join(snapshot.output_npy_directory,
-                                             snapshot.output_npy_file))
+                                             snapshot.output_npy_file),
+                                units=snapshot.output_units)
             tmp_array = self.target_calculator.get_target()
             tmp_file_name = naming_scheme_output
             tmp_file_name = tmp_file_name.replace("*", str(i))
@@ -591,7 +594,8 @@ class DataHandler:
                         tmp = self.descriptor_calculator. \
                             read_from_numpy(
                             os.path.join(snapshot.input_npy_directory,
-                                         snapshot.input_npy_file))
+                                         snapshot.input_npy_file),
+                                         units=snapshot.input_units)
                     elif snapshot.snapshot_type == "hdf5":
                         tmp = self.descriptor_calculator. \
                             read_from_hdf5(
@@ -606,8 +610,6 @@ class DataHandler:
                     # follows does NOT load it into memory, see
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
-                    tmp *= self.descriptor_calculator.\
-                        convert_units(1, snapshot.input_units)
                     tmp = tmp.astype(np.float32)
                     tmp = tmp.reshape([self.grid_size,
                                        self.get_input_dimension()])
@@ -645,7 +647,8 @@ class DataHandler:
                         self.target_calculator. \
                             read_from_numpy(
                             os.path.join(snapshot.output_npy_directory,
-                                         snapshot.output_npy_file))
+                                         snapshot.output_npy_file),
+                                         units=snapshot.output_units)
                         tmp = self.target_calculator.get_target()
                     elif snapshot.snapshot_type == "hdf5":
                         self.target_calculator. \
@@ -662,8 +665,6 @@ class DataHandler:
                     # follows does NOT load it into memory, see
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
-                    tmp *= self.target_calculator.\
-                        convert_units(1, snapshot.output_units)
                     tmp = tmp.astype(np.float32)
                     tmp = tmp.reshape([self.grid_size,
                                        self.get_output_dimension()])
@@ -689,15 +690,19 @@ class DataHandler:
 
             # Data scaling is only performed on the training data sets.
             if snapshot.snapshot_function == "tr":
-                tmp = self.__load_from_npy_file(os.path.join(snapshot.
-                                                input_npy_directory,
-                                                snapshot.input_npy_file),
-                                                mmapmode='r')
-                if self.descriptor_calculator.descriptors_contain_xyz:
-                    tmp = tmp[:, :, :, 3:]
-                tmp = np.array(tmp)
-                tmp *= self.descriptor_calculator. \
-                    convert_units(1, snapshot.input_units)
+                if snapshot.snapshot_type == "numpy":
+                    tmp = self.descriptor_calculator. \
+                        read_from_numpy(
+                        os.path.join(snapshot.input_npy_directory,
+                                     snapshot.input_npy_file),
+                                        units=snapshot.input_units)
+                elif snapshot.snapshot_type == "hdf5":
+                    tmp = self.descriptor_calculator. \
+                        read_from_hdf5(
+                        os.path.join(snapshot.input_npy_directory,
+                                     snapshot.input_npy_file))
+                else:
+                    raise Exception("Unknown snapshot file type.")
                 self.training_data_inputs.append(tmp)
 
         # The scalers will later operate on torch Tensors so we have to
@@ -722,14 +727,21 @@ class DataHandler:
 
             # Data scaling is only performed on the training data sets.
             if snapshot.snapshot_function == "tr":
-                tmp = self. \
-                    __load_from_npy_file(os.path.join(
-                                         snapshot.output_npy_directory,
-                                         snapshot.output_npy_file),
-                                         mmapmode='r')
-                tmp = np.array(tmp)
-                tmp *= self.target_calculator. \
-                    convert_units(1, snapshot.output_units)
+                if snapshot.snapshot_type == "numpy":
+                    self.target_calculator. \
+                        read_from_numpy(
+                        os.path.join(snapshot.output_npy_directory,
+                                     snapshot.output_npy_file),
+                                        units=snapshot.output_units)
+                    tmp = self.target_calculator.get_target()
+                elif snapshot.snapshot_type == "hdf5":
+                    self.target_calculator. \
+                        read_from_hdf5(
+                        os.path.join(snapshot.output_npy_directory,
+                                     snapshot.output_npy_file))
+                    tmp = self.target_calculator.get_target()
+                else:
+                    raise Exception("Unknown snapshot file type.")
                 self.training_data_outputs.append(tmp)
 
         # The scalers will later operate on torch Tensors so we have to
@@ -833,24 +845,38 @@ class DataHandler:
                 # Data scaling is only performed on the training data sets.
                 if snapshot.snapshot_function == "va" \
                         or snapshot.snapshot_function == "te":
-                    tmp = self.__load_from_npy_file(
-                        os.path.join(snapshot.input_npy_directory,
-                                     snapshot.input_npy_file), mmapmode='r')
-                    if self.descriptor_calculator.descriptors_contain_xyz:
-                        tmp = tmp[:, :, :, 3:]
-                    tmp = np.array(tmp)
-                    tmp *= self.descriptor_calculator.\
-                        convert_units(1, snapshot.input_units)
+                    if snapshot.snapshot_type == "numpy":
+                        tmp = self.descriptor_calculator. \
+                            read_from_numpy(
+                            os.path.join(snapshot.input_npy_directory,
+                                         snapshot.input_npy_file),
+                                            units=snapshot.input_units)
+                    elif snapshot.snapshot_type == "hdf5":
+                        tmp = self.descriptor_calculator. \
+                            read_from_hdf5(
+                            os.path.join(snapshot.input_npy_directory,
+                                         snapshot.input_npy_file))
+                    else:
+                        raise Exception("Unknown snapshot file type.")
                     if snapshot.snapshot_function == "va":
                         self.validation_data_inputs.append(tmp)
                     if snapshot.snapshot_function == "te":
                         self.test_data_inputs.append(tmp)
-                    tmp = self.__load_from_npy_file(
-                        os.path.join(snapshot.output_npy_directory,
-                                     snapshot.output_npy_file), mmapmode='r')
-                    tmp = np.array(tmp)
-                    tmp *= self.target_calculator.\
-                        convert_units(1, snapshot.output_units)
+                    if snapshot.snapshot_type == "numpy":
+                        self.target_calculator. \
+                            read_from_numpy(
+                            os.path.join(snapshot.output_npy_directory,
+                                         snapshot.output_npy_file),
+                                           units=snapshot.output_units)
+                        tmp = self.target_calculator.get_target()
+                    elif snapshot.snapshot_type == "hdf5":
+                        self.target_calculator. \
+                            read_from_hdf5(
+                            os.path.join(snapshot.output_npy_directory,
+                                         snapshot.output_npy_file))
+                        tmp = self.target_calculator.get_target()
+                    else:
+                        raise Exception("Unknown snapshot file type.")
                     if snapshot.snapshot_function == "va":
                         self.validation_data_outputs.append(tmp)
                     if snapshot.snapshot_function == "te":
