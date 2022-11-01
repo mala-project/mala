@@ -232,7 +232,6 @@ class Descriptor(ABC):
         else:
             return descriptor_shape
 
-    @abstractmethod
     def read_dimensions_from_hdf5(self, path):
         """
         Read only the dimensions from a HDF5 LDOS file.
