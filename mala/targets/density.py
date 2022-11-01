@@ -375,6 +375,10 @@ class Density(Target):
         # TODO: Implement this!
         pass
 
+    def read_dimensions_from_hdf5(self, path):
+        # TODO: Impelement this!
+        pass
+
     def write_as_cube(self, file_name, density_data, atoms=None,
                       grid_dimensions=None):
         """

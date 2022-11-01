@@ -247,6 +247,22 @@ class Target(ABC):
         """Read the target from an OpenPMD HDF5 file."""
         pass
 
+    def read_dimensions_from_numpy(self, path):
+        """Read only the dimensions from a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            Path to numpy file.
+        """
+        loaded_array = np.load(path, mmap_mode="r")
+        return np.shape(loaded_array)
+
+    @abstractmethod
+    def read_dimensions_from_hdf5(self, path):
+        """Read only the dimensions from a HDF5 file."""
+        pass
+
     def read_additional_calculation_data(self, data_type, data=""):
         """
         Read in additional input about a calculation.
@@ -259,7 +275,7 @@ class Target(ABC):
         Parameters
         ----------
         data_type : string
-            Type of data or file that is used. Currently supporte are:
+            Type of data or file that is used. Currently supported are:
 
             - "qe.out" : Read the additional information from a QuantumESPRESSO
               output file.

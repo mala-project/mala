@@ -351,16 +351,17 @@ class DataHandler:
         i = 0
         snapshot: Snapshot
         for snapshot in self.parameters.snapshot_directories_list:
-            tmp_array = self.__load_from_npy_file(
-                os.path.join(snapshot.input_npy_directory,
-                             snapshot.input_npy_file))
+            tmp_array = self.descriptor_calculator.\
+                read_from_numpy(os.path.join(snapshot.input_npy_directory,
+                                             snapshot.input_npy_file))
             tmp_file_name = naming_scheme_input
             tmp_file_name = tmp_file_name.replace("*", str(i))
             np.save(os.path.join(directory, tmp_file_name) + ".npy", tmp_array)
 
-            tmp_array = self.__load_from_npy_file(
-                os.path.join(snapshot.output_npy_directory,
-                             snapshot.output_npy_file))
+            self.target_calculator.\
+                read_from_numpy(os.path.join(snapshot.output_npy_directory,
+                                             snapshot.output_npy_file))
+            tmp_array = self.target_calculator.get_target()
             tmp_file_name = naming_scheme_output
             tmp_file_name = tmp_file_name.replace("*", str(i))
             np.save(os.path.join(directory, tmp_file_name + ".npy"), tmp_array)
@@ -440,21 +441,23 @@ class DataHandler:
 
             printout("Checking descriptor file ", snapshot.input_npy_file,
                      "at", snapshot.input_npy_directory, min_verbosity=1)
-            tmp = self.__load_from_npy_file(
-                os.path.join(snapshot.input_npy_directory,
-                             snapshot.input_npy_file), mmapmode='r')
-
-            # We have to cut xyz information, if we have xyz information in
-            # the descriptors.
-            if self.descriptor_calculator.descriptors_contain_xyz:
-                # Remove first 3 elements of descriptors, as they correspond
-                # to the x,y and z information.
-                tmp = tmp[:, :, :, 3:]
+            if snapshot.snapshot_type == "numpy":
+                tmp_dimension = self.descriptor_calculator.\
+                    read_dimensions_from_numpy(
+                    os.path.join(snapshot.input_npy_directory,
+                                 snapshot.input_npy_file))
+            elif snapshot.snapshot_type == "hdf5":
+                tmp_dimension = self.descriptor_calculator.\
+                    read_dimensions_from_hdf5(
+                    os.path.join(snapshot.input_npy_directory,
+                                 snapshot.input_npy_file))
+            else:
+                raise Exception("Unknown snapshot file type.")
 
             # The first snapshot determines the data size to be used.
             # We need to make sure that snapshot size is consistent.
-            tmp_input_dimension = np.shape(tmp)[-1]
-            tmp_grid_dim = np.shape(tmp)[0:3]
+            tmp_input_dimension = tmp_dimension[-1]
+            tmp_grid_dim = tmp_dimension[0:3]
             if firstsnapshot:
                 self.input_dimension = tmp_input_dimension
                 self.grid_dimension[0:3] = tmp_grid_dim[0:3]
@@ -472,14 +475,23 @@ class DataHandler:
 
             printout("Checking targets file ", snapshot.output_npy_file, "at",
                      snapshot.output_npy_directory, min_verbosity=1)
-            tmp_out = self.__load_from_npy_file(
-                os.path.join(snapshot.output_npy_directory,
-                             snapshot.output_npy_file), mmapmode='r')
+            if snapshot.snapshot_type == "numpy":
+                tmp_dimension = self.target_calculator.\
+                    read_dimensions_from_numpy(
+                    os.path.join(snapshot.output_npy_directory,
+                                 snapshot.output_npy_file))
+            elif snapshot.snapshot_type == "hdf5":
+                tmp_dimension = self.target_calculator.\
+                    read_dimensions_from_hdf5(
+                    os.path.join(snapshot.output_npy_directory,
+                                 snapshot.output_npy_file))
+            else:
+                raise Exception("Unknown snapshot file type.")
 
             # The first snapshot determines the data size to be used.
             # We need to make sure that snapshot size is consistent.
-            tmp_output_dimension = np.shape(tmp_out)[-1]
-            tmp_grid_dim = np.shape(tmp_out)[0:3]
+            tmp_output_dimension = tmp_dimension[-1]
+            tmp_grid_dim = tmp_dimension[0:3]
             if firstsnapshot:
                 self.output_dimension = tmp_output_dimension
             else:
@@ -575,12 +587,18 @@ class DataHandler:
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
                 if snapshot.snapshot_function == "tr":
-                    tmp = self.__load_from_npy_file(os.path.join(snapshot.
-                                                    input_npy_directory,
-                                                    snapshot.input_npy_file),
-                                                    mmapmode='r')
-                    if self.descriptor_calculator.descriptors_contain_xyz:
-                        tmp = tmp[:, :, :, 3:]
+                    if snapshot.snapshot_type == "numpy":
+                        tmp = self.descriptor_calculator. \
+                            read_from_numpy(
+                            os.path.join(snapshot.input_npy_directory,
+                                         snapshot.input_npy_file))
+                    elif snapshot.snapshot_type == "hdf5":
+                        tmp = self.descriptor_calculator. \
+                            read_from_hdf5(
+                            os.path.join(snapshot.input_npy_directory,
+                                         snapshot.input_npy_file))
+                    else:
+                        raise Exception("Unknown snapshot file type.")
 
                     # The scalers will later operate on torch Tensors so we
                     # have to make sure they are fitted on
@@ -623,10 +641,21 @@ class DataHandler:
             for snapshot in self.parameters.snapshot_directories_list:
                 # Data scaling is only performed on the training data sets.
                 if snapshot.snapshot_function == "tr":
-                    tmp = self.__load_from_npy_file(os.path.join(snapshot.
-                                                    output_npy_directory,
-                                                    snapshot.output_npy_file),
-                                                    mmapmode='r')
+                    if snapshot.snapshot_type == "numpy":
+                        self.target_calculator. \
+                            read_from_numpy(
+                            os.path.join(snapshot.output_npy_directory,
+                                         snapshot.output_npy_file))
+                        tmp = self.target_calculator.get_target()
+                    elif snapshot.snapshot_type == "hdf5":
+                        self.target_calculator. \
+                            read_from_hdf5(
+                            os.path.join(snapshot.output_npy_directory,
+                                         snapshot.output_npy_file))
+                        tmp = self.target_calculator.get_target()
+                    else:
+                        raise Exception("Unknown snapshot file type.")
+
                     # The scalers will later operate on torch Tensors so we
                     # have to make sure they are fitted on
                     # torch Tensors as well. Preprocessing the numpy data as

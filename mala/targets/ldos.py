@@ -598,6 +598,29 @@ class LDOS(Target):
             series.flush()
             self.local_density_of_states[:, :, :, i] = temp_ldos.copy()
 
+    def read_dimensions_from_hdf5(self, path):
+        """
+        Read only the dimensions from a HDF5 LDOS file.
+
+        Parameters
+        ----------
+        path : string
+            Name of the HDF5 file.
+        """
+        series = io.Series(path, io.Access.read_only)
+
+        # Check if this actually MALA compatible data.
+        if series.get_attribute("is_mala_data") != 1:
+            raise Exception("Non-MALA data detected, cannot work with this "
+                            "data.")
+        current_iteration = series.iterations[0]
+        ldos_mesh = current_iteration.meshes["LDOS"]
+        return (ldos_mesh["0"].shape[0], ldos_mesh["0"].shape[1],
+                ldos_mesh["0"].shape[2], len(ldos_mesh))
+
+    # Calculations
+    ##############
+
     def get_energy_grid(self):
         """
         Get energy grid.

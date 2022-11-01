@@ -505,6 +505,10 @@ class DOS(Target):
         # TODO: Implement this!
         pass
 
+    def read_dimensions_from_hdf5(self, path):
+        # TODO: Impelement this!
+        pass
+
     # Calculations
     ##############
 

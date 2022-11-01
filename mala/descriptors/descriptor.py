@@ -166,7 +166,11 @@ class Descriptor(ABC):
             A numpy array containing the descriptors.
 
         """
-        return np.load(path)*self.convert_units(1, in_units=units)
+        if self.descriptors_contain_xyz:
+            return np.load(path)[:, :, :, 3:] * \
+                   self.convert_units(1, in_units=units)
+        else:
+            return np.load(path) * self.convert_units(1, in_units=units)
 
     def read_from_hdf5(self, path, units=None):
         """
@@ -213,7 +217,49 @@ class Descriptor(ABC):
             series.flush()
             descriptor_data[:, :, :, i] = temp_descriptors.copy()
 
-        return descriptor_data
+        if self.descriptors_contain_xyz:
+            return descriptor_data[:, :, :, 3:]
+        else:
+            return descriptor_data
+
+    def read_dimensions_from_numpy(self, path):
+        """Read only the dimensions from a numpy file."""
+        loaded_array = np.load(path, mmap_mode="r")
+        descriptor_shape = np.shape(loaded_array)
+        if self.descriptors_contain_xyz:
+            return (descriptor_shape[0], descriptor_shape[1],
+                    descriptor_shape[2], descriptor_shape[3]-3)
+        else:
+            return descriptor_shape
+
+    @abstractmethod
+    def read_dimensions_from_hdf5(self, path):
+        """
+        Read only the dimensions from a HDF5 LDOS file.
+
+        Parameters
+        ----------
+        path : string
+            Name of the HDF5 file.
+        """
+        series = io.Series(path, io.Access.read_only)
+
+        # Check if this actually MALA compatible data.
+        if series.get_attribute("is_mala_data") != 1:
+            raise Exception("Non-MALA data detected, cannot work with this "
+                            "data.")
+        current_iteration = series.iterations[0]
+        descriptor_mesh = current_iteration.meshes[self.descriptor_name]
+        if self.descriptors_contain_xyz:
+            return (descriptor_mesh["0"].shape[0],
+                    descriptor_mesh["0"].shape[1],
+                    descriptor_mesh["0"].shape[2],
+                    len(descriptor_mesh)-3)
+        else:
+            return (descriptor_mesh["0"].shape[0],
+                    descriptor_mesh["0"].shape[1],
+                    descriptor_mesh["0"].shape[2],
+                    len(descriptor_mesh))
 
     # Calculations
     ##############
