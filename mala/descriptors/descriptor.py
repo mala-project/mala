@@ -196,8 +196,15 @@ class Descriptor(ABC):
         if series.get_attribute("is_mala_data") != 1:
             raise Exception("Non-MALA data detected, cannot work with this "
                             "data.")
-        current_iteration = series.iterations[0]
-        descriptor_mesh = current_iteration.meshes[self.descriptor_name]
+
+        # A bit clanky, but this way only the FIRST iteration is loaded,
+        # which is what we need for loading from a single file that
+        # may be whatever iteration in its series.
+        for current_iteration_index in series.iterations:
+            current_iteration = series.iterations[current_iteration_index]
+            descriptor_mesh = current_iteration.meshes[self.descriptor_name]
+            break
+
         descriptor_data = \
             np.zeros((descriptor_mesh["0"].shape[0],
                       descriptor_mesh["0"].shape[1],
@@ -247,18 +254,23 @@ class Descriptor(ABC):
         if series.get_attribute("is_mala_data") != 1:
             raise Exception("Non-MALA data detected, cannot work with this "
                             "data.")
-        current_iteration = series.iterations[0]
-        descriptor_mesh = current_iteration.meshes[self.descriptor_name]
-        if self.descriptors_contain_xyz:
-            return (descriptor_mesh["0"].shape[0],
-                    descriptor_mesh["0"].shape[1],
-                    descriptor_mesh["0"].shape[2],
-                    len(descriptor_mesh)-3)
-        else:
-            return (descriptor_mesh["0"].shape[0],
-                    descriptor_mesh["0"].shape[1],
-                    descriptor_mesh["0"].shape[2],
-                    len(descriptor_mesh))
+
+        # A bit clanky, but this way only the FIRST iteration is loaded,
+        # which is what we need for loading from a single file that
+        # may be whatever iteration in its series.
+        for current_iteration_index in series.iterations:
+            current_iteration = series.iterations[current_iteration_index]
+            descriptor_mesh = current_iteration.meshes[self.descriptor_name]
+            if self.descriptors_contain_xyz:
+                return (descriptor_mesh["0"].shape[0],
+                        descriptor_mesh["0"].shape[1],
+                        descriptor_mesh["0"].shape[2],
+                        len(descriptor_mesh)-3)
+            else:
+                return (descriptor_mesh["0"].shape[0],
+                        descriptor_mesh["0"].shape[1],
+                        descriptor_mesh["0"].shape[2],
+                        len(descriptor_mesh))
 
     # Calculations
     ##############

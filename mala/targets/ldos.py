@@ -568,8 +568,15 @@ class LDOS(Target):
         if series.get_attribute("is_mala_data") != 1:
             raise Exception("Non-MALA data detected, cannot work with this "
                             "data.")
-        current_iteration = series.iterations[0]
-        ldos_mesh = current_iteration.meshes["LDOS"]
+
+        # A bit clanky, but this way only the FIRST iteration is loaded,
+        # which is what we need for loading from a single file that
+        # may be whatever iteration in its series.
+        for current_iteration_index in series.iterations:
+            current_iteration = series.iterations[current_iteration_index]
+            ldos_mesh = current_iteration.meshes["LDOS"]
+            break
+
         self.local_density_of_states = \
             np.zeros((ldos_mesh["0"].shape[0], ldos_mesh["0"].shape[1],
                      ldos_mesh["0"].shape[2], len(ldos_mesh)),
@@ -613,10 +620,15 @@ class LDOS(Target):
         if series.get_attribute("is_mala_data") != 1:
             raise Exception("Non-MALA data detected, cannot work with this "
                             "data.")
-        current_iteration = series.iterations[0]
-        ldos_mesh = current_iteration.meshes["LDOS"]
-        return (ldos_mesh["0"].shape[0], ldos_mesh["0"].shape[1],
-                ldos_mesh["0"].shape[2], len(ldos_mesh))
+
+        # A bit clanky, but this way only the FIRST iteration is loaded,
+        # which is what we need for loading from a single file that
+        # may be whatever iteration in its series.
+        for current_iteration_index in series.iterations:
+            current_iteration = series.iterations[current_iteration_index]
+            ldos_mesh = current_iteration.meshes["LDOS"]
+            return (ldos_mesh["0"].shape[0], ldos_mesh["0"].shape[1],
+                    ldos_mesh["0"].shape[2], len(ldos_mesh))
 
     # Calculations
     ##############
