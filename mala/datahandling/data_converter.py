@@ -202,12 +202,15 @@ class DataConverter:
             input_series = io.Series(os.path.join(save_path,
                                                   series_name+".in.h5"),
                                      io.Access.create)
-            input_series.set_attribute("is_mala_data", 1)
 
             output_series = io.Series(os.path.join(save_path,
                                                    series_name+".out.h5"),
                                       io.Access.create)
-            output_series.set_attribute("is_mala_data", 1)
+
+            for series in [input_series, output_series]:
+                series.set_attribute("is_mala_data", 1)
+                series.set_software(name="MALA", version="x.x.x")
+                series.author = "..."
 
         for i in range(0, len(self.__snapshots_to_convert)):
             snapshot_number = i + starts_at
@@ -218,8 +221,15 @@ class DataConverter:
                 input_iteration = None
                 output_iteration = None
             else:
-                input_iteration = input_series.iterations[i + starts_at]
-                output_iteration = output_series.iterations[i + starts_at]
+                input_iteration = input_series.write_iterations()[i + starts_at]
+                output_iteration = output_series.write_iterations()[i + starts_at]
+                for it in [input_iteration, output_iteration]:
+                    # the logical time step
+                    # (in the case of MALA: probably the snapshot index)
+                    it.dt = i + starts_at
+                    # the base time of the iteration
+                    # (in the case of MALA: probably ignore)
+                    it.time = 0
 
             # A memory mapped file is used as buffer for distributed cases.
             memmap = None
@@ -337,6 +347,10 @@ class DataConverter:
                     else:
                         input_mesh = input_iteration.meshes[self.descriptor_calculator.descriptor_name]
                         input_mesh.unit_dimension = self.descriptor_calculator.si_dimension
+                        input_mesh.axis_labels = ["x", "y", "z"]
+                        input_mesh.grid_global_offset = [0, 0, 0]
+                        input_mesh.grid_spacing = [1, 1, 1]
+                        input_mesh.grid_unit_SI = 1
 
                         dataset = io.Dataset(tmp_input.dtype,
                                              tmp_input[:, :, :, 0].shape)
@@ -354,6 +368,10 @@ class DataConverter:
                             # here is the one for MALA (ASE) units
                             input_mesh_component.unit_SI = \
                                 self.descriptor_calculator.si_unit_conversion
+                            # position: which relative point within the cell is
+                            # represented by the stored values
+                            # ([0.5, 0.5, 0.5] represents the middle)
+                            input_mesh_component.position = [0.5, 0.5, 0.5]
 
                         input_iteration.close(flush=True)
 
@@ -389,6 +407,10 @@ class DataConverter:
                     else:
                         output_mesh = output_iteration.meshes[self.target_calculator.target_name]
                         output_mesh.unit_dimension = self.target_calculator.si_dimension
+                        output_mesh.axis_labels = ["x", "y", "z"]
+                        output_mesh.grid_global_offset = [0, 0, 0]
+                        output_mesh.grid_spacing = [1, 1, 1]
+                        output_mesh.grid_unit_SI = 1
 
                         dataset = io.Dataset(tmp_output.dtype,
                                              tmp_output[:, :, :, 0].shape)
@@ -405,6 +427,10 @@ class DataConverter:
                             # here is the one for MALA (ASE) units
                             output_mesh_component.unit_SI = \
                                 self.target_calculator.si_unit_conversion
+                            # position: which relative point within the cell is
+                            # represented by the stored values
+                            # ([0.5, 0.5, 0.5] represents the middle)
+                            input_mesh_component.position = [0.5, 0.5, 0.5]
 
                         output_iteration.close(flush=True)
             del tmp_output
