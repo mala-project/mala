@@ -360,8 +360,8 @@ class DataConverter:
                             input_mesh_component.reset_dataset(dataset)
 
                             # TODO: Remove this copy?
-                            input_mesh_component.\
-                                store_chunk(tmp_input[:, :, :, i].copy())
+                            input_mesh_component[:] \
+                                = tmp_input[:, :, :, i].copy()
 
                             # All data is assumed to be saved in
                             # MALA units, so the SI conversion factor we save
@@ -419,8 +419,8 @@ class DataConverter:
                             output_mesh_component.reset_dataset(dataset)
 
                             # TODO: Remove this copy?
-                            output_mesh_component.\
-                                store_chunk(tmp_output[:, :, :, i].copy())
+                            output_mesh_component[:] \
+                                = tmp_output[:, :, :, i].copy()
 
                             # All data is assumed to be saved in
                             # MALA units, so the SI conversion factor we save
