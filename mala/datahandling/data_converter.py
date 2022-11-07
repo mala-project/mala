@@ -352,6 +352,20 @@ class DataConverter:
                         input_mesh.grid_spacing = [1, 1, 1]
                         input_mesh.grid_unit_SI = 1
 
+                        # for specifying one of the standardized geometries
+                        input_mesh.geometry = io.Geometry.cartesian
+                        # or for specifying a custom one
+                        input_mesh.geometry = io.Geometry.other
+                        # only supported on dev branch so far
+                        # input_mesh.geometry = "other:my_geometry"
+                        # custom geometries might need further
+                        #  custom information
+                        input_mesh.set_attribute("angles", [45, 90, 90])
+                        # set a comment that will appear in the dataset on-disk
+                        input_mesh.comment = \
+                            "This is a special geometry, " \
+                            "based on the cartesian geometry."
+
                         dataset = io.Dataset(tmp_input.dtype,
                                              tmp_input[:, :, :, 0].shape)
 
