@@ -1023,9 +1023,6 @@ class Target(PhysicalData):
     # Private methods
     #################
 
-    def _process_loaded_array(self, array, units=None):
-        return array * self.convert_units(1, in_units=units)
-
     def _process_loaded_dimensions(self, array_dimensions):
         return array_dimensions
 

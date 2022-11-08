@@ -62,6 +62,8 @@ class SNAP(Descriptor):
         """
         if in_units == "None":
             return array
+        if in_units is None:
+            return array
         else:
             raise Exception("Unsupported unit for SNAP.")
 

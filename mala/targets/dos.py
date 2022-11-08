@@ -351,7 +351,7 @@ class DOS(Target):
         converted_array : numpy.array
             Data in 1/eV.
         """
-        if in_units == "1/eV":
+        if in_units == "1/eV" or in_units is None:
             return array
         elif in_units == "1/Ry":
             return array * (1/Rydberg)
@@ -808,6 +808,9 @@ class DOS(Target):
 
     # Private methods
     #################
+
+    def _process_loaded_array(self, array, units=None):
+        self.density_of_states = array * self.convert_units(1, in_units=units)
 
     @staticmethod
     def __number_of_electrons_from_dos(dos_data, energy_grid, fermi_energy,

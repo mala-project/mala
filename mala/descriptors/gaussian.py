@@ -59,7 +59,7 @@ class GaussianDescriptors(Descriptor):
         converted_array : numpy.array
             Data in MALA units.
         """
-        if in_units == "None":
+        if in_units == "None" or in_units is None:
             return array
         else:
             raise Exception("Unsupported unit for Gaussian descriptors.")

@@ -290,7 +290,7 @@ class Density(Target):
         converted_array : numpy.array
             Data in 1/A^3.
         """
-        if in_units == "1/A^3":
+        if in_units == "1/A^3" or in_units is None:
             return array
         elif in_units == "1/Bohr^3":
             return array * (1/Bohr) * (1/Bohr) * (1/Bohr)
@@ -719,6 +719,9 @@ class Density(Target):
 
     # Private methods
     #################
+
+    def _process_loaded_array(self, array, units=None):
+        self.density = array * self.convert_units(1, in_units=units)
 
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
                                     create_file=True, qe_input_data=None,

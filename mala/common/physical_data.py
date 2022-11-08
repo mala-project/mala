@@ -101,7 +101,7 @@ class PhysicalData(ABC):
             series.flush()
             data[:, :, :, i] = temp_descriptors.copy()
 
-        return self._process_loaded_array(data)
+        return self._process_loaded_array(data, units=units)
 
     def read_dimensions_from_numpy_file(self, path):
         """

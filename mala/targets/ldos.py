@@ -309,7 +309,7 @@ class LDOS(Target):
     ##########
 
     @staticmethod
-    def convert_units(array, in_units="1/eV"):
+    def convert_units(array, in_units="1/(eV*A^3)"):
         """
         Convert the units of an array into the MALA units.
 
@@ -333,7 +333,7 @@ class LDOS(Target):
         converted_array : numpy.array
             Data in 1/(eV*A^3).
         """
-        if in_units == "1/(eV*A^3)":
+        if in_units == "1/(eV*A^3)" or in_units is None:
             return array
         elif in_units == "1/(eV*Bohr^3)":
             return array * (1/Bohr) * (1/Bohr) * (1/Bohr)
@@ -1246,6 +1246,10 @@ class LDOS(Target):
 
     # Private methods
     #################
+
+    def _process_loaded_array(self, array, units=None):
+        self.local_density_of_states = array * \
+                                        self.convert_units(1, in_units=units)
 
     def _gather_density(self, density_values, use_pickled_comm=False):
         """
