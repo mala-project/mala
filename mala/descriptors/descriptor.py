@@ -57,7 +57,7 @@ class Descriptor(PhysicalData):
         return descriptors
 
     def __init__(self, parameters):
-        super(Descriptor, self).__init__()
+        super(Descriptor, self).__init__(parameters)
         self.parameters: ParametersDescriptors = parameters.descriptors
         self.fingerprint_length = -1  # so iterations will fail
         self.verbosity = parameters.verbosity

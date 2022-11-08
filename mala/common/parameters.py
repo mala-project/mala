@@ -1085,6 +1085,7 @@ class Parameters:
         self.use_mpi = False
         self.verbosity = 1
         self.device = "cpu"
+        self.openpmd_configuration = None
 
     @property
     def verbosity(self):

@@ -84,7 +84,7 @@ class Target(PhysicalData):
         return target
 
     def __init__(self, params):
-        super(Target, self).__init__()
+        super(Target, self).__init__(params)
         self._parameters_full = None
         if isinstance(params, Parameters):
             self.parameters: ParametersTargets = params.targets

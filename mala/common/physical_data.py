@@ -17,8 +17,8 @@ class PhysicalData(ABC):
     # Constructors
     ##############################
 
-    def __init__(self):
-        pass
+    def __init__(self, parameters):
+        self.parameters = parameters
 
     ##############################
     # Properties
@@ -75,7 +75,8 @@ class PhysicalData(ABC):
             A numpy array containing the data.
 
         """
-        series = io.Series(path, io.Access.read_only)
+        series = io.Series(path, io.Access.read_only,
+                           options=self.parameters.openpmd_configuration)
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:
@@ -124,7 +125,8 @@ class PhysicalData(ABC):
         path : string
             Path to the openPMD file.
         """
-        series = io.Series(path, io.Access.read_only)
+        series = io.Series(path, io.Access.read_only,
+                           options=self.parameters.openpmd_configuration)
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:

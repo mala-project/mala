@@ -43,6 +43,7 @@ class DataConverter:
     def __init__(self, parameters, descriptor_calculator=None,
                  target_calculator=None):
         self.parameters: ParametersData = parameters.data
+        self.parameters_full = parameters
         self.target_calculator = target_calculator
         if self.target_calculator is None:
             self.target_calculator = Target(parameters)
@@ -201,11 +202,15 @@ class DataConverter:
 
             input_series = io.Series(os.path.join(save_path,
                                                   series_name+".in.h5"),
-                                     io.Access.create)
+                                     io.Access.create,
+                                     options=self.parameters_full.
+                                     openpmd_configuration)
 
             output_series = io.Series(os.path.join(save_path,
                                                    series_name+".out.h5"),
-                                      io.Access.create)
+                                      io.Access.create,
+                                      options=self.parameters_full.
+                                      openpmd_configuration)
 
             for series in [input_series, output_series]:
                 series.set_attribute("is_mala_data", 1)
