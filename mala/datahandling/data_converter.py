@@ -345,7 +345,7 @@ class DataConverter:
                     if input_iteration is None:
                         np.save(input_path, tmp_input)
                     else:
-                        input_mesh = input_iteration.meshes[self.descriptor_calculator.descriptor_name]
+                        input_mesh = input_iteration.meshes[self.descriptor_calculator.data_name]
                         input_mesh.unit_dimension = self.descriptor_calculator.si_dimension
                         input_mesh.axis_labels = ["x", "y", "z"]
                         input_mesh.grid_global_offset = [0, 0, 0]
@@ -419,7 +419,7 @@ class DataConverter:
                     if output_iteration is None:
                         np.save(output_path, tmp_output)
                     else:
-                        output_mesh = output_iteration.meshes[self.target_calculator.target_name]
+                        output_mesh = output_iteration.meshes[self.target_calculator.data_name]
                         output_mesh.unit_dimension = self.target_calculator.si_dimension
                         output_mesh.axis_labels = ["x", "y", "z"]
                         output_mesh.grid_global_offset = [0, 0, 0]

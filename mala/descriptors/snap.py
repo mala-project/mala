@@ -36,7 +36,7 @@ class SNAP(Descriptor):
         self.grid_dimensions = []
 
     @property
-    def descriptor_name(self):
+    def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
         return "SNAP"
 

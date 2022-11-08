@@ -358,17 +358,17 @@ class DataHandler:
         snapshot: Snapshot
         for snapshot in self.parameters.snapshot_directories_list:
             tmp_array = self.descriptor_calculator.\
-                read_from_numpy(os.path.join(snapshot.input_npy_directory,
-                                             snapshot.input_npy_file),
-                                units=snapshot.input_units)
+                read_from_numpy_file(os.path.join(snapshot.input_npy_directory,
+                                                  snapshot.input_npy_file),
+                                     units=snapshot.input_units)
             tmp_file_name = naming_scheme_input
             tmp_file_name = tmp_file_name.replace("*", str(i))
             np.save(os.path.join(directory, tmp_file_name) + ".npy", tmp_array)
 
             self.target_calculator.\
-                read_from_numpy(os.path.join(snapshot.output_npy_directory,
-                                             snapshot.output_npy_file),
-                                units=snapshot.output_units)
+                read_from_numpy_file(os.path.join(snapshot.output_npy_directory,
+                                                  snapshot.output_npy_file),
+                                     units=snapshot.output_units)
             tmp_array = self.target_calculator.get_target()
             tmp_file_name = naming_scheme_output
             tmp_file_name = tmp_file_name.replace("*", str(i))
@@ -451,12 +451,12 @@ class DataHandler:
                      "at", snapshot.input_npy_directory, min_verbosity=1)
             if snapshot.snapshot_type == "numpy":
                 tmp_dimension = self.descriptor_calculator.\
-                    read_dimensions_from_numpy(
+                    read_dimensions_from_numpy_file(
                     os.path.join(snapshot.input_npy_directory,
                                  snapshot.input_npy_file))
             elif snapshot.snapshot_type == "hdf5":
                 tmp_dimension = self.descriptor_calculator.\
-                    read_dimensions_from_hdf5(
+                    read_dimensions_from_openpmd_file(
                     os.path.join(snapshot.input_npy_directory,
                                  snapshot.input_npy_file))
             else:
@@ -485,12 +485,12 @@ class DataHandler:
                      snapshot.output_npy_directory, min_verbosity=1)
             if snapshot.snapshot_type == "numpy":
                 tmp_dimension = self.target_calculator.\
-                    read_dimensions_from_numpy(
+                    read_dimensions_from_numpy_file(
                     os.path.join(snapshot.output_npy_directory,
                                  snapshot.output_npy_file))
             elif snapshot.snapshot_type == "hdf5":
                 tmp_dimension = self.target_calculator.\
-                    read_dimensions_from_hdf5(
+                    read_dimensions_from_openpmd_file(
                     os.path.join(snapshot.output_npy_directory,
                                  snapshot.output_npy_file))
             else:
@@ -597,13 +597,13 @@ class DataHandler:
                 if snapshot.snapshot_function == "tr":
                     if snapshot.snapshot_type == "numpy":
                         tmp = self.descriptor_calculator. \
-                            read_from_numpy(
+                            read_from_numpy_file(
                             os.path.join(snapshot.input_npy_directory,
                                          snapshot.input_npy_file),
                                          units=snapshot.input_units)
                     elif snapshot.snapshot_type == "hdf5":
                         tmp = self.descriptor_calculator. \
-                            read_from_hdf5(
+                            read_from_openpmd_file(
                             os.path.join(snapshot.input_npy_directory,
                                          snapshot.input_npy_file))
                     else:
@@ -650,14 +650,14 @@ class DataHandler:
                 if snapshot.snapshot_function == "tr":
                     if snapshot.snapshot_type == "numpy":
                         self.target_calculator. \
-                            read_from_numpy(
+                            read_from_numpy_file(
                             os.path.join(snapshot.output_npy_directory,
                                          snapshot.output_npy_file),
                                          units=snapshot.output_units)
                         tmp = self.target_calculator.get_target()
                     elif snapshot.snapshot_type == "hdf5":
                         self.target_calculator. \
-                            read_from_hdf5(
+                            read_from_openpmd_file(
                             os.path.join(snapshot.output_npy_directory,
                                          snapshot.output_npy_file))
                         tmp = self.target_calculator.get_target()
@@ -697,13 +697,13 @@ class DataHandler:
             if snapshot.snapshot_function == "tr":
                 if snapshot.snapshot_type == "numpy":
                     tmp = self.descriptor_calculator. \
-                        read_from_numpy(
+                        read_from_numpy_file(
                         os.path.join(snapshot.input_npy_directory,
                                      snapshot.input_npy_file),
                                         units=snapshot.input_units)
                 elif snapshot.snapshot_type == "hdf5":
                     tmp = self.descriptor_calculator. \
-                        read_from_hdf5(
+                        read_from_openpmd_file(
                         os.path.join(snapshot.input_npy_directory,
                                      snapshot.input_npy_file))
                 else:
@@ -734,14 +734,14 @@ class DataHandler:
             if snapshot.snapshot_function == "tr":
                 if snapshot.snapshot_type == "numpy":
                     self.target_calculator. \
-                        read_from_numpy(
+                        read_from_numpy_file(
                         os.path.join(snapshot.output_npy_directory,
                                      snapshot.output_npy_file),
                                         units=snapshot.output_units)
                     tmp = self.target_calculator.get_target()
                 elif snapshot.snapshot_type == "hdf5":
                     self.target_calculator. \
-                        read_from_hdf5(
+                        read_from_openpmd_file(
                         os.path.join(snapshot.output_npy_directory,
                                      snapshot.output_npy_file))
                     tmp = self.target_calculator.get_target()
@@ -852,13 +852,13 @@ class DataHandler:
                         or snapshot.snapshot_function == "te":
                     if snapshot.snapshot_type == "numpy":
                         tmp = self.descriptor_calculator. \
-                            read_from_numpy(
+                            read_from_numpy_file(
                             os.path.join(snapshot.input_npy_directory,
                                          snapshot.input_npy_file),
                                             units=snapshot.input_units)
                     elif snapshot.snapshot_type == "hdf5":
                         tmp = self.descriptor_calculator. \
-                            read_from_hdf5(
+                            read_from_openpmd_file(
                             os.path.join(snapshot.input_npy_directory,
                                          snapshot.input_npy_file))
                     else:
@@ -869,14 +869,14 @@ class DataHandler:
                         self.test_data_inputs.append(tmp)
                     if snapshot.snapshot_type == "numpy":
                         self.target_calculator. \
-                            read_from_numpy(
+                            read_from_numpy_file(
                             os.path.join(snapshot.output_npy_directory,
                                          snapshot.output_npy_file),
                                            units=snapshot.output_units)
                         tmp = self.target_calculator.get_target()
                     elif snapshot.snapshot_type == "hdf5":
                         self.target_calculator. \
-                            read_from_hdf5(
+                            read_from_openpmd_file(
                             os.path.join(snapshot.output_npy_directory,
                                          snapshot.output_npy_file))
                         tmp = self.target_calculator.get_target()

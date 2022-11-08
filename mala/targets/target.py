@@ -12,6 +12,7 @@ from scipy.integrate import simps
 from mala.common.parameters import Parameters, ParametersTargets
 from mala.common.parallelizer import printout, parallel_warn
 from mala.targets.calculation_helpers import fermi_function
+from mala.common.physical_data import PhysicalData
 
 # Empirical value for the Gaussian descriptor width, determined for an
 # aluminium system. Reasonable values for sigma can and will be calculated
@@ -21,7 +22,7 @@ optimal_sigma_aluminium = 0.2
 reference_grid_spacing_aluminium = 0.08099000022712448
 
 
-class Target(ABC):
+class Target(PhysicalData):
     """
     Base class for all target quantity parser.
 
@@ -83,6 +84,7 @@ class Target(ABC):
         return target
 
     def __init__(self, params):
+        super(Target, self).__init__()
         self._parameters_full = None
         if isinstance(params, Parameters):
             self.parameters: ParametersTargets = params.targets
@@ -141,12 +143,6 @@ class Target(ABC):
     @abstractmethod
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
-        pass
-
-    @property
-    @abstractmethod
-    def target_name(self):
-        """Get a string that describes the target (for e.g. metadata)."""
         pass
 
     @property
@@ -236,32 +232,6 @@ class Target(ABC):
         """
         raise Exception("No unit back conversion method implemented "
                         "for this target type.")
-
-    @abstractmethod
-    def read_from_numpy(self, path, units=None):
-        """Read the target from a numpy file."""
-        pass
-
-    @abstractmethod
-    def read_from_hdf5(self, path, units=None):
-        """Read the target from an OpenPMD HDF5 file."""
-        pass
-
-    def read_dimensions_from_numpy(self, path):
-        """Read only the dimensions from a numpy file.
-
-        Parameters
-        ----------
-        path : string
-            Path to numpy file.
-        """
-        loaded_array = np.load(path, mmap_mode="r")
-        return np.shape(loaded_array)
-
-    @abstractmethod
-    def read_dimensions_from_hdf5(self, path):
-        """Read only the dimensions from a HDF5 file."""
-        pass
 
     def read_additional_calculation_data(self, data_type, data=""):
         """
@@ -1052,6 +1022,12 @@ class Target(ABC):
 
     # Private methods
     #################
+
+    def _process_loaded_array(self, array, units=None):
+        return array * self.convert_units(1, in_units=units)
+
+    def _process_loaded_dimensions(self, array_dimensions):
+        return array_dimensions
 
     @staticmethod
     def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):

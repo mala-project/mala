@@ -99,7 +99,7 @@ class DOS(Target):
             DOS calculator object.
         """
         return_dos = DOS(params)
-        return_dos.read_from_numpy(path, units=units)
+        return_dos.read_from_numpy_file(path, units=units)
         return return_dos
 
     @classmethod
@@ -197,7 +197,7 @@ class DOS(Target):
         return self.parameters.ldos_gridsize
 
     @property
-    def target_name(self):
+    def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
         return "DOS"
 
@@ -470,21 +470,6 @@ class DOS(Target):
         dos_data = np.sum(dos_per_band, axis=(0, 1))
         self.density_of_states = dos_data
 
-    def read_from_numpy(self, path, units="1/eV"):
-        """
-        Read the density data from a numpy file.
-
-        Parameters
-        ----------
-        path : string
-            Name of the numpy file.
-
-        units : string
-            Units the density is saved in. Usually none.
-        """
-        self.density_of_states = np.load(path) * \
-            self.convert_units(1, in_units=units)
-
     def read_from_array(self, array, units="1/eV"):
         """
         Read the density data from a numpy array.
@@ -500,14 +485,6 @@ class DOS(Target):
         self.density_of_states = array
         self.density_of_states *= \
             self.convert_units(1, in_units=units)
-
-    def read_from_hdf5(self, path, units=None):
-        # TODO: Implement this!
-        pass
-
-    def read_dimensions_from_hdf5(self, path):
-        # TODO: Impelement this!
-        pass
 
     # Calculations
     ##############

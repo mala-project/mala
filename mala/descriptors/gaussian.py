@@ -35,7 +35,7 @@ class GaussianDescriptors(Descriptor):
         self.verbosity = parameters.verbosity
 
     @property
-    def descriptor_name(self):
+    def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
         return "Gaussian"
 

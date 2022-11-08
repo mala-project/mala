@@ -56,7 +56,7 @@ class LDOS(Target):
             LDOS calculator object.
         """
         return_ldos_object = LDOS(params)
-        return_ldos_object.read_from_numpy(path, units=units)
+        return_ldos_object.read_from_numpy_file(path, units=units)
         return return_ldos_object
 
     @classmethod
@@ -119,9 +119,9 @@ class LDOS(Target):
         return return_ldos_object
 
     @classmethod
-    def from_hdf5_file(cls, params, path):
+    def from_openpmd_file(cls, params, path):
         return_ldos_object = LDOS(params)
-        return_ldos_object.read_from_hdf5(path)
+        return_ldos_object.read_from_openpmd_file(path)
         return return_ldos_object
 
     ##############################
@@ -134,7 +134,7 @@ class LDOS(Target):
         return self.parameters.ldos_gridsize
 
     @property
-    def target_name(self):
+    def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
         return "LDOS"
 
@@ -517,21 +517,6 @@ class LDOS(Target):
         else:
             self.local_density_of_states = ldos_data
 
-    def read_from_numpy(self, path, units="1/(eV*A^3)"):
-        """
-        Read the LDOS data from a numpy file.
-
-        Parameters
-        ----------
-        path :
-            Name of the numpy file.
-
-        units : string
-            Units the LDOS is saved in.
-        """
-        self.local_density_of_states = np.load(path) * \
-                                       self.convert_units(1, in_units=units)
-
     def read_from_array(self, array, units="1/(eV*A^3)"):
         """
         Read the LDOS data from a numpy array.
@@ -546,87 +531,6 @@ class LDOS(Target):
         """
         self.local_density_of_states = array * \
                                        self.convert_units(1, in_units=units)
-
-    def read_from_hdf5(self, path, units=None):
-        """
-        Read the LDOS data from an OpenPMD HDF5 file.
-
-        The LDOS data will be saved within the LDOS object.
-
-        Parameters
-        ----------
-        path : string
-            Name of the HDF5 file.
-
-        units : string
-            Units the LDOS data is saved in. Currently ignored
-            in the OpenPMD formalism.
-        """
-        series = io.Series(path, io.Access.read_only)
-
-        # Check if this actually MALA compatible data.
-        if series.get_attribute("is_mala_data") != 1:
-            raise Exception("Non-MALA data detected, cannot work with this "
-                            "data.")
-
-        # A bit clanky, but this way only the FIRST iteration is loaded,
-        # which is what we need for loading from a single file that
-        # may be whatever iteration in its series.
-        for current_iteration in series.read_iterations():
-            ldos_mesh = current_iteration.meshes["LDOS"]
-            break
-
-        self.local_density_of_states = \
-            np.zeros((ldos_mesh["0"].shape[0], ldos_mesh["0"].shape[1],
-                     ldos_mesh["0"].shape[2], len(ldos_mesh)),
-                     dtype=ldos_mesh["0"].dtype)
-
-        # TODO: This is currently inefficient.
-        # But if I register the chunks to individual indices i of the
-        # actual LDOS object, then something goes wrong during the flushing,
-        # so I flush multiple times...
-        for i in range(0, len(ldos_mesh)):
-
-            # TODO: Fix this check.
-            # This check checks whether the correct units have been used.
-            # It's not entirely trivial to check this, since OpenPMD works
-            # in SI units, but MALA in eV/Ang units. So the correct factor
-            # is not going to be 1.0 - it's going to be (m**3)*J, and due to
-            # machine precision, any test to this effect may be slightly off.
-            # Since there is no sensible reason to not save new MALA data
-            # with the wrong units, for now we just check and complain.
-            # Eventually we may have to implement unit conversion, I guess.
-            if not np.isclose(ldos_mesh[str(i)].unit_SI, ((m**3)*J)):
-                raise Exception("MALA currently cannot operate with HDF5 "
-                                "files with non-MALA units.")
-
-            temp_ldos = ldos_mesh[str(i)].load_chunk()
-            series.flush()
-            self.local_density_of_states[:, :, :, i] = temp_ldos.copy()
-
-    def read_dimensions_from_hdf5(self, path):
-        """
-        Read only the dimensions from a HDF5 LDOS file.
-
-        Parameters
-        ----------
-        path : string
-            Name of the HDF5 file.
-        """
-        series = io.Series(path, io.Access.read_only)
-
-        # Check if this actually MALA compatible data.
-        if series.get_attribute("is_mala_data") != 1:
-            raise Exception("Non-MALA data detected, cannot work with this "
-                            "data.")
-
-        # A bit clanky, but this way only the FIRST iteration is loaded,
-        # which is what we need for loading from a single file that
-        # may be whatever iteration in its series.
-        for current_iteration in series.read_iterations():
-            ldos_mesh = current_iteration.meshes["LDOS"]
-            return (ldos_mesh["0"].shape[0], ldos_mesh["0"].shape[1],
-                    ldos_mesh["0"].shape[2], len(ldos_mesh))
 
     # Calculations
     ##############

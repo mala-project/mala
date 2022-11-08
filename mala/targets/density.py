@@ -65,7 +65,7 @@ class Density(Target):
             Density calculator object.
         """
         return_density_object = Density(params)
-        return_density_object.read_from_numpy(path, units=units)
+        return_density_object.read_from_numpy_file(path, units=units)
         return return_density_object
 
     @classmethod
@@ -177,7 +177,7 @@ class Density(Target):
         return 1
 
     @property
-    def target_name(self):
+    def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
         return "Density"
 
@@ -343,20 +343,6 @@ class Density(Target):
         data, meta = read_cube(path)*self.convert_units(1, in_units=units)
         self.density = data
 
-    def read_from_numpy(self, path, units="1/A^3"):
-        """
-        Read the density data from a numpy file.
-
-        Parameters
-        ----------
-        path :
-            Name of the numpy file.
-
-        units : string
-            Units the density is saved in. Usually none.
-        """
-        self.density = np.load(path)*self.convert_units(1, in_units=units)
-
     def read_from_array(self, array, units="1/A^3"):
         """
         Read the density data from a numpy array.
@@ -370,14 +356,6 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         self.density = array*self.convert_units(1, in_units=units)
-
-    def read_from_hdf5(self, path, units=None):
-        # TODO: Implement this!
-        pass
-
-    def read_dimensions_from_hdf5(self, path):
-        # TODO: Impelement this!
-        pass
 
     def write_as_cube(self, file_name, density_data, atoms=None,
                       grid_dimensions=None):

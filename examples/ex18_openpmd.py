@@ -73,7 +73,7 @@ def convert_data():
 def conversion_test():
     """Test whether numpy/hdf5 yield comparable LDOS."""
     ldos_calculator = mala.LDOS.\
-        from_hdf5_file(parameters, "training_data_temp/Be_snapshot0.out.h5")
+        from_openpmd_file(parameters, "training_data_temp/Be_snapshot0.out.h5")
     ldos_calculator2 = mala.LDOS.\
         from_numpy_file(parameters, "training_data_temp/Be_snapshot0.out.npy")
 

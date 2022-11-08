@@ -1,5 +1,5 @@
 """Base class for all descriptor calculators."""
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 import ase
 from ase.units import m
@@ -8,9 +8,10 @@ import openpmd_api as io
 
 from mala.common.parameters import ParametersDescriptors, Parameters
 from mala.common.parallelizer import printout, get_size
+from mala.common.physical_data import PhysicalData
 
 
-class Descriptor(ABC):
+class Descriptor(PhysicalData):
     """
     Base class for all descriptors available in MALA.
 
@@ -56,6 +57,7 @@ class Descriptor(ABC):
         return descriptors
 
     def __init__(self, parameters):
+        super(Descriptor, self).__init__()
         self.parameters: ParametersDescriptors = parameters.descriptors
         self.fingerprint_length = -1  # so iterations will fail
         self.verbosity = parameters.verbosity
@@ -63,12 +65,6 @@ class Descriptor(ABC):
     ##############################
     # Properties
     ##############################
-
-    @property
-    @abstractmethod
-    def descriptor_name(self):
-        """Get a string that describes the target (for e.g. metadata)."""
-        pass
 
     @property
     def si_unit_conversion(self):
@@ -147,128 +143,6 @@ class Descriptor(ABC):
         """
         raise Exception("No unit back conversion method implemented for "
                         "this descriptor type.")
-
-    def read_from_numpy(self, path, units="None"):
-        """
-        Read the descriptor data from a numpy file.
-
-        Parameters
-        ----------
-        path : string
-            Name of the numpy file.
-
-        units : string
-            Units the descriptor data is saved in.
-
-        Returns
-        -------
-        descriptor_data : numpy.ndarray
-            A numpy array containing the descriptors.
-
-        """
-        if self.descriptors_contain_xyz:
-            return np.load(path)[:, :, :, 3:] * \
-                   self.convert_units(1, in_units=units)
-        else:
-            return np.load(path) * self.convert_units(1, in_units=units)
-
-    def read_from_hdf5(self, path, units=None):
-        """
-        Read the descriptor data from an OpenPMD HDF5 file.
-
-        Parameters
-        ----------
-        path : string
-            Name of the HDF5 file.
-
-        units : string
-            Units the descriptor data is saved in. Currently ignored
-            in the OpenPMD formalism.
-
-        Returns
-        -------
-        descriptor_data : numpy.ndarray
-            A numpy array containing the descriptors.
-        """
-        series = io.Series(path, io.Access.read_only)
-
-        # Check if this actually MALA compatible data.
-        if series.get_attribute("is_mala_data") != 1:
-            raise Exception("Non-MALA data detected, cannot work with this "
-                            "data.")
-
-        # A bit clanky, but this way only the FIRST iteration is loaded,
-        # which is what we need for loading from a single file that
-        # may be whatever iteration in its series.
-        for current_iteration in series.read_iterations():
-            descriptor_mesh = current_iteration.meshes[self.descriptor_name]
-            break
-
-        descriptor_data = \
-            np.zeros((descriptor_mesh["0"].shape[0],
-                      descriptor_mesh["0"].shape[1],
-                      descriptor_mesh["0"].shape[2],
-                      len(descriptor_mesh)),
-                      dtype=descriptor_mesh["0"].dtype)
-
-        # TODO: This is currently inefficient.
-        # But if I register the chunks to individual indices i of the
-        # actual LDOS object, then something goes wrong during the flushing,
-        # so I flush multiple times...
-        for i in range(0, len(descriptor_mesh)):
-
-            # TODO: Investigate if some kind of unit check is needed here?
-
-            temp_descriptors = descriptor_mesh[str(i)].load_chunk()
-            series.flush()
-            descriptor_data[:, :, :, i] = temp_descriptors.copy()
-
-        if self.descriptors_contain_xyz:
-            return descriptor_data[:, :, :, 3:]
-        else:
-            return descriptor_data
-
-    def read_dimensions_from_numpy(self, path):
-        """Read only the dimensions from a numpy file."""
-        loaded_array = np.load(path, mmap_mode="r")
-        descriptor_shape = np.shape(loaded_array)
-        if self.descriptors_contain_xyz:
-            return (descriptor_shape[0], descriptor_shape[1],
-                    descriptor_shape[2], descriptor_shape[3]-3)
-        else:
-            return descriptor_shape
-
-    def read_dimensions_from_hdf5(self, path):
-        """
-        Read only the dimensions from a HDF5 LDOS file.
-
-        Parameters
-        ----------
-        path : string
-            Name of the HDF5 file.
-        """
-        series = io.Series(path, io.Access.read_only)
-
-        # Check if this actually MALA compatible data.
-        if series.get_attribute("is_mala_data") != 1:
-            raise Exception("Non-MALA data detected, cannot work with this "
-                            "data.")
-
-        # A bit clanky, but this way only the FIRST iteration is loaded,
-        # which is what we need for loading from a single file that
-        # may be whatever iteration in its series.
-        for current_iteration in series.read_iterations():
-            descriptor_mesh = current_iteration.meshes[self.descriptor_name]
-            if self.descriptors_contain_xyz:
-                return (descriptor_mesh["0"].shape[0],
-                        descriptor_mesh["0"].shape[1],
-                        descriptor_mesh["0"].shape[2],
-                        len(descriptor_mesh)-3)
-            else:
-                return (descriptor_mesh["0"].shape[0],
-                        descriptor_mesh["0"].shape[1],
-                        descriptor_mesh["0"].shape[2],
-                        len(descriptor_mesh))
 
     # Calculations
     ##############
@@ -380,6 +254,20 @@ class Descriptor(ABC):
 
     # Private methods
     #################
+
+    def _process_loaded_array(self, array, units=None):
+        if self.descriptors_contain_xyz:
+            return array[:, :, :, 3:] * \
+                   self.convert_units(1, in_units=units)
+        else:
+            return array * self.convert_units(1, in_units=units)
+
+    def _process_loaded_dimensions(self, array_dimensions):
+        if self.descriptors_contain_xyz:
+            return (array_dimensions[0], array_dimensions[1],
+                    array_dimensions[2], array_dimensions[3]-3)
+        else:
+            return array_dimensions
 
     def _setup_lammps_processors(self, nx, ny, nz):
         """
