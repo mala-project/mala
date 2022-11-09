@@ -30,6 +30,26 @@ class PhysicalData(ABC):
         """Get a string that describes the data (for e.g. metadata)."""
         pass
 
+    @property
+    @abstractmethod
+    def si_dimension(self):
+        """
+        Dictionary containing the SI unit dimensions in OpenPMD format
+
+        Needed for OpenPMD interface.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        pass
+
     ##############################
     # Read functions.
     #   Write functions for now not implemented at this level
@@ -76,7 +96,7 @@ class PhysicalData(ABC):
 
         """
         series = io.Series(path, io.Access.read_only,
-                           options=self.parameters.openpmd_configuration)
+                           options=self.parameters._configuration["openpmd_configuration"])
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:
@@ -126,7 +146,7 @@ class PhysicalData(ABC):
             Path to the openPMD file.
         """
         series = io.Series(path, io.Access.read_only,
-                           options=self.parameters.openpmd_configuration)
+                           options=self.parameters._configuration["openpmd_configuration"])
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:
@@ -144,6 +164,58 @@ class PhysicalData(ABC):
                                             mesh["0"].shape[2],
                                             len(mesh)))
 
+    def write_to_numpy_file(self, path, array):
+        """
+        Write data to a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            File to save into.
+
+        array : numpy.ndarray
+            Array to save.
+        """
+        np.save(path, array)
+
+    def write_to_openpmd_iteration(self, iteration, array):
+        """
+        Write a file within an OpenPMD iteration.
+
+        Parameters
+        ----------
+        iteration : OpenPMD iteration
+            OpenPMD iteration into which to save.
+
+        array : numpy.ndarry
+            Array to save.
+
+        """
+        mesh = iteration.meshes[self.data_name]
+        self._set_openpmd_attribtues(mesh)
+        dataset = io.Dataset(array.dtype,
+                             array[:, :, :, 0].shape)
+
+        # See above - will currently break for density of states,
+        # which is something we never do though anyway.
+        for i in range(0, array.shape[3]):
+            mesh_component = mesh[str(i)]
+            mesh_component.reset_dataset(dataset)
+
+            # TODO: Remove this copy?
+            mesh_component[:] = array[:, :, :, i].copy()
+
+            # All data is assumed to be saved in
+            # MALA units, so the SI conversion factor we save
+            # here is the one for MALA (ASE) units
+            mesh_component.unit_SI = self.si_unit_conversion
+            # position: which relative point within the cell is
+            # represented by the stored values
+            # ([0.5, 0.5, 0.5] represents the middle)
+            mesh_component.position = [0.5, 0.5, 0.5]
+
+        iteration.close(flush=True)
+
     ##############################
     # Class-specific reshaping, processing, etc. of data.
     #    Has to be implemented by the classes themselves. E.g. descriptors may
@@ -157,3 +229,25 @@ class PhysicalData(ABC):
     @abstractmethod
     def _process_loaded_dimensions(self, array_dimensions):
         pass
+
+    def _set_openpmd_attribtues(self, mesh):
+        mesh.unit_dimension = self.si_dimension
+        mesh.axis_labels = ["x", "y", "z"]
+        mesh.grid_global_offset = [0, 0, 0]
+        mesh.grid_spacing = [1, 1, 1]
+        mesh.grid_unit_SI = 1
+
+        # for specifying one of the standardized geometries
+        mesh.geometry = io.Geometry.cartesian
+        # or for specifying a custom one
+        mesh.geometry = io.Geometry.other
+        # only supported on dev branch so far
+        # input_mesh.geometry = "other:my_geometry"
+        # custom geometries might need further
+        #  custom information
+        mesh.set_attribute("angles", [45, 90, 90])
+        # set a comment that will appear in the dataset on-disk
+        mesh.comment = \
+            "This is a special geometry, " \
+            "based on the cartesian geometry."
+

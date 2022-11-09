@@ -25,7 +25,7 @@ class ParametersBase(JSONSerializable):
     def __init__(self,):
         super(ParametersBase, self).__init__()
         self._configuration = {"gpu": False, "horovod": False, "mpi": False,
-                               "device": "cpu"}
+                               "device": "cpu", "openpmd_configuration": "{}"}
         pass
 
     def show(self, indent=""):
@@ -59,6 +59,9 @@ class ParametersBase(JSONSerializable):
 
     def _update_device(self, new_device):
         self._configuration["device"] = new_device
+
+    def _update_openpmd_configuration(self, new_openpmd):
+        self._configuration["openpmd_configuration"] = new_openpmd
 
     @staticmethod
     def _member_to_json(member):
@@ -1085,7 +1088,7 @@ class Parameters:
         self.use_mpi = False
         self.verbosity = 1
         self.device = "cpu"
-        self.openpmd_configuration = None
+        self.openpmd_configuration = "{}"
 
     @property
     def verbosity(self):
@@ -1190,6 +1193,23 @@ class Parameters:
         self.data._update_mpi(self.use_mpi)
         self.running._update_mpi(self.use_mpi)
         self.hyperparameters._update_mpi(self.use_mpi)
+
+    @property
+    def openpmd_configuration(self):
+        """Control whether or not a GPU is used (provided there is one)."""
+        return self._openpmd_configuration
+
+    @openpmd_configuration.setter
+    def openpmd_configuration(self, value):
+        self._openpmd_configuration = value
+
+        # Invalidate, will be updated in setter.
+        self.network._update_openpmd_configuration(self.openpmd_configuration)
+        self.descriptors._update_openpmd_configuration(self.openpmd_configuration)
+        self.targets._update_openpmd_configuration(self.openpmd_configuration)
+        self.data._update_openpmd_configuration(self.openpmd_configuration)
+        self.running._update_openpmd_configuration(self.openpmd_configuration)
+        self.hyperparameters._update_openpmd_configuration(self.openpmd_configuration)
 
     def show(self):
         """Print name and values of all attributes of this object."""

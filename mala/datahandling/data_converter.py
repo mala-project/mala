@@ -348,52 +348,13 @@ class DataConverter:
             if get_rank() == 0:
                 if input_path is not None:
                     if input_iteration is None:
+                        self.descriptor_calculator.\
+                            write_to_numpy_file(input_path, tmp_input)
                         np.save(input_path, tmp_input)
                     else:
-                        input_mesh = input_iteration.meshes[self.descriptor_calculator.data_name]
-                        input_mesh.unit_dimension = self.descriptor_calculator.si_dimension
-                        input_mesh.axis_labels = ["x", "y", "z"]
-                        input_mesh.grid_global_offset = [0, 0, 0]
-                        input_mesh.grid_spacing = [1, 1, 1]
-                        input_mesh.grid_unit_SI = 1
-
-                        # for specifying one of the standardized geometries
-                        input_mesh.geometry = io.Geometry.cartesian
-                        # or for specifying a custom one
-                        input_mesh.geometry = io.Geometry.other
-                        # only supported on dev branch so far
-                        # input_mesh.geometry = "other:my_geometry"
-                        # custom geometries might need further
-                        #  custom information
-                        input_mesh.set_attribute("angles", [45, 90, 90])
-                        # set a comment that will appear in the dataset on-disk
-                        input_mesh.comment = \
-                            "This is a special geometry, " \
-                            "based on the cartesian geometry."
-
-                        dataset = io.Dataset(tmp_input.dtype,
-                                             tmp_input[:, :, :, 0].shape)
-
-                        for i in range(0, tmp_input.shape[3]):
-                            input_mesh_component = input_mesh[str(i)]
-                            input_mesh_component.reset_dataset(dataset)
-
-                            # TODO: Remove this copy?
-                            input_mesh_component[:] \
-                                = tmp_input[:, :, :, i].copy()
-
-                            # All data is assumed to be saved in
-                            # MALA units, so the SI conversion factor we save
-                            # here is the one for MALA (ASE) units
-                            input_mesh_component.unit_SI = \
-                                self.descriptor_calculator.si_unit_conversion
-                            # position: which relative point within the cell is
-                            # represented by the stored values
-                            # ([0.5, 0.5, 0.5] represents the middle)
-                            input_mesh_component.position = [0.5, 0.5, 0.5]
-
-                        input_iteration.close(flush=True)
-
+                        self.descriptor_calculator.\
+                            write_to_openpmd_iteration(input_iteration,
+                                                       tmp_input)
             del tmp_input
 
         ###########
@@ -422,34 +383,9 @@ class DataConverter:
             if get_rank() == 0:
                 if output_path is not None:
                     if output_iteration is None:
-                        np.save(output_path, tmp_output)
+                        self.target_calculator.write_to_numpy_file(output_path,
+                                                                   tmp_output)
                     else:
-                        output_mesh = output_iteration.meshes[self.target_calculator.data_name]
-                        output_mesh.unit_dimension = self.target_calculator.si_dimension
-                        output_mesh.axis_labels = ["x", "y", "z"]
-                        output_mesh.grid_global_offset = [0, 0, 0]
-                        output_mesh.grid_spacing = [1, 1, 1]
-                        output_mesh.grid_unit_SI = 1
-
-                        dataset = io.Dataset(tmp_output.dtype,
-                                             tmp_output[:, :, :, 0].shape)
-                        for i in range(0, tmp_output.shape[3]):
-                            output_mesh_component = output_mesh[str(i)]
-                            output_mesh_component.reset_dataset(dataset)
-
-                            # TODO: Remove this copy?
-                            output_mesh_component[:] \
-                                = tmp_output[:, :, :, i].copy()
-
-                            # All data is assumed to be saved in
-                            # MALA units, so the SI conversion factor we save
-                            # here is the one for MALA (ASE) units
-                            output_mesh_component.unit_SI = \
-                                self.target_calculator.si_unit_conversion
-                            # position: which relative point within the cell is
-                            # represented by the stored values
-                            # ([0.5, 0.5, 0.5] represents the middle)
-                            input_mesh_component.position = [0.5, 0.5, 0.5]
-
-                        output_iteration.close(flush=True)
+                        self.target_calculator.\
+                            write_to_openpmd_iteration(output_iteration, tmp_output)
             del tmp_output
