@@ -116,11 +116,20 @@ class PhysicalData(ABC):
         data = np.zeros((mesh["0"].shape[0], mesh["0"].shape[1],
                          mesh["0"].shape[2], len(mesh)), dtype=mesh["0"].dtype)
 
-        # TODO: For Franz, as discussed.
-        for i in range(0, len(mesh)):
-            temp_descriptors = mesh[str(i)].load_chunk()
+        # Deal with `granularity` items of the vectors at a time
+        # Or in the openPMD layout: with `granularity` record components
+        granularity = 16 # just some random value for now
+        for base in range(0, data.shape[3], granularity):
+            end = min(base + granularity, data.shape[3])
+            transposed = np.empty(
+                (end - base, data.shape[0], data.shape[1], data.shape[2]),
+                dtype=data.dtype)
+            for i in range(base, end):
+                # transposed[i - base, :, :, :] = mesh[str(i)][:, :, :]
+                mesh[str(i)].load_chunk(transposed[i - base, :, :, :])
             series.flush()
-            data[:, :, :, i] = temp_descriptors.copy()
+            backtranspose = np.transpose(transposed, axes=[1, 2, 3, 0])
+            data[:, :, :, base:end] = backtranspose[:, :, :, :]
 
         return self._process_loaded_array(data, units=units)
 
