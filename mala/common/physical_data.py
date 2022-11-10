@@ -1,6 +1,7 @@
 """Base class for all calculators that deal with physical data"""
 from abc import ABC, abstractmethod
 
+import json
 import numpy as np
 import openpmd_api as io
 
@@ -96,7 +97,10 @@ class PhysicalData(ABC):
 
         """
         series = io.Series(path, io.Access.read_only,
-                           options=self.parameters._configuration["openpmd_configuration"])
+                           options=json.dumps(
+                                {"defer_iteration_parsing": True} |
+                                self.parameters.
+                                    _configuration["openpmd_configuration"]))
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:
@@ -106,6 +110,9 @@ class PhysicalData(ABC):
         # A bit clanky, but this way only the FIRST iteration is loaded,
         # which is what we need for loading from a single file that
         # may be whatever iteration in its series.
+        # Also, in combination with `defer_iteration_parsing`, specified as
+        # default above, this opens and parses the first iteration,
+        # and no others.
         for current_iteration in series.read_iterations():
             mesh = current_iteration.meshes[self.data_name]
             break
@@ -155,7 +162,10 @@ class PhysicalData(ABC):
             Path to the openPMD file.
         """
         series = io.Series(path, io.Access.read_only,
-                           options=self.parameters._configuration["openpmd_configuration"])
+                           options=json.dumps(
+                                {"defer_iteration_parsing": True} |
+                                self.parameters.
+                                    _configuration["openpmd_configuration"]))
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:
@@ -165,6 +175,9 @@ class PhysicalData(ABC):
         # A bit clanky, but this way only the FIRST iteration is loaded,
         # which is what we need for loading from a single file that
         # may be whatever iteration in its series.
+        # Also, in combination with `defer_iteration_parsing`, specified as
+        # default above, this opens and parses the first iteration,
+        # and no others.
         for current_iteration in series.read_iterations():
             mesh = current_iteration.meshes[self.data_name]
             return self.\

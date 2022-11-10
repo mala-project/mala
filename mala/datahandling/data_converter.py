@@ -1,6 +1,7 @@
 """DataConverter class for converting snapshots into numpy arrays."""
 import os
 
+import json
 import numpy as np
 import openpmd_api as io
 
@@ -203,14 +204,16 @@ class DataConverter:
             input_series = io.Series(os.path.join(save_path,
                                                   series_name+".in.h5"),
                                      io.Access.create,
-                                     options=self.parameters_full.
-                                     openpmd_configuration)
+                                     options=json.dumps(
+                                        self.parameters_full.
+                                            openpmd_configuration))
 
             output_series = io.Series(os.path.join(save_path,
                                                    series_name+".out.h5"),
                                       io.Access.create,
-                                      options=self.parameters_full.
-                                      openpmd_configuration)
+                                      options=json.dumps(
+                                        self.parameters_full.
+                                            openpmd_configuration))
 
             for series in [input_series, output_series]:
                 series.set_attribute("is_mala_data", 1)
