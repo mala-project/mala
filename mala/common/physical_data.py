@@ -198,21 +198,29 @@ class PhysicalData(ABC):
 
         # See above - will currently break for density of states,
         # which is something we never do though anyway.
-        for i in range(0, array.shape[3]):
-            mesh_component = mesh[str(i)]
-            mesh_component.reset_dataset(dataset)
+        # Deal with `granularity` items of the vectors at a time
+        # Or in the openPMD layout: with `granularity` record components
+        granularity = 16 # just some random value for now
+        for base in range(0, array.shape[3], granularity):
+            end = min(base + granularity, array.shape[3])
+            transposed = \
+                np.transpose(array[:, :, :, base:end], axes=[3, 0, 1, 2]).copy()
+            for i in range(base, end):
+                mesh_component = mesh[str(i)]
+                mesh_component.reset_dataset(dataset)
 
-            # TODO: Remove this copy?
-            mesh_component[:] = array[:, :, :, i].copy()
+                # mesh_component[:, :, :] = transposed[i - base, :, :, :]
+                mesh_component.store_chunk(transposed[i - base, :, :, :])
 
-            # All data is assumed to be saved in
-            # MALA units, so the SI conversion factor we save
-            # here is the one for MALA (ASE) units
-            mesh_component.unit_SI = self.si_unit_conversion
-            # position: which relative point within the cell is
-            # represented by the stored values
-            # ([0.5, 0.5, 0.5] represents the middle)
-            mesh_component.position = [0.5, 0.5, 0.5]
+                # All data is assumed to be saved in
+                # MALA units, so the SI conversion factor we save
+                # here is the one for MALA (ASE) units
+                mesh_component.unit_SI = self.si_unit_conversion
+                # position: which relative point within the cell is
+                # represented by the stored values
+                # ([0.5, 0.5, 0.5] represents the middle)
+                mesh_component.position = [0.5, 0.5, 0.5]
+            iteration.series_flush()
 
         iteration.close(flush=True)
 
