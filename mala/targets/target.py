@@ -354,6 +354,12 @@ class Target(ABC):
                     setattr(self, key, json_dict[key])
             self.atoms = ase.Atoms.fromdict(json_dict["atoms"])
             self.voxel = Cell(json_dict["voxel"]["array"])
+            self.qe_input_data["ibrav"] = json_dict["ibrav"]
+            self.qe_input_data["ecutwfc"] = json_dict["ecutwfc"]
+            self.qe_input_data["ecutrho"] = json_dict["ecutrho"]
+            self.qe_input_data["degauss"] = json_dict["degauss"]
+            self.qe_pseudopotentials = json_dict["pseudopotentials"]
+
         else:
             raise Exception("Unsupported auxiliary file type.")
 
@@ -380,7 +386,12 @@ class Target(ABC):
             "atoms": self.atoms.todict(),
             "electrons_per_atom": self.electrons_per_atom,
             "number_of_electrons_from_eigenvals":
-                self.number_of_electrons_from_eigenvals
+                self.number_of_electrons_from_eigenvals,
+            "ibrav": self.qe_input_data["ibrav"],
+            "ecutwfc": self.qe_input_data["ecutwfc"],
+            "ecutrho": self.qe_input_data["ecutrho"],
+            "degauss": self.qe_input_data["degauss"],
+            "pseudopotentials": self.qe_pseudopotentials
         }
         additional_calculation_data["voxel"]["array"] = \
             additional_calculation_data["voxel"]["array"].tolist()
