@@ -1196,7 +1196,13 @@ class Parameters:
 
     @property
     def openpmd_configuration(self):
-        """Control whether or not a GPU is used (provided there is one)."""
+        """
+        Provide a .toml or .json formatted string to configure OpenPMD.
+
+        To load a configuration from a file, add an "@" in front of the file
+        name and put the resulting string here. OpenPMD will then load
+        the file. For further details, see the OpenPMD documentation.
+        """
         return self._openpmd_configuration
 
     @openpmd_configuration.setter
