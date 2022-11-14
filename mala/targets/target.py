@@ -1,13 +1,16 @@
 """Base class for all target calculators."""
 from abc import ABC, abstractmethod
 import itertools
+import json
 
 from ase.neighborlist import NeighborList
 from ase.units import Rydberg, kB
+from ase.cell import Cell
 import ase.io
 import numpy as np
 from scipy.spatial import distance
 from scipy.integrate import simps
+import openpmd_api as io
 
 from mala.common.parameters import Parameters, ParametersTargets
 from mala.common.parallelizer import printout, parallel_warn
@@ -398,9 +401,75 @@ class Target(PhysicalData):
             else:
                 self.number_of_electrons_exact = self.electrons_per_atom * \
                                                  len(self.atoms)
+        elif data_type == "json":
+            self.fermi_energy_dft = None
+            self.temperature = None
+            self.number_of_electrons_exact = None
+            self.voxel = None
+            self.band_energy_dft_calculation = None
+            self.total_energy_dft_calculation = None
+            self.grid_dimensions = [0, 0, 0]
+            self.atoms = None
+
+            with open(data, encoding="utf-8") as json_file:
+                json_dict = json.load(json_file)
+            for key in json_dict:
+                if not isinstance(json_dict[key], dict):
+                    setattr(self, key, json_dict[key])
+            self.atoms = ase.Atoms.fromdict(json_dict["atoms"])
+            self.voxel = Cell(json_dict["voxel"]["array"])
+            self.qe_input_data["ibrav"] = json_dict["ibrav"]
+            self.qe_input_data["ecutwfc"] = json_dict["ecutwfc"]
+            self.qe_input_data["ecutrho"] = json_dict["ecutrho"]
+            self.qe_input_data["degauss"] = json_dict["degauss"]
+            self.qe_pseudopotentials = json_dict["pseudopotentials"]
 
         else:
             raise Exception("Unsupported auxiliary file type.")
+
+    def write_additional_calculation_data(self, filepath):
+        """
+        Write additional information about a calculation to a .json file.
+
+        This way important information about a calculation can be saved more
+        accessibly.
+
+        Parameters
+        ----------
+        filepath : string
+            Path at which to save the calculation data.
+        """
+        additional_calculation_data = {
+            "fermi_energy_dft": self.fermi_energy_dft,
+            "temperature": self.temperature,
+            "number_of_electrons_exact": self.number_of_electrons_exact,
+            "voxel": self.voxel.todict(),
+            "band_energy_dft_calculation": self.band_energy_dft_calculation,
+            "total_energy_dft_calculation": self.total_energy_dft_calculation,
+            "grid_dimensions": list(self.grid_dimensions),
+            "atoms": self.atoms.todict(),
+            "electrons_per_atom": self.electrons_per_atom,
+            "number_of_electrons_from_eigenvals":
+                self.number_of_electrons_from_eigenvals,
+            "ibrav": self.qe_input_data["ibrav"],
+            "ecutwfc": self.qe_input_data["ecutwfc"],
+            "ecutrho": self.qe_input_data["ecutrho"],
+            "degauss": self.qe_input_data["degauss"],
+            "pseudopotentials": self.qe_pseudopotentials
+        }
+        additional_calculation_data["voxel"]["array"] = \
+            additional_calculation_data["voxel"]["array"].tolist()
+        additional_calculation_data["atoms"]["numbers"] = \
+            additional_calculation_data["atoms"]["numbers"].tolist()
+        additional_calculation_data["atoms"]["positions"] = \
+            additional_calculation_data["atoms"]["positions"].tolist()
+        additional_calculation_data["atoms"]["cell"] = \
+            additional_calculation_data["atoms"]["cell"].tolist()
+        additional_calculation_data["atoms"]["pbc"] = \
+            additional_calculation_data["atoms"]["pbc"].tolist()
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(additional_calculation_data, f,
+                      ensure_ascii=False, indent=4)
 
     # Accessing target data
     ########################
@@ -1025,6 +1094,13 @@ class Target(PhysicalData):
 
     def _process_loaded_dimensions(self, array_dimensions):
         return array_dimensions
+
+    def _set_geometry_info(self, mesh):
+        # Geometry: Save the cell parameters and angles of the grid.
+        if self.atoms is not None:
+            mesh.geometry = io.Geometry.cartesian
+            mesh.grid_spacing = self.voxel.cellpar()[0:3]
+            mesh.set_attribute("angles", self.voxel.cellpar()[3:])
 
     @staticmethod
     def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):

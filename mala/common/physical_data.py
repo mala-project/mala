@@ -123,6 +123,14 @@ class PhysicalData(ABC):
         data = np.zeros((mesh["0"].shape[0], mesh["0"].shape[1],
                          mesh["0"].shape[2], len(mesh)), dtype=mesh["0"].dtype)
 
+        # Only check this once, since we do not save arrays with different
+        # units throughout the feature dimension.
+        # Later, we can merge this unit check with the unit conversion
+        # MALA does naturally.
+        if not np.isclose(mesh[str(0)].unit_SI, self.si_unit_conversion):
+            raise Exception("MALA currently cannot operate with OpenPMD "
+                            "files with non-MALA units.")
+                            
         # Deal with `granularity` items of the vectors at a time
         # Or in the openPMD layout: with `granularity` record components
         granularity = 16 # just some random value for now
@@ -260,24 +268,21 @@ class PhysicalData(ABC):
     def _process_loaded_dimensions(self, array_dimensions):
         pass
 
+    def _set_geometry_info(self, mesh):
+        pass
+
     def _set_openpmd_attribtues(self, mesh):
         mesh.unit_dimension = self.si_dimension
         mesh.axis_labels = ["x", "y", "z"]
         mesh.grid_global_offset = [0, 0, 0]
-        mesh.grid_spacing = [1, 1, 1]
-        mesh.grid_unit_SI = 1
 
-        # for specifying one of the standardized geometries
-        mesh.geometry = io.Geometry.cartesian
-        # or for specifying a custom one
-        mesh.geometry = io.Geometry.other
-        # only supported on dev branch so far
-        # input_mesh.geometry = "other:my_geometry"
-        # custom geometries might need further
-        #  custom information
-        mesh.set_attribute("angles", [45, 90, 90])
-        # set a comment that will appear in the dataset on-disk
+        # MALA internally operates in Angstrom (10^-10 m)
+        mesh.grid_unit_SI = 1e-10
+
         mesh.comment = \
             "This is a special geometry, " \
             "based on the cartesian geometry."
+
+        # Fill geometry information (if provided)
+        self._set_geometry_info(mesh)
 

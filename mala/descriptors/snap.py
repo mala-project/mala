@@ -33,7 +33,6 @@ class SNAP(Descriptor):
     def __init__(self, parameters):
         super(SNAP, self).__init__(parameters)
         self.in_format_ase = ""
-        self.grid_dimensions = []
 
     @property
     def data_name(self):
@@ -125,25 +124,21 @@ class SNAP(Descriptor):
         atoms = ase.io.read(qe_out_file, format=self.in_format_ase)
 
         # Enforcing / Checking PBC on the read atoms.
-        atoms = self.enforce_pbc(atoms)
+        self.atoms = self.enforce_pbc(atoms)
 
         # Get the grid dimensions.
         qe_outfile = open(qe_out_file, "r")
         lines = qe_outfile.readlines()
-        nx = 0
-        ny = 0
-        nz = 0
-
         for line in lines:
             if "FFT dimensions" in line:
                 tmp = line.split("(")[1].split(")")[0]
-                nx = int(tmp.split(",")[0])
-                ny = int(tmp.split(",")[1])
-                nz = int(tmp.split(",")[2])
+                self.grid_dimensions[0] = int(tmp.split(",")[0])
+                self.grid_dimensions[1] = int(tmp.split(",")[1])
+                self.grid_dimensions[2] = int(tmp.split(",")[2])
                 break
 
-        return self.__calculate_snap(atoms,
-                                     working_directory, [nx, ny, nz])
+        return self.__calculate_snap(self.atoms,
+                                     working_directory, self.grid_dimensions)
 
     def calculate_from_atoms(self, atoms, grid_dimensions,
                              working_directory="."):
@@ -170,9 +165,10 @@ class SNAP(Descriptor):
             (x,y,z,descriptor_dimension)
         """
         # Enforcing / Checking PBC on the input atoms.
-        atoms = self.enforce_pbc(atoms)
-        return self.__calculate_snap(atoms, working_directory,
-                                     grid_dimensions)
+        self.atoms = self.enforce_pbc(atoms)
+        self.grid_dimensions = grid_dimensions
+        return self.__calculate_snap(self.atoms, working_directory,
+                                     self.grid_dimensions)
 
     def gather_descriptors(self, snap_descriptors_np, use_pickled_comm=False):
         """
