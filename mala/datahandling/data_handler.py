@@ -768,7 +768,6 @@ class DataHandler:
         self.training_data_outputs = \
             torch.from_numpy(self.training_data_outputs).float()
 
-    @profile
     def __build_datasets(self):
         """Build the DataSets that are used during training."""
         if self.parameters.use_lazy_loading:
