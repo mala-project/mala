@@ -1,6 +1,7 @@
 """Base class for all calculators that deal with physical data"""
 from abc import ABC, abstractmethod
 
+import json
 import numpy as np
 import openpmd_api as io
 
@@ -96,7 +97,10 @@ class PhysicalData(ABC):
 
         """
         series = io.Series(path, io.Access.read_only,
-                           options=self.parameters._configuration["openpmd_configuration"])
+                           options=json.dumps(
+                                {"defer_iteration_parsing": True} |
+                                self.parameters.
+                                    _configuration["openpmd_configuration"]))
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:
@@ -106,6 +110,9 @@ class PhysicalData(ABC):
         # A bit clanky, but this way only the FIRST iteration is loaded,
         # which is what we need for loading from a single file that
         # may be whatever iteration in its series.
+        # Also, in combination with `defer_iteration_parsing`, specified as
+        # default above, this opens and parses the first iteration,
+        # and no others.
         for current_iteration in series.read_iterations():
             mesh = current_iteration.meshes[self.data_name]
             break
@@ -123,12 +130,21 @@ class PhysicalData(ABC):
         if not np.isclose(mesh[str(0)].unit_SI, self.si_unit_conversion):
             raise Exception("MALA currently cannot operate with OpenPMD "
                             "files with non-MALA units.")
-
-        # TODO: For Franz, as discussed.
-        for i in range(0, len(mesh)):
-            temp_descriptors = mesh[str(i)].load_chunk()
+                            
+        # Deal with `granularity` items of the vectors at a time
+        # Or in the openPMD layout: with `granularity` record components
+        granularity = 16 # just some random value for now
+        for base in range(0, data.shape[3], granularity):
+            end = min(base + granularity, data.shape[3])
+            transposed = np.empty(
+                (end - base, data.shape[0], data.shape[1], data.shape[2]),
+                dtype=data.dtype)
+            for i in range(base, end):
+                # transposed[i - base, :, :, :] = mesh[str(i)][:, :, :]
+                mesh[str(i)].load_chunk(transposed[i - base, :, :, :])
             series.flush()
-            data[:, :, :, i] = temp_descriptors.copy()
+            backtranspose = np.transpose(transposed, axes=[1, 2, 3, 0])
+            data[:, :, :, base:end] = backtranspose[:, :, :, :]
 
         return self._process_loaded_array(data, units=units)
 
@@ -154,7 +170,10 @@ class PhysicalData(ABC):
             Path to the openPMD file.
         """
         series = io.Series(path, io.Access.read_only,
-                           options=self.parameters._configuration["openpmd_configuration"])
+                           options=json.dumps(
+                                {"defer_iteration_parsing": True} |
+                                self.parameters.
+                                    _configuration["openpmd_configuration"]))
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:
@@ -164,6 +183,9 @@ class PhysicalData(ABC):
         # A bit clanky, but this way only the FIRST iteration is loaded,
         # which is what we need for loading from a single file that
         # may be whatever iteration in its series.
+        # Also, in combination with `defer_iteration_parsing`, specified as
+        # default above, this opens and parses the first iteration,
+        # and no others.
         for current_iteration in series.read_iterations():
             mesh = current_iteration.meshes[self.data_name]
             return self.\
@@ -206,21 +228,29 @@ class PhysicalData(ABC):
 
         # See above - will currently break for density of states,
         # which is something we never do though anyway.
-        for i in range(0, array.shape[3]):
-            mesh_component = mesh[str(i)]
-            mesh_component.reset_dataset(dataset)
+        # Deal with `granularity` items of the vectors at a time
+        # Or in the openPMD layout: with `granularity` record components
+        granularity = 16 # just some random value for now
+        for base in range(0, array.shape[3], granularity):
+            end = min(base + granularity, array.shape[3])
+            transposed = \
+                np.transpose(array[:, :, :, base:end], axes=[3, 0, 1, 2]).copy()
+            for i in range(base, end):
+                mesh_component = mesh[str(i)]
+                mesh_component.reset_dataset(dataset)
 
-            # TODO: Remove this copy?
-            mesh_component[:] = array[:, :, :, i].copy()
+                # mesh_component[:, :, :] = transposed[i - base, :, :, :]
+                mesh_component.store_chunk(transposed[i - base, :, :, :])
 
-            # All data is assumed to be saved in
-            # MALA units, so the SI conversion factor we save
-            # here is the one for MALA (ASE) units
-            mesh_component.unit_SI = self.si_unit_conversion
-            # position: which relative point within the cell is
-            # represented by the stored values
-            # ([0.5, 0.5, 0.5] represents the middle)
-            mesh_component.position = [0.5, 0.5, 0.5]
+                # All data is assumed to be saved in
+                # MALA units, so the SI conversion factor we save
+                # here is the one for MALA (ASE) units
+                mesh_component.unit_SI = self.si_unit_conversion
+                # position: which relative point within the cell is
+                # represented by the stored values
+                # ([0.5, 0.5, 0.5] represents the middle)
+                mesh_component.position = [0.5, 0.5, 0.5]
+            iteration.series_flush()
 
         iteration.close(flush=True)
 

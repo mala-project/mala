@@ -25,7 +25,7 @@ class ParametersBase(JSONSerializable):
     def __init__(self,):
         super(ParametersBase, self).__init__()
         self._configuration = {"gpu": False, "horovod": False, "mpi": False,
-                               "device": "cpu", "openpmd_configuration": "{}"}
+                               "device": "cpu", "openpmd_configuration": {}}
         pass
 
     def show(self, indent=""):
@@ -1088,7 +1088,7 @@ class Parameters:
         self.use_mpi = False
         self.verbosity = 1
         self.device = "cpu"
-        self.openpmd_configuration = "{}"
+        self.openpmd_configuration = {}
 
     @property
     def verbosity(self):
