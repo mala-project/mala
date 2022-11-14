@@ -166,5 +166,10 @@ class MALA(Calculator):
             Path to file in which to store the Calculator.
 
         """
-        self.params.save(filename)
+        self.params.save(filename+".params.json")
+        self.network.save_network(filename+".network.pth")
+        self.data_handler.input_data_scaler.save(filename+".iscaler.pkl")
+        self.data_handler.output_data_scaler.save(filename+".oscaler.pkl")
+        self.data_handler.target_calculator.\
+            write_additional_calculation_data(filename+".reference.json")
 

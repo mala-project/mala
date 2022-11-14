@@ -12,12 +12,13 @@ except ModuleNotFoundError:
 import numpy as np
 import openpmd_api as io
 
-from mala.common.parallelizer import printout, parallel_warn, barrier
+from mala.common.parallelizer import printout, parallel_warn, barrier, get_size
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import integrate_values_on_spacing
 from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.atomic_force import AtomicForce
 from mala.descriptors.gaussian import GaussianDescriptors
+from mala.common.parallelizer import get_rank
 
 
 class Density(Target):

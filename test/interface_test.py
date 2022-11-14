@@ -19,6 +19,9 @@ data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 # same.
 accuracy_coarse = 10
 
+# The JSON additional data test further down implies a high accuracy.
+accuracy_json_test = 1e-16
+
 
 class TestInterfaces:
     """Tests MALA interfaces."""
@@ -129,3 +132,69 @@ class TestInterfaces:
         assert np.isclose(total_energy_dft_calculation,
                           calculator.results["energy"],
                           atol=accuracy_coarse)
+
+    def test_additional_calculation_data_json(self):
+        test_parameters = mala.Parameters()
+        ldos_calculator = mala.LDOS(test_parameters)
+        ldos_calculator.\
+            read_additional_calculation_data("qe.out",
+                                             os.path.join(data_path,
+                                                          "Be_snapshot1.out"))
+        ldos_calculator.\
+            write_additional_calculation_data("additional_calculation_data.json")
+        new_ldos_calculator = mala.LDOS(test_parameters)
+        new_ldos_calculator.\
+            read_additional_calculation_data("json",
+                                             "additional_calculation_data.json")
+
+        # Verify that essentially the same info has been loaded.
+        assert np.isclose(ldos_calculator.fermi_energy_dft,
+                          new_ldos_calculator.fermi_energy_dft,
+                          rtol=accuracy_json_test)
+        assert np.isclose(ldos_calculator.temperature,
+                          new_ldos_calculator.temperature,
+                          rtol=accuracy_json_test)
+        assert np.isclose(ldos_calculator.number_of_electrons_exact,
+                          new_ldos_calculator.number_of_electrons_exact,
+                          rtol=accuracy_json_test)
+        assert np.isclose(ldos_calculator.band_energy_dft_calculation,
+                          new_ldos_calculator.band_energy_dft_calculation,
+                          rtol=accuracy_json_test)
+        assert np.isclose(ldos_calculator.total_energy_dft_calculation,
+                          new_ldos_calculator.total_energy_dft_calculation,
+                          rtol=accuracy_json_test)
+        assert np.isclose(ldos_calculator.number_of_electrons_from_eigenvals,
+                          new_ldos_calculator.number_of_electrons_from_eigenvals,
+                          rtol=accuracy_json_test)
+        assert ldos_calculator.qe_input_data["ibrav"] == \
+               new_ldos_calculator.qe_input_data["ibrav"]
+        assert np.isclose(ldos_calculator.qe_input_data["ecutwfc"],
+                          new_ldos_calculator.qe_input_data["ecutwfc"],
+                          rtol=accuracy_json_test)
+        assert np.isclose(ldos_calculator.qe_input_data["ecutrho"],
+                          new_ldos_calculator.qe_input_data["ecutrho"],
+                          rtol=accuracy_json_test)
+        assert np.isclose(ldos_calculator.qe_input_data["degauss"],
+                          new_ldos_calculator.qe_input_data["degauss"],
+                          rtol=accuracy_json_test)
+        for key in ldos_calculator.qe_pseudopotentials.keys():
+            assert new_ldos_calculator.qe_pseudopotentials[key] ==\
+                   ldos_calculator.qe_pseudopotentials[key]
+        for i in range(0, 3):
+            assert ldos_calculator.grid_dimensions[i] == \
+                   new_ldos_calculator.grid_dimensions[i]
+            assert ldos_calculator.atoms.pbc[i] == \
+                   new_ldos_calculator.atoms.pbc[i]
+
+            for j in range(0, 3):
+                assert np.isclose(ldos_calculator.voxel[i, j],
+                                  new_ldos_calculator.voxel[i, j])
+                assert np.isclose(ldos_calculator.atoms.get_cell()[i, j],
+                                  new_ldos_calculator.atoms.get_cell()[i, j],
+                                  rtol=accuracy_json_test)
+
+        for i in range(0, len(ldos_calculator.atoms)):
+            for j in range(0, 3):
+                assert np.isclose(ldos_calculator.atoms.get_positions()[i, j],
+                                  new_ldos_calculator.atoms.get_positions()[i, j],
+                                  rtol=accuracy_json_test)
