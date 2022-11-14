@@ -976,9 +976,9 @@ class DataHandler:
             numpy_array = numpy_array.reshape(desired_dimensions)
         numpy_array = torch.from_numpy(numpy_array).float()
         if data_type == "in":
-            numpy_array = self.input_data_scaler.transform(numpy_array)
+            self.input_data_scaler.transform(numpy_array)
         elif data_type == "out":
-            numpy_array = self.output_data_scaler.transform(numpy_array)
+            self.output_data_scaler.transform(numpy_array)
         else:
             raise Exception("Please choose either \"in\" or \"out\" for "
                             "this function.")
