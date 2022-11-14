@@ -31,7 +31,6 @@ class GaussianDescriptors(Descriptor):
     def __init__(self, parameters):
         super(GaussianDescriptors, self).__init__(parameters)
         self.in_format_ase = ""
-        self.grid_dimensions = []
         self.verbosity = parameters.verbosity
 
     @property
@@ -122,29 +121,26 @@ class GaussianDescriptors(Descriptor):
         atoms = ase.io.read(infile, format=self.in_format_ase)
 
         # Enforcing / Checking PBC on the read atoms.
-        atoms = self.enforce_pbc(atoms)
+        self.atoms = self.enforce_pbc(atoms)
 
         # Get the grid dimensions.
         qe_outfile = open(infile, "r")
         lines = qe_outfile.readlines()
-        nx = 0
-        ny = 0
-        nz = 0
 
         for line in lines:
             if "FFT dimensions" in line:
                 tmp = line.split("(")[1].split(")")[0]
-                nx = int(tmp.split(",")[0])
-                ny = int(tmp.split(",")[1])
-                nz = int(tmp.split(",")[2])
+                self.grid_dimensions[0] = int(tmp.split(",")[0])
+                self.grid_dimensions[1] = int(tmp.split(",")[1])
+                self.grid_dimensions[2] = int(tmp.split(",")[2])
                 break
 
         if working_directory is None:
             working_directory = qe_out_directory
 
-        return self.__calculate_gaussian_descriptors(atoms,
+        return self.__calculate_gaussian_descriptors(self.atoms,
                                                      working_directory,
-                                                     [nx, ny, nz])
+                                                     self.grid_dimensions)
 
     def calculate_from_atoms(self, atoms, grid_dimensions,
                              working_directory="."):
@@ -169,9 +165,10 @@ class GaussianDescriptors(Descriptor):
             (x,y,z,descriptor_dimension)
         """
         # Enforcing / Checking PBC on the input atoms.
-        atoms = self.enforce_pbc(atoms)
+        self.atoms = self.enforce_pbc(atoms)
+        self.grid_dimensions = grid_dimensions
         return self.__calculate_gaussian_descriptors(atoms, working_directory,
-                                                     grid_dimensions)
+                                                     self.grid_dimensions)
 
     def __calculate_gaussian_descriptors(self, atoms, outdir, grid_dimensions):
         """Perform actual Gaussian descriptor calculation."""

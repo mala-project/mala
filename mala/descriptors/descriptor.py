@@ -61,6 +61,8 @@ class Descriptor(PhysicalData):
         self.parameters: ParametersDescriptors = parameters.descriptors
         self.fingerprint_length = -1  # so iterations will fail
         self.verbosity = parameters.verbosity
+        self.atoms = None
+        self.grid_dimensions = [0, 0, 0]
 
     ##############################
     # Properties
@@ -268,6 +270,18 @@ class Descriptor(PhysicalData):
                     array_dimensions[2], array_dimensions[3]-3)
         else:
             return array_dimensions
+
+    def _set_geometry_info(self, mesh):
+        # Geometry: Save the cell parameters and angles of the grid.
+        voxel = self.atoms.cell.copy()
+        voxel[0] = voxel[0] / (self.grid_dimensions[0])
+        voxel[1] = voxel[1] / (self.grid_dimensions[1])
+        voxel[2] = voxel[2] / (self.grid_dimensions[2])
+
+        if self.atoms is not None:
+            mesh.geometry = io.Geometry.cartesian
+            mesh.grid_spacing = voxel.cellpar()[0:3]
+            mesh.set_attribute("angles", voxel.cellpar()[3:])
 
     def _setup_lammps_processors(self, nx, ny, nz):
         """
@@ -579,5 +593,3 @@ class Descriptor(PhysicalData):
                                                      similarity_data[i, 0],
                                                      similarity_data[i, 0]))
         return np.mean(distances)
-
-
