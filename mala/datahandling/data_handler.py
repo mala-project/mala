@@ -550,6 +550,46 @@ class DataHandler:
         self.nr_training_data = self.nr_training_snapshots*self.grid_size
         self.nr_validation_data = self.nr_validation_snapshots*self.grid_size
         self.nr_test_data = self.nr_test_snapshots*self.grid_size
+        if not self.parameters.use_lazy_loading:
+            if self.nr_training_data > 0:
+                self.training_data_inputs = np.zeros((self.nr_training_snapshots,
+                                                      self.grid_dimension[0],
+                                                      self.grid_dimension[1],
+                                                      self.grid_dimension[2],
+                                                      self.get_input_dimension()),
+                                                     dtype=np.float32)
+                self.training_data_outputs = np.zeros((self.nr_training_snapshots,
+                                                      self.grid_dimension[0],
+                                                      self.grid_dimension[1],
+                                                      self.grid_dimension[2],
+                                                      self.get_output_dimension()),
+                                                      dtype=np.float32)
+            if self.nr_validation_data > 0:
+                self.validation_data_inputs = np.zeros((self.nr_validation_snapshots,
+                                                        self.grid_dimension[0],
+                                                        self.grid_dimension[1],
+                                                        self.grid_dimension[2],
+                                                        self.get_input_dimension()),
+                                                       dtype=np.float32)
+                self.validation_data_outputs = np.zeros((self.nr_validation_snapshots,
+                                                         self.grid_dimension[0],
+                                                         self.grid_dimension[1],
+                                                         self.grid_dimension[2],
+                                                        self.get_output_dimension()),
+                                                        dtype=np.float32)
+            if self.nr_test_data > 0:
+                self.test_data_inputs = np.zeros((self.nr_test_snapshots,
+                                                  self.grid_dimension[0],
+                                                  self.grid_dimension[1],
+                                                  self.grid_dimension[2],
+                                                  self.get_input_dimension()),
+                                                 dtype=np.float32)
+                self.test_data_outputs = np.zeros((self.nr_test_snapshots,
+                                                   self.grid_dimension[0],
+                                                   self.grid_dimension[1],
+                                                   self.grid_dimension[2],
+                                                   self.get_output_dimension()),
+                                                  dtype=np.float32)
 
         # Reordering the lists.
         snapshot_order = {'tr': 0, 'va': 1, 'te': 2}
@@ -557,16 +597,23 @@ class DataHandler:
                                                        snapshot_order
                                                        [d.snapshot_function])
 
-    def __load_from_npy_file(self, file, mmapmode=None):
+    def __load_from_npy_file(self, file, mmapmode=None, return_array=None,
+                             cut_features=None):
         """Load a numpy array from a file."""
-        loaded_array = np.load(file, mmap_mode=mmapmode)
-        if len(self.dbg_grid_dimensions) == 3:
-            return loaded_array[0:self.dbg_grid_dimensions[0],
-                                0:self.dbg_grid_dimensions[1],
-                                0:self.dbg_grid_dimensions[2], :]
+        if return_array is None:
+            loaded_array = np.load(file, mmap_mode=mmapmode)
+            if len(self.dbg_grid_dimensions) == 3:
+                return loaded_array[0:self.dbg_grid_dimensions[0],
+                                    0:self.dbg_grid_dimensions[1],
+                                    0:self.dbg_grid_dimensions[2], :]
 
+            else:
+                return loaded_array
         else:
-            return loaded_array
+            if cut_features is None:
+                return_array[:, :, :, :] = np.load(file, mmap_mode=mmapmode)
+            else:
+                return_array[:, :, :, :] = np.load(file, mmap_mode=mmapmode)[:, :, :, cut_features:]
 
     def __parametrize_scalers(self):
         """Use the training data to parametrize the DataScalers."""
@@ -665,40 +712,37 @@ class DataHandler:
         """Load the training data into RAM."""
         # INPUTS.
 
-        self.training_data_inputs = []
+        training_snapshot = 0
         # We need to perform the data scaling over the entirety of
         # the training data.
         for snapshot in self.parameters.snapshot_directories_list:
 
             # Data scaling is only performed on the training data sets.
             if snapshot.snapshot_function == "tr":
-                tmp = self.__load_from_npy_file(os.path.join(snapshot.
-                                                input_npy_directory,
-                                                snapshot.input_npy_file),
-                                                mmapmode='r')
+                cut_features = None
                 if self.descriptor_calculator.descriptors_contain_xyz:
-                    tmp = tmp[:, :, :, 3:]
-                tmp = np.array(tmp)
-                tmp *= self.descriptor_calculator. \
-                    convert_units(1, snapshot.input_units)
-                self.training_data_inputs.append(tmp)
+                    cut_features = 3
+                self.__load_from_npy_file(os.path.join(snapshot.
+                                          input_npy_directory,
+                                          snapshot.input_npy_file),
+                                          return_array=self.training_data_inputs[training_snapshot],
+                                          cut_features=cut_features)
+                self.training_data_inputs[training_snapshot] \
+                    *= self.descriptor_calculator.convert_units(1, snapshot.input_units)
+                training_snapshot += 1
 
         # The scalers will later operate on torch Tensors so we have to
         # make sure they are fitted on
         # torch Tensors as well. Preprocessing the numpy data as follows
         # does NOT load it into memory, see
         # test/tensor_memory.py
-        self.training_data_inputs = np.array(self.training_data_inputs)
-        self.training_data_inputs = \
-            self.training_data_inputs.astype(np.float32)
-        self.training_data_inputs = \
-            self.training_data_inputs.reshape(
-                [self.nr_training_data, self.get_input_dimension()])
+        self.training_data_inputs = self.training_data_inputs.reshape(
+            [self.nr_training_data, self.get_input_dimension()])
         self.training_data_inputs = \
             torch.from_numpy(self.training_data_inputs).float()
 
         # Outputs.
-        self.training_data_outputs = []
+        training_snapshot = 0
         # We need to perform the data scaling over the entirety of
         # the training data.
         for snapshot in self.parameters.snapshot_directories_list:
@@ -709,20 +753,16 @@ class DataHandler:
                     __load_from_npy_file(os.path.join(
                                          snapshot.output_npy_directory,
                                          snapshot.output_npy_file),
-                                         mmapmode='r')
-                tmp = np.array(tmp)
-                tmp *= self.target_calculator. \
-                    convert_units(1, snapshot.output_units)
-                self.training_data_outputs.append(tmp)
+                                         return_array=self.training_data_outputs[training_snapshot])
+                self.training_data_outputs[training_snapshot] \
+                    *= self.target_calculator.convert_units(1, snapshot.output_units)
+                training_snapshot += 1
 
         # The scalers will later operate on torch Tensors so we have to
         # make sure they are fitted on
         # torch Tensors as well. Preprocessing the numpy data as follows
         # does NOT load it into memory, see
         # test/tensor_memory.py
-        self.training_data_outputs = np.array(self.training_data_outputs)
-        self.training_data_outputs = \
-            self.training_data_outputs.astype(np.float32)
         self.training_data_outputs = self.training_data_outputs.reshape(
             [self.nr_training_data, self.get_output_dimension()])
         self.training_data_outputs = \
@@ -803,51 +843,61 @@ class DataHandler:
         else:
             # We iterate through the snapshots and add the validation data and
             # test data.
-            self.validation_data_inputs = []
-            self.validation_data_outputs = []
+            validation_snapshot = 0
             if self.nr_test_data != 0:
-                self.test_data_inputs = []
-                self.test_data_outputs = []
+                test_snapshot = 0
+            cut_features = None
+            if self.descriptor_calculator.descriptors_contain_xyz:
+                cut_features = 3
 
             # We need to perform the data scaling over the entirety of the
             # training data.
             for snapshot in self.parameters.snapshot_directories_list:
 
                 # Data scaling is only performed on the training data sets.
-                if snapshot.snapshot_function == "va" \
-                        or snapshot.snapshot_function == "te":
-                    tmp = self.__load_from_npy_file(
+                if snapshot.snapshot_function == "va":
+                    self.__load_from_npy_file(
                         os.path.join(snapshot.input_npy_directory,
-                                     snapshot.input_npy_file), mmapmode='r')
-                    if self.descriptor_calculator.descriptors_contain_xyz:
-                        tmp = tmp[:, :, :, 3:]
-                    tmp = np.array(tmp)
-                    tmp *= self.descriptor_calculator.\
+                                     snapshot.input_npy_file),
+                    return_array=self.validation_data_inputs[validation_snapshot],
+                    cut_features=3)
+                    self.validation_data_inputs[validation_snapshot] \
+                        *= self.descriptor_calculator.\
                         convert_units(1, snapshot.input_units)
-                    if snapshot.snapshot_function == "va":
-                        self.validation_data_inputs.append(tmp)
-                    if snapshot.snapshot_function == "te":
-                        self.test_data_inputs.append(tmp)
-                    tmp = self.__load_from_npy_file(
-                        os.path.join(snapshot.output_npy_directory,
-                                     snapshot.output_npy_file), mmapmode='r')
-                    tmp = np.array(tmp)
-                    tmp *= self.target_calculator.\
-                        convert_units(1, snapshot.output_units)
-                    if snapshot.snapshot_function == "va":
-                        self.validation_data_outputs.append(tmp)
-                    if snapshot.snapshot_function == "te":
-                        self.test_data_outputs.append(tmp)
 
+                    self.__load_from_npy_file(
+                        os.path.join(snapshot.output_npy_directory,
+                                     snapshot.output_npy_file),
+                    return_array=self.validation_data_outputs[validation_snapshot])
+                    self.validation_data_outputs[validation_snapshot] \
+                        *= self.target_calculator.\
+                        convert_units(1, snapshot.output_units)
+                    validation_snapshot += 1
+
+                if snapshot.snapshot_function == "te":
+                    self.__load_from_npy_file(
+                        os.path.join(snapshot.input_npy_directory,
+                                     snapshot.input_npy_file),
+                    return_array=self.test_data_inputs[test_snapshot],
+                    cut_features=3)
+                    self.test_data_inputs[test_snapshot] \
+                        *= self.descriptor_calculator.\
+                        convert_units(1, snapshot.input_units)
+
+                    self.__load_from_npy_file(
+                        os.path.join(snapshot.output_npy_directory,
+                                     snapshot.output_npy_file),
+                    return_array=self.test_data_outputs[test_snapshot])
+                    self.test_data_outputs[test_snapshot] \
+                        *= self.target_calculator.\
+                        convert_units(1, snapshot.output_units)
+                    test_snapshot += 1
             # I know this would be more elegant with the member functions typed
             # below. But I am pretty sure
             # that that would create a temporary copy of the arrays, and that
             # could overload the RAM
             # in cases where lazy loading is technically not even needed.
             if self.nr_test_data != 0:
-                self.test_data_inputs = np.array(self.test_data_inputs)
-                self.test_data_inputs = \
-                    self.test_data_inputs.astype(np.float32)
                 self.test_data_inputs = \
                     self.test_data_inputs.reshape(
                         [self.nr_test_data, self.get_input_dimension()])
@@ -857,9 +907,6 @@ class DataHandler:
                     self.input_data_scaler.transform(self.test_data_inputs)
                 self.test_data_inputs.requires_grad = True
 
-            self.validation_data_inputs = np.array(self.validation_data_inputs)
-            self.validation_data_inputs = \
-                self.validation_data_inputs.astype(np.float32)
             self.validation_data_inputs = \
                 self.validation_data_inputs.reshape(
                     [self.nr_validation_data, self.get_input_dimension()])
@@ -871,9 +918,6 @@ class DataHandler:
                 self.input_data_scaler.transform(self.training_data_inputs)
 
             if self.nr_test_data != 0:
-                self.test_data_outputs = np.array(self.test_data_outputs)
-                self.test_data_outputs = \
-                    self.test_data_outputs.astype(np.float32)
                 self.test_data_outputs = \
                     self.test_data_outputs.reshape(
                         [self.nr_test_data, self.get_output_dimension()])
@@ -882,10 +926,6 @@ class DataHandler:
                 self.test_data_outputs = \
                     self.output_data_scaler.transform(self.test_data_outputs)
 
-            self.validation_data_outputs = \
-                np.array(self.validation_data_outputs)
-            self.validation_data_outputs = \
-                self.validation_data_outputs.astype(np.float32)
             self.validation_data_outputs = \
                 self.validation_data_outputs.reshape(
                     [self.nr_validation_data, self.get_output_dimension()])
