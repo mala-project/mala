@@ -557,26 +557,26 @@ class DataHandler:
                                                       self.grid_dimension[1],
                                                       self.grid_dimension[2],
                                                       self.get_input_dimension()),
-                                                     dtype=np.float32)
+                                                     dtype=np.float32)+1.0
                 self.training_data_outputs = np.zeros((self.nr_training_snapshots,
                                                       self.grid_dimension[0],
                                                       self.grid_dimension[1],
                                                       self.grid_dimension[2],
                                                       self.get_output_dimension()),
-                                                      dtype=np.float32)
+                                                      dtype=np.float32)+1.0
             if self.nr_validation_data > 0:
                 self.validation_data_inputs = np.zeros((self.nr_validation_snapshots,
                                                         self.grid_dimension[0],
                                                         self.grid_dimension[1],
                                                         self.grid_dimension[2],
                                                         self.get_input_dimension()),
-                                                       dtype=np.float32)
+                                                       dtype=np.float32)+1.0
                 self.validation_data_outputs = np.zeros((self.nr_validation_snapshots,
                                                          self.grid_dimension[0],
                                                          self.grid_dimension[1],
                                                          self.grid_dimension[2],
                                                         self.get_output_dimension()),
-                                                        dtype=np.float32)
+                                                        dtype=np.float32)+1.0
             if self.nr_test_data > 0:
                 self.test_data_inputs = np.zeros((self.nr_test_snapshots,
                                                   self.grid_dimension[0],
@@ -768,6 +768,7 @@ class DataHandler:
         self.training_data_outputs = \
             torch.from_numpy(self.training_data_outputs).float()
 
+    @profile
     def __build_datasets(self):
         """Build the DataSets that are used during training."""
         if self.parameters.use_lazy_loading:
@@ -903,8 +904,7 @@ class DataHandler:
                         [self.nr_test_data, self.get_input_dimension()])
                 self.test_data_inputs = \
                     torch.from_numpy(self.test_data_inputs).float()
-                self.test_data_inputs = \
-                    self.input_data_scaler.transform(self.test_data_inputs)
+                self.input_data_scaler.transform(self.test_data_inputs)
                 self.test_data_inputs.requires_grad = True
 
             self.validation_data_inputs = \
@@ -912,10 +912,8 @@ class DataHandler:
                     [self.nr_validation_data, self.get_input_dimension()])
             self.validation_data_inputs = \
                 torch.from_numpy(self.validation_data_inputs).float()
-            self.validation_data_inputs = \
-                self.input_data_scaler.transform(self.validation_data_inputs)
-            self.training_data_inputs = \
-                self.input_data_scaler.transform(self.training_data_inputs)
+            self.input_data_scaler.transform(self.validation_data_inputs)
+            self.input_data_scaler.transform(self.training_data_inputs)
 
             if self.nr_test_data != 0:
                 self.test_data_outputs = \
@@ -923,18 +921,15 @@ class DataHandler:
                         [self.nr_test_data, self.get_output_dimension()])
                 self.test_data_outputs = \
                     torch.from_numpy(self.test_data_outputs).float()
-                self.test_data_outputs = \
-                    self.output_data_scaler.transform(self.test_data_outputs)
+                self.output_data_scaler.transform(self.test_data_outputs)
 
             self.validation_data_outputs = \
                 self.validation_data_outputs.reshape(
                     [self.nr_validation_data, self.get_output_dimension()])
             self.validation_data_outputs = \
                 torch.from_numpy(self.validation_data_outputs).float()
-            self.validation_data_outputs = \
-                self.output_data_scaler.transform(self.validation_data_outputs)
-            self.training_data_outputs = \
-                self.output_data_scaler.transform(self.training_data_outputs)
+            self.output_data_scaler.transform(self.validation_data_outputs)
+            self.output_data_scaler.transform(self.training_data_outputs)
 
             if self.nr_training_data != 0:
                 self.training_data_set = \

@@ -279,11 +279,13 @@ class DataScaler:
         """
         # First we need to find out if we even have to do anything.
         if self.scale_standard is False and self.scale_normal is False:
-            return unscaled
+            pass
 
         if self.cantransform is False:
             raise Exception("Transformation cannot be done, this DataScaler "
                             "was never initialized")
+
+        unscaled_dimensionality = len(unscaled.size())
 
         # Perform the actual scaling, but use no_grad to make sure
         # that the next couple of iterations stay untracked.
@@ -295,12 +297,16 @@ class DataScaler:
                 ##########################
 
                 if self.scale_standard:
-                    unscaled = (unscaled - self.means) / self.stds
-                    return unscaled
+                    if unscaled_dimensionality == 2:
+                        unscaled[:, :] = (unscaled[:, :] - self.means) / self.stds
+                    if unscaled_dimensionality == 4:
+                        unscaled[:, :, :, :] = (unscaled[:, :, :, :] - self.means) / self.stds
 
                 if self.scale_normal:
-                    unscaled = (unscaled - self.mins) / (self.maxs - self.mins)
-                    return unscaled
+                    if unscaled_dimensionality == 2:
+                        unscaled[:, :] = (unscaled[:, :] - self.mins) / (self.maxs - self.mins)
+                    if unscaled_dimensionality == 4:
+                        unscaled[:, :, :, :] = (unscaled[:, :, :, :] - self.mins) / (self.maxs - self.mins)
 
             else:
 
@@ -309,13 +315,18 @@ class DataScaler:
                 ##########################
 
                 if self.scale_standard:
-                    unscaled = (unscaled - self.total_mean) / self.total_std
-                    return unscaled
+                    if unscaled_dimensionality == 2:
+                        unscaled[:, :] = (unscaled[:, :] - self.total_mean) / self.total_std
+                    if unscaled_dimensionality == 4:
+                        unscaled[:, :, :, :] = (unscaled[:, :, :, :] - self.total_mean) / self.total_std
 
                 if self.scale_normal:
-                    unscaled = (unscaled - self.total_min) / \
+                    if unscaled_dimensionality == 2:
+                        unscaled[:, :] = (unscaled[:, :] - self.total_min) / \
+                                         (self.total_max - self.total_min)
+                    if unscaled_dimensionality == 4:
+                        unscaled[:, :, :, :] = (unscaled[:, :, :, :] - self.total_min) / \
                                (self.total_max - self.total_min)
-                    return unscaled
 
     def inverse_transform(self, scaled, as_numpy=False):
         """
