@@ -265,17 +265,12 @@ class DataScaler:
         Transform data from unscaled to scaled.
 
         Unscaled means real world data, scaled means data as is used in
-        the network.
+        the network. Data is transformed in-place.
 
         Parameters
         ----------
         unscaled : torch.Tensor
             Real world data.
-
-        Returns
-        -------
-        scaled : torch.Tensor
-            Scaled data.
         """
         # First we need to find out if we even have to do anything.
         if self.scale_standard is False and self.scale_normal is False:
