@@ -74,9 +74,11 @@
 <span></span><span class="sd">&quot;&quot;&quot;Base class for all target calculators.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">json</span>
 
 <span class="kn">from</span> <span class="nn">ase.neighborlist</span> <span class="kn">import</span> <span class="n">NeighborList</span>
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">kB</span>
+<span class="kn">from</span> <span class="nn">ase.cell</span> <span class="kn">import</span> <span class="n">Cell</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span>
@@ -408,9 +410,75 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="o">*</span> \
                                                  <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+                <span class="n">json_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">json_dict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="o">.</span><span class="n">fromdict</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;voxel&quot;</span><span class="p">][</span><span class="s2">&quot;array&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ibrav&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;ibrav&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span> <span class="o">=</span> <span class="n">json_dict</span><span class="p">[</span><span class="s2">&quot;pseudopotentials&quot;</span><span class="p">]</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported auxiliary file type.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Target.write_additional_calculation_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_additional_calculation_data">[docs]</a>    <span class="k">def</span> <span class="nf">write_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write additional information about a calculation to a .json file.</span>
+
+<span class="sd">        This way important information about a calculation can be saved more</span>
+<span class="sd">        accessibly.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filepath : string</span>
+<span class="sd">            Path at which to save the calculation data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">additional_calculation_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;fermi_energy_dft&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span><span class="p">,</span>
+            <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+            <span class="s2">&quot;number_of_electrons_exact&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span><span class="p">,</span>
+            <span class="s2">&quot;voxel&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="o">.</span><span class="n">todict</span><span class="p">(),</span>
+            <span class="s2">&quot;band_energy_dft_calculation&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span><span class="p">,</span>
+            <span class="s2">&quot;total_energy_dft_calculation&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span><span class="p">,</span>
+            <span class="s2">&quot;grid_dimensions&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">),</span>
+            <span class="s2">&quot;atoms&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">todict</span><span class="p">(),</span>
+            <span class="s2">&quot;electrons_per_atom&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span><span class="p">,</span>
+            <span class="s2">&quot;number_of_electrons_from_eigenvals&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span><span class="p">,</span>
+            <span class="s2">&quot;ibrav&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ibrav&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;ecutwfc&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;ecutrho&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;degauss&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;pseudopotentials&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span>
+        <span class="p">}</span>
+        <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;voxel&quot;</span><span class="p">][</span><span class="s2">&quot;array&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;voxel&quot;</span><span class="p">][</span><span class="s2">&quot;array&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;numbers&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;numbers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;cell&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;cell&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;pbc&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;pbc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">additional_calculation_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span>
+                      <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.get_energy_grid"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_energy_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get energy grid.&quot;&quot;&quot;</span>

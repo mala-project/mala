@@ -239,7 +239,12 @@
 <span class="sd">            Path to file in which to store the Calculator.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.params.json&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">save_network</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.network.pth&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.iscaler.pkl&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.oscaler.pkl&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+            <span class="n">write_additional_calculation_data</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.reference.json&quot;</span><span class="p">)</span></div></div>
 
 </pre></div>
 
