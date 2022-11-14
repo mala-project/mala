@@ -158,10 +158,10 @@ def network_training_test(use_numpy=False):
     parameters.data.use_lazy_loading = False
 
 
-convert_data()
-conversion_test()
+# convert_data()
+# conversion_test()
 
 # Note: due to the way the random seed works, these functions will only
 # generate the exact same result when called one at a time.
 network_training_test(use_numpy=False)
-network_training_test(use_numpy=True)
+# network_training_test(use_numpy=True)

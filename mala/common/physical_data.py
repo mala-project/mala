@@ -116,6 +116,14 @@ class PhysicalData(ABC):
         data = np.zeros((mesh["0"].shape[0], mesh["0"].shape[1],
                          mesh["0"].shape[2], len(mesh)), dtype=mesh["0"].dtype)
 
+        # Only check this once, since we do not save arrays with different
+        # units throughout the feature dimension.
+        # Later, we can merge this unit check with the unit conversion
+        # MALA does naturally.
+        if not np.isclose(mesh[str(0)].unit_SI, self.si_unit_conversion):
+            raise Exception("MALA currently cannot operate with OpenPMD "
+                            "files with non-MALA units.")
+
         # TODO: For Franz, as discussed.
         for i in range(0, len(mesh)):
             temp_descriptors = mesh[str(i)].load_chunk()
