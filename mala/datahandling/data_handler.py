@@ -860,7 +860,7 @@ class DataHandler:
                         os.path.join(snapshot.input_npy_directory,
                                      snapshot.input_npy_file),
                     return_array=self.validation_data_inputs[validation_snapshot],
-                    cut_features=3)
+                    cut_features=cut_features)
                     self.validation_data_inputs[validation_snapshot] \
                         *= self.descriptor_calculator.\
                         convert_units(1, snapshot.input_units)
@@ -879,7 +879,7 @@ class DataHandler:
                         os.path.join(snapshot.input_npy_directory,
                                      snapshot.input_npy_file),
                     return_array=self.test_data_inputs[test_snapshot],
-                    cut_features=3)
+                    cut_features=cut_features)
                     self.test_data_inputs[test_snapshot] \
                         *= self.descriptor_calculator.\
                         convert_units(1, snapshot.input_units)
