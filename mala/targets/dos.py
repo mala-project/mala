@@ -423,7 +423,9 @@ class DOS(Target):
                         return_dos_values.append(dosval)
                         i += 1
 
-        self.density_of_states = np.array(return_dos_values)
+        array = np.array(return_dos_values)
+        self.density_of_states = array
+        return array
 
     def read_from_qe_out(self, path=None, smearing_factor=2):
         r"""
@@ -469,6 +471,7 @@ class DOS(Target):
         # QE gives the band energies in eV, so no conversion necessary here.
         dos_data = np.sum(dos_per_band, axis=(0, 1))
         self.density_of_states = dos_data
+        return dos_data
 
     def read_from_array(self, array, units="1/eV"):
         """
@@ -482,9 +485,9 @@ class DOS(Target):
         units : string
             Units the density is saved in. Usually none.
         """
+        array *= self.convert_units(1, in_units=units)
         self.density_of_states = array
-        self.density_of_states *= \
-            self.convert_units(1, in_units=units)
+        return array
 
     # Calculations
     ##############
@@ -811,7 +814,8 @@ class DOS(Target):
 
     def _process_loaded_array(self, array, units=None):
         array *= self.convert_units(1, in_units=units)
-        self.density_of_states = array
+        if self.save_target_data:
+            self.density_of_states = array
 
     @staticmethod
     def __number_of_electrons_from_dos(dos_data, energy_grid, fermi_energy,

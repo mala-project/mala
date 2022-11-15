@@ -138,6 +138,10 @@ class Target(PhysicalData):
         self.local_grid = None
         self.y_planes = None
 
+        # Control whether target data will be saved.
+        # Can be important for I/O applications.
+        self.save_target_data = True
+
     ##############################
     # Properties
     ##############################

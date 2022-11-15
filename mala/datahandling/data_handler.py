@@ -230,6 +230,13 @@ class DataHandler:
             training data.
 
         """
+        # During data loading, there is no need to save target data to
+        # calculators.
+        # Technically, this would be no issue, but due to technical reasons
+        # (i.e. float64 to float32 conversion) saving the data this way
+        # may create copies in memory.
+        self.target_calculator.save_target_data = False
+
         # Do a consistency check of the snapshots so that we don't run into
         # an error later. If there is an error, check_snapshots() will raise
         # an exception.
@@ -265,6 +272,9 @@ class DataHandler:
         printout("Build datasets.", min_verbosity=1)
         self.__build_datasets()
         printout("Build dataset: Done.", min_verbosity=0)
+
+        # After the loading is done, target data can safely be saved again.
+        self.target_calculator.save_target_data = True
 
         # Wait until all ranks are finished with data preparation.
         # It is not uncommon that ranks might be asynchronous in their
@@ -365,11 +375,10 @@ class DataHandler:
             tmp_file_name = tmp_file_name.replace("*", str(i))
             np.save(os.path.join(directory, tmp_file_name) + ".npy", tmp_array)
 
-            self.target_calculator.\
+            tmp_array = self.target_calculator.\
                 read_from_numpy_file(os.path.join(snapshot.output_npy_directory,
                                                   snapshot.output_npy_file),
                                      units=snapshot.output_units)
-            tmp_array = self.target_calculator.get_target()
             tmp_file_name = naming_scheme_output
             tmp_file_name = tmp_file_name.replace("*", str(i))
             np.save(os.path.join(directory, tmp_file_name + ".npy"), tmp_array)
@@ -690,18 +699,16 @@ class DataHandler:
                 # Data scaling is only performed on the training data sets.
                 if snapshot.snapshot_function == "tr":
                     if snapshot.snapshot_type == "numpy":
-                        self.target_calculator. \
+                        tmp = self.target_calculator. \
                             read_from_numpy_file(
                             os.path.join(snapshot.output_npy_directory,
                                          snapshot.output_npy_file),
                                          units=snapshot.output_units)
-                        tmp = self.target_calculator.get_target()
                     elif snapshot.snapshot_type == "hdf5":
-                        self.target_calculator. \
+                        tmp = self.target_calculator. \
                             read_from_openpmd_file(
                             os.path.join(snapshot.output_npy_directory,
                                          snapshot.output_npy_file))
-                        tmp = self.target_calculator.get_target()
                     else:
                         raise Exception("Unknown snapshot file type.")
 
@@ -744,11 +751,11 @@ class DataHandler:
                                         units=snapshot.input_units,
                     array=self.training_data_inputs[training_snapshot])
                 elif snapshot.snapshot_type == "hdf5":
-                    self.descriptor_calculator. \
+                    self.training_data_inputs[training_snapshot] = \
+                        self.descriptor_calculator. \
                         read_from_openpmd_file(
                         os.path.join(snapshot.input_npy_directory,
-                                     snapshot.input_npy_file),
-                    array=self.training_data_inputs[training_snapshot])
+                                     snapshot.input_npy_file))
                 else:
                     raise Exception("Unknown snapshot file type.")
                 training_snapshot += 1
@@ -780,11 +787,11 @@ class DataHandler:
                                         units=snapshot.output_units,
                     array=self.training_data_outputs[training_snapshot])
                 elif snapshot.snapshot_type == "hdf5":
+                    self.training_data_outputs[training_snapshot] = \
                     self.target_calculator. \
                         read_from_openpmd_file(
                         os.path.join(snapshot.output_npy_directory,
-                                     snapshot.output_npy_file),
-                    array=self.training_data_outputs[training_snapshot])
+                                     snapshot.output_npy_file))
                 else:
                     raise Exception("Unknown snapshot file type.")
                 training_snapshot += 1
@@ -892,11 +899,11 @@ class DataHandler:
                                             units=snapshot.input_units,
                         array=self.validation_data_inputs[validation_snapshot])
                     elif snapshot.snapshot_type == "hdf5":
+                        self.validation_data_inputs[validation_snapshot] = \
                         self.descriptor_calculator. \
                             read_from_openpmd_file(
                             os.path.join(snapshot.input_npy_directory,
-                                         snapshot.input_npy_file),
-                        array=self.validation_data_inputs[validation_snapshot])
+                                         snapshot.input_npy_file))
                     else:
                         raise Exception("Unknown snapshot file type.")
                     if snapshot.snapshot_type == "numpy":
@@ -907,11 +914,11 @@ class DataHandler:
                                            units=snapshot.output_units,
                         array=self.validation_data_outputs[validation_snapshot])
                     elif snapshot.snapshot_type == "hdf5":
+                        self.validation_data_outputs[validation_snapshot] = \
                         self.target_calculator. \
                             read_from_openpmd_file(
                             os.path.join(snapshot.output_npy_directory,
-                                         snapshot.output_npy_file),
-                        array=self.validation_data_outputs[validation_snapshot])
+                                         snapshot.output_npy_file))
                     else:
                         raise Exception("Unknown snapshot file type.")
                     validation_snapshot += 1
@@ -925,11 +932,11 @@ class DataHandler:
                                             units=snapshot.input_units,
                         array=self.test_data_inputs[test_snapshot])
                     elif snapshot.snapshot_type == "hdf5":
+                        self.test_data_inputs[test_snapshot] = \
                         self.descriptor_calculator. \
                             read_from_openpmd_file(
                             os.path.join(snapshot.input_npy_directory,
-                                         snapshot.input_npy_file),
-                        array=self.test_data_inputs[test_snapshot])
+                                         snapshot.input_npy_file))
                     else:
                         raise Exception("Unknown snapshot file type.")
                     if snapshot.snapshot_type == "numpy":
@@ -940,11 +947,11 @@ class DataHandler:
                                            units=snapshot.output_units,
                         array=self.test_data_outputs[test_snapshot])
                     elif snapshot.snapshot_type == "hdf5":
+                        self.test_data_outputs[test_snapshot] = \
                         self.target_calculator. \
                             read_from_openpmd_file(
                             os.path.join(snapshot.output_npy_directory,
-                                         snapshot.output_npy_file),
-                        array=self.test_data_outputs[test_snapshot])
+                                         snapshot.output_npy_file))
                     else:
                         raise Exception("Unknown snapshot file type.")
                     test_snapshot += 1

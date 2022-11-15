@@ -119,7 +119,7 @@ def network_training_test(use_numpy=False):
                                       data_handler.get_output_dimension()]
 
     # Reducing output for training.
-    parameters.verbosity = 0
+    parameters.verbosity = 2
     test_network = mala.Network(parameters)
     test_trainer = mala.Trainer(parameters, test_network, data_handler)
     test_trainer.train_network()
@@ -158,8 +158,8 @@ def network_training_test(use_numpy=False):
     parameters.data.use_lazy_loading = False
 
 
-convert_data()
-conversion_test()
+# convert_data()
+# conversion_test()
 
 # Note: due to the way the random seed works, these functions will only
 # generate the exact same result when called one at a time.

@@ -341,8 +341,10 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
-        data, meta = read_cube(path)*self.convert_units(1, in_units=units)
+        data, meta = read_cube(path)
+        data *= self.convert_units(1, in_units=units)
         self.density = data
+        return data
 
     def read_from_array(self, array, units="1/A^3"):
         """
@@ -356,7 +358,9 @@ class Density(Target):
         units : string
             Units the density is saved in. Usually none.
         """
-        self.density = array*self.convert_units(1, in_units=units)
+        array *= self.convert_units(1, in_units=units)
+        self.density = array
+        return array
 
     def write_as_cube(self, file_name, density_data, atoms=None,
                       grid_dimensions=None):
@@ -723,7 +727,8 @@ class Density(Target):
 
     def _process_loaded_array(self, array, units=None):
         array *= self.convert_units(1, in_units=units)
-        self.density = array
+        if self.save_target_data:
+            self.density = array
 
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
                                     create_file=True, qe_input_data=None,

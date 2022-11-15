@@ -369,10 +369,9 @@ class DataConverter:
             target_calculator_kwargs["units"] = original_units["output"]
             target_calculator_kwargs["use_memmap"] = use_memmap
             # If no units are provided we just assume standard units.
-            self.target_calculator.\
+            tmp_output = self.target_calculator.\
                 read_from_cube(snapshot["output"][0],
                                **target_calculator_kwargs)
-            tmp_output = self.target_calculator.get_target()
 
         elif description["output"] is None:
             # In this case, only the input is processed.

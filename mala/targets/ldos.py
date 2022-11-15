@@ -479,6 +479,7 @@ class LDOS(Target):
                 ldos_data_full[:, :, :, start_index-1:end_index-1] = \
                     ldos_data[:, :, :, :]
                 self.local_density_of_states = ldos_data_full
+                return ldos_data_full
             else:
                 comm = get_comm()
 
@@ -514,8 +515,10 @@ class LDOS(Target):
                               tag=get_rank() + 100)
                 barrier()
                 self.local_density_of_states = ldos_data_full
+                return ldos_data_full
         else:
             self.local_density_of_states = ldos_data
+            return ldos_data
 
     def read_from_array(self, array, units="1/(eV*A^3)"):
         """
@@ -529,8 +532,9 @@ class LDOS(Target):
         units : string
             Units the LDOS is saved in.
         """
-        self.local_density_of_states = array * \
-                                       self.convert_units(1, in_units=units)
+        array *= self.convert_units(1, in_units=units)
+        self.local_density_of_states = array
+        return array
 
     # Calculations
     ##############
@@ -1249,7 +1253,8 @@ class LDOS(Target):
 
     def _process_loaded_array(self, array, units=None):
         array *= self.convert_units(1, in_units=units)
-        self.local_density_of_states = array
+        if self.save_target_data:
+            self.local_density_of_states = array
 
     def _gather_density(self, density_values, use_pickled_comm=False):
         """

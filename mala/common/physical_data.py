@@ -138,7 +138,8 @@ class PhysicalData(ABC):
         # But there may be in the future, and this'll break
         if array is None:
             data = np.zeros((mesh["0"].shape[0], mesh["0"].shape[1],
-                             mesh["0"].shape[2], len(mesh)), dtype=mesh["0"].dtype)
+                             mesh["0"].shape[2], len(mesh)-self._feature_mask()),
+                            dtype=mesh["0"].dtype)
         else:
             if array.shape[0] != mesh["0"].shape[0] or \
                array.shape[1] != mesh["0"].shape[1] or \
@@ -164,8 +165,9 @@ class PhysicalData(ABC):
         else:
             array_shape = array.shape
             data_type = array.dtype
-        for base in range(self._feature_mask(), array_shape[3], granularity):
-            end = min(base + granularity, array_shape[3])
+        for base in range(self._feature_mask(), array_shape[3]+self._feature_mask(),
+                          granularity):
+            end = min(base + granularity, array_shape[3]+self._feature_mask())
             transposed = np.empty(
                 (end - base, array_shape[0], array_shape[1], array_shape[2]),
                 dtype=data_type)
@@ -176,13 +178,15 @@ class PhysicalData(ABC):
             if array is None:
                 data[:, :, :, base-self._feature_mask():end-self._feature_mask()] \
                     = np.transpose(transposed, axes=[1, 2, 3, 0])[:, :, :, :]
-                self._process_loaded_array(data, units=units)
-                return data
             else:
                 array[:, :, :, base-self._feature_mask():end-self._feature_mask()] \
                     = np.transpose(transposed, axes=[1, 2, 3, 0])[:, :, :, :]
-                self._process_loaded_array(array, units=units)
-                return array
+
+        if array is None:
+            self._process_loaded_array(data, units=units)
+            return data
+        else:
+            self._process_loaded_array(array, units=units)
 
     def read_dimensions_from_numpy_file(self, path):
         """

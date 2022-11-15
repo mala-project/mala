@@ -142,23 +142,21 @@ class LazyLoadDataset(torch.utils.data.Dataset):
                 os.path.join(self.snapshot_list[file_index].input_npy_directory,
                              self.snapshot_list[file_index].input_npy_file),
                                 units=self.snapshot_list[file_index].input_units)
-            self.target_calculator. \
+            self.output_data = self.target_calculator. \
                 read_from_numpy_file(
                 os.path.join(self.snapshot_list[file_index].output_npy_directory,
                              self.snapshot_list[file_index].output_npy_file),
                              units=self.snapshot_list[file_index].output_units)
-            self.output_data = self.target_calculator.get_target()
 
         elif self.snapshot_list[file_index].snapshot_type == "hdf5":
             self.input_data = self.descriptor_calculator. \
                 read_from_openpmd_file(
                 os.path.join(self.snapshot_list[file_index].input_npy_directory,
                              self.snapshot_list[file_index].input_npy_file))
-            self.target_calculator. \
+            self.output_data = self.target_calculator. \
                 read_from_openpmd_file(
                 os.path.join(self.snapshot_list[file_index].output_npy_directory,
                              self.snapshot_list[file_index].output_npy_file))
-            self.output_data = self.target_calculator.get_target()
 
         # Transform the data.
         self.input_data = \

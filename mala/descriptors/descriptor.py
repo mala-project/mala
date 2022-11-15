@@ -260,6 +260,7 @@ class Descriptor(PhysicalData):
     def _process_loaded_array(self, array, units=None):
         array *= self.convert_units(1, in_units=units)
 
+
     def _process_loaded_dimensions(self, array_dimensions):
         if self.descriptors_contain_xyz:
             return (array_dimensions[0], array_dimensions[1],
