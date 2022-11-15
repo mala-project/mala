@@ -722,7 +722,8 @@ class Density(Target):
     #################
 
     def _process_loaded_array(self, array, units=None):
-        self.density = array * self.convert_units(1, in_units=units)
+        array *= self.convert_units(1, in_units=units)
+        self.density = array
 
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
                                     create_file=True, qe_input_data=None,

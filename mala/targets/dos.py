@@ -810,7 +810,8 @@ class DOS(Target):
     #################
 
     def _process_loaded_array(self, array, units=None):
-        self.density_of_states = array * self.convert_units(1, in_units=units)
+        array *= self.convert_units(1, in_units=units)
+        self.density_of_states = array
 
     @staticmethod
     def __number_of_electrons_from_dos(dos_data, energy_grid, fermi_energy,

@@ -1248,8 +1248,8 @@ class LDOS(Target):
     #################
 
     def _process_loaded_array(self, array, units=None):
-        self.local_density_of_states = array * \
-                                        self.convert_units(1, in_units=units)
+        array *= self.convert_units(1, in_units=units)
+        self.local_density_of_states = array
 
     def _gather_density(self, density_values, use_pickled_comm=False):
         """

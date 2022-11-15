@@ -258,11 +258,7 @@ class Descriptor(PhysicalData):
     #################
 
     def _process_loaded_array(self, array, units=None):
-        if self.descriptors_contain_xyz:
-            return array[:, :, :, 3:] * \
-                   self.convert_units(1, in_units=units)
-        else:
-            return array * self.convert_units(1, in_units=units)
+        array *= self.convert_units(1, in_units=units)
 
     def _process_loaded_dimensions(self, array_dimensions):
         if self.descriptors_contain_xyz:
@@ -282,6 +278,12 @@ class Descriptor(PhysicalData):
             mesh.geometry = io.Geometry.cartesian
             mesh.grid_spacing = voxel.cellpar()[0:3]
             mesh.set_attribute("angles", voxel.cellpar()[3:])
+
+    def _feature_mask(self):
+        if self.descriptors_contain_xyz:
+            return 3
+        else:
+            return 0
 
     def _setup_lammps_processors(self, nx, ny, nz):
         """

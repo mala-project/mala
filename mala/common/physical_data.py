@@ -57,7 +57,7 @@ class PhysicalData(ABC):
     #   because there is no need to.
     ##############################
 
-    def read_from_numpy_file(self, path, units=None):
+    def read_from_numpy_file(self, path, units=None, array=None):
         """
         Read the data from a numpy file.
 
@@ -69,16 +69,27 @@ class PhysicalData(ABC):
         units : string
             Units the data is saved in.
 
+        array : np.ndarray
+            If not None, the array to save the data into.
+            The array has to be 4-dimensional.
+
         Returns
         -------
-        data : numpy.ndarray
-            A numpy array containing the data.
+        data : numpy.ndarray or None
+            If array is None, a numpy array containing the data.
+            Elsewise, None, as the data will be saved into the provided
+            array.
 
         """
-        loaded_array = np.load(path)
-        return self._process_loaded_array(loaded_array, units=units)
+        if array is None:
+            loaded_array = np.load(path)[:, :, :, self._feature_mask():]
+            self._process_loaded_array(loaded_array, units=units)
+            return loaded_array
+        else:
+            array[:, :, :, :] = np.load(path)[:, :, :, self._feature_mask():]
+            self._process_loaded_array(array, units=units)
 
-    def read_from_openpmd_file(self, path, units=None):
+    def read_from_openpmd_file(self, path, units=None, array=None):
         """
         Read the data from a numpy file.
 
@@ -90,11 +101,16 @@ class PhysicalData(ABC):
         units : string
             Units the data is saved in.
 
+        array : np.ndarray
+            If not None, the array to save the data into.
+            The array has to be 4-dimensional.
+
         Returns
         -------
-        data : numpy.ndarray
-            A numpy array containing the data.
-
+        data : numpy.ndarray or None
+            If array is None, a numpy array containing the data.
+            Elsewise, None, as the data will be saved into the provided
+            array.
         """
         series = io.Series(path, io.Access.read_only,
                            options=json.dumps(
@@ -120,8 +136,16 @@ class PhysicalData(ABC):
         # TODO: Are there instances in MALA, where we wouldn't just label
         # the feature dimension with 0,1,... ? I can't think of one.
         # But there may be in the future, and this'll break
-        data = np.zeros((mesh["0"].shape[0], mesh["0"].shape[1],
-                         mesh["0"].shape[2], len(mesh)), dtype=mesh["0"].dtype)
+        if array is None:
+            data = np.zeros((mesh["0"].shape[0], mesh["0"].shape[1],
+                             mesh["0"].shape[2], len(mesh)), dtype=mesh["0"].dtype)
+        else:
+            if array.shape[0] != mesh["0"].shape[0] or \
+               array.shape[1] != mesh["0"].shape[1] or \
+               array.shape[2] != mesh["0"].shape[2] or \
+               array.shape[3] != len(mesh)-self._feature_mask():
+                raise Exception("Cannot load data into array, wrong "
+                                "shape provided.")
 
         # Only check this once, since we do not save arrays with different
         # units throughout the feature dimension.
@@ -133,20 +157,32 @@ class PhysicalData(ABC):
                             
         # Deal with `granularity` items of the vectors at a time
         # Or in the openPMD layout: with `granularity` record components
-        granularity = 16 # just some random value for now
-        for base in range(0, data.shape[3], granularity):
-            end = min(base + granularity, data.shape[3])
+        granularity = 1 # just some random value for now
+        if array is None:
+            array_shape = data.shape
+            data_type = data.dtype
+        else:
+            array_shape = array.shape
+            data_type = array.dtype
+        for base in range(self._feature_mask(), array_shape[3], granularity):
+            end = min(base + granularity, array_shape[3])
             transposed = np.empty(
-                (end - base, data.shape[0], data.shape[1], data.shape[2]),
-                dtype=data.dtype)
+                (end - base, array_shape[0], array_shape[1], array_shape[2]),
+                dtype=data_type)
             for i in range(base, end):
                 # transposed[i - base, :, :, :] = mesh[str(i)][:, :, :]
                 mesh[str(i)].load_chunk(transposed[i - base, :, :, :])
             series.flush()
-            backtranspose = np.transpose(transposed, axes=[1, 2, 3, 0])
-            data[:, :, :, base:end] = backtranspose[:, :, :, :]
-
-        return self._process_loaded_array(data, units=units)
+            if array is None:
+                data[:, :, :, base-self._feature_mask():end-self._feature_mask()] \
+                    = np.transpose(transposed, axes=[1, 2, 3, 0])[:, :, :, :]
+                self._process_loaded_array(data, units=units)
+                return data
+            else:
+                array[:, :, :, base-self._feature_mask():end-self._feature_mask()] \
+                    = np.transpose(transposed, axes=[1, 2, 3, 0])[:, :, :, :]
+                self._process_loaded_array(array, units=units)
+                return array
 
     def read_dimensions_from_numpy_file(self, path):
         """
@@ -267,6 +303,9 @@ class PhysicalData(ABC):
     @abstractmethod
     def _process_loaded_dimensions(self, array_dimensions):
         pass
+
+    def _feature_mask(self):
+        return 0
 
     def _set_geometry_info(self, mesh):
         pass
