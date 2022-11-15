@@ -1417,7 +1417,8 @@ class Parameters:
                 json_dict = json.load(json_file)
             loaded_parameters = cls()
             for key in json_dict:
-                if isinstance(json_dict[key], dict):
+                if isinstance(json_dict[key], dict) and key \
+                        != "openpmd_configuration":
                     # These are the other parameter classes.
                     sub_parameters =\
                         globals()[json_dict[key]["_parameters_type"]].\
@@ -1427,7 +1428,8 @@ class Parameters:
             # We iterate a second time, to set global values, so that they
             # are properly forwarded.
             for key in json_dict:
-                if not isinstance(json_dict[key], dict):
+                if not isinstance(json_dict[key], dict) or key == \
+                        "openpmd_configuration":
                     setattr(loaded_parameters, key, json_dict[key])
             if no_snapshots is True:
                 loaded_parameters.data.snapshot_directories_list = []

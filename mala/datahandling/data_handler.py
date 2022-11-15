@@ -594,6 +594,12 @@ class DataHandler:
                                                       self.grid_dimension[2],
                                                       self.get_output_dimension()),
                                                       dtype=np.float32)
+            else:
+                # TODO: Get rid of this.
+                # Currently needed because we don't check if the
+                # data is empty.
+                self.training_data_inputs = np.zeros(0, dtype=np.float32)
+                self.training_data_outputs = np.zeros(0, dtype=np.float32)
             if self.nr_validation_data > 0:
                 self.validation_data_inputs = np.zeros((self.nr_validation_snapshots,
                                                         self.grid_dimension[0],
@@ -607,6 +613,13 @@ class DataHandler:
                                                          self.grid_dimension[2],
                                                         self.get_output_dimension()),
                                                         dtype=np.float32)
+            else:
+                # TODO: Get rid of this.
+                # Currently needed because we don't check if the
+                # data is empty.
+                self.validation_data_inputs = np.zeros(0, dtype=np.float32)
+                self.validation_data_outputs = np.zeros(0, dtype=np.float32)
+
             if self.nr_test_data > 0:
                 self.test_data_inputs = np.zeros((self.nr_test_snapshots,
                                                   self.grid_dimension[0],
