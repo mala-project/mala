@@ -281,7 +281,7 @@ class DataScaler:
         if self.scale_standard is False and self.scale_normal is False:
             pass
 
-        if self.cantransform is False:
+        elif self.cantransform is False:
             raise Exception("Transformation cannot be done, this DataScaler "
                             "was never initialized")
 
