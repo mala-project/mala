@@ -25,7 +25,8 @@ class ParametersBase(JSONSerializable):
     def __init__(self,):
         super(ParametersBase, self).__init__()
         self._configuration = {"gpu": False, "horovod": False, "mpi": False,
-                               "device": "cpu", "openpmd_configuration": {}}
+                               "device": "cpu", "openpmd_configuration": {},
+                               "openpmd_granularity": 1}
         pass
 
     def show(self, indent=""):
@@ -62,6 +63,9 @@ class ParametersBase(JSONSerializable):
 
     def _update_openpmd_configuration(self, new_openpmd):
         self._configuration["openpmd_configuration"] = new_openpmd
+
+    def _update_openpmd_granularity(self, new_granularity):
+        self._configuration["openpmd_granularity"] = new_granularity
 
     @staticmethod
     def _member_to_json(member):
@@ -550,7 +554,6 @@ class ParametersData(ParametersBase):
         If use_clustering is True, this is the ratio of training data used
         to train the encoder for the clustering.
 
-
     sample_ratio : float
         If use_clustering is True, this is the ratio of training data used
         for sampling per snapshot (according to clustering then, of course).
@@ -568,31 +571,6 @@ class ParametersData(ParametersBase):
         self.number_of_clusters = 40
         self.train_ratio = 0.1
         self.sample_ratio = 0.5
-
-        # TODO: Maybe as a percentage? Feature dimensions can be quite
-        # different.
-        self.openpmd_granularity = 1
-
-    @property
-    def openpmd_granularity(self):
-        """
-        Adjust the memory overhead of the OpenPMD interface.
-
-        Smallest possible value is 1, meaning smallest memory footprint
-        and slowest I/O. Higher values will introduce some memory penalty,
-        but offer greater speed.
-        The maximum level is the feature dimension of your data set, if
-        you choose a value larger than this feature dimension, it will
-        automatically be set to the feature dimension upon loading.
-        """
-        return self._openpmd_granularity
-
-    @openpmd_granularity.setter
-    def openpmd_granularity(self, value):
-        if value < 1:
-            value = 1
-        self._openpmd_granularity = value
-
 
 class ParametersRunning(ParametersBase):
     """
@@ -1113,6 +1091,35 @@ class Parameters:
         self.verbosity = 1
         self.device = "cpu"
         self.openpmd_configuration = {}
+        # TODO: Maybe as a percentage? Feature dimensions can be quite
+        # different.
+        self.openpmd_granularity = 1
+
+    @property
+    def openpmd_granularity(self):
+        """
+        Adjust the memory overhead of the OpenPMD interface.
+
+        Smallest possible value is 1, meaning smallest memory footprint
+        and slowest I/O. Higher values will introduce some memory penalty,
+        but offer greater speed.
+        The maximum level is the feature dimension of your data set, if
+        you choose a value larger than this feature dimension, it will
+        automatically be set to the feature dimension upon loading.
+        """
+        return self._openpmd_granularity
+
+    @openpmd_granularity.setter
+    def openpmd_granularity(self, value):
+        if value < 1:
+            value = 1
+        self._openpmd_granularity = value
+        self.network._update_openpmd_granularity(self._openpmd_granularity)
+        self.descriptors._update_openpmd_granularity(self._openpmd_granularity)
+        self.targets._update_openpmd_granularity(self._openpmd_granularity)
+        self.data._update_openpmd_granularity(self._openpmd_granularity)
+        self.running._update_openpmd_granularity(self._openpmd_granularity)
+        self.hyperparameters._update_openpmd_granularity(self._openpmd_granularity)
 
     @property
     def verbosity(self):
