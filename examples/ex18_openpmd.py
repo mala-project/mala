@@ -46,6 +46,9 @@ parameters.running.mini_batch_size = 40
 parameters.running.learning_rate = 0.00001
 parameters.running.trainingtype = "Adam"
 
+# Large values: fast, more memory
+parameters.data.openpmd_granularity = 100
+
 
 def convert_data():
     """Convert/calculate volumetric data to numpy/hdf5 for later use."""
@@ -119,7 +122,7 @@ def network_training_test(use_numpy=False):
                                       data_handler.get_output_dimension()]
 
     # Reducing output for training.
-    parameters.verbosity = 0
+    parameters.verbosity = 1
     test_network = mala.Network(parameters)
     test_trainer = mala.Trainer(parameters, test_network, data_handler)
     test_trainer.train_network()

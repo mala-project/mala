@@ -569,6 +569,30 @@ class ParametersData(ParametersBase):
         self.train_ratio = 0.1
         self.sample_ratio = 0.5
 
+        # TODO: Maybe as a percentage? Feature dimensions can be quite
+        # different.
+        self.openpmd_granularity = 1
+
+    @property
+    def openpmd_granularity(self):
+        """
+        Adjust the memory overhead of the OpenPMD interface.
+
+        Smallest possible value is 1, meaning smallest memory footprint
+        and slowest I/O. Higher values will introduce some memory penalty,
+        but offer greater speed.
+        The maximum level is the feature dimension of your data set, if
+        you choose a value larger than this feature dimension, it will
+        automatically be set to the feature dimension upon loading.
+        """
+        return self._openpmd_granularity
+
+    @openpmd_granularity.setter
+    def openpmd_granularity(self, value):
+        if value < 1:
+            value = 1
+        self._openpmd_granularity = value
+
 
 class ParametersRunning(ParametersBase):
     """

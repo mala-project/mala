@@ -20,6 +20,7 @@ class PhysicalData(ABC):
 
     def __init__(self, parameters):
         self.parameters = parameters
+        self.granularity = self.parameters.data.openpmd_granularity
 
     ##############################
     # Properties
@@ -158,7 +159,6 @@ class PhysicalData(ABC):
                             
         # Deal with `granularity` items of the vectors at a time
         # Or in the openPMD layout: with `granularity` record components
-        granularity = 1 # just some random value for now
         if array is None:
             array_shape = data.shape
             data_type = data.dtype
@@ -166,8 +166,8 @@ class PhysicalData(ABC):
             array_shape = array.shape
             data_type = array.dtype
         for base in range(self._feature_mask(), array_shape[3]+self._feature_mask(),
-                          granularity):
-            end = min(base + granularity, array_shape[3]+self._feature_mask())
+                          self.granularity):
+            end = min(base + self.granularity, array_shape[3]+self._feature_mask())
             transposed = np.empty(
                 (end - base, array_shape[0], array_shape[1], array_shape[2]),
                 dtype=data_type)
