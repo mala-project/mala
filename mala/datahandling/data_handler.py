@@ -967,8 +967,7 @@ class DataHandler:
                         [self.nr_test_data, self.get_input_dimension()])
                 self.test_data_inputs = \
                     torch.from_numpy(self.test_data_inputs).float()
-                self.test_data_inputs = \
-                    self.input_data_scaler.transform(self.test_data_inputs)
+                self.input_data_scaler.transform(self.test_data_inputs)
                 self.test_data_inputs.requires_grad = True
 
             self.validation_data_inputs = \
@@ -976,10 +975,8 @@ class DataHandler:
                     [self.nr_validation_data, self.get_input_dimension()])
             self.validation_data_inputs = \
                 torch.from_numpy(self.validation_data_inputs).float()
-            self.validation_data_inputs = \
-                self.input_data_scaler.transform(self.validation_data_inputs)
-            self.training_data_inputs = \
-                self.input_data_scaler.transform(self.training_data_inputs)
+            self.input_data_scaler.transform(self.validation_data_inputs)
+            self.input_data_scaler.transform(self.training_data_inputs)
 
             if self.nr_test_data != 0:
                 self.test_data_outputs = \
@@ -987,18 +984,15 @@ class DataHandler:
                         [self.nr_test_data, self.get_output_dimension()])
                 self.test_data_outputs = \
                     torch.from_numpy(self.test_data_outputs).float()
-                self.test_data_outputs = \
-                    self.output_data_scaler.transform(self.test_data_outputs)
+                self.output_data_scaler.transform(self.test_data_outputs)
 
             self.validation_data_outputs = \
                 self.validation_data_outputs.reshape(
                     [self.nr_validation_data, self.get_output_dimension()])
             self.validation_data_outputs = \
                 torch.from_numpy(self.validation_data_outputs).float()
-            self.validation_data_outputs = \
-                self.output_data_scaler.transform(self.validation_data_outputs)
-            self.training_data_outputs = \
-                self.output_data_scaler.transform(self.training_data_outputs)
+            self.output_data_scaler.transform(self.validation_data_outputs)
+            self.output_data_scaler.transform(self.training_data_outputs)
 
             if self.nr_training_data != 0:
                 self.training_data_set = \
@@ -1046,9 +1040,9 @@ class DataHandler:
             numpy_array = numpy_array.reshape(desired_dimensions)
         numpy_array = torch.from_numpy(numpy_array).float()
         if data_type == "in":
-            numpy_array = self.input_data_scaler.transform(numpy_array)
+            self.input_data_scaler.transform(numpy_array)
         elif data_type == "out":
-            numpy_array = self.output_data_scaler.transform(numpy_array)
+            self.output_data_scaler.transform(numpy_array)
         else:
             raise Exception("Please choose either \"in\" or \"out\" for "
                             "this function.")

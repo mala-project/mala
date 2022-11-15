@@ -164,4 +164,4 @@ def network_training_test(use_numpy=False):
 # Note: due to the way the random seed works, these functions will only
 # generate the exact same result when called one at a time.
 network_training_test(use_numpy=False)
-network_training_test(use_numpy=True)
+# network_training_test(use_numpy=True)
