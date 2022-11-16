@@ -105,16 +105,16 @@ def model_setup(args, **kwargs):
 
 def train(args, model, **kwargs):
 
-    training_snapshots = load_snapshots_list(args.training_snapshots)
-    validation_snapshots = load_snapshots_list(args.validation_snapshots)
+    snapshots = load_snapshots_list(args.snapshots)
 
     data_path = os.path.join(args.data_dir, args.dataset)
     fp_transform = ConfigurationFingerprint(args.rcut, args.R, args.l, args.m, args.scaling)
-    train_data = AtomicConfigurations(data_path, training_snapshots, args.rcut, data_transform=fp_transform, rotate=args.rotate_train)
-    valid_data = AtomicConfigurations(data_path, validation_snapshots, args.rcut, data_transform=fp_transform, rotate=args.rotate_test)
-    n_train, n_valid = len(train_data), len(valid_data)
-    print("n_train: {}, n_valid: {}".format(n_train, n_valid))
-
+    all_data = AtomicConfigurations(data_path, snapshots, args.rcut, data_transform=fp_transform, rotate=args.rotate_train)
+    num_all_data = len(all_data)
+    num_valid_data = int(args.validation_fraction*num_all_data)
+    num_train_data = num_all_data - num_valid_data 
+    train_data, valid_data = torch.utils.data.random_split(all_data, [num_train_data, num_valid_data], generator=torch.Generator().manual_seed(args.seed))
+    print(f"Validation set size: {len(valid_data)}; Training set size: {len(train_data)}")
     num_workers = args.workers
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=num_workers, pin_memory=True, worker_init_fn=worker_init_fn)
     valid_loader = torch.utils.data.DataLoader(valid_data, batch_size=args.batch_size, num_workers=num_workers, pin_memory=True, drop_last=False, worker_init_fn=worker_init_fn)
@@ -252,8 +252,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-dataset", default="aluminum", help="Dataset name")
     parser.add_argument("-d", "--data_dir", help="Data directory")
-    parser.add_argument("--training_snapshots", help="File containing list of training snapshots", default="training_data.txt")
-    parser.add_argument("--validation_snapshots", help="File containing list of validation snapshots", default="validation_data.txt")
+    parser.add_argument("--snapshots", help="File containing list of training snapshots", default="training_data.txt")
+    parser.add_argument("--validation_fraction", help="Fraction of data to be used for validation.", default=0.3, type=float)
     parser.add_argument("-o", "--out", help="Name of output directory", default="ados_out") 
     parser.add_argument("-x", "--results", default='', help="Name of experiment results file")
     parser.add_argument('-l', '--level', help='Level of mesh refinement', type=int, dest='l', default=3)
@@ -272,7 +272,6 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=1e-2)
     parser.add_argument("--seed", type=int, help='random seed', default=24)
     parser.add_argument("--rotate-train", action='store_true')
-    parser.add_argument("--rotate-test", action='store_true')
     parser.add_argument("--test-trials", type=int, default=1, help="Number of test trials")
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--debug", action='store_true', help="Debug mode: single batch, single epoch")

@@ -69,25 +69,28 @@ def  ensemble_infer(hidden_output_layers: int, param_factor: int,
         with open(output_dir / "stdout.txt", "w") as outf, open(output_dir / "stderr.txt", "w") as errf:
             subprocess.run(cmd, stdout=outf, stderr=errf, cwd=output_dir)
 
-
-def  dropout_infer(hidden_output_layers: int, param_factor: int, dropout: float, 
-                   ensemble_size: int, test_snapshots: str,
+ 
+def dropout_infer(hidden_output_layers: int, param_factor: int, dropout: float, 
+                   ensemble_size: int, resume: bool, test_snapshots: str,
                    dataset: str, data_dir: str, out: str, model: str):
     test_file = make_relative(test_snapshots)
     model_rel = make_relative(model)
-    for i in range(rank, ensemble_size, num_ranks):
-        label = f"{i:03d}"
-        output_dir = pathlib.Path(label)
-        output_dir.mkdir(parents=True, exist_ok=True)
-        gpu_id = rank % 4
-        seed = get_seed(i) 
-        cmd = get_test_cmd(gpu_id, seed, hidden_output_layers, param_factor,
-                test_file, dataset, data_dir, out, model_rel, dropout) 
-        with open(output_dir / "node.txt", "w") as f:
-            f.write(f"Rank {rank} is running model {i} on {platform.node()} using gpu {gpu_id}")
-        with open(output_dir / "stdout.txt", "w") as outf, open(output_dir / "stderr.txt", "w") as errf:
-            subprocess.run(cmd, stdout=outf, stderr=errf, cwd=output_dir)
-
+    labels = [f"{i:03d}" for i in range(ensemble_size)]
+    if resume:
+        labels = [label for label in labels if not (pathlib.Path(label) / "out" /"test.csv").exists()]
+    for i in range(rank, len(labels), num_ranks):
+       label = labels[i]
+       output_dir = pathlib.Path(label)
+       output_dir.mkdir(parents=True, exist_ok=True)
+       gpu_id = rank % 4
+       seed = get_seed(i) 
+       cmd = get_test_cmd(gpu_id, seed, hidden_output_layers, param_factor,
+               test_file, dataset, data_dir, out, model_rel, dropout) 
+       with open(output_dir / "node.txt", "w") as f:
+           f.write(f"Rank {rank} is running model {i} on {platform.node()} using gpu {gpu_id}")
+       with open(output_dir / "stdout.txt", "w") as outf, open(output_dir / "stderr.txt", "w") as errf:
+           subprocess.run(cmd, stdout=outf, stderr=errf, cwd=output_dir)
+    
 
 def get_model_name(dir_num):
     model_file = glob.glob(dir_num + "/out/logs/*.pkl")
@@ -129,10 +132,9 @@ def ensemble_train(hidden_output_layers: int, param_factor: int, lr: float, epoc
 
 
 def hyperparameter_opt(hidden_output_layers, param_factor, lr, epochs,
-                     dropout, ensemble_start, training_snapshots,
-                     validation_snapshots, dataset, data_dir, out, replicates, resume):
-    val_file = make_relative(validation_snapshots)
-    train_file = make_relative(training_snapshots)
+                     dropout, ensemble_start, snapshots,
+                     validation_fraction, dataset, data_dir, out, replicates, resume):
+    snapshots_file = make_relative(snapshots)
     configs = generate_configs(hidden_output_layers, param_factor, lr, epochs, dropout, replicates)
     
     if resume:
@@ -147,7 +149,7 @@ def hyperparameter_opt(hidden_output_layers, param_factor, lr, epochs,
         seed = get_seed(i)
         gpu_id = rank % 4
         cmd = get_training_cmd(gpu_id, seed, config.hidden_output_layers, config.param_factor,
-                            config.lr, config.epochs, train_file, val_file, dataset, data_dir,
+                            config.lr, config.epochs, snapshots_file, validation_fraction, dataset, data_dir,
                             out, config.dropout)
         model_dir = pathlib.Path(label)
         shutil.rmtree(str(model_dir), ignore_errors=True)
@@ -195,18 +197,18 @@ def generate_configs(hidden_output_layers, param_factor, lr, epochs, dropout, re
 def model_exists(label):
     return bool(get_model_name(label))
 
-
-def single_train(hidden_output_layers: int, param_factor: int, lr: float, epochs: int, 
-        training_snapshots: str, validation_snapshots: str, dataset: str, data_dir: str, out: str):
+ 
+def single_train(hidden_output_layers: int, param_factor: int, lr: float, epochs: int, dropout: float,
+        snapshots: str, validation_fraction: float, dataset: str, data_dir: str, out: str):
     if rank == 0:
         gpu_id = 0
         cmd = get_training_cmd(gpu_id, 1337, hidden_output_layers, param_factor,
-            lr, epochs, training_snapshots,
-            validation_snapshots, dataset, data_dir, out, 0.0)
+            lr, epochs, snapshots,
+            validation_fraction, dataset, data_dir, out, dropout)
 
         with open("stdout.txt", "w") as outf, open("stderr.txt", "w") as errf:
             subprocess.run(cmd, stdout=outf, stderr=errf)
-
+        record_training_losses("stdout.txt", "training_validation_losses.txt")
 
 def  single_infer(hidden_output_layers: int, param_factor: int, dropout: float,
                    test_snapshots: str, dataset: str, data_dir: str, out: str, model: str):
@@ -271,8 +273,8 @@ def get_test_cmd(gpu_id: int, seed: int, hidden_output_layers: int, param_factor
 
 
 def get_training_cmd(gpu_id: int, seed: int, hidden_output_layers: int, param_factor: int,
-            lr: float, epochs: int, training_snapshots: str,
-            validation_snapshots: str, dataset: str, data_dir: str, out: str,
+            lr: float, epochs: int, snapshots: str,
+            validation_fraction: float, dataset: str, data_dir: str, out: str,
             dropout: float):
     cmd = ["python3",
            "-m",
@@ -281,10 +283,10 @@ def get_training_cmd(gpu_id: int, seed: int, hidden_output_layers: int, param_fa
            dataset,
            "--data_dir",
            data_dir,
-           "--training_snapshots",
-           training_snapshots,
-           "--validation_snapshots",
-           validation_snapshots,
+           "--snapshots",
+           snapshots,
+           "--validation_fraction",
+           str(validation_fraction),
            "--out",
            out,
            "--epochs",
@@ -330,6 +332,7 @@ def create_parser() -> ArgumentParser:
     parser_dropout_infer.add_argument("--out", default="out")
     parser_dropout_infer.add_argument("--dataset", default="aluminum")
     parser_dropout_infer.add_argument("--data-dir", default="/g/g20/jasteph/ados_dataset")
+    parser_dropout_infer.add_argument("--resume", action="store_true", default=False)
     parser_dropout_infer.add_argument("num", type=int)
     parser_dropout_infer.add_argument("model")
 
@@ -350,8 +353,8 @@ def create_parser() -> ArgumentParser:
     parser_hyper_opt.add_argument("--param-factor", nargs='+', type=int)
     parser_hyper_opt.add_argument("--lr", nargs='+', type=float)
     parser_hyper_opt.add_argument("--dropout", nargs='*', type=float)
-    parser_hyper_opt.add_argument("--training-snapshots", default="training_data.txt")
-    parser_hyper_opt.add_argument("--validation-snapshots", default="validation_data.txt")
+    parser_hyper_opt.add_argument("--snapshots", default="training_data.txt")
+    parser_hyper_opt.add_argument("--validation-fraction", default=0.3, type=float)
     parser_hyper_opt.add_argument("--out", default="out")
     parser_hyper_opt.add_argument("--epochs", default=200, type=int)
     parser_hyper_opt.add_argument("--dataset", default="aluminum")
@@ -364,9 +367,9 @@ def create_parser() -> ArgumentParser:
     parser_single_train.add_argument("--hidden-output-layers", default=2)
     parser_single_train.add_argument("--param-factor", default=4)
     parser_single_train.add_argument("--lr", default=1e-2)
-    parser_single_train.add_argument("--dropout", default=0.0)
-    parser_single_train.add_argument("--training-snapshots", default="training_data.txt")
-    parser_single_train.add_argument("--validation-snapshots", default="validation_data.txt")
+    parser_single_train.add_argument("--dropout", default=0.0, type=float)  
+    parser_single_train.add_argument("--snapshots", default="training_data.txt")
+    parser_single_train.add_argument("--validation-fraction", default=0.3)
     parser_single_train.add_argument("--out", default="out")
     parser_single_train.add_argument("--epochs", default=200)
     parser_single_train.add_argument("--dataset", default="aluminum")
@@ -400,17 +403,18 @@ def main():
                    args["test_snapshots"], args["dataset"], args["data_dir"], args["out"],
                    args["model-dir"])
     elif args["command"] == 'dropout-infer':
-        dropout_infer(args["hidden_output_layers"], args["param_factor"], args["dropout"], args["num"],
+        print(f"resume flag is {args['resume']}") 
+        dropout_infer(args["hidden_output_layers"], args["param_factor"], args["dropout"], args["num"], args["resume"],
                    args["test_snapshots"], args["dataset"], args["data_dir"], args["out"],
                    args["model"])
     elif args["command"] == "hyperparameter-opt":
         hyperparameter_opt(args["hidden_output_layers"], args["param_factor"], args["lr"], args["epochs"],
-                     args["dropout"], args["start"], args["training_snapshots"],
-                     args["validation_snapshots"], args["dataset"], args["data_dir"],
+                     args["dropout"], args["start"], args["snapshots"],
+                     args["validation_fraction"], args["dataset"], args["data_dir"],
                      args["out"], args["replicates"], args["resume"])
     elif args["command"] == 'single-train':
-        single_train(args["hidden_output_layers"], args["param_factor"], args["lr"], args["epochs"],
-                   args["training_snapshots"], args["validation_snapshots"],
+        single_train(args["hidden_output_layers"], args["param_factor"], args["lr"], args["epochs"], args["dropout"],
+                   args["snapshots"], args["validation_fraction"],
                    args["dataset"], args["data_dir"], args["out"])
     elif args["command"] == 'single-infer':
         single_infer(args["hidden_output_layers"], args["param_factor"], args["dropout"],
