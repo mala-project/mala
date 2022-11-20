@@ -8,6 +8,16 @@ from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 
+descriptor_input_types = [
+    "qe.out"
+]
+target_input_types = [
+    ".cube"
+]
+additional_info_input_types = [
+    "qe.out"
+]
+
 
 class DataConverter:
     """
@@ -59,88 +69,97 @@ class DataConverter:
         self.__snapshot_description = []
         self.__snapshot_units = []
 
-    def add_snapshot_qeout_cube(self, qe_out_file, cube_files_scheme,
-                                input_units=None, output_units=None):
+        # Keep track of what has to be done by this data converter.
+        self.process_descriptors = False
+        self.process_targets = False
+        self.process_additional_info = False
+
+    def add_snapshot(self, descriptor_input_type=None,
+                     descriptor_input_path=None,
+                     target_input_type=None,
+                     target_input_path=None,
+                     additional_info_input_type=None,
+                     additional_info_input_path=None,
+                     descriptor_units=None, target_units=None):
         """
-        Add a Quantum Espresso snapshot to the list of conversion list.
-
-        Please note that a Quantum Espresso snapshot consists of:
-
-            - a Quantum Espresso output file for a self-consistent calculation.
-            - multiple .cube files containing the LDOS
+        Add a snapshot to be processed.
 
         Parameters
         ----------
-        qe_out_file : string
-            Name of Quantum Espresso output file for this snapshot.
+        descriptor_input_type : string
+            Type of descriptor data to be processed.
+            See mala.datahandling.data_converter.descriptor_input_types
+            for options.
 
-        cube_files_scheme : string
-            Naming scheme for the LDOS .cube files.
+        descriptor_input_path : string
+            Path of descriptor data to be processed.
 
-        input_units : string
-            Unit of the input data.
+        target_input_type : string
+            Type of target data to be processed.
+            See mala.datahandling.data_converter.target_input_types
+            for options.
 
-        output_units : string
-            Unit of the output data.
+        target_input_path : string
+            Path of target data to be processed.
+
+        additional_info_input_type : string
+            Type of additional info data to be processed.
+            See mala.datahandling.data_converter.additional_info_input_types
+            for options.
+
+        additional_info_input_path : string
+            Path of additional info data to be processed.
+
+        descriptor_units : string
+            Units for descriptor data processing.
+
+        target_units : string
+            Units for target data processing.
         """
-        self.__snapshots_to_convert.append({"input": [qe_out_file],
-                                            "output": [cube_files_scheme]})
-        self.__snapshot_description.append({"input": "qe.out",
-                                            "output": ".cube"})
-        self.__snapshot_units.append({"input": input_units,
-                                      "output": output_units})
+        # Check the input.
+        if descriptor_input_type is not None:
+            if descriptor_input_path is None:
+                raise Exception("Cannot process descriptor data with no path "
+                                "given.")
+            if descriptor_input_type not in descriptor_input_types:
+                raise Exception("Cannot process this type of descriptor data.")
+            self.process_descriptors = True
 
-    def add_snapshot_qeout(self, qe_out_file, input_units=None):
-        """
-        Add a Quantum Espresso snapshot to the list of conversion list.
+        if target_input_type is not None:
+            if target_input_path is None:
+                raise Exception("Cannot process target data with no path "
+                                "given.")
+            if target_input_type not in target_input_types:
+                raise Exception("Cannot process this type of target data.")
+            self.process_targets = True
 
-        This snapshot only contains a QE.out file, i.e., only the SNAP
-        descriptors will be calculated. Useful if the output data has already
-        been processed.
+        if additional_info_input_type is not None:
+            if additional_info_input_path is None:
+                raise Exception("Cannot process additional info data with "
+                                "no path given.")
+            if additional_info_input_type not in additional_info_input_types:
+                raise Exception("Cannot process this type of additional info "
+                                "data.")
+            self.process_additional_info = True
 
-        Parameters
-        ----------
-        qe_out_file : string
-            Name of Quantum Espresso output file for this snapshot.
-
-        input_units : string
-            Unit of the input data.
-        """
-        self.__snapshots_to_convert.append({"input": [qe_out_file],
-                                            "output": None})
-        self.__snapshot_description.append({"input": "qe.out",
-                                            "output": None})
-        self.__snapshot_units.append({"input": input_units,
-                                      "output": None})
-
-    def add_snapshot_cube(self, cube_naming_scheme, output_units=None):
-        """
-        Add a Quantum Espresso snapshot to the list of conversion list.
-
-        This snapshot only contains the cube files for the output
-        quantity (LDOS/density), so only the output quantity will be
-        calculated. Useful if the input data has already been processed.
-
-        Parameters
-        ----------
-        cube_naming_scheme : string
-            Naming scheme for the LDOS .cube files.
-
-        output_units : string
-            Unit of the output data.
-        """
-        self.__snapshots_to_convert.append({"input": None,
-                                            "output": [cube_naming_scheme]})
-        self.__snapshot_description.append({"input": None,
-                                            "output": ".cube"})
-        self.__snapshot_units.append({"input": None,
-                                      "output": output_units})
+        # Assign info.
+        self.__snapshots_to_convert.append({"input": descriptor_input_path,
+                                            "output": target_input_path,
+                                            "additional_info":
+                                                additional_info_input_path})
+        self.__snapshot_description.append({"input": descriptor_input_type,
+                                            "output": target_input_type,
+                                            "additional_info":
+                                                additional_info_input_type})
+        self.__snapshot_units.append({"input": descriptor_units,
+                                      "output": target_units})
 
     def convert_single_snapshot(self, snapshot_number,
                                 descriptor_calculation_kwargs,
                                 target_calculator_kwargs,
                                 input_path=None,
                                 output_path=None,
+                                additional_info_path=None,
                                 use_memmap=None,
                                 return_data=False):
         """
@@ -192,10 +211,11 @@ class DataConverter:
         if description["input"] == "qe.out":
             descriptor_calculation_kwargs["units"] = original_units["input"]
             tmp_input, local_size = self.descriptor_calculator. \
-                calculate_from_qe_out(snapshot["input"][0],
+                calculate_from_qe_out(snapshot["input"],
                                       **descriptor_calculation_kwargs)
             if self.parameters._configuration["mpi"]:
-                tmp_input = self.descriptor_calculator.gather_descriptors(tmp_input)
+                tmp_input = self.descriptor_calculator.\
+                    gather_descriptors(tmp_input)
 
             # Cut the xyz information if requested by the user.
             if get_rank() == 0:
@@ -224,7 +244,7 @@ class DataConverter:
             target_calculator_kwargs["use_memmap"] = use_memmap
             # If no units are provided we just assume standard units.
             self.target_calculator.\
-                read_from_cube(snapshot["output"][0],
+                read_from_cube(snapshot["output"],
                                **target_calculator_kwargs)
             tmp_output = self.target_calculator.get_target()
 
@@ -241,6 +261,23 @@ class DataConverter:
                 if output_path is not None:
                     np.save(output_path, tmp_output)
 
+        # Parse and/or calculate the additional info.
+        if description["additional_info"] == "qe.out":
+            # Parsing and saving is done using the target calculator.
+            self.target_calculator.\
+                read_additional_calculation_data("qe.out",
+                                                 snapshot["additional_info"])
+            self.target_calculator.\
+                write_additional_calculation_data(additional_info_path)
+
+        elif description["additional_info"] is None:
+            # Not additional info provided, pass.
+            pass
+        else:
+            raise Exception(
+                "Unknown file extension, cannot convert additional info "
+                "data.")
+
         if return_data:
             if description["input"] is not None and description["output"] \
                     is not None:
@@ -250,7 +287,10 @@ class DataConverter:
             elif description["output"] is None:
                 return tmp_input
 
-    def convert_snapshots(self, save_path="./",
+    def convert_snapshots(self, complete_save_path=None,
+                          descriptor_save_path=None,
+                          target_save_path=None,
+                          additional_info_save_path=None,
                           naming_scheme="ELEM_snapshot*", starts_at=0,
                           file_based_communication=False,
                           descriptor_calculation_kwargs=None,
@@ -262,8 +302,19 @@ class DataConverter:
 
         Parameters
         ----------
-        save_path : string
-            Directory in which the snapshots will be saved.
+        complete_save_path : string
+            If not None: the directory in which all snapshots will be saved.
+            Overwrites descriptor_save_path, target_save_path and
+            additional_info_save_path if set.
+
+        descriptor_save_path : string
+            Directory in which to save descriptor data.
+
+        target_save_path : string
+            Directory in which to save target data.
+
+        additional_info_save_path : string
+            Directory in which to save additional info data.
 
         naming_scheme : string
             String detailing the naming scheme for the snapshots. * symbols
@@ -290,6 +341,21 @@ class DataConverter:
             Dictionary with additional keyword arguments for the calculation
             or parsing of the descriptor quantities.
         """
+        if complete_save_path is not None:
+            descriptor_save_path = complete_save_path
+            target_save_path = complete_save_path
+            additional_info_save_path = complete_save_path
+        else:
+            if self.process_targets is True and target_save_path is None:
+                raise Exception("No target path specified, cannot process "
+                                "data.")
+            if self.process_descriptors is True and descriptor_save_path is None:
+                raise Exception("No descriptor path specified, cannot "
+                                "process data.")
+            if self.process_additional_info is True and additional_info_save_path is None:
+                raise Exception("No additional info path specified, cannot "
+                                "process data.")
+
         if descriptor_calculation_kwargs is None:
             descriptor_calculation_kwargs = {}
 
@@ -301,23 +367,40 @@ class DataConverter:
             snapshot_name = naming_scheme
             snapshot_name = snapshot_name.replace("*", str(snapshot_number))
 
-            # A memory mapped file is used as buffer for distributed cases.
+            # Create the actual paths, if needed.
+            if self.process_descriptors:
+                descriptor_path = os.path.join(descriptor_save_path,
+                                         snapshot_name+".in.npy")
+            else:
+                descriptor_path = None
+
             memmap = None
-            if self.parameters._configuration["mpi"] and \
-                    file_based_communication:
-                memmap = os.path.join(save_path, snapshot_name +
-                                      ".out.npy_temp")
+            if self.process_targets:
+                target_path = os.path.join(target_save_path,
+                                         snapshot_name+".out.npy")
+                # A memory mapped file is used as buffer for distributed cases.
+                if self.parameters._configuration["mpi"] and \
+                        file_based_communication:
+                    memmap = os.path.join(target_save_path, snapshot_name +
+                                          ".out.npy_temp")
+            else:
+                target_path = None
+
+            if self.process_additional_info:
+                info_path = os.path.join(additional_info_save_path,
+                                         snapshot_name+".info.json")
+            else:
+                info_path = None
+
 
             self.convert_single_snapshot(i,
                                          descriptor_calculation_kwargs,
                                          target_calculator_kwargs,
-                                         input_path=os.path.join(save_path,
-                                         snapshot_name+".in.npy"),
-                                         output_path=os.path.join(save_path,
-                                         snapshot_name+".out.npy"),
+                                         input_path=descriptor_path,
+                                         output_path=target_path,
+                                         additional_info_path=info_path,
                                          use_memmap=memmap)
-            printout("Saved snapshot", snapshot_number, "at ", save_path,
-                     min_verbosity=0)
+            printout("Saved snapshot", snapshot_number, min_verbosity=0)
 
             if get_rank() == 0:
                 if self.parameters._configuration["mpi"] \
