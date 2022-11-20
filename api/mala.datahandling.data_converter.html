@@ -142,57 +142,26 @@ parameters provided. Default: None</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.add_snapshot_cube">
-<span class="sig-name descname"><span class="pre">add_snapshot_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cube_naming_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_cube" title="Permalink to this definition"></a></dt>
-<dd><p>Add a Quantum Espresso snapshot to the list of conversion list.</p>
-<p>This snapshot only contains the cube files for the output
-quantity (LDOS/density), so only the output quantity will be
-calculated. Useful if the input data has already been processed.</p>
+<dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.add_snapshot">
+<span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptor_input_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_input_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_info_input_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_info_input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot" title="Permalink to this definition"></a></dt>
+<dd><p>Add a snapshot to be processed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cube_naming_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files.</p></li>
-<li><p><strong>output_units</strong> (<em>string</em>) – Unit of the output data.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.add_snapshot_qeout">
-<span class="sig-name descname"><span class="pre">add_snapshot_qeout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_qeout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout" title="Permalink to this definition"></a></dt>
-<dd><p>Add a Quantum Espresso snapshot to the list of conversion list.</p>
-<p>This snapshot only contains a QE.out file, i.e., only the SNAP
-descriptors will be calculated. Useful if the output data has already
-been processed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>qe_out_file</strong> (<em>string</em>) – Name of Quantum Espresso output file for this snapshot.</p></li>
-<li><p><strong>input_units</strong> (<em>string</em>) – Unit of the input data.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube">
-<span class="sig-name descname"><span class="pre">add_snapshot_qeout_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qe_out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_files_scheme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.add_snapshot_qeout_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.add_snapshot_qeout_cube" title="Permalink to this definition"></a></dt>
-<dd><p>Add a Quantum Espresso snapshot to the list of conversion list.</p>
-<p>Please note that a Quantum Espresso snapshot consists of:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>a Quantum Espresso output file for a self-consistent calculation.</p></li>
-<li><p>multiple .cube files containing the LDOS</p></li>
-</ul>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>qe_out_file</strong> (<em>string</em>) – Name of Quantum Espresso output file for this snapshot.</p></li>
-<li><p><strong>cube_files_scheme</strong> (<em>string</em>) – Naming scheme for the LDOS .cube files.</p></li>
-<li><p><strong>input_units</strong> (<em>string</em>) – Unit of the input data.</p></li>
-<li><p><strong>output_units</strong> (<em>string</em>) – Unit of the output data.</p></li>
+<li><p><strong>descriptor_input_type</strong> (<em>string</em>) – Type of descriptor data to be processed.
+See mala.datahandling.data_converter.descriptor_input_types
+for options.</p></li>
+<li><p><strong>descriptor_input_path</strong> (<em>string</em>) – Path of descriptor data to be processed.</p></li>
+<li><p><strong>target_input_type</strong> (<em>string</em>) – Type of target data to be processed.
+See mala.datahandling.data_converter.target_input_types
+for options.</p></li>
+<li><p><strong>target_input_path</strong> (<em>string</em>) – Path of target data to be processed.</p></li>
+<li><p><strong>additional_info_input_type</strong> (<em>string</em>) – Type of additional info data to be processed.
+See mala.datahandling.data_converter.additional_info_input_types
+for options.</p></li>
+<li><p><strong>additional_info_input_path</strong> (<em>string</em>) – Path of additional info data to be processed.</p></li>
+<li><p><strong>descriptor_units</strong> (<em>string</em>) – Units for descriptor data processing.</p></li>
+<li><p><strong>target_units</strong> (<em>string</em>) – Units for target data processing.</p></li>
 </ul>
 </dd>
 </dl>
@@ -200,7 +169,7 @@ been processed.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.convert_single_snapshot">
-<span class="sig-name descname"><span class="pre">convert_single_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculation_kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator_kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_single_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_single_snapshot" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">convert_single_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculation_kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator_kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_info_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_single_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_single_snapshot" title="Permalink to this definition"></a></dt>
 <dd><p>Convert single snapshot from the conversion lists.</p>
 <p>Returns the preprocessed data as numpy array, which might be
 beneficial during testing.</p>
@@ -232,13 +201,18 @@ or parsing of the descriptor quantities.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_converter.DataConverter.convert_snapshots">
-<span class="sig-name descname"><span class="pre">convert_snapshots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ELEM_snapshot*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starts_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_based_communication</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculation_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_snapshots" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">convert_snapshots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">complete_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_info_save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naming_scheme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ELEM_snapshot*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starts_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_based_communication</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculation_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_converter.html#DataConverter.convert_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_converter.DataConverter.convert_snapshots" title="Permalink to this definition"></a></dt>
 <dd><p>Convert the snapshots in the list to numpy arrays.</p>
 <p>These can then be used by MALA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>save_path</strong> (<em>string</em>) – Directory in which the snapshots will be saved.</p></li>
+<li><p><strong>complete_save_path</strong> (<em>string</em>) – If not None: the directory in which all snapshots will be saved.
+Overwrites descriptor_save_path, target_save_path and
+additional_info_save_path if set.</p></li>
+<li><p><strong>descriptor_save_path</strong> (<em>string</em>) – Directory in which to save descriptor data.</p></li>
+<li><p><strong>target_save_path</strong> (<em>string</em>) – Directory in which to save target data.</p></li>
+<li><p><strong>additional_info_save_path</strong> (<em>string</em>) – Directory in which to save additional info data.</p></li>
 <li><p><strong>naming_scheme</strong> (<em>string</em>) – String detailing the naming scheme for the snapshots. * symbols
 will be replaced with the snapshot number.</p></li>
 <li><p><strong>starts_at</strong> (<em>int</em>) – Number of the first snapshot generated using this approach.
