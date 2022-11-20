@@ -69,6 +69,11 @@ class DataConverter:
         self.__snapshot_description = []
         self.__snapshot_units = []
 
+        # Keep track of what has to be done by this data converter.
+        self.process_descriptors = False
+        self.process_targets = False
+        self.process_additional_info = False
+
     def add_snapshot(self, descriptor_input_type=None,
                      descriptor_input_path=None,
                      target_input_type=None,
@@ -118,6 +123,7 @@ class DataConverter:
                                 "given.")
             if descriptor_input_type not in descriptor_input_types:
                 raise Exception("Cannot process this type of descriptor data.")
+            self.process_descriptors = True
 
         if target_input_type is not None:
             if target_input_path is None:
@@ -125,6 +131,7 @@ class DataConverter:
                                 "given.")
             if target_input_type not in target_input_types:
                 raise Exception("Cannot process this type of target data.")
+            self.process_targets = True
 
         if additional_info_input_type is not None:
             if additional_info_input_path is None:
@@ -133,6 +140,7 @@ class DataConverter:
             if additional_info_input_type not in additional_info_input_types:
                 raise Exception("Cannot process this type of additional info "
                                 "data.")
+            self.process_additional_info = True
 
         # Assign info.
         self.__snapshots_to_convert.append({"input": descriptor_input_path,
@@ -338,10 +346,15 @@ class DataConverter:
             target_save_path = complete_save_path
             additional_info_save_path = complete_save_path
         else:
-            if descriptor_save_path is None \
-               or target_save_path is None \
-               or additional_info_save_path is None:
-                raise Exception("No paths specified, cannot process data.")
+            if self.process_targets is True and target_save_path is None:
+                raise Exception("No target path specified, cannot process "
+                                "data.")
+            if self.process_descriptors is True and descriptor_save_path is None:
+                raise Exception("No descriptor path specified, cannot "
+                                "process data.")
+            if self.process_additional_info is True and additional_info_save_path is None:
+                raise Exception("No additional info path specified, cannot "
+                                "process data.")
 
         if descriptor_calculation_kwargs is None:
             descriptor_calculation_kwargs = {}
@@ -354,22 +367,38 @@ class DataConverter:
             snapshot_name = naming_scheme
             snapshot_name = snapshot_name.replace("*", str(snapshot_number))
 
-            # A memory mapped file is used as buffer for distributed cases.
+            # Create the actual paths, if needed.
+            if self.process_descriptors:
+                descriptor_path = os.path.join(descriptor_save_path,
+                                         snapshot_name+".in.npy")
+            else:
+                descriptor_path = None
+
             memmap = None
-            if self.parameters._configuration["mpi"] and \
-                    file_based_communication:
-                memmap = os.path.join(target_save_path, snapshot_name +
-                                      ".out.npy_temp")
+            if self.process_targets:
+                target_path = os.path.join(target_save_path,
+                                         snapshot_name+".out.npy")
+                # A memory mapped file is used as buffer for distributed cases.
+                if self.parameters._configuration["mpi"] and \
+                        file_based_communication:
+                    memmap = os.path.join(target_save_path, snapshot_name +
+                                          ".out.npy_temp")
+            else:
+                target_path = None
+
+            if self.process_additional_info:
+                info_path = os.path.join(additional_info_save_path,
+                                         snapshot_name+".info.json")
+            else:
+                info_path = None
+
 
             self.convert_single_snapshot(i,
                                          descriptor_calculation_kwargs,
                                          target_calculator_kwargs,
-                                         input_path=os.path.join(descriptor_save_path,
-                                         snapshot_name+".in.npy"),
-                                         output_path=os.path.join(target_save_path,
-                                         snapshot_name+".out.npy"),
-                                         additional_info_path=os.path.join(additional_info_save_path,
-                                         snapshot_name+".info.json"),
+                                         input_path=descriptor_path,
+                                         output_path=target_path,
+                                         additional_info_path=info_path,
                                          use_memmap=memmap)
             printout("Saved snapshot", snapshot_number, min_verbosity=0)
 

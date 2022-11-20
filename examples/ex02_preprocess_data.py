@@ -86,7 +86,8 @@ data_converter = mala.DataConverter(test_parameters)
 data_converter.add_snapshot(target_input_type=".cube",
                             target_input_path=ldosfile,
                             target_units="1/(Ry*Bohr^3)")
-data_converter.convert_snapshots("./", naming_scheme="Be_snapshot_only_out*")
+data_converter.convert_snapshots(target_save_path="./",
+                                 naming_scheme="Be_snapshot_only_out*")
 
 printout("Parameters used for this experiment:")
 test_parameters.show()
