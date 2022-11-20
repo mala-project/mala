@@ -77,13 +77,13 @@ class DataConverter:
         self.process_targets = False
         self.process_additional_info = False
 
-        def add_snapshot(self, descriptor_input_type=None,
-                         descriptor_input_path=None,
-                         target_input_type=None,
-                         target_input_path=None,
-                         additional_info_input_type=None,
-                         additional_info_input_path=None,
-                         descriptor_units=None, target_units=None):
+    def add_snapshot(self, descriptor_input_type=None,
+                     descriptor_input_path=None,
+                     target_input_type=None,
+                     target_input_path=None,
+                     additional_info_input_type=None,
+                     additional_info_input_path=None,
+                     descriptor_units=None, target_units=None):
             """
             Add a snapshot to be processed.
 
@@ -299,6 +299,7 @@ class DataConverter:
             else:
                 descriptor_path = None
                 target_path = None
+                memmap = None
                 input_iteration = input_series.write_iterations()[i + starts_at]
                 output_iteration = output_series.write_iterations()[i + starts_at]
                 for it in [input_iteration, output_iteration]:
