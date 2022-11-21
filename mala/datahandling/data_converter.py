@@ -2,7 +2,6 @@
 import os
 
 import json
-import numpy as np
 import openpmd_api as io
 
 from mala.common.parallelizer import printout, get_rank, parallel_warn
@@ -408,15 +407,13 @@ class DataConverter:
         if description["input"] is not None:
             # Save data and delete, if not requested otherwise.
             if get_rank() == 0:
-                if input_path is not None:
-                    if input_iteration is None:
-                        self.descriptor_calculator.\
-                            write_to_numpy_file(input_path, tmp_input)
-                        np.save(input_path, tmp_input)
-                    else:
-                        self.descriptor_calculator.\
-                            write_to_openpmd_iteration(input_iteration,
-                                                       tmp_input)
+                if input_path is not None and input_iteration is None:
+                    self.descriptor_calculator.\
+                        write_to_numpy_file(input_path, tmp_input)
+                else:
+                    self.descriptor_calculator.\
+                        write_to_openpmd_iteration(input_iteration,
+                                                   tmp_input)
             del tmp_input
 
         ###########
@@ -442,14 +439,13 @@ class DataConverter:
                 "data.")
         if description["output"] is not None:
             if get_rank() == 0:
-                if output_path is not None:
-                    if output_iteration is None:
-                        self.target_calculator.write_to_numpy_file(output_path,
-                                                                   tmp_output)
-                    else:
-                        self.target_calculator. \
-                            write_to_openpmd_iteration(output_iteration,
-                                                       tmp_output)
+                if output_path is not None and output_iteration is None:
+                    self.target_calculator.write_to_numpy_file(output_path,
+                                                               tmp_output)
+                else:
+                    self.target_calculator. \
+                        write_to_openpmd_iteration(output_iteration,
+                                                   tmp_output)
                 del tmp_output
 
         # Parse and/or calculate the additional info.

@@ -56,14 +56,16 @@ def convert_data():
     data_converter = mala.DataConverter(parameters)
     for i in range(0, 4):
         data_converter.\
-            add_snapshot_qeout_cube(os.path.join(full_data_path,
-                                                 "snapshot"+str(i)
-                                                 + "/snapshot"+str(i)+".out"),
-                                    os.path.join(full_data_path,
-                                                 "snapshot"+str(i)
-                                                 + "/tmp.pp0*Be_snapshot"+str(i)
-                                                 + "_ldos.cube"),
-                                    output_units="1/(Ry*Bohr^3)")
+            add_snapshot(descriptor_input_type="qe.out",
+                         descriptor_input_path=os.path.join(full_data_path,
+                                                            "snapshot"+str(i)
+                                                             + "/snapshot"+str(i)+".out"),
+                         target_input_type=".cube",
+                         target_input_path=os.path.join(full_data_path,
+                                                         "snapshot"+str(i)
+                                                         + "/tmp.pp0*Be_snapshot"+str(i)
+                                                         + "_ldos.cube"),
+                         target_units="1/(Ry*Bohr^3)")
 
     # Convert data both as OpenPMD HDF5 (default) and numpy.
     data_converter.convert_snapshots("./training_data_temp",
