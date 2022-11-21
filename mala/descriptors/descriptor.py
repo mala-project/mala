@@ -323,7 +323,8 @@ class Descriptor(ABC):
                                "zbal": f"balance 1.0 y {yint} z {zint}",
                                "ngridx": nx,
                                "ngridy": ny,
-                               "ngridz": nz}
+                               "ngridz": nz,
+                               "switch": self.parameters.snap_switchflag}
             else:
                 if self.parameters.use_z_splitting:
                     # when nyfft is not used only split processors along z axis
