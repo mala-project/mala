@@ -318,8 +318,6 @@ class DataConverter:
                                            input_iteration=input_iteration,
                                            output_iteration=output_iteration,
                                            additional_info_path=info_path)
-            printout("Saved snapshot", snapshot_number, "at ", save_path,
-                     min_verbosity=0)
 
             if get_rank() == 0:
                 if self.parameters._configuration["mpi"] \
@@ -331,6 +329,7 @@ class DataConverter:
                                   target_calculator_kwargs,
                                   input_path=None,
                                   output_path=None,
+                                  additional_info_path=None,
                                   use_memmap=None,
                                   output_iteration=None,
                                   input_iteration=None):
