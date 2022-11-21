@@ -260,7 +260,6 @@ class Descriptor(PhysicalData):
     def _process_loaded_array(self, array, units=None):
         array *= self.convert_units(1, in_units=units)
 
-
     def _process_loaded_dimensions(self, array_dimensions):
         if self.descriptors_contain_xyz:
             return (array_dimensions[0], array_dimensions[1],
@@ -270,15 +269,18 @@ class Descriptor(PhysicalData):
 
     def _set_geometry_info(self, mesh):
         # Geometry: Save the cell parameters and angles of the grid.
-        voxel = self.atoms.cell.copy()
-        voxel[0] = voxel[0] / (self.grid_dimensions[0])
-        voxel[1] = voxel[1] / (self.grid_dimensions[1])
-        voxel[2] = voxel[2] / (self.grid_dimensions[2])
-
         if self.atoms is not None:
+            voxel = self.atoms.cell.copy()
+            voxel[0] = voxel[0] / (self.grid_dimensions[0])
+            voxel[1] = voxel[1] / (self.grid_dimensions[1])
+            voxel[2] = voxel[2] / (self.grid_dimensions[2])
+
             mesh.geometry = io.Geometry.cartesian
             mesh.grid_spacing = voxel.cellpar()[0:3]
             mesh.set_attribute("angles", voxel.cellpar()[3:])
+
+    def _get_atoms(self):
+        return self.atoms
 
     def _feature_mask(self):
         if self.descriptors_contain_xyz:

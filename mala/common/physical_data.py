@@ -249,7 +249,8 @@ class PhysicalData(ABC):
         """
         np.save(path, array)
 
-    def write_to_openpmd_iteration(self, iteration, array):
+    def write_to_openpmd_iteration(self, iteration, array,
+                                   additional_metadata=None):
         """
         Write a file within an OpenPMD iteration.
 
@@ -261,9 +262,32 @@ class PhysicalData(ABC):
         array : numpy.ndarry
             Array to save.
 
+        additional_metadata : list
+            If not None, and the selected class implements it, additional
+            metadata will be read from this source. This metadata will then,
+            depending on the class, be saved in the OpenPMD file.
         """
         mesh = iteration.meshes[self.data_name]
+
+        if additional_metadata is not None:
+            self._process_additional_metadata(additional_metadata)
         self._set_openpmd_attribtues(mesh)
+
+        # If the data contains atomic data, we need to process it.
+        atoms_ase = self._get_atoms()
+        if atoms_ase is not None:
+            atoms_openpmd = iteration.particles["atoms"]
+            atomic_positions = atoms_ase.get_positions()
+            positions = io.Dataset(atomic_positions[0].dtype,
+                                   atomic_positions[0].shape)
+
+            # @Franz: In the example online this is done separately for
+            # x, y, z, but isn't it better to do that indvidually for atoms?
+            for atom in range(0, len(atoms_ase)):
+                atoms_openpmd["positions"][str(atom)].reset_dataset(positions)
+                atoms_openpmd["positions"][str(atom)].\
+                    store_chunk(atomic_positions[atom])
+
         dataset = io.Dataset(array.dtype,
                              array[:, :, :, 0].shape)
 
@@ -309,6 +333,9 @@ class PhysicalData(ABC):
     def _process_loaded_dimensions(self, array_dimensions):
         pass
 
+    def _process_additional_metadata(self, additional_metadata):
+        pass
+
     def _feature_mask(self):
         return 0
 
@@ -330,3 +357,7 @@ class PhysicalData(ABC):
         # Fill geometry information (if provided)
         self._set_geometry_info(mesh)
 
+    # Currently all data we have is atom based.
+    # That may not always be the case.
+    def _get_atoms(self):
+        return None

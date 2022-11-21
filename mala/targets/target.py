@@ -431,7 +431,7 @@ class Target(PhysicalData):
         else:
             raise Exception("Unsupported auxiliary file type.")
 
-    def write_additional_calculation_data(self, filepath):
+    def write_additional_calculation_data(self, filepath, return_string=False):
         """
         Write additional information about a calculation to a .json file.
 
@@ -442,6 +442,10 @@ class Target(PhysicalData):
         ----------
         filepath : string
             Path at which to save the calculation data.
+
+        return_string : bool
+            If True, no file will be written, and instead a json dict will
+            be returned.
         """
         additional_calculation_data = {
             "fermi_energy_dft": self.fermi_energy_dft,
@@ -471,9 +475,12 @@ class Target(PhysicalData):
             additional_calculation_data["atoms"]["cell"].tolist()
         additional_calculation_data["atoms"]["pbc"] = \
             additional_calculation_data["atoms"]["pbc"].tolist()
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(additional_calculation_data, f,
-                      ensure_ascii=False, indent=4)
+        if return_string is False:
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(additional_calculation_data, f,
+                          ensure_ascii=False, indent=4)
+        else:
+            return additional_calculation_data
 
     # Accessing target data
     ########################
@@ -1099,12 +1106,22 @@ class Target(PhysicalData):
     def _process_loaded_dimensions(self, array_dimensions):
         return array_dimensions
 
+    def _process_additional_metadata(self, additional_metadata):
+        self.read_additional_calculation_data(additional_metadata[0],
+                                              additional_metadata[1])
+
+    def _set_openpmd_attribtues(self, mesh):
+        super(Target, self)._set_openpmd_attribtues(mesh)
+
     def _set_geometry_info(self, mesh):
         # Geometry: Save the cell parameters and angles of the grid.
         if self.atoms is not None:
             mesh.geometry = io.Geometry.cartesian
             mesh.grid_spacing = self.voxel.cellpar()[0:3]
             mesh.set_attribute("angles", self.voxel.cellpar()[3:])
+
+    def _get_atoms(self):
+        return self.atoms
 
     @staticmethod
     def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):

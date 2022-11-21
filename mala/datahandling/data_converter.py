@@ -82,88 +82,120 @@ class DataConverter:
                      target_input_path=None,
                      additional_info_input_type=None,
                      additional_info_input_path=None,
-                     descriptor_units=None, target_units=None):
-            """
-            Add a snapshot to be processed.
+                     descriptor_units=None,
+                     metadata_input_type=None,
+                     metadata_input_path=None,
+                     target_units=None):
+        """
+        Add a snapshot to be processed.
 
-            Parameters
-            ----------
-            descriptor_input_type : string
-                Type of descriptor data to be processed.
-                See mala.datahandling.data_converter.descriptor_input_types
-                for options.
+        Parameters
+        ----------
+        descriptor_input_type : string
+            Type of descriptor data to be processed.
+            See mala.datahandling.data_converter.descriptor_input_types
+            for options.
 
-            descriptor_input_path : string
-                Path of descriptor data to be processed.
+        descriptor_input_path : string
+            Path of descriptor data to be processed.
 
-            target_input_type : string
-                Type of target data to be processed.
-                See mala.datahandling.data_converter.target_input_types
-                for options.
+        target_input_type : string
+            Type of target data to be processed.
+            See mala.datahandling.data_converter.target_input_types
+            for options.
 
-            target_input_path : string
-                Path of target data to be processed.
+        target_input_path : string
+            Path of target data to be processed.
 
-            additional_info_input_type : string
-                Type of additional info data to be processed.
-                See mala.datahandling.data_converter.additional_info_input_types
-                for options.
+        additional_info_input_type : string
+            Type of additional info data to be processed.
+            See mala.datahandling.data_converter.additional_info_input_types
+            for options.
 
-            additional_info_input_path : string
-                Path of additional info data to be processed.
+        additional_info_input_path : string
+            Path of additional info data to be processed.
 
-            descriptor_units : string
-                Units for descriptor data processing.
+        metadata_input_type : string
+            Type of additional metadata to be processed.
+            See mala.datahandling.data_converter.additional_info_input_types
+            for options.
+            This is essentially the same as additional_info_input_type,
+            but will not affect saving; i.e., the data given here will
+            only be saved in OpenPMD files, not saved separately.
+            If additional_info_input_type is set, this argument will be
+            ignored.
 
-            target_units : string
-                Units for target data processing.
-            """
-            # Check the input.
-            if descriptor_input_type is not None:
-                if descriptor_input_path is None:
-                    raise Exception(
-                        "Cannot process descriptor data with no path "
-                        "given.")
-                if descriptor_input_type not in descriptor_input_types:
-                    raise Exception(
-                        "Cannot process this type of descriptor data.")
-                self.process_descriptors = True
+        metadata_input_path : string
+            Path of additional metadata to be processed.
+            See metadata_input_type for extended info on use.
 
-            if target_input_type is not None:
-                if target_input_path is None:
-                    raise Exception("Cannot process target data with no path "
-                                    "given.")
-                if target_input_type not in target_input_types:
-                    raise Exception("Cannot process this type of target data.")
-                self.process_targets = True
+        descriptor_units : string
+            Units for descriptor data processing.
 
-            if additional_info_input_type is not None:
-                if additional_info_input_path is None:
-                    raise Exception("Cannot process additional info data with "
-                                    "no path given.")
-                if additional_info_input_type not in additional_info_input_types:
-                    raise Exception(
-                        "Cannot process this type of additional info "
-                        "data.")
-                self.process_additional_info = True
+        target_units : string
+            Units for target data processing.
+        """
+        # Check the input.
+        if descriptor_input_type is not None:
+            if descriptor_input_path is None:
+                raise Exception(
+                    "Cannot process descriptor data with no path "
+                    "given.")
+            if descriptor_input_type not in descriptor_input_types:
+                raise Exception(
+                    "Cannot process this type of descriptor data.")
+            self.process_descriptors = True
 
-            # Assign info.
-            self.__snapshots_to_convert.append({"input": descriptor_input_path,
-                                                "output": target_input_path,
-                                                "additional_info":
-                                                    additional_info_input_path})
-            self.__snapshot_description.append({"input": descriptor_input_type,
-                                                "output": target_input_type,
-                                                "additional_info":
-                                                    additional_info_input_type})
-            self.__snapshot_units.append({"input": descriptor_units,
-                                          "output": target_units})
+        if target_input_type is not None:
+            if target_input_path is None:
+                raise Exception("Cannot process target data with no path "
+                                "given.")
+            if target_input_type not in target_input_types:
+                raise Exception("Cannot process this type of target data.")
+            self.process_targets = True
+
+        if additional_info_input_type is not None:
+            metadata_input_type = additional_info_input_type
+            if additional_info_input_path is None:
+                raise Exception("Cannot process additional info data with "
+                                "no path given.")
+            if additional_info_input_type not in additional_info_input_types:
+                raise Exception(
+                    "Cannot process this type of additional info "
+                    "data.")
+            self.process_additional_info = True
+
+            metadata_input_path = additional_info_input_path
+
+        if metadata_input_type is not None:
+            if metadata_input_path is None:
+                raise Exception("Cannot process additional info data with "
+                                "no path given.")
+            if metadata_input_path not in additional_info_input_types:
+                raise Exception(
+                    "Cannot process this type of additional info "
+                    "data.")
+
+        # Assign info.
+        self.__snapshots_to_convert.append({"input": descriptor_input_path,
+                                            "output": target_input_path,
+                                            "additional_info":
+                                                additional_info_input_path,
+                                            "metadata": metadata_input_path})
+        self.__snapshot_description.append({"input": descriptor_input_type,
+                                            "output": target_input_type,
+                                            "additional_info":
+                                                additional_info_input_type,
+                                            "metadata": metadata_input_type})
+        self.__snapshot_units.append({"input": descriptor_units,
+                                      "output": target_units})
 
     def convert_snapshots(self, complete_save_path=None,
                           descriptor_save_path=None,
                           target_save_path=None,
                           additional_info_save_path=None,
-                          naming_scheme="ELEM_snapshot*", starts_at=0,
+                          naming_scheme="ELEM_snapshot*",
+                          starts_at=0,
                           file_based_communication=False,
                           descriptor_calculation_kwargs=None,
                           target_calculator_kwargs=None,
@@ -175,8 +207,19 @@ class DataConverter:
 
         Parameters
         ----------
-        save_path : string
-            Directory in which the snapshots will be saved.
+        complete_save_path : string
+            If not None: the directory in which all snapshots will be saved.
+            Overwrites descriptor_save_path, target_save_path and
+            additional_info_save_path if set.
+
+        descriptor_save_path : string
+            Directory in which to save descriptor data.
+
+        target_save_path : string
+            Directory in which to save target data.
+
+        additional_info_save_path : string
+            Directory in which to save additional info data.
 
         naming_scheme : string
             String detailing the naming scheme for the snapshots. * symbols
@@ -234,7 +277,6 @@ class DataConverter:
             if self.process_additional_info is True and additional_info_save_path is None:
                 raise Exception("No additional info path specified, cannot "
                                 "process data.")
-
 
         if not use_numpy:
             snapshot_name = naming_scheme
