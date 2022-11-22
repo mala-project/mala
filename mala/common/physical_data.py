@@ -155,7 +155,7 @@ class PhysicalData(ABC):
         if not np.isclose(mesh[str(0)].unit_SI, self.si_unit_conversion):
             raise Exception("MALA currently cannot operate with OpenPMD "
                             "files with non-MALA units.")
-                            
+
         # Deal with `granularity` items of the vectors at a time
         # Or in the openPMD layout: with `granularity` record components
         granularity = self.parameters._configuration["openpmd_granularity"]
@@ -173,7 +173,6 @@ class PhysicalData(ABC):
                 (end - base, array_shape[0], array_shape[1], array_shape[2]),
                 dtype=data_type)
             for i in range(base, end):
-                # transposed[i - base, :, :, :] = mesh[str(i)][:, :, :]
                 mesh[str(i)].load_chunk(transposed[i - base, :, :, :])
             series.flush()
             if array is None:
@@ -304,8 +303,7 @@ class PhysicalData(ABC):
                 mesh_component = mesh[str(i)]
                 mesh_component.reset_dataset(dataset)
 
-                # mesh_component[:, :, :] = transposed[i - base, :, :, :]
-                mesh_component.store_chunk(transposed[i - base, :, :, :])
+                mesh_component[:, :, :] = transposed[i - base, :, :, :]
 
                 # All data is assumed to be saved in
                 # MALA units, so the SI conversion factor we save
