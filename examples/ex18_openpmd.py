@@ -65,6 +65,10 @@ def convert_data():
                                                          "snapshot"+str(i)
                                                          + "/tmp.pp0*Be_snapshot"+str(i)
                                                          + "_ldos.cube"),
+                         metadata_input_type="qe.out",
+                         metadata_input_path=os.path.join(full_data_path,
+                                                            "snapshot"+str(i)
+                                                             + "/snapshot"+str(i)+".out"),
                          target_units="1/(Ry*Bohr^3)")
 
     # Convert data both as OpenPMD HDF5 (default) and numpy.

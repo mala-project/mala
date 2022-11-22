@@ -1110,8 +1110,40 @@ class Target(PhysicalData):
         self.read_additional_calculation_data(additional_metadata[0],
                                               additional_metadata[1])
 
-    def _set_openpmd_attribtues(self, mesh):
-        super(Target, self)._set_openpmd_attribtues(mesh)
+    def _set_openpmd_attribtues(self, iteration, mesh):
+        super(Target, self)._set_openpmd_attribtues(iteration, mesh)
+
+        # If no atoms have been read, neither have any of the other
+        # properties.
+        if self.atoms is not None:
+            additional_calculation_data = \
+                self.write_additional_calculation_data("", return_string=True)
+            iteration.set_attribute("fermi_energy_dft",
+                                    additional_calculation_data["fermi_energy_dft"])
+            iteration.set_attribute("temperature",
+                                    additional_calculation_data["temperature"])
+            iteration.set_attribute("number_of_electrons_exact",
+                                    additional_calculation_data["number_of_electrons_exact"])
+            iteration.set_attribute("band_energy_dft_calculation",
+                                    additional_calculation_data["band_energy_dft_calculation"])
+            iteration.set_attribute("total_energy_dft_calculation",
+                                    additional_calculation_data["total_energy_dft_calculation"])
+            iteration.set_attribute("electrons_per_atom",
+                                    additional_calculation_data["electrons_per_atom"])
+            iteration.set_attribute("number_of_electrons_from_eigenvals",
+                                    additional_calculation_data["number_of_electrons_from_eigenvals"])
+            iteration.set_attribute("ibrav",
+                                    additional_calculation_data["ibrav"])
+            iteration.set_attribute("ecutwfc",
+                                    additional_calculation_data["ecutwfc"])
+            iteration.set_attribute("ecutrho",
+                                    additional_calculation_data["ecutrho"])
+            iteration.set_attribute("degauss",
+                                    additional_calculation_data["degauss"])
+            for key in additional_calculation_data["pseudopotentials"].keys():
+                iteration.set_attribute("psp_"+key,
+                                        additional_calculation_data[
+                                            "pseudopotentials"][key])
 
     def _set_geometry_info(self, mesh):
         # Geometry: Save the cell parameters and angles of the grid.

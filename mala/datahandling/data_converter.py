@@ -171,7 +171,7 @@ class DataConverter:
             if metadata_input_path is None:
                 raise Exception("Cannot process additional info data with "
                                 "no path given.")
-            if metadata_input_path not in additional_info_input_types:
+            if metadata_input_type not in additional_info_input_types:
                 raise Exception(
                     "Cannot process this type of additional info "
                     "data.")
@@ -485,9 +485,15 @@ class DataConverter:
                     self.target_calculator.write_to_numpy_file(output_path,
                                                                tmp_output)
                 else:
+                    metadata = None
+                    if description["metadata"] is not None:
+                        metadata = [description["metadata"],
+                                    snapshot["metadata"]]
+
                     self.target_calculator. \
                         write_to_openpmd_iteration(output_iteration,
-                                                   tmp_output)
+                                                   tmp_output,
+                                                   additional_metadata=metadata)
                 del tmp_output
 
         # Parse and/or calculate the additional info.

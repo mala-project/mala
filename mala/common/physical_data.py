@@ -271,7 +271,7 @@ class PhysicalData(ABC):
 
         if additional_metadata is not None:
             self._process_additional_metadata(additional_metadata)
-        self._set_openpmd_attribtues(mesh)
+        self._set_openpmd_attribtues(iteration, mesh)
 
         # If the data contains atomic data, we need to process it.
         atoms_ase = self._get_atoms()
@@ -342,7 +342,7 @@ class PhysicalData(ABC):
     def _set_geometry_info(self, mesh):
         pass
 
-    def _set_openpmd_attribtues(self, mesh):
+    def _set_openpmd_attribtues(self, iteration, mesh):
         mesh.unit_dimension = self.si_dimension
         mesh.axis_labels = ["x", "y", "z"]
         mesh.grid_global_offset = [0, 0, 0]
