@@ -276,15 +276,16 @@ class PhysicalData(ABC):
         atoms_ase = self._get_atoms()
         if atoms_ase is not None:
             atoms_openpmd = iteration.particles["atoms"]
+            # @todo: metadata
             atomic_positions = atoms_ase.get_positions()
             positions = io.Dataset(atomic_positions[0].dtype,
                                    atomic_positions[0].shape)
 
-            # @Franz: In the example online this is done separately for
-            # x, y, z, but isn't it better to do that indvidually for atoms?
             for atom in range(0, len(atoms_ase)):
-                atoms_openpmd["positions"][str(atom)].reset_dataset(positions)
-                atoms_openpmd["positions"][str(atom)].\
+                atoms_openpmd["positionOffset"][str(atom)].reset_dataset(positions)
+                atoms_openpmd["positionOffset"][str(atom)].make_constant(0)
+                atoms_openpmd["position"][str(atom)].reset_dataset(positions)
+                atoms_openpmd["position"][str(atom)].\
                     store_chunk(atomic_positions[atom])
 
         dataset = io.Dataset(array.dtype,

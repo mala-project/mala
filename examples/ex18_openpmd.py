@@ -9,11 +9,13 @@ Requires LAMMPS interface and some additional data.
 """
 
 # This directory contains actual simulation data which we can use.
-full_data_path = "/home/fiedlerl/jobs/qe/Be2/07_dft"
+full_data_path = "/home/franzpoeschel/07_dft"
 
 # This directory will temporarily hold the training data we create
 # for development.
 data_path = "./training_data_temp"
+for i in range(4):
+    os.system("cp {0}/snapshot{2}/snapshot{2}.out {1}".format(full_data_path, data_path, i))
 
 
 # Define the MALA parameters for this run.
