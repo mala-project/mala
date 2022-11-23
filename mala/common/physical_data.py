@@ -276,17 +276,22 @@ class PhysicalData(ABC):
         atoms_ase = self._get_atoms()
         if atoms_ase is not None:
             atoms_openpmd = iteration.particles["atoms"]
-            # @todo: metadata
             atomic_positions = atoms_ase.get_positions()
             positions = io.Dataset(atomic_positions[0].dtype,
                                    atomic_positions[0].shape)
 
+            atoms_openpmd["positionOffset"]
             for atom in range(0, len(atoms_ase)):
-                atoms_openpmd["positionOffset"][str(atom)].reset_dataset(positions)
-                atoms_openpmd["positionOffset"][str(atom)].make_constant(0)
                 atoms_openpmd["position"][str(atom)].reset_dataset(positions)
+                atoms_openpmd["positionOffset"][str(atom)].reset_dataset(positions)
+
                 atoms_openpmd["position"][str(atom)].\
                     store_chunk(atomic_positions[atom])
+                atoms_openpmd["positionOffset"][str(atom)].make_constant(0)
+
+                # @todo supplement correct value
+                atoms_openpmd["position"][str(atom)].unit_SI = 1.0
+                atoms_openpmd["positionOffset"][str(atom)].unit_SI = 1.0
 
         dataset = io.Dataset(array.dtype,
                              array[:, :, :, 0].shape)
