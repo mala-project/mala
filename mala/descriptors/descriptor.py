@@ -5,7 +5,8 @@ import ase
 import numpy as np
 
 from mala.common.parameters import ParametersDescriptors, Parameters
-from mala.common.parallelizer import printout, get_size, parallel_warn
+from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
+    barrier, parallel_warn
 
 
 class Descriptor(ABC):
@@ -67,6 +68,8 @@ class Descriptor(ABC):
         self.fingerprint_length = -1  # so iterations will fail
         self.dbg_grid_dimensions = parameters.debug.grid_dimensions
         self.verbosity = parameters.verbosity
+        self.in_format_ase = ""
+        self.grid_dimensions = []
 
     @property
     def descriptors_contain_xyz(self):
@@ -158,8 +161,8 @@ class Descriptor(ABC):
                  min_verbosity=2)
         return new_atoms
 
-    @abstractmethod
-    def calculate_from_qe_out(self, qe_out_file, **kwargs):
+    def calculate_from_qe_out(self, qe_out_file, working_directory=".",
+                              **kwargs):
         """
         Calculate the descriptors based on a Quantum Espresso outfile.
 
@@ -168,6 +171,10 @@ class Descriptor(ABC):
         qe_out_file : string
             Name of Quantum Espresso output file for snapshot.
 
+        working_directory : string
+            A directory in which to write the output of the LAMMPS calculation.
+            Usually the local directory should suffice, given that there
+            are no multiple instances running in the same directory.
 
         Returns
         -------
@@ -176,12 +183,37 @@ class Descriptor(ABC):
             (x,y,z,descriptor_dimension)
 
         """
-        pass
+        self.in_format_ase = "espresso-out"
+        printout("Calculating descriptors from", qe_out_file,
+                 min_verbosity=0)
+        # We get the atomic information by using ASE.
+        atoms = ase.io.read(qe_out_file, format=self.in_format_ase)
 
-    @abstractmethod
-    def calculate_from_atoms(self, atoms, grid_dimensions):
+        # Enforcing / Checking PBC on the read atoms.
+        atoms = self.enforce_pbc(atoms)
+
+        # Get the grid dimensions.
+        qe_outfile = open(qe_out_file, "r")
+        lines = qe_outfile.readlines()
+        nx = 0
+        ny = 0
+        nz = 0
+
+        for line in lines:
+            if "FFT dimensions" in line:
+                tmp = line.split("(")[1].split(")")[0]
+                nx = int(tmp.split(",")[0])
+                ny = int(tmp.split(",")[1])
+                nz = int(tmp.split(",")[2])
+                break
+
+        return self._calculate(atoms,
+                               working_directory, [nx, ny, nz])
+
+    def calculate_from_atoms(self, atoms, grid_dimensions,
+                             working_directory="."):
         """
-        Calculate the descriptors based on the atomic configurations.
+        Calculate the SNAP descriptors based on the atomic configurations.
 
         Parameters
         ----------
@@ -191,13 +223,131 @@ class Descriptor(ABC):
         grid_dimensions : list
             Grid dimensions to be used, in the format [x,y,z].
 
+        working_directory : string
+            A directory in which to write the output of the LAMMPS calculation.
+            Usually the local directory should suffice, given that there
+            are no multiple instances running in the same directory.
+
         Returns
         -------
         descriptors : numpy.array
             Numpy array containing the descriptors with the dimension
             (x,y,z,descriptor_dimension)
         """
-        pass
+        # Enforcing / Checking PBC on the input atoms.
+        atoms = self.enforce_pbc(atoms)
+        return self._calculate(atoms, working_directory,
+                               grid_dimensions)
+
+    def gather_descriptors(self, snap_descriptors_np, use_pickled_comm=False):
+        """
+        Gathers all SNAP descriptors on rank 0 and sorts them.
+
+        This is useful for e.g. parallel preprocessing.
+        This function removes the extra 3 components that come from parallel
+        processing.
+        I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
+        97 (in parallel mode), and this function returns 94, as to retain the
+        3 x,y,z ones we by default include.
+
+        Parameters
+        ----------
+        snap_descriptors_np : numpy.array
+            Numpy array with the SNAP descriptors of this ranks local grid.
+
+        use_pickled_comm : bool
+            If True, the pickled communication route from mpi4py is used.
+            If False, a Recv/Sendv combination is used. I am not entirely
+            sure what is faster. Technically Recv/Sendv should be faster,
+            but I doubt my implementation is all that optimal. For the pickled
+            route we can use gather(), which should be fairly quick.
+            However, for large grids, one CANNOT use the pickled route;
+            too large python objects will break it. Therefore, I am setting
+            the Recv/Sendv route as default.
+        """
+        # Barrier to make sure all ranks have descriptors..
+        comm = get_comm()
+        barrier()
+
+        # Gather the SNAP descriptors into a list.
+        if use_pickled_comm:
+            all_descriptors_list = comm.gather(snap_descriptors_np,
+                                                    root=0)
+        else:
+            sendcounts = np.array(comm.gather(np.shape(snap_descriptors_np)[0],
+                                              root=0))
+            raw_feature_length = self.fingerprint_length+3
+
+            if get_rank() == 0:
+                # print("sendcounts: {}, total: {}".format(sendcounts,
+                #                                          sum(sendcounts)))
+
+                # Preparing the list of buffers.
+                all_descriptors_list = []
+                for i in range(0, get_size()):
+                    all_descriptors_list.append(
+                        np.empty(sendcounts[i] * raw_feature_length,
+                                 dtype=np.float64))
+
+                # No MPI necessary for first rank. For all the others,
+                # collect the buffers.
+                all_descriptors_list[0] = snap_descriptors_np
+                for i in range(1, get_size()):
+                    comm.Recv(all_descriptors_list[i], source=i,
+                              tag=100+i)
+                    all_descriptors_list[i] = \
+                        np.reshape(all_descriptors_list[i],
+                                   (sendcounts[i], raw_feature_length))
+            else:
+                comm.Send(snap_descriptors_np, dest=0, tag=get_rank()+100)
+            barrier()
+
+        # if get_rank() == 0:
+        #     printout(np.shape(all_descriptors_list[0]))
+        #     printout(np.shape(all_descriptors_list[1]))
+        #     printout(np.shape(all_descriptors_list[2]))
+        #     printout(np.shape(all_descriptors_list[3]))
+
+        # Dummy for the other ranks.
+        # (For now, might later simply broadcast to other ranks).
+        descriptors_full = np.zeros([1, 1, 1, 1])
+
+        # Reorder the list.
+        if get_rank() == 0:
+            # Prepare the SNAP descriptor array.
+            nx = self.grid_dimensions[0]
+            ny = self.grid_dimensions[1]
+            nz = self.grid_dimensions[2]
+            descriptors_full = np.zeros(
+                [nx, ny, nz, self.fingerprint_length])
+            # Fill the full SNAP descriptors array.
+            for idx, local_grid in enumerate(all_descriptors_list):
+                # We glue the individual cells back together, and transpose.
+                first_x = int(local_grid[0][0])
+                first_y = int(local_grid[0][1])
+                first_z = int(local_grid[0][2])
+                last_x = int(local_grid[-1][0])+1
+                last_y = int(local_grid[-1][1])+1
+                last_z = int(local_grid[-1][2])+1
+                descriptors_full[first_x:last_x,
+                                 first_y:last_y,
+                                 first_z:last_z] = \
+                    np.reshape(local_grid[:, 3:],
+                               [last_z-first_z, last_y-first_y, last_x-first_x,
+                                self.fingerprint_length]).\
+                    transpose([2, 1, 0, 3])
+
+                # Leaving this in here for debugging purposes.
+                # This is the slow way to reshape the descriptors.
+                # for entry in local_grid:
+                #     x = int(entry[0])
+                #     y = int(entry[1])
+                #     z = int(entry[2])
+                #     descriptors_full[x, y, z] = entry[3:]
+        if self.parameters.descriptors_contain_xyz:
+            return descriptors_full
+        else:
+            return descriptors_full[:, :, :, 3:]
 
     def get_acsd(self, descriptor_data, ldos_data):
         """
@@ -538,4 +688,7 @@ class Descriptor(ABC):
                                                      similarity_data[i, 0]))
         return np.mean(distances)
 
+    @abstractmethod
+    def _calculate(self, atoms, outdir, grid_dimensions):
+        pass
 

@@ -30,8 +30,6 @@ class AtomicDensity(Descriptor):
 
     def __init__(self, parameters):
         super(AtomicDensity, self).__init__(parameters)
-        self.in_format_ase = ""
-        self.grid_dimensions = []
         self.verbosity = parameters.verbosity
 
     @staticmethod
@@ -84,91 +82,7 @@ class AtomicDensity(Descriptor):
         else:
             raise Exception("Unsupported unit for Gaussian descriptors.")
 
-    def calculate_from_qe_out(self, qe_out_file, qe_out_directory,
-                              working_directory=None,
-                              **kwargs):
-        """
-        Calculate the Gaussian descriptors based on a Quantum Espresso outfile.
-
-        Parameters
-        ----------
-        qe_out_file : string
-            Name of Quantum Espresso output file for snapshot.
-
-        qe_out_directory : string
-            Path to Quantum Espresso output file for snapshot.
-
-        working_directory : string
-            A directory in which to perform the LAMMPS calculation.
-            Optional, if None, the QE out directory will be used.
-
-        Returns
-        -------
-        snap_descriptors : numpy.array
-            Numpy array containing the Gaussian descriptors with the dimension
-            (x,y,z,snap_dimension)
-
-        """
-        self.in_format_ase = "espresso-out"
-        printout("Calculating Gaussian descriptors from", qe_out_file, "at",
-                 qe_out_directory, min_verbosity=0)
-        # We get the atomic information by using ASE.
-        infile = os.path.join(qe_out_directory, qe_out_file)
-        atoms = ase.io.read(infile, format=self.in_format_ase)
-
-        # Enforcing / Checking PBC on the read atoms.
-        atoms = self.enforce_pbc(atoms)
-
-        # Get the grid dimensions.
-        qe_outfile = open(infile, "r")
-        lines = qe_outfile.readlines()
-        nx = 0
-        ny = 0
-        nz = 0
-
-        for line in lines:
-            if "FFT dimensions" in line:
-                tmp = line.split("(")[1].split(")")[0]
-                nx = int(tmp.split(",")[0])
-                ny = int(tmp.split(",")[1])
-                nz = int(tmp.split(",")[2])
-                break
-
-        if working_directory is None:
-            working_directory = qe_out_directory
-
-        return self.__calculate_gaussian_descriptors(atoms,
-                                                     working_directory,
-                                                     [nx, ny, nz])
-
-    def calculate_from_atoms(self, atoms, grid_dimensions,
-                             working_directory="."):
-        """
-        Calculate the Gaussian descriptors based on the atomic configurations.
-
-        Parameters
-        ----------
-        atoms : ase.Atoms
-            Atoms object holding the atomic configuration.
-
-        grid_dimensions : list
-            Grid dimensions to be used, in the format [x,y,z].
-
-        working_directory : string
-            A directory in which to perform the LAMMPS calculation.
-
-        Returns
-        -------
-        descriptors : numpy.array
-            Numpy array containing the descriptors with the dimension
-            (x,y,z,descriptor_dimension)
-        """
-        # Enforcing / Checking PBC on the input atoms.
-        atoms = self.enforce_pbc(atoms)
-        return self.__calculate_gaussian_descriptors(atoms, working_directory,
-                                                     grid_dimensions)
-
-    def __calculate_gaussian_descriptors(self, atoms, outdir, grid_dimensions):
+    def _calculate(self, atoms, outdir, grid_dimensions):
         """Perform actual Gaussian descriptor calculation."""
         from lammps import lammps
         lammps_format = "lammps-data"
@@ -203,7 +117,7 @@ class AtomicDensity(Descriptor):
 
         # For now the file is chosen automatically, because this is used
         # mostly under the hood anyway.
-        filepath = __file__.split("gaussian")[0]
+        filepath = __file__.split("atomic_density")[0]
         if self.parameters._configuration["mpi"]:
             if self.parameters.use_z_splitting:
                 runfile = os.path.join(filepath, "in.ggrid.python")
@@ -226,7 +140,28 @@ class AtomicDensity(Descriptor):
                                lammps_constants.LMP_STYLE_LOCAL, 2,
                                array_shape=(nrows_ggrid, ncols_ggrid))
 
-        if self.descriptors_contain_xyz:
+        self.grid_dimensions = [nx, ny, nz]
+
+        # In comparison to SNAP, the atomic density always returns
+        # in the "local mode". Thus we have to make some slight adjustments
+        # if we operate without MPI.
+        if self.parameters._configuration["mpi"]:
+            self.fingerprint_length = 4
             return gaussian_descriptors_np.copy(), nrows_ggrid
+
         else:
-            return gaussian_descriptors_np[:, 6:].copy(), nrows_ggrid
+            # We have to switch from x fastest to z fastes reordering.
+            gaussian_descriptors_np = \
+                gaussian_descriptors_np.reshape((grid_dimensions[2],
+                                                 grid_dimensions[1],
+                                                 grid_dimensions[0],
+                                                 7))
+            gaussian_descriptors_np = \
+                gaussian_descriptors_np.transpose([2, 1, 0, 3])
+            if self.parameters.descriptors_contain_xyz:
+                self.fingerprint_length = 4
+                return gaussian_descriptors_np[:, :, :, 3:].copy(), nx*ny*nz
+            else:
+                self.fingerprint_length = 1
+                return gaussian_descriptors_np[:, :, :, 6:].copy(), nx*ny*nz
+
