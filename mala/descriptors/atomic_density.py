@@ -91,6 +91,19 @@ class AtomicDensity(Descriptor):
 
     @staticmethod
     def get_optimal_sigma(voxel):
+        """
+        Calculate the optimal width of the Gaussians based on the grid voxel.
+
+        Parameters
+        ----------
+        voxel : ase.Cell
+            An ASE Cell object characterizing the voxel.
+
+        Returns
+        -------
+        optimal_sigma : float
+            The optimal sigma value.
+        """
         return (np.max(voxel) / reference_grid_spacing_aluminium) * \
                optimal_sigma_aluminium
 
