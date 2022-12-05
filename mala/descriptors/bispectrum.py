@@ -83,7 +83,7 @@ class Bispectrum(Descriptor):
         else:
             raise Exception("Unsupported unit for SNAP.")
 
-    def _calculate(self, atoms, outdir, grid_dimensions):
+    def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual SNAP calculation."""
         from lammps import lammps
         lammps_format = "lammps-data"

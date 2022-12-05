@@ -208,10 +208,10 @@ class Descriptor(ABC):
                 break
 
         return self._calculate(atoms,
-                               working_directory, [nx, ny, nz])
+                               working_directory, [nx, ny, nz], **kwargs)
 
     def calculate_from_atoms(self, atoms, grid_dimensions,
-                             working_directory="."):
+                             working_directory=".", **kwargs):
         """
         Calculate the SNAP descriptors based on the atomic configurations.
 
@@ -237,7 +237,7 @@ class Descriptor(ABC):
         # Enforcing / Checking PBC on the input atoms.
         atoms = self.enforce_pbc(atoms)
         return self._calculate(atoms, working_directory,
-                               grid_dimensions)
+                               grid_dimensions, **kwargs)
 
     def gather_descriptors(self, snap_descriptors_np, use_pickled_comm=False):
         """
@@ -689,6 +689,6 @@ class Descriptor(ABC):
         return np.mean(distances)
 
     @abstractmethod
-    def _calculate(self, atoms, outdir, grid_dimensions):
+    def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         pass
 

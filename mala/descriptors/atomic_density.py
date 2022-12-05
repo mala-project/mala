@@ -82,9 +82,14 @@ class AtomicDensity(Descriptor):
         else:
             raise Exception("Unsupported unit for Gaussian descriptors.")
 
-    def _calculate(self, atoms, outdir, grid_dimensions):
+    def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual Gaussian descriptor calculation."""
         from lammps import lammps
+
+        return_directly = False
+        if "return_directly" in kwargs.keys():
+            return_directly = kwargs["return_directly"]
+
         lammps_format = "lammps-data"
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")
         ase.io.write(ase_out_path, atoms, format=lammps_format)
@@ -150,18 +155,29 @@ class AtomicDensity(Descriptor):
             return gaussian_descriptors_np.copy(), nrows_ggrid
 
         else:
-            # We have to switch from x fastest to z fastes reordering.
-            gaussian_descriptors_np = \
-                gaussian_descriptors_np.reshape((grid_dimensions[2],
-                                                 grid_dimensions[1],
-                                                 grid_dimensions[0],
-                                                 7))
-            gaussian_descriptors_np = \
-                gaussian_descriptors_np.transpose([2, 1, 0, 3])
-            if self.parameters.descriptors_contain_xyz:
-                self.fingerprint_length = 4
-                return gaussian_descriptors_np[:, :, :, 3:].copy(), nx*ny*nz
+            # Since the atomic density may be directly fed back into QE
+            # during the total energy calculation, we may have to return
+            # the descriptors, even in serial mode, without any further
+            # reordering.
+            if return_directly:
+                return gaussian_descriptors_np.copy()
             else:
-                self.fingerprint_length = 1
-                return gaussian_descriptors_np[:, :, :, 6:].copy(), nx*ny*nz
+                # Here, we want to do something else with the atomic density,
+                # and thus have to properly reorder it.
+                # We have to switch from x fastest to z fastest reordering.
+                gaussian_descriptors_np = \
+                    gaussian_descriptors_np.reshape((grid_dimensions[2],
+                                                     grid_dimensions[1],
+                                                     grid_dimensions[0],
+                                                     7))
+                gaussian_descriptors_np = \
+                    gaussian_descriptors_np.transpose([2, 1, 0, 3])
+                if self.parameters.descriptors_contain_xyz:
+                    self.fingerprint_length = 4
+                    return gaussian_descriptors_np[:, :, :, 3:].copy(), \
+                           nx*ny*nz
+                else:
+                    self.fingerprint_length = 1
+                    return gaussian_descriptors_np[:, :, :, 6:].copy(), \
+                           nx*ny*nz
 
