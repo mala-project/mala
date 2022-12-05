@@ -5,7 +5,7 @@ import ase
 import numpy as np
 
 from mala.common.parameters import ParametersDescriptors, Parameters
-from mala.common.parallelizer import printout, get_size
+from mala.common.parallelizer import printout, get_size, parallel_warn
 
 
 class Descriptor(ABC):
@@ -39,8 +39,21 @@ class Descriptor(ABC):
         # If not, we need to return the correct object directly.
         if cls == Descriptor:
             if params.descriptors.descriptor_type == 'SNAP':
-                from mala.descriptors.snap import SNAP
-                descriptors = super(Descriptor, SNAP).__new__(SNAP)
+                from mala.descriptors.bispectrum import Bispectrum
+                parallel_warn(
+                    "Using 'SNAP' as descriptors will be deprecated "
+                    "starting in MALA v1.3.0. Please use 'Bispectrum' "
+                    "instead.",  min_verbosity=0, category=FutureWarning)
+                descriptors = super(Descriptor, Bispectrum).__new__(Bispectrum)
+
+            if params.descriptors.descriptor_type == 'Bispectrum':
+                from mala.descriptors.bispectrum import Bispectrum
+                descriptors = super(Descriptor, Bispectrum).__new__(Bispectrum)
+
+            if params.descriptors.descriptor_type == "AtomicDensity":
+                from mala.descriptors.atomic_density import AtomicDensity
+                descriptors = super(Descriptor, AtomicDensity).\
+                    __new__(AtomicDensity)
 
             if descriptors is None:
                 raise Exception("Unsupported descriptor calculator.")
@@ -324,7 +337,7 @@ class Descriptor(ABC):
                                "ngridx": nx,
                                "ngridy": ny,
                                "ngridz": nz,
-                               "switch": self.parameters.snap_switchflag}
+                               "switch": self.parameters.bispectrum_switchflag}
             else:
                 if self.parameters.use_z_splitting:
                     # when nyfft is not used only split processors along z axis
@@ -376,18 +389,18 @@ class Descriptor(ABC):
                                    "ngridx": nx,
                                    "ngridy": ny,
                                    "ngridz": nz,
-                                   "switch": self.parameters.snap_switchflag}
+                                   "switch": self.parameters.bispectrum_switchflag}
                 else:
                     lammps_dict = {"ngridx": nx,
                                    "ngridy": ny,
                                    "ngridz": nz,
-                                   "switch": self.parameters.snap_switchflag}
+                                   "switch": self.parameters.bispectrum_switchflag}
 
         else:
             lammps_dict = {"ngridx": nx,
                            "ngridy": ny,
                            "ngridz": nz,
-                           "switch": self.parameters.snap_switchflag}
+                           "switch": self.parameters.bispectrum_switchflag}
         return lammps_dict
 
     @staticmethod

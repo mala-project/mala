@@ -34,7 +34,7 @@ class TestLazyLoading:
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.descriptors.twojmax = 11
+        test_parameters.descriptors.bispectrum_twojmax = 11
         test_parameters.targets.ldos_gridsize = 10
         test_parameters.network.layer_activations = ["LeakyReLU"]
         test_parameters.running.max_number_epochs = 3

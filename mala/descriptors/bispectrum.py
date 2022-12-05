@@ -21,7 +21,7 @@ from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier
 
 
-class SNAP(Descriptor):
+class Bispectrum(Descriptor):
     """Class for calculation and parsing of SNAP descriptors.
 
     Parameters
@@ -31,7 +31,7 @@ class SNAP(Descriptor):
     """
 
     def __init__(self, parameters):
-        super(SNAP, self).__init__(parameters)
+        super(Bispectrum, self).__init__(parameters)
         self.in_format_ase = ""
         self.grid_dimensions = []
 
@@ -304,8 +304,8 @@ class SNAP(Descriptor):
         lammps_dict = self._setup_lammps_processors(nx, ny, nz)
 
         # Set the values not already filled in the LAMMPS setup.
-        lammps_dict["twojmax"] = self.parameters.twojmax
-        lammps_dict["rcutfac"] = self.parameters.rcutfac
+        lammps_dict["twojmax"] = self.parameters.bispectrum_twojmax
+        lammps_dict["rcutfac"] = self.parameters.bispectrum_cutoff
         lammps_dict["atom_config_fname"] = ase_out_path
 
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
@@ -316,7 +316,7 @@ class SNAP(Descriptor):
         # An empty string means that the user wants to use the standard input.
         # What that is differs depending on serial/parallel execution.
         if self.parameters.lammps_compute_file == "":
-            filepath = __file__.split("snap")[0]
+            filepath = __file__.split("bispectrum")[0]
             if self.parameters._configuration["mpi"]:
                 if self.parameters.use_z_splitting:
                     self.parameters.lammps_compute_file = \
@@ -337,8 +337,8 @@ class SNAP(Descriptor):
         ncols0 = 3
 
         # Analytical relation for fingerprint length
-        ncoeff = (self.parameters.twojmax+2) * \
-                 (self.parameters.twojmax+3)*(self.parameters.twojmax+4)
+        ncoeff = (self.parameters.bispectrum_twojmax + 2) * \
+                 (self.parameters.bispectrum_twojmax + 3) * (self.parameters.bispectrum_twojmax + 4)
         ncoeff = ncoeff // 24   # integer division
         self.fingerprint_length = ncols0+ncoeff
 

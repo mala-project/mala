@@ -272,7 +272,7 @@ class Target(ABC):
                         self.grid_dimensions[1])
             self.voxel[2] = self.voxel[2] / (
                         self.grid_dimensions[2])
-            self._parameters_full.descriptors.gaussian_descriptors_sigma = \
+            self._parameters_full.descriptors.atomic_density_sigma = \
                 (np.max(self.voxel) / reference_grid_spacing_aluminium) * \
                 optimal_sigma_aluminium
 
@@ -324,7 +324,7 @@ class Target(ABC):
                         self.grid_dimensions[1])
             self.voxel[2] = self.voxel[2] / (
                         self.grid_dimensions[2])
-            self._parameters_full.descriptors.gaussian_descriptors_sigma = \
+            self._parameters_full.descriptors.atomic_density_sigma = \
                 (np.max(self.voxel) / reference_grid_spacing_aluminium) * \
                 optimal_sigma_aluminium
 

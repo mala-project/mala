@@ -19,7 +19,7 @@ from mala.descriptors.descriptor import Descriptor
 from mala.common.parallelizer import printout
 
 
-class GaussianDescriptors(Descriptor):
+class AtomicDensity(Descriptor):
     """Class for calculation and parsing of Gaussian descriptors.
 
     Parameters
@@ -29,7 +29,7 @@ class GaussianDescriptors(Descriptor):
     """
 
     def __init__(self, parameters):
-        super(GaussianDescriptors, self).__init__(parameters)
+        super(AtomicDensity, self).__init__(parameters)
         self.in_format_ase = ""
         self.grid_dimensions = []
         self.verbosity = parameters.verbosity
@@ -192,8 +192,8 @@ class GaussianDescriptors(Descriptor):
         lammps_dict = self._setup_lammps_processors(nx, ny, nz)
 
         # Set the values not already filled in the LAMMPS setup.
-        lammps_dict["sigma"] = self.parameters.gaussian_descriptors_sigma
-        lammps_dict["rcutfac"] = self.parameters.gaussian_descriptors_cutoff
+        lammps_dict["sigma"] = self.parameters.atomic_density_sigma
+        lammps_dict["rcutfac"] = self.parameters.atomic_density_cutoff
         lammps_dict["atom_config_fname"] = ase_out_path
 
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)

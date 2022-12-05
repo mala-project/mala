@@ -14,7 +14,7 @@ from mala.targets.target import Target
 from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.atomic_force import AtomicForce
-from mala.descriptors.gaussian import GaussianDescriptors
+from mala.descriptors.atomic_density import AtomicDensity
 from mala.common.parallelizer import get_rank
 
 
@@ -835,7 +835,7 @@ class Density(Target):
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
 
         if self._parameters_full.descriptors.\
-                use_gaussian_descriptors_energy_formula:
+                use_atomic_density_energy_formula:
             # Calculate the Gaussian descriptors for the calculation of the
             # structure factors.
             barrier()
@@ -893,9 +893,9 @@ class Density(Target):
         # Ewald energy and the structure factor can be skipped.
         te.set_positions(np.transpose(positions_for_qe), number_of_atoms,
                          self._parameters_full.descriptors. \
-                         use_gaussian_descriptors_energy_formula,
+                         use_atomic_density_energy_formula,
                          self._parameters_full.descriptors. \
-                         use_gaussian_descriptors_energy_formula)
+                         use_atomic_density_energy_formula)
         barrier()
         t1 = time.perf_counter()
         printout("time used by set_positions: ", t1 - t0,
@@ -904,7 +904,7 @@ class Density(Target):
         barrier()
 
         if self._parameters_full.descriptors.\
-                use_gaussian_descriptors_energy_formula:
+                use_atomic_density_energy_formula:
             t0 = time.perf_counter()
             gaussian_descriptors = \
                 np.reshape(gaussian_descriptors,
@@ -913,7 +913,7 @@ class Density(Target):
                 np.reshape(reference_gaussian_descriptors,
                            [number_of_gridpoints, 1], order='F')
             sigma = self._parameters_full.descriptors.\
-                gaussian_descriptors_sigma
+                atomic_density_sigma
             sigma = sigma / Bohr
             te.set_positions_gauss(self._parameters_full.verbosity,
                                    gaussian_descriptors,
@@ -937,6 +937,6 @@ class Density(Target):
         return atoms_Angstrom
 
     def _get_gaussian_descriptors_for_structure_factors(self, atoms, grid):
-        descriptor_calculator = GaussianDescriptors(self._parameters_full)
+        descriptor_calculator = AtomicDensity(self._parameters_full)
         return descriptor_calculator.\
             calculate_from_atoms(atoms, grid)[0][:, 6:]

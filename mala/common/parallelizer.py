@@ -213,7 +213,7 @@ def printout(*values, sep=' ', min_verbosity=0):
             print(outstring)
 
 
-def parallel_warn(warning, min_verbosity=0):
+def parallel_warn(warning, min_verbosity=0, category=UserWarning):
     """
     Interface for warnings in parallel runs. Can be used like warnings.warn.
 
@@ -224,10 +224,11 @@ def parallel_warn(warning, min_verbosity=0):
     ----------
     warning
         Warning to be printed.
-
     min_verbosity : int
         Minimum number of verbosity for this output to still be printed.
+    category : class
+        Category of the warning to be thrown.
     """
     if current_verbosity >= min_verbosity:
         if get_rank() == 0:
-            warnings.warn(warning)
+            warnings.warn(warning, category=category)
