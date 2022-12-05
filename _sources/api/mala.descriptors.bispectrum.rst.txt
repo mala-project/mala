@@ -1,0 +1,7 @@
+bispectrum
+==========
+
+.. automodule:: mala.descriptors.bispectrum
+   :members:
+   :undoc-members:
+   :show-inheritance:

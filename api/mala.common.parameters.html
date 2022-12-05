@@ -724,7 +724,17 @@ globally when it is not empty.. Default : []</p>
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.descriptor_type">
 <span class="sig-name descname"><span class="pre">descriptor_type</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.descriptor_type" title="Permalink to this definition"></a></dt>
 <dd><p>Type of descriptors that is used to represent the atomic fingerprint.
-Currently only “SNAP” is supported.</p>
+Supported:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘Bispectrum’: Bispectrum descriptors (formerly called ‘SNAP’).</p></li>
+<li><dl class="simple">
+<dt>‘Atomic Density’: Atomic density, calculated via Gaussian</dt><dd><p>descriptors.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>string</p>
@@ -733,8 +743,8 @@ Currently only “SNAP” is supported.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.twojmax">
-<span class="sig-name descname"><span class="pre">twojmax</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.twojmax" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.bispectrum_twojmax">
+<span class="sig-name descname"><span class="pre">bispectrum_twojmax</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.bispectrum_twojmax" title="Permalink to this definition"></a></dt>
 <dd><p>SNAP calculation: 2*jmax-parameter used for calculation of SNAP
 descriptors. Default value for jmax is 5, so default value for
 twojmax is 10.</p>
@@ -785,8 +795,8 @@ descriptor vector. If False, no such cutting is peformed.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.gaussian_descriptors_sigma">
-<span class="sig-name descname"><span class="pre">gaussian_descriptors_sigma</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.gaussian_descriptors_sigma" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.atomic_density_sigma">
+<span class="sig-name descname"><span class="pre">atomic_density_sigma</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.atomic_density_sigma" title="Permalink to this definition"></a></dt>
 <dd><p>Sigma used for the calculation of the Gaussian descriptors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -796,14 +806,14 @@ descriptor vector. If False, no such cutting is peformed.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.rcutfac">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rcutfac</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.rcutfac" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.bispectrum_cutoff">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bispectrum_cutoff</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.bispectrum_cutoff" title="Permalink to this definition"></a></dt>
 <dd><p>Cut off radius for SNAP calculation.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.snap_switchflag">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">snap_switchflag</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.snap_switchflag" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.bispectrum_switchflag">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bispectrum_switchflag</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.bispectrum_switchflag" title="Permalink to this definition"></a></dt>
 <dd><p>Switchflag for the SNAP calculation.</p>
 <p>Can only be 1 or 0. If 1 (default), a switching function will be used
 to ensure that atomic contributions smoothly go to zero after a

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.descriptors.bispectrum &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mala.descriptors.bispectrum</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.descriptors.bispectrum</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;SNAP descriptor class.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">ase</span>
+<span class="kn">import</span> <span class="nn">ase.io</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
+    <span class="c1"># For version compatibility; older lammps versions (the serial version</span>
+    <span class="c1"># we still use on some machines) do not have these constants.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">lammps_constants</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">pass</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="n">set_cmdlinevars</span><span class="p">,</span> <span class="n">extract_compute_np</span>
+<span class="kn">from</span> <span class="nn">mala.descriptors.descriptor</span> <span class="kn">import</span> <span class="n">Descriptor</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_size</span><span class="p">,</span> \
+    <span class="n">barrier</span>
+
+
+<div class="viewcode-block" id="Bispectrum"><a class="viewcode-back" href="../../../api/mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum">[docs]</a><span class="k">class</span> <span class="nc">Bispectrum</span><span class="p">(</span><span class="n">Descriptor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for calculation and parsing of SNAP descriptors.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.common.parameters.Parameters</span>
+<span class="sd">        Parameters object used to create this object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Bispectrum</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Bispectrum.convert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the units of a SNAP descriptor.</span>
+
+<span class="sd">        Since these do not really have units this function does nothing yet.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            Data for which the units should be converted.</span>
+
+<span class="sd">        in_units : string</span>
+<span class="sd">            Units of array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">            Data in MALA units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;None&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for SNAP.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Bispectrum.backconvert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert the units of a SNAP descriptor.</span>
+
+<span class="sd">        Since these do not really have units this function does nothing yet.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            Data in MALA units.</span>
+
+<span class="sd">        out_units : string</span>
+<span class="sd">            Desired units of output array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">            Data in out_units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">out_units</span> <span class="o">==</span> <span class="s2">&quot;None&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for SNAP.&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform actual SNAP calculation.&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
+        <span class="n">lammps_format</span> <span class="o">=</span> <span class="s2">&quot;lammps-data&quot;</span>
+        <span class="n">ase_out_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_input.tmp&quot;</span><span class="p">)</span>
+        <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ase_out_path</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">lammps_format</span><span class="p">)</span>
+
+        <span class="c1"># We also need to know how big the grid is.</span>
+        <span class="c1"># Iterating directly through the file is slow, but the</span>
+        <span class="c1"># grid information is at the top (around line 200).</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">nx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ny</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">nz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dbg_grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nx</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ny</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">nz</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># Build LAMMPS arguments from the data we read.</span>
+        <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;-screen&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;-log&quot;</span><span class="p">,</span>
+                       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_bgrid_log.tmp&quot;</span><span class="p">)]</span>
+
+        <span class="c1"># LAMMPS processor grid filled by parent class.</span>
+        <span class="n">lammps_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lammps_processors</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">)</span>
+
+        <span class="c1"># Set the values not already filled in the LAMMPS setup.</span>
+        <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;twojmax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span>
+        <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;rcutfac&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_cutoff</span>
+        <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;atom_config_fname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ase_out_path</span>
+
+        <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="n">set_cmdlinevars</span><span class="p">(</span><span class="n">lmp_cmdargs</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
+
+        <span class="c1"># Build the LAMMPS object.</span>
+        <span class="n">lmp</span> <span class="o">=</span> <span class="n">lammps</span><span class="p">(</span><span class="n">cmdargs</span><span class="o">=</span><span class="n">lmp_cmdargs</span><span class="p">)</span>
+
+        <span class="c1"># An empty string means that the user wants to use the standard input.</span>
+        <span class="c1"># What that is differs depending on serial/parallel execution.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="vm">__file__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;bispectrum&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_z_splitting</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgridlocal.python&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span>
+                                     <span class="s2">&quot;in.bgridlocal_defaultproc.python&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> \
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.bgrid.python&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Do the LAMMPS calculation.</span>
+        <span class="n">lmp</span><span class="o">.</span><span class="n">file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">lammps_compute_file</span><span class="p">)</span>
+
+        <span class="c1"># Set things not accessible from LAMMPS</span>
+        <span class="c1"># First 3 cols are x, y, z, coords</span>
+        <span class="n">ncols0</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="c1"># Analytical relation for fingerprint length</span>
+        <span class="n">ncoeff</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> \
+                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">ncoeff</span> <span class="o">=</span> <span class="n">ncoeff</span> <span class="o">//</span> <span class="mi">24</span>   <span class="c1"># integer division</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="n">ncols0</span><span class="o">+</span><span class="n">ncoeff</span>
+
+        <span class="c1"># Extract data from LAMMPS calculation.</span>
+        <span class="c1"># This is different for the parallel and the serial case.</span>
+        <span class="c1"># In the serial case we can expect to have a full SNAP array at the</span>
+        <span class="c1"># end of this function.</span>
+        <span class="c1"># This is not necessarily true for the parallel case.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="n">nrows_local</span> <span class="o">=</span> <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
+                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span>
+                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_SIZE_ROWS</span><span class="p">)</span>
+            <span class="n">ncols_local</span> <span class="o">=</span> <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
+                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span>
+                                             <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_SIZE_COLS</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ncols_local</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">+</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Inconsistent number of features.&quot;</span><span class="p">)</span>
+
+            <span class="n">snap_descriptors_np</span> <span class="o">=</span> \
+                <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>
+                                   <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
+                                   <span class="n">array_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows_local</span><span class="p">,</span> <span class="n">ncols_local</span><span class="p">))</span>
+
+            <span class="c1"># Copy the grid dimensions only at the end.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">]</span>
+
+            <span class="c1"># If I directly return the descriptors, this sometimes leads</span>
+            <span class="c1"># to errors, because presumably the python garbage collection</span>
+            <span class="c1"># deallocates memory too quickly. This copy is more memory</span>
+            <span class="c1"># hungry, and we might have to tackle this later on, but</span>
+            <span class="c1"># for now it works.</span>
+            <span class="k">return</span> <span class="n">snap_descriptors_np</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">nrows_local</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Extract data from LAMMPS calculation.</span>
+            <span class="n">snap_descriptors_np</span> <span class="o">=</span> \
+                <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgrid&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
+                                   <span class="p">(</span><span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span><span class="p">))</span>
+            <span class="c1"># switch from x-fastest to z-fastest order (swaps 0th and 2nd</span>
+            <span class="c1"># dimension)</span>
+            <span class="n">snap_descriptors_np</span> <span class="o">=</span> <span class="n">snap_descriptors_np</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+            <span class="c1"># Copy the grid dimensions only at the end.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">]</span>
+            <span class="c1"># If I directly return the descriptors, this sometimes leads</span>
+            <span class="c1"># to errors, because presumably the python garbage collection</span>
+            <span class="c1"># deallocates memory too quickly. This copy is more memory</span>
+            <span class="c1"># hungry, and we might have to tackle this later on, but</span>
+            <span class="c1"># for now it works.</span>
+            <span class="c1"># I thought the transpose would take care of that, but apparently</span>
+            <span class="c1"># it does not necessarily do that - so we have do go down</span>
+            <span class="c1"># that route.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">snap_descriptors_np</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">snap_descriptors_np</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

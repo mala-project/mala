@@ -1,0 +1,7 @@
+atomic\_density
+===============
+
+.. automodule:: mala.descriptors.atomic_density
+   :members:
+   :undoc-members:
+   :show-inheritance:

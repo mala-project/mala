@@ -115,17 +115,21 @@
         <li><a href="api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.add_snapshot">(DataHandler method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.add_snapshot_to_dataset">add_snapshot_to_dataset() (LazyLoadDataset method)</a>
 
       <ul>
         <li><a href="api/mala.datahandling.lazy_load_dataset_clustered.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.add_snapshot_to_dataset">(LazyLoadDatasetClustered method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.after_before_training_metric">after_before_training_metric (ParametersRunning property)</a>
 </li>
       <li><a href="api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.analytical_integration">analytical_integration() (in module mala.targets.calculation_helpers)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.atomic_density_sigma">atomic_density_sigma (ParametersDescriptors attribute)</a>
+</li>
+      <li><a href="api/mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity">AtomicDensity (class in mala.descriptors.atomic_density)</a>
 </li>
       <li><a href="api/mala.targets.atomic_force.html#mala.targets.atomic_force.AtomicForce">AtomicForce (class in mala.targets.atomic_force)</a>
 </li>
@@ -135,18 +139,18 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.targets.density.html#mala.targets.density.Density.backconvert_units">backconvert_units() (Density static method)</a>
+      <li><a href="api/mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.backconvert_units">backconvert_units() (AtomicDensity static method)</a>
 
       <ul>
+        <li><a href="api/mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum.backconvert_units">(Bispectrum static method)</a>
+</li>
+        <li><a href="api/mala.targets.density.html#mala.targets.density.Density.backconvert_units">(Density static method)</a>
+</li>
         <li><a href="api/mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.backconvert_units">(Descriptor static method)</a>
 </li>
         <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.backconvert_units">(DOS static method)</a>
 </li>
-        <li><a href="api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors.backconvert_units">(GaussianDescriptors static method)</a>
-</li>
         <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.backconvert_units">(LDOS static method)</a>
-</li>
-        <li><a href="api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP.backconvert_units">(SNAP static method)</a>
 </li>
         <li><a href="api/mala.targets.target.html#mala.targets.target.Target.backconvert_units">(Target static method)</a>
 </li>
@@ -161,6 +165,14 @@
       </ul></li>
       <li><a href="api/mala.common.parallelizer.html#mala.common.parallelizer.barrier">barrier() (in module mala.common.parallelizer)</a>
 </li>
+      <li><a href="api/mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum">Bispectrum (class in mala.descriptors.bispectrum)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.bispectrum_cutoff">bispectrum_cutoff (ParametersDescriptors property)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.bispectrum_switchflag">bispectrum_switchflag (ParametersDescriptors property)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.bispectrum_twojmax">bispectrum_twojmax (ParametersDescriptors attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -170,21 +182,9 @@
       <li><a href="api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.calculate">calculate() (MALA method)</a>
 </li>
       <li><a href="api/mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.calculate_from_atoms">calculate_from_atoms() (Descriptor method)</a>
-
-      <ul>
-        <li><a href="api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors.calculate_from_atoms">(GaussianDescriptors method)</a>
 </li>
-        <li><a href="api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP.calculate_from_atoms">(SNAP method)</a>
-</li>
-      </ul></li>
       <li><a href="api/mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.calculate_from_qe_out">calculate_from_qe_out() (Descriptor method)</a>
-
-      <ul>
-        <li><a href="api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors.calculate_from_qe_out">(GaussianDescriptors method)</a>
 </li>
-        <li><a href="api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP.calculate_from_qe_out">(SNAP method)</a>
-</li>
-      </ul></li>
       <li><a href="api/mala.network.network.html#mala.network.network.Network.calculate_loss">calculate_loss() (Network method)</a>
 </li>
       <li><a href="api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.calculate_properties">calculate_properties() (MALA method)</a>
@@ -201,12 +201,12 @@
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersRunning.checkpoints_each_epoch">checkpoints_each_epoch (ParametersRunning attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.clear_data">clear_data() (DataHandler method)</a>
 </li>
       <li><a href="api/mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.clear_hyperparameters">clear_hyperparameters() (HyperOpt method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.datahandling.lazy_load_dataset_clustered.html#mala.datahandling.lazy_load_dataset_clustered.LazyLoadDatasetClustered.cluster_dataset">cluster_dataset() (LazyLoadDatasetClustered method)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.comment">comment (Parameters attribute)</a>
@@ -215,20 +215,20 @@
 </li>
       <li><a href="api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">convert_snapshots() (DataConverter method)</a>
 </li>
-      <li><a href="api/mala.targets.atomic_force.html#mala.targets.atomic_force.AtomicForce.convert_units">convert_units() (AtomicForce static method)</a>
+      <li><a href="api/mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.convert_units">convert_units() (AtomicDensity static method)</a>
 
       <ul>
+        <li><a href="api/mala.targets.atomic_force.html#mala.targets.atomic_force.AtomicForce.convert_units">(AtomicForce static method)</a>
+</li>
+        <li><a href="api/mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum.convert_units">(Bispectrum static method)</a>
+</li>
         <li><a href="api/mala.targets.density.html#mala.targets.density.Density.convert_units">(Density static method)</a>
 </li>
         <li><a href="api/mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.convert_units">(Descriptor static method)</a>
 </li>
         <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.convert_units">(DOS static method)</a>
 </li>
-        <li><a href="api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors.convert_units">(GaussianDescriptors static method)</a>
-</li>
         <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.convert_units">(LDOS static method)</a>
-</li>
-        <li><a href="api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP.convert_units">(SNAP static method)</a>
 </li>
         <li><a href="api/mala.targets.target.html#mala.targets.target.Target.convert_units">(Target static method)</a>
 </li>
@@ -413,11 +413,7 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP.gather_descriptors">gather_descriptors() (SNAP method)</a>
-</li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.gaussian_descriptors_sigma">gaussian_descriptors_sigma (ParametersDescriptors attribute)</a>
-</li>
-      <li><a href="api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors">GaussianDescriptors (class in mala.descriptors.gaussian)</a>
+      <li><a href="api/mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.gather_descriptors">gather_descriptors() (Descriptor method)</a>
 </li>
       <li><a href="api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.gaussians">gaussians() (in module mala.targets.calculation_helpers)</a>
 </li>
@@ -493,10 +489,10 @@
 </li>
       <li><a href="api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.get_input_dimension">get_input_dimension() (DataHandler method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna.get_int">get_int() (HyperparameterOptuna method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.parallelizer.html#mala.common.parallelizer.get_local_rank">get_local_rank() (in module mala.common.parallelizer)</a>
 </li>
       <li><a href="api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.get_new_data">get_new_data() (LazyLoadDataset method)</a>
@@ -514,6 +510,8 @@
 </li>
       </ul></li>
       <li><a href="api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.get_optimal_parameters">get_optimal_parameters() (HyperOptOAT method)</a>
+</li>
+      <li><a href="api/mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.get_optimal_sigma">get_optimal_sigma() (AtomicDensity static method)</a>
 </li>
       <li><a href="api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.get_orthogonal_array">get_orthogonal_array() (HyperOptOAT method)</a>
 </li>
@@ -836,6 +834,20 @@
 </li>
       </ul></li>
       <li>
+    mala.descriptors.atomic_density
+
+      <ul>
+        <li><a href="api/mala.descriptors.atomic_density.html#module-mala.descriptors.atomic_density">module</a>
+</li>
+      </ul></li>
+      <li>
+    mala.descriptors.bispectrum
+
+      <ul>
+        <li><a href="api/mala.descriptors.bispectrum.html#module-mala.descriptors.bispectrum">module</a>
+</li>
+      </ul></li>
+      <li>
     mala.descriptors.descriptor
 
       <ul>
@@ -843,24 +855,10 @@
 </li>
       </ul></li>
       <li>
-    mala.descriptors.gaussian
-
-      <ul>
-        <li><a href="api/mala.descriptors.gaussian.html#module-mala.descriptors.gaussian">module</a>
-</li>
-      </ul></li>
-      <li>
     mala.descriptors.lammps_utils
 
       <ul>
         <li><a href="api/mala.descriptors.lammps_utils.html#module-mala.descriptors.lammps_utils">module</a>
-</li>
-      </ul></li>
-      <li>
-    mala.descriptors.snap
-
-      <ul>
-        <li><a href="api/mala.descriptors.snap.html#module-mala.descriptors.snap">module</a>
 </li>
       </ul></li>
       <li>
@@ -1122,13 +1120,13 @@
 </li>
         <li><a href="api/mala.descriptors.html#module-mala.descriptors">mala.descriptors</a>
 </li>
+        <li><a href="api/mala.descriptors.atomic_density.html#module-mala.descriptors.atomic_density">mala.descriptors.atomic_density</a>
+</li>
+        <li><a href="api/mala.descriptors.bispectrum.html#module-mala.descriptors.bispectrum">mala.descriptors.bispectrum</a>
+</li>
         <li><a href="api/mala.descriptors.descriptor.html#module-mala.descriptors.descriptor">mala.descriptors.descriptor</a>
 </li>
-        <li><a href="api/mala.descriptors.gaussian.html#module-mala.descriptors.gaussian">mala.descriptors.gaussian</a>
-</li>
         <li><a href="api/mala.descriptors.lammps_utils.html#module-mala.descriptors.lammps_utils">mala.descriptors.lammps_utils</a>
-</li>
-        <li><a href="api/mala.descriptors.snap.html#module-mala.descriptors.snap">mala.descriptors.snap</a>
 </li>
         <li><a href="api/mala.interfaces.html#module-mala.interfaces">mala.interfaces</a>
 </li>
@@ -1341,8 +1339,6 @@
 </li>
       <li><a href="api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor">raw_numpy_to_converted_scaled_tensor() (DataHandler method)</a>
 </li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.rcutfac">rcutfac (ParametersDescriptors property)</a>
-</li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.rdb_storage_heartbeat">rdb_storage_heartbeat (ParametersHyperparameterOptimization property)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersTargets.rdf_parameters">rdf_parameters (ParametersTargets attribute)</a>
@@ -1461,10 +1457,6 @@
       </ul></li>
       <li><a href="api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance">show_order_of_importance() (HyperOptOAT method)</a>
 </li>
-      <li><a href="api/mala.descriptors.snap.html#mala.descriptors.snap.SNAP">SNAP (class in mala.descriptors.snap)</a>
-</li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.snap_switchflag">snap_switchflag (ParametersDescriptors property)</a>
-</li>
       <li><a href="api/mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot">Snapshot (class in mala.datahandling.snapshot)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersData.snapshot_directories_list">snapshot_directories_list (ParametersData attribute)</a>
@@ -1540,8 +1532,6 @@
       <li><a href="api/mala.network.network.html#mala.network.network.TransformerNet">TransformerNet (class in mala.network.network)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.trial_ensemble_evaluation">trial_ensemble_evaluation (ParametersHyperparameterOptimization property)</a>
-</li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors.twojmax">twojmax (ParametersDescriptors attribute)</a>
 </li>
   </ul></td>
 </tr></table>

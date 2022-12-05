@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mala.descriptors.gaussian &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>mala.descriptors.atomic_density &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
@@ -61,7 +61,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>mala.descriptors.gaussian</li>
+      <li>mala.descriptors.atomic_density</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -70,7 +70,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for mala.descriptors.gaussian</h1><div class="highlight"><pre>
+  <h1>Source code for mala.descriptors.atomic_density</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Gaussian descriptor class.&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -86,13 +86,20 @@
         <span class="k">pass</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="n">set_cmdlinevars</span><span class="p">,</span> <span class="n">extract_compute_np</span>
 <span class="kn">from</span> <span class="nn">mala.descriptors.descriptor</span> <span class="kn">import</span> <span class="n">Descriptor</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
+
+<span class="c1"># Empirical value for the Gaussian descriptor width, determined for an</span>
+<span class="c1"># aluminium system. Reasonable values for sigma can and will be calculated</span>
+<span class="c1"># automatically based on this value and the aluminium gridspacing</span>
+<span class="c1"># for other systems as well.</span>
+<span class="n">optimal_sigma_aluminium</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">reference_grid_spacing_aluminium</span> <span class="o">=</span> <span class="mf">0.08099000022712448</span>
 
 
-<div class="viewcode-block" id="GaussianDescriptors"><a class="viewcode-back" href="../../../api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors">[docs]</a><span class="k">class</span> <span class="nc">GaussianDescriptors</span><span class="p">(</span><span class="n">Descriptor</span><span class="p">):</span>
+<div class="viewcode-block" id="AtomicDensity"><a class="viewcode-back" href="../../../api/mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity">[docs]</a><span class="k">class</span> <span class="nc">AtomicDensity</span><span class="p">(</span><span class="n">Descriptor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class for calculation and parsing of Gaussian descriptors.</span>
 
 <span class="sd">    Parameters</span>
@@ -102,12 +109,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">GaussianDescriptors</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AtomicDensity</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">verbosity</span>
 
-<div class="viewcode-block" id="GaussianDescriptors.convert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="AtomicDensity.convert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of a Gaussian descriptor.</span>
@@ -132,7 +137,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for Gaussian descriptors.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GaussianDescriptors.backconvert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="AtomicDensity.backconvert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of a Gaussian descriptor.</span>
@@ -157,93 +162,32 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for Gaussian descriptors.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GaussianDescriptors.calculate_from_qe_out"><a class="viewcode-back" href="../../../api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors.calculate_from_qe_out">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="n">qe_out_directory</span><span class="p">,</span>
-                              <span class="n">working_directory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                              <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="AtomicDensity.get_optimal_sigma"><a class="viewcode-back" href="../../../api/mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.get_optimal_sigma">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_optimal_sigma</span><span class="p">(</span><span class="n">voxel</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the Gaussian descriptors based on a Quantum Espresso outfile.</span>
+<span class="sd">        Calculate the optimal width of the Gaussians based on the grid voxel.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        qe_out_file : string</span>
-<span class="sd">            Name of Quantum Espresso output file for snapshot.</span>
-
-<span class="sd">        qe_out_directory : string</span>
-<span class="sd">            Path to Quantum Espresso output file for snapshot.</span>
-
-<span class="sd">        working_directory : string</span>
-<span class="sd">            A directory in which to perform the LAMMPS calculation.</span>
-<span class="sd">            Optional, if None, the QE out directory will be used.</span>
+<span class="sd">        voxel : ase.Cell</span>
+<span class="sd">            An ASE Cell object characterizing the voxel.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        snap_descriptors : numpy.array</span>
-<span class="sd">            Numpy array containing the Gaussian descriptors with the dimension</span>
-<span class="sd">            (x,y,z,snap_dimension)</span>
-
+<span class="sd">        optimal_sigma : float</span>
+<span class="sd">            The optimal sigma value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span> <span class="o">=</span> <span class="s2">&quot;espresso-out&quot;</span>
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Calculating Gaussian descriptors from&quot;</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">,</span> <span class="s2">&quot;at&quot;</span><span class="p">,</span>
-                 <span class="n">qe_out_directory</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="c1"># We get the atomic information by using ASE.</span>
-        <span class="n">infile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">qe_out_directory</span><span class="p">,</span> <span class="n">qe_out_file</span><span class="p">)</span>
-        <span class="n">atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">voxel</span><span class="p">)</span> <span class="o">/</span> <span class="n">reference_grid_spacing_aluminium</span><span class="p">)</span> <span class="o">*</span> \
+               <span class="n">optimal_sigma_aluminium</span></div>
 
-        <span class="c1"># Enforcing / Checking PBC on the read atoms.</span>
-        <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enforce_pbc</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
-
-        <span class="c1"># Get the grid dimensions.</span>
-        <span class="n">qe_outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="n">qe_outfile</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
-        <span class="n">nx</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">ny</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">nz</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;FFT dimensions&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                <span class="n">tmp</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">nx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">ny</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
-                <span class="n">nz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
-                <span class="k">break</span>
-
-        <span class="k">if</span> <span class="n">working_directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">working_directory</span> <span class="o">=</span> <span class="n">qe_out_directory</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_gaussian_descriptors</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
-                                                     <span class="n">working_directory</span><span class="p">,</span>
-                                                     <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">])</span></div>
-
-<div class="viewcode-block" id="GaussianDescriptors.calculate_from_atoms"><a class="viewcode-back" href="../../../api/mala.descriptors.gaussian.html#mala.descriptors.gaussian.GaussianDescriptors.calculate_from_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_from_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span>
-                             <span class="n">working_directory</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the Gaussian descriptors based on the atomic configurations.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        atoms : ase.Atoms</span>
-<span class="sd">            Atoms object holding the atomic configuration.</span>
-
-<span class="sd">        grid_dimensions : list</span>
-<span class="sd">            Grid dimensions to be used, in the format [x,y,z].</span>
-
-<span class="sd">        working_directory : string</span>
-<span class="sd">            A directory in which to perform the LAMMPS calculation.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        descriptors : numpy.array</span>
-<span class="sd">            Numpy array containing the descriptors with the dimension</span>
-<span class="sd">            (x,y,z,descriptor_dimension)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Enforcing / Checking PBC on the input atoms.</span>
-        <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enforce_pbc</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__calculate_gaussian_descriptors</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">working_directory</span><span class="p">,</span>
-                                                     <span class="n">grid_dimensions</span><span class="p">)</span></div>
-
-    <span class="k">def</span> <span class="nf">__calculate_gaussian_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform actual Gaussian descriptor calculation.&quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
+
+        <span class="n">return_directly</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s2">&quot;return_directly&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">return_directly</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;return_directly&quot;</span><span class="p">]</span>
+
         <span class="n">lammps_format</span> <span class="o">=</span> <span class="s2">&quot;lammps-data&quot;</span>
         <span class="n">ase_out_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_input.tmp&quot;</span><span class="p">)</span>
         <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ase_out_path</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">lammps_format</span><span class="p">)</span>
@@ -257,6 +201,16 @@
             <span class="n">ny</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">nz</span> <span class="o">=</span> <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
+        <span class="c1"># Check if we have to determine the optimal sigma value.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">atomic_density_sigma</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">]</span>
+            <span class="n">voxel</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">atomic_density_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
+                <span class="n">get_optimal_sigma</span><span class="p">(</span><span class="n">voxel</span><span class="p">)</span>
+
         <span class="c1"># Build LAMMPS arguments from the data we read.</span>
         <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;-screen&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;-log&quot;</span><span class="p">,</span>
                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_ggrid_log.tmp&quot;</span><span class="p">)]</span>
@@ -265,8 +219,8 @@
         <span class="n">lammps_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_lammps_processors</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">)</span>
 
         <span class="c1"># Set the values not already filled in the LAMMPS setup.</span>
-        <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">gaussian_descriptors_sigma</span>
-        <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;rcutfac&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">gaussian_descriptors_cutoff</span>
+        <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">atomic_density_sigma</span>
+        <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;rcutfac&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">atomic_density_cutoff</span>
         <span class="n">lammps_dict</span><span class="p">[</span><span class="s2">&quot;atom_config_fname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ase_out_path</span>
 
         <span class="n">lmp_cmdargs</span> <span class="o">=</span> <span class="n">set_cmdlinevars</span><span class="p">(</span><span class="n">lmp_cmdargs</span><span class="p">,</span> <span class="n">lammps_dict</span><span class="p">)</span>
@@ -276,7 +230,7 @@
 
         <span class="c1"># For now the file is chosen automatically, because this is used</span>
         <span class="c1"># mostly under the hood anyway.</span>
-        <span class="n">filepath</span> <span class="o">=</span> <span class="vm">__file__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;gaussian&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="vm">__file__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;atomic_density&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_z_splitting</span><span class="p">:</span>
                 <span class="n">runfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;in.ggrid.python&quot;</span><span class="p">)</span>
@@ -299,10 +253,40 @@
                                <span class="n">lammps_constants</span><span class="o">.</span><span class="n">LMP_STYLE_LOCAL</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
                                <span class="n">array_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows_ggrid</span><span class="p">,</span> <span class="n">ncols_ggrid</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+        <span class="c1"># In comparison to SNAP, the atomic density always returns</span>
+        <span class="c1"># in the &quot;local mode&quot;. Thus we have to make some slight adjustments</span>
+        <span class="c1"># if we operate without MPI.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="mi">4</span>
             <span class="k">return</span> <span class="n">gaussian_descriptors_np</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">nrows_ggrid</span>
+
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">gaussian_descriptors_np</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">nrows_ggrid</span></div>
+            <span class="c1"># Since the atomic density may be directly fed back into QE</span>
+            <span class="c1"># during the total energy calculation, we may have to return</span>
+            <span class="c1"># the descriptors, even in serial mode, without any further</span>
+            <span class="c1"># reordering.</span>
+            <span class="k">if</span> <span class="n">return_directly</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">gaussian_descriptors_np</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Here, we want to do something else with the atomic density,</span>
+                <span class="c1"># and thus have to properly reorder it.</span>
+                <span class="c1"># We have to switch from x fastest to z fastest reordering.</span>
+                <span class="n">gaussian_descriptors_np</span> <span class="o">=</span> \
+                    <span class="n">gaussian_descriptors_np</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                                     <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                     <span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                     <span class="mi">7</span><span class="p">))</span>
+                <span class="n">gaussian_descriptors_np</span> <span class="o">=</span> \
+                    <span class="n">gaussian_descriptors_np</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="mi">4</span>
+                    <span class="k">return</span> <span class="n">gaussian_descriptors_np</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> \
+                           <span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">return</span> <span class="n">gaussian_descriptors_np</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">6</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> \
+                           <span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span></div>
+
 </pre></div>
 
            </div>

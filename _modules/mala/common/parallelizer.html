@@ -286,7 +286,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">outstring</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="parallel_warn"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.parallel_warn">[docs]</a><span class="k">def</span> <span class="nf">parallel_warn</span><span class="p">(</span><span class="n">warning</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="parallel_warn"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.parallel_warn">[docs]</a><span class="k">def</span> <span class="nf">parallel_warn</span><span class="p">(</span><span class="n">warning</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interface for warnings in parallel runs. Can be used like warnings.warn.</span>
 
@@ -297,13 +297,14 @@
 <span class="sd">    ----------</span>
 <span class="sd">    warning</span>
 <span class="sd">        Warning to be printed.</span>
-
 <span class="sd">    min_verbosity : int</span>
 <span class="sd">        Minimum number of verbosity for this output to still be printed.</span>
+<span class="sd">    category : class</span>
+<span class="sd">        Category of the warning to be thrown.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">current_verbosity</span> <span class="o">&gt;=</span> <span class="n">min_verbosity</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">warning</span><span class="p">)</span></div>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">warning</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

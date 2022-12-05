@@ -87,13 +87,7 @@
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">ParametersTargets</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">parallel_warn</span>
 <span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="n">fermi_function</span>
-
-<span class="c1"># Empirical value for the Gaussian descriptor width, determined for an</span>
-<span class="c1"># aluminium system. Reasonable values for sigma can and will be calculated</span>
-<span class="c1"># automatically based on this value and the aluminium gridspacing</span>
-<span class="c1"># for other systems as well.</span>
-<span class="n">optimal_sigma_aluminium</span> <span class="o">=</span> <span class="mf">0.2</span>
-<span class="n">reference_grid_spacing_aluminium</span> <span class="o">=</span> <span class="mf">0.08099000022712448</span>
+<span class="kn">from</span> <span class="nn">mala.descriptors.atomic_density</span> <span class="kn">import</span> <span class="n">AtomicDensity</span>
 
 
 <div class="viewcode-block" id="Target"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target">[docs]</a><span class="k">class</span> <span class="nc">Target</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
@@ -345,9 +339,8 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">gaussian_descriptors_sigma</span> <span class="o">=</span> \
-                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">)</span> <span class="o">/</span> <span class="n">reference_grid_spacing_aluminium</span><span class="p">)</span> <span class="o">*</span> \
-                <span class="n">optimal_sigma_aluminium</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_sigma</span> <span class="o">=</span> \
+                <span class="n">AtomicDensity</span><span class="o">.</span><span class="n">get_optimal_sigma</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">)</span>
 
             <span class="c1"># This is especially important for size extrapolation.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">/</span> \
@@ -397,9 +390,8 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">gaussian_descriptors_sigma</span> <span class="o">=</span> \
-                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">)</span> <span class="o">/</span> <span class="n">reference_grid_spacing_aluminium</span><span class="p">)</span> <span class="o">*</span> \
-                <span class="n">optimal_sigma_aluminium</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">atomic_density_sigma</span> <span class="o">=</span> \
+                <span class="n">AtomicDensity</span><span class="o">.</span><span class="n">get_optimal_sigma</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;No number of electrons per atom provided, &quot;</span>

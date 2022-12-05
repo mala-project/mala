@@ -87,7 +87,7 @@
 <span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">mala.targets.cube_parser</span> <span class="kn">import</span> <span class="n">read_cube</span><span class="p">,</span> <span class="n">write_cube</span>
 <span class="kn">from</span> <span class="nn">mala.targets.atomic_force</span> <span class="kn">import</span> <span class="n">AtomicForce</span>
-<span class="kn">from</span> <span class="nn">mala.descriptors.gaussian</span> <span class="kn">import</span> <span class="n">GaussianDescriptors</span>
+<span class="kn">from</span> <span class="nn">mala.descriptors.atomic_density</span> <span class="kn">import</span> <span class="n">AtomicDensity</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_rank</span>
 
 
@@ -908,7 +908,7 @@
         <span class="n">positions_for_qe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_scaled_positions_for_qe</span><span class="p">(</span><span class="n">atoms_Angstrom</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span>\
-                <span class="n">use_gaussian_descriptors_energy_formula</span><span class="p">:</span>
+                <span class="n">use_atomic_density_energy_formula</span><span class="p">:</span>
             <span class="c1"># Calculate the Gaussian descriptors for the calculation of the</span>
             <span class="c1"># structure factors.</span>
             <span class="n">barrier</span><span class="p">()</span>
@@ -966,9 +966,9 @@
         <span class="c1"># Ewald energy and the structure factor can be skipped.</span>
         <span class="n">te</span><span class="o">.</span><span class="n">set_positions</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">positions_for_qe</span><span class="p">),</span> <span class="n">number_of_atoms</span><span class="p">,</span>
                          <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span> \
-                         <span class="n">use_gaussian_descriptors_energy_formula</span><span class="p">,</span>
+                         <span class="n">use_atomic_density_energy_formula</span><span class="p">,</span>
                          <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span> \
-                         <span class="n">use_gaussian_descriptors_energy_formula</span><span class="p">)</span>
+                         <span class="n">use_atomic_density_energy_formula</span><span class="p">)</span>
         <span class="n">barrier</span><span class="p">()</span>
         <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;time used by set_positions: &quot;</span><span class="p">,</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
@@ -977,7 +977,7 @@
         <span class="n">barrier</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span>\
-                <span class="n">use_gaussian_descriptors_energy_formula</span><span class="p">:</span>
+                <span class="n">use_atomic_density_energy_formula</span><span class="p">:</span>
             <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
             <span class="n">gaussian_descriptors</span> <span class="o">=</span> \
                 <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">gaussian_descriptors</span><span class="p">,</span>
@@ -986,7 +986,7 @@
                 <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">reference_gaussian_descriptors</span><span class="p">,</span>
                            <span class="p">[</span><span class="n">number_of_gridpoints</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
             <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span>\
-                <span class="n">gaussian_descriptors_sigma</span>
+                <span class="n">atomic_density_sigma</span>
             <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">/</span> <span class="n">Bohr</span>
             <span class="n">te</span><span class="o">.</span><span class="n">set_positions_gauss</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="o">.</span><span class="n">verbosity</span><span class="p">,</span>
                                    <span class="n">gaussian_descriptors</span><span class="p">,</span>
@@ -1010,7 +1010,7 @@
         <span class="k">return</span> <span class="n">atoms_Angstrom</span>
 
     <span class="k">def</span> <span class="nf">_get_gaussian_descriptors_for_structure_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
-        <span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">GaussianDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="p">)</span>
+        <span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">AtomicDensity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">descriptor_calculator</span><span class="o">.</span>\
             <span class="n">calculate_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">grid</span><span class="p">)[</span><span class="mi">0</span><span class="p">][:,</span> <span class="mi">6</span><span class="p">:]</span></div>
 </pre></div>

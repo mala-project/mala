@@ -16,8 +16,8 @@ descriptors
 .. toctree::
    :maxdepth: 6
 
+   mala.descriptors.atomic_density
+   mala.descriptors.bispectrum
    mala.descriptors.descriptor
-   mala.descriptors.gaussian
    mala.descriptors.lammps_utils
-   mala.descriptors.snap
 
