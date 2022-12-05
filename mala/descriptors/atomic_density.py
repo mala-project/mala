@@ -13,10 +13,17 @@ try:
         pass
 except ModuleNotFoundError:
     pass
+import numpy as np
 
 from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
 from mala.descriptors.descriptor import Descriptor
-from mala.common.parallelizer import printout
+
+# Empirical value for the Gaussian descriptor width, determined for an
+# aluminium system. Reasonable values for sigma can and will be calculated
+# automatically based on this value and the aluminium gridspacing
+# for other systems as well.
+optimal_sigma_aluminium = 0.2
+reference_grid_spacing_aluminium = 0.08099000022712448
 
 
 class AtomicDensity(Descriptor):
@@ -82,6 +89,11 @@ class AtomicDensity(Descriptor):
         else:
             raise Exception("Unsupported unit for Gaussian descriptors.")
 
+    @staticmethod
+    def get_optimal_sigma(voxel):
+        return (np.max(voxel) / reference_grid_spacing_aluminium) * \
+               optimal_sigma_aluminium
+
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual Gaussian descriptor calculation."""
         from lammps import lammps
@@ -102,6 +114,16 @@ class AtomicDensity(Descriptor):
             nx = grid_dimensions[0]
             ny = grid_dimensions[1]
             nz = grid_dimensions[2]
+
+        # Check if we have to determine the optimal sigma value.
+        if self.parameters.atomic_density_sigma is None:
+            self.grid_dimensions = [nx, ny, nz]
+            voxel = atoms.cell.copy()
+            voxel[0] = voxel[0] / (self.grid_dimensions[0])
+            voxel[1] = voxel[1] / (self.grid_dimensions[1])
+            voxel[2] = voxel[2] / (self.grid_dimensions[2])
+            self.parameters.atomic_density_sigma = self.\
+                get_optimal_sigma(voxel)
 
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log",
@@ -144,8 +166,6 @@ class AtomicDensity(Descriptor):
             extract_compute_np(lmp, "ggrid",
                                lammps_constants.LMP_STYLE_LOCAL, 2,
                                array_shape=(nrows_ggrid, ncols_ggrid))
-
-        self.grid_dimensions = [nx, ny, nz]
 
         # In comparison to SNAP, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments

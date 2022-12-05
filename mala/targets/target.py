@@ -14,13 +14,7 @@ from scipy.integrate import simps
 from mala.common.parameters import Parameters, ParametersTargets
 from mala.common.parallelizer import printout, parallel_warn
 from mala.targets.calculation_helpers import fermi_function
-
-# Empirical value for the Gaussian descriptor width, determined for an
-# aluminium system. Reasonable values for sigma can and will be calculated
-# automatically based on this value and the aluminium gridspacing
-# for other systems as well.
-optimal_sigma_aluminium = 0.2
-reference_grid_spacing_aluminium = 0.08099000022712448
+from mala.descriptors.atomic_density import AtomicDensity
 
 
 class Target(ABC):
@@ -273,8 +267,7 @@ class Target(ABC):
             self.voxel[2] = self.voxel[2] / (
                         self.grid_dimensions[2])
             self._parameters_full.descriptors.atomic_density_sigma = \
-                (np.max(self.voxel) / reference_grid_spacing_aluminium) * \
-                optimal_sigma_aluminium
+                AtomicDensity.get_optimal_sigma(self.voxel)
 
             # This is especially important for size extrapolation.
             self.electrons_per_atom = self.number_of_electrons_exact / \
@@ -325,8 +318,7 @@ class Target(ABC):
             self.voxel[2] = self.voxel[2] / (
                         self.grid_dimensions[2])
             self._parameters_full.descriptors.atomic_density_sigma = \
-                (np.max(self.voxel) / reference_grid_spacing_aluminium) * \
-                optimal_sigma_aluminium
+                AtomicDensity.get_optimal_sigma(self.voxel)
 
             if self.electrons_per_atom is None:
                 printout("No number of electrons per atom provided, "
