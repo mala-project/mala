@@ -290,11 +290,6 @@
                 <span class="n">tmp_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
                     <span class="n">gather_descriptors</span><span class="p">(</span><span class="n">tmp_input</span><span class="p">)</span>
 
-            <span class="c1"># Cut the xyz information if requested by the user.</span>
-            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="n">tmp_input</span> <span class="o">=</span> <span class="n">tmp_input</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">:]</span>
-
         <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># In this case, only the output is processed.</span>
             <span class="k">pass</span>
