@@ -29,9 +29,9 @@ test_parameters = mala.Parameters()
 # Specify input data options, i.e. which descriptors are calculated
 # with which parameters. These parameters are slightly modified for better
 # performance.
-test_parameters.descriptors.descriptor_type = "SNAP"
-test_parameters.descriptors.twojmax = 6
-test_parameters.descriptors.rcutfac = 4.67637
+test_parameters.descriptors.descriptor_type = "Bispectrum"
+test_parameters.descriptors.bispectrum_twojmax = 6
+test_parameters.descriptors.bispectrum_cutoff = 4.67637
 test_parameters.descriptors.descriptors_contain_xyz = True
 
 # Specify output data options, i.e. how the LDOS is parsed.

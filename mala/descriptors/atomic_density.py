@@ -13,13 +13,20 @@ try:
         pass
 except ModuleNotFoundError:
     pass
+import numpy as np
 
 from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
 from mala.descriptors.descriptor import Descriptor
-from mala.common.parallelizer import printout
+
+# Empirical value for the Gaussian descriptor width, determined for an
+# aluminium system. Reasonable values for sigma can and will be calculated
+# automatically based on this value and the aluminium gridspacing
+# for other systems as well.
+optimal_sigma_aluminium = 0.2
+reference_grid_spacing_aluminium = 0.08099000022712448
 
 
-class GaussianDescriptors(Descriptor):
+class AtomicDensity(Descriptor):
     """Class for calculation and parsing of Gaussian descriptors.
 
     Parameters
@@ -29,9 +36,7 @@ class GaussianDescriptors(Descriptor):
     """
 
     def __init__(self, parameters):
-        super(GaussianDescriptors, self).__init__(parameters)
-        self.in_format_ase = ""
-        self.grid_dimensions = []
+        super(AtomicDensity, self).__init__(parameters)
         self.verbosity = parameters.verbosity
 
     @staticmethod
@@ -84,93 +89,32 @@ class GaussianDescriptors(Descriptor):
         else:
             raise Exception("Unsupported unit for Gaussian descriptors.")
 
-    def calculate_from_qe_out(self, qe_out_file, qe_out_directory,
-                              working_directory=None,
-                              **kwargs):
+    @staticmethod
+    def get_optimal_sigma(voxel):
         """
-        Calculate the Gaussian descriptors based on a Quantum Espresso outfile.
+        Calculate the optimal width of the Gaussians based on the grid voxel.
 
         Parameters
         ----------
-        qe_out_file : string
-            Name of Quantum Espresso output file for snapshot.
-
-        qe_out_directory : string
-            Path to Quantum Espresso output file for snapshot.
-
-        working_directory : string
-            A directory in which to perform the LAMMPS calculation.
-            Optional, if None, the QE out directory will be used.
+        voxel : ase.Cell
+            An ASE Cell object characterizing the voxel.
 
         Returns
         -------
-        snap_descriptors : numpy.array
-            Numpy array containing the Gaussian descriptors with the dimension
-            (x,y,z,snap_dimension)
-
+        optimal_sigma : float
+            The optimal sigma value.
         """
-        self.in_format_ase = "espresso-out"
-        printout("Calculating Gaussian descriptors from", qe_out_file, "at",
-                 qe_out_directory, min_verbosity=0)
-        # We get the atomic information by using ASE.
-        infile = os.path.join(qe_out_directory, qe_out_file)
-        atoms = ase.io.read(infile, format=self.in_format_ase)
+        return (np.max(voxel) / reference_grid_spacing_aluminium) * \
+               optimal_sigma_aluminium
 
-        # Enforcing / Checking PBC on the read atoms.
-        atoms = self.enforce_pbc(atoms)
-
-        # Get the grid dimensions.
-        qe_outfile = open(infile, "r")
-        lines = qe_outfile.readlines()
-        nx = 0
-        ny = 0
-        nz = 0
-
-        for line in lines:
-            if "FFT dimensions" in line:
-                tmp = line.split("(")[1].split(")")[0]
-                nx = int(tmp.split(",")[0])
-                ny = int(tmp.split(",")[1])
-                nz = int(tmp.split(",")[2])
-                break
-
-        if working_directory is None:
-            working_directory = qe_out_directory
-
-        return self.__calculate_gaussian_descriptors(atoms,
-                                                     working_directory,
-                                                     [nx, ny, nz])
-
-    def calculate_from_atoms(self, atoms, grid_dimensions,
-                             working_directory="."):
-        """
-        Calculate the Gaussian descriptors based on the atomic configurations.
-
-        Parameters
-        ----------
-        atoms : ase.Atoms
-            Atoms object holding the atomic configuration.
-
-        grid_dimensions : list
-            Grid dimensions to be used, in the format [x,y,z].
-
-        working_directory : string
-            A directory in which to perform the LAMMPS calculation.
-
-        Returns
-        -------
-        descriptors : numpy.array
-            Numpy array containing the descriptors with the dimension
-            (x,y,z,descriptor_dimension)
-        """
-        # Enforcing / Checking PBC on the input atoms.
-        atoms = self.enforce_pbc(atoms)
-        return self.__calculate_gaussian_descriptors(atoms, working_directory,
-                                                     grid_dimensions)
-
-    def __calculate_gaussian_descriptors(self, atoms, outdir, grid_dimensions):
+    def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual Gaussian descriptor calculation."""
         from lammps import lammps
+
+        return_directly = False
+        if "return_directly" in kwargs.keys():
+            return_directly = kwargs["return_directly"]
+
         lammps_format = "lammps-data"
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")
         ase.io.write(ase_out_path, atoms, format=lammps_format)
@@ -184,6 +128,16 @@ class GaussianDescriptors(Descriptor):
             ny = grid_dimensions[1]
             nz = grid_dimensions[2]
 
+        # Check if we have to determine the optimal sigma value.
+        if self.parameters.atomic_density_sigma is None:
+            self.grid_dimensions = [nx, ny, nz]
+            voxel = atoms.cell.copy()
+            voxel[0] = voxel[0] / (self.grid_dimensions[0])
+            voxel[1] = voxel[1] / (self.grid_dimensions[1])
+            voxel[2] = voxel[2] / (self.grid_dimensions[2])
+            self.parameters.atomic_density_sigma = self.\
+                get_optimal_sigma(voxel)
+
         # Build LAMMPS arguments from the data we read.
         lmp_cmdargs = ["-screen", "none", "-log",
                        os.path.join(outdir, "lammps_ggrid_log.tmp")]
@@ -192,8 +146,8 @@ class GaussianDescriptors(Descriptor):
         lammps_dict = self._setup_lammps_processors(nx, ny, nz)
 
         # Set the values not already filled in the LAMMPS setup.
-        lammps_dict["sigma"] = self.parameters.gaussian_descriptors_sigma
-        lammps_dict["rcutfac"] = self.parameters.gaussian_descriptors_cutoff
+        lammps_dict["sigma"] = self.parameters.atomic_density_sigma
+        lammps_dict["rcutfac"] = self.parameters.atomic_density_cutoff
         lammps_dict["atom_config_fname"] = ase_out_path
 
         lmp_cmdargs = set_cmdlinevars(lmp_cmdargs, lammps_dict)
@@ -203,7 +157,7 @@ class GaussianDescriptors(Descriptor):
 
         # For now the file is chosen automatically, because this is used
         # mostly under the hood anyway.
-        filepath = __file__.split("gaussian")[0]
+        filepath = __file__.split("atomic_density")[0]
         if self.parameters._configuration["mpi"]:
             if self.parameters.use_z_splitting:
                 runfile = os.path.join(filepath, "in.ggrid.python")
@@ -226,7 +180,37 @@ class GaussianDescriptors(Descriptor):
                                lammps_constants.LMP_STYLE_LOCAL, 2,
                                array_shape=(nrows_ggrid, ncols_ggrid))
 
-        if self.descriptors_contain_xyz:
+        # In comparison to SNAP, the atomic density always returns
+        # in the "local mode". Thus we have to make some slight adjustments
+        # if we operate without MPI.
+        if self.parameters._configuration["mpi"]:
+            self.fingerprint_length = 4
             return gaussian_descriptors_np.copy(), nrows_ggrid
+
         else:
-            return gaussian_descriptors_np[:, 6:].copy(), nrows_ggrid
+            # Since the atomic density may be directly fed back into QE
+            # during the total energy calculation, we may have to return
+            # the descriptors, even in serial mode, without any further
+            # reordering.
+            if return_directly:
+                return gaussian_descriptors_np.copy()
+            else:
+                # Here, we want to do something else with the atomic density,
+                # and thus have to properly reorder it.
+                # We have to switch from x fastest to z fastest reordering.
+                gaussian_descriptors_np = \
+                    gaussian_descriptors_np.reshape((grid_dimensions[2],
+                                                     grid_dimensions[1],
+                                                     grid_dimensions[0],
+                                                     7))
+                gaussian_descriptors_np = \
+                    gaussian_descriptors_np.transpose([2, 1, 0, 3])
+                if self.parameters.descriptors_contain_xyz:
+                    self.fingerprint_length = 4
+                    return gaussian_descriptors_np[:, :, :, 3:].copy(), \
+                           nx*ny*nz
+                else:
+                    self.fingerprint_length = 1
+                    return gaussian_descriptors_np[:, :, :, 6:].copy(), \
+                           nx*ny*nz
+

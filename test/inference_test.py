@@ -123,10 +123,10 @@ class TestInference:
         test_parameters.targets.ldos_gridspacing_ev = 2.5
         test_parameters.targets.ldos_gridoffset_ev = -5
         test_parameters.running.inference_data_grid = [18, 18, 27]
-        test_parameters.descriptors.descriptor_type = "SNAP"
-        test_parameters.descriptors.twojmax = 10
-        test_parameters.descriptors.rcutfac = 4.67637
-        test_parameters.descriptors.snap_switchflag = 0
+        test_parameters.descriptors.descriptor_type = "Bispectrum"
+        test_parameters.descriptors.bispectrum_twojmax = 10
+        test_parameters.descriptors.bispectrum_cutoff = 4.67637
+        test_parameters.descriptors.bispectrum_switchflag = 0
 
         data_handler = DataHandler(test_parameters)
         data_handler.add_snapshot("Be_snapshot1.in.npy", beryllium_path,

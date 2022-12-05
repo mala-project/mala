@@ -268,9 +268,13 @@ class ParametersDescriptors(ParametersBase):
     ----------
     descriptor_type : string
         Type of descriptors that is used to represent the atomic fingerprint.
-        Currently only "SNAP" is supported.
+        Supported:
 
-    twojmax : int
+            - 'Bispectrum': Bispectrum descriptors (formerly called 'SNAP').
+            - 'Atomic Density': Atomic density, calculated via Gaussian
+                                descriptors.
+
+    bispectrum_twojmax : int
         SNAP calculation: 2*jmax-parameter used for calculation of SNAP
         descriptors. Default value for jmax is 5, so default value for
         twojmax is 10.
@@ -290,22 +294,19 @@ class ParametersDescriptors(ParametersBase):
         the descriptor vector are the xyz coordinates and they are cut from the
         descriptor vector. If False, no such cutting is peformed.
 
-    gaussian_descriptors_sigma : float
+    atomic_density_sigma : float
         Sigma used for the calculation of the Gaussian descriptors.
     """
 
     def __init__(self):
         super(ParametersDescriptors, self).__init__()
-        self.descriptor_type = "SNAP"
-        self.twojmax = 10
-        self.use_gaussian_descriptors_energy_formula = False
-        self.gaussian_descriptors_sigma = None
-        self.gaussian_descriptors_cutoff = None
-        self.rcutfac = 4.67637
+        self.descriptor_type = "Bispectrum"
+
+        # These affect all descriptors, at least as long all descriptors
+        # use LAMMPS (which they currently do).
         self.lammps_compute_file = ""
-        self.snap_switchflag = 1
-        self.acsd_points = 100
         self.descriptors_contain_xyz = True
+
         # TODO: I would rather handle the parallelization info automatically
         # and more under the hood. At this stage of the project this would
         # probably be overkill and hard to do, since there are many moving
@@ -313,6 +314,23 @@ class ParametersDescriptors(ParametersBase):
         # this should be adressed.
         self.use_z_splitting = True
         self.use_y_splitting = 0
+
+        # Everything pertaining to the bispectrum descriptors.
+        self.bispectrum_twojmax = 10
+        self.bispectrum_cutoff = 4.67637
+        self.bispectrum_switchflag = 1
+
+        # Everything pertaining to the atomic density.
+        # Seperate cutoff given here because bispectrum descriptors and
+        # atomic density may be used at the same time, if e.g. bispectrum
+        # descriptors are used for a full inference, which then uses the atomic
+        # density for the calculation of the Ewald sum.
+        self.use_atomic_density_energy_formula = False
+        self.atomic_density_sigma = None
+        self.atomic_density_cutoff = None
+
+        # For accelerated hyperparameter optimization.
+        self.acsd_points = 100
 
     @property
     def use_z_splitting(self):
@@ -354,17 +372,17 @@ class ParametersDescriptors(ParametersBase):
                 self._number_y_planes = value
 
     @property
-    def rcutfac(self):
+    def bispectrum_cutoff(self):
         """Cut off radius for SNAP calculation."""
         return self._rcutfac
 
-    @rcutfac.setter
-    def rcutfac(self, value):
+    @bispectrum_cutoff.setter
+    def bispectrum_cutoff(self, value):
         self._rcutfac = value
-        self.gaussian_descriptors_cutoff = value
+        self.atomic_density_cutoff = value
 
     @property
-    def snap_switchflag(self):
+    def bispectrum_switchflag(self):
         """
         Switchflag for the SNAP calculation.
 
@@ -375,8 +393,8 @@ class ParametersDescriptors(ParametersBase):
         """
         return self._snap_switchflag
 
-    @snap_switchflag.setter
-    def snap_switchflag(self, value):
+    @bispectrum_switchflag.setter
+    def bispectrum_switchflag(self, value):
         _int_value = int(value)
         if _int_value == 0:
             self._snap_switchflag = value
