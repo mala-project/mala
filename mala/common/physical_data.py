@@ -280,7 +280,8 @@ class PhysicalData(ABC):
             positions = io.Dataset(atomic_positions[0].dtype,
                                    atomic_positions[0].shape)
 
-            atoms_openpmd["positionOffset"]
+            atoms_openpmd["position"].time_offset = 0
+            atoms_openpmd["positionOffset"].time_offset = 0
             for atom in range(0, len(atoms_ase)):
                 atoms_openpmd["position"][str(atom)].reset_dataset(positions)
                 atoms_openpmd["positionOffset"][str(atom)].reset_dataset(positions)
