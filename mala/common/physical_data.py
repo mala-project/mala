@@ -155,7 +155,7 @@ class PhysicalData(ABC):
         if not np.isclose(mesh[str(0)].unit_SI, self.si_unit_conversion):
             raise Exception("MALA currently cannot operate with OpenPMD "
                             "files with non-MALA units.")
-                            
+
         # Deal with `granularity` items of the vectors at a time
         # Or in the openPMD layout: with `granularity` record components
         granularity = self.parameters._configuration["openpmd_granularity"]
@@ -173,7 +173,6 @@ class PhysicalData(ABC):
                 (end - base, array_shape[0], array_shape[1], array_shape[2]),
                 dtype=data_type)
             for i in range(base, end):
-                # transposed[i - base, :, :, :] = mesh[str(i)][:, :, :]
                 mesh[str(i)].load_chunk(transposed[i - base, :, :, :])
             series.flush()
             if array is None:
@@ -281,12 +280,19 @@ class PhysicalData(ABC):
             positions = io.Dataset(atomic_positions[0].dtype,
                                    atomic_positions[0].shape)
 
-            # @Franz: In the example online this is done separately for
-            # x, y, z, but isn't it better to do that indvidually for atoms?
+            atoms_openpmd["position"].time_offset = 0
+            atoms_openpmd["positionOffset"].time_offset = 0
             for atom in range(0, len(atoms_ase)):
-                atoms_openpmd["positions"][str(atom)].reset_dataset(positions)
-                atoms_openpmd["positions"][str(atom)].\
+                atoms_openpmd["position"][str(atom)].reset_dataset(positions)
+                atoms_openpmd["positionOffset"][str(atom)].reset_dataset(positions)
+
+                atoms_openpmd["position"][str(atom)].\
                     store_chunk(atomic_positions[atom])
+                atoms_openpmd["positionOffset"][str(atom)].make_constant(0)
+
+                # @todo supplement correct value
+                atoms_openpmd["position"][str(atom)].unit_SI = 1.0
+                atoms_openpmd["positionOffset"][str(atom)].unit_SI = 1.0
 
         dataset = io.Dataset(array.dtype,
                              array[:, :, :, 0].shape)
@@ -304,8 +310,7 @@ class PhysicalData(ABC):
                 mesh_component = mesh[str(i)]
                 mesh_component.reset_dataset(dataset)
 
-                # mesh_component[:, :, :] = transposed[i - base, :, :, :]
-                mesh_component.store_chunk(transposed[i - base, :, :, :])
+                mesh_component[:, :, :] = transposed[i - base, :, :, :]
 
                 # All data is assumed to be saved in
                 # MALA units, so the SI conversion factor we save
