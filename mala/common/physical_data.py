@@ -133,6 +133,9 @@ class PhysicalData(ABC):
             mesh = current_iteration.meshes[self.data_name]
             break
 
+        # Read the attributes from the OpenPMD iteration.
+        self._process_openpmd_attributes(series, current_iteration, mesh)
+
         # TODO: Are there instances in MALA, where we wouldn't just label
         # the feature dimension with 0,1,... ? I can't think of one.
         # But there may be in the future, and this'll break
@@ -277,22 +280,28 @@ class PhysicalData(ABC):
         if atoms_ase is not None:
             atoms_openpmd = iteration.particles["atoms"]
             atomic_positions = atoms_ase.get_positions()
+            atomic_numbers = atoms_ase.get_atomic_numbers()
             positions = io.Dataset(atomic_positions[0].dtype,
                                    atomic_positions[0].shape)
+            numbers = io.Dataset(atomic_numbers[0].dtype,
+                                 [1])
 
-            atoms_openpmd["position"].time_offset = 0
-            atoms_openpmd["positionOffset"].time_offset = 0
+            # atoms_openpmd["position"].time_offset = 0.0
+            # atoms_openpmd["positionOffset"].time_offset = 0.0
             for atom in range(0, len(atoms_ase)):
                 atoms_openpmd["position"][str(atom)].reset_dataset(positions)
+                atoms_openpmd["number"][str(atom)].reset_dataset(numbers)
                 atoms_openpmd["positionOffset"][str(atom)].reset_dataset(positions)
 
                 atoms_openpmd["position"][str(atom)].\
                     store_chunk(atomic_positions[atom])
+                atoms_openpmd["number"][str(atom)].\
+                    store_chunk(np.array([atomic_numbers[atom]]))
                 atoms_openpmd["positionOffset"][str(atom)].make_constant(0)
 
-                # @todo supplement correct value
-                atoms_openpmd["position"][str(atom)].unit_SI = 1.0
-                atoms_openpmd["positionOffset"][str(atom)].unit_SI = 1.0
+                # Positions are stored in Angstrom.
+                atoms_openpmd["position"][str(atom)].unit_SI = 1.0e-10
+                atoms_openpmd["positionOffset"][str(atom)].unit_SI = 1.0e-10
 
         dataset = io.Dataset(array.dtype,
                              array[:, :, :, 0].shape)
@@ -361,6 +370,12 @@ class PhysicalData(ABC):
 
         # Fill geometry information (if provided)
         self._set_geometry_info(mesh)
+
+    def _process_openpmd_attributes(self, series, iteration, mesh):
+        self._process_geometry_info(mesh)
+
+    def _process_geometry_info(self, mesh):
+        pass
 
     # Currently all data we have is atom based.
     # That may not always be the case.

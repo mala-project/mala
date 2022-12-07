@@ -1145,12 +1145,65 @@ class Target(PhysicalData):
                                         additional_calculation_data[
                                             "pseudopotentials"][key])
 
+    def _process_openpmd_attributes(self, series, iteration, mesh):
+        super(Target, self)._process_openpmd_attributes(series, iteration, mesh)
+
+        # Process the atoms, which can only be done if we have voxel info.
+        if self.voxel is None:
+            raise Exception("Voxel was never read from OpenPMD file, "
+                            "cannot recreate atoms object without it.")
+
+        atoms_openpmd = iteration.particles["atoms"]
+        nr_atoms = len(atoms_openpmd["position"])
+        positions = np.zeros((nr_atoms, 3))
+        numbers = np.zeros((nr_atoms, 1), dtype=np.int64)
+        for i in range(0, nr_atoms):
+            atoms_openpmd["position"][str(i)].load_chunk(positions[i, :])
+            atoms_openpmd["number"][str(i)].load_chunk(numbers[i, :])
+        series.flush()
+        numbers = np.squeeze(numbers)
+
+        # Recreate the cell from voxel and grid info.
+        self.grid_dimensions[0] = mesh["0"].shape[0]
+        self.grid_dimensions[1] = mesh["0"].shape[1]
+        self.grid_dimensions[2] = mesh["0"].shape[2]
+        cell = self.voxel.copy()
+        cell[0] = self.voxel[0] * self.grid_dimensions[0]
+        cell[1] = self.voxel[1] * self.grid_dimensions[1]
+        cell[2] = self.voxel[2] * self.grid_dimensions[2]
+        self.atoms = ase.Atoms(positions=positions, cell=cell, numbers=numbers)
+
+        # Process all the regular meta info.
+        self.fermi_energy_dft = iteration.get_attribute("fermi_energy_dft")
+        self.temperature = iteration.get_attribute("temperature")
+        self.number_of_electrons_exact = iteration.get_attribute("number_of_electrons_exact")
+        self.band_energy_dft_calculation = iteration.get_attribute("band_energy_dft_calculation")
+        self.total_energy_dft_calculation = iteration.get_attribute("total_energy_dft_calculation")
+        self.electrons_per_atom = iteration.get_attribute("electrons_per_atom")
+        self.number_of_electrons_from_eigenvals = iteration.get_attribute("number_of_electrons_from_eigenvals")
+        self.qe_input_data["ibrav"] = iteration.get_attribute("ibrav")
+        self.qe_input_data["ecutwfc"] = iteration.get_attribute("ecutwfc")
+        self.qe_input_data["ecutrho"] = iteration.get_attribute("ecutrho")
+        self.qe_input_data["degauss"] = iteration.get_attribute("degauss")
+
+        # Take care of the pseudopotentials.
+        self.qe_input_data["pseudopotentials"] = {}
+        for attribute in iteration.attributes:
+            if "psp" in attribute:
+                self.qe_pseudopotentials[attribute.split("psp_")[1]] = \
+                    iteration.get_attribute(attribute)
+
     def _set_geometry_info(self, mesh):
         # Geometry: Save the cell parameters and angles of the grid.
         if self.atoms is not None:
             mesh.geometry = io.Geometry.cartesian
             mesh.grid_spacing = self.voxel.cellpar()[0:3]
             mesh.set_attribute("angles", self.voxel.cellpar()[3:])
+
+    def _process_geometry_info(self, mesh):
+        spacing = mesh.grid_spacing
+        angles = mesh.get_attribute("angles")
+        self.voxel = ase.cell.Cell.new(cell=spacing+angles)
 
     def _get_atoms(self):
         return self.atoms
