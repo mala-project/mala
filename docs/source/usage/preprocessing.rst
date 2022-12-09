@@ -52,14 +52,14 @@ by themselves if needed.
             parameters = mala.Parameters()
             parameters.descriptors.descriptor_type = 'SNAP'
 
-            # Creates a SNAP object via interface
-            snap = mala.Descriptor(parameters)
+            # Creates a bispectrum object via interface
+            bispectrum = mala.Descriptor(parameters)
 
-            # Creates a SNAP object directly
-            snap = mala.SNAP(parameters)
+            # Creates a bispectrum object directly
+            bispectrum = mala.Bispectrum(parameters)
 
-            # Use the SNAP object to calculate descriptors from QE calculation.
-            snap_descriptors = snap.calculate_from_qe_out(...)
+            # Use the bispectrum object to calculate descriptors from QE calculation.
+            bispectrum_descriptors = bispectrum.calculate_from_qe_out(...)
 
 
 Targets
