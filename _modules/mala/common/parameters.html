@@ -348,13 +348,13 @@
 <span class="sd">                                descriptors.</span>
 
 <span class="sd">    bispectrum_twojmax : int</span>
-<span class="sd">        SNAP calculation: 2*jmax-parameter used for calculation of SNAP</span>
+<span class="sd">        Bispectrum calculation: 2*jmax-parameter used for calculation of SNAP</span>
 <span class="sd">        descriptors. Default value for jmax is 5, so default value for</span>
 <span class="sd">        twojmax is 10.</span>
 
 <span class="sd">    lammps_compute_file: string</span>
-<span class="sd">        SNAP calculation: LAMMPS input file that is used to calculate the</span>
-<span class="sd">        SNAP descriptors. If this string is empty, the standard LAMMPS input</span>
+<span class="sd">        Bispectrum calculation: LAMMPS input file that is used to calculate the</span>
+<span class="sd">        Bispectrum descriptors. If this string is empty, the standard LAMMPS input</span>
 <span class="sd">        file found in this repository will be used (recommended).</span>
 
 <span class="sd">    acsd_points : int</span>
@@ -446,7 +446,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bispectrum_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Cut off radius for SNAP calculation.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Cut off radius for bispectrum calculation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rcutfac</span>
 
     <span class="nd">@bispectrum_cutoff</span><span class="o">.</span><span class="n">setter</span>
@@ -457,7 +457,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bispectrum_switchflag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Switchflag for the SNAP calculation.</span>
+<span class="sd">        Switchflag for the bispectrum calculation.</span>
 
 <span class="sd">        Can only be 1 or 0. If 1 (default), a switching function will be used</span>
 <span class="sd">        to ensure that atomic contributions smoothly go to zero after a</span>
@@ -486,11 +486,10 @@
 <span class="sd">        (L)DOS.</span>
 
 <span class="sd">    ldos_gridsize : float</span>
-<span class="sd">        Gridspacing of the energy grid the (L)DOS is evaluated on [eV].</span>
+<span class="sd">        Gridsize of the LDOS.</span>
 
 <span class="sd">    ldos_gridspacing_ev: float</span>
-<span class="sd">        SNAP calculation: radius cutoff factor for the fingerprint sphere in</span>
-<span class="sd">        Angstroms. Default value is 4.67637.</span>
+<span class="sd">        Gridspacing of the energy grid the (L)DOS is evaluated on [eV].</span>
 
 <span class="sd">    ldos_gridoffset_ev: float</span>
 <span class="sd">        Lowest energy value on the (L)DOS energy grid [eV].</span>

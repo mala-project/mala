@@ -4,7 +4,7 @@ External modules
 MALA can be coupled to external libraries for data pre- and postprocesing.
 The DFT code Quantum ESPRESSO is used for the calculation of the density
 contributions to the total energy, while the LAMMPS code is used to calculate
-SNAP descriptors on the real space grid of a simulation cell, either for
+bispectrum descriptors on the real space grid of a simulation cell, either for
 training or inference.
 
 Quantum ESPRESSO (total energy module)
@@ -64,9 +64,12 @@ LAMMPS (descriptor calculation)
 * Make sure the ``mala`` tree is checked out locally via ``git branch``!
 * Compile the LAMMPS shared library with the SNAP package installed
 
-  - cd into ``/path/to/lammps/src`` folder of LAMMPS
+  - Change into the source folder of LAMMPS ``cd /path/to/lammps/src``
   - ``make yes-ml-snap``
   - (optional: check with ``make ps`` that ``ml-snap`` was correctly added)
   - ``make mode=shlib mpi``
 
-* Make the LAMMPS library visible via ``python3 install.py -p lammps -l ../src/liblammps.so``
+* Make the LAMMPS library visible in python
+
+  - Change into the python path of LAMMPS ``cd /path/to/lammps/python``
+  - ``python3 install.py -p lammps -l ../src/liblammps.so``

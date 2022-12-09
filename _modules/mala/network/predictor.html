@@ -124,7 +124,7 @@
 <span class="sd">            Path from which to read the atomic configuration.</span>
 
 <span class="sd">        gather_ldos : bool</span>
-<span class="sd">            Only important if MPI is used. If True, all SNAP descriptors</span>
+<span class="sd">            Only important if MPI is used. If True, all descriptors</span>
 <span class="sd">            are gathered on rank 0, and the pass is performed there.</span>
 <span class="sd">            Helpful for using multiple CPUs for descriptor calculations</span>
 <span class="sd">            and only one for network pass.</span>
@@ -149,7 +149,7 @@
 <span class="sd">            ASE atoms for which the prediction should be done.</span>
 
 <span class="sd">        gather_ldos : bool</span>
-<span class="sd">            Only important if MPI is used. If True, all SNAP descriptors</span>
+<span class="sd">            Only important if MPI is used. If True, all descriptors</span>
 <span class="sd">            are gathered on rank 0, and the pass is performed there.</span>
 <span class="sd">            Helpful for using multiple CPUs for descriptor calculations</span>
 <span class="sd">            and only one for network pass.</span>
@@ -162,7 +162,7 @@
         <span class="c1"># Make sure no data lingers in the target calculator.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">invalidate_target</span><span class="p">()</span>
 
-        <span class="c1"># Calculate SNAP descriptors.</span>
+        <span class="c1"># Calculate descriptors.</span>
         <span class="n">snap_descriptors</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
             <span class="n">calculate_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">)</span>
 
@@ -172,7 +172,7 @@
                                              <span class="p">[</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">])</span>
         <span class="n">feature_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">fingerprint_length</span>
 
-        <span class="c1"># The actual calculation of the LDOS from the SNAP descriptors depends</span>
+        <span class="c1"># The actual calculation of the LDOS from the descriptors depends</span>
         <span class="c1"># on whether we run in parallel or serial. In the former case,</span>
         <span class="c1"># each batch is forwarded individually (for now), in the latter</span>
         <span class="c1"># case, everything is forwarded at once.</span>
@@ -230,7 +230,7 @@
 
     <span class="k">def</span> <span class="nf">_forward_snap_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snap_descriptors</span><span class="p">,</span>
                                   <span class="n">local_data_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Forward a scaled tensor of SNAP descriptors through the NN.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Forward a scaled tensor of descriptors through the NN.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">local_data_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">local_data_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span>
         <span class="n">predicted_outputs</span> <span class="o">=</span> \

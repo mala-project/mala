@@ -136,14 +136,14 @@ by themselves if needed.</p>
 <span class="n">parameters</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Parameters</span><span class="p">()</span>
 <span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">=</span> <span class="s1">&#39;SNAP&#39;</span>
 
-<span class="c1"># Creates a SNAP object via interface</span>
-<span class="n">snap</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Descriptor</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+<span class="c1"># Creates a bispectrum object via interface</span>
+<span class="n">bispectrum</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Descriptor</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
-<span class="c1"># Creates a SNAP object directly</span>
-<span class="n">snap</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">SNAP</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+<span class="c1"># Creates a bispectrum object directly</span>
+<span class="n">bispectrum</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Bispectrum</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
-<span class="c1"># Use the SNAP object to calculate descriptors from QE calculation.</span>
-<span class="n">snap_descriptors</span> <span class="o">=</span> <span class="n">snap</span><span class="o">.</span><span class="n">calculate_from_qe_out</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="c1"># Use the bispectrum object to calculate descriptors from QE calculation.</span>
+<span class="n">bispectrum_descriptors</span> <span class="o">=</span> <span class="n">bispectrum</span><span class="o">.</span><span class="n">calculate_from_qe_out</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 </pre></div>
 </div>
 </div></blockquote>

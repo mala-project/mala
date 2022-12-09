@@ -134,7 +134,7 @@ as an interface to Target and Descriptor objects.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – ASE atoms for which the prediction should be done.</p></li>
-<li><p><strong>gather_ldos</strong> (<em>bool</em>) – Only important if MPI is used. If True, all SNAP descriptors
+<li><p><strong>gather_ldos</strong> (<em>bool</em>) – Only important if MPI is used. If True, all descriptors
 are gathered on rank 0, and the pass is performed there.
 Helpful for using multiple CPUs for descriptor calculations
 and only one for network pass.</p></li>
@@ -157,7 +157,7 @@ and only one for network pass.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path_to_file</strong> (<em>string</em>) – Path from which to read the atomic configuration.</p></li>
-<li><p><strong>gather_ldos</strong> (<em>bool</em>) – Only important if MPI is used. If True, all SNAP descriptors
+<li><p><strong>gather_ldos</strong> (<em>bool</em>) – Only important if MPI is used. If True, all descriptors
 are gathered on rank 0, and the pass is performed there.
 Helpful for using multiple CPUs for descriptor calculations
 and only one for network pass.</p></li>

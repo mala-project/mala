@@ -131,7 +131,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.descriptors.descriptor.Descriptor.calculate_from_atoms">
 <span class="sig-name descname"><span class="pre">calculate_from_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor.html#Descriptor.calculate_from_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.calculate_from_atoms" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the SNAP descriptors based on the atomic configurations.</p>
+<dd><p>Calculate the bispectrum descriptors based on atomic configurations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -221,17 +221,17 @@ objects, the atoms are explicitly in the unit cell.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.descriptors.descriptor.Descriptor.gather_descriptors">
 <span class="sig-name descname"><span class="pre">gather_descriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snap_descriptors_np</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pickled_comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor.html#Descriptor.gather_descriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.gather_descriptors" title="Permalink to this definition"></a></dt>
-<dd><p>Gathers all SNAP descriptors on rank 0 and sorts them.</p>
+<dd><p>Gathers all bispectrum descriptors on rank 0 and sorts them.</p>
 <p>This is useful for e.g. parallel preprocessing.
 This function removes the extra 3 components that come from parallel
 processing.
-I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
+I.e. if we have 91 bispectrum descriptors, LAMMPS directly outputs us
 97 (in parallel mode), and this function returns 94, as to retain the
 3 x,y,z ones we by default include.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>snap_descriptors_np</strong> (<em>numpy.array</em>) – Numpy array with the SNAP descriptors of this ranks local grid.</p></li>
+<li><p><strong>snap_descriptors_np</strong> (<em>numpy.array</em>) – Numpy array with the descriptors of this ranks local grid.</p></li>
 <li><p><strong>use_pickled_comm</strong> (<em>bool</em>) – If True, the pickled communication route from mpi4py is used.
 If False, a Recv/Sendv combination is used. I am not entirely
 sure what is faster. Technically Recv/Sendv should be faster,

@@ -71,7 +71,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mala.descriptors.bispectrum</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;SNAP descriptor class.&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Bispectrum descriptor class.&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">ase</span>
@@ -86,16 +86,13 @@
         <span class="k">pass</span>
 <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
     <span class="k">pass</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">mala.descriptors.lammps_utils</span> <span class="kn">import</span> <span class="n">set_cmdlinevars</span><span class="p">,</span> <span class="n">extract_compute_np</span>
 <span class="kn">from</span> <span class="nn">mala.descriptors.descriptor</span> <span class="kn">import</span> <span class="n">Descriptor</span>
-<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">printout</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">get_size</span><span class="p">,</span> \
-    <span class="n">barrier</span>
 
 
 <div class="viewcode-block" id="Bispectrum"><a class="viewcode-back" href="../../../api/mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum">[docs]</a><span class="k">class</span> <span class="nc">Bispectrum</span><span class="p">(</span><span class="n">Descriptor</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class for calculation and parsing of SNAP descriptors.</span>
+    <span class="sd">&quot;&quot;&quot;Class for calculation and parsing of bispectrum descriptors.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -109,7 +106,7 @@
 <div class="viewcode-block" id="Bispectrum.convert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert the units of a SNAP descriptor.</span>
+<span class="sd">        Convert the units of a bispectrum descriptor.</span>
 
 <span class="sd">        Since these do not really have units this function does nothing yet.</span>
 
@@ -134,7 +131,7 @@
 <div class="viewcode-block" id="Bispectrum.backconvert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert the units of a SNAP descriptor.</span>
+<span class="sd">        Convert the units of a bispectrum descriptor.</span>
 
 <span class="sd">        Since these do not really have units this function does nothing yet.</span>
 
@@ -157,7 +154,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for SNAP.&quot;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Perform actual SNAP calculation.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Perform actual bispectrum calculation.&quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">lammps</span> <span class="kn">import</span> <span class="n">lammps</span>
         <span class="n">lammps_format</span> <span class="o">=</span> <span class="s2">&quot;lammps-data&quot;</span>
         <span class="n">ase_out_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;lammps_input.tmp&quot;</span><span class="p">)</span>
@@ -223,8 +220,8 @@
 
         <span class="c1"># Extract data from LAMMPS calculation.</span>
         <span class="c1"># This is different for the parallel and the serial case.</span>
-        <span class="c1"># In the serial case we can expect to have a full SNAP array at the</span>
-        <span class="c1"># end of this function.</span>
+        <span class="c1"># In the serial case we can expect to have a full bispectrum array at</span>
+        <span class="c1"># the end of this function.</span>
         <span class="c1"># This is not necessarily true for the parallel case.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
             <span class="n">nrows_local</span> <span class="o">=</span> <span class="n">extract_compute_np</span><span class="p">(</span><span class="n">lmp</span><span class="p">,</span> <span class="s2">&quot;bgridlocal&quot;</span><span class="p">,</span>

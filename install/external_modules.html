@@ -92,7 +92,7 @@
 <p>MALA can be coupled to external libraries for data pre- and postprocesing.
 The DFT code Quantum ESPRESSO is used for the calculation of the density
 contributions to the total energy, while the LAMMPS code is used to calculate
-SNAP descriptors on the real space grid of a simulation cell, either for
+bispectrum descriptors on the real space grid of a simulation cell, either for
 training or inference.</p>
 <div class="section" id="quantum-espresso-total-energy-module">
 <h2>Quantum ESPRESSO (total energy module)<a class="headerlink" href="#quantum-espresso-total-energy-module" title="Permalink to this headline"></a></h2>
@@ -158,13 +158,18 @@ path, e.g. via <code class="docutils literal notranslate"><span class="pre">expo
 <li><p>Make sure the <code class="docutils literal notranslate"><span class="pre">mala</span></code> tree is checked out locally via <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">branch</span></code>!</p></li>
 <li><p>Compile the LAMMPS shared library with the SNAP package installed</p>
 <ul>
-<li><p>cd into <code class="docutils literal notranslate"><span class="pre">/path/to/lammps/src</span></code> folder of LAMMPS</p></li>
+<li><p>Change into the source folder of LAMMPS <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">/path/to/lammps/src</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">yes-ml-snap</span></code></p></li>
 <li><p>(optional: check with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">ps</span></code> that <code class="docutils literal notranslate"><span class="pre">ml-snap</span></code> was correctly added)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">mode=shlib</span> <span class="pre">mpi</span></code></p></li>
 </ul>
 </li>
-<li><p>Make the LAMMPS library visible via <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">install.py</span> <span class="pre">-p</span> <span class="pre">lammps</span> <span class="pre">-l</span> <span class="pre">../src/liblammps.so</span></code></p></li>
+<li><p>Make the LAMMPS library visible in python</p>
+<ul>
+<li><p>Change into the python path of LAMMPS <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">/path/to/lammps/python</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">install.py</span> <span class="pre">-p</span> <span class="pre">lammps</span> <span class="pre">-l</span> <span class="pre">../src/liblammps.so</span></code></p></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>

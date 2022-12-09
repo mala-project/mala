@@ -745,7 +745,7 @@ Supported:</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.bispectrum_twojmax">
 <span class="sig-name descname"><span class="pre">bispectrum_twojmax</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.bispectrum_twojmax" title="Permalink to this definition"></a></dt>
-<dd><p>SNAP calculation: 2*jmax-parameter used for calculation of SNAP
+<dd><p>Bispectrum calculation: 2*jmax-parameter used for calculation of SNAP
 descriptors. Default value for jmax is 5, so default value for
 twojmax is 10.</p>
 <dl class="field-list simple">
@@ -758,8 +758,8 @@ twojmax is 10.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.lammps_compute_file">
 <span class="sig-name descname"><span class="pre">lammps_compute_file</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.lammps_compute_file" title="Permalink to this definition"></a></dt>
-<dd><p>SNAP calculation: LAMMPS input file that is used to calculate the
-SNAP descriptors. If this string is empty, the standard LAMMPS input
+<dd><p>Bispectrum calculation: LAMMPS input file that is used to calculate the
+Bispectrum descriptors. If this string is empty, the standard LAMMPS input
 file found in this repository will be used (recommended).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -808,13 +808,13 @@ descriptor vector. If False, no such cutting is peformed.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.bispectrum_cutoff">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bispectrum_cutoff</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.bispectrum_cutoff" title="Permalink to this definition"></a></dt>
-<dd><p>Cut off radius for SNAP calculation.</p>
+<dd><p>Cut off radius for bispectrum calculation.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersDescriptors.bispectrum_switchflag">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bispectrum_switchflag</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDescriptors.bispectrum_switchflag" title="Permalink to this definition"></a></dt>
-<dd><p>Switchflag for the SNAP calculation.</p>
+<dd><p>Switchflag for the bispectrum calculation.</p>
 <p>Can only be 1 or 0. If 1 (default), a switching function will be used
 to ensure that atomic contributions smoothly go to zero after a
 certain cutoff. If 0 (old default, which can be problematic in some
@@ -1391,7 +1391,7 @@ calculated.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersTargets.ldos_gridsize">
 <span class="sig-name descname"><span class="pre">ldos_gridsize</span></span><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridsize" title="Permalink to this definition"></a></dt>
-<dd><p>Gridspacing of the energy grid the (L)DOS is evaluated on [eV].</p>
+<dd><p>Gridsize of the LDOS.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>float</p>
@@ -1402,8 +1402,7 @@ calculated.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersTargets.ldos_gridspacing_ev">
 <span class="sig-name descname"><span class="pre">ldos_gridspacing_ev</span></span><a class="headerlink" href="#mala.common.parameters.ParametersTargets.ldos_gridspacing_ev" title="Permalink to this definition"></a></dt>
-<dd><p>SNAP calculation: radius cutoff factor for the fingerprint sphere in
-Angstroms. Default value is 4.67637.</p>
+<dd><p>Gridspacing of the energy grid the (L)DOS is evaluated on [eV].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>float</p>
