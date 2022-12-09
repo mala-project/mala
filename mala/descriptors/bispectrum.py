@@ -1,4 +1,4 @@
-"""SNAP descriptor class."""
+"""Bispectrum descriptor class."""
 import os
 
 import ase
@@ -13,16 +13,13 @@ try:
         pass
 except ModuleNotFoundError:
     pass
-import numpy as np
 
 from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
 from mala.descriptors.descriptor import Descriptor
-from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
-    barrier
 
 
 class Bispectrum(Descriptor):
-    """Class for calculation and parsing of SNAP descriptors.
+    """Class for calculation and parsing of bispectrum descriptors.
 
     Parameters
     ----------
@@ -36,7 +33,7 @@ class Bispectrum(Descriptor):
     @staticmethod
     def convert_units(array, in_units="None"):
         """
-        Convert the units of a SNAP descriptor.
+        Convert the units of a bispectrum descriptor.
 
         Since these do not really have units this function does nothing yet.
 
@@ -61,7 +58,7 @@ class Bispectrum(Descriptor):
     @staticmethod
     def backconvert_units(array, out_units):
         """
-        Convert the units of a SNAP descriptor.
+        Convert the units of a bispectrum descriptor.
 
         Since these do not really have units this function does nothing yet.
 
@@ -84,7 +81,7 @@ class Bispectrum(Descriptor):
             raise Exception("Unsupported unit for SNAP.")
 
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
-        """Perform actual SNAP calculation."""
+        """Perform actual bispectrum calculation."""
         from lammps import lammps
         lammps_format = "lammps-data"
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")
@@ -150,8 +147,8 @@ class Bispectrum(Descriptor):
 
         # Extract data from LAMMPS calculation.
         # This is different for the parallel and the serial case.
-        # In the serial case we can expect to have a full SNAP array at the
-        # end of this function.
+        # In the serial case we can expect to have a full bispectrum array at
+        # the end of this function.
         # This is not necessarily true for the parallel case.
         if self.parameters._configuration["mpi"]:
             nrows_local = extract_compute_np(lmp, "bgridlocal",

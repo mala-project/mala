@@ -1221,11 +1221,11 @@ class LDOS(Target):
         -------
         dd_dB: torch.tensor
             (WIP) Returns the scaled (!) derivative of the LDOS w.r.t to
-            the SNAP descriptors.
+            the descriptors.
 
         """
         # For now this only works with ML generated LDOS.
-        # Gradient of the LDOS respect to the SNAP descriptors.
+        # Gradient of the LDOS respect to the descriptors.
         ldos_data.backward(dE_dd)
         dd_dB = used_data_handler.get_test_input_gradient(snapshot_number)
         return dd_dB
@@ -1235,19 +1235,12 @@ class LDOS(Target):
 
     def _gather_density(self, density_values, use_pickled_comm=False):
         """
-        Gathers all SNAP descriptors on rank 0 and sorts them.
-
-        This is useful for e.g. parallel preprocessing.
-        This function removes the extra 3 components that come from parallel
-        processing.
-        I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
-        97 (in parallel mode), and this function returns, as to retain the
-        3 x,y,z ones we by default include.
+        Gathers the density on rank 0 and sorts it.
 
         Parameters
         ----------
         density_values : numpy.array
-            Numpy array with the SNAP descriptors of this ranks local grid.
+            Numpy array with the density slice of this ranks local grid.
 
         use_pickled_comm : bool
             If True, the pickled communication route from mpi4py is used.
@@ -1263,7 +1256,7 @@ class LDOS(Target):
         comm = get_comm()
         barrier()
 
-        # Gather the SNAP descriptors into a list.
+        # Gather the densities into a list.
         if use_pickled_comm:
             density_list = comm.gather(density_values, root=0)
         else:
@@ -1302,13 +1295,13 @@ class LDOS(Target):
 
         # Reorder the list.
         if get_rank() == 0:
-            # Prepare the SNAP descriptor array.
+            # Prepare the densities array.
             nx = self.grid_dimensions[0]
             ny = self.grid_dimensions[1]
             nz = self.grid_dimensions[2]
             full_density = np.zeros(
                 [nx, ny, nz, 1])
-            # Fill the full SNAP descriptors array.
+            # Fill the full density array.
             for idx, local_density in enumerate(density_list):
                 # We glue the individual cells back together, and transpose.
                 first_x = int(local_density[0][0])

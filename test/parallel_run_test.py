@@ -23,7 +23,7 @@ class TestParallel:
         Test whether MALA can preprocess data.
 
         This means reading the LDOS from cube files and calculating
-        SNAP descriptors.
+        bispectrum descriptors.
         The data necessary for this is currently not in the data repo!
         """
 

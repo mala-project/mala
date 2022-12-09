@@ -275,13 +275,13 @@ class ParametersDescriptors(ParametersBase):
                                 descriptors.
 
     bispectrum_twojmax : int
-        SNAP calculation: 2*jmax-parameter used for calculation of SNAP
+        Bispectrum calculation: 2*jmax-parameter used for calculation of SNAP
         descriptors. Default value for jmax is 5, so default value for
         twojmax is 10.
 
     lammps_compute_file: string
-        SNAP calculation: LAMMPS input file that is used to calculate the
-        SNAP descriptors. If this string is empty, the standard LAMMPS input
+        Bispectrum calculation: LAMMPS input file that is used to calculate the
+        Bispectrum descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
 
     acsd_points : int
@@ -373,7 +373,7 @@ class ParametersDescriptors(ParametersBase):
 
     @property
     def bispectrum_cutoff(self):
-        """Cut off radius for SNAP calculation."""
+        """Cut off radius for bispectrum calculation."""
         return self._rcutfac
 
     @bispectrum_cutoff.setter
@@ -384,7 +384,7 @@ class ParametersDescriptors(ParametersBase):
     @property
     def bispectrum_switchflag(self):
         """
-        Switchflag for the SNAP calculation.
+        Switchflag for the bispectrum calculation.
 
         Can only be 1 or 0. If 1 (default), a switching function will be used
         to ensure that atomic contributions smoothly go to zero after a
@@ -413,11 +413,10 @@ class ParametersTargets(ParametersBase):
         (L)DOS.
 
     ldos_gridsize : float
-        Gridspacing of the energy grid the (L)DOS is evaluated on [eV].
+        Gridsize of the LDOS.
 
     ldos_gridspacing_ev: float
-        SNAP calculation: radius cutoff factor for the fingerprint sphere in
-        Angstroms. Default value is 4.67637.
+        Gridspacing of the energy grid the (L)DOS is evaluated on [eV].
 
     ldos_gridoffset_ev: float
         Lowest energy value on the (L)DOS energy grid [eV].

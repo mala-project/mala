@@ -213,7 +213,7 @@ class Descriptor(ABC):
     def calculate_from_atoms(self, atoms, grid_dimensions,
                              working_directory=".", **kwargs):
         """
-        Calculate the SNAP descriptors based on the atomic configurations.
+        Calculate the bispectrum descriptors based on atomic configurations.
 
         Parameters
         ----------
@@ -241,19 +241,19 @@ class Descriptor(ABC):
 
     def gather_descriptors(self, snap_descriptors_np, use_pickled_comm=False):
         """
-        Gathers all SNAP descriptors on rank 0 and sorts them.
+        Gathers all bispectrum descriptors on rank 0 and sorts them.
 
         This is useful for e.g. parallel preprocessing.
         This function removes the extra 3 components that come from parallel
         processing.
-        I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
+        I.e. if we have 91 bispectrum descriptors, LAMMPS directly outputs us
         97 (in parallel mode), and this function returns 94, as to retain the
         3 x,y,z ones we by default include.
 
         Parameters
         ----------
         snap_descriptors_np : numpy.array
-            Numpy array with the SNAP descriptors of this ranks local grid.
+            Numpy array with the descriptors of this ranks local grid.
 
         use_pickled_comm : bool
             If True, the pickled communication route from mpi4py is used.
@@ -269,7 +269,7 @@ class Descriptor(ABC):
         comm = get_comm()
         barrier()
 
-        # Gather the SNAP descriptors into a list.
+        # Gather the descriptors into a list.
         if use_pickled_comm:
             all_descriptors_list = comm.gather(snap_descriptors_np,
                                                     root=0)
@@ -314,7 +314,7 @@ class Descriptor(ABC):
 
         # Reorder the list.
         if get_rank() == 0:
-            # Prepare the SNAP descriptor array.
+            # Prepare the descriptor array.
             nx = self.grid_dimensions[0]
             ny = self.grid_dimensions[1]
             nz = self.grid_dimensions[2]
