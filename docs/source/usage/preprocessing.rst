@@ -50,7 +50,7 @@ by themselves if needed.
             import mala
 
             parameters = mala.Parameters()
-            parameters.descriptors.descriptor_type = 'SNAP'
+            parameters.descriptors.descriptor_type = 'Bispectrum'
 
             # Creates a bispectrum object via interface
             bispectrum = mala.Descriptor(parameters)
