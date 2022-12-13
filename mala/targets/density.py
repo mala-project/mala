@@ -4,6 +4,7 @@ import time
 import ase.io
 from ase.units import Rydberg, Bohr
 from functools import cached_property
+import numpy as np
 try:
     import total_energy as te
 except ModuleNotFoundError:
@@ -11,11 +12,11 @@ except ModuleNotFoundError:
 
 from mala.common.parallelizer import printout, parallel_warn, barrier, get_size
 from mala.targets.target import Target
-from mala.targets.calculation_helpers import *
 from mala.targets.cube_parser import read_cube, write_cube
+from mala.targets.calculation_helpers import integrate_values_on_spacing
+from mala.targets.xsf_parser import read_xsf
 from mala.targets.atomic_force import AtomicForce
 from mala.descriptors.atomic_density import AtomicDensity
-from mala.common.parallelizer import get_rank
 
 
 class Density(Target):
@@ -117,6 +118,31 @@ class Density(Target):
         """
         return_density_object = Density(params)
         return_density_object.read_from_cube(path, units=units)
+        return return_density_object
+
+    @classmethod
+    def from_xsf_file(cls, params, path, units="1/A^3"):
+        """
+        Create a Density calculator from a xsf file.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this DOS object.
+
+        path : string
+            Name of the xsf file.
+
+        units : string
+            Units the density is saved in.
+
+        Returns
+        -------
+        dens_object : mala.targets.density.Density
+            Density object created from LDOS object.
+        """
+        return_density_object = Density(params)
+        return_density_object.read_from_xsf(path, units=units)
         return return_density_object
 
     @classmethod
@@ -321,6 +347,22 @@ class Density(Target):
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
         data, meta = read_cube(path)*self.convert_units(1, in_units=units)
+        self.density = data
+
+    def read_from_xsf(self, path, units="1/A^3", **kwargs):
+        """
+        Read the density data from an xsf file.
+
+        Parameters
+        ----------
+        path : string
+            Name of the xsf file.
+
+        units : string
+            Units the density is saved in. Usually none.
+        """
+        printout("Reading density from .cube file ", path, min_verbosity=0)
+        data, meta = read_xsf(path)*self.convert_units(1, in_units=units)
         self.density = data
 
     def read_from_numpy(self, path, units="1/A^3"):
