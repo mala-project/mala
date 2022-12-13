@@ -1274,7 +1274,7 @@ class LDOS(Target):
     def _read_from_qe_files(self, path_scheme, units,
                             use_memmap, file_type, **kwargs):
         """
-        Reads the LDOS from QE produced files, i.e. one file per energy level.
+        Read the LDOS from QE produced files, i.e. one file per energy level.
 
         Can currently work with .xsf and .cube files.
 

@@ -9,6 +9,23 @@ import numpy as np
 
 
 def read_xsf(filename):
+    """
+    Read xsf file into numpy array.
+
+    Parameters
+    ----------
+    filename : string
+        filename of xsf file.
+
+    Returns
+    -------
+    data : numpy.array
+        Data from xsf file.
+
+    meta : dict
+        Metadata from xsf file - empty for now, and provided for compatibility
+        reasons.
+    """
     f = open(filename)
     lines = f.readlines()
 

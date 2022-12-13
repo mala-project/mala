@@ -243,7 +243,7 @@ class DataConverter:
                                **target_calculator_kwargs)
             tmp_output = self.target_calculator.get_target()
 
-        if description["output"] == ".xsf":
+        elif description["output"] == ".xsf":
             target_calculator_kwargs["units"] = original_units["output"]
             target_calculator_kwargs["use_memmap"] = use_memmap
             # If no units are provided we just assume standard units.
