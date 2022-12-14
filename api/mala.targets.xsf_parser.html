@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>targets &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>xsf_parser &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -20,8 +20,8 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="atomic_force" href="mala.targets.atomic_force.html" />
-    <link rel="prev" title="trainer" href="mala.network.trainer.html" /> 
+    <link rel="next" title="version" href="mala.version.html" />
+    <link rel="prev" title="target" href="mala.targets.target.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,7 +52,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">targets</a><ul>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.targets.html">targets</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.atomic_force.html">atomic_force</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.calculation_helpers.html">calculation_helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.cube_parser.html">cube_parser</a></li>
@@ -60,7 +60,7 @@
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html">dos</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html">ldos</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html">target</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.targets.xsf_parser.html">xsf_parser</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">xsf_parser</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
@@ -87,9 +87,10 @@
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="modules.html">API reference</a> &raquo;</li>
           <li><a href="mala.html">mala</a> &raquo;</li>
-      <li>targets</li>
+          <li><a href="mala.targets.html">targets</a> &raquo;</li>
+      <li>xsf_parser</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.targets.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.targets.xsf_parser.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -97,29 +98,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <span class="target" id="module-mala.targets"></span><p>Calculators for physical output quantities.</p>
-<div class="section" id="targets">
-<h1>targets<a class="headerlink" href="#targets" title="Permalink to this headline"></a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="mala.targets.atomic_force.html">atomic_force</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.targets.calculation_helpers.html">calculation_helpers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.targets.cube_parser.html">cube_parser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.targets.density.html">density</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.targets.dos.html">dos</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.targets.ldos.html">ldos</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.targets.target.html">target</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mala.targets.xsf_parser.html">xsf_parser</a></li>
+  <div class="section" id="module-mala.targets.xsf_parser">
+<span id="xsf-parser"></span><h1>xsf_parser<a class="headerlink" href="#module-mala.targets.xsf_parser" title="Permalink to this headline"></a></h1>
+<p>Parsing for .xsf files. The goal is to extract volumetric data.</p>
+<p>The .xsf file format offers a lot of information, we are only interested in
+the volumetric data for now.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mala.targets.xsf_parser.read_xsf">
+<span class="sig-name descname"><span class="pre">read_xsf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/xsf_parser.html#read_xsf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.xsf_parser.read_xsf" title="Permalink to this definition"></a></dt>
+<dd><p>Read xsf file into numpy array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>string</em>) – filename of xsf file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>data</strong> (<em>numpy.array</em>) – Data from xsf file.</p></li>
+<li><p><strong>meta</strong> (<em>dict</em>) – Metadata from xsf file - empty for now, and provided for compatibility
+reasons.</p></li>
 </ul>
-</div>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="mala.network.trainer.html" class="btn btn-neutral float-left" title="trainer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.targets.atomic_force.html" class="btn btn-neutral float-right" title="atomic_force" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.targets.target.html" class="btn btn-neutral float-left" title="target" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.version.html" class="btn btn-neutral float-right" title="version" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

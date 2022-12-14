@@ -23,4 +23,5 @@ targets
    mala.targets.dos
    mala.targets.ldos
    mala.targets.target
+   mala.targets.xsf_parser
 

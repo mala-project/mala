@@ -1,0 +1,7 @@
+xsf\_parser
+===========
+
+.. automodule:: mala.targets.xsf_parser
+   :members:
+   :undoc-members:
+   :show-inheritance:

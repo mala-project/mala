@@ -61,6 +61,7 @@
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.dos.html">dos</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.ldos.html">ldos</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.targets.target.html">target</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.targets.xsf_parser.html">xsf_parser</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
@@ -244,6 +245,27 @@ object directly, proper unit coversion is ensured.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>dens_object</strong> – Density calculator object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.density.Density" title="mala.targets.density.Density">mala.targets.density.Density</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.density.Density.from_xsf_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_xsf_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/A^3'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.from_xsf_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.from_xsf_file" title="Permalink to this definition"></a></dt>
+<dd><p>Create a Density calculator from a xsf file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this DOS object.</p></li>
+<li><p><strong>path</strong> (<em>string</em>) – Name of the xsf file.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dens_object</strong> – Density object created from LDOS object.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#mala.targets.density.Density" title="mala.targets.density.Density">mala.targets.density.Density</a></p>
@@ -456,6 +478,20 @@ It should work for all implemented targets.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> – Name of the numpy file.</p></li>
+<li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in. Usually none.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.density.Density.read_from_xsf">
+<span class="sig-name descname"><span class="pre">read_from_xsf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/A^3'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.read_from_xsf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.read_from_xsf" title="Permalink to this definition"></a></dt>
+<dd><p>Read the density data from an xsf file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>string</em>) – Name of the xsf file.</p></li>
 <li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in. Usually none.</p></li>
 </ul>
 </dd>
