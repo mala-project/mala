@@ -432,9 +432,9 @@ class Density(Target):
 
         meta["atoms"] = atom_list
         meta["org"] = [0.0, 0.0, 0.0]
-        meta["xvec"] = self.voxel[0]
-        meta["yvec"] = self.voxel[1]
-        meta["zvec"] = self.voxel[2]
+        meta["xvec"] = self.voxel[0] / Bohr
+        meta["yvec"] = self.voxel[1] / Bohr
+        meta["zvec"] = self.voxel[2] / Bohr
         write_cube(density_data, meta, file_name)
 
     # Calculations
