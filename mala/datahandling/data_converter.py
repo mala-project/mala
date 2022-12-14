@@ -12,7 +12,7 @@ descriptor_input_types = [
     "qe.out"
 ]
 target_input_types = [
-    ".cube"
+    ".cube", ".xsf"
 ]
 additional_info_input_types = [
     "qe.out"
@@ -240,6 +240,15 @@ class DataConverter:
             # If no units are provided we just assume standard units.
             self.target_calculator.\
                 read_from_cube(snapshot["output"],
+                               **target_calculator_kwargs)
+            tmp_output = self.target_calculator.get_target()
+
+        elif description["output"] == ".xsf":
+            target_calculator_kwargs["units"] = original_units["output"]
+            target_calculator_kwargs["use_memmap"] = use_memmap
+            # If no units are provided we just assume standard units.
+            self.target_calculator.\
+                read_from_xsf(snapshot["output"],
                                **target_calculator_kwargs)
             tmp_output = self.target_calculator.get_target()
 
