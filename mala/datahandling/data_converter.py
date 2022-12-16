@@ -194,12 +194,11 @@ class DataConverter:
                           descriptor_save_path=None,
                           target_save_path=None,
                           additional_info_save_path=None,
-                          naming_scheme="ELEM_snapshot*",
+                          naming_scheme="ELEM_snapshot*.npy",
                           starts_at=0,
                           file_based_communication=False,
                           descriptor_calculation_kwargs=None,
-                          target_calculator_kwargs=None,
-                          use_numpy=False):
+                          target_calculator_kwargs=None):
         """
         Convert the snapshots in the list to numpy arrays.
 
@@ -223,7 +222,13 @@ class DataConverter:
 
         naming_scheme : string
             String detailing the naming scheme for the snapshots. * symbols
-            will be replaced with the snapshot number.
+            will be replaced with the snapshot number. The naming scheme
+            can also include a file ending. If none is provided, one is picked
+            by MALA by default. Supported file endings:
+
+              - ".npy" - activates the MALA numpy backend.
+              - "json", "bp", "sst", "h5": Activates the OpenPMD backend,
+                with the respective file format (see OpenPMD documentation).
 
         starts_at : int
             Number of the first snapshot generated using this approach.
@@ -245,12 +250,18 @@ class DataConverter:
         descriptor_calculation_kwargs : dict
             Dictionary with additional keyword arguments for the calculation
             or parsing of the descriptor quantities.
-
-        use_numpy : bool
-            Use the old numpy saving algorithm. This is discouraged and will
-            be deprecated in the future.
         """
-        if use_numpy:
+        if "." in naming_scheme:
+            file_ending = naming_scheme.split(".")[-1]
+            naming_scheme = naming_scheme.split(".")[0]
+            if file_ending != "npy":
+                if file_ending not in io.file_extensions:
+                    raise Exception("Invalid file ending selected: " +
+                                    file_ending)
+        else:
+            file_ending = "npy"
+
+        if file_ending == "npy":
             parallel_warn("NumPy array based file saving will be deprecated"
                           "starting in MALA v1.3.0.", min_verbosity=0,
                           category=FutureWarning)
@@ -278,13 +289,14 @@ class DataConverter:
                 raise Exception("No additional info path specified, cannot "
                                 "process data.")
 
-        if not use_numpy:
+        if file_ending != "npy":
             snapshot_name = naming_scheme
             series_name = snapshot_name.replace("*", str("%01T"))
 
             if self.process_descriptors:
                 input_series = io.Series(os.path.join(descriptor_save_path,
-                                                      series_name+".in.h5"),
+                                                      series_name+".in." +
+                                                      file_ending),
                                          io.Access.create,
                                          options=json.dumps(
                                             self.parameters_full.
@@ -295,7 +307,8 @@ class DataConverter:
 
             if self.process_targets:
                 output_series = io.Series(os.path.join(target_save_path,
-                                                       series_name+".out.h5"),
+                                                       series_name+".out." +
+                                                       file_ending),
                                           io.Access.create,
                                           options=json.dumps(
                                             self.parameters_full.
@@ -316,20 +329,22 @@ class DataConverter:
                                          snapshot_name + ".info.json")
             else:
                 info_path = None
-            if use_numpy:
+            if file_ending == "npy":
                 input_iteration = None
                 output_iteration = None
                 # Create the actual paths, if needed.
                 if self.process_descriptors:
                     descriptor_path = os.path.join(descriptor_save_path,
-                                                   snapshot_name + ".in.npy")
+                                                   snapshot_name + ".in." +
+                                                   file_ending)
                 else:
                     descriptor_path = None
 
                 memmap = None
                 if self.process_targets:
                     target_path = os.path.join(target_save_path,
-                                               snapshot_name + ".out.npy")
+                                               snapshot_name + ".out."+
+                                               file_ending)
                     # A memory mapped file is used as buffer for distributed cases.
                     if self.parameters._configuration["mpi"] and \
                             file_based_communication:

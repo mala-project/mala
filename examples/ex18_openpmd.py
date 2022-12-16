@@ -73,10 +73,9 @@ def convert_data():
 
     # Convert data both as OpenPMD HDF5 (default) and numpy.
     data_converter.convert_snapshots("./training_data_temp",
-                                     naming_scheme="Be_snapshot*")
+                                     naming_scheme="Be_snapshot*.h5")
     data_converter.convert_snapshots("./training_data_temp",
-                                     naming_scheme="Be_snapshot*",
-                                     use_numpy=True)
+                                     naming_scheme="Be_snapshot*.npy")
 
 
 def conversion_test():
@@ -95,9 +94,10 @@ def conversion_test():
                                          data=os.path.join("training_data_temp",
                                                            "snapshot0.out"))
 
-    # These two values should match.
+    # These two values should match, and be not toooo far off the third one.
     print(ldos_calculator.band_energy)
     print(ldos_calculator2.band_energy)
+    print(ldos_calculator.band_energy_dft_calculation)
 
 
 def network_training_test(use_numpy=False):
