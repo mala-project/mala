@@ -8,6 +8,7 @@ from mala.common.parallelizer import printout, get_rank, parallel_warn
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
+from mala.version import __version__ as mala_version
 
 descriptor_input_types = [
     "qe.out"
@@ -315,7 +316,7 @@ class DataConverter:
                                             openpmd_configuration))
 
                 output_series.set_attribute("is_mala_data", 1)
-                output_series.set_software(name="MALA", version="x.x.x")
+                output_series.set_software(name="MALA", version=mala_version)
                 output_series.author = "..."
 
         for i in range(0, len(self.__snapshots_to_convert)):

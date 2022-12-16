@@ -962,7 +962,7 @@ class LDOS(Target):
         conserve_dimensions : bool
             If True, the density is returned in the same dimensions as
             the LDOS was entered. If False, the density is always given
-            as [gridsize]. If None, the cached LDOS
+            as [gridsize, 1]. If None, the cached LDOS
             will be used for the calculation.
 
 
@@ -1057,15 +1057,6 @@ class LDOS(Target):
         else:
             raise Exception("Unknown integration method.")
 
-        if len(ldos_data_shape) == 4 and conserve_dimensions is True:
-            # This breaks in the distributed case currently,
-            # but I don't see an application where we would need it.
-            # It would mean that we load an LDOS in distributed 3D fashion,
-            # which is not implemented either.
-            ldos_data_shape = list(ldos_data_shape)
-            ldos_data_shape[-1] = 1
-            density_values = density_values.reshape(ldos_data_shape)
-
         # Now we have the full density; We now need to collect it, in the
         # MPI case.
         if self.parameters._configuration["mpi"] and gather_density:
@@ -1081,6 +1072,21 @@ class LDOS(Target):
                                                          ldos_shape[2], 1])
             return full_density
         else:
+            if len(ldos_data_shape) == 4 and conserve_dimensions is True:
+                # This breaks in the distributed case currently,
+                # but I don't see an application where we would need it.
+                # It would mean that we load an LDOS in distributed 3D fashion,
+                # which is not implemented either.
+                ldos_data_shape = list(ldos_data_shape)
+                ldos_data_shape[-1] = 1
+                density_values = density_values.reshape(ldos_data_shape)
+            else:
+                if len(ldos_data_shape) == 4:
+                    grid_length = ldos_data_shape[0] * ldos_data_shape[1] * \
+                                  ldos_data_shape[2]
+                else:
+                    grid_length = ldos_data_shape[0]
+                density_values = density_values.reshape([grid_length, 1])
             return density_values
 
     def get_density_of_states(self, ldos_data=None, voxel=None,

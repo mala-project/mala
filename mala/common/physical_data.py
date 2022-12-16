@@ -1,9 +1,12 @@
 """Base class for all calculators that deal with physical data"""
 from abc import ABC, abstractmethod
+import os
 
 import json
 import numpy as np
 import openpmd_api as io
+
+from mala.version import __version__ as mala_version
 
 
 class PhysicalData(ABC):
@@ -250,6 +253,34 @@ class PhysicalData(ABC):
             Array to save.
         """
         np.save(path, array)
+
+    def write_to_openpmd_file(self, path, array):
+        """
+        Write data to a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            File to save into. If no file ending is given, .h5 is assumed.
+
+        array : numpy.ndarray
+            Array to save.
+        """
+        file_name = os.path.basename(path)
+        file_ending = file_name.split(".")[-1]
+        if file_name == file_ending:
+            path += ".h5"
+        elif file_ending not in io.file_extensions:
+            raise Exception("Invalid file ending selected: " +
+                            file_ending)
+        series = io.Series(path, io.Access.create,
+                           options=json.dumps(self.parameters.
+                                              _configuration["openpmd_configuration"]))
+        series.set_attribute("is_mala_data", 1)
+        series.set_software(name="MALA", version=mala_version)
+        series.author = "..."
+        iteration = series.write_iterations()[0]
+        self.write_to_openpmd_iteration(iteration, array)
 
     def write_to_openpmd_iteration(self, iteration, array,
                                    additional_metadata=None):

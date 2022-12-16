@@ -123,6 +123,12 @@ class Density(Target):
         return return_density_object
 
     @classmethod
+    def from_openpmd_file(cls, params, path):
+        return_ldos_object = Density(params)
+        return_ldos_object.read_from_openpmd_file(path)
+        return return_ldos_object
+
+    @classmethod
     def from_ldos_calculator(cls, ldos_object):
         """
         Create a Density calculator from an LDOS object.
@@ -505,7 +511,7 @@ class Density(Target):
                 number_of_electrons = np.sum(density_data, axis=0) * \
                                       voxel.volume
 
-        return number_of_electrons
+        return np.squeeze(number_of_electrons)
 
     def get_density(self, density_data=None, convert_to_threedimensional=False,
                     grid_dimensions=None):
