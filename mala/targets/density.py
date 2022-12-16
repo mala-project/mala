@@ -504,10 +504,10 @@ class Density(Target):
             else:
                 number_of_electrons *= grid_spacing_bohr_z
         else:
-            if len(data_shape) == 3:
+            if len(data_shape) == 4:
                 number_of_electrons = np.sum(density_data, axis=(0, 1, 2)) \
                                       * voxel.volume
-            if len(data_shape) == 1:
+            if len(data_shape) == 2:
                 number_of_electrons = np.sum(density_data, axis=0) * \
                                       voxel.volume
 
@@ -542,9 +542,9 @@ class Density(Target):
         density_data : numpy.array
             Electronic density data in the desired shape.
         """
-        if len(density_data.shape) == 3:
+        if len(density_data.shape) == 4:
             return density_data
-        elif len(density_data.shape) == 1:
+        elif len(density_data.shape) == 2:
             if convert_to_threedimensional:
                 if self.parameters._configuration["mpi"]:
                     # In the MPI case we have to use the local grid to
@@ -563,12 +563,12 @@ class Density(Target):
                     density_data = \
                         np.reshape(density_data,
                                    [last_z - first_z, last_y - first_y,
-                                    last_x - first_x]).transpose([2, 1, 0])
+                                    last_x - first_x]).transpose([2, 1, 0, 3])
                     return density_data
                 else:
                     if grid_dimensions is None:
                         grid_dimensions = self.grid_dimensions
-                    return density_data.reshape(grid_dimensions)
+                    return density_data.reshape(grid_dimensions + [1])
             else:
                 return density_data
         else:
@@ -792,11 +792,11 @@ class Density(Target):
         # We need to find out if the grid dimensions are consistent.
         # That depends on the form of the density data we received.
         number_of_gridpoints = te.get_nnr()
-        if len(density_data.shape) == 3:
+        if len(density_data.shape) == 4:
             number_of_gridpoints_mala = density_data.shape[0] * \
                                         density_data.shape[1] * \
                                         density_data.shape[2]
-        elif len(density_data.shape) == 1:
+        elif len(density_data.shape) == 2:
             number_of_gridpoints_mala = density_data.shape[0]
         else:
             raise Exception("Density data has wrong dimensions. ")
@@ -806,10 +806,10 @@ class Density(Target):
 
         # Now we need to reshape the density.
         density_for_qe = None
-        if len(density_data.shape) == 3:
+        if len(density_data.shape) == 4:
             density_for_qe = np.reshape(density_data, [number_of_gridpoints,
                                                        1], order='F')
-        elif len(density_data.shape) == 1:
+        elif len(density_data.shape) == 2:
             parallel_warn("Using 1D density to calculate the total energy"
                           " requires reshaping of this data. "
                           "This is unproblematic, as long as you provided t"
