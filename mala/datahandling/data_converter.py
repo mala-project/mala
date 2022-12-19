@@ -195,7 +195,7 @@ class DataConverter:
                           descriptor_save_path=None,
                           target_save_path=None,
                           additional_info_save_path=None,
-                          naming_scheme="ELEM_snapshot*", starts_at=0,
+                          naming_scheme="ELEM_snapshot*.npy", starts_at=0,
                           file_based_communication=False,
                           descriptor_calculation_kwargs=None,
                           target_calculator_kwargs=None):
@@ -256,9 +256,12 @@ class DataConverter:
             file_ending = "npy"
 
         if file_ending == "npy":
-            parallel_warn("NumPy array based file saving will be deprecated"
-                          "starting in MALA v1.3.0.", min_verbosity=0,
-                          category=FutureWarning)
+            # I will leave the deprecation warning out for now, we re-enable
+            # it as soon as we have a precise timeline.
+            # parallel_warn("NumPy array based file saving will be deprecated"
+            #               "starting in MALA v1.3.0.", min_verbosity=0,
+            #               category=FutureWarning)
+            pass
         else:
             file_based_communication = False
 
