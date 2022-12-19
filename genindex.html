@@ -211,8 +211,6 @@
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.comment">comment (Parameters attribute)</a>
 </li>
-      <li><a href="api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_single_snapshot">convert_single_snapshot() (DataConverter method)</a>
-</li>
       <li><a href="api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.convert_snapshots">convert_snapshots() (DataConverter method)</a>
 </li>
       <li><a href="api/mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.convert_units">convert_units() (AtomicDensity static method)</a>
@@ -243,6 +241,20 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.data">data (Parameters attribute)</a>
 </li>
+      <li><a href="api/mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.data_name">data_name (AtomicDensity property)</a>
+
+      <ul>
+        <li><a href="api/mala.descriptors.bispectrum.html#mala.descriptors.bispectrum.Bispectrum.data_name">(Bispectrum property)</a>
+</li>
+        <li><a href="api/mala.targets.density.html#mala.targets.density.Density.data_name">(Density property)</a>
+</li>
+        <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.data_name">(DOS property)</a>
+</li>
+        <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.data_name">(LDOS property)</a>
+</li>
+        <li><a href="api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.data_name">(PhysicalData property)</a>
+</li>
+      </ul></li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersData.data_splitting_type">data_splitting_type (ParametersData attribute)</a>
 </li>
       <li><a href="api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter">DataConverter (class in mala.datahandling.data_converter)</a>
@@ -261,14 +273,14 @@
         <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.density">(LDOS property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.density_of_states">density_of_states (DOS property)</a>
 
       <ul>
         <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.density_of_states">(LDOS property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor">Descriptor (class in mala.descriptors.descriptor)</a>
 </li>
       <li><a href="api/mala.datahandling.data_converter.html#mala.datahandling.data_converter.DataConverter.descriptor_calculator">descriptor_calculator (DataConverter attribute)</a>
@@ -365,14 +377,14 @@
         <li><a href="api/mala.network.network.html#mala.network.network.TransformerNet.forward">(TransformerNet method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.targets.density.html#mala.targets.density.Density.from_cube_file">from_cube_file() (Density class method)</a>
 
       <ul>
         <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_cube_file">(LDOS class method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable.from_json">from_json() (JSONSerializable class method)</a>
 
       <ul>
@@ -401,6 +413,12 @@
         <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.from_numpy_file">(DOS class method)</a>
 </li>
         <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_numpy_file">(LDOS class method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/mala.targets.density.html#mala.targets.density.Density.from_openpmd_file">from_openpmd_file() (Density class method)</a>
+
+      <ul>
+        <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.from_openpmd_file">(LDOS class method)</a>
 </li>
       </ul></li>
       <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.from_qe_dos_txt">from_qe_dos_txt() (DOS class method)</a>
@@ -570,8 +588,6 @@
       <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.get_total_energy">get_total_energy() (LDOS method)</a>
 </li>
       <li><a href="api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.get_trials_from_study">get_trials_from_study() (HyperOptOptuna method)</a>
-</li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDebug.grid_dimensions">grid_dimensions (ParametersDebug attribute)</a>
 </li>
       <li><a href="api/mala.network.network.html#mala.network.network.GRU">GRU (class in mala.network.network)</a>
 </li>
@@ -753,6 +769,13 @@
 
       <ul>
         <li><a href="api/mala.common.parameters.html#module-mala.common.parameters">module</a>
+</li>
+      </ul></li>
+      <li>
+    mala.common.physical_data
+
+      <ul>
+        <li><a href="api/mala.common.physical_data.html#module-mala.common.physical_data">module</a>
 </li>
       </ul></li>
       <li>
@@ -1109,6 +1132,8 @@
 </li>
         <li><a href="api/mala.common.parameters.html#module-mala.common.parameters">mala.common.parameters</a>
 </li>
+        <li><a href="api/mala.common.physical_data.html#module-mala.common.physical_data">mala.common.physical_data</a>
+</li>
         <li><a href="api/mala.datageneration.html#module-mala.datageneration">mala.datageneration</a>
 </li>
         <li><a href="api/mala.datageneration.ofdft_initializer.html#module-mala.datageneration.ofdft_initializer">mala.datageneration.ofdft_initializer</a>
@@ -1256,13 +1281,17 @@
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_number_of_timesteps">ofdft_number_of_timesteps (ParametersDataGeneration attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_temperature">ofdft_temperature (ParametersDataGeneration attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration.ofdft_timestep">ofdft_timestep (ParametersDataGeneration attribute)</a>
 </li>
       <li><a href="api/mala.datageneration.ofdft_initializer.html#mala.datageneration.ofdft_initializer.OFDFTInitializer">OFDFTInitializer (class in mala.datageneration.ofdft_initializer)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.openpmd_configuration">openpmd_configuration (Parameters property)</a>
+</li>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.openpmd_granularity">openpmd_granularity (Parameters property)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.optuna_singlenode_setup">optuna_singlenode_setup() (Parameters method)</a>
 </li>
@@ -1284,8 +1313,6 @@
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration">ParametersDataGeneration (class in mala.common.parameters)</a>
 </li>
-      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDebug">ParametersDebug (class in mala.common.parameters)</a>
-</li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors">ParametersDescriptors (class in mala.common.parameters)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization">ParametersHyperparameterOptimization (class in mala.common.parameters)</a>
@@ -1302,8 +1329,6 @@
 </li>
       <li><a href="api/mala.network.objective_base.html#mala.network.objective_base.ObjectiveBase.parse_trial_optuna">parse_trial_optuna() (ObjectiveBase method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.perform_study">perform_study() (HyperOpt method)</a>
 
       <ul>
@@ -1314,6 +1339,10 @@
         <li><a href="api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.perform_study">(HyperOptOptuna method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData">PhysicalData (class in mala.common.physical_data)</a>
+</li>
       <li><a href="api/mala.network.network.html#mala.network.network.PositionalEncoding">PositionalEncoding (class in mala.network.network)</a>
 </li>
       <li><a href="api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_for_atoms">predict_for_atoms() (Predictor method)</a>
@@ -1362,6 +1391,10 @@
 </li>
       <li><a href="api/mala.targets.cube_parser.html#mala.targets.cube_parser.read_cube">read_cube() (in module mala.targets.cube_parser)</a>
 </li>
+      <li><a href="api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_numpy_file">read_dimensions_from_numpy_file() (PhysicalData method)</a>
+</li>
+      <li><a href="api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file">read_dimensions_from_openpmd_file() (PhysicalData method)</a>
+</li>
       <li><a href="api/mala.targets.density.html#mala.targets.density.Density.read_from_array">read_from_array() (Density method)</a>
 
       <ul>
@@ -1376,20 +1409,16 @@
         <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_cube">(LDOS method)</a>
 </li>
       </ul></li>
-      <li><a href="api/mala.targets.density.html#mala.targets.density.Density.read_from_numpy">read_from_numpy() (Density method)</a>
-
-      <ul>
-        <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_numpy">(DOS method)</a>
+      <li><a href="api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_numpy_file">read_from_numpy_file() (PhysicalData method)</a>
 </li>
-        <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.read_from_numpy">(LDOS method)</a>
+      <li><a href="api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_openpmd_file">read_from_openpmd_file() (PhysicalData method)</a>
 </li>
-      </ul></li>
       <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_dos_txt">read_from_qe_dos_txt() (DOS method)</a>
-</li>
-      <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_out">read_from_qe_out() (DOS method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_out">read_from_qe_out() (DOS method)</a>
+</li>
       <li><a href="api/mala.targets.density.html#mala.targets.density.Density.read_from_xsf">read_from_xsf() (Density method)</a>
 
       <ul>
@@ -1434,6 +1463,8 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersData.sample_ratio">sample_ratio (ParametersData attribute)</a>
+</li>
       <li><a href="api/mala.datahandling.data_scaler.html#mala.datahandling.data_scaler.DataScaler.save">save() (DataScaler method)</a>
 
       <ul>
@@ -1466,8 +1497,6 @@
         <li><a href="api/mala.network.hyper_opt_optuna.html#mala.network.hyper_opt_optuna.HyperOptOptuna.set_optimal_parameters">(HyperOptOptuna method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt.set_parameters">set_parameters() (HyperOpt method)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.Parameters.show">show() (Parameters method)</a>
@@ -1478,8 +1507,38 @@
         <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.show">(ParametersHyperparameterOptimization method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.network.hyper_opt_oat.html#mala.network.hyper_opt_oat.HyperOptOAT.show_order_of_importance">show_order_of_importance() (HyperOptOAT method)</a>
 </li>
+      <li><a href="api/mala.targets.density.html#mala.targets.density.Density.si_dimension">si_dimension (Density property)</a>
+
+      <ul>
+        <li><a href="api/mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.si_dimension">(Descriptor property)</a>
+</li>
+        <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.si_dimension">(DOS property)</a>
+</li>
+        <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.si_dimension">(LDOS property)</a>
+</li>
+        <li><a href="api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.si_dimension">(PhysicalData property)</a>
+</li>
+        <li><a href="api/mala.targets.target.html#mala.targets.target.Target.si_dimension">(Target property)</a>
+</li>
+      </ul></li>
+      <li><a href="api/mala.targets.density.html#mala.targets.density.Density.si_unit_conversion">si_unit_conversion (Density property)</a>
+
+      <ul>
+        <li><a href="api/mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor.si_unit_conversion">(Descriptor property)</a>
+</li>
+        <li><a href="api/mala.targets.dos.html#mala.targets.dos.DOS.si_unit_conversion">(DOS property)</a>
+</li>
+        <li><a href="api/mala.targets.ldos.html#mala.targets.ldos.LDOS.si_unit_conversion">(LDOS property)</a>
+</li>
+        <li><a href="api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.si_unit_conversion">(PhysicalData property)</a>
+</li>
+        <li><a href="api/mala.targets.target.html#mala.targets.target.Target.si_unit_conversion">(Target property)</a>
+</li>
+      </ul></li>
       <li><a href="api/mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot">Snapshot (class in mala.datahandling.snapshot)</a>
 </li>
       <li><a href="api/mala.common.parameters.html#mala.common.parameters.ParametersData.snapshot_directories_list">snapshot_directories_list (ParametersData attribute)</a>
@@ -1622,13 +1681,19 @@
 </li>
       <li><a href="api/mala.targets.density.html#mala.targets.density.Density.write_as_cube">write_as_cube() (Density method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.targets.cube_parser.html#mala.targets.cube_parser.write_cube">write_cube() (in module mala.targets.cube_parser)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mala.targets.cube_parser.html#mala.targets.cube_parser.write_imcube">write_imcube() (in module mala.targets.cube_parser)</a>
 </li>
       <li><a href="api/mala.targets.target.html#mala.targets.target.Target.write_tem_input_file">write_tem_input_file() (Target static method)</a>
+</li>
+      <li><a href="api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_numpy_file">write_to_numpy_file() (PhysicalData method)</a>
+</li>
+      <li><a href="api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_file">write_to_openpmd_file() (PhysicalData method)</a>
+</li>
+      <li><a href="api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_iteration">write_to_openpmd_iteration() (PhysicalData method)</a>
 </li>
   </ul></td>
 </tr></table>

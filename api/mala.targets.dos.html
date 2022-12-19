@@ -450,21 +450,7 @@ It should work for all implemented targets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Numpy array containing the DOS..</p></li>
-<li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in. Usually none.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.dos.DOS.read_from_numpy">
-<span class="sig-name descname"><span class="pre">read_from_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/dos.html#DOS.read_from_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.dos.DOS.read_from_numpy" title="Permalink to this definition"></a></dt>
-<dd><p>Read the density data from a numpy file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>string</em>) – Name of the numpy file.</p></li>
+<li><p><strong>array</strong> (<em>numpy.ndarray</em>) – Numpy array containing the DOS.</p></li>
 <li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in. Usually none.</p></li>
 </ul>
 </dd>
@@ -527,6 +513,12 @@ via read_additional_calculation_data will be used.</p></li>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.data_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_name</span></span><a class="headerlink" href="#mala.targets.dos.DOS.data_name" title="Permalink to this definition"></a></dt>
+<dd><p>Get a string that describes the target (for e.g. metadata).</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="mala.targets.dos.DOS.density_of_states">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">density_of_states</span></span><a class="headerlink" href="#mala.targets.dos.DOS.density_of_states" title="Permalink to this definition"></a></dt>
 <dd><p>Density of states as array.</p>
@@ -566,6 +558,19 @@ from how this quantity is calculated. Calculated via cached DOS.</p>
 <dd><p>Number of electrons in the system, calculated via cached DOS.</p>
 <p>Does not necessarily match up exactly with KS-DFT provided values,
 due to discretization errors.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.si_dimension">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">si_dimension</span></span><a class="headerlink" href="#mala.targets.dos.DOS.si_dimension" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary containing the SI unit dimensions in OpenPMD format.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.dos.DOS.si_unit_conversion">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">si_unit_conversion</span></span><a class="headerlink" href="#mala.targets.dos.DOS.si_unit_conversion" title="Permalink to this definition"></a></dt>
+<dd><p>Numeric value of the conversion from MALA (ASE) units to SI.</p>
+<p>Needed for OpenPMD interface.</p>
 </dd></dl>
 
 </dd></dl>

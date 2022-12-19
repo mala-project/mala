@@ -104,7 +104,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.targets.target.Target">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="mala.common.physical_data.html#mala.common.physical_data.PhysicalData" title="mala.common.physical_data.PhysicalData"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.physical_data.PhysicalData</span></code></a></p>
 <p>Base class for all target quantity parser.</p>
 <p>Target parsers read the target quantity
 (i.e. the quantity the NN will learn to predict) from a specified file
@@ -119,7 +119,7 @@ format and performs postprocessing calculations on the quantity.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.backconvert_units">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backconvert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.backconvert_units" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backconvert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.backconvert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.backconvert_units" title="Permalink to this definition"></a></dt>
 <dd><p>Convert the units of an array from MALA units into desired units.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -139,7 +139,7 @@ format and performs postprocessing calculations on the quantity.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.convert_units">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.convert_units" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.convert_units" title="Permalink to this definition"></a></dt>
 <dd><p>Convert the units of an array into the MALA units.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -312,7 +312,7 @@ temperature) for post processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data_type</strong> (<em>string</em>) – <p>Type of data or file that is used. Currently supporte are:</p>
+<li><p><strong>data_type</strong> (<em>string</em>) – <p>Type of data or file that is used. Currently supported are:</p>
 <ul>
 <li><p>”qe.out” : Read the additional information from a QuantumESPRESSO
 output file.</p></li>
@@ -429,13 +429,17 @@ to reproduce some earlier trajectory results</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.write_additional_calculation_data">
-<span class="sig-name descname"><span class="pre">write_additional_calculation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_additional_calculation_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_additional_calculation_data" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_additional_calculation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_additional_calculation_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_additional_calculation_data" title="Permalink to this definition"></a></dt>
 <dd><p>Write additional information about a calculation to a .json file.</p>
 <p>This way important information about a calculation can be saved more
 accessibly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>filepath</strong> (<em>string</em>) – Path at which to save the calculation data.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>string</em>) – Path at which to save the calculation data.</p></li>
+<li><p><strong>return_string</strong> (<em>bool</em>) – If True, no file will be written, and instead a json dict will
+be returned.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -473,6 +477,20 @@ interface. If None (recommended), MALA will create one.</p></li>
 <dt class="sig sig-object py" id="mala.targets.target.Target.qe_input_data">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qe_input_data</span></span><a class="headerlink" href="#mala.targets.target.Target.qe_input_data" title="Permalink to this definition"></a></dt>
 <dd><p>Input data for QE TEM calls.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.target.Target.si_dimension">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">si_dimension</span></span><a class="headerlink" href="#mala.targets.target.Target.si_dimension" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary containing the SI unit dimensions in OpenPMD format.</p>
+<p>Needed for OpenPMD interface.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.target.Target.si_unit_conversion">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">si_unit_conversion</span></span><a class="headerlink" href="#mala.targets.target.Target.si_unit_conversion" title="Permalink to this definition"></a></dt>
+<dd><p>Numeric value of the conversion from MALA (ASE) units to SI.</p>
+<p>Needed for OpenPMD interface.</p>
 </dd></dl>
 
 </dd></dl>

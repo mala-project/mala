@@ -1,0 +1,7 @@
+physical\_data
+==============
+
+.. automodule:: mala.common.physical_data
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -253,6 +253,27 @@ object directly, proper unit coversion is ensured.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.density.Density.from_openpmd_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_openpmd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.from_openpmd_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.from_openpmd_file" title="Permalink to this definition"></a></dt>
+<dd><p>Create an Density calculator from an OpenPMD file.</p>
+<p>Supports all OpenPMD supported file endings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create this LDOS object.</p></li>
+<li><p><strong>path</strong> (<em>string</em>) – Path to OpenPMD file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>density_calculator</strong> – Density calculator object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mala.targets.density.Density" title="mala.targets.density.Density">mala.targets.density.Density</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.density.Density.from_xsf_file">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_xsf_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/A^3'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.from_xsf_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.from_xsf_file" title="Permalink to this definition"></a></dt>
 <dd><p>Create a Density calculator from a xsf file.</p>
@@ -471,20 +492,6 @@ It should work for all implemented targets.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.density.Density.read_from_numpy">
-<span class="sig-name descname"><span class="pre">read_from_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/A^3'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.read_from_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.read_from_numpy" title="Permalink to this definition"></a></dt>
-<dd><p>Read the density data from a numpy file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> – Name of the numpy file.</p></li>
-<li><p><strong>units</strong> (<em>string</em>) – Units the density is saved in. Usually none.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.density.Density.read_from_xsf">
 <span class="sig-name descname"><span class="pre">read_from_xsf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/A^3'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.read_from_xsf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.read_from_xsf" title="Permalink to this definition"></a></dt>
 <dd><p>Read the density data from an xsf file.</p>
@@ -523,6 +530,12 @@ be used.</p></li>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.density.Density.data_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_name</span></span><a class="headerlink" href="#mala.targets.density.Density.data_name" title="Permalink to this definition"></a></dt>
+<dd><p>Get a string that describes the target (for e.g. metadata).</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="mala.targets.density.Density.density">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">density</span></span><a class="headerlink" href="#mala.targets.density.Density.density" title="Permalink to this definition"></a></dt>
 <dd><p>Electronic density.</p>
@@ -540,6 +553,19 @@ be used.</p></li>
 <dd><p>Number of electrons in the system, calculated via cached Density.</p>
 <p>Does not necessarily match up exactly with KS-DFT provided values,
 due to discretization errors.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.density.Density.si_dimension">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">si_dimension</span></span><a class="headerlink" href="#mala.targets.density.Density.si_dimension" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary containing the SI unit dimensions in OpenPMD format.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.targets.density.Density.si_unit_conversion">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">si_unit_conversion</span></span><a class="headerlink" href="#mala.targets.density.Density.si_unit_conversion" title="Permalink to this definition"></a></dt>
+<dd><p>Numeric value of the conversion from MALA (ASE) units to SI.</p>
+<p>Needed for OpenPMD interface.</p>
 </dd></dl>
 
 <dl class="py attribute">

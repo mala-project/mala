@@ -75,7 +75,7 @@
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 
 <span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span>
+<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Rydberg</span><span class="p">,</span> <span class="n">J</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">integrate</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">toms748</span>
@@ -171,7 +171,7 @@
 <span class="sd">            DOS calculator object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">return_dos</span> <span class="o">=</span> <span class="n">DOS</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-        <span class="n">return_dos</span><span class="o">.</span><span class="n">read_from_numpy</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+        <span class="n">return_dos</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">return_dos</span></div>
 
 <div class="viewcode-block" id="DOS.from_numpy_array"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_numpy_array">[docs]</a>    <span class="nd">@classmethod</span>
@@ -267,6 +267,28 @@
     <span class="k">def</span> <span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a string that describes the target (for e.g. metadata).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;DOS&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">si_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Numeric value of the conversion from MALA (ASE) units to SI.</span>
+
+<span class="sd">        Needed for OpenPMD interface.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">J</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Dictionary containing the SI unit dimensions in OpenPMD format.&quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">M</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">L</span><span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">T</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -403,7 +425,7 @@
 <span class="sd">        converted_array : numpy.array</span>
 <span class="sd">            Data in 1/eV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/eV&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/eV&quot;</span> <span class="ow">or</span> <span class="n">in_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">array</span>
         <span class="k">elif</span> <span class="n">in_units</span> <span class="o">==</span> <span class="s2">&quot;1/Ry&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">array</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">Rydberg</span><span class="p">)</span>
@@ -475,7 +497,9 @@
                         <span class="n">return_dos_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dosval</span><span class="p">)</span>
                         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">return_dos_values</span><span class="p">)</span></div>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">return_dos_values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">array</span>
+        <span class="k">return</span> <span class="n">array</span></div>
 
 <div class="viewcode-block" id="DOS.read_from_qe_out"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_out">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smearing_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -520,22 +544,8 @@
 
         <span class="c1"># QE gives the band energies in eV, so no conversion necessary here.</span>
         <span class="n">dos_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dos_per_band</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">dos_data</span></div>
-
-<div class="viewcode-block" id="DOS.read_from_numpy"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_numpy">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Read the density data from a numpy file.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        path : string</span>
-<span class="sd">            Name of the numpy file.</span>
-
-<span class="sd">        units : string</span>
-<span class="sd">            Units the density is saved in. Usually none.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">*</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">dos_data</span>
+        <span class="k">return</span> <span class="n">dos_data</span></div>
 
 <div class="viewcode-block" id="DOS.read_from_array"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_array">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -544,14 +554,14 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        array : numpy.ndarray</span>
-<span class="sd">            Numpy array containing the DOS..</span>
+<span class="sd">            Numpy array containing the DOS.</span>
 
 <span class="sd">        units : string</span>
 <span class="sd">            Units the density is saved in. Usually none.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">array</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">array</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">*=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">array</span></div>
 
     <span class="c1"># Calculations</span>
     <span class="c1">##############</span>
@@ -875,6 +885,11 @@
 
     <span class="c1"># Private methods</span>
     <span class="c1">#################</span>
+
+    <span class="k">def</span> <span class="nf">_process_loaded_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">array</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_units</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_target_data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">array</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__number_of_electrons_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>

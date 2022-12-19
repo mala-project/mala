@@ -20,7 +20,7 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="datageneration" href="mala.datageneration.html" />
+    <link rel="next" title="physical_data" href="mala.common.physical_data.html" />
     <link rel="prev" title="parallelizer" href="mala.common.parallelizer.html" /> 
 </head>
 
@@ -51,6 +51,7 @@
 <li class="toctree-l4"><a class="reference internal" href="mala.common.json_serializable.html">json_serializable</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.common.parallelizer.html">parallelizer</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.common.physical_data.html">physical_data</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
@@ -186,7 +187,7 @@ quantites.</p>
 <dd><p>Container for all debugging parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#mala.common.parameters.ParametersDebug" title="mala.common.parameters.ParametersDebug">ParametersDebug</a></p>
+<dd class="field-odd"><p>ParametersDebug</p>
 </dd>
 </dl>
 </dd></dl>
@@ -336,6 +337,27 @@ Currently only supported file format is “pickle”.</p></li>
 <dt class="sig sig-object py" id="mala.common.parameters.Parameters.device">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">device</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.device" title="Permalink to this definition"></a></dt>
 <dd><p>Get the device used by MALA. Read-only.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.common.parameters.Parameters.openpmd_configuration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">openpmd_configuration</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.openpmd_configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Provide a .toml or .json formatted string to configure OpenPMD.</p>
+<p>To load a configuration from a file, add an “&#64;” in front of the file
+name and put the resulting string here. OpenPMD will then load
+the file. For further details, see the OpenPMD documentation.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.common.parameters.Parameters.openpmd_granularity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">openpmd_granularity</span></span><a class="headerlink" href="#mala.common.parameters.Parameters.openpmd_granularity" title="Permalink to this definition"></a></dt>
+<dd><p>Adjust the memory overhead of the OpenPMD interface.</p>
+<p>Smallest possible value is 1, meaning smallest memory footprint
+and slowest I/O. Higher values will introduce some memory penalty,
+but offer greater speed.
+The maximum level is the feature dimension of your data set, if
+you choose a value larger than this feature dimension, it will
+automatically be set to the feature dimension upon loading.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -563,11 +585,18 @@ to train the encoder for the clustering.</p>
 </dl>
 </dd></dl>
 
-<dl class="simple">
-<dt>sample_ratio<span class="classifier">float</span></dt><dd><p>If use_clustering is True, this is the ratio of training data used
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersData.sample_ratio">
+<span class="sig-name descname"><span class="pre">sample_ratio</span></span><a class="headerlink" href="#mala.common.parameters.ParametersData.sample_ratio" title="Permalink to this definition"></a></dt>
+<dd><p>If use_clustering is True, this is the ratio of training data used
 for sampling per snapshot (according to clustering then, of course).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -690,25 +719,6 @@ does not need to be changed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersDebug">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParametersDebug</span></span><a class="reference internal" href="../_modules/mala/common/parameters.html#ParametersDebug"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.parameters.ParametersDebug" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mala.common.parameters.ParametersBase" title="mala.common.parameters.ParametersBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.parameters.ParametersBase</span></code></a></p>
-<p>All debugging parameters.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.common.parameters.ParametersDebug.grid_dimensions">
-<span class="sig-name descname"><span class="pre">grid_dimensions</span></span><a class="headerlink" href="#mala.common.parameters.ParametersDebug.grid_dimensions" title="Permalink to this definition"></a></dt>
-<dd><p>A list containing three elements. It enforces a smaller grid size
-globally when it is not empty.. Default : []</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1519,7 +1529,7 @@ or “absolute_values”, i.e. all negative values are multiplied by -1.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="mala.common.parallelizer.html" class="btn btn-neutral float-left" title="parallelizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.datageneration.html" class="btn btn-neutral float-right" title="datageneration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.common.physical_data.html" class="btn btn-neutral float-right" title="physical_data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -87,10 +87,11 @@
 <span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">ParametersTargets</span>
 <span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span><span class="p">,</span> <span class="n">parallel_warn</span>
 <span class="kn">from</span> <span class="nn">mala.targets.calculation_helpers</span> <span class="kn">import</span> <span class="n">fermi_function</span>
+<span class="kn">from</span> <span class="nn">mala.common.physical_data</span> <span class="kn">import</span> <span class="n">PhysicalData</span>
 <span class="kn">from</span> <span class="nn">mala.descriptors.atomic_density</span> <span class="kn">import</span> <span class="n">AtomicDensity</span>
 
 
-<div class="viewcode-block" id="Target"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target">[docs]</a><span class="k">class</span> <span class="nc">Target</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Target"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target">[docs]</a><span class="k">class</span> <span class="nc">Target</span><span class="p">(</span><span class="n">PhysicalData</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for all target quantity parser.</span>
 
@@ -104,6 +105,10 @@
 <span class="sd">    mala.common.parameters.ParametersTargets</span>
 <span class="sd">        Parameters used to create this Target object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">##############################</span>
+    <span class="c1"># Constructors</span>
+    <span class="c1">##############################</span>
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -148,6 +153,7 @@
         <span class="k">return</span> <span class="n">target</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parameters_full</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersTargets</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">targets</span>
@@ -198,10 +204,38 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">local_grid</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y_planes</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="c1"># Control whether target data will be saved.</span>
+        <span class="c1"># Can be important for I/O applications.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_target_data</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1">##############################</span>
+    <span class="c1"># Properties</span>
+    <span class="c1">##############################</span>
+
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">si_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Numeric value of the conversion from MALA (ASE) units to SI.</span>
+
+<span class="sd">        Needed for OpenPMD interface.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dictionary containing the SI unit dimensions in OpenPMD format.</span>
+
+<span class="sd">        Needed for OpenPMD interface.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
@@ -219,25 +253,58 @@
     <span class="k">def</span> <span class="nf">_is_property_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Target.get_target"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_target">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1">##############################</span>
+    <span class="c1"># Methods</span>
+    <span class="c1">##############################</span>
+
+    <span class="c1"># File I/O</span>
+    <span class="c1">##########</span>
+
+<div class="viewcode-block" id="Target.convert_units"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the target quantity.</span>
+<span class="sd">        Convert the units of an array into the MALA units.</span>
 
-<span class="sd">        This is the generic interface for cached target quantities.</span>
-<span class="sd">        It should work for all implemented targets.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            Data for which the units should be converted.</span>
+
+<span class="sd">        in_units : string</span>
+<span class="sd">            Units of array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">            Data in MALA units.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No unit conversion method implemented for&quot;</span>
+                        <span class="s2">&quot; this target type.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.invalidate_target"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.invalidate_target">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.backconvert_units"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Invalidates the saved target wuantity.</span>
+<span class="sd">        Convert the units of an array from MALA units into desired units.</span>
 
-<span class="sd">        This is the generic interface for cached target quantities.</span>
-<span class="sd">        It should work for all implemented targets.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        array : numpy.array</span>
+<span class="sd">            Data in MALA units.</span>
+
+<span class="sd">        out_units : string</span>
+<span class="sd">            Desired units of output array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        converted_array : numpy.array</span>
+<span class="sd">            Data in out_units.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No unit back conversion method implemented &quot;</span>
+                        <span class="s2">&quot;for this target type.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.read_additional_calculation_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.read_additional_calculation_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -251,7 +318,7 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        data_type : string</span>
-<span class="sd">            Type of data or file that is used. Currently supporte are:</span>
+<span class="sd">            Type of data or file that is used. Currently supported are:</span>
 
 <span class="sd">            - &quot;qe.out&quot; : Read the additional information from a QuantumESPRESSO</span>
 <span class="sd">              output file.</span>
@@ -428,7 +495,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported auxiliary file type.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.write_additional_calculation_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_additional_calculation_data">[docs]</a>    <span class="k">def</span> <span class="nf">write_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.write_additional_calculation_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_additional_calculation_data">[docs]</a>    <span class="k">def</span> <span class="nf">write_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">return_string</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write additional information about a calculation to a .json file.</span>
 
@@ -439,6 +506,10 @@
 <span class="sd">        ----------</span>
 <span class="sd">        filepath : string</span>
 <span class="sd">            Path at which to save the calculation data.</span>
+
+<span class="sd">        return_string : bool</span>
+<span class="sd">            If True, no file will be written, and instead a json dict will</span>
+<span class="sd">            be returned.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">additional_calculation_data</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;fermi_energy_dft&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span><span class="p">,</span>
@@ -468,9 +539,38 @@
             <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;cell&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;pbc&quot;</span><span class="p">]</span> <span class="o">=</span> \
             <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">][</span><span class="s2">&quot;pbc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">additional_calculation_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span>
-                      <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">return_string</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">additional_calculation_data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span>
+                          <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">additional_calculation_data</span></div>
+
+    <span class="c1"># Accessing target data</span>
+    <span class="c1">########################</span>
+
+<div class="viewcode-block" id="Target.get_target"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_target">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the target quantity.</span>
+
+<span class="sd">        This is the generic interface for cached target quantities.</span>
+<span class="sd">        It should work for all implemented targets.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Target.invalidate_target"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.invalidate_target">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Invalidates the saved target wuantity.</span>
+
+<span class="sd">        This is the generic interface for cached target quantities.</span>
+<span class="sd">        It should work for all implemented targets.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+    <span class="c1"># Calculations</span>
+    <span class="c1">##############</span>
 
 <div class="viewcode-block" id="Target.get_energy_grid"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_energy_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get energy grid.&quot;&quot;&quot;</span>
@@ -485,15 +585,6 @@
                 <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
                     <span class="n">grid3D</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">grid3D</span></div>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;mic&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
-        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;2mic&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.0001</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown option to calculate rMax provided.&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Target.radial_distribution_function_from_atoms"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.radial_distribution_function_from_atoms">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">radial_distribution_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
@@ -1045,50 +1136,6 @@
                      <span class="n">pseudopotentials</span><span class="o">=</span><span class="n">qe_pseudopotentials</span><span class="p">,</span>
                      <span class="n">kpts</span><span class="o">=</span><span class="n">kpoints</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Target.convert_units"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert the units of an array into the MALA units.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
-<span class="sd">            Data for which the units should be converted.</span>
-
-<span class="sd">        in_units : string</span>
-<span class="sd">            Units of array.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
-<span class="sd">            Data in MALA units.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No unit conversion method implemented for&quot;</span>
-                        <span class="s2">&quot; this target type.&quot;</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Target.backconvert_units"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert the units of an array from MALA units into desired units.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        array : numpy.array</span>
-<span class="sd">            Data in MALA units.</span>
-
-<span class="sd">        out_units : string</span>
-<span class="sd">            Desired units of output array.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        converted_array : numpy.array</span>
-<span class="sd">            Data in out_units.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No unit back conversion method implemented &quot;</span>
-                        <span class="s2">&quot;for this target type.&quot;</span><span class="p">)</span></div>
-
 <div class="viewcode-block" id="Target.restrict_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.restrict_data">[docs]</a>    <span class="k">def</span> <span class="nf">restrict_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Restrict target data to only contain physically meaningful values.</span>
@@ -1115,9 +1162,126 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">restrict_targets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">array</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Wrong data restriction.&quot;</span><span class="p">)</span></div></div>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Wrong data restriction.&quot;</span><span class="p">)</span></div>
 
+    <span class="c1"># Private methods</span>
+    <span class="c1">#################</span>
 
+    <span class="k">def</span> <span class="nf">_process_loaded_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array_dimensions</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">array_dimensions</span>
+
+    <span class="k">def</span> <span class="nf">_process_additional_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">additional_metadata</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">additional_metadata</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                              <span class="n">additional_metadata</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_set_openpmd_attribtues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_set_openpmd_attribtues</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+
+        <span class="c1"># If no atoms have been read, neither have any of the other</span>
+        <span class="c1"># properties.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">additional_calculation_data</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_additional_calculation_data</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">return_string</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;fermi_energy_dft&quot;</span><span class="p">,</span>
+                                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;fermi_energy_dft&quot;</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span>
+                                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;number_of_electrons_exact&quot;</span><span class="p">,</span>
+                                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;number_of_electrons_exact&quot;</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;band_energy_dft_calculation&quot;</span><span class="p">,</span>
+                                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;band_energy_dft_calculation&quot;</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;total_energy_dft_calculation&quot;</span><span class="p">,</span>
+                                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;total_energy_dft_calculation&quot;</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;electrons_per_atom&quot;</span><span class="p">,</span>
+                                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;electrons_per_atom&quot;</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;number_of_electrons_from_eigenvals&quot;</span><span class="p">,</span>
+                                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;number_of_electrons_from_eigenvals&quot;</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;ibrav&quot;</span><span class="p">,</span>
+                                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;ibrav&quot;</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">,</span>
+                                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">,</span>
+                                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;degauss&quot;</span><span class="p">,</span>
+                                    <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">additional_calculation_data</span><span class="p">[</span><span class="s2">&quot;pseudopotentials&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;psp_&quot;</span><span class="o">+</span><span class="n">key</span><span class="p">,</span>
+                                        <span class="n">additional_calculation_data</span><span class="p">[</span>
+                                            <span class="s2">&quot;pseudopotentials&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_process_openpmd_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_process_openpmd_attributes</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+
+        <span class="c1"># Process the atoms, which can only be done if we have voxel info.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Voxel was never read from OpenPMD file, &quot;</span>
+                            <span class="s2">&quot;cannot recreate atoms object without it.&quot;</span><span class="p">)</span>
+
+        <span class="n">atoms_openpmd</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">particles</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span>
+        <span class="n">nr_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">])</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nr_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nr_atoms</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nr_atoms</span><span class="p">):</span>
+            <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span><span class="o">.</span><span class="n">load_chunk</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span><span class="o">.</span><span class="n">load_chunk</span><span class="p">(</span><span class="n">numbers</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">series</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
+
+        <span class="c1"># Recreate the cell from voxel and grid info.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">cell</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cell</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cell</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">numbers</span><span class="p">)</span>
+
+        <span class="c1"># Process all the regular meta info.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fermi_energy_dft</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;fermi_energy_dft&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;temperature&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_exact</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;number_of_electrons_exact&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;band_energy_dft_calculation&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;total_energy_dft_calculation&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;electrons_per_atom&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;number_of_electrons_from_eigenvals&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ibrav&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;ibrav&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;ecutwfc&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;ecutrho&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;degauss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;degauss&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Take care of the pseudopotentials.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span><span class="p">[</span><span class="s2">&quot;pseudopotentials&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">iteration</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;psp&quot;</span> <span class="ow">in</span> <span class="n">attribute</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qe_pseudopotentials</span><span class="p">[</span><span class="n">attribute</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;psp_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> \
+                    <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+        <span class="c1"># Geometry: Save the cell parameters and angles of the grid.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+
+            <span class="n">mesh</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Geometry</span><span class="o">.</span><span class="n">cartesian</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">grid_spacing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;angles&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">3</span><span class="p">:])</span>
+
+    <span class="k">def</span> <span class="nf">_process_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+        <span class="n">spacing</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">grid_spacing</span>
+        <span class="n">angles</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;angles&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voxel</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">Cell</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="n">spacing</span><span class="o">+</span><span class="n">angles</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_ideal_rmax_for_rdf</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;mic&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;2mic&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.0001</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown option to calculate rMax provided.&quot;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

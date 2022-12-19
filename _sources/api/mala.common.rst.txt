@@ -20,4 +20,5 @@ common
    mala.common.json_serializable
    mala.common.parallelizer
    mala.common.parameters
+   mala.common.physical_data
 

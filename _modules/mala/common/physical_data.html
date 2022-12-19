@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.common.physical_data &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mala.common.physical_data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.common.physical_data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Base class for all calculators that deal with physical data.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">mala.version</span> <span class="kn">import</span> <span class="n">__version__</span> <span class="k">as</span> <span class="n">mala_version</span>
+
+
+<div class="viewcode-block" id="PhysicalData"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData">[docs]</a><span class="k">class</span> <span class="nc">PhysicalData</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for physical data.</span>
+
+<span class="sd">    Implements general framework to read and write such data to and from</span>
+<span class="sd">    files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">##############################</span>
+    <span class="c1"># Constructors</span>
+    <span class="c1">##############################</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+
+    <span class="c1">##############################</span>
+    <span class="c1"># Properties</span>
+    <span class="c1">##############################</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a string that describes the data (for e.g. metadata).&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dictionary containing the SI unit dimensions in OpenPMD format.</span>
+
+<span class="sd">        Needed for OpenPMD interface.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">si_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Numeric value of the conversion from MALA (ASE) units to SI.</span>
+
+<span class="sd">        Needed for OpenPMD interface.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="c1">##############################</span>
+    <span class="c1"># Read functions.</span>
+    <span class="c1">#   Write functions for now not implemented at this level</span>
+    <span class="c1">#   because there is no need to.</span>
+    <span class="c1">##############################</span>
+
+<div class="viewcode-block" id="PhysicalData.read_from_numpy_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_numpy_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_numpy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the data from a numpy file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : string</span>
+<span class="sd">            Path to the numpy file.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units the data is saved in.</span>
+
+<span class="sd">        array : np.ndarray</span>
+<span class="sd">            If not None, the array to save the data into.</span>
+<span class="sd">            The array has to be 4-dimensional.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        data : numpy.ndarray or None</span>
+<span class="sd">            If array is None, a numpy array containing the data.</span>
+<span class="sd">            Elsewise, None, as the data will be saved into the provided</span>
+<span class="sd">            array.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loaded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">():]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_array</span><span class="p">(</span><span class="n">loaded_array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">loaded_array</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">():]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PhysicalData.read_from_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_from_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the data from a numpy file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : string</span>
+<span class="sd">            Path to the openPMD file.</span>
+
+<span class="sd">        units : string</span>
+<span class="sd">            Units the data is saved in.</span>
+
+<span class="sd">        array : np.ndarray</span>
+<span class="sd">            If not None, the array to save the data into.</span>
+<span class="sd">            The array has to be 4-dimensional.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        data : numpy.ndarray or None</span>
+<span class="sd">            If array is None, a numpy array containing the data.</span>
+<span class="sd">            Elsewise, None, as the data will be saved into the provided</span>
+<span class="sd">            array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+
+        <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">,</span>
+                           <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                                <span class="p">{</span><span class="s2">&quot;defer_iteration_parsing&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span> <span class="o">|</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                    <span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
+
+        <span class="c1"># Check if this actually MALA compatible data.</span>
+        <span class="k">if</span> <span class="n">series</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Non-MALA data detected, cannot work with this &quot;</span>
+                            <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># A bit clanky, but this way only the FIRST iteration is loaded,</span>
+        <span class="c1"># which is what we need for loading from a single file that</span>
+        <span class="c1"># may be whatever iteration in its series.</span>
+        <span class="c1"># Also, in combination with `defer_iteration_parsing`, specified as</span>
+        <span class="c1"># default above, this opens and parses the first iteration,</span>
+        <span class="c1"># and no others.</span>
+        <span class="k">for</span> <span class="n">current_iteration</span> <span class="ow">in</span> <span class="n">series</span><span class="o">.</span><span class="n">read_iterations</span><span class="p">():</span>
+            <span class="n">mesh</span> <span class="o">=</span> <span class="n">current_iteration</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_name</span><span class="p">]</span>
+            <span class="k">break</span>
+
+        <span class="c1"># Read the attributes from the OpenPMD iteration.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_openpmd_attributes</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">current_iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Are there instances in MALA, where we wouldn&#39;t just label</span>
+        <span class="c1"># the feature dimension with 0,1,... ? I can&#39;t think of one.</span>
+        <span class="c1"># But there may be in the future, and this&#39;ll break</span>
+        <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                             <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()),</span>
+                            <span class="n">dtype</span><span class="o">=</span><span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> \
+               <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> \
+               <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">or</span> \
+               <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot load data into array, wrong &quot;</span>
+                                <span class="s2">&quot;shape provided.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Only check this once, since we do not save arrays with different</span>
+        <span class="c1"># units throughout the feature dimension.</span>
+        <span class="c1"># Later, we can merge this unit check with the unit conversion</span>
+        <span class="c1"># MALA does naturally.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">si_unit_conversion</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;MALA currently cannot operate with OpenPMD &quot;</span>
+                            <span class="s2">&quot;files with non-MALA units.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Deal with `granularity` items of the vectors at a time</span>
+        <span class="c1"># Or in the openPMD layout: with `granularity` record components</span>
+        <span class="n">granularity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_granularity&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">array_shape</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">array_shape</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">(),</span> <span class="n">array_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">(),</span>
+                          <span class="n">granularity</span><span class="p">):</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">base</span> <span class="o">+</span> <span class="n">granularity</span><span class="p">,</span> <span class="n">array_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">())</span>
+            <span class="n">transposed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">base</span><span class="p">,</span> <span class="n">array_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">array_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">array_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+                <span class="n">mesh</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span><span class="o">.</span><span class="n">load_chunk</span><span class="p">(</span><span class="n">transposed</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">base</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:])</span>
+            <span class="n">series</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">base</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">():</span><span class="n">end</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()]</span> \
+                    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">transposed</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">base</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">():</span><span class="n">end</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_mask</span><span class="p">()]</span> \
+                    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">transposed</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_array</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PhysicalData.read_dimensions_from_numpy_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_numpy_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_dimensions_from_numpy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read only the dimensions from a numpy file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : string</span>
+<span class="sd">            Path to the numpy file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">loaded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_loaded_dimensions</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">loaded_array</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PhysicalData.read_dimensions_from_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.read_dimensions_from_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_dimensions_from_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read only the dimensions from a openPMD file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : string</span>
+<span class="sd">            Path to the openPMD file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+
+        <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">read_only</span><span class="p">,</span>
+                           <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                                <span class="p">{</span><span class="s2">&quot;defer_iteration_parsing&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span> <span class="o">|</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                    <span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
+
+        <span class="c1"># Check if this actually MALA compatible data.</span>
+        <span class="k">if</span> <span class="n">series</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Non-MALA data detected, cannot work with this &quot;</span>
+                            <span class="s2">&quot;data.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># A bit clanky, but this way only the FIRST iteration is loaded,</span>
+        <span class="c1"># which is what we need for loading from a single file that</span>
+        <span class="c1"># may be whatever iteration in its series.</span>
+        <span class="c1"># Also, in combination with `defer_iteration_parsing`, specified as</span>
+        <span class="c1"># default above, this opens and parses the first iteration,</span>
+        <span class="c1"># and no others.</span>
+        <span class="k">for</span> <span class="n">current_iteration</span> <span class="ow">in</span> <span class="n">series</span><span class="o">.</span><span class="n">read_iterations</span><span class="p">():</span>
+            <span class="n">mesh</span> <span class="o">=</span> <span class="n">current_iteration</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_name</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span>\
+                <span class="n">_process_loaded_dimensions</span><span class="p">((</span><span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                            <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                            <span class="n">mesh</span><span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                            <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="PhysicalData.write_to_numpy_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_numpy_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_numpy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write data to a numpy file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : string</span>
+<span class="sd">            File to save into.</span>
+
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">            Array to save.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PhysicalData.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write data to a numpy file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : string</span>
+<span class="sd">            File to save into. If no file ending is given, .h5 is assumed.</span>
+
+<span class="sd">        array : numpy.ndarray</span>
+<span class="sd">            Array to save.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">file_ending</span> <span class="o">=</span> <span class="n">file_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">file_name</span> <span class="o">==</span> <span class="n">file_ending</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">+=</span> <span class="s2">&quot;.h5&quot;</span>
+        <span class="k">elif</span> <span class="n">file_ending</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">file_extensions</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid file ending selected: &quot;</span> <span class="o">+</span>
+                            <span class="n">file_ending</span><span class="p">)</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
+                           <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                              <span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
+        <span class="n">series</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">series</span><span class="o">.</span><span class="n">set_software</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MALA&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">mala_version</span><span class="p">)</span>
+        <span class="n">series</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>
+        <span class="n">iteration</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">write_iterations</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PhysicalData.write_to_openpmd_iteration"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span>
+                                   <span class="n">additional_metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a file within an OpenPMD iteration.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        iteration : OpenPMD iteration</span>
+<span class="sd">            OpenPMD iteration into which to save.</span>
+
+<span class="sd">        array : numpy.ndarry</span>
+<span class="sd">            Array to save.</span>
+
+<span class="sd">        additional_metadata : list</span>
+<span class="sd">            If not None, and the selected class implements it, additional</span>
+<span class="sd">            metadata will be read from this source. This metadata will then,</span>
+<span class="sd">            depending on the class, be saved in the OpenPMD file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+
+        <span class="n">mesh</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_name</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">additional_metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_process_additional_metadata</span><span class="p">(</span><span class="n">additional_metadata</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_openpmd_attribtues</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+
+        <span class="c1"># If the data contains atomic data, we need to process it.</span>
+        <span class="n">atoms_ase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_atoms</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">atoms_ase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atoms_openpmd</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">particles</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span>
+            <span class="n">atomic_positions</span> <span class="o">=</span> <span class="n">atoms_ase</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
+            <span class="n">atomic_numbers</span> <span class="o">=</span> <span class="n">atoms_ase</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">()</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">atomic_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                                   <span class="n">atomic_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">numbers</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                                 <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="c1"># atoms_openpmd[&quot;position&quot;].time_offset = 0.0</span>
+            <span class="c1"># atoms_openpmd[&quot;positionOffset&quot;].time_offset = 0.0</span>
+            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms_ase</span><span class="p">)):</span>
+                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
+                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
+                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
+
+                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span>\
+                    <span class="n">store_chunk</span><span class="p">(</span><span class="n">atomic_positions</span><span class="p">[</span><span class="n">atom</span><span class="p">])</span>
+                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span>\
+                    <span class="n">store_chunk</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="n">atom</span><span class="p">]]))</span>
+                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">make_constant</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="c1"># Positions are stored in Angstrom.</span>
+                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="mf">1.0e-10</span>
+                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="mf">1.0e-10</span>
+
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                             <span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="c1"># See above - will currently break for density of states,</span>
+        <span class="c1"># which is something we never do though anyway.</span>
+        <span class="c1"># Deal with `granularity` items of the vectors at a time</span>
+        <span class="c1"># Or in the openPMD layout: with `granularity` record components</span>
+        <span class="n">granularity</span> <span class="o">=</span> <span class="mi">16</span> <span class="c1"># just some random value for now</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">granularity</span><span class="p">):</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">base</span> <span class="o">+</span> <span class="n">granularity</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">transposed</span> <span class="o">=</span> \
+                <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">base</span><span class="p">:</span><span class="n">end</span><span class="p">],</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+                <span class="n">mesh_component</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+                <span class="n">mesh_component</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+
+                <span class="n">mesh_component</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">transposed</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">base</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+                <span class="c1"># All data is assumed to be saved in</span>
+                <span class="c1"># MALA units, so the SI conversion factor we save</span>
+                <span class="c1"># here is the one for MALA (ASE) units</span>
+                <span class="n">mesh_component</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">si_unit_conversion</span>
+                <span class="c1"># position: which relative point within the cell is</span>
+                <span class="c1"># represented by the stored values</span>
+                <span class="c1"># ([0.5, 0.5, 0.5] represents the middle)</span>
+                <span class="n">mesh_component</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">series_flush</span><span class="p">()</span>
+
+        <span class="n">iteration</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+    <span class="c1">##############################</span>
+    <span class="c1"># Class-specific reshaping, processing, etc. of data.</span>
+    <span class="c1">#    Has to be implemented by the classes themselves. E.g. descriptors may</span>
+    <span class="c1">#    need to cut xyz-coordinates, LDOS/density may need unit conversion.</span>
+    <span class="c1">##############################</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_process_loaded_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_process_loaded_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array_dimensions</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_process_additional_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">additional_metadata</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_feature_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_set_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_set_openpmd_attribtues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">unit_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">si_dimension</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">axis_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">grid_global_offset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># MALA internally operates in Angstrom (10^-10 m)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">grid_unit_SI</span> <span class="o">=</span> <span class="mf">1e-10</span>
+
+        <span class="n">mesh</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> \
+            <span class="s2">&quot;This is a special geometry, &quot;</span> \
+            <span class="s2">&quot;based on the cartesian geometry.&quot;</span>
+
+        <span class="c1"># Fill geometry information (if provided)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_geometry_info</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_openpmd_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_geometry_info</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_geometry_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Currently all data we have is atom based.</span>
+    <span class="c1"># That may not always be the case.</span>
+    <span class="k">def</span> <span class="nf">_get_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
