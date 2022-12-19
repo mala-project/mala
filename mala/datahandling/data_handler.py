@@ -184,7 +184,7 @@ class DataHandler:
             respectively.
 
         snapshot_type : string
-            Either "numpy" or "hdf5" based on what kind of files you
+            Either "numpy" or "openpmd" based on what kind of files you
             want to operate on.
         """
         snapshot = Snapshot(input_npy_file, input_npy_directory,
@@ -463,7 +463,7 @@ class DataHandler:
                     read_dimensions_from_numpy_file(
                     os.path.join(snapshot.input_npy_directory,
                                  snapshot.input_npy_file))
-            elif snapshot.snapshot_type == "hdf5":
+            elif snapshot.snapshot_type == "openpmd":
                 tmp_dimension = self.descriptor_calculator.\
                     read_dimensions_from_openpmd_file(
                     os.path.join(snapshot.input_npy_directory,
@@ -497,7 +497,7 @@ class DataHandler:
                     read_dimensions_from_numpy_file(
                     os.path.join(snapshot.output_npy_directory,
                                  snapshot.output_npy_file))
-            elif snapshot.snapshot_type == "hdf5":
+            elif snapshot.snapshot_type == "openpmd":
                 tmp_dimension = self.target_calculator.\
                     read_dimensions_from_openpmd_file(
                     os.path.join(snapshot.output_npy_directory,
@@ -664,7 +664,7 @@ class DataHandler:
                             os.path.join(snapshot.input_npy_directory,
                                          snapshot.input_npy_file),
                                          units=snapshot.input_units)
-                    elif snapshot.snapshot_type == "hdf5":
+                    elif snapshot.snapshot_type == "openpmd":
                         tmp = self.descriptor_calculator. \
                             read_from_openpmd_file(
                             os.path.join(snapshot.input_npy_directory,
@@ -717,7 +717,7 @@ class DataHandler:
                             os.path.join(snapshot.output_npy_directory,
                                          snapshot.output_npy_file),
                                          units=snapshot.output_units)
-                    elif snapshot.snapshot_type == "hdf5":
+                    elif snapshot.snapshot_type == "openpmd":
                         tmp = self.target_calculator. \
                             read_from_openpmd_file(
                             os.path.join(snapshot.output_npy_directory,
@@ -763,7 +763,7 @@ class DataHandler:
                                      snapshot.input_npy_file),
                                         units=snapshot.input_units,
                     array=self.training_data_inputs[training_snapshot])
-                elif snapshot.snapshot_type == "hdf5":
+                elif snapshot.snapshot_type == "openpmd":
                     self.training_data_inputs[training_snapshot] = \
                         self.descriptor_calculator. \
                         read_from_openpmd_file(
@@ -799,7 +799,7 @@ class DataHandler:
                                      snapshot.output_npy_file),
                                         units=snapshot.output_units,
                     array=self.training_data_outputs[training_snapshot])
-                elif snapshot.snapshot_type == "hdf5":
+                elif snapshot.snapshot_type == "openpmd":
                     self.training_data_outputs[training_snapshot] = \
                     self.target_calculator. \
                         read_from_openpmd_file(
@@ -911,7 +911,7 @@ class DataHandler:
                                          snapshot.input_npy_file),
                                             units=snapshot.input_units,
                         array=self.validation_data_inputs[validation_snapshot])
-                    elif snapshot.snapshot_type == "hdf5":
+                    elif snapshot.snapshot_type == "openpmd":
                         self.validation_data_inputs[validation_snapshot] = \
                         self.descriptor_calculator. \
                             read_from_openpmd_file(
@@ -926,7 +926,7 @@ class DataHandler:
                                          snapshot.output_npy_file),
                                            units=snapshot.output_units,
                         array=self.validation_data_outputs[validation_snapshot])
-                    elif snapshot.snapshot_type == "hdf5":
+                    elif snapshot.snapshot_type == "openpmd":
                         self.validation_data_outputs[validation_snapshot] = \
                         self.target_calculator. \
                             read_from_openpmd_file(
@@ -944,7 +944,7 @@ class DataHandler:
                                          snapshot.input_npy_file),
                                             units=snapshot.input_units,
                         array=self.test_data_inputs[test_snapshot])
-                    elif snapshot.snapshot_type == "hdf5":
+                    elif snapshot.snapshot_type == "openpmd":
                         self.test_data_inputs[test_snapshot] = \
                         self.descriptor_calculator. \
                             read_from_openpmd_file(
@@ -959,7 +959,7 @@ class DataHandler:
                                          snapshot.output_npy_file),
                                            units=snapshot.output_units,
                         array=self.test_data_outputs[test_snapshot])
-                    elif snapshot.snapshot_type == "hdf5":
+                    elif snapshot.snapshot_type == "openpmd":
                         self.test_data_outputs[test_snapshot] = \
                         self.target_calculator. \
                             read_from_openpmd_file(

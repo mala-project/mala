@@ -116,10 +116,10 @@ def network_training_test(use_numpy=False):
     else:
         data_handler.add_snapshot("Be_snapshot0.in.h5", data_path,
                                   "Be_snapshot0.out.h5", data_path, "tr",
-                                  snapshot_type="hdf5")
+                                  snapshot_type="openpmd")
         data_handler.add_snapshot("Be_snapshot1.in.h5", data_path,
                                   "Be_snapshot1.out.h5", data_path, "va",
-                                  snapshot_type="hdf5")
+                                  snapshot_type="openpmd")
     data_handler.prepare_data()
 
     # Prepare and train network.
