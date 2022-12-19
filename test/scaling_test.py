@@ -33,6 +33,6 @@ class TestScaling:
             scaler.fit(data)
             transformed = data
             scaler.transform(transformed)
-            scaler.inverse_transform(transformed)
+            transformed = scaler.inverse_transform(transformed)
             relative_error = torch.sum(np.abs((data2 - transformed)/data2))
             assert relative_error < desired_accuracy
