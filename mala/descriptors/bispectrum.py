@@ -55,10 +55,10 @@ class Bispectrum(Descriptor):
         converted_array : numpy.array
             Data in MALA units.
         """
-        if in_units == "None":
+        if in_units == "None" or in_units is None:
             return array
         else:
-            raise Exception("Unsupported unit for SNAP.")
+            raise Exception("Unsupported unit for bispectrum descriptors.")
 
     @staticmethod
     def backconvert_units(array, out_units):
@@ -80,10 +80,10 @@ class Bispectrum(Descriptor):
         converted_array : numpy.array
             Data in out_units.
         """
-        if out_units == "None":
+        if out_units == "None" or out_units is None:
             return array
         else:
-            raise Exception("Unsupported unit for SNAP.")
+            raise Exception("Unsupported unit for bispectrum descriptors.")
 
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual bispectrum calculation."""
