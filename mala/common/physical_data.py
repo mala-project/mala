@@ -4,7 +4,6 @@ import os
 
 import json
 import numpy as np
-import openpmd_api as io
 
 from mala.version import __version__ as mala_version
 
@@ -115,6 +114,8 @@ class PhysicalData(ABC):
             Elsewise, None, as the data will be saved into the provided
             array.
         """
+        import openpmd_api as io
+
         series = io.Series(path, io.Access.read_only,
                            options=json.dumps(
                                 {"defer_iteration_parsing": True} |
@@ -215,6 +216,8 @@ class PhysicalData(ABC):
         path : string
             Path to the openPMD file.
         """
+        import openpmd_api as io
+
         series = io.Series(path, io.Access.read_only,
                            options=json.dumps(
                                 {"defer_iteration_parsing": True} |
@@ -266,6 +269,8 @@ class PhysicalData(ABC):
         array : numpy.ndarray
             Array to save.
         """
+        import openpmd_api as io
+
         file_name = os.path.basename(path)
         file_ending = file_name.split(".")[-1]
         if file_name == file_ending:
@@ -300,6 +305,8 @@ class PhysicalData(ABC):
             metadata will be read from this source. This metadata will then,
             depending on the class, be saved in the OpenPMD file.
         """
+        import openpmd_api as io
+
         mesh = iteration.meshes[self.data_name]
 
         if additional_metadata is not None:

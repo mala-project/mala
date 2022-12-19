@@ -2,7 +2,6 @@
 import os
 
 import json
-import openpmd_api as io
 
 from mala.common.parallelizer import printout, get_rank, parallel_warn
 from mala.common.parameters import ParametersData
@@ -249,6 +248,8 @@ class DataConverter:
             file_ending = naming_scheme.split(".")[-1]
             naming_scheme = naming_scheme.split(".")[0]
             if file_ending != "npy":
+                import openpmd_api as io
+
                 if file_ending not in io.file_extensions:
                     raise Exception("Invalid file ending selected: " +
                                     file_ending)

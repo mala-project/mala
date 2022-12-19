@@ -10,7 +10,6 @@ import ase.io
 import numpy as np
 from scipy.spatial import distance
 from scipy.integrate import simps
-import openpmd_api as io
 
 from mala.common.parameters import Parameters, ParametersTargets
 from mala.common.parallelizer import printout, parallel_warn
@@ -1188,6 +1187,8 @@ class Target(PhysicalData):
     def _set_geometry_info(self, mesh):
         # Geometry: Save the cell parameters and angles of the grid.
         if self.atoms is not None:
+            import openpmd_api as io
+
             mesh.geometry = io.Geometry.cartesian
             mesh.grid_spacing = self.voxel.cellpar()[0:3]
             mesh.set_attribute("angles", self.voxel.cellpar()[3:])

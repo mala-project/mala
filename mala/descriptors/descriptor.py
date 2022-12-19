@@ -4,7 +4,6 @@ from abc import abstractmethod
 import ase
 from ase.units import m
 import numpy as np
-import openpmd_api as io
 
 from mala.common.parameters import ParametersDescriptors, Parameters
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
@@ -99,6 +98,8 @@ class Descriptor(PhysicalData):
 
         Needed for OpenPMD interface.
         """
+        import openpmd_api as io
+
         return {io.Unit_Dimension.L: -3}
 
     @property
@@ -437,6 +438,8 @@ class Descriptor(PhysicalData):
     def _set_geometry_info(self, mesh):
         # Geometry: Save the cell parameters and angles of the grid.
         if self.atoms is not None:
+            import openpmd_api as io
+
             voxel = self.atoms.cell.copy()
             voxel[0] = voxel[0] / (self.grid_dimensions[0])
             voxel[1] = voxel[1] / (self.grid_dimensions[1])

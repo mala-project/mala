@@ -4,7 +4,6 @@ from functools import cached_property
 from ase.units import Rydberg, Bohr, J, m
 import math
 import numpy as np
-import openpmd_api as io
 from scipy import integrate
 
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
@@ -200,6 +199,8 @@ class LDOS(Target):
     @property
     def si_dimension(self):
         """Dictionary containing the SI unit dimensions in OpenPMD format."""
+        import openpmd_api as io
+
         return {io.Unit_Dimension.M: -1, io.Unit_Dimension.L: -5,
                 io.Unit_Dimension.T: 2}
 

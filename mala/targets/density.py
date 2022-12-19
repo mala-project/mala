@@ -6,7 +6,6 @@ import ase.io
 from ase.units import Rydberg, Bohr, m
 from functools import cached_property
 import numpy as np
-import openpmd_api as io
 try:
     import total_energy as te
 except ModuleNotFoundError:
@@ -245,6 +244,8 @@ class Density(Target):
     @property
     def si_dimension(self):
         """Dictionary containing the SI unit dimensions in OpenPMD format."""
+        import openpmd_api as io
+
         return {io.Unit_Dimension.L: -3}
 
     @property
