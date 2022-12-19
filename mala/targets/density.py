@@ -393,8 +393,8 @@ class Density(Target):
             grid_dimensions = self.grid_dimensions
         if atoms is None:
             atoms = self.atoms
-        if len(density_data.shape) != 3:
-            if len(density_data.shape) == 1:
+        if len(density_data.shape) != 4:
+            if len(density_data.shape) == 2:
                 density_data = np.reshape(density_data, grid_dimensions)
             else:
                 raise Exception("Unknown density shape provided.")
@@ -450,9 +450,9 @@ class Density(Target):
             voxel = self.voxel
 
         # Check input data for correctness.
-        data_shape = np.shape(np.squeeze(density_data))
-        if len(data_shape) != 3:
-            if len(data_shape) != 1:
+        data_shape = np.shape(density_data)
+        if len(data_shape) != 4:
+            if len(data_shape) != 2:
                 raise Exception("Unknown Density shape, cannot calculate "
                                 "number of electrons.")
             elif integration_method != "summation":
@@ -563,7 +563,7 @@ class Density(Target):
                     density_data = \
                         np.reshape(density_data,
                                    [last_z - first_z, last_y - first_y,
-                                    last_x - first_x]).transpose([2, 1, 0, 3])
+                                    last_x - first_x, 1]).transpose([2, 1, 0, 3])
                     return density_data
                 else:
                     if grid_dimensions is None:

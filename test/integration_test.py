@@ -108,6 +108,10 @@ class TestMALAIntegration:
         density_dft = dens_calculator.convert_units(np.load(path_to_dens_npy),
                                                     "1/Bohr^3")
 
+        # Density shape has recently been changed.
+        density_dft = np.reshape(density_dft, list(np.shape(density_dft)) +
+                                 [1])
+
         # Calculate the quantities we want to compare.
         nr_mala = dens_calculator.get_number_of_electrons(density_dft)
         nr_dft = dens_calculator.number_of_electrons_exact

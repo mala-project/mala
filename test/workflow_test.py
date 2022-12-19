@@ -174,6 +174,8 @@ class TestFullWorkflow:
         dens_data = dens.convert_units(
             np.load(os.path.join(data_path_ldos, "Be_dens.npy")),
             "1/Bohr^3")
+        dens_data = np.reshape(dens_data, list(np.shape(dens_data)) + [1])
+
         dos = mala.DOS.from_ldos_calculator(ldos)
 
         # Calculate energies

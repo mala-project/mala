@@ -22,7 +22,7 @@ structure readers.
 # Regular MALA inference will return a 1D density.
 density = np.load(density_path)
 grid_dimensions = [density.shape[0], density.shape[1], density.shape[2]]
-density = np.reshape(density, np.prod(grid_dimensions))
+density = np.reshape(density, [np.prod(grid_dimensions), 1])
 
 # In the inference case the command that reads grid information is
 # automatically done in the prediction routine.
