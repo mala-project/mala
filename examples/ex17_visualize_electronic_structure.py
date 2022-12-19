@@ -22,7 +22,7 @@ structure readers.
 # Regular MALA inference will return a 1D density.
 density = np.load(density_path)
 grid_dimensions = [density.shape[0], density.shape[1], density.shape[2]]
-density = np.reshape(density, np.prod(grid_dimensions))
+density = np.reshape(density, [np.prod(grid_dimensions), 1])
 
 # In the inference case the command that reads grid information is
 # automatically done in the prediction routine.
@@ -31,6 +31,11 @@ atoms = read(atoms_path)
 params = mala.Parameters()
 density_calculator = mala.Density(params)
 density_calculator.read_additional_calculation_data("atoms+grid", [atoms, grid_dimensions])
-density_calculator.write_as_cube("Be_dens.cube", density, atoms, grid_dimensions)
 
 # The resulting cube file can be opened by e.g. VMD, VESTA or scenery.
+density_calculator.write_as_cube("Be_dens.cube", density, atoms, grid_dimensions)
+
+# Writing of a file for OpenPMD requires reshaping.
+# OpenPMD will become the interface for Unity visualization.
+# density3D = np.reshape(density, grid_dimensions + [1])
+# density_calculator.write_to_openpmd_file("Be_dens.h5", density3D)

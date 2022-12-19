@@ -2,7 +2,7 @@
 from functools import cached_property
 
 import ase.io
-from ase.units import Rydberg
+from ase.units import Rydberg, J
 import numpy as np
 from scipy import interpolate, integrate
 from scipy.optimize import toms748
@@ -98,7 +98,7 @@ class DOS(Target):
             DOS calculator object.
         """
         return_dos = DOS(params)
-        return_dos.read_from_numpy(path, units=units)
+        return_dos.read_from_numpy_file(path, units=units)
         return return_dos
 
     @classmethod
@@ -194,6 +194,28 @@ class DOS(Target):
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
         return self.parameters.ldos_gridsize
+
+    @property
+    def data_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        return "DOS"
+
+    @property
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        return J
+
+    @property
+    def si_dimension(self):
+        """Dictionary containing the SI unit dimensions in OpenPMD format."""
+        import openpmd_api as io
+
+        return {io.Unit_Dimension.M: -1, io.Unit_Dimension.L: -2,
+                io.Unit_Dimension.T: 2}
 
     @property
     def density_of_states(self):
@@ -330,7 +352,7 @@ class DOS(Target):
         converted_array : numpy.array
             Data in 1/eV.
         """
-        if in_units == "1/eV":
+        if in_units == "1/eV" or in_units is None:
             return array
         elif in_units == "1/Ry":
             return array * (1/Rydberg)
@@ -402,7 +424,9 @@ class DOS(Target):
                         return_dos_values.append(dosval)
                         i += 1
 
-        self.density_of_states = np.array(return_dos_values)
+        array = np.array(return_dos_values)
+        self.density_of_states = array
+        return array
 
     def read_from_qe_out(self, path=None, smearing_factor=2):
         r"""
@@ -448,21 +472,7 @@ class DOS(Target):
         # QE gives the band energies in eV, so no conversion necessary here.
         dos_data = np.sum(dos_per_band, axis=(0, 1))
         self.density_of_states = dos_data
-
-    def read_from_numpy(self, path, units="1/eV"):
-        """
-        Read the density data from a numpy file.
-
-        Parameters
-        ----------
-        path : string
-            Name of the numpy file.
-
-        units : string
-            Units the density is saved in. Usually none.
-        """
-        self.density_of_states = np.load(path) * \
-            self.convert_units(1, in_units=units)
+        return dos_data
 
     def read_from_array(self, array, units="1/eV"):
         """
@@ -471,14 +481,14 @@ class DOS(Target):
         Parameters
         ----------
         array : numpy.ndarray
-            Numpy array containing the DOS..
+            Numpy array containing the DOS.
 
         units : string
             Units the density is saved in. Usually none.
         """
+        array *= self.convert_units(1, in_units=units)
         self.density_of_states = array
-        self.density_of_states *= \
-            self.convert_units(1, in_units=units)
+        return array
 
     # Calculations
     ##############
@@ -802,6 +812,11 @@ class DOS(Target):
 
     # Private methods
     #################
+
+    def _process_loaded_array(self, array, units=None):
+        array *= self.convert_units(1, in_units=units)
+        if self.save_target_data:
+            self.density_of_states = array
 
     @staticmethod
     def __number_of_electrons_from_dos(dos_data, energy_grid, fermi_energy,

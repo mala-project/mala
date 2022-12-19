@@ -1,7 +1,7 @@
 """LDOS calculation class."""
 from functools import cached_property
 
-from ase.units import Rydberg, Bohr
+from ase.units import Rydberg, Bohr, J, m
 import math
 import numpy as np
 from scipy import integrate
@@ -56,7 +56,7 @@ class LDOS(Target):
             LDOS calculator object.
         """
         return_ldos_object = LDOS(params)
-        return_ldos_object.read_from_numpy(path, units=units)
+        return_ldos_object.read_from_numpy_file(path, units=units)
         return return_ldos_object
 
     @classmethod
@@ -149,6 +149,30 @@ class LDOS(Target):
                                          use_memmap=use_memmap)
         return return_ldos_object
 
+    @classmethod
+    def from_openpmd_file(cls, params, path):
+        """
+        Create an LDOS calculator from an OpenPMD file.
+
+        Supports all OpenPMD supported file endings.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        path : string
+            Path to OpenPMD file.
+
+        Returns
+        -------
+        ldos_calculator : mala.targets.ldos.LDOS
+            LDOS calculator object.
+        """
+        return_ldos_object = LDOS(params)
+        return_ldos_object.read_from_openpmd_file(path)
+        return return_ldos_object
+
     ##############################
     # Properties
     ##############################
@@ -157,6 +181,28 @@ class LDOS(Target):
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
         return self.parameters.ldos_gridsize
+
+    @property
+    def data_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        return "LDOS"
+
+    @property
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        return (m**3)*J
+
+    @property
+    def si_dimension(self):
+        """Dictionary containing the SI unit dimensions in OpenPMD format."""
+        import openpmd_api as io
+
+        return {io.Unit_Dimension.M: -1, io.Unit_Dimension.L: -5,
+                io.Unit_Dimension.T: 2}
 
     @property
     def local_density_of_states(self):
@@ -314,7 +360,7 @@ class LDOS(Target):
     ##########
 
     @staticmethod
-    def convert_units(array, in_units="1/eV"):
+    def convert_units(array, in_units="1/(eV*A^3)"):
         """
         Convert the units of an array into the MALA units.
 
@@ -338,7 +384,7 @@ class LDOS(Target):
         converted_array : numpy.array
             Data in 1/(eV*A^3).
         """
-        if in_units == "1/(eV*A^3)":
+        if in_units == "1/(eV*A^3)" or in_units is None:
             return array
         elif in_units == "1/(eV*Bohr^3)":
             return array * (1/Bohr) * (1/Bohr) * (1/Bohr)
@@ -413,38 +459,8 @@ class LDOS(Target):
         # tmp.pp003ELEMENT_ldos.cube
         # ...
         # tmp.pp100ELEMENT_ldos.cube
-        self._read_from_qe_files(path_scheme, units,
-                                 use_memmap, ".cube", **kwargs)
-
-    def read_from_numpy(self, path, units="1/(eV*A^3)"):
-        """
-        Read the LDOS data from a numpy file.
-
-        Parameters
-        ----------
-        path :
-            Name of the numpy file.
-
-        units : string
-            Units the LDOS is saved in.
-        """
-        self.local_density_of_states = np.load(path) * \
-                                       self.convert_units(1, in_units=units)
-
-    def read_from_array(self, array, units="1/(eV*A^3)"):
-        """
-        Read the LDOS data from a numpy array.
-
-        Parameters
-        ----------
-        array : numpy.ndarray
-            Numpy array containing the density.
-
-        units : string
-            Units the LDOS is saved in.
-        """
-        self.local_density_of_states = array * \
-                                       self.convert_units(1, in_units=units)
+        return self._read_from_qe_files(path_scheme, units,
+                                        use_memmap, ".cube", **kwargs)
 
     def read_from_xsf(self, path_scheme, units="1/(eV*A^3)",
                       use_memmap=None, **kwargs):
@@ -470,8 +486,27 @@ class LDOS(Target):
             Usage will reduce RAM footprint while SIGNIFICANTLY
             impacting disk usage and
         """
-        self._read_from_qe_files(path_scheme, units,
-                                 use_memmap, ".xsf", **kwargs)
+        return self._read_from_qe_files(path_scheme, units,
+                                        use_memmap, ".xsf", **kwargs)
+
+    def read_from_array(self, array, units="1/(eV*A^3)"):
+        """
+        Read the LDOS data from a numpy array.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Numpy array containing the density.
+
+        units : string
+            Units the LDOS is saved in.
+        """
+        array *= self.convert_units(1, in_units=units)
+        self.local_density_of_states = array
+        return array
+
+    # Calculations
+    ##############
 
     def get_energy_grid(self):
         """
@@ -896,7 +931,7 @@ class LDOS(Target):
         conserve_dimensions : bool
             If True, the density is returned in the same dimensions as
             the LDOS was entered. If False, the density is always given
-            as [gridsize]. If None, the cached LDOS
+            as [gridsize, 1]. If None, the cached LDOS
             will be used for the calculation.
 
 
@@ -991,15 +1026,6 @@ class LDOS(Target):
         else:
             raise Exception("Unknown integration method.")
 
-        if len(ldos_data_shape) == 4 and conserve_dimensions is True:
-            # This breaks in the distributed case currently,
-            # but I don't see an application where we would need it.
-            # It would mean that we load an LDOS in distributed 3D fashion,
-            # which is not implemented either.
-            ldos_data_shape = list(ldos_data_shape)
-            ldos_data_shape[-1] = 1
-            density_values = density_values.reshape(ldos_data_shape)
-
         # Now we have the full density; We now need to collect it, in the
         # MPI case.
         if self.parameters._configuration["mpi"] and gather_density:
@@ -1015,6 +1041,21 @@ class LDOS(Target):
                                                          ldos_shape[2], 1])
             return full_density
         else:
+            if len(ldos_data_shape) == 4 and conserve_dimensions is True:
+                # This breaks in the distributed case currently,
+                # but I don't see an application where we would need it.
+                # It would mean that we load an LDOS in distributed 3D fashion,
+                # which is not implemented either.
+                ldos_data_shape = list(ldos_data_shape)
+                ldos_data_shape[-1] = 1
+                density_values = density_values.reshape(ldos_data_shape)
+            else:
+                if len(ldos_data_shape) == 4:
+                    grid_length = ldos_data_shape[0] * ldos_data_shape[1] * \
+                                  ldos_data_shape[2]
+                else:
+                    grid_length = ldos_data_shape[0]
+                density_values = density_values.reshape([grid_length, 1])
             return density_values
 
     def get_density_of_states(self, ldos_data=None, voxel=None,
@@ -1184,6 +1225,11 @@ class LDOS(Target):
 
     # Private methods
     #################
+
+    def _process_loaded_array(self, array, units=None):
+        array *= self.convert_units(1, in_units=units)
+        if self.save_target_data:
+            self.local_density_of_states = array
 
     def _gather_density(self, density_values, use_pickled_comm=False):
         """
@@ -1369,6 +1415,7 @@ class LDOS(Target):
                 ldos_data_full[:, :, :, start_index-1:end_index-1] = \
                     ldos_data[:, :, :, :]
                 self.local_density_of_states = ldos_data_full
+                return ldos_data_full
             else:
                 comm = get_comm()
 
@@ -1404,5 +1451,7 @@ class LDOS(Target):
                               tag=get_rank() + 100)
                 barrier()
                 self.local_density_of_states = ldos_data_full
+                return ldos_data_full
         else:
             self.local_density_of_states = ldos_data
+            return ldos_data

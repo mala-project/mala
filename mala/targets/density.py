@@ -1,8 +1,9 @@
 """Electronic density calculation class."""
+import os
 import time
 
 import ase.io
-from ase.units import Rydberg, Bohr
+from ase.units import Rydberg, Bohr, m
 from functools import cached_property
 import numpy as np
 try:
@@ -12,6 +13,7 @@ except ModuleNotFoundError:
 
 from mala.common.parallelizer import printout, parallel_warn, barrier, get_size
 from mala.targets.target import Target
+from mala.targets.calculation_helpers import integrate_values_on_spacing
 from mala.targets.cube_parser import read_cube, write_cube
 from mala.targets.calculation_helpers import integrate_values_on_spacing
 from mala.targets.xsf_parser import read_xsf
@@ -64,7 +66,7 @@ class Density(Target):
             Density calculator object.
         """
         return_density_object = Density(params)
-        return_density_object.read_from_numpy(path, units=units)
+        return_density_object.read_from_numpy_file(path, units=units)
         return return_density_object
 
     @classmethod
@@ -146,6 +148,30 @@ class Density(Target):
         return return_density_object
 
     @classmethod
+    def from_openpmd_file(cls, params, path):
+        """
+        Create an Density calculator from an OpenPMD file.
+
+        Supports all OpenPMD supported file endings.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        path : string
+            Path to OpenPMD file.
+
+        Returns
+        -------
+        density_calculator : mala.targets.density.Density
+            Density calculator object.
+        """
+        return_density_object = Density(params)
+        return_density_object.read_from_openpmd_file(path)
+        return return_density_object
+
+    @classmethod
     def from_ldos_calculator(cls, ldos_object):
         """
         Create a Density calculator from an LDOS object.
@@ -197,6 +223,32 @@ class Density(Target):
     ##############################
 
     @property
+    def feature_size(self):
+        """Get dimension of this target if used as feature in ML."""
+        return 1
+
+    @property
+    def data_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        return "Density"
+
+    @property
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        return m**3
+
+    @property
+    def si_dimension(self):
+        """Dictionary containing the SI unit dimensions in OpenPMD format."""
+        import openpmd_api as io
+
+        return {io.Unit_Dimension.L: -3}
+
+    @property
     def density(self):
         """Electronic density."""
         return self._density
@@ -225,11 +277,6 @@ class Density(Target):
         It should work for all implemented targets.
         """
         self.density = None
-
-    @property
-    def feature_size(self):
-        """Get dimension of this target if used as feature in ML."""
-        return 1
 
     @cached_property
     def number_of_electrons(self):
@@ -296,7 +343,7 @@ class Density(Target):
         converted_array : numpy.array
             Data in 1/A^3.
         """
-        if in_units == "1/A^3":
+        if in_units == "1/A^3" or in_units is None:
             return array
         elif in_units == "1/Bohr^3":
             return array * (1/Bohr) * (1/Bohr) * (1/Bohr)
@@ -346,8 +393,10 @@ class Density(Target):
             Units the density is saved in. Usually none.
         """
         printout("Reading density from .cube file ", path, min_verbosity=0)
-        data, meta = read_cube(path)*self.convert_units(1, in_units=units)
+        data, meta = read_cube(path)
+        data *= self.convert_units(1, in_units=units)
         self.density = data
+        return data
 
     def read_from_xsf(self, path, units="1/A^3", **kwargs):
         """
@@ -364,20 +413,7 @@ class Density(Target):
         printout("Reading density from .cube file ", path, min_verbosity=0)
         data, meta = read_xsf(path)*self.convert_units(1, in_units=units)
         self.density = data
-
-    def read_from_numpy(self, path, units="1/A^3"):
-        """
-        Read the density data from a numpy file.
-
-        Parameters
-        ----------
-        path :
-            Name of the numpy file.
-
-        units : string
-            Units the density is saved in. Usually none.
-        """
-        self.density = np.load(path)*self.convert_units(1, in_units=units)
+        return data
 
     def read_from_array(self, array, units="1/A^3"):
         """
@@ -391,7 +427,9 @@ class Density(Target):
         units : string
             Units the density is saved in. Usually none.
         """
-        self.density = array*self.convert_units(1, in_units=units)
+        array *= self.convert_units(1, in_units=units)
+        self.density = array
+        return array
 
     def write_as_cube(self, file_name, density_data, atoms=None,
                       grid_dimensions=None):
@@ -418,8 +456,8 @@ class Density(Target):
             grid_dimensions = self.grid_dimensions
         if atoms is None:
             atoms = self.atoms
-        if len(density_data.shape) != 3:
-            if len(density_data.shape) == 1:
+        if len(density_data.shape) != 4:
+            if len(density_data.shape) == 2:
                 density_data = np.reshape(density_data, grid_dimensions)
             else:
                 raise Exception("Unknown density shape provided.")
@@ -475,9 +513,9 @@ class Density(Target):
             voxel = self.voxel
 
         # Check input data for correctness.
-        data_shape = np.shape(np.squeeze(density_data))
-        if len(data_shape) != 3:
-            if len(data_shape) != 1:
+        data_shape = np.shape(density_data)
+        if len(data_shape) != 4:
+            if len(data_shape) != 2:
                 raise Exception("Unknown Density shape, cannot calculate "
                                 "number of electrons.")
             elif integration_method != "summation":
@@ -529,14 +567,14 @@ class Density(Target):
             else:
                 number_of_electrons *= grid_spacing_bohr_z
         else:
-            if len(data_shape) == 3:
+            if len(data_shape) == 4:
                 number_of_electrons = np.sum(density_data, axis=(0, 1, 2)) \
                                       * voxel.volume
-            if len(data_shape) == 1:
+            if len(data_shape) == 2:
                 number_of_electrons = np.sum(density_data, axis=0) * \
                                       voxel.volume
 
-        return number_of_electrons
+        return np.squeeze(number_of_electrons)
 
     def get_density(self, density_data=None, convert_to_threedimensional=False,
                     grid_dimensions=None):
@@ -567,9 +605,9 @@ class Density(Target):
         density_data : numpy.array
             Electronic density data in the desired shape.
         """
-        if len(density_data.shape) == 3:
+        if len(density_data.shape) == 4:
             return density_data
-        elif len(density_data.shape) == 1:
+        elif len(density_data.shape) == 2:
             if convert_to_threedimensional:
                 if self.parameters._configuration["mpi"]:
                     # In the MPI case we have to use the local grid to
@@ -588,7 +626,7 @@ class Density(Target):
                     density_data = \
                         np.reshape(density_data,
                                    [last_z - first_z, last_y - first_y,
-                                    last_x - first_x]).transpose([2, 1, 0])
+                                    last_x - first_x, 1]).transpose([2, 1, 0, 3])
                     return density_data
                 else:
                     if grid_dimensions is None:
@@ -756,6 +794,11 @@ class Density(Target):
     # Private methods
     #################
 
+    def _process_loaded_array(self, array, units=None):
+        array *= self.convert_units(1, in_units=units)
+        if self.save_target_data:
+            self.density = array
+
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
                                     create_file=True, qe_input_data=None,
                                     qe_pseudopotentials=None):
@@ -812,11 +855,11 @@ class Density(Target):
         # We need to find out if the grid dimensions are consistent.
         # That depends on the form of the density data we received.
         number_of_gridpoints = te.get_nnr()
-        if len(density_data.shape) == 3:
+        if len(density_data.shape) == 4:
             number_of_gridpoints_mala = density_data.shape[0] * \
                                         density_data.shape[1] * \
                                         density_data.shape[2]
-        elif len(density_data.shape) == 1:
+        elif len(density_data.shape) == 2:
             number_of_gridpoints_mala = density_data.shape[0]
         else:
             raise Exception("Density data has wrong dimensions. ")
@@ -845,10 +888,10 @@ class Density(Target):
 
         # Now we need to reshape the density.
         density_for_qe = None
-        if len(density_data.shape) == 3:
+        if len(density_data.shape) == 4:
             density_for_qe = np.reshape(density_data, [number_of_gridpoints,
                                                        1], order='F')
-        elif len(density_data.shape) == 1:
+        elif len(density_data.shape) == 2:
             parallel_warn("Using 1D density to calculate the total energy"
                           " requires reshaping of this data. "
                           "This is unproblematic, as long as you provided t"

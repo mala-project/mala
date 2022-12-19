@@ -65,10 +65,15 @@ data_converter.add_snapshot(descriptor_input_type="qe.out",
 # Likewise, there are multiple ways to save data. One way is to specify
 # separate paths for descriptors, target and info data.
 # A unified path can also be provided (see below).
+# Further, naming_scheme impacts how data is saved. Standard is
+# numpy, which can be indicated by ".npy".
+# One can just as easily save using OpenPMD (if installed on your machine),
+# in which case simply the correct file ending (e.g. ".h5" for HDF5) needs
+# to be used on the naming_scheme.
 data_converter.convert_snapshots(descriptor_save_path="./",
                                  target_save_path="./",
                                  additional_info_save_path="./",
-                                 naming_scheme="Be_snapshot*")
+                                 naming_scheme="Be_snapshot*.npy")
 
 # If parts of the data have already been processed, the DataConverter class can
 # also be used to convert the rest.

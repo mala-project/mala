@@ -1,15 +1,17 @@
 """Base class for all descriptor calculators."""
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 import ase
+from ase.units import m
 import numpy as np
 
 from mala.common.parameters import ParametersDescriptors, Parameters
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier, parallel_warn
+from mala.common.physical_data import PhysicalData
 
 
-class Descriptor(ABC):
+class Descriptor(PhysicalData):
     """
     Base class for all descriptors available in MALA.
 
@@ -21,6 +23,10 @@ class Descriptor(ABC):
         Parameters object used to create this object.
 
     """
+
+    ##############################
+    # Constructors
+    ##############################
 
     def __new__(cls, params: Parameters):
         """
@@ -64,12 +70,37 @@ class Descriptor(ABC):
         return descriptors
 
     def __init__(self, parameters):
+        super(Descriptor, self).__init__(parameters)
         self.parameters: ParametersDescriptors = parameters.descriptors
         self.fingerprint_length = -1  # so iterations will fail
-        self.dbg_grid_dimensions = parameters.debug.grid_dimensions
         self.verbosity = parameters.verbosity
         self.in_format_ase = ""
-        self.grid_dimensions = []
+        self.atoms = None
+        self.grid_dimensions = [0, 0, 0]
+
+    ##############################
+    # Properties
+    ##############################
+
+    @property
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        return m**3
+
+    @property
+    def si_dimension(self):
+        """
+        Dictionary containing the SI unit dimensions in OpenPMD format.
+
+        Needed for OpenPMD interface.
+        """
+        import openpmd_api as io
+
+        return {io.Unit_Dimension.L: -3}
 
     @property
     def descriptors_contain_xyz(self):
@@ -79,6 +110,13 @@ class Descriptor(ABC):
     @descriptors_contain_xyz.setter
     def descriptors_contain_xyz(self, value):
         self.parameters.descriptors_contain_xyz = value
+
+    ##############################
+    # Methods
+    ##############################
+
+    # File I/O
+    ##########
 
     @staticmethod
     def convert_units(array, in_units="1/eV"):
@@ -123,6 +161,9 @@ class Descriptor(ABC):
         """
         raise Exception("No unit back conversion method implemented for "
                         "this descriptor type.")
+
+    # Calculations
+    ##############
 
     @staticmethod
     def enforce_pbc(atoms):
@@ -380,6 +421,42 @@ class Descriptor(ABC):
                                     self.parameters.acsd_points,
                                     descriptor_vectors_contain_xyz=
                                     self.descriptors_contain_xyz)
+
+    # Private methods
+    #################
+
+    def _process_loaded_array(self, array, units=None):
+        array *= self.convert_units(1, in_units=units)
+
+    def _process_loaded_dimensions(self, array_dimensions):
+        if self.descriptors_contain_xyz:
+            return (array_dimensions[0], array_dimensions[1],
+                    array_dimensions[2], array_dimensions[3]-3)
+        else:
+            return array_dimensions
+
+    def _set_geometry_info(self, mesh):
+        # Geometry: Save the cell parameters and angles of the grid.
+        if self.atoms is not None:
+            import openpmd_api as io
+
+            voxel = self.atoms.cell.copy()
+            voxel[0] = voxel[0] / (self.grid_dimensions[0])
+            voxel[1] = voxel[1] / (self.grid_dimensions[1])
+            voxel[2] = voxel[2] / (self.grid_dimensions[2])
+
+            mesh.geometry = io.Geometry.cartesian
+            mesh.grid_spacing = voxel.cellpar()[0:3]
+            mesh.set_attribute("angles", voxel.cellpar()[3:])
+
+    def _get_atoms(self):
+        return self.atoms
+
+    def _feature_mask(self):
+        if self.descriptors_contain_xyz:
+            return 3
+        else:
+            return 0
 
     def _setup_lammps_processors(self, nx, ny, nz):
         """

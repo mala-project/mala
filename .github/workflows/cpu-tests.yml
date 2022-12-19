@@ -172,7 +172,7 @@ jobs:
         with:
           repository: mala-project/test-data
           path: mala_data
-          ref: v1.3.0
+          ref: v1.4.0
           lfs: false
 
       - name: Test mala

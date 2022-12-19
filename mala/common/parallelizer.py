@@ -226,6 +226,7 @@ def parallel_warn(warning, min_verbosity=0, category=UserWarning):
         Warning to be printed.
     min_verbosity : int
         Minimum number of verbosity for this output to still be printed.
+
     category : class
         Category of the warning to be thrown.
     """

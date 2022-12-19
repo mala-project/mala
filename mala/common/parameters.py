@@ -25,7 +25,8 @@ class ParametersBase(JSONSerializable):
     def __init__(self,):
         super(ParametersBase, self).__init__()
         self._configuration = {"gpu": False, "horovod": False, "mpi": False,
-                               "device": "cpu"}
+                               "device": "cpu", "openpmd_configuration": {},
+                               "openpmd_granularity": 1}
         pass
 
     def show(self, indent=""):
@@ -59,6 +60,12 @@ class ParametersBase(JSONSerializable):
 
     def _update_device(self, new_device):
         self._configuration["device"] = new_device
+
+    def _update_openpmd_configuration(self, new_openpmd):
+        self._configuration["openpmd_configuration"] = new_openpmd
+
+    def _update_openpmd_granularity(self, new_granularity):
+        self._configuration["openpmd_granularity"] = new_granularity
 
     @staticmethod
     def _member_to_json(member):
@@ -564,7 +571,6 @@ class ParametersData(ParametersBase):
         If use_clustering is True, this is the ratio of training data used
         to train the encoder for the clustering.
 
-
     sample_ratio : float
         If use_clustering is True, this is the ratio of training data used
         for sampling per snapshot (according to clustering then, of course).
@@ -582,7 +588,6 @@ class ParametersData(ParametersBase):
         self.number_of_clusters = 40
         self.train_ratio = 0.1
         self.sample_ratio = 0.5
-
 
 class ParametersRunning(ParametersBase):
     """
@@ -1045,23 +1050,6 @@ class ParametersDataGeneration(ParametersBase):
         self.ofdft_friction = 0.1
 
 
-class ParametersDebug(ParametersBase):
-    """
-    All debugging parameters.
-
-    Attributes
-    ----------
-    grid_dimensions : list
-        A list containing three elements. It enforces a smaller grid size
-        globally when it is not empty.. Default : []
-
-    """
-
-    def __init__(self):
-        super(ParametersDebug, self).__init__()
-        self.grid_dimensions = []
-
-
 class Parameters:
     """
     All parameter MALA needs to perform its various tasks.
@@ -1109,7 +1097,6 @@ class Parameters:
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
         self.datageneration = ParametersDataGeneration()
-        self.debug = ParametersDebug()
 
         # Attributes.
         self.manual_seed = None
@@ -1120,6 +1107,36 @@ class Parameters:
         self.use_mpi = False
         self.verbosity = 1
         self.device = "cpu"
+        self.openpmd_configuration = {}
+        # TODO: Maybe as a percentage? Feature dimensions can be quite
+        # different.
+        self.openpmd_granularity = 1
+
+    @property
+    def openpmd_granularity(self):
+        """
+        Adjust the memory overhead of the OpenPMD interface.
+
+        Smallest possible value is 1, meaning smallest memory footprint
+        and slowest I/O. Higher values will introduce some memory penalty,
+        but offer greater speed.
+        The maximum level is the feature dimension of your data set, if
+        you choose a value larger than this feature dimension, it will
+        automatically be set to the feature dimension upon loading.
+        """
+        return self._openpmd_granularity
+
+    @openpmd_granularity.setter
+    def openpmd_granularity(self, value):
+        if value < 1:
+            value = 1
+        self._openpmd_granularity = value
+        self.network._update_openpmd_granularity(self._openpmd_granularity)
+        self.descriptors._update_openpmd_granularity(self._openpmd_granularity)
+        self.targets._update_openpmd_granularity(self._openpmd_granularity)
+        self.data._update_openpmd_granularity(self._openpmd_granularity)
+        self.running._update_openpmd_granularity(self._openpmd_granularity)
+        self.hyperparameters._update_openpmd_granularity(self._openpmd_granularity)
 
     @property
     def verbosity(self):
@@ -1165,7 +1182,6 @@ class Parameters:
         self.data._update_gpu(self.use_gpu)
         self.running._update_gpu(self.use_gpu)
         self.hyperparameters._update_gpu(self.use_gpu)
-        self.debug._update_gpu(self.use_gpu)
 
     @property
     def use_horovod(self):
@@ -1187,7 +1203,6 @@ class Parameters:
         self.data._update_horovod(self.use_horovod)
         self.running._update_horovod(self.use_horovod)
         self.hyperparameters._update_horovod(self.use_horovod)
-        self.debug._update_horovod(self.use_horovod)
 
     @property
     def device(self):
@@ -1208,7 +1223,6 @@ class Parameters:
         self.data._update_device(self._device)
         self.running._update_device(self._device)
         self.hyperparameters._update_device(self._device)
-        self.debug._update_device(self._device)
 
     @property
     def use_mpi(self):
@@ -1227,7 +1241,29 @@ class Parameters:
         self.data._update_mpi(self.use_mpi)
         self.running._update_mpi(self.use_mpi)
         self.hyperparameters._update_mpi(self.use_mpi)
-        self.debug._update_mpi(self.use_mpi)
+
+    @property
+    def openpmd_configuration(self):
+        """
+        Provide a .toml or .json formatted string to configure OpenPMD.
+
+        To load a configuration from a file, add an "@" in front of the file
+        name and put the resulting string here. OpenPMD will then load
+        the file. For further details, see the OpenPMD documentation.
+        """
+        return self._openpmd_configuration
+
+    @openpmd_configuration.setter
+    def openpmd_configuration(self, value):
+        self._openpmd_configuration = value
+
+        # Invalidate, will be updated in setter.
+        self.network._update_openpmd_configuration(self.openpmd_configuration)
+        self.descriptors._update_openpmd_configuration(self.openpmd_configuration)
+        self.targets._update_openpmd_configuration(self.openpmd_configuration)
+        self.data._update_openpmd_configuration(self.openpmd_configuration)
+        self.running._update_openpmd_configuration(self.openpmd_configuration)
+        self.hyperparameters._update_openpmd_configuration(self.openpmd_configuration)
 
     def show(self):
         """Print name and values of all attributes of this object."""
@@ -1362,7 +1398,6 @@ class Parameters:
         self.data._update_device(device_temp)
         self.running._update_device(device_temp)
         self.hyperparameters._update_device(device_temp)
-        self.debug._update_device(device_temp)
 
     @classmethod
     def load_from_file(cls, filename, save_format="json",
@@ -1399,7 +1434,8 @@ class Parameters:
                 json_dict = json.load(json_file)
             loaded_parameters = cls()
             for key in json_dict:
-                if isinstance(json_dict[key], dict):
+                if isinstance(json_dict[key], dict) and key \
+                        != "openpmd_configuration":
                     # These are the other parameter classes.
                     sub_parameters =\
                         globals()[json_dict[key]["_parameters_type"]].\
@@ -1409,7 +1445,8 @@ class Parameters:
             # We iterate a second time, to set global values, so that they
             # are properly forwarded.
             for key in json_dict:
-                if not isinstance(json_dict[key], dict):
+                if not isinstance(json_dict[key], dict) or key == \
+                        "openpmd_configuration":
                     setattr(loaded_parameters, key, json_dict[key])
             if no_snapshots is True:
                 loaded_parameters.data.snapshot_directories_list = []

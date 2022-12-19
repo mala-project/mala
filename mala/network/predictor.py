@@ -134,8 +134,7 @@ class Predictor(Runner):
                     snap_descriptors.astype(np.float32)
                 snap_descriptors = \
                     torch.from_numpy(snap_descriptors).float()
-                snap_descriptors = \
-                    self.data.input_data_scaler.transform(snap_descriptors)
+                self.data.input_data_scaler.transform(snap_descriptors)
                 return self. \
                     _forward_snap_descriptors(snap_descriptors, local_size)
 
@@ -151,8 +150,7 @@ class Predictor(Runner):
                     [self.data.grid_size, feature_length])
             snap_descriptors = \
                 torch.from_numpy(snap_descriptors).float()
-            snap_descriptors = \
-                self.data.input_data_scaler.transform(snap_descriptors)
+            self.data.input_data_scaler.transform(snap_descriptors)
             return self._forward_snap_descriptors(snap_descriptors)
 
     def _forward_snap_descriptors(self, snap_descriptors,

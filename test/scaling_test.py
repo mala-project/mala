@@ -31,6 +31,8 @@ class TestScaling:
 
             scaler = mala.DataScaler(scaling)
             scaler.fit(data)
-            transformed = scaler.inverse_transform(scaler.transform(data))
+            transformed = data
+            scaler.transform(transformed)
+            transformed = scaler.inverse_transform(transformed)
             relative_error = torch.sum(np.abs((data2 - transformed)/data2))
             assert relative_error < desired_accuracy

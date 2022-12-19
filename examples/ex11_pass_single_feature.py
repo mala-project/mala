@@ -96,7 +96,8 @@ def load_memmap_snapshot():
     x = torch.from_numpy(inputs_array[0, 0, 0, 3:].astype(np.float32))
 
     # For some reason, DataScaler changes the shape (N,) -> (1,N), revert that
-    x_scaled = iscaler.transform(x)[0, :]
+    x_scaled = x.detach().clone()
+    iscaler.transform(x_scaled)
     with torch.no_grad():
         y_pred = network(x_scaled)
 

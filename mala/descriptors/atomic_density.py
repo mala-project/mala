@@ -39,6 +39,11 @@ class AtomicDensity(Descriptor):
         super(AtomicDensity, self).__init__(parameters)
         self.verbosity = parameters.verbosity
 
+    @property
+    def data_name(self):
+        """Get a string that describes the target (for e.g. metadata)."""
+        return "Gaussian"
+
     @staticmethod
     def convert_units(array, in_units="None"):
         """
@@ -59,7 +64,7 @@ class AtomicDensity(Descriptor):
         converted_array : numpy.array
             Data in MALA units.
         """
-        if in_units == "None":
+        if in_units == "None" or in_units is None:
             return array
         else:
             raise Exception("Unsupported unit for Gaussian descriptors.")
@@ -119,14 +124,9 @@ class AtomicDensity(Descriptor):
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")
         ase.io.write(ase_out_path, atoms, format=lammps_format)
 
-        if len(self.dbg_grid_dimensions) == 3:
-            nx = self.dbg_grid_dimensions[0]
-            ny = self.dbg_grid_dimensions[1]
-            nz = self.dbg_grid_dimensions[2]
-        else:
-            nx = grid_dimensions[0]
-            ny = grid_dimensions[1]
-            nz = grid_dimensions[2]
+        nx = grid_dimensions[0]
+        ny = grid_dimensions[1]
+        nz = grid_dimensions[2]
 
         # Check if we have to determine the optimal sigma value.
         if self.parameters.atomic_density_sigma is None:

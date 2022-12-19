@@ -14,10 +14,11 @@ from scipy.integrate import simps
 from mala.common.parameters import Parameters, ParametersTargets
 from mala.common.parallelizer import printout, parallel_warn
 from mala.targets.calculation_helpers import fermi_function
+from mala.common.physical_data import PhysicalData
 from mala.descriptors.atomic_density import AtomicDensity
 
 
-class Target(ABC):
+class Target(PhysicalData):
     """
     Base class for all target quantity parser.
 
@@ -31,6 +32,10 @@ class Target(ABC):
     mala.common.parameters.ParametersTargets
         Parameters used to create this Target object.
     """
+
+    ##############################
+    # Constructors
+    ##############################
 
     def __new__(cls, params: Parameters):
         """
@@ -75,6 +80,7 @@ class Target(ABC):
         return target
 
     def __init__(self, params):
+        super(Target, self).__init__(params)
         self._parameters_full = None
         if isinstance(params, Parameters):
             self.parameters: ParametersTargets = params.targets
@@ -125,10 +131,38 @@ class Target(ABC):
         self.local_grid = None
         self.y_planes = None
 
+        # Control whether target data will be saved.
+        # Can be important for I/O applications.
+        self.save_target_data = True
+
+    ##############################
+    # Properties
+    ##############################
+
     @property
     @abstractmethod
     def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
+        pass
+
+    @property
+    @abstractmethod
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def si_dimension(self):
+        """
+        Dictionary containing the SI unit dimensions in OpenPMD format.
+
+        Needed for OpenPMD interface.
+        """
         pass
 
     @property
@@ -146,25 +180,58 @@ class Target(ABC):
     def _is_property_cached(self, property_name):
         return property_name in self.__dict__.keys()
 
+    ##############################
+    # Methods
+    ##############################
+
+    # File I/O
+    ##########
+
+    @staticmethod
     @abstractmethod
-    def get_target(self):
+    def convert_units(array, in_units="eV"):
         """
-        Get the target quantity.
+        Convert the units of an array into the MALA units.
 
-        This is the generic interface for cached target quantities.
-        It should work for all implemented targets.
+        Parameters
+        ----------
+        array : numpy.array
+            Data for which the units should be converted.
+
+        in_units : string
+            Units of array.
+
+        Returns
+        -------
+        converted_array : numpy.array
+            Data in MALA units.
+
         """
-        pass
+        raise Exception("No unit conversion method implemented for"
+                        " this target type.")
 
+    @staticmethod
     @abstractmethod
-    def invalidate_target(self):
+    def backconvert_units(array, out_units):
         """
-        Invalidates the saved target wuantity.
+        Convert the units of an array from MALA units into desired units.
 
-        This is the generic interface for cached target quantities.
-        It should work for all implemented targets.
+        Parameters
+        ----------
+        array : numpy.array
+            Data in MALA units.
+
+        out_units : string
+            Desired units of output array.
+
+        Returns
+        -------
+        converted_array : numpy.array
+            Data in out_units.
+
         """
-        pass
+        raise Exception("No unit back conversion method implemented "
+                        "for this target type.")
 
     def read_additional_calculation_data(self, data_type, data=""):
         """
@@ -178,7 +245,7 @@ class Target(ABC):
         Parameters
         ----------
         data_type : string
-            Type of data or file that is used. Currently supporte are:
+            Type of data or file that is used. Currently supported are:
 
             - "qe.out" : Read the additional information from a QuantumESPRESSO
               output file.
@@ -355,7 +422,7 @@ class Target(ABC):
         else:
             raise Exception("Unsupported auxiliary file type.")
 
-    def write_additional_calculation_data(self, filepath):
+    def write_additional_calculation_data(self, filepath, return_string=False):
         """
         Write additional information about a calculation to a .json file.
 
@@ -366,6 +433,10 @@ class Target(ABC):
         ----------
         filepath : string
             Path at which to save the calculation data.
+
+        return_string : bool
+            If True, no file will be written, and instead a json dict will
+            be returned.
         """
         additional_calculation_data = {
             "fermi_energy_dft": self.fermi_energy_dft,
@@ -395,9 +466,38 @@ class Target(ABC):
             additional_calculation_data["atoms"]["cell"].tolist()
         additional_calculation_data["atoms"]["pbc"] = \
             additional_calculation_data["atoms"]["pbc"].tolist()
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(additional_calculation_data, f,
-                      ensure_ascii=False, indent=4)
+        if return_string is False:
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(additional_calculation_data, f,
+                          ensure_ascii=False, indent=4)
+        else:
+            return additional_calculation_data
+
+    # Accessing target data
+    ########################
+
+    @abstractmethod
+    def get_target(self):
+        """
+        Get the target quantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        pass
+
+    @abstractmethod
+    def invalidate_target(self):
+        """
+        Invalidates the saved target wuantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        pass
+
+    # Calculations
+    ##############
 
     def get_energy_grid(self):
         """Get energy grid."""
@@ -412,15 +512,6 @@ class Target(ABC):
                 for k in range(0, self.grid_dimensions[2]):
                     grid3D[i, j, k, :] = np.matmul(self.voxel, [i, j, k])
         return grid3D
-
-    @staticmethod
-    def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):
-        if method == "mic":
-            return np.min(np.linalg.norm(atoms.get_cell(), axis=0))/2
-        elif method == "2mic":
-            return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
-        else:
-            raise Exception("Unknown option to calculate rMax provided.")
 
     @staticmethod
     def radial_distribution_function_from_atoms(atoms: ase.Atoms,
@@ -972,50 +1063,6 @@ class Target(ABC):
                      pseudopotentials=qe_pseudopotentials,
                      kpts=kpoints)
 
-    @staticmethod
-    def convert_units(array, in_units="eV"):
-        """
-        Convert the units of an array into the MALA units.
-
-        Parameters
-        ----------
-        array : numpy.array
-            Data for which the units should be converted.
-
-        in_units : string
-            Units of array.
-
-        Returns
-        -------
-        converted_array : numpy.array
-            Data in MALA units.
-
-        """
-        raise Exception("No unit conversion method implemented for"
-                        " this target type.")
-
-    @staticmethod
-    def backconvert_units(array, out_units):
-        """
-        Convert the units of an array from MALA units into desired units.
-
-        Parameters
-        ----------
-        array : numpy.array
-            Data in MALA units.
-
-        out_units : string
-            Desired units of output array.
-
-        Returns
-        -------
-        converted_array : numpy.array
-            Data in out_units.
-
-        """
-        raise Exception("No unit back conversion method implemented "
-                        "for this target type.")
-
     def restrict_data(self, array):
         """
         Restrict target data to only contain physically meaningful values.
@@ -1044,4 +1091,121 @@ class Target(ABC):
         else:
             raise Exception("Wrong data restriction.")
 
+    # Private methods
+    #################
 
+    def _process_loaded_dimensions(self, array_dimensions):
+        return array_dimensions
+
+    def _process_additional_metadata(self, additional_metadata):
+        self.read_additional_calculation_data(additional_metadata[0],
+                                              additional_metadata[1])
+
+    def _set_openpmd_attribtues(self, iteration, mesh):
+        super(Target, self)._set_openpmd_attribtues(iteration, mesh)
+
+        # If no atoms have been read, neither have any of the other
+        # properties.
+        if self.atoms is not None:
+            additional_calculation_data = \
+                self.write_additional_calculation_data("", return_string=True)
+            iteration.set_attribute("fermi_energy_dft",
+                                    additional_calculation_data["fermi_energy_dft"])
+            iteration.set_attribute("temperature",
+                                    additional_calculation_data["temperature"])
+            iteration.set_attribute("number_of_electrons_exact",
+                                    additional_calculation_data["number_of_electrons_exact"])
+            iteration.set_attribute("band_energy_dft_calculation",
+                                    additional_calculation_data["band_energy_dft_calculation"])
+            iteration.set_attribute("total_energy_dft_calculation",
+                                    additional_calculation_data["total_energy_dft_calculation"])
+            iteration.set_attribute("electrons_per_atom",
+                                    additional_calculation_data["electrons_per_atom"])
+            iteration.set_attribute("number_of_electrons_from_eigenvals",
+                                    additional_calculation_data["number_of_electrons_from_eigenvals"])
+            iteration.set_attribute("ibrav",
+                                    additional_calculation_data["ibrav"])
+            iteration.set_attribute("ecutwfc",
+                                    additional_calculation_data["ecutwfc"])
+            iteration.set_attribute("ecutrho",
+                                    additional_calculation_data["ecutrho"])
+            iteration.set_attribute("degauss",
+                                    additional_calculation_data["degauss"])
+            for key in additional_calculation_data["pseudopotentials"].keys():
+                iteration.set_attribute("psp_"+key,
+                                        additional_calculation_data[
+                                            "pseudopotentials"][key])
+
+    def _process_openpmd_attributes(self, series, iteration, mesh):
+        super(Target, self)._process_openpmd_attributes(series, iteration, mesh)
+
+        # Process the atoms, which can only be done if we have voxel info.
+        if self.voxel is None:
+            raise Exception("Voxel was never read from OpenPMD file, "
+                            "cannot recreate atoms object without it.")
+
+        atoms_openpmd = iteration.particles["atoms"]
+        nr_atoms = len(atoms_openpmd["position"])
+        positions = np.zeros((nr_atoms, 3))
+        numbers = np.zeros((nr_atoms, 1), dtype=np.int64)
+        for i in range(0, nr_atoms):
+            atoms_openpmd["position"][str(i)].load_chunk(positions[i, :])
+            atoms_openpmd["number"][str(i)].load_chunk(numbers[i, :])
+        series.flush()
+        numbers = np.squeeze(numbers)
+
+        # Recreate the cell from voxel and grid info.
+        self.grid_dimensions[0] = mesh["0"].shape[0]
+        self.grid_dimensions[1] = mesh["0"].shape[1]
+        self.grid_dimensions[2] = mesh["0"].shape[2]
+        cell = self.voxel.copy()
+        cell[0] = self.voxel[0] * self.grid_dimensions[0]
+        cell[1] = self.voxel[1] * self.grid_dimensions[1]
+        cell[2] = self.voxel[2] * self.grid_dimensions[2]
+        self.atoms = ase.Atoms(positions=positions, cell=cell, numbers=numbers)
+
+        # Process all the regular meta info.
+        self.fermi_energy_dft = iteration.get_attribute("fermi_energy_dft")
+        self.temperature = iteration.get_attribute("temperature")
+        self.number_of_electrons_exact = iteration.get_attribute("number_of_electrons_exact")
+        self.band_energy_dft_calculation = iteration.get_attribute("band_energy_dft_calculation")
+        self.total_energy_dft_calculation = iteration.get_attribute("total_energy_dft_calculation")
+        self.electrons_per_atom = iteration.get_attribute("electrons_per_atom")
+        self.number_of_electrons_from_eigenvals = iteration.get_attribute("number_of_electrons_from_eigenvals")
+        self.qe_input_data["ibrav"] = iteration.get_attribute("ibrav")
+        self.qe_input_data["ecutwfc"] = iteration.get_attribute("ecutwfc")
+        self.qe_input_data["ecutrho"] = iteration.get_attribute("ecutrho")
+        self.qe_input_data["degauss"] = iteration.get_attribute("degauss")
+
+        # Take care of the pseudopotentials.
+        self.qe_input_data["pseudopotentials"] = {}
+        for attribute in iteration.attributes:
+            if "psp" in attribute:
+                self.qe_pseudopotentials[attribute.split("psp_")[1]] = \
+                    iteration.get_attribute(attribute)
+
+    def _set_geometry_info(self, mesh):
+        # Geometry: Save the cell parameters and angles of the grid.
+        if self.atoms is not None:
+            import openpmd_api as io
+
+            mesh.geometry = io.Geometry.cartesian
+            mesh.grid_spacing = self.voxel.cellpar()[0:3]
+            mesh.set_attribute("angles", self.voxel.cellpar()[3:])
+
+    def _process_geometry_info(self, mesh):
+        spacing = mesh.grid_spacing
+        angles = mesh.get_attribute("angles")
+        self.voxel = ase.cell.Cell.new(cell=spacing+angles)
+
+    def _get_atoms(self):
+        return self.atoms
+
+    @staticmethod
+    def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):
+        if method == "mic":
+            return np.min(np.linalg.norm(atoms.get_cell(), axis=0))/2
+        elif method == "2mic":
+            return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+        else:
+            raise Exception("Unknown option to calculate rMax provided.")
