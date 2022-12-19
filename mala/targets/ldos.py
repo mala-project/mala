@@ -10,6 +10,7 @@ from scipy import integrate
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier
 from mala.targets.cube_parser import read_cube
+from mala.targets.xsf_parser import read_xsf
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import fermi_function, \
     analytical_integration, integrate_values_on_spacing
@@ -116,6 +117,37 @@ class LDOS(Target):
         return_ldos_object = LDOS(params)
         return_ldos_object.read_from_cube(path_name_scheme, units=units,
                                           use_memmap=use_memmap)
+        return return_ldos_object
+
+    @classmethod
+    def from_xsf_file(cls, params, path_name_scheme, units="1/(eV*A^3)",
+                      use_memmap=None):
+        """
+        Create an LDOS calculator from multiple xsf files.
+
+        The files have to be located in the same directory.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        path_name_scheme : string
+            Naming scheme for the LDOS .xsf files. Every asterisk will be
+            replaced with an appropriate number for the LDOS files. Before
+            the file name, please make sure to include the proper file path.
+
+        units : string
+            Units the LDOS is saved in.
+
+        use_memmap : string
+            If not None, a memory mapped file with this name will be used to
+            gather the LDOS.
+            If run in MPI parallel mode, such a file MUST be provided.
+        """
+        return_ldos_object = LDOS(params)
+        return_ldos_object.read_from_xsf(path_name_scheme, units=units,
+                                         use_memmap=use_memmap)
         return return_ldos_object
 
     @classmethod
@@ -408,117 +440,35 @@ class LDOS(Target):
         # tmp.pp003ELEMENT_ldos.cube
         # ...
         # tmp.pp100ELEMENT_ldos.cube
+        return self._read_from_qe_files(path_scheme, units,
+                                        use_memmap, ".cube", **kwargs)
 
-        # Find out the number of digits that are needed to encode this
-        # grid (by QE).
-        digits = int(math.log10(self.parameters.ldos_gridsize)) + 1
+    def read_from_xsf(self, path_scheme, units="1/(eV*A^3)",
+                      use_memmap=None, **kwargs):
+        """
+        Read the LDOS data from multiple .xsf files.
 
-        # Iterate over the amount of specified LDOS input files.
-        # QE is a Fortran code, so everything is 1 based.
-        printout("Reading "+str(self.parameters.ldos_gridsize) +
-                 " LDOS files from"+path_scheme+".", min_verbosity=0)
-        ldos_data = None
-        if self.parameters._configuration["mpi"]:
-            local_size = int(np.floor(self.parameters.ldos_gridsize /
-                                      get_size()))
-            start_index = get_rank()*local_size + 1
-            if get_rank()+1 == get_size():
-                local_size += self.parameters.ldos_gridsize % \
-                                     get_size()
-            end_index = start_index+local_size
-        else:
-            start_index = 1
-            end_index = self.parameters.ldos_gridsize + 1
-            local_size = self.parameters.ldos_gridsize
+        The files have to be located in the same directory. .xsf
+        files are used by XCrysDen.
 
-        for i in range(start_index, end_index):
-            tmp_file_name = path_scheme
-            tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
+        Parameters
+        ----------
+        path_scheme : string
+            Naming scheme for the LDOS .xsf files. Every asterisk will be
+            replaced with an appropriate number for the LDOS files. Before
+            the file name, please make sure to include the proper file path.
 
-            # Open the cube file
-            data, meta = read_cube(tmp_file_name)
+        units : string
+            Units the LDOS is saved in.
 
-            # Once we have read the first cube file, we know the dimensions
-            # of the LDOS and can prepare the array
-            # in which we want to store the LDOS.
-            if i == start_index:
-                data_shape = np.shape(data)
-                ldos_data = np.zeros((data_shape[0], data_shape[1],
-                                      data_shape[2], local_size),
-                                     dtype=np.float64)
-
-            # Convert and then append the LDOS data.
-            data = data*self.convert_units(1, in_units=units)
-            ldos_data[:, :, :, i-start_index] = data[:, :, :]
-
-        # We have to gather the LDOS either file based or not.
-        if self.parameters._configuration["mpi"]:
-            barrier()
-            data_shape = np.shape(ldos_data)
-            if use_memmap is not None:
-                if get_rank() == 0:
-                    ldos_data_full = np.memmap(use_memmap,
-                                               shape=(data_shape[0],
-                                                      data_shape[1],
-                                                      data_shape[2],
-                                                      self.parameters.
-                                                      ldos_gridsize),
-                                               mode="w+",
-                                               dtype=np.float64)
-                barrier()
-                if get_rank() != 0:
-                    ldos_data_full = np.memmap(use_memmap,
-                                               shape=(data_shape[0],
-                                                      data_shape[1],
-                                                      data_shape[2],
-                                                      self.parameters.
-                                                      ldos_gridsize),
-                                               mode="r+",
-                                               dtype=np.float64)
-                barrier()
-                ldos_data_full[:, :, :, start_index-1:end_index-1] = \
-                    ldos_data[:, :, :, :]
-                self.local_density_of_states = ldos_data_full
-                return ldos_data_full
-            else:
-                comm = get_comm()
-
-                # First get the indices from all the ranks.
-                indices = np.array(
-                    comm.gather([get_rank(), start_index, end_index],
-                                root=0))
-                ldos_data_full = None
-                if get_rank() == 0:
-                    ldos_data_full = np.empty((data_shape[0], data_shape[1],
-                                               data_shape[2], self.parameters.
-                                               ldos_gridsize),dtype=np.float64)
-                    ldos_data_full[:, :, :, start_index-1:end_index-1] = \
-                        ldos_data[:, :, :, :]
-
-                    # No MPI necessary for first rank. For all the others,
-                    # collect the buffers.
-                    for i in range(1, get_size()):
-                        local_start = indices[i][1]
-                        local_end = indices[i][2]
-                        local_size = local_end-local_start
-                        ldos_local = np.empty(local_size*data_shape[0] *
-                                              data_shape[1]*data_shape[2],
-                                              dtype=np.float64)
-                        comm.Recv(ldos_local, source=i, tag=100 + i)
-                        ldos_data_full[:, :, :, local_start-1:local_end-1] = \
-                            np.reshape(ldos_local, (data_shape[0],
-                                                    data_shape[1],
-                                                    data_shape[2],
-                                                    local_size))[:, :, :, :]
-                else:
-                    comm.Send(ldos_data, dest=0,
-                              tag=get_rank() + 100)
-                barrier()
-                self.local_density_of_states = ldos_data_full
-                return ldos_data_full
-        else:
-            self.local_density_of_states = ldos_data
-            return ldos_data
+        use_memmap : string
+            If not None, a memory mapped file with this name will be used to
+            gather the LDOS. Only has an effect in MPI parallel mode.
+            Usage will reduce RAM footprint while SIGNIFICANTLY
+            impacting disk usage and
+        """
+        return self._read_from_qe_files(path_scheme, units,
+                                        use_memmap, ".xsf", **kwargs)
 
     def read_from_array(self, array, units="1/(eV*A^3)"):
         """
@@ -1245,11 +1195,11 @@ class LDOS(Target):
         -------
         dd_dB: torch.tensor
             (WIP) Returns the scaled (!) derivative of the LDOS w.r.t to
-            the SNAP descriptors.
+            the descriptors.
 
         """
         # For now this only works with ML generated LDOS.
-        # Gradient of the LDOS respect to the SNAP descriptors.
+        # Gradient of the LDOS respect to the descriptors.
         ldos_data.backward(dE_dd)
         dd_dB = used_data_handler.get_test_input_gradient(snapshot_number)
         return dd_dB
@@ -1264,19 +1214,12 @@ class LDOS(Target):
 
     def _gather_density(self, density_values, use_pickled_comm=False):
         """
-        Gathers all SNAP descriptors on rank 0 and sorts them.
-
-        This is useful for e.g. parallel preprocessing.
-        This function removes the extra 3 components that come from parallel
-        processing.
-        I.e. if we have 91 SNAP descriptors, LAMMPS directly outputs us
-        97 (in parallel mode), and this function returns, as to retain the
-        3 x,y,z ones we by default include.
+        Gathers the density on rank 0 and sorts it.
 
         Parameters
         ----------
         density_values : numpy.array
-            Numpy array with the SNAP descriptors of this ranks local grid.
+            Numpy array with the density slice of this ranks local grid.
 
         use_pickled_comm : bool
             If True, the pickled communication route from mpi4py is used.
@@ -1292,7 +1235,7 @@ class LDOS(Target):
         comm = get_comm()
         barrier()
 
-        # Gather the SNAP descriptors into a list.
+        # Gather the densities into a list.
         if use_pickled_comm:
             density_list = comm.gather(density_values, root=0)
         else:
@@ -1331,13 +1274,13 @@ class LDOS(Target):
 
         # Reorder the list.
         if get_rank() == 0:
-            # Prepare the SNAP descriptor array.
+            # Prepare the densities array.
             nx = self.grid_dimensions[0]
             ny = self.grid_dimensions[1]
             nz = self.grid_dimensions[2]
             full_density = np.zeros(
                 [nx, ny, nz, 1])
-            # Fill the full SNAP descriptors array.
+            # Fill the full density array.
             for idx, local_density in enumerate(density_list):
                 # We glue the individual cells back together, and transpose.
                 first_x = int(local_density[0][0])
@@ -1354,3 +1297,142 @@ class LDOS(Target):
                                 last_x-first_x, 1]).transpose([2, 1, 0, 3])
 
         return full_density
+
+    def _read_from_qe_files(self, path_scheme, units,
+                            use_memmap, file_type, **kwargs):
+        """
+        Read the LDOS from QE produced files, i.e. one file per energy level.
+
+        Can currently work with .xsf and .cube files.
+
+        Parameters
+        ----------
+        path_scheme : string
+            Naming scheme for the LDOS .xsf files. Every asterisk will be
+            replaced with an appropriate number for the LDOS files. Before
+            the file name, please make sure to include the proper file path.
+
+        units : string
+            Units the LDOS is saved in.
+
+        use_memmap : string
+            If not None, a memory mapped file with this name will be used to
+            gather the LDOS. Only has an effect in MPI parallel mode.
+            Usage will reduce RAM footprint while SIGNIFICANTLY
+            impacting disk usage and
+        """
+        # Find out the number of digits that are needed to encode this
+        # grid (by QE).
+        digits = int(math.log10(self.parameters.ldos_gridsize)) + 1
+
+        # Iterate over the amount of specified LDOS input files.
+        # QE is a Fortran code, so everything is 1 based.
+        printout("Reading "+str(self.parameters.ldos_gridsize) +
+                 " LDOS files from"+path_scheme+".", min_verbosity=0)
+        ldos_data = None
+        if self.parameters._configuration["mpi"]:
+            local_size = int(np.floor(self.parameters.ldos_gridsize /
+                                      get_size()))
+            start_index = get_rank()*local_size + 1
+            if get_rank()+1 == get_size():
+                local_size += self.parameters.ldos_gridsize % \
+                                     get_size()
+            end_index = start_index+local_size
+        else:
+            start_index = 1
+            end_index = self.parameters.ldos_gridsize + 1
+            local_size = self.parameters.ldos_gridsize
+
+        for i in range(start_index, end_index):
+            tmp_file_name = path_scheme
+            tmp_file_name = tmp_file_name.replace("*", str(i).zfill(digits))
+
+            # Open the cube file
+            if file_type == ".cube":
+                data, meta = read_cube(tmp_file_name)
+            elif file_type == ".xsf":
+                data, meta = read_xsf(tmp_file_name)
+            else:
+                raise Exception("Unknown QE data type.")
+
+            # Once we have read the first cube file, we know the dimensions
+            # of the LDOS and can prepare the array
+            # in which we want to store the LDOS.
+            if i == start_index:
+                data_shape = np.shape(data)
+                ldos_data = np.zeros((data_shape[0], data_shape[1],
+                                      data_shape[2], local_size),
+                                     dtype=np.float64)
+
+            # Convert and then append the LDOS data.
+            data = data*self.convert_units(1, in_units=units)
+            ldos_data[:, :, :, i-start_index] = data[:, :, :]
+
+        # We have to gather the LDOS either file based or not.
+        if self.parameters._configuration["mpi"]:
+            barrier()
+            data_shape = np.shape(ldos_data)
+            if use_memmap is not None:
+                if get_rank() == 0:
+                    ldos_data_full = np.memmap(use_memmap,
+                                               shape=(data_shape[0],
+                                                      data_shape[1],
+                                                      data_shape[2],
+                                                      self.parameters.
+                                                      ldos_gridsize),
+                                               mode="w+",
+                                               dtype=np.float64)
+                barrier()
+                if get_rank() != 0:
+                    ldos_data_full = np.memmap(use_memmap,
+                                               shape=(data_shape[0],
+                                                      data_shape[1],
+                                                      data_shape[2],
+                                                      self.parameters.
+                                                      ldos_gridsize),
+                                               mode="r+",
+                                               dtype=np.float64)
+                barrier()
+                ldos_data_full[:, :, :, start_index-1:end_index-1] = \
+                    ldos_data[:, :, :, :]
+                self.local_density_of_states = ldos_data_full
+                return ldos_data_full
+            else:
+                comm = get_comm()
+
+                # First get the indices from all the ranks.
+                indices = np.array(
+                    comm.gather([get_rank(), start_index, end_index],
+                                root=0))
+                ldos_data_full = None
+                if get_rank() == 0:
+                    ldos_data_full = np.empty((data_shape[0], data_shape[1],
+                                               data_shape[2], self.parameters.
+                                               ldos_gridsize),dtype=np.float64)
+                    ldos_data_full[:, :, :, start_index-1:end_index-1] = \
+                        ldos_data[:, :, :, :]
+
+                    # No MPI necessary for first rank. For all the others,
+                    # collect the buffers.
+                    for i in range(1, get_size()):
+                        local_start = indices[i][1]
+                        local_end = indices[i][2]
+                        local_size = local_end-local_start
+                        ldos_local = np.empty(local_size*data_shape[0] *
+                                              data_shape[1]*data_shape[2],
+                                              dtype=np.float64)
+                        comm.Recv(ldos_local, source=i, tag=100 + i)
+                        ldos_data_full[:, :, :, local_start-1:local_end-1] = \
+                            np.reshape(ldos_local, (data_shape[0],
+                                                    data_shape[1],
+                                                    data_shape[2],
+                                                    local_size))[:, :, :, :]
+                else:
+                    comm.Send(ldos_data, dest=0,
+                              tag=get_rank() + 100)
+                barrier()
+                self.local_density_of_states = ldos_data_full
+                return ldos_data_full
+        else:
+            self.local_density_of_states = ldos_data
+            return ldos_data

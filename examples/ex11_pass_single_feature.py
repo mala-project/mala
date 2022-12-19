@@ -91,8 +91,8 @@ def load_memmap_snapshot():
 
     # Our inputs usually contain x,y,z information, so one single input vector
     # reads [x,y,z,f_0, f_1, ..., f_N] where [f_0, f_1, ..., f_N] is the actual
-    # SNAP feature vector. Now, we select a single feature vector from the
-    # snapshot.
+    # bispectrum feature vector. Now, we select a single feature vector from
+    # the snapshot.
     x = torch.from_numpy(inputs_array[0, 0, 0, 3:].astype(np.float32))
 
     # For some reason, DataScaler changes the shape (N,) -> (1,N), revert that

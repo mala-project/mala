@@ -14,7 +14,7 @@ descriptor_input_types = [
     "qe.out"
 ]
 target_input_types = [
-    ".cube"
+    ".cube", ".xsf"
 ]
 additional_info_input_types = [
     "qe.out"
@@ -195,8 +195,7 @@ class DataConverter:
                           descriptor_save_path=None,
                           target_save_path=None,
                           additional_info_save_path=None,
-                          naming_scheme="ELEM_snapshot*.npy",
-                          starts_at=0,
+                          naming_scheme="ELEM_snapshot*", starts_at=0,
                           file_based_communication=False,
                           descriptor_calculation_kwargs=None,
                           target_calculator_kwargs=None):
@@ -223,13 +222,7 @@ class DataConverter:
 
         naming_scheme : string
             String detailing the naming scheme for the snapshots. * symbols
-            will be replaced with the snapshot number. The naming scheme
-            can also include a file ending. If none is provided, one is picked
-            by MALA by default. Supported file endings:
-
-              - ".npy" - activates the MALA numpy backend.
-              - "json", "bp", "sst", "h5": Activates the OpenPMD backend,
-                with the respective file format (see OpenPMD documentation).
+            will be replaced with the snapshot number.
 
         starts_at : int
             Number of the first snapshot generated using this approach.
@@ -382,14 +375,14 @@ class DataConverter:
                     os.remove(memmap)
 
     def __convert_single_snapshot(self, snapshot_number,
-                                  descriptor_calculation_kwargs,
-                                  target_calculator_kwargs,
-                                  input_path=None,
-                                  output_path=None,
-                                  additional_info_path=None,
-                                  use_memmap=None,
-                                  output_iteration=None,
-                                  input_iteration=None):
+                                descriptor_calculation_kwargs,
+                                target_calculator_kwargs,
+                                input_path=None,
+                                output_path=None,
+                                additional_info_path=None,
+                                use_memmap=None,
+                                output_iteration=None,
+                                input_iteration=None):
         """
         Convert single snapshot from the conversion lists.
 
@@ -411,6 +404,9 @@ class DataConverter:
 
         output_path : string
             If not None, outputs will be saved in this file.
+
+        return_data : bool
+            If True, inputs and outputs will be returned directly.
 
         target_calculator_kwargs : dict
             Dictionary with additional keyword arguments for the calculation
@@ -485,6 +481,14 @@ class DataConverter:
             # If no units are provided we just assume standard units.
             tmp_output = self.target_calculator. \
                 read_from_cube(snapshot["output"],
+                               **target_calculator_kwargs)
+
+        elif description["output"] == ".xsf":
+            target_calculator_kwargs["units"] = original_units["output"]
+            target_calculator_kwargs["use_memmap"] = use_memmap
+            # If no units are provided we just assume standard units.
+            tmp_output = self.target_calculator.\
+                read_from_xsf(snapshot["output"],
                                **target_calculator_kwargs)
 
         elif description["output"] is None:

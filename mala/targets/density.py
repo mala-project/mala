@@ -5,20 +5,21 @@ import time
 import ase.io
 from ase.units import Rydberg, Bohr, m
 from functools import cached_property
+import numpy as np
+import openpmd_api as io
 try:
     import total_energy as te
 except ModuleNotFoundError:
     pass
-import numpy as np
-import openpmd_api as io
 
 from mala.common.parallelizer import printout, parallel_warn, barrier, get_size
 from mala.targets.target import Target
 from mala.targets.calculation_helpers import integrate_values_on_spacing
 from mala.targets.cube_parser import read_cube, write_cube
+from mala.targets.calculation_helpers import integrate_values_on_spacing
+from mala.targets.xsf_parser import read_xsf
 from mala.targets.atomic_force import AtomicForce
-from mala.descriptors.gaussian import GaussianDescriptors
-from mala.common.parallelizer import get_rank
+from mala.descriptors.atomic_density import AtomicDensity
 
 
 class Density(Target):
@@ -123,6 +124,31 @@ class Density(Target):
         return return_density_object
 
     @classmethod
+    def from_xsf_file(cls, params, path, units="1/A^3"):
+        """
+        Create a Density calculator from a xsf file.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this DOS object.
+
+        path : string
+            Name of the xsf file.
+
+        units : string
+            Units the density is saved in.
+
+        Returns
+        -------
+        dens_object : mala.targets.density.Density
+            Density object created from LDOS object.
+        """
+        return_density_object = Density(params)
+        return_density_object.read_from_xsf(path, units=units)
+        return return_density_object
+
+    @classmethod
     def from_openpmd_file(cls, params, path):
         return_ldos_object = Density(params)
         return_ldos_object.read_from_openpmd_file(path)
@@ -166,6 +192,7 @@ class Density(Target):
             ldos_object.number_of_electrons_from_eigenvals
         return_density_object.local_grid = ldos_object.local_grid
         return_density_object._parameters_full = ldos_object._parameters_full
+        return_density_object.y_planes = ldos_object.y_planes
 
         # If the source calculator has LDOS data, then this new object
         # can have DOS data.
@@ -352,6 +379,23 @@ class Density(Target):
         self.density = data
         return data
 
+    def read_from_xsf(self, path, units="1/A^3", **kwargs):
+        """
+        Read the density data from an xsf file.
+
+        Parameters
+        ----------
+        path : string
+            Name of the xsf file.
+
+        units : string
+            Units the density is saved in. Usually none.
+        """
+        printout("Reading density from .cube file ", path, min_verbosity=0)
+        data, meta = read_xsf(path)*self.convert_units(1, in_units=units)
+        self.density = data
+        return data
+
     def read_from_array(self, array, units="1/A^3"):
         """
         Read the density data from a numpy array.
@@ -407,9 +451,9 @@ class Density(Target):
 
         meta["atoms"] = atom_list
         meta["org"] = [0.0, 0.0, 0.0]
-        meta["xvec"] = self.voxel[0]
-        meta["yvec"] = self.voxel[1]
-        meta["zvec"] = self.voxel[2]
+        meta["xvec"] = self.voxel[0] / Bohr
+        meta["yvec"] = self.voxel[1] / Bohr
+        meta["zvec"] = self.voxel[2] / Bohr
         write_cube(density_data, meta, file_name)
 
     # Calculations
@@ -568,7 +612,7 @@ class Density(Target):
                 else:
                     if grid_dimensions is None:
                         grid_dimensions = self.grid_dimensions
-                    return density_data.reshape(grid_dimensions + [1])
+                    return density_data.reshape(grid_dimensions)
             else:
                 return density_data
         else:
@@ -800,9 +844,28 @@ class Density(Target):
             number_of_gridpoints_mala = density_data.shape[0]
         else:
             raise Exception("Density data has wrong dimensions. ")
-        if number_of_gridpoints_mala != number_of_gridpoints:
-            raise Exception("Grid is inconsistent between MALA and"
-                            " Quantum Espresso")
+
+        # If MPI is enabled, we NEED z-splitting for this to work.
+        if self._parameters_full.use_mpi and \
+                not self._parameters_full.descriptors.use_z_splitting:
+            raise Exception("Cannot calculate the total energy if "
+                            "the real space grid was not split in "
+                            "z-direction.")
+
+        # Check if we need to test the grid points.
+        # We skip the check only if z-splitting is enabled and unequal
+        # z-splits are to be expected, and no
+        # y-splitting is enabled (since y-splitting currently works
+        # for equal z-splitting anyway).
+        if self._parameters_full.use_mpi and \
+           self._parameters_full.descriptors.use_y_splitting == 0 \
+           and int(self.grid_dimensions[2] / get_size()) != \
+                  (self.grid_dimensions[2] / get_size()):
+            pass
+        else:
+            if number_of_gridpoints_mala != number_of_gridpoints:
+                raise Exception("Grid is inconsistent between MALA and"
+                                " Quantum Espresso")
 
         # Now we need to reshape the density.
         density_for_qe = None
@@ -817,8 +880,17 @@ class Density(Target):
             density_for_qe = self.get_density(density_data,
                                               convert_to_threedimensional=True)
 
-            density_for_qe = np.reshape(density_for_qe, [number_of_gridpoints,
-                                                         1], order='F')
+            density_for_qe = np.reshape(density_for_qe,
+                                        [number_of_gridpoints_mala, 1],
+                                        order='F')
+
+            # If there is an inconsistency between MALA and QE (which
+            # can only happen in the uneven z-splitting case at the moment)
+            # we need to pad the density array.
+            if density_for_qe.shape[0] < number_of_gridpoints:
+                grid_diff = number_of_gridpoints - number_of_gridpoints_mala
+                density_for_qe = np.pad(density_for_qe,
+                                        pad_width=((0, grid_diff), (0, 0)))
 
         # QE has the density in 1/Bohr^3
         density_for_qe *= self.backconvert_units(1, "1/Bohr^3")
@@ -829,7 +901,7 @@ class Density(Target):
         positions_for_qe = self.get_scaled_positions_for_qe(atoms_Angstrom)
 
         if self._parameters_full.descriptors.\
-                use_gaussian_descriptors_energy_formula:
+                use_atomic_density_energy_formula:
             # Calculate the Gaussian descriptors for the calculation of the
             # structure factors.
             barrier()
@@ -887,9 +959,9 @@ class Density(Target):
         # Ewald energy and the structure factor can be skipped.
         te.set_positions(np.transpose(positions_for_qe), number_of_atoms,
                          self._parameters_full.descriptors. \
-                         use_gaussian_descriptors_energy_formula,
+                         use_atomic_density_energy_formula,
                          self._parameters_full.descriptors. \
-                         use_gaussian_descriptors_energy_formula)
+                         use_atomic_density_energy_formula)
         barrier()
         t1 = time.perf_counter()
         printout("time used by set_positions: ", t1 - t0,
@@ -898,7 +970,7 @@ class Density(Target):
         barrier()
 
         if self._parameters_full.descriptors.\
-                use_gaussian_descriptors_energy_formula:
+                use_atomic_density_energy_formula:
             t0 = time.perf_counter()
             gaussian_descriptors = \
                 np.reshape(gaussian_descriptors,
@@ -907,7 +979,7 @@ class Density(Target):
                 np.reshape(reference_gaussian_descriptors,
                            [number_of_gridpoints, 1], order='F')
             sigma = self._parameters_full.descriptors.\
-                gaussian_descriptors_sigma
+                atomic_density_sigma
             sigma = sigma / Bohr
             te.set_positions_gauss(self._parameters_full.verbosity,
                                    gaussian_descriptors,
@@ -931,6 +1003,6 @@ class Density(Target):
         return atoms_Angstrom
 
     def _get_gaussian_descriptors_for_structure_factors(self, atoms, grid):
-        descriptor_calculator = GaussianDescriptors(self._parameters_full)
+        descriptor_calculator = AtomicDensity(self._parameters_full)
         return descriptor_calculator.\
             calculate_from_atoms(atoms, grid)[0][:, 6:]

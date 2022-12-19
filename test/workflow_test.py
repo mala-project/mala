@@ -37,15 +37,15 @@ class TestFullWorkflow:
         Test whether MALA can preprocess data.
 
         This means reading the LDOS from cube files and calculating
-        SNAP descriptors.
+        bispectrum descriptors.
         The data necessary for this is currently not in the data repo!
         """
 
         # Set up parameters.
         test_parameters = mala.Parameters()
-        test_parameters.descriptors.descriptor_type = "SNAP"
-        test_parameters.descriptors.twojmax = 6
-        test_parameters.descriptors.rcutfac = 4.67637
+        test_parameters.descriptors.descriptor_type = "Bispectrum"
+        test_parameters.descriptors.bispectrum_twojmax = 6
+        test_parameters.descriptors.bispectrum_cutoff = 4.67637
         test_parameters.descriptors.descriptors_contain_xyz = True
         test_parameters.targets.target_type = "LDOS"
         test_parameters.targets.ldos_gridsize = 11

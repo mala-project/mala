@@ -51,7 +51,7 @@ class Predictor(Runner):
             Path from which to read the atomic configuration.
 
         gather_ldos : bool
-            Only important if MPI is used. If True, all SNAP descriptors
+            Only important if MPI is used. If True, all descriptors
             are gathered on rank 0, and the pass is performed there.
             Helpful for using multiple CPUs for descriptor calculations
             and only one for network pass.
@@ -76,7 +76,7 @@ class Predictor(Runner):
             ASE atoms for which the prediction should be done.
 
         gather_ldos : bool
-            Only important if MPI is used. If True, all SNAP descriptors
+            Only important if MPI is used. If True, all descriptors
             are gathered on rank 0, and the pass is performed there.
             Helpful for using multiple CPUs for descriptor calculations
             and only one for network pass.
@@ -89,7 +89,7 @@ class Predictor(Runner):
         # Make sure no data lingers in the target calculator.
         self.data.target_calculator.invalidate_target()
 
-        # Calculate SNAP descriptors.
+        # Calculate descriptors.
         snap_descriptors, local_size = self.data.descriptor_calculator.\
             calculate_from_atoms(atoms, self.data.grid_dimension)
 
@@ -99,7 +99,7 @@ class Predictor(Runner):
                                              [atoms, self.data.grid_dimension])
         feature_length = self.data.descriptor_calculator.fingerprint_length
 
-        # The actual calculation of the LDOS from the SNAP descriptors depends
+        # The actual calculation of the LDOS from the descriptors depends
         # on whether we run in parallel or serial. In the former case,
         # each batch is forwarded individually (for now), in the latter
         # case, everything is forwarded at once.
@@ -155,7 +155,7 @@ class Predictor(Runner):
 
     def _forward_snap_descriptors(self, snap_descriptors,
                                   local_data_size=None):
-        """Forward a scaled tensor of SNAP descriptors through the NN."""
+        """Forward a scaled tensor of descriptors through the NN."""
         if local_data_size is None:
             local_data_size = self.data.grid_size
         predicted_outputs = \

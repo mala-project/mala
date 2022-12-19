@@ -100,7 +100,7 @@ employed via
 
 Thus, a network pass is performed *for every point in space*.
 :math:`B(j, \boldsymbol{r})` are some descriptors that capture the local
-environment. Often SNAP descriptors are used. :math:`\boldsymbol{\lambda}`
+environment. Often bispectrum descriptors are used. :math:`\boldsymbol{\lambda}`
 are the hyperparameters that characterize the neural network.
 
 For more detailed information please refer to our
