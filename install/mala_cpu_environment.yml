@@ -91,7 +91,7 @@ dependencies:
   - numpy=1.22.2=py38h6ae9a64_0
   - oauthlib=3.2.0=pyhd8ed1ab_0
   - openjpeg=2.4.0=hb52868f_1
-  - openpmd-api=0.14.5=py310hb1c60db_3
+  - openpmd-api=0.14.5=py38h1f0dae1_3
   - openssl=1.1.1l=h7f98852_0
   - optuna=2.10.0=pyhd8ed1ab_0
   - packaging=21.3=pyhd8ed1ab_0
@@ -113,7 +113,7 @@ dependencies:
   - python=3.8.12=ha38a3c6_3_cpython
   - python-dateutil=2.8.2=pyhd8ed1ab_0
   - python_abi=3.8=2_cp38
-  - pytorch=1.10.2=cpu_py38hb2150b6_0
+  - pytorch=1.10.1=cpu_py38hb2150b6_0
   - pytorch-cpu=1.10.2=cpu_py38h718b53a_0
   - pytz=2021.3=pyhd8ed1ab_0
   - pyu2f=0.1.5=pyhd8ed1ab_0
