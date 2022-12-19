@@ -1,4 +1,4 @@
-"""Base class for all calculators that deal with physical data"""
+"""Base class for all calculators that deal with physical data."""
 from abc import ABC, abstractmethod
 import os
 
@@ -38,7 +38,7 @@ class PhysicalData(ABC):
     @abstractmethod
     def si_dimension(self):
         """
-        Dictionary containing the SI unit dimensions in OpenPMD format
+        Dictionary containing the SI unit dimensions in OpenPMD format.
 
         Needed for OpenPMD interface.
         """

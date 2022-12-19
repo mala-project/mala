@@ -160,7 +160,7 @@ class Target(PhysicalData):
     @abstractmethod
     def si_dimension(self):
         """
-        Dictionary containing the SI unit dimensions in OpenPMD format
+        Dictionary containing the SI unit dimensions in OpenPMD format.
 
         Needed for OpenPMD interface.
         """

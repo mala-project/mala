@@ -152,6 +152,24 @@ class LDOS(Target):
 
     @classmethod
     def from_openpmd_file(cls, params, path):
+        """
+        Create an LDOS calculator from an OpenPMD file.
+
+        Supports all OpenPMD supported file endings.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        path : string
+            Path to OpenPMD file.
+
+        Returns
+        -------
+        ldos_calculator : mala.targets.ldos.LDOS
+            LDOS calculator object.
+        """
         return_ldos_object = LDOS(params)
         return_ldos_object.read_from_openpmd_file(path)
         return return_ldos_object
@@ -181,7 +199,7 @@ class LDOS(Target):
 
     @property
     def si_dimension(self):
-        """Dictionary containing the SI unit dimensions in OpenPMD format"""
+        """Dictionary containing the SI unit dimensions in OpenPMD format."""
         return {io.Unit_Dimension.M: -1, io.Unit_Dimension.L: -5,
                 io.Unit_Dimension.T: 2}
 

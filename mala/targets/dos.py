@@ -212,7 +212,7 @@ class DOS(Target):
 
     @property
     def si_dimension(self):
-        """Dictionary containing the SI unit dimensions in OpenPMD format"""
+        """Dictionary containing the SI unit dimensions in OpenPMD format."""
         return {io.Unit_Dimension.M: -1, io.Unit_Dimension.L: -2,
                 io.Unit_Dimension.T: 2}
 

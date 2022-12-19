@@ -150,9 +150,27 @@ class Density(Target):
 
     @classmethod
     def from_openpmd_file(cls, params, path):
-        return_ldos_object = Density(params)
-        return_ldos_object.read_from_openpmd_file(path)
-        return return_ldos_object
+        """
+        Create an Density calculator from an OpenPMD file.
+
+        Supports all OpenPMD supported file endings.
+
+        Parameters
+        ----------
+        params : mala.common.parameters.Parameters
+            Parameters used to create this LDOS object.
+
+        path : string
+            Path to OpenPMD file.
+
+        Returns
+        -------
+        density_calculator : mala.targets.density.Density
+            Density calculator object.
+        """
+        return_density_object = Density(params)
+        return_density_object.read_from_openpmd_file(path)
+        return return_density_object
 
     @classmethod
     def from_ldos_calculator(cls, ldos_object):
@@ -226,7 +244,7 @@ class Density(Target):
 
     @property
     def si_dimension(self):
-        """Dictionary containing the SI unit dimensions in OpenPMD format"""
+        """Dictionary containing the SI unit dimensions in OpenPMD format."""
         return {io.Unit_Dimension.L: -3}
 
     @property

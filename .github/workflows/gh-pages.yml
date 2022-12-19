@@ -29,7 +29,7 @@ jobs:
 
       - name: Check docstrings
          # Ignoring the cached_properties because pydocstyle (sometimes?) treats them as functions.
-        run: pydocstyle --convention=numpy --ignore-decorators=cached_property mala
+        run: pydocstyle --convention=numpy --ignore-decorators=[cached_property,property] mala
 
   build-and-deploy-pages:
     needs: test-docstrings
