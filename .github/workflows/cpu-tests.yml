@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set environment variables
         run: |
@@ -37,7 +37,7 @@ jobs:
           echo "IMAGE_REPO=$IMAGE_REPO"
 
       - name: Restore cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-docker
         with:
           path: ${{ env.DOCKER_CACHE_PATH }}
@@ -114,7 +114,7 @@ jobs:
     steps:
       - name: "Prepare environment: Restore cache"
         if: env.DOCKER_TAG != 'latest'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-docker
         with:
           path: ${{ env.DOCKER_CACHE_PATH }}
@@ -145,7 +145,7 @@ jobs:
           [[ $(docker inspect --format '{{json .State.Running}}' mala-cpu) == 'true' ]]
 
       - name: Check out repository (mala)
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install mala package
         # Exec all commands inside the mala-cpu container
@@ -168,7 +168,7 @@ jobs:
           diff env_1.yml env_2.yml
 
       - name: Check out repository (data)
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: mala-project/test-data
           path: mala_data
@@ -194,11 +194,11 @@ jobs:
       || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: "Prepare environment: Restore cache"
         if: env.DOCKER_TAG != 'latest'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-docker
         with:
           path: ${{ env.DOCKER_CACHE_PATH }}
