@@ -336,6 +336,9 @@ class ParametersDescriptors(ParametersBase):
         self.atomic_density_sigma = None
         self.atomic_density_cutoff = None
 
+        # Everything concerning the minterpy descriptors.
+        self.minterpy_point_list = []
+
         # For accelerated hyperparameter optimization.
         self.acsd_points = 100
 
