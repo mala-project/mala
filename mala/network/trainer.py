@@ -400,7 +400,7 @@ class Trainer(Runner):
 
         # Scale the learning rate according to horovod.
         if self.parameters_full.use_horovod:
-            if hvd.size() > 1:
+            if hvd.size() > 1 and self.last_epoch > 0:
                 printout("Rescaling learning rate because multiple workers are"
                          " used for training.", min_verbosity=1)
                 self.parameters.learning_rate = self.parameters.learning_rate \
