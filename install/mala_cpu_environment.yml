@@ -113,7 +113,7 @@ dependencies:
   - python=3.8.12=ha38a3c6_3_cpython
   - python-dateutil=2.8.2=pyhd8ed1ab_0
   - python_abi=3.8=2_cp38
-  - pytorch=1.10.2=cpu_py38hb2150b6_0
+  - pytorch=1.10.2=cpu_py38hb2150b6_1
   - pytorch-cpu=1.10.2=cpu_py38h718b53a_0
   - pytz=2021.3=pyhd8ed1ab_0
   - pyu2f=0.1.5=pyhd8ed1ab_0
