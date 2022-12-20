@@ -42,7 +42,7 @@ class AtomicDensity(Descriptor):
     @property
     def data_name(self):
         """Get a string that describes the target (for e.g. metadata)."""
-        return "Gaussian"
+        return "AtomicDensity"
 
     @staticmethod
     def convert_units(array, in_units="None"):
