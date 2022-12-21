@@ -116,11 +116,20 @@ class PhysicalData(ABC):
         """
         import openpmd_api as io
 
+        # The union operator for dicts is only supported starting with
+        # python 3.9. Currently, MALA works down to python 3.8; For now,
+        # I think it is good to keep it that way.
+        # I will leave this code in for now, because that may change in the
+        # future.
+        # series = io.Series(path, io.Access.read_only,
+        #                    options=json.dumps(
+        #                         {"defer_iteration_parsing": True} |
+        #                         self.parameters.
+        #                             _configuration["openpmd_configuration"]))
+        options = self.parameters._configuration["openpmd_configuration"].copy()
+        options["defer_iteration_parsing"] = True
         series = io.Series(path, io.Access.read_only,
-                           options=json.dumps(
-                                {"defer_iteration_parsing": True} |
-                                self.parameters.
-                                    _configuration["openpmd_configuration"]))
+                           options=json.dumps(options))
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:
@@ -217,12 +226,20 @@ class PhysicalData(ABC):
             Path to the openPMD file.
         """
         import openpmd_api as io
-
+        # The union operator for dicts is only supported starting with
+        # python 3.9. Currently, MALA works down to python 3.8; For now,
+        # I think it is good to keep it that way.
+        # I will leave this code in for now, because that may change in the
+        # future.
+        # series = io.Series(path, io.Access.read_only,
+        #                    options=json.dumps(
+        #                         {"defer_iteration_parsing": True} |
+        #                         self.parameters.
+        #                             _configuration["openpmd_configuration"]))
+        options = self.parameters._configuration["openpmd_configuration"].copy()
+        options["defer_iteration_parsing"] = True
         series = io.Series(path, io.Access.read_only,
-                           options=json.dumps(
-                                {"defer_iteration_parsing": True} |
-                                self.parameters.
-                                    _configuration["openpmd_configuration"]))
+                           options=json.dumps(options))
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:
