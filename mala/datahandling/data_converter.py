@@ -450,11 +450,6 @@ class DataConverter:
                 tmp_input = self.descriptor_calculator. \
                     gather_descriptors(tmp_input)
 
-            # Cut the xyz information if requested by the user.
-            if get_rank() == 0:
-                if self.descriptor_calculator.descriptors_contain_xyz is False:
-                    tmp_input = tmp_input[:, :, :, 3:]
-
         elif description["input"] is None:
             # In this case, only the output is processed.
             pass
