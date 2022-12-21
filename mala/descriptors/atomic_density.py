@@ -183,6 +183,7 @@ class AtomicDensity(Descriptor):
         # In comparison to SNAP, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
         # if we operate without MPI.
+        self.grid_dimensions = [nx, ny, nz]
         if self.parameters._configuration["mpi"]:
             self.fingerprint_length = 4
             return gaussian_descriptors_np.copy(), nrows_ggrid
