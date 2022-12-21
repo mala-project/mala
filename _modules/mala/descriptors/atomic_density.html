@@ -256,6 +256,7 @@
         <span class="c1"># In comparison to SNAP, the atomic density always returns</span>
         <span class="c1"># in the &quot;local mode&quot;. Thus we have to make some slight adjustments</span>
         <span class="c1"># if we operate without MPI.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nz</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="mi">4</span>
             <span class="k">return</span> <span class="n">gaussian_descriptors_np</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">nrows_ggrid</span>
