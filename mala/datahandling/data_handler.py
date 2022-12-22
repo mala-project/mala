@@ -47,41 +47,42 @@ class DataHandler:
         Used to scale the output data. If None, then one will be created by
         this class.
     """
+    ##############################
+    # Constructors
+    ##############################
 
     def __init__(self, parameters: Parameters, target_calculator=None,
                  descriptor_calculator=None, input_data_scaler=None,
                  output_data_scaler=None):
         self.parameters: ParametersData = parameters.data
         self.use_horovod = parameters.use_horovod
-        self.training_data_set = None
 
-        self.validation_data_set = None
+        # Calculators used to parse data from compatible files.
+        self.target_calculator = target_calculator
+        if self.target_calculator is None:
+            self.target_calculator = Target(parameters)
+        self.descriptor_calculator = descriptor_calculator
+        if self.descriptor_calculator is None:
+            self.descriptor_calculator = Descriptor(parameters)
 
-        self.test_data_set = None
-
+        # Data will be scaled per user specification.
         self.input_data_scaler = input_data_scaler
         if self.input_data_scaler is None:
             self.input_data_scaler \
                 = DataScaler(self.parameters.input_rescaling_type,
                              use_horovod=self.use_horovod)
-
         self.output_data_scaler = output_data_scaler
         if self.output_data_scaler is None:
             self.output_data_scaler \
                 = DataScaler(self.parameters.output_rescaling_type,
                              use_horovod=self.use_horovod)
 
-        self.target_calculator = target_calculator
-        if self.target_calculator is None:
-            self.target_calculator = Target(parameters)
-
-        self.descriptor_calculator = descriptor_calculator
-        if self.descriptor_calculator is None:
-            self.descriptor_calculator = Descriptor(parameters)
-
-        self.nr_snapshots = 0
+        # Dimensionalities of data.
+        self.input_dimension = 0
+        self.output_dimension = 0
         self.grid_dimension = [0, 0, 0]
         self.grid_size = 0
+        self.nr_snapshots = 0
 
         # Actual data points in the different categories.
         self.nr_training_data = 0
@@ -93,57 +94,45 @@ class DataHandler:
         self.nr_test_snapshots = 0
         self.nr_validation_snapshots = 0
 
+        # Arrays and data sets containing the actual data.
         self.training_data_inputs = torch.empty(0)
-        """
-        Torch tensor holding all scaled training data inputs.
-        """
-
         self.validation_data_inputs = torch.empty(0)
-        """
-        Torch tensor holding all scaled validation data inputs.
-        """
-
         self.test_data_inputs = torch.empty(0)
-        """
-        Torch tensor holding all scaled testing data inputs.
-        """
-
         self.training_data_outputs = torch.empty(0)
-        """
-        Torch tensor holding all scaled training data output.
-        """
-
         self.validation_data_outputs = torch.empty(0)
-        """
-        Torch tensor holding all scaled validation data output.
-        """
-
         self.test_data_outputs = torch.empty(0)
-        """
-        Torch tensor holding all scaled testing data output.
-        """
+        self.training_data_set = None
+        self.validation_data_set = None
+        self.test_data_set = None
 
-    def get_input_dimension(self):
-        """
-        Get the dimension of the input vector.
+    ##############################
+    # Properties
+    ##############################
 
-        Returns
-        -------
-        input_dimension : int
-            Dimension of the input vector.
-        """
-        return self.input_dimension
+    @property
+    def input_dimension(self):
+        """Feature dimension of input data."""
+        return self._input_dimension
 
-    def get_output_dimension(self):
-        """
-        Get the dimension of the output vector.
+    @input_dimension.setter
+    def input_dimension(self, new_dimension):
+        self._input_dimension = new_dimension
 
-        Returns
-        -------
-        output_dimension : int
-            Dimension of the output vector.
-        """
-        return self.output_dimension
+    @property
+    def output_dimension(self):
+        """Feature dimension of output data."""
+        return self._output_dimension
+
+    @output_dimension.setter
+    def output_dimension(self, new_dimension):
+        self._output_dimension = new_dimension
+
+    ##############################
+    # Public methods
+    ##############################
+
+    # Adding/Deleting data
+    ######################
 
     def add_snapshot(self, input_npy_file, input_npy_directory,
                      output_npy_file, output_npy_directory, add_snapshot_as,
@@ -212,6 +201,9 @@ class DataHandler:
         self.nr_test_snapshots = 0
         self.nr_validation_snapshots = 0
         self.parameters.snapshot_directories_list = []
+
+    # Preparing data
+    ######################
 
     def prepare_data(self, reparametrize_scaler=True):
         """
@@ -284,6 +276,19 @@ class DataHandler:
         # allows for parallel I/O.
         barrier()
 
+    def prepare_for_testing(self):
+        """
+        Prepare DataHandler for usage within Tester class.
+
+        Ensures that lazily-loaded data sets do not perform unnecessary I/O
+        operations. Only needed in Tester class.
+        """
+        if self.parameters.use_lazy_loading:
+            self.test_data_set.return_outputs_directly = True
+
+    # Training  / Testing
+    ######################
+
     def mix_datasets(self):
         """
         For lazily-loaded data sets, the snapshot ordering is (re-)mixed.
@@ -293,6 +298,60 @@ class DataHandler:
         """
         if self.parameters.use_lazy_loading:
             self.training_data_set.mix_datasets()
+
+    def get_test_input_gradient(self, snapshot_number):
+        """
+        Get the gradient of the test inputs for an entire snapshot.
+
+        This gradient will be returned as scaled Tensor.
+        The reason the gradient is returned (rather then returning the entire
+        inputs themselves) is that by slicing a variable, pytorch no longer
+        considers it a "leaf" variable and will stop tracking and evaluating
+        its gradient. Thus, it is easier to obtain the gradient and then
+        slice it.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            Number of the snapshot for which the entire test inputs.
+
+        Returns
+        -------
+        torch.Tensor
+            Tensor holding the gradient.
+
+        """
+        if self.parameters.use_lazy_loading:
+            # This fails if an incorrect snapshot was loaded.
+            if self.test_data_set.currently_loaded_file != snapshot_number:
+                raise Exception("Cannot calculate gradients, wrong file "
+                                "was lazily loaded.")
+            return self.test_data_set.input_data.grad
+        else:
+            return self.test_data_inputs.\
+                       grad[self.grid_size*snapshot_number:
+                            self.grid_size*(snapshot_number+1)]
+
+    def get_snapshot_calculation_output(self, snapshot_number):
+        """
+        Get the path to the output file for a specific snapshot.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            Snapshot for which the calculation output should be returned.
+
+        Returns
+        -------
+        calculation_output : string
+            Path to the calculation output for this snapshot.
+
+        """
+        return self.parameters.snapshot_directories_list[snapshot_number].\
+            calculation_output
+
+    # Debugging
+    ######################
 
     def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type,
                                              units, convert3Dto1D=False):
@@ -332,9 +391,9 @@ class DataHandler:
         # If desired, the dimensions can be changed.
         if convert3Dto1D:
             if data_type == "in":
-                data_dimension = self.get_input_dimension()
+                data_dimension = self.input_dimension
             else:
-                data_dimension = self.get_output_dimension()
+                data_dimension = self.output_dimension
             desired_dimensions = [self.grid_size, data_dimension]
         else:
             desired_dimensions = None
@@ -385,66 +444,12 @@ class DataHandler:
             np.save(os.path.join(directory, tmp_file_name + ".npy"), tmp_array)
             i += 1
 
-    def get_snapshot_calculation_output(self, snapshot_number):
-        """
-        Get the path to the output file for a specific snapshot.
+    ##############################
+    # Private methods
+    ##############################
 
-        Parameters
-        ----------
-        snapshot_number : int
-            Snapshot for which the calculation output should be returned.
-
-        Returns
-        -------
-        calculation_output : string
-            Path to the calculation output for this snapshot.
-
-        """
-        return self.parameters.snapshot_directories_list[snapshot_number].\
-            calculation_output
-
-    def prepare_for_testing(self):
-        """
-        Prepare DataHandler for usage within Tester class.
-
-        Ensures that lazily-loaded data sets do not perform unnecessary I/O
-        operations. Only needed in Tester class.
-        """
-        if self.parameters.use_lazy_loading:
-            self.test_data_set.return_outputs_directly = True
-
-    def get_test_input_gradient(self, snapshot_number):
-        """
-        Get the gradient of the test inputs for an entire snapshot.
-
-        This gradient will be returned as scaled Tensor.
-        The reason the gradient is returned (rather then returning the entire
-        inputs themselves) is that by slicing a variable, pytorch no longer
-        considers it a "leaf" variable and will stop tracking and evaluating
-        its gradient. Thus, it is easier to obtain the gradient and then
-        slice it.
-
-        Parameters
-        ----------
-        snapshot_number : int
-            Number of the snapshot for which the entire test inputs.
-
-        Returns
-        -------
-        torch.Tensor
-            Tensor holding the gradient.
-
-        """
-        if self.parameters.use_lazy_loading:
-            # This fails if an incorrect snapshot was loaded.
-            if self.test_data_set.currently_loaded_file != snapshot_number:
-                raise Exception("Cannot calculate gradients, wrong file "
-                                "was lazily loaded.")
-            return self.test_data_set.input_data.grad
-        else:
-            return self.test_data_inputs.\
-                       grad[self.grid_size*snapshot_number:
-                            self.grid_size*(snapshot_number+1)]
+    # Loading data
+    ######################
 
     def __check_snapshots(self):
         """Check the snapshots for consistency."""
@@ -590,13 +595,13 @@ class DataHandler:
                                                   self.grid_dimension[0],
                                                   self.grid_dimension[1],
                                                   self.grid_dimension[2],
-                                                  self.get_input_dimension()),
+                                                  self.input_dimension),
                                                  dtype=np.float32)
             self.training_data_outputs = np.zeros((self.nr_training_snapshots,
                                                    self.grid_dimension[0],
                                                    self.grid_dimension[1],
                                                    self.grid_dimension[2],
-                                                   self.get_output_dimension()),
+                                                   self.output_dimension),
                                                   dtype=np.float32)
         else:
             # TODO: Get rid of this.
@@ -610,14 +615,14 @@ class DataHandler:
                  self.grid_dimension[0],
                  self.grid_dimension[1],
                  self.grid_dimension[2],
-                 self.get_input_dimension()),
+                 self.input_dimension),
                 dtype=np.float32)
             self.validation_data_outputs = np.zeros(
                 (self.nr_validation_snapshots,
                  self.grid_dimension[0],
                  self.grid_dimension[1],
                  self.grid_dimension[2],
-                 self.get_output_dimension()),
+                 self.output_dimension),
                 dtype=np.float32)
         else:
             # TODO: Get rid of this.
@@ -631,316 +636,32 @@ class DataHandler:
                                               self.grid_dimension[0],
                                               self.grid_dimension[1],
                                               self.grid_dimension[2],
-                                              self.get_input_dimension()),
+                                              self.input_dimension),
                                              dtype=np.float32)
             self.test_data_outputs = np.zeros((self.nr_test_snapshots,
                                                self.grid_dimension[0],
                                                self.grid_dimension[1],
                                                self.grid_dimension[2],
-                                               self.get_output_dimension()),
+                                               self.output_dimension),
                                               dtype=np.float32)
             if self.nr_test_data > 0:
                 self.test_data_inputs = np.zeros((self.nr_test_snapshots,
                                                   self.grid_dimension[0],
                                                   self.grid_dimension[1],
                                                   self.grid_dimension[2],
-                                                  self.get_input_dimension()),
+                                                  self.input_dimension),
                                                  dtype=np.float32)
                 self.test_data_outputs = np.zeros((self.nr_test_snapshots,
                                                    self.grid_dimension[0],
                                                    self.grid_dimension[1],
                                                    self.grid_dimension[2],
-                                                   self.get_output_dimension()),
+                                                   self.output_dimension),
                                                   dtype=np.float32)
         # Reordering the lists.
         snapshot_order = {'tr': 0, 'va': 1, 'te': 2}
         self.parameters.snapshot_directories_list.sort(key=lambda d:
                                                        snapshot_order
                                                        [d.snapshot_function])
-
-    def __parametrize_scalers(self):
-        """Use the training data to parametrize the DataScalers."""
-        ##################
-        # Inputs.
-        ##################
-
-        # If we do lazy loading, we have to iterate over the files one at a
-        # time and add them to the fit, i.e. incrementally updating max/min
-        # or mean/std. If we DON'T do lazy loading, we can simply load the
-        # training data (we will need it later anyway) and perform the
-        # scaling. This should save some performance.
-
-        if self.parameters.use_lazy_loading:
-            self.input_data_scaler.start_incremental_fitting()
-            # We need to perform the data scaling over the entirety of the
-            # training data.
-            for snapshot in self.parameters.snapshot_directories_list:
-                # Data scaling is only performed on the training data sets.
-                if snapshot.snapshot_function == "tr":
-                    if snapshot.snapshot_type == "numpy":
-                        tmp = self.descriptor_calculator. \
-                            read_from_numpy_file(
-                            os.path.join(snapshot.input_npy_directory,
-                                         snapshot.input_npy_file),
-                                         units=snapshot.input_units)
-                    elif snapshot.snapshot_type == "openpmd":
-                        tmp = self.descriptor_calculator. \
-                            read_from_openpmd_file(
-                            os.path.join(snapshot.input_npy_directory,
-                                         snapshot.input_npy_file))
-                    else:
-                        raise Exception("Unknown snapshot file type.")
-
-                    # The scalers will later operate on torch Tensors so we
-                    # have to make sure they are fitted on
-                    # torch Tensors as well. Preprocessing the numpy data as
-                    # follows does NOT load it into memory, see
-                    # test/tensor_memory.py
-                    tmp = np.array(tmp)
-                    tmp = tmp.astype(np.float32)
-                    tmp = tmp.reshape([self.grid_size,
-                                       self.get_input_dimension()])
-                    tmp = torch.from_numpy(tmp).float()
-                    self.input_data_scaler.incremental_fit(tmp)
-
-            self.input_data_scaler.finish_incremental_fitting()
-
-        else:
-            self.__load_data("tr", "input")
-            self.input_data_scaler.fit(self.training_data_inputs)
-
-        printout("Input scaler parametrized.", min_verbosity=1)
-
-        ##################
-        # Output.
-        ##################
-
-        # If we do lazy loading, we have to iterate over the files one at a
-        # time and add them to the fit,
-        # i.e. incrementally updating max/min or mean/std.
-        # If we DON'T do lazy loading, we can simply load the training data
-        # (we will need it later anyway)
-        # and perform the scaling. This should save some performance.
-
-        if self.parameters.use_lazy_loading:
-            i = 0
-            self.output_data_scaler.start_incremental_fitting()
-            # We need to perform the data scaling over the entirety of the
-            # training data.
-            for snapshot in self.parameters.snapshot_directories_list:
-                # Data scaling is only performed on the training data sets.
-                if snapshot.snapshot_function == "tr":
-                    if snapshot.snapshot_type == "numpy":
-                        tmp = self.target_calculator. \
-                            read_from_numpy_file(
-                            os.path.join(snapshot.output_npy_directory,
-                                         snapshot.output_npy_file),
-                                         units=snapshot.output_units)
-                    elif snapshot.snapshot_type == "openpmd":
-                        tmp = self.target_calculator. \
-                            read_from_openpmd_file(
-                            os.path.join(snapshot.output_npy_directory,
-                                         snapshot.output_npy_file))
-                    else:
-                        raise Exception("Unknown snapshot file type.")
-
-                    # The scalers will later operate on torch Tensors so we
-                    # have to make sure they are fitted on
-                    # torch Tensors as well. Preprocessing the numpy data as
-                    # follows does NOT load it into memory, see
-                    # test/tensor_memory.py
-                    tmp = np.array(tmp)
-                    tmp = tmp.astype(np.float32)
-                    tmp = tmp.reshape([self.grid_size,
-                                       self.get_output_dimension()])
-                    tmp = torch.from_numpy(tmp).float()
-                    self.output_data_scaler.incremental_fit(tmp)
-                i += 1
-            self.output_data_scaler.finish_incremental_fitting()
-
-        else:
-            # Already loaded into RAM above.
-            self.__load_data("tr", "output")
-            self.output_data_scaler.fit(self.training_data_outputs)
-
-        printout("Output scaler parametrized.", min_verbosity=1)
-
-    def __load_training_data_into_ram(self):
-        """Load the training data into RAM."""
-        # INPUTS.
-
-        training_snapshot = 0
-        # We need to perform the data scaling over the entirety of
-        # the training data.
-        for snapshot in self.parameters.snapshot_directories_list:
-
-            # Data scaling is only performed on the training data sets.
-            if snapshot.snapshot_function == "tr":
-                if snapshot.snapshot_type == "numpy":
-                    self.descriptor_calculator. \
-                        read_from_numpy_file(
-                        os.path.join(snapshot.input_npy_directory,
-                                     snapshot.input_npy_file),
-                                        units=snapshot.input_units,
-                    array=self.training_data_inputs[training_snapshot])
-                elif snapshot.snapshot_type == "openpmd":
-                    self.training_data_inputs[training_snapshot] = \
-                        self.descriptor_calculator. \
-                        read_from_openpmd_file(
-                        os.path.join(snapshot.input_npy_directory,
-                                     snapshot.input_npy_file))
-                else:
-                    raise Exception("Unknown snapshot file type.")
-                training_snapshot += 1
-
-        # The scalers will later operate on torch Tensors so we have to
-        # make sure they are fitted on
-        # torch Tensors as well. Preprocessing the numpy data as follows
-        # does NOT load it into memory, see
-        # test/tensor_memory.py
-        self.training_data_inputs = \
-            self.training_data_inputs.reshape(
-                [self.nr_training_data, self.get_input_dimension()])
-        self.training_data_inputs = \
-            torch.from_numpy(self.training_data_inputs).float()
-
-        # Outputs.
-        training_snapshot = 0
-        # We need to perform the data scaling over the entirety of
-        # the training data.
-        for snapshot in self.parameters.snapshot_directories_list:
-
-            # Data scaling is only performed on the training data sets.
-            if snapshot.snapshot_function == "tr":
-                if snapshot.snapshot_type == "numpy":
-                    self.target_calculator. \
-                        read_from_numpy_file(
-                        os.path.join(snapshot.output_npy_directory,
-                                     snapshot.output_npy_file),
-                                        units=snapshot.output_units,
-                    array=self.training_data_outputs[training_snapshot])
-                elif snapshot.snapshot_type == "openpmd":
-                    self.training_data_outputs[training_snapshot] = \
-                    self.target_calculator. \
-                        read_from_openpmd_file(
-                        os.path.join(snapshot.output_npy_directory,
-                                     snapshot.output_npy_file))
-                else:
-                    raise Exception("Unknown snapshot file type.")
-                training_snapshot += 1
-
-        # The scalers will later operate on torch Tensors so we have to
-        # make sure they are fitted on
-        # torch Tensors as well. Preprocessing the numpy data as follows
-        # does NOT load it into memory, see
-        # test/tensor_memory.py
-        self.training_data_outputs = self.training_data_outputs.reshape(
-            [self.nr_training_data, self.get_output_dimension()])
-        self.training_data_outputs = \
-            torch.from_numpy(self.training_data_outputs).float()
-
-    def __build_datasets(self):
-        """Build the DataSets that are used during training."""
-        if self.parameters.use_lazy_loading:
-
-            # Create the lazy loading data sets.
-            if self.parameters.use_clustering:
-                self.training_data_set = LazyLoadDatasetClustered(
-                    self.get_input_dimension(), self.get_output_dimension(),
-                    self.input_data_scaler, self.output_data_scaler,
-                    self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
-                    self.use_horovod, self.parameters.number_of_clusters,
-                    self.parameters.train_ratio,
-                    self.parameters.sample_ratio)
-                self.validation_data_set = LazyLoadDataset(
-                    self.get_input_dimension(), self.get_output_dimension(),
-                    self.input_data_scaler, self.output_data_scaler,
-                    self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
-                    self.use_horovod)
-
-                if self.nr_test_data != 0:
-                    self.test_data_set = LazyLoadDataset(
-                        self.get_input_dimension(),
-                        self.get_output_dimension(),
-                        self.input_data_scaler, self.output_data_scaler,
-                        self.descriptor_calculator, self.target_calculator,
-                        self.grid_dimension, self.grid_size,
-                        self.use_horovod,
-                        input_requires_grad=True)
-
-            else:
-                self.training_data_set = LazyLoadDataset(
-                    self.get_input_dimension(), self.get_output_dimension(),
-                    self.input_data_scaler, self.output_data_scaler,
-                    self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
-                    self.use_horovod)
-                self.validation_data_set = LazyLoadDataset(
-                    self.get_input_dimension(), self.get_output_dimension(),
-                    self.input_data_scaler, self.output_data_scaler,
-                    self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
-                    self.use_horovod)
-
-                if self.nr_test_data != 0:
-                    self.test_data_set = LazyLoadDataset(
-                        self.get_input_dimension(),
-                        self.get_output_dimension(),
-                        self.input_data_scaler, self.output_data_scaler,
-                        self.descriptor_calculator, self.target_calculator,
-                        self.grid_dimension, self.grid_size,
-                        self.use_horovod,
-                        input_requires_grad=True)
-
-            # Add snapshots to the lazy loading data sets.
-            for snapshot in self.parameters.snapshot_directories_list:
-                if snapshot.snapshot_function == "tr":
-                    self.training_data_set.add_snapshot_to_dataset(snapshot)
-                if snapshot.snapshot_function == "va":
-                    self.validation_data_set.add_snapshot_to_dataset(snapshot)
-                if snapshot.snapshot_function == "te":
-                    self.test_data_set.add_snapshot_to_dataset(snapshot)
-
-            if self.parameters.use_clustering:
-                self.training_data_set.cluster_dataset()
-            # I don't think we need to mix them here. We can use the standard
-            # ordering for the first epoch
-            # and mix it up after.
-            # self.training_data_set.mix_datasets()
-            # self.validation_data_set.mix_datasets()
-            # self.test_data_set.mix_datasets()
-        else:
-            self.__load_data("va", "input")
-            self.__load_data("va", "output")
-            if self.nr_test_data != 0:
-                self.__load_data("te", "input")
-                self.__load_data("te", "output")
-
-            if self.nr_test_data != 0:
-                self.input_data_scaler.transform(self.test_data_inputs)
-                self.test_data_inputs.requires_grad = True
-            self.input_data_scaler.transform(self.validation_data_inputs)
-            self.input_data_scaler.transform(self.training_data_inputs)
-
-            if self.nr_test_data != 0:
-                self.output_data_scaler.transform(self.test_data_outputs)
-            self.output_data_scaler.transform(self.validation_data_outputs)
-            self.output_data_scaler.transform(self.training_data_outputs)
-
-            if self.nr_training_data != 0:
-                self.training_data_set = \
-                    TensorDataset(self.training_data_inputs,
-                                  self.training_data_outputs)
-            if self.nr_validation_data != 0:
-                self.validation_data_set = \
-                    TensorDataset(self.validation_data_inputs,
-                                  self.validation_data_outputs)
-            if self.nr_test_data != 0:
-                self.test_data_set = \
-                    TensorDataset(self.test_data_inputs,
-                                  self.test_data_outputs)
 
     def __load_data(self, function, data_type):
         """
@@ -987,8 +708,8 @@ class DataHandler:
                 array = "test_data_outputs"
                 calculator = self.target_calculator
 
-        feature_dimension = self.get_input_dimension() if data_type == "input" \
-            else self.get_output_dimension()
+        feature_dimension = self.input_dimension if data_type == "input" \
+            else self.output_dimension
 
         snapshot_counter = 0
         for snapshot in self.parameters.snapshot_directories_list:
@@ -1044,6 +765,219 @@ class DataHandler:
             if function == "te":
                 self.test_data_outputs = self.test_data_outputs.reshape([self.nr_test_data, feature_dimension])
                 self.test_data_outputs = torch.from_numpy(self.test_data_outputs).float()
+
+    def __build_datasets(self):
+        """Build the DataSets that are used during training."""
+        if self.parameters.use_lazy_loading:
+
+            # Create the lazy loading data sets.
+            if self.parameters.use_clustering:
+                self.training_data_set = LazyLoadDatasetClustered(
+                    self.input_dimension, self.output_dimension,
+                    self.input_data_scaler, self.output_data_scaler,
+                    self.descriptor_calculator, self.target_calculator,
+                    self.grid_dimension, self.grid_size,
+                    self.use_horovod, self.parameters.number_of_clusters,
+                    self.parameters.train_ratio,
+                    self.parameters.sample_ratio)
+                self.validation_data_set = LazyLoadDataset(
+                    self.input_dimension, self.output_dimension,
+                    self.input_data_scaler, self.output_data_scaler,
+                    self.descriptor_calculator, self.target_calculator,
+                    self.grid_dimension, self.grid_size,
+                    self.use_horovod)
+
+                if self.nr_test_data != 0:
+                    self.test_data_set = LazyLoadDataset(
+                        self.input_dimension,
+                        self.output_dimension,
+                        self.input_data_scaler, self.output_data_scaler,
+                        self.descriptor_calculator, self.target_calculator,
+                        self.grid_dimension, self.grid_size,
+                        self.use_horovod,
+                        input_requires_grad=True)
+
+            else:
+                self.training_data_set = LazyLoadDataset(
+                    self.input_dimension, self.output_dimension,
+                    self.input_data_scaler, self.output_data_scaler,
+                    self.descriptor_calculator, self.target_calculator,
+                    self.grid_dimension, self.grid_size,
+                    self.use_horovod)
+                self.validation_data_set = LazyLoadDataset(
+                    self.input_dimension, self.output_dimension,
+                    self.input_data_scaler, self.output_data_scaler,
+                    self.descriptor_calculator, self.target_calculator,
+                    self.grid_dimension, self.grid_size,
+                    self.use_horovod)
+
+                if self.nr_test_data != 0:
+                    self.test_data_set = LazyLoadDataset(
+                        self.input_dimension,
+                        self.output_dimension,
+                        self.input_data_scaler, self.output_data_scaler,
+                        self.descriptor_calculator, self.target_calculator,
+                        self.grid_dimension, self.grid_size,
+                        self.use_horovod,
+                        input_requires_grad=True)
+
+            # Add snapshots to the lazy loading data sets.
+            for snapshot in self.parameters.snapshot_directories_list:
+                if snapshot.snapshot_function == "tr":
+                    self.training_data_set.add_snapshot_to_dataset(snapshot)
+                if snapshot.snapshot_function == "va":
+                    self.validation_data_set.add_snapshot_to_dataset(snapshot)
+                if snapshot.snapshot_function == "te":
+                    self.test_data_set.add_snapshot_to_dataset(snapshot)
+
+            if self.parameters.use_clustering:
+                self.training_data_set.cluster_dataset()
+            # I don't think we need to mix them here. We can use the standard
+            # ordering for the first epoch
+            # and mix it up after.
+            # self.training_data_set.mix_datasets()
+            # self.validation_data_set.mix_datasets()
+            # self.test_data_set.mix_datasets()
+        else:
+            self.__load_data("va", "input")
+            self.__load_data("va", "output")
+            if self.nr_test_data != 0:
+                self.__load_data("te", "input")
+                self.__load_data("te", "output")
+
+            if self.nr_test_data != 0:
+                self.input_data_scaler.transform(self.test_data_inputs)
+                self.test_data_inputs.requires_grad = True
+            self.input_data_scaler.transform(self.validation_data_inputs)
+            self.input_data_scaler.transform(self.training_data_inputs)
+
+            if self.nr_test_data != 0:
+                self.output_data_scaler.transform(self.test_data_outputs)
+            self.output_data_scaler.transform(self.validation_data_outputs)
+            self.output_data_scaler.transform(self.training_data_outputs)
+
+            if self.nr_training_data != 0:
+                self.training_data_set = \
+                    TensorDataset(self.training_data_inputs,
+                                  self.training_data_outputs)
+            if self.nr_validation_data != 0:
+                self.validation_data_set = \
+                    TensorDataset(self.validation_data_inputs,
+                                  self.validation_data_outputs)
+            if self.nr_test_data != 0:
+                self.test_data_set = \
+                    TensorDataset(self.test_data_inputs,
+                                  self.test_data_outputs)
+
+    # Scaling
+    ######################
+
+    def __parametrize_scalers(self):
+        """Use the training data to parametrize the DataScalers."""
+        ##################
+        # Inputs.
+        ##################
+
+        # If we do lazy loading, we have to iterate over the files one at a
+        # time and add them to the fit, i.e. incrementally updating max/min
+        # or mean/std. If we DON'T do lazy loading, we can simply load the
+        # training data (we will need it later anyway) and perform the
+        # scaling. This should save some performance.
+
+        if self.parameters.use_lazy_loading:
+            self.input_data_scaler.start_incremental_fitting()
+            # We need to perform the data scaling over the entirety of the
+            # training data.
+            for snapshot in self.parameters.snapshot_directories_list:
+                # Data scaling is only performed on the training data sets.
+                if snapshot.snapshot_function == "tr":
+                    if snapshot.snapshot_type == "numpy":
+                        tmp = self.descriptor_calculator. \
+                            read_from_numpy_file(
+                            os.path.join(snapshot.input_npy_directory,
+                                         snapshot.input_npy_file),
+                                         units=snapshot.input_units)
+                    elif snapshot.snapshot_type == "openpmd":
+                        tmp = self.descriptor_calculator. \
+                            read_from_openpmd_file(
+                            os.path.join(snapshot.input_npy_directory,
+                                         snapshot.input_npy_file))
+                    else:
+                        raise Exception("Unknown snapshot file type.")
+
+                    # The scalers will later operate on torch Tensors so we
+                    # have to make sure they are fitted on
+                    # torch Tensors as well. Preprocessing the numpy data as
+                    # follows does NOT load it into memory, see
+                    # test/tensor_memory.py
+                    tmp = np.array(tmp)
+                    tmp = tmp.astype(np.float32)
+                    tmp = tmp.reshape([self.grid_size,
+                                       self.input_dimension])
+                    tmp = torch.from_numpy(tmp).float()
+                    self.input_data_scaler.incremental_fit(tmp)
+
+            self.input_data_scaler.finish_incremental_fitting()
+
+        else:
+            self.__load_data("tr", "input")
+            self.input_data_scaler.fit(self.training_data_inputs)
+
+        printout("Input scaler parametrized.", min_verbosity=1)
+
+        ##################
+        # Output.
+        ##################
+
+        # If we do lazy loading, we have to iterate over the files one at a
+        # time and add them to the fit,
+        # i.e. incrementally updating max/min or mean/std.
+        # If we DON'T do lazy loading, we can simply load the training data
+        # (we will need it later anyway)
+        # and perform the scaling. This should save some performance.
+
+        if self.parameters.use_lazy_loading:
+            i = 0
+            self.output_data_scaler.start_incremental_fitting()
+            # We need to perform the data scaling over the entirety of the
+            # training data.
+            for snapshot in self.parameters.snapshot_directories_list:
+                # Data scaling is only performed on the training data sets.
+                if snapshot.snapshot_function == "tr":
+                    if snapshot.snapshot_type == "numpy":
+                        tmp = self.target_calculator. \
+                            read_from_numpy_file(
+                            os.path.join(snapshot.output_npy_directory,
+                                         snapshot.output_npy_file),
+                                         units=snapshot.output_units)
+                    elif snapshot.snapshot_type == "openpmd":
+                        tmp = self.target_calculator. \
+                            read_from_openpmd_file(
+                            os.path.join(snapshot.output_npy_directory,
+                                         snapshot.output_npy_file))
+                    else:
+                        raise Exception("Unknown snapshot file type.")
+
+                    # The scalers will later operate on torch Tensors so we
+                    # have to make sure they are fitted on
+                    # torch Tensors as well. Preprocessing the numpy data as
+                    # follows does NOT load it into memory, see
+                    # test/tensor_memory.py
+                    tmp = np.array(tmp)
+                    tmp = tmp.astype(np.float32)
+                    tmp = tmp.reshape([self.grid_size,
+                                       self.output_dimension])
+                    tmp = torch.from_numpy(tmp).float()
+                    self.output_data_scaler.incremental_fit(tmp)
+                i += 1
+            self.output_data_scaler.finish_incremental_fitting()
+
+        else:
+            # Already loaded into RAM above.
+            self.__load_data("tr", "output")
+            self.output_data_scaler.fit(self.training_data_outputs)
+
+        printout("Output scaler parametrized.", min_verbosity=1)
 
     def __raw_numpy_to_converted_numpy(self, numpy_array, data_type="in",
                                        units=None):
