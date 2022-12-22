@@ -255,12 +255,11 @@ class DataHandler:
             printout("Initializing the data scalers.", min_verbosity=1)
             self.__parametrize_scalers()
             printout("Data scalers initialized.", min_verbosity=0)
-        else:
+        elif self.parameters.use_lazy_loading is False and self.nr_training_data != 0:
             printout("Data scalers already initilized, loading data to RAM.",
                      min_verbosity=0)
-            if self.parameters.use_lazy_loading is False:
-                self.__load_data("tr", "input")
-                self.__load_data("tr", "output")
+            self.__load_data("tr", "input")
+            self.__load_data("tr", "output")
 
         # Build Datasets.
         printout("Build datasets.", min_verbosity=1)
@@ -532,8 +531,7 @@ class DataHandler:
                 firstsnapshot = False
 
         # Save the grid size.
-        self.grid_size = self.grid_dimension[0]\
-            * self.grid_dimension[1] * self.grid_dimension[2]
+        self.grid_size = np.prod(self.grid_dimension)
 
         # Now we need to confirm that the snapshot list has some inner
         # consistency.
@@ -550,7 +548,7 @@ class DataHandler:
                     raise Exception("Unknown option for snapshot splitting "
                                     "selected.")
 
-            # Now we need to check whether or not this input is believable.
+            # Now we need to check whether this input is believable.
             nr_of_snapshots = len(self.parameters.snapshot_directories_list)
             if nr_of_snapshots != (self.nr_training_snapshots +
                                    self.nr_test_snapshots +
@@ -558,25 +556,24 @@ class DataHandler:
                 raise Exception("Cannot split snapshots with specified "
                                 "splitting scheme, "
                                 "too few or too many options selected")
-            if self.nr_training_snapshots == 0 and self.nr_test_snapshots == 0:
-                raise Exception("No training snapshots provided.")
-            if self.nr_validation_snapshots == 0 and \
-                    self.nr_test_snapshots == 0:
-                raise Exception("No validation snapshots provided.")
-            if self.nr_training_snapshots == 0 and self.nr_test_snapshots != 0:
-                printout("DataHandler prepared for inference. No training "
-                         "possible with this setup. "
-                         "If this is not what you wanted, please revise the "
-                         "input script.", min_verbosity=0)
-                if self.nr_validation_snapshots != 0:
-                    printout("As this DataHandler can only be used for "
-                             "inference, the validation data you have "
-                             "provided will be ignored.", min_verbosity=1)
-            if self.nr_test_snapshots == 0:
-                printout("Running MALA without test data. If this is not "
-                         "what you wanted, "
-                         "please revise the input script.", min_verbosity=0)
 
+            # MALA can either be run in training or test-only mode.
+            # But it has to be run in either of those!
+            # So either training AND validation snapshots can be provided
+            # OR only test snapshots.
+            if self.nr_test_snapshots != 0:
+                if self.nr_training_snapshots == 0:
+                    printout("DataHandler prepared for inference. No training "
+                             "possible with this setup. If this is not what "
+                             "you wanted, please revise the input script. "
+                             "Validation snapshots you may have entered will"
+                             "be ignored.",
+                             min_verbosity=0)
+            else:
+                if self.nr_training_snapshots == 0:
+                    raise Exception("No training snapshots provided.")
+                if self.nr_validation_snapshots == 0:
+                    raise Exception("No validation snapshots provided.")
         else:
             raise Exception("Wrong parameter for data splitting provided.")
 
@@ -588,7 +585,7 @@ class DataHandler:
 
         # Pre-allocating arrays to load the data into.
         if not self.parameters.use_lazy_loading:
-                self.__allocate_arrays()
+            self.__allocate_arrays()
 
     def __allocate_arrays(self):
         if self.nr_training_data > 0:
@@ -604,33 +601,20 @@ class DataHandler:
                                                    self.grid_dimension[2],
                                                    self.output_dimension),
                                                   dtype=np.float32)
-        else:
-            # TODO: Get rid of this.
-            # Currently needed because we don't check if the
-            # data is empty.
-            self.training_data_inputs = np.zeros(0, dtype=np.float32)
-            self.training_data_outputs = np.zeros(0, dtype=np.float32)
+
         if self.nr_validation_data > 0:
-            self.validation_data_inputs = np.zeros(
-                (self.nr_validation_snapshots,
-                 self.grid_dimension[0],
-                 self.grid_dimension[1],
-                 self.grid_dimension[2],
-                 self.input_dimension),
-                dtype=np.float32)
-            self.validation_data_outputs = np.zeros(
-                (self.nr_validation_snapshots,
-                 self.grid_dimension[0],
-                 self.grid_dimension[1],
-                 self.grid_dimension[2],
-                 self.output_dimension),
-                dtype=np.float32)
-        else:
-            # TODO: Get rid of this.
-            # Currently needed because we don't check if the
-            # data is empty.
-            self.validation_data_inputs = np.zeros(0, dtype=np.float32)
-            self.validation_data_outputs = np.zeros(0, dtype=np.float32)
+            self.validation_data_inputs = np.zeros((self.nr_validation_snapshots,
+                                                    self.grid_dimension[0],
+                                                    self.grid_dimension[1],
+                                                    self.grid_dimension[2],
+                                                    self.input_dimension),
+                                                   dtype=np.float32)
+            self.validation_data_outputs = np.zeros((self.nr_validation_snapshots,
+                                                     self.grid_dimension[0],
+                                                     self.grid_dimension[1],
+                                                     self.grid_dimension[2],
+                                                     self.output_dimension),
+                                                    dtype=np.float32)
 
         if self.nr_test_data > 0:
             self.test_data_inputs = np.zeros((self.nr_test_snapshots,
@@ -841,32 +825,32 @@ class DataHandler:
             # self.validation_data_set.mix_datasets()
             # self.test_data_set.mix_datasets()
         else:
-            self.__load_data("va", "input")
-            self.__load_data("va", "output")
-            if self.nr_test_data != 0:
-                self.__load_data("te", "input")
-                self.__load_data("te", "output")
-
-            if self.nr_test_data != 0:
-                self.input_data_scaler.transform(self.test_data_inputs)
-                self.test_data_inputs.requires_grad = True
-            self.input_data_scaler.transform(self.validation_data_inputs)
-            self.input_data_scaler.transform(self.training_data_inputs)
-
-            if self.nr_test_data != 0:
-                self.output_data_scaler.transform(self.test_data_outputs)
-            self.output_data_scaler.transform(self.validation_data_outputs)
-            self.output_data_scaler.transform(self.training_data_outputs)
-
             if self.nr_training_data != 0:
+                self.input_data_scaler.transform(self.training_data_inputs)
+                self.output_data_scaler.transform(self.training_data_outputs)
                 self.training_data_set = \
                     TensorDataset(self.training_data_inputs,
                                   self.training_data_outputs)
+
             if self.nr_validation_data != 0:
+                self.__load_data("va", "input")
+                self.input_data_scaler.transform(self.validation_data_inputs)
+
+                self.__load_data("va", "output")
+                self.output_data_scaler.transform(self.validation_data_outputs)
+
                 self.validation_data_set = \
                     TensorDataset(self.validation_data_inputs,
                                   self.validation_data_outputs)
+
             if self.nr_test_data != 0:
+                self.__load_data("te", "input")
+                self.input_data_scaler.transform(self.test_data_inputs)
+                self.test_data_inputs.requires_grad = True
+
+                self.__load_data("te", "output")
+                self.output_data_scaler.transform(self.test_data_outputs)
+
                 self.test_data_set = \
                     TensorDataset(self.test_data_inputs,
                                   self.test_data_outputs)
