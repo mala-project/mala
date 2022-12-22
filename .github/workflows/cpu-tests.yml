@@ -47,9 +47,9 @@ jobs:
         id: check_file
         run: |
           if [[ -f "$DOCKER_CACHE_PATH/docker-image.tar.gz" ]]; then
-            echo '::set-output name=file_exists::true'
+            echo "FILE_EXISTS=true" >> $GITHUB_OUTPUT
           else
-            echo '::set-output name=file_exists::false'
+            echo "FILE_EXISTS=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Pull latest image from container registry
@@ -57,7 +57,7 @@ jobs:
 
       - name: Build temporary Docker image
         run: |
-          if [[ "${{ steps.check_file.outputs.file_exists }}" == 'true' ]]
+          if [[ "${{ steps.check_file.outputs.FILE_EXISTS }}" == 'true' ]]
           then
             docker load -i $DOCKER_CACHE_PATH/docker-image.tar.gz
             CACHE=$IMAGE_NAME:$GITHUB_RUN_ID
