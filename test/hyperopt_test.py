@@ -200,9 +200,9 @@ class TestHyperparameterOptimization:
         test_hp_optimizer = mala.HyperOpt(test_parameters,
                                                    data_handler)
         test_parameters.network.layer_sizes = [
-            data_handler.get_input_dimension(),
+            data_handler.input_dimension,
             100, 100,
-            data_handler.get_output_dimension()]
+            data_handler.output_dimension]
 
         # Add hyperparameters we want to have optimized to the list.
         # If we do a NASWOT run currently we can provide an input

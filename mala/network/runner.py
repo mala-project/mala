@@ -94,7 +94,7 @@ class Runner:
                     as_numpy=True)
 
         predicted_outputs = np.zeros((self.data.grid_size,
-                                      self.data.get_output_dimension()))
+                                      self.data.output_dimension))
 
         offset = snapshot_number * self.data.grid_size
         for i in range(0, number_of_batches_per_snapshot):

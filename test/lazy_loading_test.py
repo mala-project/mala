@@ -116,8 +116,8 @@ class TestLazyLoading:
                                           (data_handler.training_data_set[4001])
                                           [0].sum())
                     test_parameters.network.layer_sizes = \
-                        [data_handler.get_input_dimension(), 100,
-                         data_handler.get_output_dimension()]
+                        [data_handler.input_dimension, 100,
+                         data_handler.output_dimension]
 
                     # Setup network and trainer.
                     test_network = Network(test_parameters)
@@ -219,8 +219,8 @@ class TestLazyLoading:
 
                 data_handler.prepare_data()
                 test_parameters.network.layer_sizes = \
-                    [data_handler.get_input_dimension(), 100,
-                     data_handler.get_output_dimension()]
+                    [data_handler.input_dimension, 100,
+                     data_handler.output_dimension]
 
                 # Setup network and trainer.
                 test_network = Network(test_parameters)
