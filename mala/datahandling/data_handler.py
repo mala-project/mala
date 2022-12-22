@@ -47,6 +47,7 @@ class DataHandler:
         Used to scale the output data. If None, then one will be created by
         this class.
     """
+
     ##############################
     # Constructors
     ##############################
@@ -665,9 +666,10 @@ class DataHandler:
 
     def __load_data(self, function, data_type):
         """
-        Loads data into the appropriate arrays.
+        Load data into the appropriate arrays.
 
         Also transforms them into torch tensors.
+
         Parameters
         ----------
         function : string
