@@ -266,7 +266,8 @@ class DataHandler:
             printout("Data scalers already initilized, loading data to RAM.",
                      min_verbosity=0)
             if self.parameters.use_lazy_loading is False:
-                self.__load_training_data_into_ram()
+                self.__load_data("tr", "input")
+                self.__load_data("tr", "output")
 
         # Build Datasets.
         printout("Build datasets.", min_verbosity=1)
@@ -581,45 +582,63 @@ class DataHandler:
 
         # Pre-allocating arrays to load the data into.
         if not self.parameters.use_lazy_loading:
-            if self.nr_training_data > 0:
-                self.training_data_inputs = np.zeros((self.nr_training_snapshots,
-                                                      self.grid_dimension[0],
-                                                      self.grid_dimension[1],
-                                                      self.grid_dimension[2],
-                                                      self.get_input_dimension()),
-                                                     dtype=np.float32)
-                self.training_data_outputs = np.zeros((self.nr_training_snapshots,
-                                                      self.grid_dimension[0],
-                                                      self.grid_dimension[1],
-                                                      self.grid_dimension[2],
-                                                      self.get_output_dimension()),
-                                                      dtype=np.float32)
-            else:
-                # TODO: Get rid of this.
-                # Currently needed because we don't check if the
-                # data is empty.
-                self.training_data_inputs = np.zeros(0, dtype=np.float32)
-                self.training_data_outputs = np.zeros(0, dtype=np.float32)
-            if self.nr_validation_data > 0:
-                self.validation_data_inputs = np.zeros((self.nr_validation_snapshots,
-                                                        self.grid_dimension[0],
-                                                        self.grid_dimension[1],
-                                                        self.grid_dimension[2],
-                                                        self.get_input_dimension()),
-                                                       dtype=np.float32)
-                self.validation_data_outputs = np.zeros((self.nr_validation_snapshots,
-                                                         self.grid_dimension[0],
-                                                         self.grid_dimension[1],
-                                                         self.grid_dimension[2],
-                                                        self.get_output_dimension()),
-                                                        dtype=np.float32)
-            else:
-                # TODO: Get rid of this.
-                # Currently needed because we don't check if the
-                # data is empty.
-                self.validation_data_inputs = np.zeros(0, dtype=np.float32)
-                self.validation_data_outputs = np.zeros(0, dtype=np.float32)
+                self.__allocate_arrays()
 
+    def __allocate_arrays(self):
+        if self.nr_training_data > 0:
+            self.training_data_inputs = np.zeros((self.nr_training_snapshots,
+                                                  self.grid_dimension[0],
+                                                  self.grid_dimension[1],
+                                                  self.grid_dimension[2],
+                                                  self.get_input_dimension()),
+                                                 dtype=np.float32)
+            self.training_data_outputs = np.zeros((self.nr_training_snapshots,
+                                                   self.grid_dimension[0],
+                                                   self.grid_dimension[1],
+                                                   self.grid_dimension[2],
+                                                   self.get_output_dimension()),
+                                                  dtype=np.float32)
+        else:
+            # TODO: Get rid of this.
+            # Currently needed because we don't check if the
+            # data is empty.
+            self.training_data_inputs = np.zeros(0, dtype=np.float32)
+            self.training_data_outputs = np.zeros(0, dtype=np.float32)
+        if self.nr_validation_data > 0:
+            self.validation_data_inputs = np.zeros(
+                (self.nr_validation_snapshots,
+                 self.grid_dimension[0],
+                 self.grid_dimension[1],
+                 self.grid_dimension[2],
+                 self.get_input_dimension()),
+                dtype=np.float32)
+            self.validation_data_outputs = np.zeros(
+                (self.nr_validation_snapshots,
+                 self.grid_dimension[0],
+                 self.grid_dimension[1],
+                 self.grid_dimension[2],
+                 self.get_output_dimension()),
+                dtype=np.float32)
+        else:
+            # TODO: Get rid of this.
+            # Currently needed because we don't check if the
+            # data is empty.
+            self.validation_data_inputs = np.zeros(0, dtype=np.float32)
+            self.validation_data_outputs = np.zeros(0, dtype=np.float32)
+
+        if self.nr_test_data > 0:
+            self.test_data_inputs = np.zeros((self.nr_test_snapshots,
+                                              self.grid_dimension[0],
+                                              self.grid_dimension[1],
+                                              self.grid_dimension[2],
+                                              self.get_input_dimension()),
+                                             dtype=np.float32)
+            self.test_data_outputs = np.zeros((self.nr_test_snapshots,
+                                               self.grid_dimension[0],
+                                               self.grid_dimension[1],
+                                               self.grid_dimension[2],
+                                               self.get_output_dimension()),
+                                              dtype=np.float32)
             if self.nr_test_data > 0:
                 self.test_data_inputs = np.zeros((self.nr_test_snapshots,
                                                   self.grid_dimension[0],
@@ -687,7 +706,7 @@ class DataHandler:
             self.input_data_scaler.finish_incremental_fitting()
 
         else:
-            self.__load_training_data_into_ram()
+            self.__load_data("tr", "input")
             self.input_data_scaler.fit(self.training_data_inputs)
 
         printout("Input scaler parametrized.", min_verbosity=1)
@@ -741,6 +760,7 @@ class DataHandler:
 
         else:
             # Already loaded into RAM above.
+            self.__load_data("tr", "output")
             self.output_data_scaler.fit(self.training_data_outputs)
 
         printout("Output scaler parametrized.", min_verbosity=1)
@@ -892,118 +912,20 @@ class DataHandler:
             # self.validation_data_set.mix_datasets()
             # self.test_data_set.mix_datasets()
         else:
-            # We iterate through the snapshots and add the validation data and
-            # test data.
-            validation_snapshot = 0
+            self.__load_data("va", "input")
+            self.__load_data("va", "output")
             if self.nr_test_data != 0:
-                test_snapshot = 0
+                self.__load_data("te", "input")
+                self.__load_data("te", "output")
 
-            # We need to perform the data scaling over the entirety of the
-            # training data.
-            for snapshot in self.parameters.snapshot_directories_list:
-
-                # Data scaling is only performed on the training data sets.
-                if snapshot.snapshot_function == "va":
-                    if snapshot.snapshot_type == "numpy":
-                        self.descriptor_calculator. \
-                            read_from_numpy_file(
-                            os.path.join(snapshot.input_npy_directory,
-                                         snapshot.input_npy_file),
-                                            units=snapshot.input_units,
-                        array=self.validation_data_inputs[validation_snapshot])
-                    elif snapshot.snapshot_type == "openpmd":
-                        self.validation_data_inputs[validation_snapshot] = \
-                        self.descriptor_calculator. \
-                            read_from_openpmd_file(
-                            os.path.join(snapshot.input_npy_directory,
-                                         snapshot.input_npy_file))
-                    else:
-                        raise Exception("Unknown snapshot file type.")
-                    if snapshot.snapshot_type == "numpy":
-                        self.target_calculator. \
-                            read_from_numpy_file(
-                            os.path.join(snapshot.output_npy_directory,
-                                         snapshot.output_npy_file),
-                                           units=snapshot.output_units,
-                        array=self.validation_data_outputs[validation_snapshot])
-                    elif snapshot.snapshot_type == "openpmd":
-                        self.validation_data_outputs[validation_snapshot] = \
-                        self.target_calculator. \
-                            read_from_openpmd_file(
-                            os.path.join(snapshot.output_npy_directory,
-                                         snapshot.output_npy_file))
-                    else:
-                        raise Exception("Unknown snapshot file type.")
-                    validation_snapshot += 1
-
-                if snapshot.snapshot_function == "te":
-                    if snapshot.snapshot_type == "numpy":
-                        self.descriptor_calculator. \
-                            read_from_numpy_file(
-                            os.path.join(snapshot.input_npy_directory,
-                                         snapshot.input_npy_file),
-                                            units=snapshot.input_units,
-                        array=self.test_data_inputs[test_snapshot])
-                    elif snapshot.snapshot_type == "openpmd":
-                        self.test_data_inputs[test_snapshot] = \
-                        self.descriptor_calculator. \
-                            read_from_openpmd_file(
-                            os.path.join(snapshot.input_npy_directory,
-                                         snapshot.input_npy_file))
-                    else:
-                        raise Exception("Unknown snapshot file type.")
-                    if snapshot.snapshot_type == "numpy":
-                        self.target_calculator. \
-                            read_from_numpy_file(
-                            os.path.join(snapshot.output_npy_directory,
-                                         snapshot.output_npy_file),
-                                           units=snapshot.output_units,
-                        array=self.test_data_outputs[test_snapshot])
-                    elif snapshot.snapshot_type == "openpmd":
-                        self.test_data_outputs[test_snapshot] = \
-                        self.target_calculator. \
-                            read_from_openpmd_file(
-                            os.path.join(snapshot.output_npy_directory,
-                                         snapshot.output_npy_file))
-                    else:
-                        raise Exception("Unknown snapshot file type.")
-                    test_snapshot += 1
-
-            # I know this would be more elegant with the member functions typed
-            # below. But I am pretty sure
-            # that that would create a temporary copy of the arrays, and that
-            # could overload the RAM
-            # in cases where lazy loading is technically not even needed.
             if self.nr_test_data != 0:
-                self.test_data_inputs = \
-                    self.test_data_inputs.reshape(
-                        [self.nr_test_data, self.get_input_dimension()])
-                self.test_data_inputs = \
-                    torch.from_numpy(self.test_data_inputs).float()
                 self.input_data_scaler.transform(self.test_data_inputs)
                 self.test_data_inputs.requires_grad = True
-
-            self.validation_data_inputs = \
-                self.validation_data_inputs.reshape(
-                    [self.nr_validation_data, self.get_input_dimension()])
-            self.validation_data_inputs = \
-                torch.from_numpy(self.validation_data_inputs).float()
             self.input_data_scaler.transform(self.validation_data_inputs)
             self.input_data_scaler.transform(self.training_data_inputs)
 
             if self.nr_test_data != 0:
-                self.test_data_outputs = \
-                    self.test_data_outputs.reshape(
-                        [self.nr_test_data, self.get_output_dimension()])
-                self.test_data_outputs = \
-                    torch.from_numpy(self.test_data_outputs).float()
                 self.output_data_scaler.transform(self.test_data_outputs)
-
-            self.validation_data_outputs = \
-                self.validation_data_outputs.reshape(
-                    [self.nr_validation_data, self.get_output_dimension()])
-            self.validation_data_outputs = \
-                torch.from_numpy(self.validation_data_outputs).float()
             self.output_data_scaler.transform(self.validation_data_outputs)
             self.output_data_scaler.transform(self.training_data_outputs)
 
@@ -1019,6 +941,109 @@ class DataHandler:
                 self.test_data_set = \
                     TensorDataset(self.test_data_inputs,
                                   self.test_data_outputs)
+
+    def __load_data(self, function, data_type):
+        """
+        Loads data into the appropriate arrays.
+
+        Also transforms them into torch tensors.
+        Parameters
+        ----------
+        function : string
+            Can be "tr", "va" or "te.
+
+        data_type : string
+            Can be "input" or "output".
+        """
+        if function != "tr" and function != "te" and function != "va":
+            raise Exception("Unknown snapshot type detected.")
+        if data_type != "output" and data_type != "input":
+            raise Exception("Unknown data type detected.")
+
+        # Extracting all the information pertaining to the data set.
+        if data_type == "input":
+            if function == "tr":
+                array = "training_data_inputs"
+                calculator = self.descriptor_calculator
+
+            if function == "va":
+                array = "validation_data_inputs"
+                calculator = self.descriptor_calculator
+
+            if function == "te":
+                array = "test_data_inputs"
+                calculator = self.descriptor_calculator
+
+        if data_type == "output":
+            if function == "tr":
+                array = "training_data_outputs"
+                calculator = self.target_calculator
+
+            if function == "va":
+                array = "validation_data_outputs"
+                calculator = self.target_calculator
+
+            if function == "te":
+                array = "test_data_outputs"
+                calculator = self.target_calculator
+
+        feature_dimension = self.get_input_dimension() if data_type == "input" \
+            else self.get_output_dimension()
+
+        snapshot_counter = 0
+        for snapshot in self.parameters.snapshot_directories_list:
+
+            # Data scaling is only performed on the training data sets.
+            if snapshot.snapshot_function == function:
+                if data_type == "input":
+                    file = os.path.join(snapshot.input_npy_directory,
+                                        snapshot.input_npy_file)
+                    units = snapshot.input_units
+                else:
+                    file = os.path.join(snapshot.output_npy_directory,
+                                        snapshot.output_npy_file)
+                    units = snapshot.output_units
+
+                if snapshot.snapshot_type == "numpy":
+                    calculator.read_from_numpy_file(file, units=units,
+                                                    array=getattr(self, array)[snapshot_counter])
+                elif snapshot.snapshot_type == "openpmd":
+                    getattr(self, array)[snapshot_counter] = \
+                        calculator.read_from_openpmd_file(file, units=units)
+                else:
+                    raise Exception("Unknown snapshot file type.")
+                snapshot_counter += 1
+
+        # The scalers will later operate on torch Tensors so we have to
+        # make sure they are fitted on
+        # torch Tensors as well. Preprocessing the numpy data as follows
+        # does NOT load it into memory, see
+        # test/tensor_memory.py
+        if data_type == "input":
+            if function == "tr":
+                self.training_data_inputs = self.training_data_inputs.reshape([self.nr_training_data, feature_dimension])
+                self.training_data_inputs = torch.from_numpy(self.training_data_inputs).float()
+
+            if function == "va":
+                self.validation_data_inputs = self.validation_data_inputs.reshape([self.nr_validation_data, feature_dimension])
+                self.validation_data_inputs = torch.from_numpy(self.validation_data_inputs).float()
+
+            if function == "te":
+                self.test_data_inputs = self.test_data_inputs.reshape([self.nr_test_data, feature_dimension])
+                self.test_data_inputs = torch.from_numpy(self.test_data_inputs).float()
+
+        if data_type == "output":
+            if function == "tr":
+                self.training_data_outputs = self.training_data_outputs.reshape([self.nr_training_data, feature_dimension])
+                self.training_data_outputs = torch.from_numpy(self.training_data_outputs).float()
+
+            if function == "va":
+                self.validation_data_outputs = self.validation_data_outputs.reshape([self.nr_validation_data, feature_dimension])
+                self.validation_data_outputs = torch.from_numpy(self.validation_data_outputs).float()
+
+            if function == "te":
+                self.test_data_outputs = self.test_data_outputs.reshape([self.nr_test_data, feature_dimension])
+                self.test_data_outputs = torch.from_numpy(self.test_data_outputs).float()
 
     def __raw_numpy_to_converted_numpy(self, numpy_array, data_type="in",
                                        units=None):
