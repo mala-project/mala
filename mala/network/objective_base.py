@@ -147,7 +147,7 @@ class ObjectiveBase:
         """
         if self.optimize_layer_list:
             self.params.network.layer_sizes = \
-                [self.data_handler.get_input_dimension()]
+                [self.data_handler.input_dimension]
         if self.optimize_activation_list > 0:
             self.params.network.layer_activations = []
 
@@ -244,7 +244,7 @@ class ObjectiveBase:
 
         if self.optimize_layer_list:
             self.params.network.layer_sizes.\
-                append(self.data_handler.get_output_dimension())
+                append(self.data_handler.output_dimension)
 
     def parse_trial_oat(self, trial):
         """
@@ -257,7 +257,7 @@ class ObjectiveBase:
         """
         if self.optimize_layer_list:
             self.params.network.layer_sizes = \
-                [self.data_handler.get_input_dimension()]
+                [self.data_handler.input_dimension]
 
         if self.optimize_activation_list:
             self.params.network.layer_activations = []
@@ -358,4 +358,4 @@ class ObjectiveBase:
 
         if self.optimize_layer_list:
             self.params.network.layer_sizes.\
-                append(self.data_handler.get_output_dimension())
+                append(self.data_handler.output_dimension)

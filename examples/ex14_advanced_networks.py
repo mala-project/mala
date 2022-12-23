@@ -64,8 +64,8 @@ test_parameters.network.nn_type = "transformer"
 # test_parameters.network.nn_type = "gru"
 
 test_parameters.network.num_hidden_layers = 1
-test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),100,
-                                       data_handler.get_output_dimension()]
+test_parameters.network.layer_sizes = [data_handler.input_dimension,100,
+                                       data_handler.output_dimension]
 
 if test_parameters.network.nn_type == "lstm" or \
         test_parameters.network.nn_type == "gru":

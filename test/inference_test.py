@@ -138,9 +138,9 @@ class TestInference:
         data_handler.prepare_data()
 
         test_parameters.network.layer_sizes = [
-            data_handler.get_input_dimension(),
+            data_handler.input_dimension,
             100,
-            data_handler.get_output_dimension()]
+            data_handler.output_dimension]
         test_network = Network(test_parameters)
         test_trainer = Trainer(test_parameters, test_network,
                                     data_handler)

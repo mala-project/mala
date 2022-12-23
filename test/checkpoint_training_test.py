@@ -165,10 +165,10 @@ class TestTrainingCheckpoint:
         ####################
 
         test_parameters.network.layer_sizes = [data_handler.
-                                               get_input_dimension(),
+                                               input_dimension,
                                                100,
                                                data_handler.
-                                               get_output_dimension()]
+                                               output_dimension]
 
         # Setup network and trainer.
         test_network = mala.Network(test_parameters)
