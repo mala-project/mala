@@ -684,7 +684,7 @@ class DataHandler:
         for snapshot in self.parameters.snapshot_directories_list:
 
             # Data scaling is only performed on the training data sets.
-            if snapshot.snapshot_function == function:
+            if snapshot.snapshot_function == function[0:2]:
                 if data_type == "inputs":
                     file = os.path.join(snapshot.input_npy_directory,
                                         snapshot.input_npy_file)
