@@ -255,11 +255,12 @@ class DataHandler:
             printout("Initializing the data scalers.", min_verbosity=1)
             self.__parametrize_scalers()
             printout("Data scalers initialized.", min_verbosity=0)
-        elif self.parameters.use_lazy_loading is False and self.nr_training_data != 0:
+        elif self.parameters.use_lazy_loading is False and \
+                self.nr_training_data != 0:
             printout("Data scalers already initilized, loading data to RAM.",
                      min_verbosity=0)
-            self.__load_data("tr", "input")
-            self.__load_data("tr", "output")
+            self.__load_data("training", "inputs")
+            self.__load_data("training", "outputs")
 
         # Build Datasets.
         printout("Build datasets.", min_verbosity=1)
@@ -587,6 +588,12 @@ class DataHandler:
         if not self.parameters.use_lazy_loading:
             self.__allocate_arrays()
 
+        # Reordering the lists.
+        snapshot_order = {'tr': 0, 'va': 1, 'te': 2}
+        self.parameters.snapshot_directories_list.sort(key=lambda d:
+                                                       snapshot_order
+                                                       [d.snapshot_function])
+
     def __allocate_arrays(self):
         if self.nr_training_data > 0:
             self.training_data_inputs = np.zeros((self.nr_training_snapshots,
@@ -642,11 +649,6 @@ class DataHandler:
                                                    self.grid_dimension[2],
                                                    self.output_dimension),
                                                   dtype=np.float32)
-        # Reordering the lists.
-        snapshot_order = {'tr': 0, 'va': 1, 'te': 2}
-        self.parameters.snapshot_directories_list.sort(key=lambda d:
-                                                       snapshot_order
-                                                       [d.snapshot_function])
 
     def __load_data(self, function, data_type):
         """
@@ -662,39 +664,20 @@ class DataHandler:
         data_type : string
             Can be "input" or "output".
         """
-        if function != "tr" and function != "te" and function != "va":
+        if function != "training" and function != "test" and \
+                function != "validation":
             raise Exception("Unknown snapshot type detected.")
-        if data_type != "output" and data_type != "input":
+        if data_type != "outputs" and data_type != "inputs":
             raise Exception("Unknown data type detected.")
 
         # Extracting all the information pertaining to the data set.
-        if data_type == "input":
-            if function == "tr":
-                array = "training_data_inputs"
-                calculator = self.descriptor_calculator
+        array = function+"_data_"+data_type
+        if data_type == "inputs":
+            calculator = self.descriptor_calculator
+        else:
+            calculator = self.target_calculator
 
-            if function == "va":
-                array = "validation_data_inputs"
-                calculator = self.descriptor_calculator
-
-            if function == "te":
-                array = "test_data_inputs"
-                calculator = self.descriptor_calculator
-
-        if data_type == "output":
-            if function == "tr":
-                array = "training_data_outputs"
-                calculator = self.target_calculator
-
-            if function == "va":
-                array = "validation_data_outputs"
-                calculator = self.target_calculator
-
-            if function == "te":
-                array = "test_data_outputs"
-                calculator = self.target_calculator
-
-        feature_dimension = self.input_dimension if data_type == "input" \
+        feature_dimension = self.input_dimension if data_type == "inputs" \
             else self.output_dimension
 
         snapshot_counter = 0
@@ -702,7 +685,7 @@ class DataHandler:
 
             # Data scaling is only performed on the training data sets.
             if snapshot.snapshot_function == function:
-                if data_type == "input":
+                if data_type == "inputs":
                     file = os.path.join(snapshot.input_npy_directory,
                                         snapshot.input_npy_file)
                     units = snapshot.input_units
@@ -726,31 +709,46 @@ class DataHandler:
         # torch Tensors as well. Preprocessing the numpy data as follows
         # does NOT load it into memory, see
         # test/tensor_memory.py
-        if data_type == "input":
-            if function == "tr":
-                self.training_data_inputs = self.training_data_inputs.reshape([self.nr_training_data, feature_dimension])
-                self.training_data_inputs = torch.from_numpy(self.training_data_inputs).float()
+        # Also, the following bit does not work with getattr, so I had to
+        # hard code it. If someone has a smart idea to circumvent this, I am
+        # all ears.
+        if data_type == "inputs":
+            if function == "training":
+                self.training_data_inputs = self.training_data_inputs.\
+                    reshape([self.nr_training_data, feature_dimension])
+                self.training_data_inputs = torch.\
+                    from_numpy(self.training_data_inputs).float()
 
-            if function == "va":
-                self.validation_data_inputs = self.validation_data_inputs.reshape([self.nr_validation_data, feature_dimension])
-                self.validation_data_inputs = torch.from_numpy(self.validation_data_inputs).float()
+            if function == "validation":
+                self.validation_data_inputs = self.validation_data_inputs.\
+                    reshape([self.nr_validation_data, feature_dimension])
+                self.validation_data_inputs = torch.\
+                    from_numpy(self.validation_data_inputs).float()
 
-            if function == "te":
-                self.test_data_inputs = self.test_data_inputs.reshape([self.nr_test_data, feature_dimension])
-                self.test_data_inputs = torch.from_numpy(self.test_data_inputs).float()
+            if function == "test":
+                self.test_data_inputs = self.test_data_inputs.\
+                    reshape([self.nr_test_data, feature_dimension])
+                self.test_data_inputs = torch.\
+                    from_numpy(self.test_data_inputs).float()
 
-        if data_type == "output":
-            if function == "tr":
-                self.training_data_outputs = self.training_data_outputs.reshape([self.nr_training_data, feature_dimension])
-                self.training_data_outputs = torch.from_numpy(self.training_data_outputs).float()
+        if data_type == "outputs":
+            if function == "training":
+                self.training_data_outputs = self.training_data_outputs.\
+                    reshape([self.nr_training_data, feature_dimension])
+                self.training_data_outputs = torch.\
+                    from_numpy(self.training_data_outputs).float()
 
-            if function == "va":
-                self.validation_data_outputs = self.validation_data_outputs.reshape([self.nr_validation_data, feature_dimension])
-                self.validation_data_outputs = torch.from_numpy(self.validation_data_outputs).float()
+            if function == "validation":
+                self.validation_data_outputs = self.validation_data_outputs.\
+                    reshape([self.nr_validation_data, feature_dimension])
+                self.validation_data_outputs = torch.\
+                    from_numpy(self.validation_data_outputs).float()
 
-            if function == "te":
-                self.test_data_outputs = self.test_data_outputs.reshape([self.nr_test_data, feature_dimension])
-                self.test_data_outputs = torch.from_numpy(self.test_data_outputs).float()
+            if function == "test":
+                self.test_data_outputs = self.test_data_outputs.\
+                    reshape([self.nr_test_data, feature_dimension])
+                self.test_data_outputs = torch.\
+                    from_numpy(self.test_data_outputs).float()
 
     def __build_datasets(self):
         """Build the DataSets that are used during training."""
@@ -833,10 +831,10 @@ class DataHandler:
                                   self.training_data_outputs)
 
             if self.nr_validation_data != 0:
-                self.__load_data("va", "input")
+                self.__load_data("validation", "inputs")
                 self.input_data_scaler.transform(self.validation_data_inputs)
 
-                self.__load_data("va", "output")
+                self.__load_data("validation", "outputs")
                 self.output_data_scaler.transform(self.validation_data_outputs)
 
                 self.validation_data_set = \
@@ -844,11 +842,11 @@ class DataHandler:
                                   self.validation_data_outputs)
 
             if self.nr_test_data != 0:
-                self.__load_data("te", "input")
+                self.__load_data("test", "inputs")
                 self.input_data_scaler.transform(self.test_data_inputs)
                 self.test_data_inputs.requires_grad = True
 
-                self.__load_data("te", "output")
+                self.__load_data("test", "outputs")
                 self.output_data_scaler.transform(self.test_data_outputs)
 
                 self.test_data_set = \
@@ -879,15 +877,13 @@ class DataHandler:
                 if snapshot.snapshot_function == "tr":
                     if snapshot.snapshot_type == "numpy":
                         tmp = self.descriptor_calculator. \
-                            read_from_numpy_file(
-                            os.path.join(snapshot.input_npy_directory,
-                                         snapshot.input_npy_file),
-                                         units=snapshot.input_units)
+                            read_from_numpy_file(os.path.join(snapshot.input_npy_directory,
+                                                              snapshot.input_npy_file),
+                                                 units=snapshot.input_units)
                     elif snapshot.snapshot_type == "openpmd":
                         tmp = self.descriptor_calculator. \
-                            read_from_openpmd_file(
-                            os.path.join(snapshot.input_npy_directory,
-                                         snapshot.input_npy_file))
+                            read_from_openpmd_file(os.path.join(snapshot.input_npy_directory,
+                                                                snapshot.input_npy_file))
                     else:
                         raise Exception("Unknown snapshot file type.")
 
@@ -906,7 +902,7 @@ class DataHandler:
             self.input_data_scaler.finish_incremental_fitting()
 
         else:
-            self.__load_data("tr", "input")
+            self.__load_data("training", "inputs")
             self.input_data_scaler.fit(self.training_data_inputs)
 
         printout("Input scaler parametrized.", min_verbosity=1)
@@ -931,16 +927,14 @@ class DataHandler:
                 # Data scaling is only performed on the training data sets.
                 if snapshot.snapshot_function == "tr":
                     if snapshot.snapshot_type == "numpy":
-                        tmp = self.target_calculator. \
-                            read_from_numpy_file(
-                            os.path.join(snapshot.output_npy_directory,
-                                         snapshot.output_npy_file),
-                                         units=snapshot.output_units)
+                        tmp = self.target_calculator.\
+                            read_from_numpy_file(os.path.join(snapshot.output_npy_directory,
+                                                              snapshot.output_npy_file),
+                                                 units=snapshot.output_units)
                     elif snapshot.snapshot_type == "openpmd":
                         tmp = self.target_calculator. \
-                            read_from_openpmd_file(
-                            os.path.join(snapshot.output_npy_directory,
-                                         snapshot.output_npy_file))
+                            read_from_openpmd_file(os.path.join(snapshot.output_npy_directory,
+                                                                snapshot.output_npy_file))
                     else:
                         raise Exception("Unknown snapshot file type.")
 
@@ -959,8 +953,7 @@ class DataHandler:
             self.output_data_scaler.finish_incremental_fitting()
 
         else:
-            # Already loaded into RAM above.
-            self.__load_data("tr", "output")
+            self.__load_data("training", "outputs")
             self.output_data_scaler.fit(self.training_data_outputs)
 
         printout("Output scaler parametrized.", min_verbosity=1)
