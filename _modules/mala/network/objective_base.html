@@ -220,7 +220,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span> <span class="o">=</span> \
-                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_input_dimension</span><span class="p">()]</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_activation_list</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -317,7 +317,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span><span class="o">.</span>\
-                <span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_output_dimension</span><span class="p">())</span></div>
+                <span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObjectiveBase.parse_trial_oat"><a class="viewcode-back" href="../../../api/mala.network.objective_base.html#mala.network.objective_base.ObjectiveBase.parse_trial_oat">[docs]</a>    <span class="k">def</span> <span class="nf">parse_trial_oat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -330,7 +330,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span> <span class="o">=</span> \
-                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_input_dimension</span><span class="p">()]</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_activation_list</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_activations</span> <span class="o">=</span> <span class="p">[]</span>
@@ -431,7 +431,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize_layer_list</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">layer_sizes</span><span class="o">.</span>\
-                <span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">get_output_dimension</span><span class="p">())</span></div></div>
+                <span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

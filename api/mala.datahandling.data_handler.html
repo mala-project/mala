@@ -157,34 +157,6 @@ want to operate on.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.get_input_dimension">
-<span class="sig-name descname"><span class="pre">get_input_dimension</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_input_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_input_dimension" title="Permalink to this definition"></a></dt>
-<dd><p>Get the dimension of the input vector.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>input_dimension</strong> – Dimension of the input vector.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.get_output_dimension">
-<span class="sig-name descname"><span class="pre">get_output_dimension</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_output_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_output_dimension" title="Permalink to this definition"></a></dt>
-<dd><p>Get the dimension of the output vector.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>output_dimension</strong> – Dimension of the output vector.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output">
 <span class="sig-name descname"><span class="pre">get_snapshot_calculation_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler.html#DataHandler.get_snapshot_calculation_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output" title="Permalink to this definition"></a></dt>
 <dd><p>Get the path to the output file for a specific snapshot.</p>
@@ -301,40 +273,16 @@ into a (x*y*z,dim) array.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.test_data_inputs">
-<span class="sig-name descname"><span class="pre">test_data_inputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.test_data_inputs" title="Permalink to this definition"></a></dt>
-<dd><p>Torch tensor holding all scaled testing data inputs.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.input_dimension">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_dimension</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.input_dimension" title="Permalink to this definition"></a></dt>
+<dd><p>Feature dimension of input data.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.test_data_outputs">
-<span class="sig-name descname"><span class="pre">test_data_outputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.test_data_outputs" title="Permalink to this definition"></a></dt>
-<dd><p>Torch tensor holding all scaled testing data output.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.training_data_inputs">
-<span class="sig-name descname"><span class="pre">training_data_inputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.training_data_inputs" title="Permalink to this definition"></a></dt>
-<dd><p>Torch tensor holding all scaled training data inputs.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.training_data_outputs">
-<span class="sig-name descname"><span class="pre">training_data_outputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.training_data_outputs" title="Permalink to this definition"></a></dt>
-<dd><p>Torch tensor holding all scaled training data output.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.validation_data_inputs">
-<span class="sig-name descname"><span class="pre">validation_data_inputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.validation_data_inputs" title="Permalink to this definition"></a></dt>
-<dd><p>Torch tensor holding all scaled validation data inputs.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.validation_data_outputs">
-<span class="sig-name descname"><span class="pre">validation_data_outputs</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.validation_data_outputs" title="Permalink to this definition"></a></dt>
-<dd><p>Torch tensor holding all scaled validation data output.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler.DataHandler.output_dimension">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_dimension</span></span><a class="headerlink" href="#mala.datahandling.data_handler.DataHandler.output_dimension" title="Permalink to this definition"></a></dt>
+<dd><p>Feature dimension of output data.</p>
 </dd></dl>
 
 </dd></dl>
