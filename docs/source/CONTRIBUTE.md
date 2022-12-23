@@ -8,7 +8,7 @@ code high.
 ## Versioning and releases
 
 MALA has a versioning system. The version number is only updated when merging
-on `master`. This constitues a release. Please note that not all changes
+on `master`. This constitutes a release. Please note that not all changes
 to code constitute such a release and generally, merges will be directed
 to the `develop` branch
 (see [branching strategy](#branching-strategy)). The version number has
@@ -22,6 +22,18 @@ the form `MAJOR.MINOR.FIX`:
 Every new version should be accompanied by a changelog. Please include the
 version of the test data repository with which this version is supposed to be
 used in this changelog.
+
+### Creating a release
+
+In order to correctly update the MALA version, we use 
+[bumpversion](https://github.com/peritus/bumpversion). The actual release 
+process is very straightforward:
+
+1. Merge all necessary changes on `master`
+2. Change the release date in `CITATION.cff`
+3. Execute `bumpversion` with either `major`, `minor` or `fix`, depending on what this release updates
+4. Push the created commit, including tags
+5. Edit the release on GitHub, by e.g. adding release notes/change log
 
 ## Branching strategy
 
@@ -40,6 +52,14 @@ the core development team.
 * Keep your code object-oriented, modular, and easily reusable
 * If you're adding code that should be tested, add tests
 * If you're adding or modifying examples, make sure to add them to `test_examples.py`
+
+### Adding dependencies
+
+If you add additional dependencies, make sure to add them to `requirements.txt`
+if they are required or to `setup.py` under the appropriate `extras` tag if 
+they are not. 
+Further, in order for them to be available during the CI tests, make sure to 
+add them in the `Dockerfile` for the `conda` environment build.
 
 
 ## Pull Requests
