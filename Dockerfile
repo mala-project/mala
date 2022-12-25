@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3:4.9.2
+FROM continuumio/miniconda3:22.11.1
 MAINTAINER Daniel Kotik <d.kotik@hzdr.de>
 
 # Update the image to the latest packages
