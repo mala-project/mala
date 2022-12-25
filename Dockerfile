@@ -1,5 +1,5 @@
 FROM continuumio/miniconda3:22.11.1
-MAINTAINER Daniel Kotik <d.kotik@hzdr.de>
+LABEL maintainer="d.kotik@hzdr.de"
 
 # Update the image to the latest packages
 RUN apt-get --allow-releaseinfo-change update && apt-get upgrade -y
