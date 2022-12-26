@@ -98,6 +98,7 @@ dependencies:
   - openssl=3.0.7
   - optuna=3.0.5
   - packaging=22.0
+  - pandas=1.5.2
   - pbr=5.11.0
   - pillow=9.2.0
   - pip=22.3.1
@@ -117,6 +118,7 @@ dependencies:
   - python_abi=3.8
   - pytorch=1.13.0
   - pytorch-cpu=1.13.0
+  - pytz=2022.7
   - pyu2f=0.1.5
   - pyyaml=6.0
   - re2=2022.06.01
