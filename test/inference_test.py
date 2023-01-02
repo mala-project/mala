@@ -206,6 +206,10 @@ class TestInference:
                           nr_electrons_tester_class,
                           atol=accuracy_strict)
 
+    @pytest.mark.skipif(importlib.util.find_spec("total_energy") is None
+                        or importlib.util.find_spec("lammps") is None,
+                        reason="QE and LAMMPS are currently not part of the "
+                               "pipeline.")
     def test_total_energy_predictions(self):
         """
         Test that total energy predictions are in principle correct.
