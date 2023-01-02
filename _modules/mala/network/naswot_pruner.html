@@ -80,7 +80,7 @@
 
 
 <div class="viewcode-block" id="NASWOTPruner"><a class="viewcode-back" href="../../../api/mala.network.naswot_pruner.html#mala.network.naswot_pruner.NASWOTPruner">[docs]</a><span class="k">class</span> <span class="nc">NASWOTPruner</span><span class="p">(</span><span class="n">BasePruner</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the NASWOT method (first version of paper) as an optuna pruner.</span>
 
 <span class="sd">    This means that before each training of a trial network the network will</span>
@@ -107,7 +107,7 @@
 
 <div class="viewcode-block" id="NASWOTPruner.prune"><a class="viewcode-back" href="../../../api/mala.network.naswot_pruner.html#mala.network.naswot_pruner.NASWOTPruner.prune">[docs]</a>    <span class="k">def</span> <span class="nf">prune</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">:</span> <span class="s2">&quot;optuna.study.Study&quot;</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span>
               <span class="s2">&quot;optuna.trial.FrozenTrial&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Judge whether the trial should be pruned based on the reported values.</span>
 
 <span class="sd">        Note that this method is not supposed to be called by library users. </span>

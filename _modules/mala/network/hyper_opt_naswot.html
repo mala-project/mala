@@ -84,7 +84,7 @@
 
 
 <div class="viewcode-block" id="HyperOptNASWOT"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT">[docs]</a><span class="k">class</span> <span class="nc">HyperOptNASWOT</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hyperparameter optimizer that does not require training networks.</span>
 
 <span class="sd">    Networks are analysed using the Jacobian.</span>
@@ -115,7 +115,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">last_trial</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="HyperOptNASWOT.perform_study"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.perform_study">[docs]</a>    <span class="k">def</span> <span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform the study, i.e. the optimization.</span>
 
 <span class="sd">        This is done by sampling a certain subset of network architectures.</span>
@@ -203,7 +203,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_best_trial_results</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="HyperOptNASWOT.get_best_trial_results"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.get_best_trial_results">[docs]</a>    <span class="k">def</span> <span class="nf">get_best_trial_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the best trial out of the list, including the value.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the best trial out of the list, including the value.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
             <span class="n">comm</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span>
             <span class="n">local_result</span> <span class="o">=</span> \
@@ -217,7 +217,7 @@
             <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_losses</span><span class="p">)]</span></div>
 
 <div class="viewcode-block" id="HyperOptNASWOT.set_optimal_parameters"><a class="viewcode-back" href="../../../api/mala.network.hyper_opt_naswot.html#mala.network.hyper_opt_naswot.HyperOptNASWOT.set_optimal_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the optimal parameters found in the present study.</span>
 
 <span class="sd">        The parameters will be written to the parameter object with which the</span>

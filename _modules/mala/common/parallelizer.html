@@ -90,7 +90,7 @@
 
 
 <div class="viewcode-block" id="set_current_verbosity"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_current_verbosity">[docs]</a><span class="k">def</span> <span class="nf">set_current_verbosity</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the verbosity used for the printout statements.</span>
 
 <span class="sd">    Should only be called by the parameters file, not by the user directly!</span>
@@ -105,7 +105,7 @@
 
 
 <div class="viewcode-block" id="set_horovod_status"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_horovod_status">[docs]</a><span class="k">def</span> <span class="nf">set_horovod_status</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the horovod status.</span>
 
 <span class="sd">    By setting the horovod status via this function it can be ensured that</span>
@@ -125,7 +125,7 @@
 
 
 <div class="viewcode-block" id="set_mpi_status"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.set_mpi_status">[docs]</a><span class="k">def</span> <span class="nf">set_mpi_status</span><span class="p">(</span><span class="n">new_value</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the MPI status.</span>
 
 <span class="sd">    By setting the horovod status via this function it can be ensured that</span>
@@ -154,7 +154,7 @@
 
 
 <div class="viewcode-block" id="get_rank"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_rank">[docs]</a><span class="k">def</span> <span class="nf">get_rank</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the rank of the current thread.</span>
 
 <span class="sd">    Always returns 0 in the serial case.</span>
@@ -173,7 +173,7 @@
 
 
 <div class="viewcode-block" id="get_local_rank"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_local_rank">[docs]</a><span class="k">def</span> <span class="nf">get_local_rank</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the local rank of the process.</span>
 
 <span class="sd">    This is the rank WITHIN a node. Useful when multiple GPUs are</span>
@@ -225,7 +225,7 @@
 
 
 <div class="viewcode-block" id="get_size"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_size">[docs]</a><span class="k">def</span> <span class="nf">get_size</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the number of ranks.</span>
 
 <span class="sd">    Returns</span>
@@ -241,7 +241,7 @@
 
 <span class="c1"># TODO: This is hacky, improve it.</span>
 <div class="viewcode-block" id="get_comm"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.get_comm">[docs]</a><span class="k">def</span> <span class="nf">get_comm</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the MPI communicator, if MPI is being used.</span>
 
 <span class="sd">    Returns</span>
@@ -254,7 +254,7 @@
 
 
 <div class="viewcode-block" id="barrier"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.barrier">[docs]</a><span class="k">def</span> <span class="nf">barrier</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;General interface for a barrier.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;General interface for a barrier.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">use_horovod</span><span class="p">:</span>
         <span class="n">hvd</span><span class="o">.</span><span class="n">allreduce</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;barrier&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">use_mpi</span><span class="p">:</span>
@@ -263,7 +263,7 @@
 
 
 <div class="viewcode-block" id="printout"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.printout">[docs]</a><span class="k">def</span> <span class="nf">printout</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interface to built-in &quot;print&quot; for parallel runs. Can be used like print.</span>
 
 <span class="sd">    Linked to the verbosity option in parameters. By default, all messages are</span>
@@ -287,7 +287,7 @@
 
 
 <div class="viewcode-block" id="parallel_warn"><a class="viewcode-back" href="../../../api/mala.common.parallelizer.html#mala.common.parallelizer.parallel_warn">[docs]</a><span class="k">def</span> <span class="nf">parallel_warn</span><span class="p">(</span><span class="n">warning</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interface for warnings in parallel runs. Can be used like warnings.warn.</span>
 
 <span class="sd">    Linked to the verbosity option in parameters. By default, all messages are</span>

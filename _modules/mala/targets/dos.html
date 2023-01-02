@@ -88,7 +88,7 @@
 
 
 <div class="viewcode-block" id="DOS"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS">[docs]</a><span class="k">class</span> <span class="nc">DOS</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Postprocessing / parsing functions for the density of states (DOS).</span>
 
 <span class="sd">    Parameters</span>
@@ -107,7 +107,7 @@
 
 <div class="viewcode-block" id="DOS.from_ldos_calculator"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_ldos_calculator">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_ldos_calculator</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ldos_object</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a DOS object from an LDOS object.</span>
 
 <span class="sd">        If the LDOS object has data associated with it, this data will</span>
@@ -151,7 +151,7 @@
 
 <div class="viewcode-block" id="DOS.from_numpy_file"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_numpy_file">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_numpy_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an DOS calculator from a numpy array saved in a file.</span>
 
 <span class="sd">        Parameters</span>
@@ -176,7 +176,7 @@
 
 <div class="viewcode-block" id="DOS.from_numpy_array"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_numpy_array">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_numpy_array</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an DOS calculator from a numpy array in memory.</span>
 
 <span class="sd">        By using this function rather then setting the local_density_of_states</span>
@@ -204,7 +204,7 @@
 
 <div class="viewcode-block" id="DOS.from_qe_dos_txt"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_qe_dos_txt">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_qe_dos_txt</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a DOS calculator from a Quantum Espresso generated file.</span>
 
 <span class="sd">        These files do not have a specified file ending, so I will call them</span>
@@ -229,7 +229,7 @@
 
 <div class="viewcode-block" id="DOS.from_qe_out"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.from_qe_out">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_qe_out</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a DOS calculator from a Quantum Espresso output file.</span>
 
 <span class="sd">        This will only work if the QE calculation has been performed with</span>
@@ -265,17 +265,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get a string that describes the target (for e.g. metadata).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a string that describes the target (for e.g. metadata).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;DOS&quot;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">si_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numeric value of the conversion from MALA (ASE) units to SI.</span>
 
 <span class="sd">        Needed for OpenPMD interface.</span>
@@ -284,7 +284,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Dictionary containing the SI unit dimensions in OpenPMD format.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dictionary containing the SI unit dimensions in OpenPMD format.&quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">M</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Unit_Dimension</span><span class="o">.</span><span class="n">L</span><span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span>
@@ -292,7 +292,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Density of states as array.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Density of states as array.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_density_of_states</span>
 
     <span class="nd">@density_of_states</span><span class="o">.</span><span class="n">setter</span>
@@ -303,7 +303,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">uncache_properties</span><span class="p">()</span>
 
 <div class="viewcode-block" id="DOS.get_target"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_target">[docs]</a>    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the target quantity.</span>
 
 <span class="sd">        This is the generic interface for cached target quantities.</span>
@@ -312,7 +312,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span></div>
 
 <div class="viewcode-block" id="DOS.invalidate_target"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.invalidate_target">[docs]</a>    <span class="k">def</span> <span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Invalidates the saved target wuantity.</span>
 
 <span class="sd">        This is the generic interface for cached target quantities.</span>
@@ -322,12 +322,12 @@
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Energy grid on which the DOS is expressed.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Energy grid on which the DOS is expressed.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_grid</span><span class="p">()</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Band energy of the system, calculated via cached DOS.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Band energy of the system, calculated via cached DOS.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_band_energy</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -336,7 +336,7 @@
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of electrons in the system, calculated via cached DOS.</span>
 
 <span class="sd">        Does not necessarily match up exactly with KS-DFT provided values,</span>
@@ -350,7 +350,7 @@
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">fermi_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;Self-consistent&quot; Fermi energy of the system.</span>
 
 <span class="sd">        &quot;Self-consistent&quot; does not mean self-consistent in the DFT sense,</span>
@@ -377,7 +377,7 @@
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">entropy_contribution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Entropy contribution to the energy calculated via cached DOS.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Entropy contribution to the energy calculated via cached DOS.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_entropy_contribution</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -385,7 +385,7 @@
                             <span class="s2">&quot;property.&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DOS.uncache_properties"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.uncache_properties">[docs]</a>    <span class="k">def</span> <span class="nf">uncache_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Uncache all cached properties of this calculator.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Uncache all cached properties of this calculator.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;number_of_electrons&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_property_cached</span><span class="p">(</span><span class="s2">&quot;energy_grid&quot;</span><span class="p">):</span>
@@ -404,7 +404,7 @@
 
 <div class="viewcode-block" id="DOS.convert_units"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array into the MALA units.</span>
 
 <span class="sd">        MALA units for the DOS means 1/eV.</span>
@@ -434,7 +434,7 @@
 
 <div class="viewcode-block" id="DOS.backconvert_units"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array from MALA units into desired units.</span>
 
 <span class="sd">        MALA units for the DOS means 1/eV.</span>
@@ -460,7 +460,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported unit for LDOS.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DOS.read_from_qe_dos_txt"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_dos_txt">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_qe_dos_txt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the DOS from a Quantum Espresso generated file.</span>
 
 <span class="sd">        These files do not have a specified file ending, so I will call them</span>
@@ -502,7 +502,7 @@
         <span class="k">return</span> <span class="n">array</span></div>
 
 <div class="viewcode-block" id="DOS.read_from_qe_out"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_qe_out">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_qe_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">smearing_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the DOS from a Quantum Espresso DFT output file.</span>
 
 <span class="sd">        The DOS will be read calculated via the eigenvalues and the equation</span>
@@ -548,7 +548,7 @@
         <span class="k">return</span> <span class="n">dos_data</span></div>
 
 <div class="viewcode-block" id="DOS.read_from_array"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.read_from_array">[docs]</a>    <span class="k">def</span> <span class="nf">read_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1/eV&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read the density data from a numpy array.</span>
 
 <span class="sd">        Parameters</span>
@@ -567,7 +567,7 @@
     <span class="c1">##############</span>
 
 <div class="viewcode-block" id="DOS.get_energy_grid"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_energy_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get energy grid.</span>
 
 <span class="sd">        Returns</span>
@@ -587,7 +587,7 @@
 <div class="viewcode-block" id="DOS.get_band_energy"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_band_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_band_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
                         <span class="n">broadcast_band_energy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the band energy from given DOS data.</span>
 
 <span class="sd">        Parameters</span>
@@ -666,7 +666,7 @@
 <div class="viewcode-block" id="DOS.get_number_of_electrons"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_number_of_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_of_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the number of electrons from given DOS data.</span>
 
 <span class="sd">        Parameters</span>
@@ -722,7 +722,7 @@
                                  <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                  <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
                                  <span class="n">broadcast_entropy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the entropy contribution to the total energy.</span>
 
 <span class="sd">        Parameters</span>
@@ -796,7 +796,7 @@
 <div class="viewcode-block" id="DOS.get_self_consistent_fermi_energy"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_self_consistent_fermi_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                          <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;analytical&quot;</span><span class="p">,</span>
                                          <span class="n">broadcast_fermi_energy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the self-consistent Fermi energy.</span>
 
 <span class="sd">        &quot;Self-consistent&quot; does not mean self-consistent in the DFT sense,</span>
@@ -870,7 +870,7 @@
             <span class="k">return</span> <span class="n">fermi_energy_sc</span></div>
 
 <div class="viewcode-block" id="DOS.get_density_of_states"><a class="viewcode-back" href="../../../api/mala.targets.dos.html#mala.targets.dos.DOS.get_density_of_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_of_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dos_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the density of states.</span>
 
 <span class="sd">        This function currently doesn&#39;t do much. In the LDOS and</span>
@@ -894,7 +894,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__number_of_electrons_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
                                        <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate the number of electrons from DOS data.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the number of electrons from DOS data.&quot;&quot;&quot;</span>
         <span class="c1"># Calculate the energy levels and the Fermi function.</span>
 
         <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
@@ -925,7 +925,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__band_energy_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
                                <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate the band energy from DOS data.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the band energy from DOS data.&quot;&quot;&quot;</span>
         <span class="c1"># Calculate the energy levels and the Fermi function.</span>
         <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
 
@@ -964,7 +964,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__entropy_contribution_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
                                         <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the entropy contribution to the total energy from DOS data.</span>
 
 <span class="sd">        More specifically, this gives -\beta^-1*S_S</span>

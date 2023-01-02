@@ -84,7 +84,7 @@
 
 
 <div class="viewcode-block" id="Tester"><a class="viewcode-back" href="../../../api/mala.network.tester.html#mala.network.tester.Tester">[docs]</a><span class="k">class</span> <span class="nc">Tester</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class for testing a neural network.</span>
 
 <span class="sd">    It enables easy inference throughout a test set.</span>
@@ -109,7 +109,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__prepare_to_test</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Tester.test_snapshot"><a class="viewcode-back" href="../../../api/mala.network.tester.html#mala.network.tester.Tester.test_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">test_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get actual and predicted output for a snapshot.</span>
 
 <span class="sd">        Parameters</span>
@@ -136,7 +136,7 @@
                                      <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">__prepare_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Prepare the tester class to for test run.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the tester class to for test run.&quot;&quot;&quot;</span>
         <span class="c1"># We will use the DataSet iterator to iterate over the test data.</span>
         <span class="c1"># But since we only want the data per snapshot,</span>
         <span class="c1"># we need to make sure the batch size is compatible with that.</span>

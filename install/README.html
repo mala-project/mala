@@ -133,28 +133,28 @@ files will likely install newer versions of (sub-)dependencies and we cannot gua
 <ol class="arabic">
 <li><p>(optional) If needed, specify the python version you want to use in this
 environment by replacing <code class="docutils literal notranslate"><span class="pre">3.6</span></code> with your desired version in <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code>:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dependencies</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python&gt;=yourversionhere</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dependencies</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python&gt;=yourversionhere</span>
 </pre></div>
 </div>
 </li>
 <li><p>Create an environment <code class="docutils literal notranslate"><span class="pre">mala</span></code>:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ conda env create -f environment.yml
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
 </pre></div>
 </div>
 </li>
 <li><p>Activate the new environment:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ conda activate mala
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>mala
 </pre></div>
 </div>
 </li>
 <li><p>You can deactivate the environment with:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ conda deactivate
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>deactivate
 </pre></div>
 </div>
 </li>
 <li><p>You can update your conda environment by making changes to environment.yml:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ conda env update --name mala  --file environment.yml
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>env<span class="w"> </span>update<span class="w"> </span>--name<span class="w"> </span>mala<span class="w">  </span>--file<span class="w"> </span>environment.yml
 </pre></div>
 </div>
 </li>
@@ -169,17 +169,17 @@ users may have or want to work with special <code class="docutils literal notran
 HPC infrastructure. If you install MALA manually from scratch, make sure there
 is a <code class="docutils literal notranslate"><span class="pre">torch</span></code> version available to python. For local testing, people
 might want to install the CPU-only version using something like</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install <span class="nv">torch</span><span class="o">==</span><span class="m">1</span>.7.1+cpu <span class="nv">torchvision</span><span class="o">==</span><span class="m">0</span>.8.2+cpu <span class="se">\</span>
-    <span class="nv">torchaudio</span><span class="o">==</span><span class="m">0</span>.7.2 -f <span class="se">\</span>
-    https://download.pytorch.org/whl/torch_stable.html
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">torch</span><span class="o">==</span><span class="m">1</span>.7.1+cpu<span class="w"> </span><span class="nv">torchvision</span><span class="o">==</span><span class="m">0</span>.8.2+cpu<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">torchaudio</span><span class="o">==</span><span class="m">0</span>.7.2<span class="w"> </span>-f<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://download.pytorch.org/whl/torch_stable.html
 </pre></div>
 </div>
 <p>while a plain <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">torch</span></code> will pull the much larger GPU version by
 default. For other ways to install PyTorch you might also refer
 to <a class="reference external" href="https://pytorch.org/">https://pytorch.org/</a>.</p>
 <p>Afterwards, MALA can easily be installed via</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> ~/path/to/this/git/root/directory
-$ pip install -e .<span class="o">[</span>options<span class="o">]</span>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>~/path/to/this/git/root/directory
+$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>options<span class="o">]</span>
 </pre></div>
 </div>
 <p>The following options are available:</p>
@@ -218,13 +218,13 @@ data repository, that can be obtained from
 correct tag for the data repository, since the data repository itself is
 subject to ongoing development as well.</p>
 <p>Download data repository and check out correct tag.</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/mala-project/test-data ~/path/to/data/repo
-$ <span class="nb">cd</span> ~/path/to/data/repo
-$ git checkout v1.3.0
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/mala-project/test-data<span class="w"> </span>~/path/to/data/repo
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>~/path/to/data/repo
+$<span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>v1.3.0
 </pre></div>
 </div>
 <p>Export the path to that repo by</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">export</span> <span class="nv">MALA_DATA_REPO</span><span class="o">=</span>~/path/to/data/repo
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="nv">MALA_DATA_REPO</span><span class="o">=</span>~/path/to/data/repo
 </pre></div>
 </div>
 <p>This will be used by tests and examples.</p>
@@ -232,7 +232,7 @@ $ git checkout v1.3.0
 <div class="section" id="build-documentation-locally-optional">
 <h2>Build documentation locally (Optional)<a class="headerlink" href="#build-documentation-locally-optional" title="Permalink to this headline"></a></h2>
 <p>Install the prerequisites (if you haven’t already during the MALA setup).</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ pip install -r docs/requirements.txt
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>docs/requirements.txt
 </pre></div>
 </div>
 <p>Afterwards, the documentation can be built via:</p>

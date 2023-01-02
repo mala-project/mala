@@ -84,7 +84,7 @@
 
 
 <div class="viewcode-block" id="ObjectiveNASWOT"><a class="viewcode-back" href="../../../api/mala.network.objective_naswot.html#mala.network.objective_naswot.ObjectiveNASWOT">[docs]</a><span class="k">class</span> <span class="nc">ObjectiveNASWOT</span><span class="p">(</span><span class="n">ObjectiveBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Represents the objective function using no NN training.</span>
 
 <span class="sd">    The objective value is calculated using the Jacobian.</span>
@@ -120,7 +120,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">search_parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">mini_batch_size</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get objective value for a trial (=set of hyperparameters).</span>
 
 <span class="sd">        Parameters</span>
@@ -185,7 +185,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__get_batch_jacobian</span><span class="p">(</span><span class="n">net</span><span class="p">:</span> <span class="n">Network</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span> \
             <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Calculate the jacobian of the batch.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the jacobian of the batch.&quot;&quot;&quot;</span>
         <span class="n">x</span><span class="p">:</span> <span class="n">Tensor</span>
         <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">loader</span><span class="p">))</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
@@ -198,7 +198,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__corrcoef</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the correlation coefficient of an array.</span>
 
 <span class="sd">        Pytorch implementation of np.corrcoef.</span>
@@ -222,7 +222,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__calc_score</span><span class="p">(</span><span class="n">jacobian</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate the score for a Jacobian.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the score for a Jacobian.&quot;&quot;&quot;</span>
         <span class="n">correlations</span> <span class="o">=</span> <span class="n">ObjectiveNASWOT</span><span class="o">.</span><span class="n">__corrcoef</span><span class="p">(</span><span class="n">jacobian</span><span class="p">)</span>
         <span class="n">eigen_values</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">correlations</span><span class="p">)</span>
         <span class="c1"># Only consider the real valued part, imaginary part is rounding</span>

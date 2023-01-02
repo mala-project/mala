@@ -78,7 +78,7 @@
 
 
 <div class="viewcode-block" id="AtomicForce"><a class="viewcode-back" href="../../../api/mala.targets.atomic_force.html#mala.targets.atomic_force.AtomicForce">[docs]</a><span class="k">class</span> <span class="nc">AtomicForce</span><span class="p">(</span><span class="n">Target</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Postprocessing / parsing functions for atomic forces.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Postprocessing / parsing functions for atomic forces.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -87,7 +87,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Density object.</span>
 
 <span class="sd">        Parameters</span>
@@ -99,12 +99,12 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">AtomicForce</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AtomicForce.get_feature_size"><a class="viewcode-back" href="../../../api/mala.targets.atomic_force.html#mala.targets.atomic_force.AtomicForce.get_feature_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">3</span></div>
 
 <div class="viewcode-block" id="AtomicForce.convert_units"><a class="viewcode-back" href="../../../api/mala.targets.atomic_force.html#mala.targets.atomic_force.AtomicForce.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;eV/Ang&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array into the MALA units.</span>
 
 <span class="sd">        MALA units for the LDOS means 1/eV.</span>

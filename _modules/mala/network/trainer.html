@@ -96,7 +96,7 @@
 
 
 <div class="viewcode-block" id="Trainer"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer">[docs]</a><span class="k">class</span> <span class="nc">Trainer</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;A class for training a neural network.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for training a neural network.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -159,7 +159,7 @@
 
 <div class="viewcode-block" id="Trainer.checkpoint_exists"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.checkpoint_exists">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">checkpoint_exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if a hyperparameter optimization checkpoint exists.</span>
 
 <span class="sd">        Returns True if it does.</span>
@@ -192,7 +192,7 @@
 
 <div class="viewcode-block" id="Trainer.resume_checkpoint"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.resume_checkpoint">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">resume_checkpoint</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">use_pkl_checkpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prepare resumption of training from a checkpoint.</span>
 
 <span class="sd">        Please note that to actually resume the training,</span>
@@ -251,7 +251,7 @@
 
 <div class="viewcode-block" id="Trainer.load_from_file"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a trainer from a file.</span>
 
 <span class="sd">        Parameters</span>
@@ -284,7 +284,7 @@
         <span class="k">return</span> <span class="n">loaded_trainer</span></div>
 
 <div class="viewcode-block" id="Trainer.train_network"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.train_network">[docs]</a>    <span class="k">def</span> <span class="nf">train_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Train a network using data given by a DataHandler.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Train a network using data given by a DataHandler.&quot;&quot;&quot;</span>
         <span class="c1">############################</span>
         <span class="c1"># CALCULATE INITIAL METRICS</span>
         <span class="c1">############################</span>
@@ -464,7 +464,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">final_test_loss</span> <span class="o">=</span> <span class="n">tloss</span></div>
 
     <span class="k">def</span> <span class="nf">__prepare_to_train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_dict</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Prepare everything for training.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare everything for training.&quot;&quot;&quot;</span>
         <span class="c1"># Configure keyword arguments for DataSampler.</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;num_workers&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
                   <span class="s1">&#39;pin_memory&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
@@ -600,7 +600,7 @@
                                                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__process_mini_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">target_data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Process a mini batch.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a mini batch.&quot;&quot;&quot;</span>
         <span class="n">prediction</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target_data</span><span class="p">)</span>
         <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
@@ -609,7 +609,7 @@
         <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__validate_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data_set_type</span><span class="p">,</span> <span class="n">validation_type</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Validate a network, using test or validation data.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate a network, using test or validation data.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">data_set_type</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
             <span class="n">data_loader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span>
             <span class="n">data_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span>
@@ -731,7 +731,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Selected validation method not supported.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__create_training_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a checkpoint during training.</span>
 
 <span class="sd">        Follows https://pytorch.org/tutorials/recipes/recipes/saving_and_</span>
@@ -786,7 +786,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__average_validation</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Average validation over multiple parallel processes.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Average validation over multiple parallel processes.&quot;&quot;&quot;</span>
         <span class="n">tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
         <span class="n">avg_loss</span> <span class="o">=</span> <span class="n">hvd</span><span class="o">.</span><span class="n">allreduce</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">hvd</span><span class="o">.</span><span class="n">Average</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">avg_loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span></div>

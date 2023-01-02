@@ -198,8 +198,8 @@ To set up PostgreSQL, use the following steps.</p>
 <ol class="arabic">
 <li><p>Install postgres (e.g. in a conda environment)</p></li>
 <li><p>Initialize a postgres server configuration somewhere in your home directory:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> /a/suitable/location/
-$ initdb -D YOUR_SERVER_NAME
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/a/suitable/location/
+$<span class="w"> </span>initdb<span class="w"> </span>-D<span class="w"> </span>YOUR_SERVER_NAME
 </pre></div>
 </div>
 </li>
@@ -214,7 +214,7 @@ $ initdb -D YOUR_SERVER_NAME
 </div></blockquote>
 </li>
 <li><p>Start the postgres server:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pg_ctl -D postgres_local -l logfile start
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pg_ctl<span class="w"> </span>-D<span class="w"> </span>postgres_local<span class="w"> </span>-l<span class="w"> </span>logfile<span class="w"> </span>start
 </pre></div>
 </div>
 </li>
@@ -230,13 +230,13 @@ $ initdb -D YOUR_SERVER_NAME
 <blockquote>
 <div><ul>
 <li><p>You can/should also create a database for optuna, so you can create a study from within Python</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /a/suitable/location/
-pg_ctl -D A_DESCRIPTIVE_SERVER_NAME -l logfile start
-createdb YOUR_SERVER_NAME
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/a/suitable/location/
+pg_ctl<span class="w"> </span>-D<span class="w"> </span>A_DESCRIPTIVE_SERVER_NAME<span class="w"> </span>-l<span class="w"> </span>logfile<span class="w"> </span>start
+createdb<span class="w"> </span>YOUR_SERVER_NAME
 
-<span class="k">while</span> true<span class="p">;</span> <span class="k">do</span>
-  pg_ctl -D postgres_local status
-  sleep 60m
+<span class="k">while</span><span class="w"> </span>true<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span>pg_ctl<span class="w"> </span>-D<span class="w"> </span>postgres_local<span class="w"> </span>status
+<span class="w">  </span>sleep<span class="w"> </span>60m
 <span class="k">done</span>
 </pre></div>
 </div>
@@ -273,7 +273,7 @@ to mount the folders to your local machine.</p>
 </li>
 <li><p>Alternatively, simply use the following command</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ sshfs username@hemera5.fz-rossendorf.de:folder/file/location folder/location/in/local
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>sshfs<span class="w"> </span>username@hemera5.fz-rossendorf.de:folder/file/location<span class="w"> </span>folder/location/in/local
 </pre></div>
 </div>
 </div></blockquote>
@@ -299,7 +299,7 @@ You should always use all GPUs per node in a multinode setup.</p>
 
 <span class="c1">#... module loading and such ...</span>
 
-mpirun -np NUMBER_OF_NODES*MAX_NUMBER_OF_GPUS_PER_NODE -npernode MAX_NUMBER_OF_GPUS_PER_NODE -bind-to none -x <span class="nv">NCCL_DEBUG</span><span class="o">=</span>INFO -x LD_LIBRARY_PATH -x PATH -mca pml ob1 -mca btl ^openib python3 your_mala_script.py
+mpirun<span class="w"> </span>-np<span class="w"> </span>NUMBER_OF_NODES*MAX_NUMBER_OF_GPUS_PER_NODE<span class="w"> </span>-npernode<span class="w"> </span>MAX_NUMBER_OF_GPUS_PER_NODE<span class="w"> </span>-bind-to<span class="w"> </span>none<span class="w"> </span>-x<span class="w"> </span><span class="nv">NCCL_DEBUG</span><span class="o">=</span>INFO<span class="w"> </span>-x<span class="w"> </span>LD_LIBRARY_PATH<span class="w"> </span>-x<span class="w"> </span>PATH<span class="w"> </span>-mca<span class="w"> </span>pml<span class="w"> </span>ob1<span class="w"> </span>-mca<span class="w"> </span>btl<span class="w"> </span>^openib<span class="w"> </span>python3<span class="w"> </span>your_mala_script.py
 </pre></div>
 </div>
 </div></blockquote>

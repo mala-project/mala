@@ -93,7 +93,7 @@
 
 
 <div class="viewcode-block" id="ParametersBase"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase">[docs]</a><span class="k">class</span> <span class="nc">ParametersBase</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Base parameter class for MALA.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base parameter class for MALA.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -103,7 +103,7 @@
         <span class="k">pass</span>
 
 <div class="viewcode-block" id="ParametersBase.show"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print name and values of all attributes of this object.</span>
 
 <span class="sd">        Parameters</span>
@@ -148,7 +148,7 @@
             <span class="k">return</span> <span class="n">member</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ParametersBase.to_json"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert this object to a dictionary that can be saved in a JSON file.</span>
 
 <span class="sd">        Returns</span>
@@ -212,7 +212,7 @@
 
 <div class="viewcode-block" id="ParametersBase.from_json"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersBase.from_json">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read this object from a dictionary saved in a JSON file.</span>
 
 <span class="sd">        Parameters</span>
@@ -263,7 +263,7 @@
 
 
 <div class="viewcode-block" id="ParametersNetwork"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersNetwork">[docs]</a><span class="k">class</span> <span class="nc">ParametersNetwork</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for constructing a neural network.</span>
 
 <span class="sd">    Attributes</span>
@@ -341,7 +341,7 @@
 
 
 <div class="viewcode-block" id="ParametersDescriptors"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersDescriptors">[docs]</a><span class="k">class</span> <span class="nc">ParametersDescriptors</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for calculating/parsing input descriptors.</span>
 
 <span class="sd">    Attributes</span>
@@ -414,7 +414,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_z_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control whether splitting across the z-axis is used.</span>
 
 <span class="sd">        Default is True, since this gives descriptors compatible with</span>
@@ -432,7 +432,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_y_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control whether a splitting in y-axis is used.</span>
 
 <span class="sd">        This can only be used in conjunction with a z-splitting, and</span>
@@ -453,7 +453,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bispectrum_cutoff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Cut off radius for bispectrum calculation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cut off radius for bispectrum calculation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rcutfac</span>
 
     <span class="nd">@bispectrum_cutoff</span><span class="o">.</span><span class="n">setter</span>
@@ -463,7 +463,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bispectrum_switchflag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Switchflag for the bispectrum calculation.</span>
 
 <span class="sd">        Can only be 1 or 0. If 1 (default), a switching function will be used</span>
@@ -483,7 +483,7 @@
 
 
 <div class="viewcode-block" id="ParametersTargets"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersTargets">[docs]</a><span class="k">class</span> <span class="nc">ParametersTargets</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for calculating/parsing output quantites.</span>
 
 <span class="sd">    Attributes</span>
@@ -565,7 +565,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">restrict_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control if and how targets are restricted to physical values.</span>
 
 <span class="sd">        Can be &quot;zero_out_negative&quot;, i.e. all negative values are set to zero</span>
@@ -582,7 +582,7 @@
 
 
 <div class="viewcode-block" id="ParametersData"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersData">[docs]</a><span class="k">class</span> <span class="nc">ParametersData</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters necessary for loading and preprocessing data.</span>
 
 <span class="sd">    Attributes</span>
@@ -663,7 +663,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_ratio</span> <span class="o">=</span> <span class="mf">0.5</span></div>
 
 <div class="viewcode-block" id="ParametersRunning"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersRunning">[docs]</a><span class="k">class</span> <span class="nc">ParametersRunning</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parameters needed for network runs (train, test or inference).</span>
 
 <span class="sd">    Some of these parameters only apply to either the train or test or</span>
@@ -794,7 +794,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">during_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control the metric used during training.</span>
 
 <span class="sd">        Metric for evaluated on the validation set during training.</span>
@@ -817,7 +817,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">after_before_training_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the metric used during training.</span>
 
 <span class="sd">        Metric for evaluated on the validation and test set before and after</span>
@@ -840,7 +840,7 @@
 
 
 <div class="viewcode-block" id="ParametersHyperparameterOptimization"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization">[docs]</a><span class="k">class</span> <span class="nc">ParametersHyperparameterOptimization</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hyperparameter optimization parameters.</span>
 
 <span class="sd">    Attributes</span>
@@ -991,7 +991,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">rdb_storage_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Control whether a heartbeat is used for distributed optuna runs.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether a heartbeat is used for distributed optuna runs.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rdb_storage_heartbeat</span>
 
     <span class="nd">@rdb_storage_heartbeat</span><span class="o">.</span><span class="n">setter</span>
@@ -1003,7 +1003,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">number_training_per_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Control how many trainings are run per optuna trial.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control how many trainings are run per optuna trial.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_number_training_per_trial</span>
 
     <span class="nd">@number_training_per_trial</span><span class="o">.</span><span class="n">setter</span>
@@ -1015,7 +1015,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">trial_ensemble_evaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control how multiple trainings performed during a trial are evaluated.</span>
 
 <span class="sd">        By default, simply &quot;mean&quot; is used. For smaller numbers of training</span>
@@ -1034,7 +1034,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_trial_ensemble_evaluation</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="ParametersHyperparameterOptimization.show"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersHyperparameterOptimization.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print name and values of all attributes of this object.</span>
 
 <span class="sd">        Parameters</span>
@@ -1064,7 +1064,7 @@
 
 
 <div class="viewcode-block" id="ParametersDataGeneration"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersDataGeneration">[docs]</a><span class="k">class</span> <span class="nc">ParametersDataGeneration</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    All parameters to help with data generation.</span>
 
 <span class="sd">    Attributes</span>
@@ -1124,7 +1124,7 @@
 
 
 <div class="viewcode-block" id="Parameters"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters">[docs]</a><span class="k">class</span> <span class="nc">Parameters</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    All parameter MALA needs to perform its various tasks.</span>
 
 <span class="sd">    Attributes</span>
@@ -1187,7 +1187,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">openpmd_granularity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adjust the memory overhead of the OpenPMD interface.</span>
 
 <span class="sd">        Smallest possible value is 1, meaning smallest memory footprint</span>
@@ -1213,7 +1213,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">verbosity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Control the level of output for MALA.</span>
 
 <span class="sd">        The following options are available:</span>
@@ -1233,7 +1233,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_gpu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Control whether or not a GPU is used (provided there is one).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not a GPU is used (provided there is one).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_gpu</span>
 
     <span class="nd">@use_gpu</span><span class="o">.</span><span class="n">setter</span>
@@ -1258,7 +1258,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_horovod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Control whether or not horovod is used for parallel training.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not horovod is used for parallel training.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_horovod</span>
 
     <span class="nd">@use_horovod</span><span class="o">.</span><span class="n">setter</span>
@@ -1279,7 +1279,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the device used by MALA. Read-only.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the device used by MALA. Read-only.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device</span>
 
     <span class="nd">@device</span><span class="o">.</span><span class="n">setter</span>
@@ -1299,7 +1299,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Control whether or not horovod is used for parallel training.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Control whether or not horovod is used for parallel training.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_mpi</span>
 
     <span class="nd">@use_mpi</span><span class="o">.</span><span class="n">setter</span>
@@ -1317,7 +1317,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Provide a .toml or .json formatted string to configure OpenPMD.</span>
 
 <span class="sd">        To load a configuration from a file, add an &quot;@&quot; in front of the file</span>
@@ -1339,7 +1339,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">_update_openpmd_configuration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openpmd_configuration</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Parameters.show"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Print name and values of all attributes of this object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Print name and values of all attributes of this object.&quot;&quot;&quot;</span>
         <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;--- &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; ---&quot;</span><span class="p">,</span>
                  <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
@@ -1362,7 +1362,7 @@
                 <span class="n">parobject</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parameters.save"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the Parameters object to a file.</span>
 
 <span class="sd">        Parameters</span>
@@ -1412,7 +1412,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported parameter save format.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parameters.save_as_pickle"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.save_as_pickle">[docs]</a>    <span class="k">def</span> <span class="nf">save_as_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the Parameters object to a pickle file.</span>
 
 <span class="sd">        Parameters</span>
@@ -1424,7 +1424,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parameters.save_as_json"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.save_as_json">[docs]</a>    <span class="k">def</span> <span class="nf">save_as_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the Parameters object to a json file.</span>
 
 <span class="sd">        Parameters</span>
@@ -1436,7 +1436,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parameters.optuna_singlenode_setup"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.optuna_singlenode_setup">[docs]</a>    <span class="k">def</span> <span class="nf">optuna_singlenode_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait_time</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set up device and parallelization parameters for Optuna+MPI.</span>
 
 <span class="sd">        This only needs to be called if multiple MPI ranks are used on</span>
@@ -1475,7 +1475,7 @@
 <div class="viewcode-block" id="Parameters.load_from_file"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_file">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
                        <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a Parameters object from a file.</span>
 
 <span class="sd">        Parameters</span>
@@ -1530,7 +1530,7 @@
 
 <div class="viewcode-block" id="Parameters.load_from_pickle"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_pickle">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_pickle</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a Parameters object from a pickle file.</span>
 
 <span class="sd">        Parameters</span>
@@ -1553,7 +1553,7 @@
 
 <div class="viewcode-block" id="Parameters.load_from_json"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.Parameters.load_from_json">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">no_snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load a Parameters object from a json file.</span>
 
 <span class="sd">        Parameters</span>

@@ -92,7 +92,7 @@
 
 
 <div class="viewcode-block" id="Target"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target">[docs]</a><span class="k">class</span> <span class="nc">Target</span><span class="p">(</span><span class="n">PhysicalData</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for all target quantity parser.</span>
 
 <span class="sd">    Target parsers read the target quantity</span>
@@ -111,7 +111,7 @@
     <span class="c1">##############################</span>
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Target instance.</span>
 
 <span class="sd">        The correct type of target calculator will automatically be</span>
@@ -215,13 +215,13 @@
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get dimension of this target if used as feature in ML.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">si_unit_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numeric value of the conversion from MALA (ASE) units to SI.</span>
 
 <span class="sd">        Needed for OpenPMD interface.</span>
@@ -231,7 +231,7 @@
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">si_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dictionary containing the SI unit dimensions in OpenPMD format.</span>
 
 <span class="sd">        Needed for OpenPMD interface.</span>
@@ -240,7 +240,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qe_input_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Input data for QE TEM calls.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Input data for QE TEM calls.&quot;&quot;&quot;</span>
         <span class="c1"># Update the pseudopotential path from Parameters.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_qe_input_data</span><span class="p">[</span><span class="s2">&quot;pseudo_dir&quot;</span><span class="p">]</span> <span class="o">=</span> \
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">pseudopotential_path</span>
@@ -263,7 +263,7 @@
 <div class="viewcode-block" id="Target.convert_units"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;eV&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array into the MALA units.</span>
 
 <span class="sd">        Parameters</span>
@@ -286,7 +286,7 @@
 <div class="viewcode-block" id="Target.backconvert_units"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.backconvert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">backconvert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">out_units</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the units of an array from MALA units into desired units.</span>
 
 <span class="sd">        Parameters</span>
@@ -307,7 +307,7 @@
                         <span class="s2">&quot;for this target type.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.read_additional_calculation_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.read_additional_calculation_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read in additional input about a calculation.</span>
 
 <span class="sd">        This is e.g. necessary when we operate with preprocessed</span>
@@ -496,7 +496,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported auxiliary file type.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.write_additional_calculation_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.write_additional_calculation_data">[docs]</a>    <span class="k">def</span> <span class="nf">write_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">return_string</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write additional information about a calculation to a .json file.</span>
 
 <span class="sd">        This way important information about a calculation can be saved more</span>
@@ -551,7 +551,7 @@
 
 <div class="viewcode-block" id="Target.get_target"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_target">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the target quantity.</span>
 
 <span class="sd">        This is the generic interface for cached target quantities.</span>
@@ -561,7 +561,7 @@
 
 <div class="viewcode-block" id="Target.invalidate_target"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.invalidate_target">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">invalidate_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Invalidates the saved target wuantity.</span>
 
 <span class="sd">        This is the generic interface for cached target quantities.</span>
@@ -573,11 +573,11 @@
     <span class="c1">##############</span>
 
 <div class="viewcode-block" id="Target.get_energy_grid"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_energy_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get energy grid.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get energy grid.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No method implement to calculate an energy grid.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.get_real_space_grid"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_real_space_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_real_space_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the real space grid.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the real space grid.&quot;&quot;&quot;</span>
         <span class="n">grid3D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
@@ -591,7 +591,7 @@
                                                 <span class="n">number_of_bins</span><span class="p">,</span>
                                                 <span class="n">rMax</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span><span class="p">,</span>
                                                 <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mala&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the radial distribution function (RDF).</span>
 
 <span class="sd">        In comparison with other python implementation, this function</span>
@@ -717,7 +717,7 @@
     <span class="k">def</span> <span class="nf">three_particle_correlation_function_from_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
                                                        <span class="n">number_of_bins</span><span class="p">,</span>
                                                        <span class="n">rMax</span><span class="o">=</span><span class="s2">&quot;mic&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the three particle correlation function (TPCF).</span>
 
 <span class="sd">        The implementation was done as given by doi.org/10.1063/5.0048450,</span>
@@ -849,7 +849,7 @@
                                            <span class="n">kMax</span><span class="p">,</span>
                                            <span class="n">radial_distribution_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                            <span class="n">calculation_type</span><span class="o">=</span><span class="s2">&quot;direct&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the static structure factor (SSF).</span>
 
 <span class="sd">        Implemented according to https://arxiv.org/abs/1606.03610:</span>
@@ -988,7 +988,7 @@
 
 <div class="viewcode-block" id="Target.get_radial_distribution_function"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_radial_distribution_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_radial_distribution_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
                                          <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mala&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the radial distribution function (RDF).</span>
 
 <span class="sd">        Uses the values as given in the parameters object.</span>
@@ -1030,7 +1030,7 @@
                                                     <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.get_three_particle_correlation_function"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_three_particle_correlation_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_three_particle_correlation_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the three particle correlation function (TPCF).</span>
 
 <span class="sd">        Uses the values as given in the parameters object.</span>
@@ -1059,7 +1059,7 @@
                                                            <span class="n">tpcf_parameters</span><span class="p">[</span><span class="s2">&quot;rMax&quot;</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="Target.get_static_structure_factor"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.get_static_structure_factor">[docs]</a>    <span class="k">def</span> <span class="nf">get_static_structure_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the static structure factor (SSF).</span>
 
 <span class="sd">        Uses the values as given in the parameters object.</span>
@@ -1088,7 +1088,7 @@
     <span class="k">def</span> <span class="nf">write_tem_input_file</span><span class="p">(</span><span class="n">atoms_Angstrom</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="p">,</span>
                              <span class="n">qe_pseudopotentials</span><span class="p">,</span>
                              <span class="n">grid_dimensions</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write a QE-style input file for the total energy module.</span>
 
 <span class="sd">        Usually, the used parameters should correspond to the properties of</span>
@@ -1137,7 +1137,7 @@
                      <span class="n">kpts</span><span class="o">=</span><span class="n">kpoints</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Target.restrict_data"><a class="viewcode-back" href="../../../api/mala.targets.target.html#mala.targets.target.Target.restrict_data">[docs]</a>    <span class="k">def</span> <span class="nf">restrict_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Restrict target data to only contain physically meaningful values.</span>
 
 <span class="sd">        For the LDOS this e.g. implies non-negative values. The type</span>
