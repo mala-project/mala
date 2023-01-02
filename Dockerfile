@@ -1,11 +1,15 @@
 FROM continuumio/miniconda3:22.11.1
 LABEL maintainer="d.kotik@hzdr.de"
 
-# Update the image to the latest packages
-RUN apt-get --allow-releaseinfo-change update && apt-get upgrade -y
-
-RUN apt-get install --no-install-recommends -y build-essential libz-dev swig git-lfs cmake
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Update the image and install essential packages
+RUN apt-get --allow-releaseinfo-change update && apt-get upgrade -y && \
+    apt-get install --no-install-recommends -y \
+    build-essential \
+    libz-dev \
+    swig \
+    git-lfs \
+    cmake && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Choose 'cpu' or 'gpu'
 ARG DEVICE=cpu
