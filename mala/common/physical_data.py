@@ -276,7 +276,7 @@ class PhysicalData(ABC):
 
     def write_to_openpmd_file(self, path, array):
         """
-        Write data to a numpy file.
+        Write data to an OpenPMD file.
 
         Parameters
         ----------

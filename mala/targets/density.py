@@ -431,7 +431,29 @@ class Density(Target):
         self.density = array
         return array
 
-    def write_as_cube(self, file_name, density_data, atoms=None,
+    def write_to_openpmd_file(self, path, target_data=None):
+        """
+        Write data to a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            File to save into. If no file ending is given, .h5 is assumed.
+
+        target_data : numpy.ndarray
+            Target data to save. If None, the data stored in the calculator
+            will be used.
+        """
+        if target_data is None:
+            if len(self.density.shape) == 2:
+                super(Target, self).\
+                    write_to_openpmd_file(path, np.reshape(self.density,
+                                                           self.grid_dimensions
+                                                           + [1]))
+        else:
+            super(Target, self).write_to_openpmd_file(path, target_data)
+
+    def write_to_cube(self, file_name, density_data=None, atoms=None,
                       grid_dimensions=None):
         """
         Write the density data in a cube file.
@@ -447,20 +469,26 @@ class Density(Target):
         atoms : ase.Atoms
             Atoms to be written to the file alongside the density data.
             If None, and the target object has an atoms object, this will
-            be used.
+            be used. Ignored, unless density_data is provided.
 
         grid_dimensions : list
-            Grid dimensions. Only necessary if a 1D density is provided.
+            Grid dimensions. Ignored, unless density_data is provided.
         """
-        if grid_dimensions is None:
+        if density_data is not None:
+            if grid_dimensions is None or atoms is None:
+                raise Exception("No grid or atom data provided. "
+                                "Please note that these are only optional "
+                                "if the density saved in the calculator is "
+                                "used and have to be provided otherwise.")
+        else:
+            density_data = self.density
             grid_dimensions = self.grid_dimensions
-        if atoms is None:
             atoms = self.atoms
-        if len(density_data.shape) != 4:
-            if len(density_data.shape) == 2:
-                density_data = np.reshape(density_data, grid_dimensions)
-            else:
-                raise Exception("Unknown density shape provided.")
+
+        if len(density_data.shape) == 4 or len(density_data.shape) == 2:
+            density_data = np.reshape(density_data, grid_dimensions)
+        else:
+            raise Exception("Unknown density shape provided.")
         # %%
         meta = {}
         atom_list = []
@@ -631,7 +659,7 @@ class Density(Target):
                 else:
                     if grid_dimensions is None:
                         grid_dimensions = self.grid_dimensions
-                    return density_data.reshape(grid_dimensions)
+                    return density_data.reshape(grid_dimensions+[1])
             else:
                 return density_data
         else:
