@@ -431,6 +431,28 @@ class Density(Target):
         self.density = array
         return array
 
+    def write_to_openpmd_file(self, path, target_data=None):
+        """
+        Write data to a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            File to save into. If no file ending is given, .h5 is assumed.
+
+        target_data : numpy.ndarray
+            Target data to save. If None, the data stored in the calculator
+            will be used.
+        """
+        if target_data is None:
+            if len(self.density.shape) == 2:
+                super(Target, self).\
+                    write_to_openpmd_file(path, np.reshape(self.density,
+                                                           self.grid_dimensions
+                                                           + [1]))
+        else:
+            super(Target, self).write_to_openpmd_file(path, target_data)
+
     def write_to_cube(self, file_name, density_data=None, atoms=None,
                       grid_dimensions=None):
         """

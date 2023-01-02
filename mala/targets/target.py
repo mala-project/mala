@@ -473,6 +473,42 @@ class Target(PhysicalData):
         else:
             return additional_calculation_data
 
+    def write_to_numpy_file(self, path, target_data=None):
+        """
+        Write data to a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            File to save into.
+
+        target_data : numpy.ndarray
+            Target data to save. If None, the data stored in the calculator
+            will be used.
+        """
+        if target_data is None:
+            super(Target, self).write_to_numpy_file(path, self.get_target())
+        else:
+            super(Target, self).write_to_numpy_file(path, target_data)
+
+    def write_to_openpmd_file(self, path, target_data=None):
+        """
+        Write data to a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            File to save into. If no file ending is given, .h5 is assumed.
+
+        target_data : numpy.ndarray
+            Target data to save. If None, the data stored in the calculator
+            will be used.
+        """
+        if target_data is None:
+            super(Target, self).write_to_openpmd_file(path, self.get_target())
+        else:
+            super(Target, self).write_to_openpmd_file(path, target_data)
+
     # Accessing target data
     ########################
 
