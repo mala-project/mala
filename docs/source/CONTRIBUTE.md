@@ -62,7 +62,7 @@ If you add additional dependencies, make sure to add them to `requirements.txt`
 if they are required or to `setup.py` under the appropriate `extras` tag if 
 they are not. 
 Further, in order for them to be available during the CI tests, make sure to 
-add them in the `Dockerfile` for the `conda` environment build.
+add _required_ dependencies to the appropriate environment files in folder `install/` and _extra_ requirements directly in the `Dockerfile` for the `conda` environment build.
 
 
 ## Pull Requests
