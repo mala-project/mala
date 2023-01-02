@@ -504,7 +504,29 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="n">array</span>
         <span class="k">return</span> <span class="n">array</span></div>
 
-<div class="viewcode-block" id="Density.write_as_cube"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_as_cube">[docs]</a>    <span class="k">def</span> <span class="nf">write_as_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">density_data</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="Density.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">target_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write data to a numpy file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : string</span>
+<span class="sd">            File to save into. If no file ending is given, .h5 is assumed.</span>
+
+<span class="sd">        target_data : numpy.ndarray</span>
+<span class="sd">            Target data to save. If None, the data stored in the calculator</span>
+<span class="sd">            will be used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">target_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span>\
+                    <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">density</span><span class="p">,</span>
+                                                           <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span>
+                                                           <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">target_data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Density.write_to_cube"><a class="viewcode-back" href="../../../api/mala.targets.density.html#mala.targets.density.Density.write_to_cube">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">density_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">grid_dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write the density data in a cube file.</span>
@@ -520,20 +542,26 @@
 <span class="sd">        atoms : ase.Atoms</span>
 <span class="sd">            Atoms to be written to the file alongside the density data.</span>
 <span class="sd">            If None, and the target object has an atoms object, this will</span>
-<span class="sd">            be used.</span>
+<span class="sd">            be used. Ignored, unless density_data is provided.</span>
 
 <span class="sd">        grid_dimensions : list</span>
-<span class="sd">            Grid dimensions. Only necessary if a 1D density is provided.</span>
+<span class="sd">            Grid dimensions. Ignored, unless density_data is provided.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">grid_dimensions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">density_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">grid_dimensions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No grid or atom data provided. &quot;</span>
+                                <span class="s2">&quot;Please note that these are only optional &quot;</span>
+                                <span class="s2">&quot;if the density saved in the calculator is &quot;</span>
+                                <span class="s2">&quot;used and have to be provided otherwise.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">density_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density</span>
             <span class="n">grid_dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span>
-        <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">density_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown density shape provided.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">density_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">density_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">density_data</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown density shape provided.&quot;</span><span class="p">)</span>
         <span class="c1"># %%</span>
         <span class="n">meta</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">atom_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -704,7 +732,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">grid_dimensions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">grid_dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span>
-                    <span class="k">return</span> <span class="n">density_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">grid_dimensions</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">density_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">grid_dimensions</span><span class="o">+</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">density_data</span>
         <span class="k">else</span><span class="p">:</span>

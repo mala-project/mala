@@ -512,8 +512,8 @@ It should work for all implemented targets.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mala.targets.density.Density.write_as_cube">
-<span class="sig-name descname"><span class="pre">write_as_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.write_as_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.write_as_cube" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mala.targets.density.Density.write_to_cube">
+<span class="sig-name descname"><span class="pre">write_to_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.write_to_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.write_to_cube" title="Permalink to this definition"></a></dt>
 <dd><p>Write the density data in a cube file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -522,8 +522,23 @@ It should work for all implemented targets.</p>
 <li><p><strong>density_data</strong> (<em>numpy.ndarray</em>) – 1D or 3D array of the density.</p></li>
 <li><p><strong>atoms</strong> (<em>ase.Atoms</em>) – Atoms to be written to the file alongside the density data.
 If None, and the target object has an atoms object, this will
-be used.</p></li>
-<li><p><strong>grid_dimensions</strong> (<em>list</em>) – Grid dimensions. Only necessary if a 1D density is provided.</p></li>
+be used. Ignored, unless density_data is provided.</p></li>
+<li><p><strong>grid_dimensions</strong> (<em>list</em>) – Grid dimensions. Ignored, unless density_data is provided.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.targets.density.Density.write_to_openpmd_file">
+<span class="sig-name descname"><span class="pre">write_to_openpmd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/density.html#Density.write_to_openpmd_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.density.Density.write_to_openpmd_file" title="Permalink to this definition"></a></dt>
+<dd><p>Write data to a numpy file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>string</em>) – File to save into. If no file ending is given, .h5 is assumed.</p></li>
+<li><p><strong>target_data</strong> (<em>numpy.ndarray</em>) – Target data to save. If None, the data stored in the calculator
+will be used.</p></li>
 </ul>
 </dd>
 </dl>
