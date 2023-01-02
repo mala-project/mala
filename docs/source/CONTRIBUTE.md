@@ -29,11 +29,14 @@ In order to correctly update the MALA version, we use
 [bumpversion](https://github.com/peritus/bumpversion). The actual release 
 process is very straightforward:
 
-1. Merge all necessary changes on `master`
-2. Change the release date in `CITATION.cff`
-3. Execute `bumpversion` with either `major`, `minor` or `fix`, depending on what this release updates
-4. Push the created commit, including tags
-5. Edit the release on GitHub, by e.g. adding release notes/change log
+1. Create a PR from `develop` to `master`.
+2. Merge the PR.
+3. Update the `date-released: ...` entry in `CITATION.cff` (on `master`).
+4. Create a tagged (and signed) commit on `master` with `bumpversion minor --allow-dirty` (check changes with `git show` or `git diff HEAD^`). Use either `major`, `minor` or `fix`, depending on what this release updates.
+5. Check out `develop` and do a `git merge master --ff`
+6. Push `master` and `develop` including tags (`--tags`). 
+7. Create a new release out of the tag on GitHub (https://github.com/mala-project/mala/releases/new) and add release notes/change log.
+8. Check if release got published to PyPI.
 
 ## Branching strategy
 
