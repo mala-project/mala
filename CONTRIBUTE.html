@@ -45,9 +45,15 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">API reference</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing to MALA</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#versioning-and-releases">Versioning and releases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#versioning-and-releases">Versioning and releases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-release">Creating a release</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#branching-strategy">Branching strategy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#developing-code">Developing code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developing-code">Developing code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#adding-dependencies">Adding dependencies</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pull-requests">Pull Requests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#issues">Issues</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
@@ -88,7 +94,7 @@ code high.</p>
 <div class="section" id="versioning-and-releases">
 <h2>Versioning and releases<a class="headerlink" href="#versioning-and-releases" title="Permalink to this headline"></a></h2>
 <p>MALA has a versioning system. The version number is only updated when merging
-on <code class="docutils literal notranslate"><span class="pre">master</span></code>. This constitues a release. Please note that not all changes
+on <code class="docutils literal notranslate"><span class="pre">master</span></code>. This constitutes a release. Please note that not all changes
 to code constitute such a release and generally, merges will be directed
 to the <code class="docutils literal notranslate"><span class="pre">develop</span></code> branch
 (see <a class="reference internal" href="#branching-strategy"><span class="std std-doc">branching strategy</span></a>). The version number has
@@ -102,6 +108,22 @@ functions or wrap up a longer development.</p></li>
 <p>Every new version should be accompanied by a changelog. Please include the
 version of the test data repository with which this version is supposed to be
 used in this changelog.</p>
+<div class="section" id="creating-a-release">
+<h3>Creating a release<a class="headerlink" href="#creating-a-release" title="Permalink to this headline"></a></h3>
+<p>In order to correctly update the MALA version, we use
+<a class="reference external" href="https://github.com/peritus/bumpversion">bumpversion</a>. The actual release
+process is very straightforward:</p>
+<ol class="arabic simple">
+<li><p>Create a PR from <code class="docutils literal notranslate"><span class="pre">develop</span></code> to <code class="docutils literal notranslate"><span class="pre">master</span></code>.</p></li>
+<li><p>Merge the PR.</p></li>
+<li><p>Update the <code class="docutils literal notranslate"><span class="pre">date-released:</span> <span class="pre">...</span></code> entry in <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code> (on <code class="docutils literal notranslate"><span class="pre">master</span></code>).</p></li>
+<li><p>Create a tagged (and signed) commit on <code class="docutils literal notranslate"><span class="pre">master</span></code> with <code class="docutils literal notranslate"><span class="pre">bumpversion</span> <span class="pre">minor</span> <span class="pre">--allow-dirty</span></code> (check changes with <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">show</span></code> or <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">diff</span> <span class="pre">HEAD^</span></code>). Use either <code class="docutils literal notranslate"><span class="pre">major</span></code>, <code class="docutils literal notranslate"><span class="pre">minor</span></code> or <code class="docutils literal notranslate"><span class="pre">fix</span></code>, depending on what this release updates.</p></li>
+<li><p>Check out <code class="docutils literal notranslate"><span class="pre">develop</span></code> and do a <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">merge</span> <span class="pre">master</span> <span class="pre">--ff</span></code></p></li>
+<li><p>Push <code class="docutils literal notranslate"><span class="pre">master</span></code> and <code class="docutils literal notranslate"><span class="pre">develop</span></code> including tags (<code class="docutils literal notranslate"><span class="pre">--tags</span></code>).</p></li>
+<li><p>Create a new release out of the tag on GitHub (https://github.com/mala-project/mala/releases/new) and add release notes/change log.</p></li>
+<li><p>Check if release got published to PyPI.</p></li>
+</ol>
+</div>
 </div>
 <div class="section" id="branching-strategy">
 <h2>Branching strategy<a class="headerlink" href="#branching-strategy" title="Permalink to this headline"></a></h2>
@@ -122,6 +144,14 @@ for docstrings</p></li>
 <li><p>If you’re adding code that should be tested, add tests</p></li>
 <li><p>If you’re adding or modifying examples, make sure to add them to <code class="docutils literal notranslate"><span class="pre">test_examples.py</span></code></p></li>
 </ul>
+<div class="section" id="adding-dependencies">
+<h3>Adding dependencies<a class="headerlink" href="#adding-dependencies" title="Permalink to this headline"></a></h3>
+<p>If you add additional dependencies, make sure to add them to <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>
+if they are required or to <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> under the appropriate <code class="docutils literal notranslate"><span class="pre">extras</span></code> tag if
+they are not.
+Further, in order for them to be available during the CI tests, make sure to
+add <em>required</em> dependencies to the appropriate environment files in folder <code class="docutils literal notranslate"><span class="pre">install/</span></code> and <em>extra</em> requirements directly in the <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> for the <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment build.</p>
+</div>
 </div>
 <div class="section" id="pull-requests">
 <h2>Pull Requests<a class="headerlink" href="#pull-requests" title="Permalink to this headline"></a></h2>
