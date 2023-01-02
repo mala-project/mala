@@ -218,77 +218,77 @@ class TestInference:
         based N-scaling formula is used in the calculation.
         """
 
-    ####################
-    # Set up and train a network to be used for the tests.
-    ####################
+        ####################
+        # Set up and train a network to be used for the tests.
+        ####################
 
-    test_parameters = Parameters()
-    test_parameters.data.data_splitting_type = "by_snapshot"
-    test_parameters.data.input_rescaling_type = "feature-wise-standard"
-    test_parameters.data.output_rescaling_type = "normal"
-    test_parameters.network.layer_activations = ["ReLU"]
-    test_parameters.running.max_number_epochs = 100
-    test_parameters.running.mini_batch_size = 40
-    test_parameters.running.learning_rate = 0.00001
-    test_parameters.running.trainingtype = "Adam"
-    test_parameters.targets.target_type = "LDOS"
-    test_parameters.targets.ldos_gridsize = 11
-    test_parameters.targets.ldos_gridspacing_ev = 2.5
-    test_parameters.targets.ldos_gridoffset_ev = -5
-    test_parameters.running.inference_data_grid = [18, 18, 27]
-    test_parameters.descriptors.descriptor_type = "Bispectrum"
-    test_parameters.descriptors.bispectrum_twojmax = 10
-    test_parameters.descriptors.bispectrum_cutoff = 4.67637
-    test_parameters.descriptors.bispectrum_switchflag = 0
-    test_parameters.targets.pseudopotential_path = pseudopotential_path
+        test_parameters = Parameters()
+        test_parameters.data.data_splitting_type = "by_snapshot"
+        test_parameters.data.input_rescaling_type = "feature-wise-standard"
+        test_parameters.data.output_rescaling_type = "normal"
+        test_parameters.network.layer_activations = ["ReLU"]
+        test_parameters.running.max_number_epochs = 100
+        test_parameters.running.mini_batch_size = 40
+        test_parameters.running.learning_rate = 0.00001
+        test_parameters.running.trainingtype = "Adam"
+        test_parameters.targets.target_type = "LDOS"
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
+        test_parameters.running.inference_data_grid = [18, 18, 27]
+        test_parameters.descriptors.descriptor_type = "Bispectrum"
+        test_parameters.descriptors.bispectrum_twojmax = 10
+        test_parameters.descriptors.bispectrum_cutoff = 4.67637
+        test_parameters.descriptors.bispectrum_switchflag = 0
+        test_parameters.targets.pseudopotential_path = pseudopotential_path
 
-    data_handler = DataHandler(test_parameters)
-    data_handler.add_snapshot("Be_snapshot1.in.npy", beryllium_path,
-                              "Be_snapshot1.out.npy", beryllium_path, "tr",
-                              output_units="1/(eV*Bohr^3)")
-    data_handler.add_snapshot("Be_snapshot2.in.npy", beryllium_path,
-                              "Be_snapshot2.out.npy", beryllium_path, "va",
-                              output_units="1/(eV*Bohr^3)")
-    data_handler.prepare_data()
+        data_handler = DataHandler(test_parameters)
+        data_handler.add_snapshot("Be_snapshot1.in.npy", beryllium_path,
+                                  "Be_snapshot1.out.npy", beryllium_path, "tr",
+                                  output_units="1/(eV*Bohr^3)")
+        data_handler.add_snapshot("Be_snapshot2.in.npy", beryllium_path,
+                                  "Be_snapshot2.out.npy", beryllium_path, "va",
+                                  output_units="1/(eV*Bohr^3)")
+        data_handler.prepare_data()
 
-    test_parameters.network.layer_sizes = [
-        data_handler.input_dimension,
-        100,
-        data_handler.output_dimension]
-    test_network = Network(test_parameters)
-    test_trainer = Trainer(test_parameters, test_network,
-                           data_handler)
-    test_trainer.train_network()
+        test_parameters.network.layer_sizes = [
+            data_handler.input_dimension,
+            100,
+            data_handler.output_dimension]
+        test_network = Network(test_parameters)
+        test_trainer = Trainer(test_parameters, test_network,
+                               data_handler)
+        test_trainer.train_network()
 
-    inference_data_handler = DataHandler(test_parameters,
-                                         input_data_scaler=data_handler.
-                                         input_data_scaler,
-                                         output_data_scaler=data_handler.
-                                         output_data_scaler)
-    inference_data_handler.clear_data()
+        inference_data_handler = DataHandler(test_parameters,
+                                             input_data_scaler=data_handler.
+                                             input_data_scaler,
+                                             output_data_scaler=data_handler.
+                                             output_data_scaler)
+        inference_data_handler.clear_data()
 
-    predictor = Predictor(test_parameters, test_network,
-                          inference_data_handler)
-    predicted_ldos = predictor. \
-        predict_from_qeout(os.path.join(beryllium_path,
-                                        "Be_snapshot3.out"))
+        predictor = Predictor(test_parameters, test_network,
+                              inference_data_handler)
+        predicted_ldos = predictor. \
+            predict_from_qeout(os.path.join(beryllium_path,
+                                            "Be_snapshot3.out"))
 
-    ldos_calculator: LDOS
-    ldos_calculator = inference_data_handler.target_calculator
-    ldos_calculator. \
-        read_additional_calculation_data("qe.out",
-                                         os.path.join(beryllium_path,
-                                                      "Be_snapshot3.out"))
-    ldos_calculator.read_from_array(predicted_ldos)
-    total_energy_traditional = ldos_calculator.total_energy
-    test_parameters.descriptors.use_atomic_density_energy_formula = True
-    ldos_calculator.read_from_array(predicted_ldos)
-    total_energy_atomic_density = ldos_calculator.total_energy
-    assert np.isclose(total_energy_traditional, total_energy_atomic_density,
-                      atol=accuracy_coarse)
-    assert np.isclose(total_energy_traditional,
-                      ldos_calculator.total_energy_dft_calculation,
-                      atol=accuracy_very_coarse)
+        ldos_calculator: LDOS
+        ldos_calculator = inference_data_handler.target_calculator
+        ldos_calculator. \
+            read_additional_calculation_data("qe.out",
+                                             os.path.join(beryllium_path,
+                                                          "Be_snapshot3.out"))
+        ldos_calculator.read_from_array(predicted_ldos)
+        total_energy_traditional = ldos_calculator.total_energy
+        test_parameters.descriptors.use_atomic_density_energy_formula = True
+        ldos_calculator.read_from_array(predicted_ldos)
+        total_energy_atomic_density = ldos_calculator.total_energy
+        assert np.isclose(total_energy_traditional, total_energy_atomic_density,
+                          atol=accuracy_coarse)
+        assert np.isclose(total_energy_traditional,
+                          ldos_calculator.total_energy_dft_calculation,
+                          atol=accuracy_very_coarse)
 
     @staticmethod
     def __run(use_lazy_loading=False, batchsize=46):
