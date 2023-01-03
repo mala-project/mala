@@ -458,6 +458,7 @@ class Target(PhysicalData):
         }
         additional_calculation_data["voxel"]["array"] = \
             additional_calculation_data["voxel"]["array"].tolist()
+        additional_calculation_data["voxel"].pop("pbc", None)
         additional_calculation_data["atoms"]["numbers"] = \
             additional_calculation_data["atoms"]["numbers"].tolist()
         additional_calculation_data["atoms"]["positions"] = \
