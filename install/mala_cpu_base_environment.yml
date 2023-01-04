@@ -8,6 +8,7 @@ dependencies:
   - numpy
   - scipy
   - optuna
+  - pandas
   - ase
   - pytorch-cpu
   - mpmath
