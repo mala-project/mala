@@ -471,9 +471,13 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_gpu</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pin_memory&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
+        <span class="c1"># Read last epoch</span>
+        <span class="k">if</span> <span class="n">optimizer_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span>
+
         <span class="c1"># Scale the learning rate according to horovod.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">hvd</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Rescaling learning rate because multiple workers are&quot;</span>
                          <span class="s2">&quot; used for training.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">learning_rate</span> \
@@ -497,7 +501,6 @@
         <span class="k">if</span> <span class="n">optimizer_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span>\
                 <span class="n">load_state_dict</span><span class="p">(</span><span class="n">optimizer_dict</span><span class="p">[</span><span class="s1">&#39;optimizer_state_dict&#39;</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">patience_counter</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s1">&#39;early_stopping_counter&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">last_loss</span> <span class="o">=</span> <span class="n">optimizer_dict</span><span class="p">[</span><span class="s1">&#39;early_stopping_last_loss&#39;</span><span class="p">]</span>
 
