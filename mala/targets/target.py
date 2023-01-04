@@ -442,11 +442,9 @@ class Target(PhysicalData):
             "fermi_energy_dft": self.fermi_energy_dft,
             "temperature": self.temperature,
             "number_of_electrons_exact": self.number_of_electrons_exact,
-            "voxel": self.voxel.todict(),
             "band_energy_dft_calculation": self.band_energy_dft_calculation,
             "total_energy_dft_calculation": self.total_energy_dft_calculation,
             "grid_dimensions": list(self.grid_dimensions),
-            "atoms": self.atoms.todict(),
             "electrons_per_atom": self.electrons_per_atom,
             "number_of_electrons_from_eigenvals":
                 self.number_of_electrons_from_eigenvals,
@@ -456,17 +454,21 @@ class Target(PhysicalData):
             "degauss": self.qe_input_data["degauss"],
             "pseudopotentials": self.qe_pseudopotentials
         }
-        additional_calculation_data["voxel"]["array"] = \
-            additional_calculation_data["voxel"]["array"].tolist()
-        additional_calculation_data["voxel"].pop("pbc", None)
-        additional_calculation_data["atoms"]["numbers"] = \
-            additional_calculation_data["atoms"]["numbers"].tolist()
-        additional_calculation_data["atoms"]["positions"] = \
-            additional_calculation_data["atoms"]["positions"].tolist()
-        additional_calculation_data["atoms"]["cell"] = \
-            additional_calculation_data["atoms"]["cell"].tolist()
-        additional_calculation_data["atoms"]["pbc"] = \
-            additional_calculation_data["atoms"]["pbc"].tolist()
+        if self.voxel is not None:
+            additional_calculation_data["voxel"] = self.voxel.todict()
+            additional_calculation_data["voxel"]["array"] = \
+                additional_calculation_data["voxel"]["array"].tolist()
+            additional_calculation_data["voxel"].pop("pbc", None)
+        if self.atoms is not None:
+            additional_calculation_data["atoms"] = self.atoms.todict()
+            additional_calculation_data["atoms"]["numbers"] = \
+                additional_calculation_data["atoms"]["numbers"].tolist()
+            additional_calculation_data["atoms"]["positions"] = \
+                additional_calculation_data["atoms"]["positions"].tolist()
+            additional_calculation_data["atoms"]["cell"] = \
+                additional_calculation_data["atoms"]["cell"].tolist()
+            additional_calculation_data["atoms"]["pbc"] = \
+                additional_calculation_data["atoms"]["pbc"].tolist()
         if return_string is False:
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(additional_calculation_data, f,
@@ -1143,76 +1145,87 @@ class Target(PhysicalData):
 
         # If no atoms have been read, neither have any of the other
         # properties.
-        if self.atoms is not None:
-            additional_calculation_data = \
-                self.write_additional_calculation_data("", return_string=True)
-            iteration.set_attribute("fermi_energy_dft",
-                                    additional_calculation_data["fermi_energy_dft"])
-            iteration.set_attribute("temperature",
-                                    additional_calculation_data["temperature"])
-            iteration.set_attribute("number_of_electrons_exact",
-                                    additional_calculation_data["number_of_electrons_exact"])
-            iteration.set_attribute("band_energy_dft_calculation",
-                                    additional_calculation_data["band_energy_dft_calculation"])
-            iteration.set_attribute("total_energy_dft_calculation",
-                                    additional_calculation_data["total_energy_dft_calculation"])
-            iteration.set_attribute("electrons_per_atom",
-                                    additional_calculation_data["electrons_per_atom"])
-            iteration.set_attribute("number_of_electrons_from_eigenvals",
-                                    additional_calculation_data["number_of_electrons_from_eigenvals"])
-            iteration.set_attribute("ibrav",
-                                    additional_calculation_data["ibrav"])
-            iteration.set_attribute("ecutwfc",
-                                    additional_calculation_data["ecutwfc"])
-            iteration.set_attribute("ecutrho",
-                                    additional_calculation_data["ecutrho"])
-            iteration.set_attribute("degauss",
-                                    additional_calculation_data["degauss"])
-            for key in additional_calculation_data["pseudopotentials"].keys():
-                iteration.set_attribute("psp_"+key,
-                                        additional_calculation_data[
-                                            "pseudopotentials"][key])
+        additional_calculation_data = \
+            self.write_additional_calculation_data("", return_string=True)
+        for key in additional_calculation_data:
+            if key != "atoms" and key != "voxel" and key != "grid_dimensions" \
+                    and key is not None and key != "pseudopotentials" and \
+                    additional_calculation_data[key] is not None:
+                iteration.set_attribute(key, additional_calculation_data[key])
+            if key == "pseudopotentials":
+                for pseudokey in \
+                        additional_calculation_data["pseudopotentials"].keys():
+                    iteration.set_attribute("psp_" + pseudokey,
+                                            additional_calculation_data[
+                                                "pseudopotentials"][pseudokey])
 
     def _process_openpmd_attributes(self, series, iteration, mesh):
         super(Target, self)._process_openpmd_attributes(series, iteration, mesh)
 
         # Process the atoms, which can only be done if we have voxel info.
-        if self.voxel is None:
-            raise Exception("Voxel was never read from OpenPMD file, "
-                            "cannot recreate atoms object without it.")
-
-        atoms_openpmd = iteration.particles["atoms"]
-        nr_atoms = len(atoms_openpmd["position"])
-        positions = np.zeros((nr_atoms, 3))
-        numbers = np.zeros((nr_atoms, 1), dtype=np.int64)
-        for i in range(0, nr_atoms):
-            atoms_openpmd["position"][str(i)].load_chunk(positions[i, :])
-            atoms_openpmd["number"][str(i)].load_chunk(numbers[i, :])
-        series.flush()
-        numbers = np.squeeze(numbers)
-
-        # Recreate the cell from voxel and grid info.
         self.grid_dimensions[0] = mesh["0"].shape[0]
         self.grid_dimensions[1] = mesh["0"].shape[1]
         self.grid_dimensions[2] = mesh["0"].shape[2]
-        cell = self.voxel.copy()
-        cell[0] = self.voxel[0] * self.grid_dimensions[0]
-        cell[1] = self.voxel[1] * self.grid_dimensions[1]
-        cell[2] = self.voxel[2] * self.grid_dimensions[2]
-        self.atoms = ase.Atoms(positions=positions, cell=cell, numbers=numbers)
+
+        if self.voxel is not None:
+            atoms_openpmd = iteration.particles["atoms"]
+            nr_atoms = len(atoms_openpmd["position"])
+            positions = np.zeros((nr_atoms, 3))
+            numbers = np.zeros((nr_atoms, 1), dtype=np.int64)
+
+            for i in range(0, nr_atoms):
+                atoms_openpmd["position"][str(i)].load_chunk(positions[i, :])
+                atoms_openpmd["number"][str(i)].load_chunk(numbers[i, :])
+            series.flush()
+            numbers = np.squeeze(numbers)
+
+            # Recreate the cell from voxel and grid info.
+            cell = self.voxel.copy()
+            cell[0] = self.voxel[0] * self.grid_dimensions[0]
+            cell[1] = self.voxel[1] * self.grid_dimensions[1]
+            cell[2] = self.voxel[2] * self.grid_dimensions[2]
+            self.atoms = ase.Atoms(positions=positions, cell=cell, numbers=numbers)
+            self.atoms.pbc[0] = iteration.\
+                get_attribute("periodic_boundary_conditions_x")
+            self.atoms.pbc[1] = iteration.\
+                get_attribute("periodic_boundary_conditions_y")
+            self.atoms.pbc[2] = iteration.\
+                get_attribute("periodic_boundary_conditions_z")
 
         # Process all the regular meta info.
-        self.fermi_energy_dft = iteration.get_attribute("fermi_energy_dft")
-        self.temperature = iteration.get_attribute("temperature")
-        self.number_of_electrons_exact = iteration.get_attribute("number_of_electrons_exact")
-        self.band_energy_dft_calculation = iteration.get_attribute("band_energy_dft_calculation")
-        self.total_energy_dft_calculation = iteration.get_attribute("total_energy_dft_calculation")
-        self.electrons_per_atom = iteration.get_attribute("electrons_per_atom")
-        self.number_of_electrons_from_eigenvals = iteration.get_attribute("number_of_electrons_from_eigenvals")
-        self.qe_input_data["ibrav"] = iteration.get_attribute("ibrav")
-        self.qe_input_data["ecutwfc"] = iteration.get_attribute("ecutwfc")
-        self.qe_input_data["ecutrho"] = iteration.get_attribute("ecutrho")
-        self.qe_input_data["degauss"] = iteration.get_attribute("degauss")
+        self.fermi_energy_dft = \
+            self._get_attribute_if_attribute_exists(iteration, "fermi_energy_dft",
+                                                    default_value=self.fermi_energy_dft)
+        self.temperature = \
+            self._get_attribute_if_attribute_exists(iteration, "temperature",
+                                                    default_value=self.temperature)
+        self.number_of_electrons_exact = \
+            self._get_attribute_if_attribute_exists(iteration, "number_of_electrons_exact",
+                                                    default_value=self.number_of_electrons_exact)
+        self.band_energy_dft_calculation = \
+            self._get_attribute_if_attribute_exists(iteration, "band_energy_dft_calculation",
+                                                    default_value=self.band_energy_dft_calculation)
+        self.total_energy_dft_calculation = \
+            self._get_attribute_if_attribute_exists(iteration, "total_energy_dft_calculation",
+                                                    default_value=self.total_energy_dft_calculation)
+        self.electrons_per_atom = \
+            self._get_attribute_if_attribute_exists(iteration, "electrons_per_atom",
+                                                    default_value=self.electrons_per_atom)
+        self.number_of_electrons_from_eigenval = \
+            self._get_attribute_if_attribute_exists(iteration, "number_of_electrons_from_eigenvals",
+                                                    default_value=self.number_of_electrons_from_eigenvals)
+        self.qe_input_data["ibrav"] = \
+            self._get_attribute_if_attribute_exists(iteration, "ibrav",
+                                                    default_value=self.qe_input_data["ibrav"])
+        self.qe_input_data["ecutwfc"] = \
+            self._get_attribute_if_attribute_exists(iteration, "ecutwfc",
+                                                    default_value=self.qe_input_data["ecutwfc"])
+        self.qe_input_data["ecutrho"] = \
+            self._get_attribute_if_attribute_exists(iteration, "ecutrho",
+                                                    default_value=self.qe_input_data["ecutrho"])
+        self.qe_input_data["degauss"] = \
+            self._get_attribute_if_attribute_exists(iteration, "degauss",
+                                                    default_value=self.qe_input_data["degauss"])
 
         # Take care of the pseudopotentials.
         self.qe_input_data["pseudopotentials"] = {}
@@ -1232,8 +1245,9 @@ class Target(PhysicalData):
 
     def _process_geometry_info(self, mesh):
         spacing = mesh.grid_spacing
-        angles = mesh.get_attribute("angles")
-        self.voxel = ase.cell.Cell.new(cell=spacing+angles)
+        if "angles" in mesh.attributes:
+            angles = mesh.get_attribute("angles")
+            self.voxel = ase.cell.Cell.new(cell=spacing+angles)
 
     def _get_atoms(self):
         return self.atoms

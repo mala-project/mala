@@ -340,7 +340,12 @@ class PhysicalData(ABC):
                                    atomic_positions[0].shape)
             numbers = io.Dataset(atomic_numbers[0].dtype,
                                  [1])
-
+            iteration.set_attribute("periodic_boundary_conditions_x",
+                                    atoms_ase.pbc[0])
+            iteration.set_attribute("periodic_boundary_conditions_y",
+                                    atoms_ase.pbc[1])
+            iteration.set_attribute("periodic_boundary_conditions_z",
+                                    atoms_ase.pbc[2])
             # atoms_openpmd["position"].time_offset = 0.0
             # atoms_openpmd["positionOffset"].time_offset = 0.0
             for atom in range(0, len(atoms_ase)):
@@ -436,3 +441,11 @@ class PhysicalData(ABC):
     # That may not always be the case.
     def _get_atoms(self):
         return None
+
+    @staticmethod
+    def _get_attribute_if_attribute_exists(iteration, attribute,
+                                           default_value=None):
+        if attribute in iteration.attributes:
+            return iteration.get_attribute(attribute)
+        else:
+            return default_value
