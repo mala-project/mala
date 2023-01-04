@@ -413,7 +413,12 @@
                                    <span class="n">atomic_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
             <span class="n">numbers</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
                                  <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;periodic_boundary_conditions_x&quot;</span><span class="p">,</span>
+                                    <span class="n">atoms_ase</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;periodic_boundary_conditions_y&quot;</span><span class="p">,</span>
+                                    <span class="n">atoms_ase</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;periodic_boundary_conditions_z&quot;</span><span class="p">,</span>
+                                    <span class="n">atoms_ase</span><span class="o">.</span><span class="n">pbc</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
             <span class="c1"># atoms_openpmd[&quot;position&quot;].time_offset = 0.0</span>
             <span class="c1"># atoms_openpmd[&quot;positionOffset&quot;].time_offset = 0.0</span>
             <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms_ase</span><span class="p">)):</span>
@@ -508,7 +513,15 @@
     <span class="c1"># Currently all data we have is atom based.</span>
     <span class="c1"># That may not always be the case.</span>
     <span class="k">def</span> <span class="nf">_get_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_attribute_if_attribute_exists</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span>
+                                           <span class="n">default_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">iteration</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">iteration</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default_value</span></div>
 </pre></div>
 
            </div>
