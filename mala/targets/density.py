@@ -450,6 +450,8 @@ class Density(Target):
                     write_to_openpmd_file(path, np.reshape(self.density,
                                                            self.grid_dimensions
                                                            + [1]))
+            elif len(self.density.shape) == 4:
+                super(Target, self).write_to_openpmd_file(path, self.density)
         else:
             super(Target, self).write_to_openpmd_file(path, target_data)
 
