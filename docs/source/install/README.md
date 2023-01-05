@@ -121,7 +121,7 @@ Download data repository and check out correct tag.
 ```sh
 $ git clone https://github.com/mala-project/test-data ~/path/to/data/repo
 $ cd ~/path/to/data/repo
-$ git checkout v1.3.0
+$ git checkout v1.4.0
 ```
 
 Export the path to that repo by
