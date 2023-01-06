@@ -327,9 +327,10 @@ class DataConverter:
                                          snapshot_name + ".info.json")
             else:
                 info_path = None
+            input_iteration = None
+            output_iteration = None
+
             if file_ending == "npy":
-                input_iteration = None
-                output_iteration = None
                 # Create the actual paths, if needed.
                 if self.process_descriptors:
                     descriptor_path = os.path.join(descriptor_save_path,
@@ -354,15 +355,14 @@ class DataConverter:
                 descriptor_path = None
                 target_path = None
                 memmap = None
-                input_iteration = input_series.write_iterations()[i + starts_at]
-                output_iteration = output_series.write_iterations()[i + starts_at]
-                for it in [input_iteration, output_iteration]:
-                    # the logical time step
-                    # (in the case of MALA: probably the snapshot index)
-                    it.dt = i + starts_at
-                    # the base time of the iteration
-                    # (in the case of MALA: probably ignore)
-                    it.time = 0
+                if self.process_descriptors:
+                    input_iteration = input_series.write_iterations()[i + starts_at]
+                    input_iteration.dt = i + starts_at
+                    input_iteration.time = 0
+                if self.process_targets:
+                    output_iteration = output_series.write_iterations()[i + starts_at]
+                    output_iteration.dt = i + starts_at
+                    output_iteration.time = 0
 
             self.__convert_single_snapshot(i, descriptor_calculation_kwargs,
                                            target_calculator_kwargs,
@@ -453,9 +453,6 @@ class DataConverter:
             tmp_input, local_size = self.descriptor_calculator. \
                 calculate_from_qe_out(snapshot["input"],
                                       **descriptor_calculation_kwargs)
-            if self.parameters._configuration["mpi"]:
-                tmp_input = self.descriptor_calculator. \
-                    gather_descriptors(tmp_input)
 
         elif description["input"] is None:
             # In this case, only the output is processed.
@@ -466,14 +463,21 @@ class DataConverter:
 
         if description["input"] is not None:
             # Save data and delete, if not requested otherwise.
-            if get_rank() == 0:
-                if input_path is not None and input_iteration is None:
+            if input_path is not None and input_iteration is None:
+                if get_rank() == 0:
+                    if self.parameters._configuration["mpi"]:
+                        tmp_input = self.descriptor_calculator. \
+                            gather_descriptors(tmp_input)
                     self.descriptor_calculator.\
                         write_to_numpy_file(input_path, tmp_input)
-                else:
-                    self.descriptor_calculator.\
-                        write_to_openpmd_iteration(input_iteration,
-                                                   tmp_input)
+            else:
+                import numpy as np
+                tmp_input = self.descriptor_calculator.convert_local_to_3d(tmp_input[0])
+                print(np.shape(tmp_input))
+                exit()
+                self.descriptor_calculator.\
+                    write_to_openpmd_iteration(input_iteration,
+                                               tmp_input)
             del tmp_input
 
         ###########
@@ -506,21 +510,21 @@ class DataConverter:
                 "Unknown file extension, cannot convert target"
                 "data.")
         if description["output"] is not None:
-            if get_rank() == 0:
-                if output_path is not None and output_iteration is None:
+            if output_path is not None and output_iteration is None:
+                if get_rank() == 0:
                     self.target_calculator.write_to_numpy_file(output_path,
                                                                tmp_output)
-                else:
-                    metadata = None
-                    if description["metadata"] is not None:
-                        metadata = [snapshot["metadata"],
-                                    description["metadata"]]
+            else:
+                metadata = None
+                if description["metadata"] is not None:
+                    metadata = [snapshot["metadata"],
+                                description["metadata"]]
 
-                    self.target_calculator. \
-                        write_to_openpmd_iteration(output_iteration,
-                                                   tmp_output,
-                                                   additional_metadata=metadata)
-                del tmp_output
+                self.target_calculator. \
+                    write_to_openpmd_iteration(output_iteration,
+                                               tmp_output,
+                                               additional_metadata=metadata)
+            del tmp_output
 
         # Parse and/or calculate the additional info.
         if description["additional_info"] is not None:

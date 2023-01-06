@@ -285,9 +285,9 @@ class Descriptor(PhysicalData):
         return self._calculate(atoms, working_directory,
                                grid_dimensions, **kwargs)
 
-    def gather_descriptors(self, snap_descriptors_np, use_pickled_comm=False):
+    def gather_descriptors(self, descriptors_np, use_pickled_comm=False):
         """
-        Gathers all bispectrum descriptors on rank 0 and sorts them.
+        Gathers all descriptors on rank 0 and sorts them.
 
         This is useful for e.g. parallel preprocessing.
         This function removes the extra 3 components that come from parallel
@@ -298,7 +298,7 @@ class Descriptor(PhysicalData):
 
         Parameters
         ----------
-        snap_descriptors_np : numpy.array
+        descriptors_np : numpy.array
             Numpy array with the descriptors of this ranks local grid.
 
         use_pickled_comm : bool
@@ -317,10 +317,10 @@ class Descriptor(PhysicalData):
 
         # Gather the descriptors into a list.
         if use_pickled_comm:
-            all_descriptors_list = comm.gather(snap_descriptors_np,
-                                                    root=0)
+            all_descriptors_list = comm.gather(descriptors_np,
+                                               root=0)
         else:
-            sendcounts = np.array(comm.gather(np.shape(snap_descriptors_np)[0],
+            sendcounts = np.array(comm.gather(np.shape(descriptors_np)[0],
                                               root=0))
             raw_feature_length = self.fingerprint_length+3
 
@@ -337,7 +337,7 @@ class Descriptor(PhysicalData):
 
                 # No MPI necessary for first rank. For all the others,
                 # collect the buffers.
-                all_descriptors_list[0] = snap_descriptors_np
+                all_descriptors_list[0] = descriptors_np
                 for i in range(1, get_size()):
                     comm.Recv(all_descriptors_list[i], source=i,
                               tag=100+i)
@@ -345,7 +345,7 @@ class Descriptor(PhysicalData):
                         np.reshape(all_descriptors_list[i],
                                    (sendcounts[i], raw_feature_length))
             else:
-                comm.Send(snap_descriptors_np, dest=0, tag=get_rank()+100)
+                comm.Send(descriptors_np, dest=0, tag=get_rank() + 100)
             barrier()
 
         # if get_rank() == 0:
@@ -394,6 +394,43 @@ class Descriptor(PhysicalData):
             return descriptors_full
         else:
             return descriptors_full[:, :, :, 3:]
+
+    def convert_local_to_3d(self, descriptors_np):
+        """
+        Converts the desciptors as done in the gather function, but per rank.
+
+        This is useful for e.g. parallel preprocessing.
+        This function removes the extra 3 components that come from parallel
+        processing.
+        I.e. if we have 91 bispectrum descriptors, LAMMPS directly outputs us
+        97 (in parallel mode), and this function returns 94, as to retain the
+        3 x,y,z ones we by default include.
+
+        Parameters
+        ----------
+        descriptors_np : numpy.array
+            Numpy array with the descriptors of this ranks local grid.
+        """
+        grid_portion = [None, None, None, None, None, None]
+        grid_portion[0] = int(descriptors_np[0][0][0])
+        grid_portion[2] = int(descriptors_np[0][0][1])
+        grid_portion[4] = int(descriptors_np[0][0][2])
+        grid_portion[1] = int(descriptors_np[0][-1][0]) + 1
+        grid_portion[3] = int(descriptors_np[0][-1][1]) + 1
+        grid_portion[5] = int(descriptors_np[0][-1][2]) + 1
+        nx = grid_portion[1] - grid_portion[0]
+        ny = grid_portion[3] - grid_portion[2]
+        nz = grid_portion[5] - grid_portion[4]
+
+        descriptors_full = np.zeros([nx, ny, nz, self.fingerprint_length])
+
+        descriptors_full[grid_portion[0]:grid_portion[1],
+                         grid_portion[2]:grid_portion[3],
+                         grid_portion[4]:grid_portion[5]] = \
+            np.reshape(descriptors_np[0][:, 3:],
+                       [nx, ny, nx, self.fingerprint_length]).\
+                transpose([2, 1, 0, 3])
+        return descriptors_full, grid_portion
 
     def get_acsd(self, descriptor_data, ldos_data):
         """
