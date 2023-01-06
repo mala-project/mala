@@ -3,7 +3,7 @@ from ase.units import kB
 import mpmath as mp
 import numpy as np
 from scipy import integrate
-
+import sys
 
 def integrate_values_on_spacing(values, spacing, method, axis=0):
     """
@@ -72,9 +72,13 @@ def fermi_function(energy, fermi_energy, temperature):
     # therefore get zero (or machine precision within zero) either way.
     # Adding this check removes overflow warnings.
     # The overhead for inference should be minimal.
-    max_exponent = np.finfo(exponent.dtype.name).max
-    overflow = np.argwhere(exponent > max_exponent)
-    exponent[overflow] = max_exponent
+    # Since this function works both for arrays and scalars,
+    # we have to check which maximum to use.
+    if type(energy) == np.ndarray:
+        max_exponent = np.log(np.finfo(exponent.dtype.name).max)
+        exponent[np.argwhere(exponent > max_exponent)] = max_exponent
+    else:
+        exponent = min(exponent, np.log(sys.float_info.max))
 
     return 1.0 / (1.0 + np.exp(exponent))
 
