@@ -135,7 +135,7 @@
 <span class="sd">            Precicted LDOS for these atomic positions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-            <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="s2">&quot;qe.out&quot;</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">)</span>
+            <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">path_to_file</span><span class="p">,</span> <span class="s2">&quot;espresso-out&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
                                       <span class="n">gather_ldos</span><span class="o">=</span><span class="n">gather_ldos</span><span class="p">)</span></div>
 
@@ -168,8 +168,8 @@
 
         <span class="c1"># Provide info from current snapshot to target calculator.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-            <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="s2">&quot;atoms+grid&quot;</span><span class="p">,</span>
-                                             <span class="p">[</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">])</span>
+            <span class="n">read_additional_calculation_data</span><span class="p">([</span><span class="n">atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">],</span>
+                                             <span class="s2">&quot;atoms+grid&quot;</span><span class="p">)</span>
         <span class="n">feature_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">fingerprint_length</span>
 
         <span class="c1"># The actual calculation of the LDOS from the descriptors depends</span>

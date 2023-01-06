@@ -303,7 +303,7 @@ as [rMax] array.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.read_additional_calculation_data">
-<span class="sig-name descname"><span class="pre">read_additional_calculation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.read_additional_calculation_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.read_additional_calculation_data" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read_additional_calculation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.read_additional_calculation_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.read_additional_calculation_data" title="Permalink to this definition"></a></dt>
 <dd><p>Read in additional input about a calculation.</p>
 <p>This is e.g. necessary when we operate with preprocessed
 data for the training itself but want to take into account other
@@ -312,17 +312,21 @@ temperature) for post processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data_type</strong> (<em>string</em>) – <p>Type of data or file that is used. Currently supported are:</p>
+<li><p><strong>data</strong> (<em>string</em><em> or </em><em>List</em>) – Data from which additional calculation data is inputted.</p></li>
+<li><p><strong>data_type</strong> (<em>string</em>) – <p>Type of data or file that is used. If not provided, MALA will
+attempt to guess the provided type of data based on shape and/or
+file ending. Currently supported are:</p>
 <ul>
-<li><p>”qe.out” : Read the additional information from a QuantumESPRESSO
-output file.</p></li>
+<li><p>”espresso-out” : Read the additional information from a
+QuantumESPRESSO output file.</p></li>
 <li><p>”atoms+grid” : Provide a grid and an atoms object from which to
 predict. Except for the number of electrons,
 this mode will not change any member variables;
 values have to be adjusted BEFORE.</p></li>
+<li><p>”json” : Read the additional information from a MALA generated
+.json file.</p></li>
 </ul>
 </p></li>
-<li><p><strong>data</strong> (<em>string</em><em> or </em><em>List</em>) – Data from which additional calculation data is inputted.</p></li>
 </ul>
 </dd>
 </dl>

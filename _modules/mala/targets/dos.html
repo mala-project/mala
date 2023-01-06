@@ -253,7 +253,7 @@
         <span class="n">return_dos</span> <span class="o">=</span> <span class="n">DOS</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
 
         <span class="c1"># In this case, we may just read the entire qe.out file.</span>
-        <span class="n">return_dos</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="s2">&quot;qe.out&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="n">return_dos</span><span class="o">.</span><span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;espresso-out&quot;</span><span class="p">)</span>
 
         <span class="c1"># This method will use the ASE atoms object read above automatically.</span>
         <span class="n">return_dos</span><span class="o">.</span><span class="n">read_from_qe_out</span><span class="p">()</span>
