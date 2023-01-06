@@ -378,6 +378,13 @@ class DataConverter:
                         and file_based_communication:
                     os.remove(memmap)
 
+        # Properly close series
+        if file_ending != "npy":
+            if self.process_descriptors:
+                del input_series
+            if self.process_targets:
+                del output_series
+
     def __convert_single_snapshot(self, snapshot_number,
                                 descriptor_calculation_kwargs,
                                 target_calculator_kwargs,
