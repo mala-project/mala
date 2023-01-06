@@ -62,8 +62,21 @@ def fermi_function(energy, fermi_energy, temperature):
         Value of the Fermi function.
 
     """
-    return 1.0 / (1.0 + np.exp((energy - fermi_energy) /
-                               (kB * temperature)))
+    exponent = (energy - fermi_energy) / (kB * temperature)
+
+    # Maximum exponent that will not result in inf when performing
+    # np.exp() (for double values only).
+    # Very large exponents result in very large values, and if we don't check
+    # for overflow, infinity. Cutting this back to the maximum float value
+    # (~ 1e308) is more then enough, since we divide by the exponent, and
+    # therefore get zero (or machine precision within zero) either way.
+    # Adding this check removes overflow warnings.
+    # The overhead for inference should be minimal.
+    max_exponent = np.finfo(exponent.dtype.name).max
+    overflow = np.argwhere(exponent > max_exponent)
+    exponent[overflow] = max_exponent
+
+    return 1.0 / (1.0 + np.exp(exponent))
 
 
 def entropy_multiplicator(energy, fermi_energy, temperature):
