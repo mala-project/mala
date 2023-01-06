@@ -123,7 +123,7 @@ class TestInterfaces:
         calculator = mala.MALA(test_parameters, test_network,
                                data_handler,
                                reference_data=
-                                        ["qe.out",
+                                        ["espresso-out",
                                          os.path.join(data_path,
                                                       "Be_snapshot1.out")])
         total_energy_dft_calculation = calculator.data_handler.\
@@ -137,15 +137,15 @@ class TestInterfaces:
         test_parameters = mala.Parameters()
         ldos_calculator = mala.LDOS(test_parameters)
         ldos_calculator.\
-            read_additional_calculation_data("qe.out",
-                                             os.path.join(data_path,
-                                                          "Be_snapshot1.out"))
+            read_additional_calculation_data(os.path.join(data_path,
+                                                          "Be_snapshot1.out"),
+                                             "espresso-out")
         ldos_calculator.\
             write_additional_calculation_data("additional_calculation_data.json")
         new_ldos_calculator = mala.LDOS(test_parameters)
         new_ldos_calculator.\
-            read_additional_calculation_data("json",
-                                             "additional_calculation_data.json")
+            read_additional_calculation_data("additional_calculation_data.json",
+                                             "json")
 
         # Verify that essentially the same info has been loaded.
         assert np.isclose(ldos_calculator.fermi_energy_dft,
@@ -211,9 +211,9 @@ class TestInterfaces:
                             os.path.join(data_path,
                                          "Be_snapshot1.out.npy"))
         ldos_calculator.\
-            read_additional_calculation_data("qe.out",
-                                             os.path.join(data_path,
-                                                          "Be_snapshot1.out"))
+            read_additional_calculation_data(os.path.join(data_path,
+                                                          "Be_snapshot1.out"),
+                                             "espresso-out")
 
         # Write and then read in via OpenPMD and make sure all the info is
         # retained.

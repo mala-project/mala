@@ -54,8 +54,8 @@ ldos = mala.LDOS.from_numpy_file(test_parameters,
 # Read additional information about the calculation.
 # By doing this, the calculator is able to know e.g. the temperature
 # at which the calculation took place or the lattice constant used.
-ldos.read_additional_calculation_data("qe.out", os.path.join(
-                                      data_path, "Be.pw.scf.out"))
+ldos.read_additional_calculation_data(os.path.join(data_path,
+                                                   "Be.pw.scf.out"))
 
 # Get quantities of interest.
 # For better values in the post processing, it is recommended to

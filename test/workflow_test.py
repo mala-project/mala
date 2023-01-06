@@ -54,7 +54,7 @@ class TestFullWorkflow:
 
         # Create a DataConverter, and add snapshots to it.
         data_converter = mala.DataConverter(test_parameters)
-        data_converter.add_snapshot(descriptor_input_type="qe.out",
+        data_converter.add_snapshot(descriptor_input_type="espresso-out",
                                     descriptor_input_path=
                                     os.path.join(data_path_ldos,
                                                  "Be.pw.scf.out"),
@@ -93,8 +93,9 @@ class TestFullWorkflow:
 
         # Create a target calculator to perform postprocessing.
         dos = mala.Target(test_parameters)
-        dos.read_additional_calculation_data("qe.out", os.path.join(
-                                             data_path, "Al.pw.scf.out"))
+        dos.read_additional_calculation_data(os.path.join(
+                                             data_path, "Al.pw.scf.out"),
+                                             "espresso-out")
         dos_data = np.load(os.path.join(data_path, "Al_dos.npy"))
 
         # Calculate energies
@@ -128,9 +129,10 @@ class TestFullWorkflow:
 
         # Create a target calculator to perform postprocessing.
         ldos = mala.Target(test_parameters)
-        ldos.read_additional_calculation_data("qe.out", os.path.join(
+        ldos.read_additional_calculation_data(os.path.join(
                                               data_path_ldos,
-                                               "Be.pw.scf.out"))
+                                               "Be.pw.scf.out"),
+                                              "espresso-out")
         ldos_data = ldos.convert_units(
             np.load(os.path.join(data_path_ldos, "Be_ldos.npy")),
             "1/(eV*Bohr^3)")
@@ -168,8 +170,9 @@ class TestFullWorkflow:
         # Create a target calculator to perform postprocessing.
         ldos = mala.Target(test_parameters)
         dens = mala.Density.from_ldos_calculator(ldos)
-        ldos.read_additional_calculation_data("qe.out", os.path.join(
-                                              data_path_ldos, "Be.pw.scf.out"))
+        ldos.read_additional_calculation_data(os.path.join(
+                                              data_path_ldos, "Be.pw.scf.out"),
+                                              "espresso-out")
         dos_data = np.load(os.path.join(data_path_ldos, "Be_dos.npy"))
         dens_data = dens.convert_units(
             np.load(os.path.join(data_path_ldos, "Be_dens.npy")),
@@ -207,9 +210,9 @@ class TestFullWorkflow:
 
         # Create a target calculator to perform postprocessing.
         ldos = mala.Target(test_parameters)
-        ldos.read_additional_calculation_data("qe.out", os.path.join(
+        ldos.read_additional_calculation_data(os.path.join(
                                               data_path_ldos,
-                                              "Be.pw.scf.out"))
+                                              "Be.pw.scf.out"), "espresso-out")
         ldos_data = ldos.convert_units(
             np.load(os.path.join(data_path_ldos, "Be_ldos.npy")),
             in_units="1/(eV*Bohr^3)")
@@ -329,9 +332,10 @@ class TestFullWorkflow:
                              inference_data_handler)
         actual_ldos, predicted_ldos = tester.test_snapshot(0)
         ldos_calculator = inference_data_handler.target_calculator
-        ldos_calculator.read_additional_calculation_data("qe.out", os.path.join(
+        ldos_calculator.read_additional_calculation_data(os.path.join(
                                                          data_path,
-                                                         "Al.pw.scf.out"))
+                                                         "Al.pw.scf.out"),
+                                                         "espresso-out")
         band_energy_predicted = ldos_calculator.get_band_energy(predicted_ldos)
         band_energy_actual = ldos_calculator.get_band_energy(actual_ldos)
         nr_electrons_predicted = ldos_calculator.\

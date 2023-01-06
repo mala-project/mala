@@ -102,7 +102,8 @@ class TestMALAIntegration:
         """
         # Create a calculator.
         dens_calculator = Density(test_parameters)
-        dens_calculator.read_additional_calculation_data("qe.out", path_to_out)
+        dens_calculator.read_additional_calculation_data(path_to_out,
+                                                         "espresso-out")
 
         # Read the input data.
         density_dft = dens_calculator.convert_units(np.load(path_to_dens_npy),
@@ -134,7 +135,7 @@ class TestMALAIntegration:
         """
         # Create a calculator.abs()
         ldos_calculator = LDOS(test_parameters)
-        ldos_calculator.read_additional_calculation_data("qe.out", path_to_out)
+        ldos_calculator.read_additional_calculation_data(path_to_out, "espresso-out")
         dens_calculator = Density.from_ldos_calculator(ldos_calculator)
 
         # Read the input data.
@@ -169,9 +170,9 @@ class TestMALAIntegration:
         The integral of the LDOS over real space grid should yield the DOS.
         """
         ldos_calculator = LDOS(test_parameters)
-        ldos_calculator.read_additional_calculation_data("qe.out", path_to_out)
+        ldos_calculator.read_additional_calculation_data(path_to_out, "espresso-out")
         dos_calculator = DOS(test_parameters)
-        dos_calculator.read_additional_calculation_data("qe.out", path_to_out)
+        dos_calculator.read_additional_calculation_data(path_to_out, "espresso-out")
 
         # Read the input data.
         ldos_dft = ldos_calculator.convert_units(np.load(path_to_ldos_npy),
@@ -192,7 +193,8 @@ class TestMALAIntegration:
     def test_pwevaldos_vs_ppdos(self):
         """Check pp.x DOS vs. pw.x DOS (from eigenvalues in outfile)."""
         dos_calculator = DOS(test_parameters)
-        dos_calculator.read_additional_calculation_data("qe.out", path_to_out)
+        dos_calculator.read_additional_calculation_data(path_to_out,
+                                                        "espresso-out")
 
         dos_from_pp = np.load(path_to_dos_npy)
 

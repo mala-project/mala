@@ -168,9 +168,10 @@ class TestInference:
         tester = Tester(test_parameters, test_network, inference_data_handler)
         actual_ldos, predicted_ldos = tester.test_snapshot(0)
         ldos_calculator = inference_data_handler.target_calculator
-        ldos_calculator.read_additional_calculation_data("qe.out", os.path.join(
+        ldos_calculator.read_additional_calculation_data(os.path.join(
                                                          beryllium_path,
-                                                         "Be_snapshot3.out"))
+                                                         "Be_snapshot3.out"),
+                                                         "espresso-out")
 
         band_energy_tester_class = ldos_calculator.get_band_energy(predicted_ldos)
         nr_electrons_tester_class = ldos_calculator.\
@@ -190,9 +191,10 @@ class TestInference:
         # parameters.
         inference_data_handler. \
             target_calculator.\
-            read_additional_calculation_data("qe.out", os.path.join(
+            read_additional_calculation_data(os.path.join(
                                              beryllium_path,
-                                             "Be_snapshot3.out"))
+                                             "Be_snapshot3.out"),
+                                             "espresso-out")
 
         nr_electrons_predictor_class = inference_data_handler.\
             target_calculator.get_number_of_electrons(predicted_ldos)
@@ -276,9 +278,9 @@ class TestInference:
         ldos_calculator: LDOS
         ldos_calculator = inference_data_handler.target_calculator
         ldos_calculator. \
-            read_additional_calculation_data("qe.out",
-                                             os.path.join(beryllium_path,
-                                                          "Be_snapshot3.out"))
+            read_additional_calculation_data(os.path.join(beryllium_path,
+                                                          "Be_snapshot3.out"),
+                                             "espresso-out")
         ldos_calculator.read_from_array(predicted_ldos)
         total_energy_traditional = ldos_calculator.total_energy
         test_parameters.descriptors.use_atomic_density_energy_formula = True

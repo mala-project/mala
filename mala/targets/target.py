@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 import itertools
 import json
+import os
 
 from ase.neighborlist import NeighborList
 from ase.units import Rydberg, kB
@@ -233,7 +234,7 @@ class Target(PhysicalData):
         raise Exception("No unit back conversion method implemented "
                         "for this target type.")
 
-    def read_additional_calculation_data(self, data_type, data=""):
+    def read_additional_calculation_data(self, data, data_type=None):
         """
         Read in additional input about a calculation.
 
@@ -244,21 +245,40 @@ class Target(PhysicalData):
 
         Parameters
         ----------
-        data_type : string
-            Type of data or file that is used. Currently supported are:
+        data : string or List
+            Data from which additional calculation data is inputted.
 
-            - "qe.out" : Read the additional information from a QuantumESPRESSO
-              output file.
+        data_type : string
+            Type of data or file that is used. If not provided, MALA will
+            attempt to guess the provided type of data based on shape and/or
+            file ending. Currently supported are:
+
+            - "espresso-out" : Read the additional information from a
+              QuantumESPRESSO output file.
 
             - "atoms+grid" : Provide a grid and an atoms object from which to
               predict. Except for the number of electrons,
               this mode will not change any member variables;
               values have to be adjusted BEFORE.
 
-        data : string or List
-            Data from which additional calculation data is inputted.
+            - "json" : Read the additional information from a MALA generated
+              .json file.
         """
-        if data_type == "qe.out":
+        if data_type is None:
+            if type(data) == list or type(data) == tuple:
+                data_type = "atoms+grid"
+            if type(data) == str:
+                file_name = os.path.basename(data)
+                file_ending = file_name.split(".")[-1]
+                if file_ending == "out":
+                    data_type = "espresso-out"
+                elif file_ending == "json":
+                    data_type = "json"
+                else:
+                    raise Exception("Could not guess type of additional "
+                                    "calculation data provided to MALA.")
+
+        if data_type == "espresso-out":
             # Reset everything.
             self.fermi_energy_dft = None
             self.temperature = None

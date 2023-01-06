@@ -62,7 +62,7 @@ class Predictor(Runner):
             Precicted LDOS for these atomic positions.
         """
         self.data.target_calculator.\
-            read_additional_calculation_data("qe.out", path_to_file)
+            read_additional_calculation_data(path_to_file, "espresso-out")
         return self.predict_for_atoms(self.data.target_calculator.atoms,
                                       gather_ldos=gather_ldos)
 
@@ -95,8 +95,8 @@ class Predictor(Runner):
 
         # Provide info from current snapshot to target calculator.
         self.data.target_calculator.\
-            read_additional_calculation_data("atoms+grid",
-                                             [atoms, self.data.grid_dimension])
+            read_additional_calculation_data([atoms, self.data.grid_dimension],
+                                             "atoms+grid")
         feature_length = self.data.descriptor_calculator.fingerprint_length
 
         # The actual calculation of the LDOS from the descriptors depends
