@@ -265,9 +265,9 @@ class Target(PhysicalData):
               .json file.
         """
         if data_type is None:
-            if type(data) == list or type(data) == tuple:
+            if isinstance(data, list) or isinstance(data, tuple):
                 data_type = "atoms+grid"
-            if type(data) == str:
+            elif isinstance(data, str):
                 file_name = os.path.basename(data)
                 file_ending = file_name.split(".")[-1]
                 if file_ending == "out":
@@ -277,6 +277,9 @@ class Target(PhysicalData):
                 else:
                     raise Exception("Could not guess type of additional "
                                     "calculation data provided to MALA.")
+            else:
+                raise Exception("Could not guess type of additional "
+                                "calculation data provided to MALA.")
 
         if data_type == "espresso-out":
             # Reset everything.
