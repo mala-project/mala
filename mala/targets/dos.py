@@ -180,7 +180,7 @@ class DOS(Target):
         return_dos = DOS(params)
 
         # In this case, we may just read the entire qe.out file.
-        return_dos.read_additional_calculation_data("qe.out", path)
+        return_dos.read_additional_calculation_data(path, "espresso-out")
 
         # This method will use the ASE atoms object read above automatically.
         return_dos.read_from_qe_out()

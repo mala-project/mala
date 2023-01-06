@@ -30,7 +30,7 @@ density = np.reshape(density, [np.prod(grid_dimensions), 1])
 atoms = read(atoms_path)
 params = mala.Parameters()
 density_calculator = mala.Density(params)
-density_calculator.read_additional_calculation_data("atoms+grid", [atoms, grid_dimensions])
+density_calculator.read_additional_calculation_data([atoms, grid_dimensions])
 
 # The resulting cube file can be opened by e.g. VMD, VESTA or scenery.
 density_calculator.write_to_cube("Be_dens.cube", density, atoms, grid_dimensions)

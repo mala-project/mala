@@ -590,8 +590,7 @@ class Trainer(Runner):
                 # This works because the list is always guaranteed to be
                 # ordered.
                 calculator.\
-                    read_additional_calculation_data("qe.out",
-                                                     self.data.get_snapshot_calculation_output(snapshot_number))
+                    read_additional_calculation_data(self.data.get_snapshot_calculation_output(snapshot_number))
                 fe_actual = calculator.\
                     get_self_consistent_fermi_energy(actual_outputs)
                 be_actual = calculator.\
@@ -633,8 +632,7 @@ class Trainer(Runner):
                 # This works because the list is always guaranteed to be
                 # ordered.
                 calculator.\
-                    read_additional_calculation_data("qe.out",
-                                                     self.data.get_snapshot_calculation_output(snapshot_number))
+                    read_additional_calculation_data(self.data.get_snapshot_calculation_output(snapshot_number))
                 fe_actual = calculator.\
                     get_self_consistent_fermi_energy(actual_outputs)
                 te_actual = calculator.\

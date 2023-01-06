@@ -54,11 +54,11 @@ ldosfile = os.path.join(data_path, "cubes/tmp.pp*Be_ldos.cube")
 # The add_snapshot function can be called with a lot of options to reflect
 # the data to be processed.
 # The standard way is this: specifying descriptor, target and additional info.
-data_converter.add_snapshot(descriptor_input_type="qe.out",
+data_converter.add_snapshot(descriptor_input_type="espresso-out",
                             descriptor_input_path=outfile,
                             target_input_type=".cube",
                             target_input_path=ldosfile,
-                            additional_info_input_type="qe.out",
+                            additional_info_input_type="espresso-out",
                             additional_info_input_path=outfile,
                             target_units="1/(Ry*Bohr^3)")
 
@@ -80,7 +80,7 @@ data_converter.convert_snapshots(descriptor_save_path="./",
 # No matter which way you access the DataConvert, you can always specify
 # keywords (check API) for the calculators.
 data_converter = mala.DataConverter(test_parameters)
-data_converter.add_snapshot(descriptor_input_type="qe.out",
+data_converter.add_snapshot(descriptor_input_type="espresso-out",
                             descriptor_input_path=outfile,)
 data_converter.convert_snapshots(complete_save_path="./",
                                  naming_scheme="Be_snapshot_only_in*",

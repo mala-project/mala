@@ -59,8 +59,8 @@ class MALA(Calculator):
 
         # Get critical values from a reference file (cutoff, temperature, etc.)
         self.data_handler.target_calculator.\
-            read_additional_calculation_data(reference_data[0],
-                                             reference_data[1])
+            read_additional_calculation_data(reference_data[1],
+                                             reference_data[0])
 
         # Needed for e.g. Monte Carlo.
         self.last_energy_contributions = {}
