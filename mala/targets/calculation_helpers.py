@@ -74,11 +74,11 @@ def fermi_function(energy, fermi_energy, temperature):
     # The overhead for inference should be minimal.
     # Since this function works both for arrays and scalars,
     # we have to check which maximum to use.
-    if type(energy) == np.ndarray:
-        max_exponent = np.log(np.finfo(exponent.dtype.name).max)
-        exponent[np.argwhere(exponent > max_exponent)] = max_exponent
+    if isinstance(energy, np.ndarray):
+        max_exponent = np.log(np.finfo(exponent.dtype).max)
+        exponent[exponent > max_exponent] = max_exponent
     else:
-        exponent = min(exponent, np.log(sys.float_info.max))
+        exponent = min(exponent, np.log(np.finfo(exponent).max))
 
     return 1.0 / (1.0 + np.exp(exponent))
 
