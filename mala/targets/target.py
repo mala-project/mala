@@ -375,11 +375,13 @@ class Target(PhysicalData):
                 kweights = self.atoms.get_calculator().get_k_point_weights()
                 eband_per_band = eigs * fermi_function(eigs,
                                                        self.fermi_energy_dft,
-                                                       self.temperature)
+                                                       self.temperature,
+                                                       suppress_overflow=True)
                 eband_per_band = kweights[np.newaxis, :] * eband_per_band
                 self.band_energy_dft_calculation = np.sum(eband_per_band)
                 enum_per_band = fermi_function(eigs, self.fermi_energy_dft,
-                                               self.temperature)
+                                               self.temperature,
+                                               suppress_overflow=True)
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
 

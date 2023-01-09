@@ -1010,7 +1010,8 @@ class LDOS(Target):
 
         # Build the energy grid and calculate the fermi function.
         energy_grid = self.get_energy_grid()
-        fermi_values = fermi_function(energy_grid, fermi_energy, temperature)
+        fermi_values = fermi_function(energy_grid, fermi_energy, temperature,
+                                      suppress_overflow=True)
 
         # Calculate the number of electrons.
         if integration_method == "trapz":
