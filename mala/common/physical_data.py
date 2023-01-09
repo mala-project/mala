@@ -4,6 +4,7 @@ import os
 
 import json
 import numpy as np
+from mala.common.parallelizer import get_comm
 
 from mala.version import __version__ as mala_version
 
@@ -295,9 +296,19 @@ class PhysicalData(ABC):
         elif file_ending not in io.file_extensions:
             raise Exception("Invalid file ending selected: " +
                             file_ending)
-        series = io.Series(path, io.Access.create,
-                           options=json.dumps(self.parameters.
-                                              _configuration["openpmd_configuration"]))
+        if self.parameters._configuration["mpi"]:
+            series = io.Series(
+                path,
+                io.Access.create,
+                get_comm(),
+                options=json.dumps(
+                    self.parameters._configuration["openpmd_configuration"]))
+        else:
+            series = io.Series(
+                path,
+                io.Access.create,
+                options=json.dumps(
+                    self.parameters._configuration["openpmd_configuration"]))
         series.set_attribute("is_mala_data", 1)
         series.set_software(name="MALA", version=mala_version)
         series.author = "..."
@@ -305,10 +316,10 @@ class PhysicalData(ABC):
         self.write_to_openpmd_iteration(iteration, array)
 
     def write_to_openpmd_iteration(self, iteration, array,
+                                   global_grid,
+                                   local_offset,
+                                   local_reach,
                                    additional_metadata=None,
-                                   x_from=None, x_to=None,
-                                   y_from=None, y_to=None,
-                                   z_from=None, z_to=None,
                                    feature_from=0, feature_to=None):
         """
         Write a file within an OpenPMD iteration.
@@ -327,6 +338,9 @@ class PhysicalData(ABC):
             depending on the class, be saved in the OpenPMD file.
         """
         import openpmd_api as io
+
+        [x_from, y_from, z_from] = local_offset
+        [x_to, y_to, z_to] = local_reach
 
         mesh = iteration.meshes[self.data_name]
 
@@ -367,8 +381,7 @@ class PhysicalData(ABC):
                 atoms_openpmd["position"][str(atom)].unit_SI = 1.0e-10
                 atoms_openpmd["positionOffset"][str(atom)].unit_SI = 1.0e-10
 
-        dataset = io.Dataset(array.dtype,
-                             array[:, :, :, 0].shape)
+        dataset = io.Dataset(array.dtype, global_grid)
 
         # See above - will currently break for density of states,
         # which is something we never do though anyway.
