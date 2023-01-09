@@ -317,10 +317,10 @@ class PhysicalData(ABC):
 
     def write_to_openpmd_iteration(self, iteration, array,
                                    global_grid,
+                                   x_from, x_to,
+                                   y_from, y_to,
+                                   z_from, z_to,
                                    additional_metadata=None,
-                                   x_from=None, x_to=None,
-                                   y_from=None, y_to=None,
-                                   z_from=None, z_to=None,
                                    feature_from=0, feature_to=None):
         """
         Write a file within an OpenPMD iteration.
