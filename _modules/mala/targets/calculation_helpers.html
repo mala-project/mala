@@ -76,7 +76,7 @@
 <span class="kn">import</span> <span class="nn">mpmath</span> <span class="k">as</span> <span class="nn">mp</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
-
+<span class="kn">import</span> <span class="nn">sys</span>
 
 <div class="viewcode-block" id="integrate_values_on_spacing"><a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.integrate_values_on_spacing">[docs]</a><span class="k">def</span> <span class="nf">integrate_values_on_spacing</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">spacing</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -111,7 +111,8 @@
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown integration method.&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="fermi_function"><a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.fermi_function">[docs]</a><span class="k">def</span> <span class="nf">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
+<div class="viewcode-block" id="fermi_function"><a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.fermi_function">[docs]</a><span class="k">def</span> <span class="nf">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
+                   <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the Fermi function.</span>
 
@@ -124,10 +125,17 @@
 <span class="sd">    energy : float or numpy.array</span>
 <span class="sd">        Energy for which the Fermi function is supposed to be calculated in</span>
 <span class="sd">        energy_units.</span>
+
 <span class="sd">    fermi_energy : float</span>
 <span class="sd">        Fermi energy level in energy_units.</span>
+
 <span class="sd">    temperature : float</span>
 <span class="sd">        Temperature in K.</span>
+
+<span class="sd">    suppress_overflow : bool</span>
+<span class="sd">        If True, overflow that may occur in the exponent of the divisor of</span>
+<span class="sd">        the Fermi function is suppressed. This is mathematically justifiable,</span>
+<span class="sd">        but</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -135,8 +143,27 @@
 <span class="sd">        Value of the Fermi function.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">energy</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span> <span class="o">/</span>
-                               <span class="p">(</span><span class="n">kB</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">)))</span></div>
+    <span class="n">exponent</span> <span class="o">=</span> <span class="p">(</span><span class="n">energy</span> <span class="o">-</span> <span class="n">fermi_energy</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">kB</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">suppress_overflow</span><span class="p">:</span>
+        <span class="c1"># Maximum exponent that will not result in inf when performing</span>
+        <span class="c1"># np.exp() (for double values only).</span>
+        <span class="c1"># Very large exponents result in very large values, and if we don&#39;t</span>
+        <span class="c1"># check for overflow, infinity. Cutting this back to the maximum float</span>
+        <span class="c1"># value (~ 1e308) is more then enough, since we divide by the exponent,</span>
+        <span class="c1"># and therefore get zero (or machine precision within zero) either way.</span>
+        <span class="c1"># Adding this check removes overflow warnings.</span>
+        <span class="c1"># The overhead for inference should be minimal.</span>
+        <span class="c1"># Since this function works both for arrays and scalars,</span>
+        <span class="c1"># we have to check which maximum to use.</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">max_exponent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">exponent</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+            <span class="n">exponent</span><span class="p">[</span><span class="n">exponent</span> <span class="o">&gt;</span> <span class="n">max_exponent</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_exponent</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">exponent</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">exponent</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">exponent</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">exponent</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="entropy_multiplicator"><a class="viewcode-back" href="../../../api/mala.targets.calculation_helpers.html#mala.targets.calculation_helpers.entropy_multiplicator">[docs]</a><span class="k">def</span> <span class="nf">entropy_multiplicator</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
@@ -168,7 +195,8 @@
         <span class="n">dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">energy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">multiplicator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">energy</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="n">fermi_val</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
+            <span class="n">fermi_val</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
+                                       <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">fermi_val</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
                 <span class="n">secondterm</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="k">else</span><span class="p">:</span>
@@ -179,7 +207,8 @@
                 <span class="n">firsterm</span> <span class="o">=</span> <span class="n">fermi_val</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">fermi_val</span><span class="p">)</span>
             <span class="n">multiplicator</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">firsterm</span> <span class="o">+</span> <span class="n">secondterm</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">fermi_val</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
+        <span class="n">fermi_val</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
+                                   <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">fermi_val</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
             <span class="n">secondterm</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="k">else</span><span class="p">:</span>

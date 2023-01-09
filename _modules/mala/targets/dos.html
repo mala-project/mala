@@ -897,7 +897,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the number of electrons from DOS data.&quot;&quot;&quot;</span>
         <span class="c1"># Calculate the energy levels and the Fermi function.</span>
 
-        <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
+        <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
+                                    <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># Calculate the number of electrons.</span>
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
             <span class="n">number_of_electrons</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">dos_data</span> <span class="o">*</span> <span class="n">fermi_vals</span><span class="p">,</span>
@@ -909,7 +910,8 @@
             <span class="n">dos_pointer</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">)</span>
             <span class="n">number_of_electrons</span><span class="p">,</span> <span class="n">abserr</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
                 <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">dos_pointer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
-                                                          <span class="n">temperature</span><span class="p">),</span>
+                                                          <span class="n">temperature</span><span class="p">,</span>
+                                                          <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
                 <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
                 <span class="n">points</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>
@@ -927,7 +929,8 @@
                                <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the band energy from DOS data.&quot;&quot;&quot;</span>
         <span class="c1"># Calculate the energy levels and the Fermi function.</span>
-        <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
+        <span class="n">fermi_vals</span> <span class="o">=</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
+                                    <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># Calculate the band energy.</span>
         <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
@@ -942,7 +945,8 @@
             <span class="n">dos_pointer</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">energy_grid</span><span class="p">,</span> <span class="n">dos_data</span><span class="p">)</span>
             <span class="n">band_energy</span><span class="p">,</span> <span class="n">abserr</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
                 <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">dos_pointer</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">e</span> <span class="o">*</span> <span class="n">fermi_function</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
-                                                              <span class="n">temperature</span><span class="p">),</span>
+                                                              <span class="n">temperature</span><span class="p">,</span>
+                                                              <span class="n">suppress_overflow</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
                 <span class="n">energy_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">energy_grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
                 <span class="n">points</span><span class="o">=</span><span class="n">fermi_energy</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;analytical&quot;</span><span class="p">:</span>

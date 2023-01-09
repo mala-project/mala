@@ -177,7 +177,7 @@ energy_units.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mala.targets.calculation_helpers.fermi_function">
-<span class="sig-name descname"><span class="pre">fermi_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#fermi_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.fermi_function" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fermi_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermi_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_overflow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/calculation_helpers.html#fermi_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.calculation_helpers.fermi_function" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the Fermi function.</p>
 <p>The Fermi function reads</p>
 <div class="math notranslate nohighlight">
@@ -189,6 +189,9 @@ energy_units.</p></li>
 energy_units.</p></li>
 <li><p><strong>fermi_energy</strong> (<em>float</em>) – Fermi energy level in energy_units.</p></li>
 <li><p><strong>temperature</strong> (<em>float</em>) – Temperature in K.</p></li>
+<li><p><strong>suppress_overflow</strong> (<em>bool</em>) – If True, overflow that may occur in the exponent of the divisor of
+the Fermi function is suppressed. This is mathematically justifiable,
+but</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
