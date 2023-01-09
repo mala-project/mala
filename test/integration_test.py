@@ -74,13 +74,15 @@ class TestMALAIntegration:
 
         # Calculate the numerically approximated values.
         qint_0, abserr = sp.integrate.quad(
-            lambda e: fermi_function(e, e_fermi, temp),
+            lambda e: fermi_function(e, e_fermi, temp, suppress_overflow=True),
             energies[0], energies[-1])
         qint_1, abserr = sp.integrate.quad(
-            lambda e: (e - e_fermi) * fermi_function(e, e_fermi, temp),
+            lambda e: (e - e_fermi) * fermi_function(e, e_fermi, temp,
+                                                     suppress_overflow=True),
             energies[0], energies[-1])
         qint_2, abserr = sp.integrate.quad(
-            lambda e: (e - e_fermi) ** 2 * fermi_function(e, e_fermi, temp),
+            lambda e: (e - e_fermi) ** 2 * fermi_function(e, e_fermi, temp,
+                                                          suppress_overflow=True),
             energies[0], energies[-1])
 
         # Calculate the errors.
