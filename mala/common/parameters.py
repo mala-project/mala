@@ -338,6 +338,7 @@ class ParametersDescriptors(ParametersBase):
 
         # Everything concerning the minterpy descriptors.
         self.minterpy_point_list = []
+        self.minterpy_cutoff_cube_size = 0.0
 
         # For accelerated hyperparameter optimization.
         self.acsd_points = 100

@@ -15,6 +15,9 @@ params.descriptors.minterpy_point_list = [
     [0.75, 0.75, 0.75]
 ]
 
+# Set the size of the local cubes.
+params.descriptors.minterpy_cutoff_cube_size = 0.0
+
 descriptor_calculator = mala.MinterpyDescriptors(params)
 data = descriptor_calculator.calculate_from_qe_out(outfile)[0]
 

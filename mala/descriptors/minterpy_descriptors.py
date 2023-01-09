@@ -114,6 +114,14 @@ class MinterpyDescriptors(Descriptor):
         self.fingerprint_length = \
             len(self.parameters.minterpy_point_list)+coord_length
 
+        # Size of the local cube
+        # self.parameters.minterpy_cutoff_cube_size
+
+        # first grid point - for now just assume 0.0, 0.0, 0.0.
+        # That is correct in 99% of the cases I am aware of, and once
+        # we have a working implementation we can test and refine this.
+        first_grid_point = [0.0, 0.0, 0.0]
+
         # Perform one LAMMPS call for each point in the Minterpy point list.
         for idx, point in enumerate(self.parameters.minterpy_point_list):
             # Shift the atoms in negative direction of the point(s) we actually
