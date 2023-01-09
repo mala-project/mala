@@ -412,25 +412,25 @@ class Descriptor(PhysicalData):
             Numpy array with the descriptors of this ranks local grid.
         """
         grid_portion = [None, None, None, None, None, None]
-        grid_portion[0] = int(descriptors_np[0][0][0])
-        grid_portion[2] = int(descriptors_np[0][0][1])
-        grid_portion[4] = int(descriptors_np[0][0][2])
-        grid_portion[1] = int(descriptors_np[0][-1][0]) + 1
-        grid_portion[3] = int(descriptors_np[0][-1][1]) + 1
-        grid_portion[5] = int(descriptors_np[0][-1][2]) + 1
+        grid_portion[0] = int(descriptors_np[0][0])
+        grid_portion[2] = int(descriptors_np[0][1])
+        grid_portion[4] = int(descriptors_np[0][2])
+        grid_portion[1] = int(descriptors_np[-1][0]) + 1
+        grid_portion[3] = int(descriptors_np[-1][1]) + 1
+        grid_portion[5] = int(descriptors_np[-1][2]) + 1
         nx = grid_portion[1] - grid_portion[0]
         ny = grid_portion[3] - grid_portion[2]
         nz = grid_portion[5] - grid_portion[4]
 
         descriptors_full = np.zeros([nx, ny, nz, self.fingerprint_length])
 
-        descriptors_full[grid_portion[0]:grid_portion[1],
-                         grid_portion[2]:grid_portion[3],
-                         grid_portion[4]:grid_portion[5]] = \
-            np.reshape(descriptors_np[0][:, 3:],
-                       [nx, ny, nx, self.fingerprint_length]).\
+        descriptors_full[0:grid_portion[1]-grid_portion[0],
+                         0:grid_portion[3]-grid_portion[2],
+                         0:grid_portion[5]-grid_portion[4]] = \
+            np.reshape(descriptors_np[:, 3:],
+                       [nz, ny, nx, self.fingerprint_length]).\
                 transpose([2, 1, 0, 3])
-        return descriptors_full, grid_portion
+        return descriptors_full, grid_portion, self.grid_dimensions
 
     def get_acsd(self, descriptor_data, ldos_data):
         """
@@ -810,4 +810,3 @@ class Descriptor(PhysicalData):
     @abstractmethod
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         pass
-

@@ -3,7 +3,7 @@ import os
 
 import json
 
-from mala.common.parallelizer import printout, get_rank, parallel_warn
+from mala.common.parallelizer import printout, get_rank, get_comm
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
@@ -292,25 +292,41 @@ class DataConverter:
             series_name = snapshot_name.replace("*", str("%01T"))
 
             if self.process_descriptors:
-                input_series = io.Series(os.path.join(descriptor_save_path,
-                                                      series_name+".in." +
-                                                      file_ending),
-                                         io.Access.create,
-                                         options=json.dumps(
-                                            self.parameters_full.
-                                                openpmd_configuration))
+                if self.parameters._configuration["mpi"]:
+                    input_series = io.Series(
+                        os.path.join(descriptor_save_path,
+                                     series_name + ".in." + file_ending),
+                        io.Access.create,
+                        get_comm(),
+                        options=json.dumps(
+                            self.parameters_full.openpmd_configuration))
+                else:
+                    input_series = io.Series(
+                        os.path.join(descriptor_save_path,
+                                     series_name + ".in." + file_ending),
+                        io.Access.create,
+                        options=json.dumps(
+                            self.parameters_full.openpmd_configuration))
                 input_series.set_attribute("is_mala_data", 1)
                 input_series.set_software(name="MALA", version="x.x.x")
                 input_series.author = "..."
 
             if self.process_targets:
-                output_series = io.Series(os.path.join(target_save_path,
-                                                       series_name+".out." +
-                                                       file_ending),
-                                          io.Access.create,
-                                          options=json.dumps(
-                                            self.parameters_full.
-                                            openpmd_configuration))
+                if self.parameters._configuration["mpi"]:
+                    output_series = io.Series(
+                        os.path.join(target_save_path,
+                                     series_name + ".out." + file_ending),
+                        io.Access.create,
+                        get_comm(),
+                        options=json.dumps(
+                            self.parameters_full.openpmd_configuration))
+                else:
+                    output_series = io.Series(
+                        os.path.join(target_save_path,
+                                     series_name + ".out." + file_ending),
+                        io.Access.create,
+                        options=json.dumps(
+                            self.parameters_full.openpmd_configuration))
 
                 output_series.set_attribute("is_mala_data", 1)
                 output_series.set_software(name="MALA", version=mala_version)
@@ -472,12 +488,13 @@ class DataConverter:
                         write_to_numpy_file(input_path, tmp_input)
             else:
                 import numpy as np
-                tmp_input = self.descriptor_calculator.convert_local_to_3d(tmp_input[0])
-                print(np.shape(tmp_input))
-                exit()
+                tmp_input, [
+                    x_from, x_to, y_from, y_to, z_from, z_to
+                ], global_grid = self.descriptor_calculator.convert_local_to_3d(
+                    tmp_input)
                 self.descriptor_calculator.\
                     write_to_openpmd_iteration(input_iteration,
-                                               tmp_input)
+                                               tmp_input, global_grid=global_grid, x_from=x_from, x_to=x_to, y_from=y_from, y_to=y_to, z_from=z_from, z_to=z_to)
             del tmp_input
 
         ###########
