@@ -317,9 +317,8 @@ class PhysicalData(ABC):
 
     def write_to_openpmd_iteration(self, iteration, array,
                                    global_grid,
-                                   x_from, x_to,
-                                   y_from, y_to,
-                                   z_from, z_to,
+                                   local_offset,
+                                   local_reach,
                                    additional_metadata=None,
                                    feature_from=0, feature_to=None):
         """
@@ -339,6 +338,9 @@ class PhysicalData(ABC):
             depending on the class, be saved in the OpenPMD file.
         """
         import openpmd_api as io
+
+        [x_from, y_from, z_from] = local_offset
+        [x_to, y_to, z_to] = local_reach
 
         mesh = iteration.meshes[self.data_name]
 

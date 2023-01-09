@@ -488,13 +488,11 @@ class DataConverter:
                         write_to_numpy_file(input_path, tmp_input)
             else:
                 import numpy as np
-                tmp_input, [
-                    x_from, x_to, y_from, y_to, z_from, z_to
-                ], global_grid = self.descriptor_calculator.convert_local_to_3d(
-                    tmp_input)
+                tmp_input, local_offset, local_reach, global_grid = \
+                    self.descriptor_calculator.convert_local_to_3d(tmp_input)
                 self.descriptor_calculator.\
                     write_to_openpmd_iteration(input_iteration,
-                                               tmp_input, global_grid=global_grid, x_from=x_from, x_to=x_to, y_from=y_from, y_to=y_to, z_from=z_from, z_to=z_to)
+                                               tmp_input, global_grid=global_grid, local_offset=local_offset, local_reach=local_reach)
             del tmp_input
 
         ###########

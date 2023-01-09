@@ -411,26 +411,25 @@ class Descriptor(PhysicalData):
         descriptors_np : numpy.array
             Numpy array with the descriptors of this ranks local grid.
         """
-        grid_portion = [None, None, None, None, None, None]
-        grid_portion[0] = int(descriptors_np[0][0])
-        grid_portion[2] = int(descriptors_np[0][1])
-        grid_portion[4] = int(descriptors_np[0][2])
-        grid_portion[1] = int(descriptors_np[-1][0]) + 1
-        grid_portion[3] = int(descriptors_np[-1][1]) + 1
-        grid_portion[5] = int(descriptors_np[-1][2]) + 1
-        nx = grid_portion[1] - grid_portion[0]
-        ny = grid_portion[3] - grid_portion[2]
-        nz = grid_portion[5] - grid_portion[4]
+        local_offset = [None, None, None]
+        local_reach = [None, None, None]
+        local_offset[0] = int(descriptors_np[0][0])
+        local_offset[1] = int(descriptors_np[0][1])
+        local_offset[2] = int(descriptors_np[0][2])
+        local_reach[0] = int(descriptors_np[-1][0]) + 1
+        local_reach[1] = int(descriptors_np[-1][1]) + 1
+        local_reach[2] = int(descriptors_np[-1][2]) + 1
+        nx = local_reach[0] - local_offset[0]
+        ny = local_reach[1] - local_offset[1]
+        nz = local_reach[2] - local_offset[2]
 
         descriptors_full = np.zeros([nx, ny, nz, self.fingerprint_length])
 
-        descriptors_full[0:grid_portion[1]-grid_portion[0],
-                         0:grid_portion[3]-grid_portion[2],
-                         0:grid_portion[5]-grid_portion[4]] = \
+        descriptors_full[0:nx, 0:ny, 0:nz] = \
             np.reshape(descriptors_np[:, 3:],
                        [nz, ny, nx, self.fingerprint_length]).\
                 transpose([2, 1, 0, 3])
-        return descriptors_full, grid_portion, self.grid_dimensions
+        return descriptors_full, local_offset, local_reach, self.grid_dimensions
 
     def get_acsd(self, descriptor_data, ldos_data):
         """
