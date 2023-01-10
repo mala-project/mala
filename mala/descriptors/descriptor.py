@@ -428,7 +428,7 @@ class Descriptor(PhysicalData):
             np.reshape(descriptors_np[:, 3:],
                        [nz, ny, nx, self.fingerprint_length]).\
                 transpose([2, 1, 0, 3])
-        return descriptors_full, local_offset, local_reach, self.grid_dimensions
+        return descriptors_full, local_offset, local_reach
 
     def get_acsd(self, descriptor_data, ldos_data):
         """
