@@ -265,7 +265,7 @@ class DataScaler:
         Transform data from unscaled to scaled.
 
         Unscaled means real world data, scaled means data as is used in
-        the network.
+        the network. Data is transformed in-place.
 
         Parameters
         ----------
@@ -279,9 +279,9 @@ class DataScaler:
         """
         # First we need to find out if we even have to do anything.
         if self.scale_standard is False and self.scale_normal is False:
-            return unscaled
+            pass
 
-        if self.cantransform is False:
+        elif self.cantransform is False:
             raise Exception("Transformation cannot be done, this DataScaler "
                             "was never initialized")
 
@@ -295,12 +295,12 @@ class DataScaler:
                 ##########################
 
                 if self.scale_standard:
-                    unscaled = (unscaled - self.means) / self.stds
-                    return unscaled
+                    unscaled -= self.means
+                    unscaled /= self.stds
 
                 if self.scale_normal:
-                    unscaled = (unscaled - self.mins) / (self.maxs - self.mins)
-                    return unscaled
+                    unscaled -= self.mins
+                    unscaled /= (self.maxs - self.mins)
 
             else:
 
@@ -309,13 +309,12 @@ class DataScaler:
                 ##########################
 
                 if self.scale_standard:
-                    unscaled = (unscaled - self.total_mean) / self.total_std
-                    return unscaled
+                    unscaled -= self.total_mean
+                    unscaled /= self.total_std
 
                 if self.scale_normal:
-                    unscaled = (unscaled - self.total_min) / \
-                               (self.total_max - self.total_min)
-                    return unscaled
+                    unscaled -= self.total_min
+                    unscaled /= (self.total_max - self.total_min)
 
     def inverse_transform(self, scaled, as_numpy=False):
         """
@@ -342,38 +341,39 @@ class DataScaler:
         if self.scale_standard is False and self.scale_normal is False:
             unscaled = scaled
 
-        if self.cantransform is False:
-            raise Exception("Backtransformation cannot be done, this "
-                            "DataScaler was never initialized")
+        else:
+            if self.cantransform is False:
+                raise Exception("Backtransformation cannot be done, this "
+                                "DataScaler was never initialized")
 
-        # Perform the actual scaling, but use no_grad to make sure
-        # that the next couple of iterations stay untracked.
-        with torch.no_grad():
-            if self.feature_wise:
+            # Perform the actual scaling, but use no_grad to make sure
+            # that the next couple of iterations stay untracked.
+            with torch.no_grad():
+                if self.feature_wise:
 
-                ##########################
-                # Feature-wise-scaling
-                ##########################
+                    ##########################
+                    # Feature-wise-scaling
+                    ##########################
 
-                if self.scale_standard:
-                    unscaled = (scaled * self.stds) + self.means
+                    if self.scale_standard:
+                        unscaled = (scaled * self.stds) + self.means
 
-                if self.scale_normal:
-                    unscaled = (scaled*(self.maxs.values
-                                        - self.mins.values)) + self.mins.values
+                    if self.scale_normal:
+                        unscaled = (scaled*(self.maxs
+                                            - self.mins)) + self.mins
 
-            else:
+                else:
 
-                ##########################
-                # Total scaling
-                ##########################
+                    ##########################
+                    # Total scaling
+                    ##########################
 
-                if self.scale_standard:
-                    unscaled = (scaled * self.total_std) + self.total_mean
+                    if self.scale_standard:
+                        unscaled = (scaled * self.total_std) + self.total_mean
 
-                if self.scale_normal:
-                    unscaled = (scaled*(self.total_max
-                                        - self.total_min)) + self.total_min
+                    if self.scale_normal:
+                        unscaled = (scaled*(self.total_max
+                                            - self.total_min)) + self.total_min
 #
         if as_numpy:
             return unscaled.detach().numpy().astype(np.float64)

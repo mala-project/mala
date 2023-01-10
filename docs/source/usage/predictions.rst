@@ -22,7 +22,7 @@ always specify the parameters for descriptor calculation prior to this, i.e.
       .. code-block:: python
 
             parameters.running.inference_data_grid = [18, 18, 27]
-            parameters.descriptors.descriptor_type = "SNAP"
+            parameters.descriptors.descriptor_type = "Bispectrum"
             parameters.descriptors.twojmax = 10
             parameters.descriptors.rcutfac = 4.67637
 

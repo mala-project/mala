@@ -54,7 +54,8 @@ class Snapshot(JSONSerializable):
                  output_npy_file,  output_npy_directory,
                  snapshot_function,
                  input_units="", output_units="",
-                 calculation_output=""):
+                 calculation_output="",
+                 snapshot_type="hdf5"):
         super(Snapshot, self).__init__()
 
         # Inputs.
@@ -73,12 +74,16 @@ class Snapshot(JSONSerializable):
         # Function of the snapshot.
         self.snapshot_function = snapshot_function
 
+        # Legacy functionality: Determine whether the snapshot contains
+        # numpy or HDF5 files.
+        self.snapshot_type = snapshot_type        
+
         # All the dimensionalities of the snapshot.
         self.grid_dimensions = None
         self.grid_size = None
         self.input_dimension = None
         self.output_dimension = None
-
+        
     def load_dimensions(self, descriptors_contain_xyz,
                         debug_dimensions=None):
         """
@@ -152,7 +157,8 @@ class Snapshot(JSONSerializable):
                                   json_dict["input_npy_directory"],
                                   json_dict["output_npy_file"],
                                   json_dict["output_npy_directory"],
-                                  json_dict["snapshot_function"])
+                                  json_dict["snapshot_function"],
+                                  json_dict["snapshot_type"])
         for key in json_dict:
             setattr(deserialized_object, key, json_dict[key])
         return deserialized_object

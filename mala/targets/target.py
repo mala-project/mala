@@ -1,9 +1,11 @@
 """Base class for all target calculators."""
 from abc import ABC, abstractmethod
 import itertools
+import json
 
 from ase.neighborlist import NeighborList
-from ase.units import Rydberg, Bohr, kB
+from ase.units import Rydberg, kB
+from ase.cell import Cell
 import ase.io
 import numpy as np
 from scipy.spatial import distance
@@ -12,9 +14,11 @@ from scipy.integrate import simps
 from mala.common.parameters import Parameters, ParametersTargets
 from mala.common.parallelizer import printout, parallel_warn
 from mala.targets.calculation_helpers import fermi_function
+from mala.common.physical_data import PhysicalData
+from mala.descriptors.atomic_density import AtomicDensity
 
 
-class Target(ABC):
+class Target(PhysicalData):
     """
     Base class for all target quantity parser.
 
@@ -28,6 +32,10 @@ class Target(ABC):
     mala.common.parameters.ParametersTargets
         Parameters used to create this Target object.
     """
+
+    ##############################
+    # Constructors
+    ##############################
 
     def __new__(cls, params: Parameters):
         """
@@ -72,16 +80,19 @@ class Target(ABC):
         return target
 
     def __init__(self, params):
+        super(Target, self).__init__(params)
+        self._parameters_full = None
         if isinstance(params, Parameters):
             self.parameters: ParametersTargets = params.targets
+            self._parameters_full = params
         elif isinstance(params, ParametersTargets):
             self.parameters: ParametersTargets = params
         else:
             raise Exception("Wrong type of parameters for Targets class.")
-        self.fermi_energy_eV = None
-        self.temperature_K = None
-        self.voxel_Bohr = None
-        self.number_of_electrons = None
+        self.fermi_energy_dft = None
+        self.temperature = None
+        self.voxel = None
+        self.number_of_electrons_exact = None
         self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
@@ -116,12 +127,42 @@ class Target(ABC):
         self.kpoints = None  # (2, 2, 2)
         self.qe_pseudopotentials = {}
 
-        # Local grid for distributed inference.
+        # Local grid and parallelization info for distributed inference.
         self.local_grid = None
+        self.y_planes = None
 
+        # Control whether target data will be saved.
+        # Can be important for I/O applications.
+        self.save_target_data = True
+
+    ##############################
+    # Properties
+    ##############################
+
+    @property
     @abstractmethod
-    def get_feature_size(self):
+    def feature_size(self):
         """Get dimension of this target if used as feature in ML."""
+        pass
+
+    @property
+    @abstractmethod
+    def si_unit_conversion(self):
+        """
+        Numeric value of the conversion from MALA (ASE) units to SI.
+
+        Needed for OpenPMD interface.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def si_dimension(self):
+        """
+        Dictionary containing the SI unit dimensions in OpenPMD format.
+
+        Needed for OpenPMD interface.
+        """
         pass
 
     @property
@@ -136,49 +177,61 @@ class Target(ABC):
     def qe_input_data(self, value):
         self._qe_input_data = value
 
-    def read_from_cube(self):
-        """Read the quantity from a .cube file."""
-        raise Exception("No function defined to read this quantity "
-                        "from a .cube file.")
+    def _is_property_cached(self, property_name):
+        return property_name in self.__dict__.keys()
 
-    def read_from_qe_dos_txt(self):
-        """Read the quantity from a Quantum Espresso .dos.txt file."""
-        raise Exception("No function defined to read this quantity "
-                        "from a qe.dos.txt file")
+    ##############################
+    # Methods
+    ##############################
 
-    def write_as_cube(self):
-        """Write the quantity in a cube file."""
-        raise Exception("No function defined to write this quantity "
-                        "to a .cube file.")
+    # File I/O
+    ##########
 
-    def get_density(self):
-        """Get the electronic density."""
-        raise Exception("No function to calculate or provide the "
-                        "density has been implemented for this target type.")
+    @staticmethod
+    @abstractmethod
+    def convert_units(array, in_units="eV"):
+        """
+        Convert the units of an array into the MALA units.
 
-    def get_density_of_states(self):
-        """Get the density of states."""
-        raise Exception("No function to calculate or provide the"
-                        "density of states (DOS) has been implemented "
+        Parameters
+        ----------
+        array : numpy.array
+            Data for which the units should be converted.
+
+        in_units : string
+            Units of array.
+
+        Returns
+        -------
+        converted_array : numpy.array
+            Data in MALA units.
+
+        """
+        raise Exception("No unit conversion method implemented for"
+                        " this target type.")
+
+    @staticmethod
+    @abstractmethod
+    def backconvert_units(array, out_units):
+        """
+        Convert the units of an array from MALA units into desired units.
+
+        Parameters
+        ----------
+        array : numpy.array
+            Data in MALA units.
+
+        out_units : string
+            Desired units of output array.
+
+        Returns
+        -------
+        converted_array : numpy.array
+            Data in out_units.
+
+        """
+        raise Exception("No unit back conversion method implemented "
                         "for this target type.")
-
-    def get_band_energy(self):
-        """Get the band energy."""
-        raise Exception("No function to calculate or provide the"
-                        "band energy has been implemented for this target "
-                        "type.")
-
-    def get_number_of_electrons(self):
-        """Get the number of electrons."""
-        raise Exception("No function to calculate or provide the number of"
-                        " electrons has been implemented for this target "
-                        "type.")
-
-    def get_total_energy(self):
-        """Get the total energy."""
-        raise Exception("No function to calculate or provide the number "
-                        "of electons has been implemented for this target "
-                        "type.")
 
     def read_additional_calculation_data(self, data_type, data=""):
         """
@@ -192,7 +245,7 @@ class Target(ABC):
         Parameters
         ----------
         data_type : string
-            Type of data or file that is used. Currently supporte are:
+            Type of data or file that is used. Currently supported are:
 
             - "qe.out" : Read the additional information from a QuantumESPRESSO
               output file.
@@ -207,10 +260,10 @@ class Target(ABC):
         """
         if data_type == "qe.out":
             # Reset everything.
-            self.fermi_energy_eV = None
-            self.temperature_K = None
-            self.voxel_Bohr = None
-            self.number_of_electrons = None
+            self.fermi_energy_dft = None
+            self.temperature = None
+            self.number_of_electrons_exact = None
+            self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
@@ -219,7 +272,7 @@ class Target(ABC):
             # Read the file.
             self.atoms = ase.io.read(data, format="espresso-out")
             vol = self.atoms.get_volume()
-            self.fermi_energy_eV = self.atoms.get_calculator().\
+            self.fermi_energy_dft = self.atoms.get_calculator().\
                 get_fermi_level()
 
             # Parse the file for energy values.
@@ -233,11 +286,11 @@ class Target(ABC):
                     if "End of self-consistent calculation" in line:
                         past_calculation_part = True
                     if "number of electrons       =" in line:
-                        self.number_of_electrons = np.float64(line.split('=')
-                                                              [1])
+                        self.number_of_electrons_exact = \
+                            np.float64(line.split('=')[1])
                     if "Fermi-Dirac smearing, width (Ry)=" in line:
-                        self.temperature_K = np.float64(line.split('=')[2]) * \
-                                             Rydberg / kB
+                        self.temperature = np.float64(line.split('=')[2]) * \
+                                           Rydberg / kB
                     if "xc contribution" in line:
                         break
                     if "FFT dimensions" in line:
@@ -273,16 +326,19 @@ class Target(ABC):
                         bands_included = False
 
             # The voxel is needed for e.g. LDOS integration.
-            self.voxel_Bohr = self.atoms.cell.copy()
-            self.voxel_Bohr[0] = self.voxel_Bohr[0] / (
-                        self.grid_dimensions[0] * Bohr)
-            self.voxel_Bohr[1] = self.voxel_Bohr[1] / (
-                        self.grid_dimensions[1] * Bohr)
-            self.voxel_Bohr[2] = self.voxel_Bohr[2] / (
-                        self.grid_dimensions[2] * Bohr)
+            self.voxel = self.atoms.cell.copy()
+            self.voxel[0] = self.voxel[0] / (
+                        self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (
+                        self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (
+                        self.grid_dimensions[2])
+            self._parameters_full.descriptors.atomic_density_sigma = \
+                AtomicDensity.get_optimal_sigma(self.voxel)
 
             # This is especially important for size extrapolation.
-            self.electrons_per_atom = self.number_of_electrons/len(self.atoms)
+            self.electrons_per_atom = self.number_of_electrons_exact / \
+                len(self.atoms)
 
             # Unit conversion
             self.total_energy_dft_calculation = total_energy*Rydberg
@@ -295,19 +351,18 @@ class Target(ABC):
                     energies[0, :, :])
                 kweights = self.atoms.get_calculator().get_k_point_weights()
                 eband_per_band = eigs * fermi_function(eigs,
-                                                       self.fermi_energy_eV,
-                                                       self.temperature_K)
+                                                       self.fermi_energy_dft,
+                                                       self.temperature)
                 eband_per_band = kweights[np.newaxis, :] * eband_per_band
                 self.band_energy_dft_calculation = np.sum(eband_per_band)
-                enum_per_band = fermi_function(eigs,
-                                               self.fermi_energy_eV,
-                                               self.temperature_K)
+                enum_per_band = fermi_function(eigs, self.fermi_energy_dft,
+                                               self.temperature)
                 enum_per_band = kweights[np.newaxis, :] * enum_per_band
                 self.number_of_electrons_from_eigenvals = np.sum(enum_per_band)
 
         elif data_type == "atoms+grid":
             # Reset everything that we can get this way.
-            self.voxel_Bohr = None
+            self.voxel = None
             self.band_energy_dft_calculation = None
             self.total_energy_dft_calculation = None
             self.grid_dimensions = [0, 0, 0]
@@ -322,13 +377,15 @@ class Target(ABC):
             self.grid_dimensions[2] = data[1][2]
 
             # The voxel is needed for e.g. LDOS integration.
-            self.voxel_Bohr = self.atoms.cell.copy()
-            self.voxel_Bohr[0] = self.voxel_Bohr[0] / (
-                        self.grid_dimensions[0] * Bohr)
-            self.voxel_Bohr[1] = self.voxel_Bohr[1] / (
-                        self.grid_dimensions[1] * Bohr)
-            self.voxel_Bohr[2] = self.voxel_Bohr[2] / (
-                        self.grid_dimensions[2] * Bohr)
+            self.voxel = self.atoms.cell.copy()
+            self.voxel[0] = self.voxel[0] / (
+                        self.grid_dimensions[0])
+            self.voxel[1] = self.voxel[1] / (
+                        self.grid_dimensions[1])
+            self.voxel[2] = self.voxel[2] / (
+                        self.grid_dimensions[2])
+            self._parameters_full.descriptors.atomic_density_sigma = \
+                AtomicDensity.get_optimal_sigma(self.voxel)
 
             if self.electrons_per_atom is None:
                 printout("No number of electrons per atom provided, "
@@ -337,11 +394,147 @@ class Target(ABC):
                          "wrong.")
 
             else:
-                self.number_of_electrons = self.electrons_per_atom *\
-                                           len(self.atoms)
+                self.number_of_electrons_exact = self.electrons_per_atom * \
+                                                 len(self.atoms)
+        elif data_type == "json":
+            self.fermi_energy_dft = None
+            self.temperature = None
+            self.number_of_electrons_exact = None
+            self.voxel = None
+            self.band_energy_dft_calculation = None
+            self.total_energy_dft_calculation = None
+            self.grid_dimensions = [0, 0, 0]
+            self.atoms = None
+
+            with open(data, encoding="utf-8") as json_file:
+                json_dict = json.load(json_file)
+            for key in json_dict:
+                if not isinstance(json_dict[key], dict):
+                    setattr(self, key, json_dict[key])
+            self.atoms = ase.Atoms.fromdict(json_dict["atoms"])
+            self.voxel = Cell(json_dict["voxel"]["array"])
+            self.qe_input_data["ibrav"] = json_dict["ibrav"]
+            self.qe_input_data["ecutwfc"] = json_dict["ecutwfc"]
+            self.qe_input_data["ecutrho"] = json_dict["ecutrho"]
+            self.qe_input_data["degauss"] = json_dict["degauss"]
+            self.qe_pseudopotentials = json_dict["pseudopotentials"]
 
         else:
             raise Exception("Unsupported auxiliary file type.")
+
+    def write_additional_calculation_data(self, filepath, return_string=False):
+        """
+        Write additional information about a calculation to a .json file.
+
+        This way important information about a calculation can be saved more
+        accessibly.
+
+        Parameters
+        ----------
+        filepath : string
+            Path at which to save the calculation data.
+
+        return_string : bool
+            If True, no file will be written, and instead a json dict will
+            be returned.
+        """
+        additional_calculation_data = {
+            "fermi_energy_dft": self.fermi_energy_dft,
+            "temperature": self.temperature,
+            "number_of_electrons_exact": self.number_of_electrons_exact,
+            "voxel": self.voxel.todict(),
+            "band_energy_dft_calculation": self.band_energy_dft_calculation,
+            "total_energy_dft_calculation": self.total_energy_dft_calculation,
+            "grid_dimensions": list(self.grid_dimensions),
+            "atoms": self.atoms.todict(),
+            "electrons_per_atom": self.electrons_per_atom,
+            "number_of_electrons_from_eigenvals":
+                self.number_of_electrons_from_eigenvals,
+            "ibrav": self.qe_input_data["ibrav"],
+            "ecutwfc": self.qe_input_data["ecutwfc"],
+            "ecutrho": self.qe_input_data["ecutrho"],
+            "degauss": self.qe_input_data["degauss"],
+            "pseudopotentials": self.qe_pseudopotentials
+        }
+        additional_calculation_data["voxel"]["array"] = \
+            additional_calculation_data["voxel"]["array"].tolist()
+        additional_calculation_data["voxel"].pop("pbc", None)
+        additional_calculation_data["atoms"]["numbers"] = \
+            additional_calculation_data["atoms"]["numbers"].tolist()
+        additional_calculation_data["atoms"]["positions"] = \
+            additional_calculation_data["atoms"]["positions"].tolist()
+        additional_calculation_data["atoms"]["cell"] = \
+            additional_calculation_data["atoms"]["cell"].tolist()
+        additional_calculation_data["atoms"]["pbc"] = \
+            additional_calculation_data["atoms"]["pbc"].tolist()
+        if return_string is False:
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(additional_calculation_data, f,
+                          ensure_ascii=False, indent=4)
+        else:
+            return additional_calculation_data
+
+    def write_to_numpy_file(self, path, target_data=None):
+        """
+        Write data to a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            File to save into.
+
+        target_data : numpy.ndarray
+            Target data to save. If None, the data stored in the calculator
+            will be used.
+        """
+        if target_data is None:
+            super(Target, self).write_to_numpy_file(path, self.get_target())
+        else:
+            super(Target, self).write_to_numpy_file(path, target_data)
+
+    def write_to_openpmd_file(self, path, target_data=None):
+        """
+        Write data to a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            File to save into. If no file ending is given, .h5 is assumed.
+
+        target_data : numpy.ndarray
+            Target data to save. If None, the data stored in the calculator
+            will be used.
+        """
+        if target_data is None:
+            super(Target, self).write_to_openpmd_file(path, self.get_target())
+        else:
+            super(Target, self).write_to_openpmd_file(path, target_data)
+
+    # Accessing target data
+    ########################
+
+    @abstractmethod
+    def get_target(self):
+        """
+        Get the target quantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        pass
+
+    @abstractmethod
+    def invalidate_target(self):
+        """
+        Invalidates the saved target wuantity.
+
+        This is the generic interface for cached target quantities.
+        It should work for all implemented targets.
+        """
+        pass
+
+    # Calculations
+    ##############
 
     def get_energy_grid(self):
         """Get energy grid."""
@@ -354,17 +547,8 @@ class Target(ABC):
         for i in range(0, self.grid_dimensions[0]):
             for j in range(0, self.grid_dimensions[1]):
                 for k in range(0, self.grid_dimensions[2]):
-                    grid3D[i, j, k, :] = np.matmul(self.voxel_Bohr, [i, j, k])
+                    grid3D[i, j, k, :] = np.matmul(self.voxel, [i, j, k])
         return grid3D
-
-    @staticmethod
-    def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):
-        if method == "mic":
-            return np.min(np.linalg.norm(atoms.get_cell(), axis=0))/2
-        elif method == "2mic":
-            return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
-        else:
-            raise Exception("Unknown option to calculate rMax provided.")
 
     @staticmethod
     def radial_distribution_function_from_atoms(atoms: ase.Atoms,
@@ -428,7 +612,8 @@ class Target(ABC):
             _rMax = Target._get_ideal_rmax_for_rdf(atoms, method="2mic")
         else:
             if method == "asap3":
-                _rMax_possible = Target._get_ideal_rmax_for_rdf(atoms, method="2mic")
+                _rMax_possible = Target._get_ideal_rmax_for_rdf(atoms,
+                                                                method="2mic")
                 if rMax > _rMax_possible:
                     raise Exception("ASAP3 calculation fo RDF cannot work "
                                     "with radii that are bigger then the "
@@ -447,9 +632,9 @@ class Target(ABC):
                 if pbc[i]:
                     if _rMax > cell[i, i]:
                         parallel_warn(
-                            "Calculating RDF with a radius larger then the unit"
-                            " cell. While this will work numerically, be cautious"
-                            " about the physicality of its results", stacklevel=3)
+                            "Calculating RDF with a radius larger then the "
+                            "unit cell. While this will work numerically, be "
+                            "cautious about the physicality of its results")
 
             # Calculate all the distances.
             # rMax/2 because this is the radius around one atom, so half the
@@ -556,7 +741,8 @@ class Target(ABC):
 
         # Construct a neighbor list for calculation of distances.
         # With this, the PBC are satisfied.
-        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms))+[_rMax/2.0],
+        neighborlist = ase.neighborlist.NeighborList(np.zeros(len(atoms)) +
+                                                     [_rMax/2.0],
                                                      bothways=True)
         neighborlist.update(atoms)
 
@@ -623,7 +809,8 @@ class Target(ABC):
         return tpcf[1:, 1:, 1:], rr[:, 1:, 1:, 1:]
 
     @staticmethod
-    def static_structure_factor_from_atoms(atoms: ase.Atoms, number_of_bins, kMax,
+    def static_structure_factor_from_atoms(atoms: ase.Atoms, number_of_bins,
+                                           kMax,
                                            radial_distribution_function=None,
                                            calculation_type="direct"):
         """
@@ -764,7 +951,7 @@ class Target(ABC):
                             "unsupported.")
 
     def get_radial_distribution_function(self, atoms: ase.Atoms,
-                                                method="mala"):
+                                         method="mala"):
         """
         Calculate the radial distribution function (RDF).
 
@@ -774,6 +961,11 @@ class Target(ABC):
         ----------
         atoms : ase.Atoms
             Atoms for which to construct the RDF.
+
+        method : string
+            If "mala" the more flexible, yet less performant python based
+            RDF will be calculated. If "asap3", asap3's C++ implementation
+            will be used.
 
         Returns
         -------
@@ -851,10 +1043,10 @@ class Target(ABC):
             as [kMax] array.
         """
         return Target.static_structure_factor_from_atoms(atoms,
-                                                             self.parameters.
-                                                             ssf_parameters["number_of_bins"],
-                                                             self.parameters.
-                                                             ssf_parameters["number_of_bins"])
+                                                         self.parameters.
+                                                         ssf_parameters["number_of_bins"],
+                                                         self.parameters.
+                                                         ssf_parameters["number_of_bins"])
 
     @staticmethod
     def write_tem_input_file(atoms_Angstrom, qe_input_data,
@@ -908,50 +1100,6 @@ class Target(ABC):
                      pseudopotentials=qe_pseudopotentials,
                      kpts=kpoints)
 
-    @staticmethod
-    def convert_units(array, in_units="eV"):
-        """
-        Convert the units of an array into the MALA units.
-
-        Parameters
-        ----------
-        array : numpy.array
-            Data for which the units should be converted.
-
-        in_units : string
-            Units of array.
-
-        Returns
-        -------
-        converted_array : numpy.array
-            Data in MALA units.
-
-        """
-        raise Exception("No unit conversion method implemented for"
-                        " this target type.")
-
-    @staticmethod
-    def backconvert_units(array, out_units):
-        """
-        Convert the units of an array from MALA units into desired units.
-
-        Parameters
-        ----------
-        array : numpy.array
-            Data in MALA units.
-
-        out_units : string
-            Desired units of output array.
-
-        Returns
-        -------
-        converted_array : numpy.array
-            Data in out_units.
-
-        """
-        raise Exception("No unit back conversion method implemented "
-                        "for this target type.")
-
     def restrict_data(self, array):
         """
         Restrict target data to only contain physically meaningful values.
@@ -980,4 +1128,121 @@ class Target(ABC):
         else:
             raise Exception("Wrong data restriction.")
 
+    # Private methods
+    #################
 
+    def _process_loaded_dimensions(self, array_dimensions):
+        return array_dimensions
+
+    def _process_additional_metadata(self, additional_metadata):
+        self.read_additional_calculation_data(additional_metadata[0],
+                                              additional_metadata[1])
+
+    def _set_openpmd_attribtues(self, iteration, mesh):
+        super(Target, self)._set_openpmd_attribtues(iteration, mesh)
+
+        # If no atoms have been read, neither have any of the other
+        # properties.
+        if self.atoms is not None:
+            additional_calculation_data = \
+                self.write_additional_calculation_data("", return_string=True)
+            iteration.set_attribute("fermi_energy_dft",
+                                    additional_calculation_data["fermi_energy_dft"])
+            iteration.set_attribute("temperature",
+                                    additional_calculation_data["temperature"])
+            iteration.set_attribute("number_of_electrons_exact",
+                                    additional_calculation_data["number_of_electrons_exact"])
+            iteration.set_attribute("band_energy_dft_calculation",
+                                    additional_calculation_data["band_energy_dft_calculation"])
+            iteration.set_attribute("total_energy_dft_calculation",
+                                    additional_calculation_data["total_energy_dft_calculation"])
+            iteration.set_attribute("electrons_per_atom",
+                                    additional_calculation_data["electrons_per_atom"])
+            iteration.set_attribute("number_of_electrons_from_eigenvals",
+                                    additional_calculation_data["number_of_electrons_from_eigenvals"])
+            iteration.set_attribute("ibrav",
+                                    additional_calculation_data["ibrav"])
+            iteration.set_attribute("ecutwfc",
+                                    additional_calculation_data["ecutwfc"])
+            iteration.set_attribute("ecutrho",
+                                    additional_calculation_data["ecutrho"])
+            iteration.set_attribute("degauss",
+                                    additional_calculation_data["degauss"])
+            for key in additional_calculation_data["pseudopotentials"].keys():
+                iteration.set_attribute("psp_"+key,
+                                        additional_calculation_data[
+                                            "pseudopotentials"][key])
+
+    def _process_openpmd_attributes(self, series, iteration, mesh):
+        super(Target, self)._process_openpmd_attributes(series, iteration, mesh)
+
+        # Process the atoms, which can only be done if we have voxel info.
+        if self.voxel is None:
+            raise Exception("Voxel was never read from OpenPMD file, "
+                            "cannot recreate atoms object without it.")
+
+        atoms_openpmd = iteration.particles["atoms"]
+        nr_atoms = len(atoms_openpmd["position"])
+        positions = np.zeros((nr_atoms, 3))
+        numbers = np.zeros((nr_atoms, 1), dtype=np.int64)
+        for i in range(0, nr_atoms):
+            atoms_openpmd["position"][str(i)].load_chunk(positions[i, :])
+            atoms_openpmd["number"][str(i)].load_chunk(numbers[i, :])
+        series.flush()
+        numbers = np.squeeze(numbers)
+
+        # Recreate the cell from voxel and grid info.
+        self.grid_dimensions[0] = mesh["0"].shape[0]
+        self.grid_dimensions[1] = mesh["0"].shape[1]
+        self.grid_dimensions[2] = mesh["0"].shape[2]
+        cell = self.voxel.copy()
+        cell[0] = self.voxel[0] * self.grid_dimensions[0]
+        cell[1] = self.voxel[1] * self.grid_dimensions[1]
+        cell[2] = self.voxel[2] * self.grid_dimensions[2]
+        self.atoms = ase.Atoms(positions=positions, cell=cell, numbers=numbers)
+
+        # Process all the regular meta info.
+        self.fermi_energy_dft = iteration.get_attribute("fermi_energy_dft")
+        self.temperature = iteration.get_attribute("temperature")
+        self.number_of_electrons_exact = iteration.get_attribute("number_of_electrons_exact")
+        self.band_energy_dft_calculation = iteration.get_attribute("band_energy_dft_calculation")
+        self.total_energy_dft_calculation = iteration.get_attribute("total_energy_dft_calculation")
+        self.electrons_per_atom = iteration.get_attribute("electrons_per_atom")
+        self.number_of_electrons_from_eigenvals = iteration.get_attribute("number_of_electrons_from_eigenvals")
+        self.qe_input_data["ibrav"] = iteration.get_attribute("ibrav")
+        self.qe_input_data["ecutwfc"] = iteration.get_attribute("ecutwfc")
+        self.qe_input_data["ecutrho"] = iteration.get_attribute("ecutrho")
+        self.qe_input_data["degauss"] = iteration.get_attribute("degauss")
+
+        # Take care of the pseudopotentials.
+        self.qe_input_data["pseudopotentials"] = {}
+        for attribute in iteration.attributes:
+            if "psp" in attribute:
+                self.qe_pseudopotentials[attribute.split("psp_")[1]] = \
+                    iteration.get_attribute(attribute)
+
+    def _set_geometry_info(self, mesh):
+        # Geometry: Save the cell parameters and angles of the grid.
+        if self.atoms is not None:
+            import openpmd_api as io
+
+            mesh.geometry = io.Geometry.cartesian
+            mesh.grid_spacing = self.voxel.cellpar()[0:3]
+            mesh.set_attribute("angles", self.voxel.cellpar()[3:])
+
+    def _process_geometry_info(self, mesh):
+        spacing = mesh.grid_spacing
+        angles = mesh.get_attribute("angles")
+        self.voxel = ase.cell.Cell.new(cell=spacing+angles)
+
+    def _get_atoms(self):
+        return self.atoms
+
+    @staticmethod
+    def _get_ideal_rmax_for_rdf(atoms: ase.Atoms, method="mic"):
+        if method == "mic":
+            return np.min(np.linalg.norm(atoms.get_cell(), axis=0))/2
+        elif method == "2mic":
+            return np.min(np.linalg.norm(atoms.get_cell(), axis=0)) - 0.0001
+        else:
+            raise Exception("Unknown option to calculate rMax provided.")

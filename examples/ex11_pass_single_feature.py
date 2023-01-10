@@ -47,12 +47,12 @@ def load_whole_snapshot():
     # Add snapshots that are to be tested and make sure that the
     # data_splitting_snapshots list is correct.
     #
-    # Units: output_units="1/Ry" means that the output (target) data (LDOS) has
+    # Units: output_units="1/(Ry*Bohr^3)" means that the output (target) data (LDOS) has
     # unit 1/Ry. Rescaled network output, after oscaler.inverse_transform() is
     # applied (see below) will be in 1/eV.
     inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                         "Al_debug_2k_nr2.out.npy", data_path,
-                                        "te", output_units="1/Ry")
+                                        "te", output_units="1/(Ry*Bohr^3)")
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 
     # Extract single feature vector from snapshot. The x,y,z part (first 3
@@ -91,12 +91,13 @@ def load_memmap_snapshot():
 
     # Our inputs usually contain x,y,z information, so one single input vector
     # reads [x,y,z,f_0, f_1, ..., f_N] where [f_0, f_1, ..., f_N] is the actual
-    # SNAP feature vector. Now, we select a single feature vector from the
-    # snapshot.
+    # bispectrum feature vector. Now, we select a single feature vector from
+    # the snapshot.
     x = torch.from_numpy(inputs_array[0, 0, 0, 3:].astype(np.float32))
 
     # For some reason, DataScaler changes the shape (N,) -> (1,N), revert that
-    x_scaled = iscaler.transform(x)[0, :]
+    x_scaled = x.detach().clone()
+    iscaler.transform(x_scaled)
     with torch.no_grad():
         y_pred = network(x_scaled)
 

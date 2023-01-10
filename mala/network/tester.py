@@ -45,14 +45,16 @@ class Tester(Runner):
 
         Returns
         -------
-        actual_outputs : torch.Tensor
+        actual_outputs : numpy.ndarray
             Actual outputs for snapshot.
 
-        predicted_outputs : torch.Tensor
+        predicted_outputs : numpy.ndarray
             Precicted outputs for snapshot.
         """
         # Adjust batch size and such.
         self.__prepare_to_test(snapshot_number)
+        # Make sure no data lingers in the target calculator.
+        self.data.target_calculator.invalidate_target()
 
         # Forward through network.
         offset_snapshots = self.data.nr_validation_snapshots + \

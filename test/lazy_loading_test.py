@@ -34,7 +34,7 @@ class TestLazyLoading:
         test_parameters.data.input_rescaling_type = "feature-wise-standard"
         test_parameters.data.output_rescaling_type = "normal"
         test_parameters.data.data_splitting_type = "by_snapshot"
-        test_parameters.descriptors.twojmax = 11
+        test_parameters.descriptors.bispectrum_twojmax = 11
         test_parameters.targets.ldos_gridsize = 10
         test_parameters.network.layer_activations = ["LeakyReLU"]
         test_parameters.running.max_number_epochs = 3
@@ -70,23 +70,23 @@ class TestLazyLoading:
                 data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                           "Al_debug_2k_nr0.out.npy", data_path,
                                           add_snapshot_as="tr",
-                                          output_units="1/Ry")
+                                          output_units="1/(Ry*Bohr^3)")
                 data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                           "Al_debug_2k_nr1.out.npy", data_path,
                                           add_snapshot_as="tr",
-                                          output_units="1/Ry")
+                                          output_units="1/(Ry*Bohr^3)")
                 data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                           "Al_debug_2k_nr2.out.npy", data_path,
                                           add_snapshot_as="tr",
-                                          output_units="1/Ry")
+                                          output_units="1/(Ry*Bohr^3)")
                 data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                           "Al_debug_2k_nr1.out.npy", data_path,
                                           add_snapshot_as="va",
-                                          output_units="1/Ry")
+                                          output_units="1/(Ry*Bohr^3)")
                 data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                           "Al_debug_2k_nr2.out.npy", data_path,
                                           add_snapshot_as="te",
-                                          output_units="1/Ry")
+                                          output_units="1/(Ry*Bohr^3)")
                 data_handler.prepare_data()
                 if scalingtype == "standard":
                     # The lazy-loading STD equation (and to a smaller amount the
@@ -211,23 +211,23 @@ class TestLazyLoading:
                 data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                           "Al_debug_2k_nr0.out.npy", data_path,
                                           add_snapshot_as="tr",
-                                          output_units="1/Ry")
+                                          output_units="1/(Ry*Bohr^3)")
                 data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                           "Al_debug_2k_nr1.out.npy", data_path,
                                           add_snapshot_as="tr",
-                                          output_units="1/Ry")
+                                          output_units="1/(Ry*Bohr^3)")
                 data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                           "Al_debug_2k_nr2.out.npy", data_path,
                                           add_snapshot_as="tr",
-                                          output_units="1/Ry")
+                                          output_units="1/(Ry*Bohr^3)")
                 data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
                                           "Al_debug_2k_nr1.out.npy", data_path,
                                           add_snapshot_as="va",
-                                          output_units="1/Ry")
+                                          output_units="1/(Ry*Bohr^3)")
                 data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
                                           "Al_debug_2k_nr2.out.npy", data_path,
                                           add_snapshot_as="te",
-                                          output_units="1/Ry")
+                                          output_units="1/(Ry*Bohr^3)")
 
                 data_handler.prepare_data()
                 test_parameters.network.layer_sizes = \

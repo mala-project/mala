@@ -1,5 +1,4 @@
 """Hyperparameter optimizer using optuna."""
-import os
 import pickle
 
 import optuna
@@ -29,13 +28,14 @@ class HyperOptOptuna(HyperOpt):
 
     def __init__(self, params, data, use_pkl_checkpoints=False):
         super(HyperOptOptuna, self).__init__(params, data,
-                                             use_pkl_checkpoints=use_pkl_checkpoints)
+                                             use_pkl_checkpoints=
+                                             use_pkl_checkpoints)
         self.params = params
 
         # Make the sample behave in a reproducible way, if so specified by
         # the user.
         sampler = optuna.samplers.TPESampler(seed=params.manual_seed,
-                                             multivariate=params. \
+                                             multivariate=params.
                                              hyperparameters.use_multivariate)
 
         # See if the user specified a pruner.
@@ -47,7 +47,8 @@ class HyperOptOptuna(HyperOpt):
                 if self.params.hyperparameters.number_training_per_trial > 1:
                     pruner = MultiTrainingPruner(self.params)
                 else:
-                    printout("MultiTrainingPruner requested, but only one training"
+                    printout("MultiTrainingPruner requested, but only one "
+                             "training"
                              "per trial specified; Skipping pruner creation.")
             else:
                 raise Exception("Invalid pruner type selected.")
@@ -64,10 +65,16 @@ class HyperOptOptuna(HyperOpt):
             if self.params.hyperparameters.study_name is None:
                 raise Exception("If RDB storage is used, a name for the study "
                                 "has to be provided.")
+            if "sqlite" in self.params.hyperparameters.rdb_storage:
+                engine_kwargs = {"connect_args": {"timeout": self.params.
+                                 hyperparameters.sqlite_timeout}}
+            else:
+                engine_kwargs = None
             rdb_storage = optuna.storages.RDBStorage(
                     url=self.params.hyperparameters.rdb_storage,
                     heartbeat_interval=self.params.hyperparameters.
-                    rdb_storage_heartbeat)
+                    rdb_storage_heartbeat,
+                    engine_kwargs=engine_kwargs)
 
             self.study = optuna.\
                 create_study(direction=self.params.hyperparameters.direction,
@@ -121,7 +128,7 @@ class HyperOptOptuna(HyperOpt):
             A list of optuna.FrozenTrial objects.
         """
         return self.study.get_trials(states=(optuna.trial.
-                                              TrialState.COMPLETE, ))
+                                             TrialState.COMPLETE, ))
 
     @staticmethod
     def requeue_zombie_trials(study_name, rdb_storage):
@@ -290,9 +297,10 @@ class HyperOptOptuna(HyperOpt):
                     number_bad_trials_before_stopping > 0:
                 if trial.number - self.study.best_trial.number >= \
                         self.params.hyperparameters.\
-                                number_bad_trials_before_stopping:
+                        number_bad_trials_before_stopping:
                     printout("No new best trial found in",
-                             self.params.hyperparameters.number_bad_trials_before_stopping,
+                             self.params.hyperparameters.
+                             number_bad_trials_before_stopping,
                              "attempts, stopping the study.")
                     self.study.stop()
 

@@ -131,7 +131,6 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         # needed, I'll make this import per-demand.
         import pqkmeans
 
-
         # Load the data into memory, and transform it as necessary.
         # I know, the here-and-there transform via torch is ugly, but
         # currently, the MALA scalers only support torch tensors.
@@ -149,7 +148,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
             convert_units(1, self.snapshot_list[snapshot_idx].input_units)
         input_data = input_data.astype(np.float32)
         input_data = torch.from_numpy(input_data).float()
-        input_data = self.input_data_scaler.transform(input_data)
+        self.input_data_scaler.transform(input_data)
         input_data = np.array(input_data)
 
         # Pad the vector to be a power of 2.
@@ -254,14 +253,27 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
             File to be read.
         """
         # Load the data into RAM.
-        self.input_data = \
-            np.load(os.path.join(
-                    self.snapshot_list[file_index].input_npy_directory,
-                    self.snapshot_list[file_index].input_npy_file))
-        self.output_data = \
-            np.load(os.path.join(
-                    self.snapshot_list[file_index].output_npy_directory,
-                    self.snapshot_list[file_index].output_npy_file))
+        if self.snapshot_list[file_index].snapshot_type == "numpy":
+            self.input_data = self.descriptor_calculator. \
+                read_from_numpy_file(
+                os.path.join(self.snapshot_list[file_index].input_npy_directory,
+                             self.snapshot_list[file_index].input_npy_file),
+                                units=self.snapshot_list[file_index].input_units)
+            self.output_data = self.target_calculator. \
+                read_from_numpy_file(
+                os.path.join(self.snapshot_list[file_index].output_npy_directory,
+                             self.snapshot_list[file_index].output_npy_file),
+                             units=self.snapshot_list[file_index].output_units)
+
+        elif self.snapshot_list[file_index].snapshot_type == "hdf5":
+            self.input_data = self.descriptor_calculator. \
+                read_from_openpmd_file(
+                os.path.join(self.snapshot_list[file_index].input_npy_directory,
+                             self.snapshot_list[file_index].input_npy_file))
+            self.output_data = self.target_calculator. \
+                read_from_openpmd_file(
+                os.path.join(self.snapshot_list[file_index].output_npy_directory,
+                             self.snapshot_list[file_index].output_npy_file))
 
         # Transform the data.
         if self.descriptors_contain_xyz:
@@ -273,7 +285,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
             convert_units(1, self.snapshot_list[file_index].input_units)
         self.input_data = self.input_data.astype(np.float32)
         self.input_data = torch.from_numpy(self.input_data).float()
-        self.input_data = self.input_data_scaler.transform(self.input_data)
+        self.input_data_scaler.transform(self.input_data)
         self.input_data.requires_grad = self.input_requires_grad
 
         self.output_data = \
@@ -285,8 +297,7 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
             self.output_data = np.array(self.output_data)
             self.output_data = self.output_data.astype(np.float32)
             self.output_data = torch.from_numpy(self.output_data).float()
-            self.output_data = \
-                self.output_data_scaler.transform(self.output_data)
+            self.output_data_scaler.transform(self.output_data)
 
         # Save which data we have currently loaded.
         self.currently_loaded_file = file_index

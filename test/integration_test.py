@@ -74,13 +74,13 @@ class TestMALAIntegration:
 
         # Calculate the numerically approximated values.
         qint_0, abserr = sp.integrate.quad(
-            lambda e: fermi_function_eV(e, e_fermi, temp),
+            lambda e: fermi_function(e, e_fermi, temp),
             energies[0], energies[-1])
         qint_1, abserr = sp.integrate.quad(
-            lambda e: (e - e_fermi) * fermi_function_eV(e, e_fermi, temp),
+            lambda e: (e - e_fermi) * fermi_function(e, e_fermi, temp),
             energies[0], energies[-1])
         qint_2, abserr = sp.integrate.quad(
-            lambda e: (e - e_fermi) ** 2 * fermi_function_eV(e, e_fermi, temp),
+            lambda e: (e - e_fermi) ** 2 * fermi_function(e, e_fermi, temp),
             energies[0], energies[-1])
 
         # Calculate the errors.
@@ -105,11 +105,16 @@ class TestMALAIntegration:
         dens_calculator.read_additional_calculation_data("qe.out", path_to_out)
 
         # Read the input data.
-        density_dft = np.load(path_to_dens_npy)
+        density_dft = dens_calculator.convert_units(np.load(path_to_dens_npy),
+                                                    "1/Bohr^3")
+
+        # Density shape has recently been changed.
+        density_dft = np.reshape(density_dft, list(np.shape(density_dft)) +
+                                 [1])
 
         # Calculate the quantities we want to compare.
         nr_mala = dens_calculator.get_number_of_electrons(density_dft)
-        nr_dft = dens_calculator.number_of_electrons
+        nr_dft = dens_calculator.number_of_electrons_exact
 
         # Calculate relative error.
         rel_error = np.abs(nr_mala-nr_dft) / nr_dft
@@ -130,16 +135,20 @@ class TestMALAIntegration:
         # Create a calculator.abs()
         ldos_calculator = LDOS(test_parameters)
         ldos_calculator.read_additional_calculation_data("qe.out", path_to_out)
+        dens_calculator = Density.from_ldos_calculator(ldos_calculator)
 
         # Read the input data.
-        density_dft = np.load(path_to_dens_npy)
-        ldos_dft = np.load(path_to_ldos_npy)
+        density_dft = dens_calculator.convert_units(np.load(path_to_dens_npy),
+                                                    "1/Bohr^3")
+
+        ldos_dft = ldos_calculator.convert_units(np.load(path_to_ldos_npy),
+                                                 "1/(eV*Bohr^3)")
 
         # Calculate the quantities we want to compare.
-        self_consistent_fermi_energy = ldos_calculator.\
-            get_self_consistent_fermi_energy_ev(ldos_dft)
-        density_mala = ldos_calculator.\
-            get_density(ldos_dft, fermi_energy_ev=self_consistent_fermi_energy)
+        self_consistent_fermi_energy = ldos_calculator. \
+            get_self_consistent_fermi_energy(ldos_dft)
+        density_mala = ldos_calculator. \
+            get_density(ldos_dft, fermi_energy=self_consistent_fermi_energy)
         density_mala_sum = density_mala.sum()
         density_dft_sum = density_dft.sum()
 
@@ -165,7 +174,8 @@ class TestMALAIntegration:
         dos_calculator.read_additional_calculation_data("qe.out", path_to_out)
 
         # Read the input data.
-        ldos_dft = np.load(path_to_ldos_npy)
+        ldos_dft = ldos_calculator.convert_units(np.load(path_to_ldos_npy),
+                                                 "1/(eV*Bohr^3)")
         dos_dft = np.load(path_to_dos_npy)
 
         # Calculate the quantities we want to compare.
@@ -187,7 +197,8 @@ class TestMALAIntegration:
         dos_from_pp = np.load(path_to_dos_npy)
 
         # Calculate the quantities we want to compare.
-        dos_from_dft = dos_calculator.read_from_qe_out()
+        dos_calculator.read_from_qe_out()
+        dos_from_dft = dos_calculator.density_of_states
         dos_pp_sum = dos_from_pp.sum()
         dos_dft_sum = dos_from_dft.sum()
         rel_error = np.abs(dos_dft_sum-dos_pp_sum) / dos_pp_sum

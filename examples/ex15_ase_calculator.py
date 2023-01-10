@@ -27,9 +27,9 @@ def use_calculator(network, new_parameters, iscaler, oscaler):
     new_parameters.targets.ldos_gridoffset_ev = -5
     new_parameters.running.inference_data_grid = [18, 18, 27]
 
-    new_parameters.descriptors.descriptor_type = "SNAP"
-    new_parameters.descriptors.twojmax = 10
-    new_parameters.descriptors.rcutfac = 4.67637
+    new_parameters.descriptors.descriptor_type = "Bispectrum"
+    new_parameters.descriptors.bispectrum_twojmax = 10
+    new_parameters.descriptors.bispectrum_cutoff = 4.67637
     new_parameters.targets.pseudopotential_path = os.path.join(data_repo_path,
                                                                "Be2")
 

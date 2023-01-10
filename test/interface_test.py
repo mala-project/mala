@@ -19,6 +19,9 @@ data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
 # same.
 accuracy_coarse = 10
 
+# The JSON additional data test further down implies a high accuracy.
+accuracy_fine = 1e-16
+
 
 class TestInterfaces:
     """Tests MALA interfaces."""
@@ -35,7 +38,7 @@ class TestInterfaces:
         params.manual_seed = 2022
         params.network.layer_sizes = [100, 100, 100]
         params.network.layer_activations = ['test', 'test']
-        params.descriptors.rcutfac = 4.67637
+        params.descriptors.bispectrum_cutoff = 4.67637
 
         # Save, load, compare.
         params.save("interface_test.json")
@@ -77,9 +80,10 @@ class TestInterfaces:
         test_parameters.targets.ldos_gridspacing_ev = 2.5
         test_parameters.targets.ldos_gridoffset_ev = -5
         test_parameters.running.inference_data_grid = [18, 18, 27]
-        test_parameters.descriptors.descriptor_type = "SNAP"
-        test_parameters.descriptors.twojmax = 10
-        test_parameters.descriptors.rcutfac = 4.67637
+        test_parameters.descriptors.descriptor_type = "Bispectrum"
+        test_parameters.descriptors.bispectrum_twojmax = 10
+        test_parameters.descriptors.bispectrum_cutoff = 4.67637
+        test_parameters.descriptors.bispectrum_switchflag = 0
         test_parameters.targets.pseudopotential_path = os.path.join(
             data_repo_path,
             "Be2")
@@ -90,9 +94,11 @@ class TestInterfaces:
 
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "tr")
+                                  "Be_snapshot1.out.npy", data_path, "tr",
+                                  output_units="1/(eV*Bohr^3)")
         data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "va")
+                                  "Be_snapshot2.out.npy", data_path, "va",
+                                  output_units="1/(eV*Bohr^3)")
         data_handler.prepare_data()
 
         ####################
@@ -126,3 +132,100 @@ class TestInterfaces:
         assert np.isclose(total_energy_dft_calculation,
                           calculator.results["energy"],
                           atol=accuracy_coarse)
+
+    def test_additional_calculation_data_json(self):
+        test_parameters = mala.Parameters()
+        ldos_calculator = mala.LDOS(test_parameters)
+        ldos_calculator.\
+            read_additional_calculation_data("qe.out",
+                                             os.path.join(data_path,
+                                                          "Be_snapshot1.out"))
+        ldos_calculator.\
+            write_additional_calculation_data("additional_calculation_data.json")
+        new_ldos_calculator = mala.LDOS(test_parameters)
+        new_ldos_calculator.\
+            read_additional_calculation_data("json",
+                                             "additional_calculation_data.json")
+
+        # Verify that essentially the same info has been loaded.
+        assert np.isclose(ldos_calculator.fermi_energy_dft,
+                          new_ldos_calculator.fermi_energy_dft,
+                          rtol=accuracy_fine)
+        assert np.isclose(ldos_calculator.temperature,
+                          new_ldos_calculator.temperature,
+                          rtol=accuracy_fine)
+        assert np.isclose(ldos_calculator.number_of_electrons_exact,
+                          new_ldos_calculator.number_of_electrons_exact,
+                          rtol=accuracy_fine)
+        assert np.isclose(ldos_calculator.band_energy_dft_calculation,
+                          new_ldos_calculator.band_energy_dft_calculation,
+                          rtol=accuracy_fine)
+        assert np.isclose(ldos_calculator.total_energy_dft_calculation,
+                          new_ldos_calculator.total_energy_dft_calculation,
+                          rtol=accuracy_fine)
+        assert np.isclose(ldos_calculator.number_of_electrons_from_eigenvals,
+                          new_ldos_calculator.number_of_electrons_from_eigenvals,
+                          rtol=accuracy_fine)
+        assert ldos_calculator.qe_input_data["ibrav"] == \
+               new_ldos_calculator.qe_input_data["ibrav"]
+        assert np.isclose(ldos_calculator.qe_input_data["ecutwfc"],
+                          new_ldos_calculator.qe_input_data["ecutwfc"],
+                          rtol=accuracy_fine)
+        assert np.isclose(ldos_calculator.qe_input_data["ecutrho"],
+                          new_ldos_calculator.qe_input_data["ecutrho"],
+                          rtol=accuracy_fine)
+        assert np.isclose(ldos_calculator.qe_input_data["degauss"],
+                          new_ldos_calculator.qe_input_data["degauss"],
+                          rtol=accuracy_fine)
+        for key in ldos_calculator.qe_pseudopotentials.keys():
+            assert new_ldos_calculator.qe_pseudopotentials[key] ==\
+                   ldos_calculator.qe_pseudopotentials[key]
+        for i in range(0, 3):
+            assert ldos_calculator.grid_dimensions[i] == \
+                   new_ldos_calculator.grid_dimensions[i]
+            assert ldos_calculator.atoms.pbc[i] == \
+                   new_ldos_calculator.atoms.pbc[i]
+
+            for j in range(0, 3):
+                assert np.isclose(ldos_calculator.voxel[i, j],
+                                  new_ldos_calculator.voxel[i, j])
+                assert np.isclose(ldos_calculator.atoms.get_cell()[i, j],
+                                  new_ldos_calculator.atoms.get_cell()[i, j],
+                                  rtol=accuracy_fine)
+
+        for i in range(0, len(ldos_calculator.atoms)):
+            for j in range(0, 3):
+                assert np.isclose(ldos_calculator.atoms.get_positions()[i, j],
+                                  new_ldos_calculator.atoms.get_positions()[i, j],
+                                  rtol=accuracy_fine)
+
+    @pytest.mark.skipif(importlib.util.find_spec("openpmd_api") is None,
+                        reason="No OpenPMD found on this machine, skipping "
+                               "test.")
+    def test_openpmd_io(self):
+        params = mala.Parameters()
+
+        # Read an LDOS and some additional data for it.
+        ldos_calculator = mala.LDOS.\
+            from_numpy_file(params,
+                            os.path.join(data_path,
+                                         "Be_snapshot1.out.npy"))
+        ldos_calculator.\
+            read_additional_calculation_data("qe.out",
+                                             os.path.join(data_path,
+                                                          "Be_snapshot1.out"))
+
+        # Write and then read in via OpenPMD and make sure all the info is
+        # retained.
+        ldos_calculator.write_to_openpmd_file("test_openpmd.h5",
+                                              ldos_calculator.
+                                              local_density_of_states)
+        ldos_calculator2 = mala.LDOS.from_openpmd_file(params,
+                                                       "test_openpmd.h5")
+
+        assert np.isclose(np.sum(ldos_calculator.local_density_of_states -
+                                 ldos_calculator.local_density_of_states),
+                          0.0, rtol=accuracy_fine)
+        assert np.isclose(ldos_calculator.fermi_energy_dft,
+                          ldos_calculator2.fermi_energy_dft,
+                          rtol=accuracy_fine)

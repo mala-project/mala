@@ -46,13 +46,16 @@ class HyperOpt(ABC):
         if cls == HyperOpt:
             if params.hyperparameters.hyper_opt_method == "optuna":
                 from mala.network.hyper_opt_optuna import HyperOptOptuna
-                hoptimizer = super(HyperOpt, HyperOptOptuna).__new__(HyperOptOptuna)
+                hoptimizer = super(HyperOpt, HyperOptOptuna).\
+                    __new__(HyperOptOptuna)
             if params.hyperparameters.hyper_opt_method == "oat":
                 from mala.network.hyper_opt_oat import HyperOptOAT
-                hoptimizer = super(HyperOpt, HyperOptOAT).__new__(HyperOptOAT)
+                hoptimizer = super(HyperOpt, HyperOptOAT).\
+                    __new__(HyperOptOAT)
             if params.hyperparameters.hyper_opt_method == "naswot":
                 from mala.network.hyper_opt_naswot import HyperOptNASWOT
-                hoptimizer = super(HyperOpt, HyperOptNASWOT).__new__(HyperOptNASWOT)
+                hoptimizer = super(HyperOpt, HyperOptNASWOT).\
+                    __new__(HyperOptNASWOT)
 
             if hoptimizer is None:
                 raise Exception("Unknown hyperparameter optimizer requested.")
@@ -146,9 +149,9 @@ class HyperOpt(ABC):
     def _save_params_and_scaler(self):
         # Saving the Scalers is straight forward.
         iscaler_name = self.params.hyperparameters.checkpoint_name \
-                       + "_iscaler.pkl"
+            + "_iscaler.pkl"
         oscaler_name = self.params.hyperparameters.checkpoint_name \
-                       + "_oscaler.pkl"
+            + "_oscaler.pkl"
         self.data_handler.input_data_scaler.save(iscaler_name)
         self.data_handler.output_data_scaler.save(oscaler_name)
 

@@ -1,9 +1,10 @@
 """Collection of all parameter related classes and functions."""
-import os
 import importlib
 import inspect
 import json
+import os
 import pickle
+from time import sleep
 
 try:
     import horovod.torch as hvd
@@ -24,7 +25,8 @@ class ParametersBase(JSONSerializable):
     def __init__(self,):
         super(ParametersBase, self).__init__()
         self._configuration = {"gpu": False, "horovod": False, "mpi": False,
-                               "device": "cpu"}
+                               "device": "cpu", "openpmd_configuration": {},
+                               "openpmd_granularity": 1}
         pass
 
     def show(self, indent=""):
@@ -58,6 +60,12 @@ class ParametersBase(JSONSerializable):
 
     def _update_device(self, new_device):
         self._configuration["device"] = new_device
+
+    def _update_openpmd_configuration(self, new_openpmd):
+        self._configuration["openpmd_configuration"] = new_openpmd
+
+    def _update_openpmd_granularity(self, new_granularity):
+        self._configuration["openpmd_granularity"] = new_granularity
 
     @staticmethod
     def _member_to_json(member):
@@ -158,7 +166,8 @@ class ParametersBase(JSONSerializable):
                     if len(json_dict[key]) > 0:
                         _member = []
                         for m in json_dict[key]:
-                            _member.append(deserialized_object._json_to_member(m))
+                            _member.append(deserialized_object.
+                                           _json_to_member(m))
                         setattr(deserialized_object, key, _member)
                     else:
                         setattr(deserialized_object, key, json_dict[key])
@@ -167,14 +176,16 @@ class ParametersBase(JSONSerializable):
                     if len(json_dict[key]) > 0:
                         _member = {}
                         for m in json_dict[key].keys():
-                            _member[m] = deserialized_object._json_to_member(json_dict[key][m])
+                            _member[m] = deserialized_object.\
+                                _json_to_member(json_dict[key][m])
                         setattr(deserialized_object, key, _member)
 
                     else:
                         setattr(deserialized_object, key, json_dict[key])
 
                 else:
-                    setattr(deserialized_object, key, deserialized_object._json_to_member(json_dict[key]))
+                    setattr(deserialized_object, key, deserialized_object.
+                            _json_to_member(json_dict[key]))
         return deserialized_object
 
 
@@ -255,6 +266,7 @@ class ParametersNetwork(ParametersBase):
         self.dropout = 0.1
         self.num_heads = 10
 
+
 class ParametersDescriptors(ParametersBase):
     """
     Parameters necessary for calculating/parsing input descriptors.
@@ -263,20 +275,20 @@ class ParametersDescriptors(ParametersBase):
     ----------
     descriptor_type : string
         Type of descriptors that is used to represent the atomic fingerprint.
-        Currently only "SNAP" is supported.
+        Supported:
 
-    twojmax : int
-        SNAP calculation: 2*jmax-parameter used for calculation of SNAP
+            - 'Bispectrum': Bispectrum descriptors (formerly called 'SNAP').
+            - 'Atomic Density': Atomic density, calculated via Gaussian
+                                descriptors.
+
+    bispectrum_twojmax : int
+        Bispectrum calculation: 2*jmax-parameter used for calculation of SNAP
         descriptors. Default value for jmax is 5, so default value for
         twojmax is 10.
 
-    rcutfac: float
-        SNAP calculation: radius cutoff factor for the fingerprint sphere in
-        Angstroms. Default value is 4.67637.
-
     lammps_compute_file: string
-        SNAP calculation: LAMMPS input file that is used to calculate the
-        SNAP descriptors. If this string is empty, the standard LAMMPS input
+        Bispectrum calculation: LAMMPS input file that is used to calculate the
+        Bispectrum descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
 
     acsd_points : int
@@ -289,16 +301,112 @@ class ParametersDescriptors(ParametersBase):
         the descriptor vector are the xyz coordinates and they are cut from the
         descriptor vector. If False, no such cutting is peformed.
 
+    atomic_density_sigma : float
+        Sigma used for the calculation of the Gaussian descriptors.
     """
 
     def __init__(self):
         super(ParametersDescriptors, self).__init__()
-        self.descriptor_type = "SNAP"
-        self.twojmax = 10
-        self.rcutfac = 4.67637
+        self.descriptor_type = "Bispectrum"
+
+        # These affect all descriptors, at least as long all descriptors
+        # use LAMMPS (which they currently do).
         self.lammps_compute_file = ""
-        self.acsd_points = 100
         self.descriptors_contain_xyz = True
+
+        # TODO: I would rather handle the parallelization info automatically
+        # and more under the hood. At this stage of the project this would
+        # probably be overkill and hard to do, since there are many moving
+        # parts, so for now let's keep this here, but in the future,
+        # this should be adressed.
+        self.use_z_splitting = True
+        self.use_y_splitting = 0
+
+        # Everything pertaining to the bispectrum descriptors.
+        self.bispectrum_twojmax = 10
+        self.bispectrum_cutoff = 4.67637
+        self.bispectrum_switchflag = 1
+
+        # Everything pertaining to the atomic density.
+        # Seperate cutoff given here because bispectrum descriptors and
+        # atomic density may be used at the same time, if e.g. bispectrum
+        # descriptors are used for a full inference, which then uses the atomic
+        # density for the calculation of the Ewald sum.
+        self.use_atomic_density_energy_formula = False
+        self.atomic_density_sigma = None
+        self.atomic_density_cutoff = None
+
+        # For accelerated hyperparameter optimization.
+        self.acsd_points = 100
+
+    @property
+    def use_z_splitting(self):
+        """
+        Control whether splitting across the z-axis is used.
+
+        Default is True, since this gives descriptors compatible with
+        QE, for total energy evaluation. However, setting this value to False
+        can, e.g. in the LAMMPS case, improve performance. This is relevant
+        for e.g. preprocessing.
+        """
+        return self._use_z_splitting
+
+    @use_z_splitting.setter
+    def use_z_splitting(self, value):
+        if value is False:
+            self.use_y_splitting = 0
+        self._use_z_splitting = value
+
+    @property
+    def use_y_splitting(self):
+        """
+        Control whether a splitting in y-axis is used.
+
+        This can only be used in conjunction with a z-splitting, and
+        the option will ignored if z-splitting is disabled. Only has an
+        effect for values larger then 1.
+        """
+        return self._number_y_planes
+
+    @use_y_splitting.setter
+    def use_y_splitting(self, value):
+        if self.use_z_splitting is False:
+            self._number_y_planes = 0
+        else:
+            if value == 1:
+                self._number_y_planes = 0
+            else:
+                self._number_y_planes = value
+
+    @property
+    def bispectrum_cutoff(self):
+        """Cut off radius for bispectrum calculation."""
+        return self._rcutfac
+
+    @bispectrum_cutoff.setter
+    def bispectrum_cutoff(self, value):
+        self._rcutfac = value
+        self.atomic_density_cutoff = value
+
+    @property
+    def bispectrum_switchflag(self):
+        """
+        Switchflag for the bispectrum calculation.
+
+        Can only be 1 or 0. If 1 (default), a switching function will be used
+        to ensure that atomic contributions smoothly go to zero after a
+        certain cutoff. If 0 (old default, which can be problematic in some
+        instances), this is not done, which can lead to discontinuities.
+        """
+        return self._snap_switchflag
+
+    @bispectrum_switchflag.setter
+    def bispectrum_switchflag(self, value):
+        _int_value = int(value)
+        if _int_value == 0:
+            self._snap_switchflag = value
+        if _int_value > 0:
+            self._snap_switchflag = 1
 
 
 class ParametersTargets(ParametersBase):
@@ -312,11 +420,10 @@ class ParametersTargets(ParametersBase):
         (L)DOS.
 
     ldos_gridsize : float
-        Gridspacing of the energy grid the (L)DOS is evaluated on [eV].
+        Gridsize of the LDOS.
 
     ldos_gridspacing_ev: float
-        SNAP calculation: radius cutoff factor for the fingerprint sphere in
-        Angstroms. Default value is 4.67637.
+        Gridspacing of the energy grid the (L)DOS is evaluated on [eV].
 
     ldos_gridoffset_ev: float
         Lowest energy value on the (L)DOS energy grid [eV].
@@ -464,7 +571,6 @@ class ParametersData(ParametersBase):
         If use_clustering is True, this is the ratio of training data used
         to train the encoder for the clustering.
 
-
     sample_ratio : float
         If use_clustering is True, this is the ratio of training data used
         for sampling per snapshot (according to clustering then, of course).
@@ -482,7 +588,6 @@ class ParametersData(ParametersBase):
         self.number_of_clusters = 40
         self.train_ratio = 0.1
         self.sample_ratio = 0.5
-
 
 class ParametersRunning(ParametersBase):
     """
@@ -551,9 +656,6 @@ class ParametersRunning(ParametersBase):
 
     num_workers : int
         Number of workers to be used for data loading.
-
-    sampler : dict
-        Dictionary with samplers.
 
     use_shuffling_for_samplers :
         If True, the training data will be shuffled in between epochs.
@@ -786,6 +888,12 @@ class ParametersHyperparameterOptimization(ParametersBase):
         Only applies to optuna studies. If any integer above 0, then if no
         new best trial is found within number_bad_trials_before trials after
         the last one, the study will be stopped.
+
+    sqlite_timeout : int
+        Timeout for the SQLite backend of Optuna. This backend is officially
+        not recommended because it is file based and can lead to errors;
+        With a suitable timeout it can be used somewhat stable though and
+        help in HPC settings.
     """
 
     def __init__(self):
@@ -806,6 +914,7 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.pruner = None
         self.naswot_pruner_batch_size = 0
         self.number_bad_trials_before_stopping = None
+        self.sqlite_timeout = 600
 
     @property
     def rdb_storage_heartbeat(self):
@@ -866,8 +975,8 @@ class ParametersHyperparameterOptimization(ParametersBase):
             if v != "_configuration":
                 if v != "hlist":
                     if v[0] == "_":
-                        printout(indent + '%-15s: %s' % (
-                        v[1:], getattr(self, v)), min_verbosity=0)
+                        printout(indent + '%-15s: %s' %
+                                 (v[1:], getattr(self, v)), min_verbosity=0)
                     else:
                         printout(
                             indent + '%-15s: %s' % (v, getattr(self, v)),
@@ -957,7 +1066,6 @@ class ParametersDebug(ParametersBase):
         super(ParametersDebug, self).__init__()
         self.grid_dimensions = None
 
-
 class Parameters:
     """
     All parameter MALA needs to perform its various tasks.
@@ -1005,7 +1113,6 @@ class Parameters:
         self.running = ParametersRunning()
         self.hyperparameters = ParametersHyperparameterOptimization()
         self.datageneration = ParametersDataGeneration()
-        self.debug = ParametersDebug()
 
         # Attributes.
         self.manual_seed = None
@@ -1016,6 +1123,36 @@ class Parameters:
         self.use_mpi = False
         self.verbosity = 1
         self.device = "cpu"
+        self.openpmd_configuration = {}
+        # TODO: Maybe as a percentage? Feature dimensions can be quite
+        # different.
+        self.openpmd_granularity = 1
+
+    @property
+    def openpmd_granularity(self):
+        """
+        Adjust the memory overhead of the OpenPMD interface.
+
+        Smallest possible value is 1, meaning smallest memory footprint
+        and slowest I/O. Higher values will introduce some memory penalty,
+        but offer greater speed.
+        The maximum level is the feature dimension of your data set, if
+        you choose a value larger than this feature dimension, it will
+        automatically be set to the feature dimension upon loading.
+        """
+        return self._openpmd_granularity
+
+    @openpmd_granularity.setter
+    def openpmd_granularity(self, value):
+        if value < 1:
+            value = 1
+        self._openpmd_granularity = value
+        self.network._update_openpmd_granularity(self._openpmd_granularity)
+        self.descriptors._update_openpmd_granularity(self._openpmd_granularity)
+        self.targets._update_openpmd_granularity(self._openpmd_granularity)
+        self.data._update_openpmd_granularity(self._openpmd_granularity)
+        self.running._update_openpmd_granularity(self._openpmd_granularity)
+        self.hyperparameters._update_openpmd_granularity(self._openpmd_granularity)
 
     @property
     def verbosity(self):
@@ -1061,7 +1198,6 @@ class Parameters:
         self.data._update_gpu(self.use_gpu)
         self.running._update_gpu(self.use_gpu)
         self.hyperparameters._update_gpu(self.use_gpu)
-        self.debug._update_gpu(self.use_gpu)
 
     @property
     def use_horovod(self):
@@ -1083,7 +1219,6 @@ class Parameters:
         self.data._update_horovod(self.use_horovod)
         self.running._update_horovod(self.use_horovod)
         self.hyperparameters._update_horovod(self.use_horovod)
-        self.debug._update_horovod(self.use_horovod)
 
     @property
     def device(self):
@@ -1092,10 +1227,10 @@ class Parameters:
 
     @device.setter
     def device(self, value):
-        id = get_local_rank()
+        device_id = get_local_rank()
         if self.use_gpu:
             self._device = "cuda:"\
-                           f"{id}"
+                           f"{device_id}"
         else:
             self._device = "cpu"
         self.network._update_device(self._device)
@@ -1104,7 +1239,6 @@ class Parameters:
         self.data._update_device(self._device)
         self.running._update_device(self._device)
         self.hyperparameters._update_device(self._device)
-        self.debug._update_device(self._device)
 
     @property
     def use_mpi(self):
@@ -1123,11 +1257,34 @@ class Parameters:
         self.data._update_mpi(self.use_mpi)
         self.running._update_mpi(self.use_mpi)
         self.hyperparameters._update_mpi(self.use_mpi)
-        self.debug._update_mpi(self.use_mpi)
+
+    @property
+    def openpmd_configuration(self):
+        """
+        Provide a .toml or .json formatted string to configure OpenPMD.
+
+        To load a configuration from a file, add an "@" in front of the file
+        name and put the resulting string here. OpenPMD will then load
+        the file. For further details, see the OpenPMD documentation.
+        """
+        return self._openpmd_configuration
+
+    @openpmd_configuration.setter
+    def openpmd_configuration(self, value):
+        self._openpmd_configuration = value
+
+        # Invalidate, will be updated in setter.
+        self.network._update_openpmd_configuration(self.openpmd_configuration)
+        self.descriptors._update_openpmd_configuration(self.openpmd_configuration)
+        self.targets._update_openpmd_configuration(self.openpmd_configuration)
+        self.data._update_openpmd_configuration(self.openpmd_configuration)
+        self.running._update_openpmd_configuration(self.openpmd_configuration)
+        self.hyperparameters._update_openpmd_configuration(self.openpmd_configuration)
 
     def show(self):
         """Print name and values of all attributes of this object."""
-        printout("--- " + self.__doc__.split("\n")[1] + " ---", min_verbosity=0)
+        printout("--- " + self.__doc__.split("\n")[1] + " ---",
+                 min_verbosity=0)
 
         # Two for-statements so that global parameters are shown on top.
         for v in vars(self):
@@ -1221,7 +1378,7 @@ class Parameters:
         """
         self.save(filename, save_format="json")
 
-    def optuna_singlenode_setup(self):
+    def optuna_singlenode_setup(self, wait_time=0):
         """
         Set up device and parallelization parameters for Optuna+MPI.
 
@@ -1233,12 +1390,20 @@ class Parameters:
         up properly. This of course requires MPI.
         This may be a bit hacky, but it lets us use one script and one
         MPI command to launch x GPU backed jobs on any node with x GPUs.
+
+        Parameters
+        ----------
+        wait_time : int
+            If larger than 0, then all processes will wait this many seconds
+            times their rank number after this routine before proceeding.
+            This can be useful when using a file based distribution algorithm.
         """
         # We first "trick" the parameters object to assume MPI and GPUs
         # are used. That way we get the right device.
         self.use_gpu = True
         self.use_mpi = True
         device_temp = self.device
+        sleep(get_rank()*wait_time)
 
         # Now we can turn of MPI and set the device manually.
         self.use_mpi = False
@@ -1249,7 +1414,6 @@ class Parameters:
         self.data._update_device(device_temp)
         self.running._update_device(device_temp)
         self.hyperparameters._update_device(device_temp)
-        self.debug._update_device(device_temp)
 
     @classmethod
     def load_from_file(cls, filename, save_format="json",
@@ -1286,15 +1450,19 @@ class Parameters:
                 json_dict = json.load(json_file)
             loaded_parameters = cls()
             for key in json_dict:
-                if isinstance(json_dict[key], dict):
+                if isinstance(json_dict[key], dict) and key \
+                        != "openpmd_configuration":
                     # These are the other parameter classes.
-                    sub_parameters = globals()[json_dict[key]["_parameters_type"]].from_json(json_dict[key])
+                    sub_parameters =\
+                        globals()[json_dict[key]["_parameters_type"]].\
+                        from_json(json_dict[key])
                     setattr(loaded_parameters, key, sub_parameters)
 
             # We iterate a second time, to set global values, so that they
             # are properly forwarded.
             for key in json_dict:
-                if not isinstance(json_dict[key], dict):
+                if not isinstance(json_dict[key], dict) or key == \
+                        "openpmd_configuration":
                     setattr(loaded_parameters, key, json_dict[key])
             if no_snapshots is True:
                 loaded_parameters.data.snapshot_directories_list = []
@@ -1324,7 +1492,7 @@ class Parameters:
 
         """
         return Parameters.load_from_file(filename, save_format="pickle",
-                                  no_snapshots=no_snapshots)
+                                         no_snapshots=no_snapshots)
 
     @classmethod
     def load_from_json(cls, filename, no_snapshots=False):
@@ -1347,4 +1515,4 @@ class Parameters:
 
         """
         return Parameters.load_from_file(filename, save_format="json",
-                                  no_snapshots=no_snapshots)
+                                         no_snapshots=no_snapshots)

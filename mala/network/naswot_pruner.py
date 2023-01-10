@@ -1,7 +1,6 @@
 """Prunes a network when the score is above a user defined limit."""
 import optuna
 from optuna.pruners import BasePruner
-from optuna.trial._state import TrialState
 
 from mala import Parameters, DataHandler
 from mala.network.objective_naswot import ObjectiveNASWOT
@@ -38,9 +37,11 @@ class NASWOTPruner(BasePruner):
         """
         Judge whether the trial should be pruned based on the reported values.
 
-        Note that this method is not supposed to be called by library users. Instead,
-        :func:`optuna.trial.Trial.report` and :func:`optuna.trial.Trial.should_prune` provide
-        user interfaces to implement pruning mechanism in an objective function.
+        Note that this method is not supposed to be called by library users. 
+        Instead, :func:`optuna.trial.Trial.report` and 
+        :func:`optuna.trial.Trial.should_prune` provide
+        user interfaces to implement pruning mechanism in an objective 
+        function.
         
         Parameters
         ----------

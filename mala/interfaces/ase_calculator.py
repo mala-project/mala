@@ -2,6 +2,7 @@
 
 from ase.calculators.calculator import Calculator, all_changes
 import numpy as np
+
 from mala import Parameters, Network, DataHandler, Predictor, LDOS, Density, \
                  DOS
 from mala.common.parallelizer import get_rank, get_comm, barrier
@@ -88,10 +89,9 @@ class MALA(Calculator):
         Calculator.calculate(self, atoms, properties, system_changes)
 
         # Get the LDOS from the NN.
-        ldos = self.predictor.predict_for_atoms(atoms, gather_ldos=True)
+        ldos = self.predictor.predict_for_atoms(atoms)
 
-        energy = 0.0
-        forces = np.zeros([len(atoms), 3], dtype=np.float64)
+        # forces = np.zeros([len(atoms), 3], dtype=np.float64)
 
         # If an MPI environment is detected, ASE will use it for writing.
         # Therefore we have to do this before forking.
@@ -107,40 +107,18 @@ class MALA(Calculator):
                                  self.data_handler.
                                  target_calculator.kpoints)
 
-        if get_rank() == 0:
-            # Define calculator objects.
-            ldos_calculator: LDOS = self.data_handler.target_calculator
-            density_calculator = Density.from_ldos(ldos_calculator)
-            dos_calculator = DOS.from_ldos(ldos_calculator)
+        ldos_calculator: LDOS = self.data_handler.target_calculator
 
-            # Get DOS and density.
-            dos = ldos_calculator.get_density_of_states(ldos, gather_dos=False)
-            fermi_energy_ev = dos_calculator.get_self_consistent_fermi_energy_ev(
-                dos)
-            density = ldos_calculator.get_density(ldos,
-                                                  fermi_energy_ev=fermi_energy_ev)
-            energy, self.last_energy_contributions = ldos_calculator.\
-            get_total_energy(dos_data=dos, density_data=density,
-                             fermi_energy_eV=fermi_energy_ev,
-                             create_qe_file=False,
-                             return_energy_contributions=True)
-            if "forces" in properties:
-                forces = density_calculator.get_atomic_forces(density,
-                                                              create_file=False)
+        ldos_calculator.read_from_array(ldos)
+        energy, self.last_energy_contributions \
+            = ldos_calculator.get_total_energy(return_energy_contributions=
+                                               True)
         barrier()
-        if self.params.use_mpi:
-            # I think we should refrain from top-level MPI imports; the first
-            # import triggers an MPI init, which can take quite long.
-            from mpi4py import MPI
-
-            energy = get_comm().bcast(energy, root=0)
-            if "forces" in properties:
-                get_comm().Bcast([forces, MPI.DOUBLE], root=0)
 
         # Use the LDOS determined DOS and density to get energy and forces.
         self.results["energy"] = energy
-        if "forces" in properties:
-            self.results["forces"] = forces
+        # if "forces" in properties:
+        #     self.results["forces"] = forces
 
     def calculate_properties(self, atoms, properties):
         """
@@ -188,5 +166,10 @@ class MALA(Calculator):
             Path to file in which to store the Calculator.
 
         """
-        self.params.save(filename)
+        self.params.save(filename+".params.json")
+        self.network.save_network(filename+".network.pth")
+        self.data_handler.input_data_scaler.save(filename+".iscaler.pkl")
+        self.data_handler.output_data_scaler.save(filename+".oscaler.pkl")
+        self.data_handler.target_calculator.\
+            write_additional_calculation_data(filename+".reference.json")
 

@@ -29,9 +29,9 @@ test_parameters = mala.Parameters()
 # Specify input data options, i.e. which descriptors are calculated
 # with which parameters. These parameters are slightly modified for better
 # performance.
-test_parameters.descriptors.descriptor_type = "SNAP"
-test_parameters.descriptors.twojmax = 6
-test_parameters.descriptors.rcutfac = 4.67637
+test_parameters.descriptors.descriptor_type = "Bispectrum"
+test_parameters.descriptors.bispectrum_twojmax = 6
+test_parameters.descriptors.bispectrum_cutoff = 4.67637
 test_parameters.descriptors.descriptors_contain_xyz = True
 
 # Specify output data options, i.e. how the LDOS is parsed.
@@ -49,28 +49,50 @@ test_parameters.targets.ldos_gridoffset_ev = -5
 
 data_converter = mala.DataConverter(test_parameters)
 
-# Take care to choose the "add_snapshot" function correct for
-# the type of data you want to preprocess.
-data_converter.add_snapshot_qeout_cube("Be.pw.scf.out", data_path,
-                                       "cubes/tmp.pp*Be_ldos.cube",
-                                       data_path, output_units="1/Ry")
+outfile = os.path.join(data_path, "Be.pw.scf.out")
+ldosfile = os.path.join(data_path, "cubes/tmp.pp*Be_ldos.cube")
+# The add_snapshot function can be called with a lot of options to reflect
+# the data to be processed.
+# The standard way is this: specifying descriptor, target and additional info.
+data_converter.add_snapshot(descriptor_input_type="qe.out",
+                            descriptor_input_path=outfile,
+                            target_input_type=".cube",
+                            target_input_path=ldosfile,
+                            additional_info_input_type="qe.out",
+                            additional_info_input_path=outfile,
+                            target_units="1/(Ry*Bohr^3)")
 
-# Convert all the snapshots and save them in the current directory.
-data_converter.convert_snapshots("./", naming_scheme="Be_snapshot*")
+# Likewise, there are multiple ways to save data. One way is to specify
+# separate paths for descriptors, target and info data.
+# A unified path can also be provided (see below).
+# Further, naming_scheme impacts how data is saved. Standard is
+# numpy, which can be indicated by ".npy".
+# One can just as easily save using OpenPMD (if installed on your machine),
+# in which case simply the correct file ending (e.g. ".h5" for HDF5) needs
+# to be used on the naming_scheme.
+data_converter.convert_snapshots(descriptor_save_path="./",
+                                 target_save_path="./",
+                                 additional_info_save_path="./",
+                                 naming_scheme="Be_snapshot*.npy")
 
 # If parts of the data have already been processed, the DataConverter class can
 # also be used to convert the rest.
 # No matter which way you access the DataConvert, you can always specify
 # keywords (check API) for the calculators.
 data_converter = mala.DataConverter(test_parameters)
-data_converter.add_snapshot_qeout("Be.pw.scf.out", data_path)
-data_converter.convert_snapshots("./", naming_scheme="Be_snapshot_only_in*",
-                                 descriptor_calculation_kwargs={"working_directory": data_path})
+data_converter.add_snapshot(descriptor_input_type="qe.out",
+                            descriptor_input_path=outfile,)
+data_converter.convert_snapshots(complete_save_path="./",
+                                 naming_scheme="Be_snapshot_only_in*",
+                                 descriptor_calculation_kwargs=
+                                 {"working_directory": data_path})
 
 data_converter = mala.DataConverter(test_parameters)
-data_converter.add_snapshot_cube("cubes/tmp.pp*Be_ldos.cube",
-                                 data_path, output_units="1/Ry")
-data_converter.convert_snapshots("./", naming_scheme="Be_snapshot_only_out*")
+data_converter.add_snapshot(target_input_type=".cube",
+                            target_input_path=ldosfile,
+                            target_units="1/(Ry*Bohr^3)")
+data_converter.convert_snapshots(target_save_path="./",
+                                 naming_scheme="Be_snapshot_only_out*")
 
 printout("Parameters used for this experiment:")
 test_parameters.show()
