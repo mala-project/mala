@@ -76,7 +76,6 @@ class Descriptor(PhysicalData):
         self.verbosity = parameters.verbosity
         self.in_format_ase = ""
         self.atoms = None
-        self.grid_dimensions = [0, 0, 0]
 
     ##############################
     # Properties

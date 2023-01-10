@@ -487,45 +487,47 @@ class DataConverter:
                     self.descriptor_calculator.\
                         write_to_numpy_file(input_path, tmp_input)
             else:
-                import numpy as np
-                tmp_input, local_offset, local_reach, global_grid = \
+                tmp_input, local_offset, local_reach = \
                     self.descriptor_calculator.convert_local_to_3d(tmp_input)
                 self.descriptor_calculator.\
                     write_to_openpmd_iteration(input_iteration,
-                                               tmp_input, global_grid=global_grid, local_offset=local_offset, local_reach=local_reach)
+                                               tmp_input, local_offset=local_offset, local_reach=local_reach)
             del tmp_input
 
         ###########
         # Outputs #
         ###########
 
-        # Parse and/or calculate the output descriptors.
-        if description["output"] == ".cube":
-            target_calculator_kwargs["units"] = original_units["output"]
-            target_calculator_kwargs["use_memmap"] = use_memmap
-            # If no units are provided we just assume standard units.
-            tmp_output = self.target_calculator. \
-                read_from_cube(snapshot["output"],
-                               **target_calculator_kwargs)
-
-        elif description["output"] == ".xsf":
-            target_calculator_kwargs["units"] = original_units["output"]
-            target_calculator_kwargs["use_memmap"] = use_memmap
-            # If no units are provided we just assume standard units.
-            tmp_output = self.target_calculator.\
-                read_from_xsf(snapshot["output"],
-                               **target_calculator_kwargs)
-
-        elif description["output"] is None:
-            # In this case, only the input is processed.
-            pass
-
-        else:
-            raise Exception(
-                "Unknown file extension, cannot convert target"
-                "data.")
         if description["output"] is not None:
             if output_path is not None and output_iteration is None:
+                # Parse and/or calculate the output descriptors.
+                if description["output"] == ".cube":
+                    target_calculator_kwargs["units"] = original_units[
+                        "output"]
+                    target_calculator_kwargs["use_memmap"] = use_memmap
+                    # If no units are provided we just assume standard units.
+                    tmp_output = self.target_calculator. \
+                        read_from_cube(snapshot["output"],
+                                       **target_calculator_kwargs)
+
+                elif description["output"] == ".xsf":
+                    target_calculator_kwargs["units"] = original_units[
+                        "output"]
+                    target_calculator_kwargs["use_memmap"] = use_memmap
+                    # If no units are provided we just assume standard units.
+                    tmp_output = self.target_calculator. \
+                        read_from_xsf(snapshot["output"],
+                                      **target_calculator_kwargs)
+
+                elif description["output"] is None:
+                    # In this case, only the input is processed.
+                    pass
+
+                else:
+                    raise Exception(
+                        "Unknown file extension, cannot convert target"
+                        "data.")
+
                 if get_rank() == 0:
                     self.target_calculator.write_to_numpy_file(output_path,
                                                                tmp_output)
@@ -534,11 +536,48 @@ class DataConverter:
                 if description["metadata"] is not None:
                     metadata = [snapshot["metadata"],
                                 description["metadata"]]
+                # Parse and/or calculate the output descriptors.
+                if self.parameters._configuration["mpi"]:
+                    target_calculator_kwargs["return_local"] = True
+                if description["output"] == ".cube":
+                    target_calculator_kwargs["units"] = original_units[
+                        "output"]
+                    target_calculator_kwargs["use_memmap"] = use_memmap
+                    # If no units are provided we just assume standard units.
+                    tmp_output = self.target_calculator. \
+                        read_from_cube(snapshot["output"],
+                                       **target_calculator_kwargs)
 
-                self.target_calculator. \
-                    write_to_openpmd_iteration(output_iteration,
-                                               tmp_output,
-                                               additional_metadata=metadata)
+                elif description["output"] == ".xsf":
+                    target_calculator_kwargs["units"] = original_units[
+                        "output"]
+                    target_calculator_kwargs["use_memmap"] = use_memmap
+                    # If no units are provided we just assume standard units.
+                    tmp_output = self.target_calculator. \
+                        read_from_xsf(snapshot["output"],
+                                      **target_calculator_kwargs)
+
+                elif description["output"] is None:
+                    # In this case, only the input is processed.
+                    pass
+
+                else:
+                    raise Exception(
+                        "Unknown file extension, cannot convert target"
+                        "data.")
+
+                if self.parameters._configuration["mpi"]:
+                    self.target_calculator. \
+                        write_to_openpmd_iteration(output_iteration,
+                                                   tmp_output[0],
+                                                   feature_from=tmp_output[1],
+                                                   feature_to=tmp_output[2],
+                                                   additional_metadata=metadata)
+                else:
+                    self.target_calculator. \
+                        write_to_openpmd_iteration(output_iteration,
+                                                   tmp_output,
+                                                   additional_metadata=metadata)
             del tmp_output
 
         # Parse and/or calculate the additional info.

@@ -23,6 +23,7 @@ class PhysicalData(ABC):
 
     def __init__(self, parameters):
         self.parameters = parameters
+        self.grid_dimensions = [0, 0, 0]
 
     ##############################
     # Properties
@@ -316,9 +317,8 @@ class PhysicalData(ABC):
         self.write_to_openpmd_iteration(iteration, array)
 
     def write_to_openpmd_iteration(self, iteration, array,
-                                   global_grid,
-                                   local_offset,
-                                   local_reach,
+                                   local_offset=None,
+                                   local_reach=None,
                                    additional_metadata=None,
                                    feature_from=0, feature_to=None):
         """
@@ -339,8 +339,14 @@ class PhysicalData(ABC):
         """
         import openpmd_api as io
 
-        [x_from, y_from, z_from] = local_offset
-        [x_to, y_to, z_to] = local_reach
+        if local_offset is None:
+            [x_from, y_from, z_from] = [None, None, None]
+        else:
+            [x_from, y_from, z_from] = local_offset
+        if local_reach is None:
+            [x_to, y_to, z_to] = [None, None, None]
+        else:
+            [x_to, y_to, z_to] = local_reach
 
         mesh = iteration.meshes[self.data_name]
 
@@ -381,7 +387,7 @@ class PhysicalData(ABC):
                 atoms_openpmd["position"][str(atom)].unit_SI = 1.0e-10
                 atoms_openpmd["positionOffset"][str(atom)].unit_SI = 1.0e-10
 
-        dataset = io.Dataset(array.dtype, global_grid)
+        dataset = io.Dataset(array.dtype, self.grid_dimensions)
 
         # See above - will currently break for density of states,
         # which is something we never do though anyway.
