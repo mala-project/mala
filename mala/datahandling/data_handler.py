@@ -718,7 +718,6 @@ class DataHandler:
                     self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
                     self.use_horovod)
 
                 if self.nr_test_data != 0:
@@ -727,7 +726,6 @@ class DataHandler:
                         self.output_dimension,
                         self.input_data_scaler, self.output_data_scaler,
                         self.descriptor_calculator, self.target_calculator,
-                        self.grid_dimension, self.grid_size,
                         self.use_horovod,
                         input_requires_grad=True)
 
@@ -736,13 +734,11 @@ class DataHandler:
                     self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
                     self.use_horovod)
                 self.validation_data_set = LazyLoadDataset(
                     self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
                     self.use_horovod)
 
                 if self.nr_test_data != 0:
@@ -751,7 +747,6 @@ class DataHandler:
                         self.output_dimension,
                         self.input_data_scaler, self.output_data_scaler,
                         self.descriptor_calculator, self.target_calculator,
-                        self.grid_dimension, self.grid_size,
                         self.use_horovod,
                         input_requires_grad=True)
 
@@ -844,7 +839,7 @@ class DataHandler:
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
                     tmp = tmp.astype(np.float32)
-                    tmp = tmp.reshape([self.grid_size,
+                    tmp = tmp.reshape([snapshot.grid_size,
                                        self.input_dimension])
                     tmp = torch.from_numpy(tmp).float()
                     self.input_data_scaler.incremental_fit(tmp)
@@ -895,7 +890,7 @@ class DataHandler:
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
                     tmp = tmp.astype(np.float32)
-                    tmp = tmp.reshape([self.grid_size,
+                    tmp = tmp.reshape([snapshot.grid_size,
                                        self.output_dimension])
                     tmp = torch.from_numpy(tmp).float()
                     self.output_data_scaler.incremental_fit(tmp)
