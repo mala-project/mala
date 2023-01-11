@@ -34,10 +34,10 @@ class Predictor(Runner):
     def __init__(self, params, network, data):
         # copy the parameters into the class.
         super(Predictor, self).__init__(params, network, data)
-        self.grid_dimension = self.parameters.inference_data_grid
-        self.grid_size = self.grid_dimension[0] * \
-                         self.grid_dimension[1] * \
-                         self.grid_dimension[2]
+        self.data.grid_dimension = self.parameters.inference_data_grid
+        self.data.grid_size = self.data.grid_dimension[0] * \
+                              self.data.grid_dimension[1] * \
+                              self.data.grid_dimension[2]
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
 
@@ -62,7 +62,7 @@ class Predictor(Runner):
             Precicted LDOS for these atomic positions.
         """
         self.data.target_calculator.\
-            read_additional_calculation_data("qe.out", path_to_file)
+            read_additional_calculation_data(path_to_file, "espresso-out")
         return self.predict_for_atoms(self.data.target_calculator.atoms,
                                       gather_ldos=gather_ldos)
 
@@ -91,12 +91,12 @@ class Predictor(Runner):
 
         # Calculate descriptors.
         snap_descriptors, local_size = self.data.descriptor_calculator.\
-            calculate_from_atoms(atoms, self.grid_dimension)
+            calculate_from_atoms(atoms, self.data.grid_dimension)
 
         # Provide info from current snapshot to target calculator.
         self.data.target_calculator.\
-            read_additional_calculation_data("atoms+grid",
-                                             [atoms, self.grid_dimension])
+            read_additional_calculation_data([atoms, self.data.grid_dimension],
+                                             "atoms+grid")
         feature_length = self.data.descriptor_calculator.fingerprint_length
 
         # The actual calculation of the LDOS from the descriptors depends
@@ -147,7 +147,7 @@ class Predictor(Runner):
                 snap_descriptors.astype(np.float32)
             snap_descriptors = \
                 snap_descriptors.reshape(
-                    [self.grid_size, feature_length])
+                    [self.data.grid_size, feature_length])
             snap_descriptors = \
                 torch.from_numpy(snap_descriptors).float()
             self.data.input_data_scaler.transform(snap_descriptors)
@@ -157,7 +157,7 @@ class Predictor(Runner):
                                   local_data_size=None):
         """Forward a scaled tensor of descriptors through the NN."""
         if local_data_size is None:
-            local_data_size = self.grid_size
+            local_data_size = self.data.grid_size
         predicted_outputs = \
             np.zeros((local_data_size,
                       self.data.target_calculator.feature_size))

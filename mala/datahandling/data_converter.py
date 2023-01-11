@@ -10,13 +10,13 @@ from mala.targets.target import Target
 from mala.version import __version__ as mala_version
 
 descriptor_input_types = [
-    "qe.out"
+    "espresso-out"
 ]
 target_input_types = [
     ".cube", ".xsf"
 ]
 additional_info_input_types = [
-    "qe.out"
+    "espresso-out"
 ]
 
 
@@ -441,7 +441,7 @@ class DataConverter:
         original_units = self.__snapshot_units[snapshot_number]
 
         # Parse and/or calculate the input descriptors.
-        if description["input"] == "qe.out":
+        if description["input"] == "espresso-out":
             descriptor_calculation_kwargs["units"] = original_units["input"]
             tmp_input, local_size = self.descriptor_calculator. \
                 calculate_from_qe_out(snapshot["input"],
@@ -506,8 +506,8 @@ class DataConverter:
                 else:
                     metadata = None
                     if description["metadata"] is not None:
-                        metadata = [description["metadata"],
-                                    snapshot["metadata"]]
+                        metadata = [snapshot["metadata"],
+                                    description["metadata"]]
 
                     self.target_calculator. \
                         write_to_openpmd_iteration(output_iteration,
@@ -516,18 +516,10 @@ class DataConverter:
                 del tmp_output
 
         # Parse and/or calculate the additional info.
-        if description["additional_info"] == "qe.out":
+        if description["additional_info"] is not None:
             # Parsing and saving is done using the target calculator.
             self.target_calculator. \
-                read_additional_calculation_data("qe.out",
-                                                 snapshot["additional_info"])
+                read_additional_calculation_data(snapshot["additional_info"],
+                                                 description["additional_info"])
             self.target_calculator. \
                 write_additional_calculation_data(additional_info_path)
-
-        elif description["additional_info"] is None:
-            # Not additional info provided, pass.
-            pass
-        else:
-            raise Exception(
-                "Unknown file extension, cannot convert additional info "
-                "data.")

@@ -3,7 +3,7 @@ from ase.units import kB
 import mpmath as mp
 import numpy as np
 from scipy import integrate
-
+import sys
 
 def integrate_values_on_spacing(values, spacing, method, axis=0):
     """
@@ -38,7 +38,8 @@ def integrate_values_on_spacing(values, spacing, method, axis=0):
         raise Exception("Unknown integration method.")
 
 
-def fermi_function(energy, fermi_energy, temperature):
+def fermi_function(energy, fermi_energy, temperature,
+                   suppress_overflow=False):
     r"""
     Calculate the Fermi function.
 
@@ -51,10 +52,17 @@ def fermi_function(energy, fermi_energy, temperature):
     energy : float or numpy.array
         Energy for which the Fermi function is supposed to be calculated in
         energy_units.
+
     fermi_energy : float
         Fermi energy level in energy_units.
+
     temperature : float
         Temperature in K.
+
+    suppress_overflow : bool
+        If True, overflow that may occur in the exponent of the divisor of
+        the Fermi function is suppressed. This is mathematically justifiable,
+        but
 
     Returns
     -------
@@ -62,8 +70,27 @@ def fermi_function(energy, fermi_energy, temperature):
         Value of the Fermi function.
 
     """
-    return 1.0 / (1.0 + np.exp((energy - fermi_energy) /
-                               (kB * temperature)))
+    exponent = (energy - fermi_energy) / (kB * temperature)
+
+    if suppress_overflow:
+        # Maximum exponent that will not result in inf when performing
+        # np.exp() (for double values only).
+        # Very large exponents result in very large values, and if we don't
+        # check for overflow, infinity. Cutting this back to the maximum float
+        # value (~ 1e308) is more then enough, since we divide by the exponent,
+        # and therefore get zero (or machine precision within zero) either way.
+        # Adding this check removes overflow warnings.
+        # The overhead for inference should be minimal.
+        # Since this function works both for arrays and scalars,
+        # we have to check which maximum to use.
+
+        if isinstance(energy, np.ndarray):
+            max_exponent = np.log(np.finfo(exponent.dtype).max)
+            exponent[exponent > max_exponent] = max_exponent
+        else:
+            exponent = min(exponent, np.log(np.finfo(exponent).max))
+
+    return 1.0 / (1.0 + np.exp(exponent))
 
 
 def entropy_multiplicator(energy, fermi_energy, temperature):
@@ -95,7 +122,8 @@ def entropy_multiplicator(energy, fermi_energy, temperature):
         dim = np.shape(energy)[0]
         multiplicator = np.zeros(dim, dtype=np.float64)
         for i in range(0, np.shape(energy)[0]):
-            fermi_val = fermi_function(energy[i], fermi_energy, temperature)
+            fermi_val = fermi_function(energy[i], fermi_energy, temperature,
+                                       suppress_overflow=True)
             if fermi_val == 1.0:
                 secondterm = 0.0
             else:
@@ -106,7 +134,8 @@ def entropy_multiplicator(energy, fermi_energy, temperature):
                 firsterm = fermi_val * np.log(fermi_val)
             multiplicator[i] = firsterm + secondterm
     else:
-        fermi_val = fermi_function(energy, fermi_energy, temperature)
+        fermi_val = fermi_function(energy, fermi_energy, temperature,
+                                   suppress_overflow=True)
         if fermi_val == 1.0:
             secondterm = 0.0
         else:

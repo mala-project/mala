@@ -43,7 +43,7 @@ def use_calculator(network, new_parameters, iscaler, oscaler):
     calculator = mala.MALA(new_parameters, network,
                            inference_data_handler,
                            reference_data=
-                                    ["qe.out",
+                                    ["espresso-out",
                                      os.path.join(data_path,
                                                   "Be_snapshot1.out")])
     atoms.set_calculator(calculator)

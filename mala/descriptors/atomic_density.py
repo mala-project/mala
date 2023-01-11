@@ -185,9 +185,11 @@ class AtomicDensity(Descriptor):
         # if we operate without MPI.
         self.grid_dimensions = [nx, ny, nz]
         if self.parameters._configuration["mpi"]:
-            self.fingerprint_length = 4
-            return gaussian_descriptors_np.copy(), nrows_ggrid
-
+            if return_directly:
+                return gaussian_descriptors_np.copy()
+            else:
+                self.fingerprint_length = 4
+                return gaussian_descriptors_np.copy(), nrows_ggrid
         else:
             # Since the atomic density may be directly fed back into QE
             # during the total energy calculation, we may have to return

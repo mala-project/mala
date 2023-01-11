@@ -398,9 +398,13 @@ class Trainer(Runner):
         if self.parameters_full.use_gpu:
             kwargs['pin_memory'] = True
 
+        # Read last epoch
+        if optimizer_dict is not None: 
+            self.last_epoch = optimizer_dict['epoch']+1
+
         # Scale the learning rate according to horovod.
         if self.parameters_full.use_horovod:
-            if hvd.size() > 1:
+            if hvd.size() > 1 and self.last_epoch == 0:
                 printout("Rescaling learning rate because multiple workers are"
                          " used for training.", min_verbosity=1)
                 self.parameters.learning_rate = self.parameters.learning_rate \
@@ -424,7 +428,6 @@ class Trainer(Runner):
         if optimizer_dict is not None:
             self.optimizer.\
                 load_state_dict(optimizer_dict['optimizer_state_dict'])
-            self.last_epoch = optimizer_dict['epoch']+1
             self.patience_counter = optimizer_dict['early_stopping_counter']
             self.last_loss = optimizer_dict['early_stopping_last_loss']
 
@@ -591,8 +594,7 @@ class Trainer(Runner):
                 # This works because the list is always guaranteed to be
                 # ordered.
                 calculator.\
-                    read_additional_calculation_data("qe.out",
-                                                     self.data.get_snapshot_calculation_output(snapshot_number))
+                    read_additional_calculation_data(self.data.get_snapshot_calculation_output(snapshot_number))
                 fe_actual = calculator.\
                     get_self_consistent_fermi_energy(actual_outputs)
                 be_actual = calculator.\
@@ -640,8 +642,7 @@ class Trainer(Runner):
                 # This works because the list is always guaranteed to be
                 # ordered.
                 calculator.\
-                    read_additional_calculation_data("qe.out",
-                                                     self.data.get_snapshot_calculation_output(snapshot_number))
+                    read_additional_calculation_data(self.data.get_snapshot_calculation_output(snapshot_number))
                 fe_actual = calculator.\
                     get_self_consistent_fermi_energy(actual_outputs)
                 te_actual = calculator.\

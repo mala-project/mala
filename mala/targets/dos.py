@@ -180,7 +180,7 @@ class DOS(Target):
         return_dos = DOS(params)
 
         # In this case, we may just read the entire qe.out file.
-        return_dos.read_additional_calculation_data("qe.out", path)
+        return_dos.read_additional_calculation_data(path, "espresso-out")
 
         # This method will use the ASE atoms object read above automatically.
         return_dos.read_from_qe_out()
@@ -824,7 +824,8 @@ class DOS(Target):
         """Calculate the number of electrons from DOS data."""
         # Calculate the energy levels and the Fermi function.
 
-        fermi_vals = fermi_function(energy_grid, fermi_energy, temperature)
+        fermi_vals = fermi_function(energy_grid, fermi_energy, temperature,
+                                    suppress_overflow=True)
         # Calculate the number of electrons.
         if integration_method == "trapz":
             number_of_electrons = integrate.trapz(dos_data * fermi_vals,
@@ -836,7 +837,8 @@ class DOS(Target):
             dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             number_of_electrons, abserr = integrate.quad(
                 lambda e: dos_pointer(e) * fermi_function(e, fermi_energy,
-                                                          temperature),
+                                                          temperature,
+                                                          suppress_overflow=True),
                 energy_grid[0], energy_grid[-1], limit=500,
                 points=fermi_energy)
         elif integration_method == "analytical":
@@ -854,7 +856,8 @@ class DOS(Target):
                                temperature, integration_method):
         """Calculate the band energy from DOS data."""
         # Calculate the energy levels and the Fermi function.
-        fermi_vals = fermi_function(energy_grid, fermi_energy, temperature)
+        fermi_vals = fermi_function(energy_grid, fermi_energy, temperature,
+                                    suppress_overflow=True)
 
         # Calculate the band energy.
         if integration_method == "trapz":
@@ -869,7 +872,8 @@ class DOS(Target):
             dos_pointer = interpolate.interp1d(energy_grid, dos_data)
             band_energy, abserr = integrate.quad(
                 lambda e: dos_pointer(e) * e * fermi_function(e, fermi_energy,
-                                                              temperature),
+                                                              temperature,
+                                                              suppress_overflow=True),
                 energy_grid[0], energy_grid[-1], limit=500,
                 points=fermi_energy)
         elif integration_method == "analytical":
