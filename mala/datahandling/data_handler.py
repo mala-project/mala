@@ -82,11 +82,12 @@ class DataHandler:
         # Dimensionalities of data.
         self.input_dimension = 0 # None ??
         self.output_dimension = 0 # None ??
-        # commenting the next two lines out because they are not fixed
-        # for flexible data handling
-        #self.grid_dimension = [0, 0, 0]
-        #self.grid_size = 0
         self.nr_snapshots = 0
+        
+        # TODO only define these parameters in case of clustering
+        if self.parameters.use_clustering:
+            self.grid_dimension = [0, 0, 0]
+            self.grid_size = 0
 
         # Actual data points in the different categories.
         self.nr_training_data = 0
@@ -325,6 +326,8 @@ class DataHandler:
             Tensor holding the gradient.
 
         """
+        # TODO: not sure where this function is used
+        # since we got rid of the self.grid_size parameter, it won't work in current form
         if self.parameters.use_lazy_loading:
             # This fails if an incorrect snapshot was loaded.
             if self.test_data_set.currently_loaded_file != snapshot_number:
@@ -383,6 +386,8 @@ class DataHandler:
         converted_tensor: torch.Tensor
             The fully converted and scaled tensor.
         """
+        # TODO: not sure where this function is used
+        # since we got rid of the self.grid_size parameter, it won't work in current form
         # Check parameters for consistency.
         if data_type != "in" and data_type != "out":
             raise Exception("Please specify either \"in\" or \"out\" as "
@@ -490,6 +495,10 @@ class DataHandler:
             snapshot.grid_size = int(np.prod(snapshot.grid_dimension))            
             if firstsnapshot:
                 self.input_dimension = tmp_input_dimension
+                # TODO is this the best way to do this?
+                if self.parameters.use_clustering:
+                    self.grid_dimension[0:3] = tmp_grid_dim[0:3]
+                    self.grid_size = np.prod(self.grid_dimension)
             else:
                 if self.input_dimension != tmp_input_dimension:
                     raise Exception("Invalid snapshot entered at ", snapshot.
