@@ -171,8 +171,8 @@ params_path = "./ex05_params.json"
 network_path = "./ex05_network.pth"
 input_scaler_path = "./ex05_iscaler.pkl"
 output_scaler_path = "./ex05_oscaler.pkl"
-# initial_training(network_path, params_path, input_scaler_path,
-#                  output_scaler_path)
+initial_training(network_path, params_path, input_scaler_path,
+                 output_scaler_path)
 use_trained_network(network_path, params_path, input_scaler_path,
                     output_scaler_path)
 
