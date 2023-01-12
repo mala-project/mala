@@ -37,6 +37,12 @@ class PhysicalData(ABC):
 
     @property
     @abstractmethod
+    def feature_size(self):
+        """Get the feature dimension of this data."""
+        pass
+
+    @property
+    @abstractmethod
     def si_dimension(self):
         """
         Dictionary containing the SI unit dimensions in OpenPMD format.
@@ -348,6 +354,9 @@ class PhysicalData(ABC):
         else:
             [x_to, y_to, z_to] = local_reach
 
+        # Global feature sizes:
+        # feature_global_from = 0
+        # feature_global_to = self.feature_size
         mesh = iteration.meshes[self.data_name]
 
         if additional_metadata is not None:

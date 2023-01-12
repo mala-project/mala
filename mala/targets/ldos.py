@@ -1396,7 +1396,7 @@ class LDOS(Target):
             barrier()
             data_shape = np.shape(ldos_data)
             if return_local:
-                return ldos_data, start_index, end_index
+                return ldos_data, start_index-1, end_index-1
             if use_memmap is not None:
                 if get_rank() == 0:
                     ldos_data_full = np.memmap(use_memmap,
