@@ -326,8 +326,9 @@ class DataHandler:
             Tensor holding the gradient.
 
         """
-        # TODO: not sure where this function is used
-        # since we got rid of the self.grid_size parameter, it won't work in current form
+        # get the snapshot from the snapshot number
+        snapshot = self.parameters.snapshot_directories_list[snapshot_number]
+        
         if self.parameters.use_lazy_loading:
             # This fails if an incorrect snapshot was loaded.
             if self.test_data_set.currently_loaded_file != snapshot_number:
@@ -336,8 +337,8 @@ class DataHandler:
             return self.test_data_set.input_data.grad
         else:
             return self.test_data_inputs.\
-                       grad[self.grid_size*snapshot_number:
-                            self.grid_size*(snapshot_number+1)]
+                       grad[snapshot.grid_size*snapshot_number:
+                            snapshot.grid_size*(snapshot_number+1)]
 
     def get_snapshot_calculation_output(self, snapshot_number):
         """
