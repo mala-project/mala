@@ -4,7 +4,7 @@ import os
 
 import json
 import numpy as np
-from mala.common.parallelizer import get_comm
+from mala.common.parallelizer import get_comm, get_rank
 
 from mala.version import __version__ as mala_version
 
@@ -356,7 +356,8 @@ class PhysicalData(ABC):
 
         # If the data contains atomic data, we need to process it.
         atoms_ase = self._get_atoms()
-        if atoms_ase is not None:
+        if atoms_ase is not None and get_rank() == 0:
+            # This data is equivalent across the ranks, so just write it once
             atoms_openpmd = iteration.particles["atoms"]
             atomic_positions = atoms_ase.get_positions()
             atomic_numbers = atoms_ase.get_atomic_numbers()
@@ -389,6 +390,16 @@ class PhysicalData(ABC):
 
         dataset = io.Dataset(array.dtype, self.grid_dimensions)
 
+        if feature_to is None:
+            feature_to = array.shape[3]
+
+        if feature_to - feature_from != array.shape[3]:
+            raise RuntimeError("""\
+[write_to_openpmd_iteration] Internal error, called function with
+wrong parameters. Specification of features ({} - {}) on rank {} does not
+match the array dimensions (extent {} in the feature dimension)""".format(
+                feature_from, feature_to, get_rank(), array.shape[3]))
+
         # See above - will currently break for density of states,
         # which is something we never do though anyway.
         # Deal with `granularity` items of the vectors at a time
@@ -399,7 +410,11 @@ class PhysicalData(ABC):
             transposed = \
                 np.transpose(array[:, :, :, base:end], axes=[3, 0, 1, 2]).copy()
             for i in range(base, end):
-                mesh_component = mesh[str(i)]
+                # i is the index within the array passed to this function.
+                # The feature corresponding to this index is offset
+                # by the feature_from parameter
+                current_feature = i + feature_from
+                mesh_component = mesh[str(current_feature)]
                 mesh_component.reset_dataset(dataset)
 
                 mesh_component[x_from:x_to, y_from:y_to, z_from:z_to] = \
