@@ -38,9 +38,16 @@ modobjs="$(find $root_dir/Modules/ -name "*.o")"
 # Libraries from the external FoX project
 foxlibs="-L$root_dir/FoX/lib -lFoX_dom -lFoX_utils -lFoX_wcml -lFoX_wkml -lFoX_wxml -lFoX_common -lFoX_sax -lFoX_common -lFoX_fsys"
 
-project_lib_folders=" -L$root_dir/Modules -L$root_dir/KS_Solvers -L$root_dir/FFTXlib -L$root_dir/LAXlib -L$root_dir/UtilXlib -L$root_dir/dft-d3"
-project_libs="-lqemod -lks_solvers -lqefft -lqela -lutil -ldftd3qe"
-project_inc_folders="-I$root_dir/Modules -I$root_dir/FFTXlib -I$root_dir/LAXlib -I$root_dir/KS_Solvers -I$root_dir/UtilXlib"
+# LF: For some reason I cannot make the linker find the XClib if I don't rename
+# the library. This is probably just me not understanding linker syntax well
+# enough, but after this rename it works. If someone has a smarter idea,
+# I am all ears.
+
+cp $root_dir/XClib/xc_lib.a $root_dir/XClib/libqexc.a
+
+project_lib_folders=" -L$root_dir/Modules -L$root_dir/KS_Solvers -L$root_dir/FFTXlib/src -L$root_dir/LAXlib -L$root_dir/UtilXlib -L$root_dir/dft-d3 -L$root_dir/upflib -L$root_dir/XClib -L$root_dir/external/devxlib/src -L$root_dir/external/mbd/src"
+project_libs="-lqemod -lks_solvers -lqefft -lqela -lutil -ldftd3qe -lupf -ldevXlib -lmbd -lqexc"
+project_inc_folders="-I$root_dir/Modules -I$root_dir/FFTXlib/src -I$root_dir/LAXlib -I$root_dir/KS_Solvers -I$root_dir/UtilXlib -I$root_dir/upflib -I$root_dir/XClib -I$root_dir/external/devxlib/src -I$root_dir/external/mbd/src"
 
 # default: systen blas,lapack and fftw, adapt as needed
 linalg="-lblas -llapack"
@@ -67,8 +74,7 @@ ${F2PY:=f2py} \
     $modobjs \
     $linalg \
     $fftw \
-    $foxlibs \
-    $root_dir/clib/clib.a
+    $foxlibs
 
 rm $src
 mv -v ${mod_name}.*.so $here/
