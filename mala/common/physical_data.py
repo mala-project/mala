@@ -415,7 +415,7 @@ match the array dimensions (extent {} in the feature dimension)""".format(
         # which is something we never do though anyway.
         # Deal with `granularity` items of the vectors at a time
         # Or in the openPMD layout: with `granularity` record components
-        granularity = 16 # just some random value for now
+        granularity = self.parameters._configuration["openpmd_granularity"]
         # Before writing the actual data, we have to make two considerations
         # for MPI:
         # 1) The following loop does not necessarily have the same number of
