@@ -354,9 +354,6 @@ class PhysicalData(ABC):
         else:
             [x_to, y_to, z_to] = local_reach
 
-        # Global feature sizes:
-        # feature_global_from = 0
-        # feature_global_to = self.feature_size
         mesh = iteration.meshes[self.data_name]
 
         if additional_metadata is not None:
@@ -365,13 +362,16 @@ class PhysicalData(ABC):
 
         # If the data contains atomic data, we need to process it.
         atoms_ase = self._get_atoms()
-        if atoms_ase is not None and get_rank() == 0:
+        if atoms_ase is not None:
             # This data is equivalent across the ranks, so just write it once
             atoms_openpmd = iteration.particles["atoms"]
             atomic_positions = atoms_ase.get_positions()
             atomic_numbers = atoms_ase.get_atomic_numbers()
-            positions = io.Dataset(atomic_positions[0].dtype,
-                                   atomic_positions[0].shape)
+            positions = io.Dataset(
+                # Need bugfix https://github.com/openPMD/openPMD-api/pull/1357
+                atomic_positions[0].dtype if io.__version__ >= '0.15.0' else
+                io.Datatype.DOUBLE,
+                atomic_positions[0].shape)
             numbers = io.Dataset(atomic_numbers[0].dtype,
                                  [1])
             iteration.set_attribute("periodic_boundary_conditions_x",
@@ -387,10 +387,12 @@ class PhysicalData(ABC):
                 atoms_openpmd["number"][str(atom)].reset_dataset(numbers)
                 atoms_openpmd["positionOffset"][str(atom)].reset_dataset(positions)
 
-                atoms_openpmd["position"][str(atom)].\
-                    store_chunk(atomic_positions[atom])
-                atoms_openpmd["number"][str(atom)].\
-                    store_chunk(np.array([atomic_numbers[atom]]))
+                atoms_openpmd_position = atoms_openpmd["position"][str(atom)]
+                atoms_openpmd_number = atoms_openpmd["number"][str(atom)]
+                if get_rank() == 0:
+                    atoms_openpmd_position.store_chunk(atomic_positions[atom])
+                    atoms_openpmd_number.store_chunk(
+                        np.array([atomic_numbers[atom]]))
                 atoms_openpmd["positionOffset"][str(atom)].make_constant(0)
 
                 # Positions are stored in Angstrom.
@@ -414,6 +416,41 @@ match the array dimensions (extent {} in the feature dimension)""".format(
         # Deal with `granularity` items of the vectors at a time
         # Or in the openPMD layout: with `granularity` record components
         granularity = 16 # just some random value for now
+        # Before writing the actual data, we have to make two considerations
+        # for MPI:
+        # 1) The following loop does not necessarily have the same number of
+        #    iterations across MPI ranks. Since the Series is flushed in every
+        #    loop iteration, we need to harmonize the number of flushes
+        #    (flushing is collective).
+        # 2) Dataset creation and attribute writing is collective in HDF5.
+        #    So, we need to define all features on all ranks, even if not all
+        #    features are written from all ranks.
+        if self.parameters._configuration["mpi"]:
+            from mpi4py import MPI
+            my_iteration_count = len(range(0, array.shape[3], granularity))
+            highest_iteration_count = get_comm().allreduce(my_iteration_count,
+                                                           op=MPI.MAX)
+            extra_flushes = highest_iteration_count - my_iteration_count
+        else:
+            extra_flushes = 0
+
+        # Global feature sizes:
+        feature_global_from = 0
+        feature_global_to = self.feature_size
+        # First loop: Only metadata, write metadata equivalently across ranks
+        for current_feature in range(feature_global_from, feature_global_to):
+            mesh_component = mesh[str(current_feature)]
+            mesh_component.reset_dataset(dataset)
+            # All data is assumed to be saved in
+            # MALA units, so the SI conversion factor we save
+            # here is the one for MALA (ASE) units
+            mesh_component.unit_SI = self.si_unit_conversion
+            # position: which relative point within the cell is
+            # represented by the stored values
+            # ([0.5, 0.5, 0.5] represents the middle)
+            mesh_component.position = [0.5, 0.5, 0.5]
+
+        # Second loop: Write heavy data
         for base in range(0, array.shape[3], granularity):
             end = min(base + granularity, array.shape[3])
             transposed = \
@@ -424,19 +461,14 @@ match the array dimensions (extent {} in the feature dimension)""".format(
                 # by the feature_from parameter
                 current_feature = i + feature_from
                 mesh_component = mesh[str(current_feature)]
-                mesh_component.reset_dataset(dataset)
 
                 mesh_component[x_from:x_to, y_from:y_to, z_from:z_to] = \
                     transposed[i - base, :, :, :]
 
-                # All data is assumed to be saved in
-                # MALA units, so the SI conversion factor we save
-                # here is the one for MALA (ASE) units
-                mesh_component.unit_SI = self.si_unit_conversion
-                # position: which relative point within the cell is
-                # represented by the stored values
-                # ([0.5, 0.5, 0.5] represents the middle)
-                mesh_component.position = [0.5, 0.5, 0.5]
+            iteration.series_flush()
+
+        # Third loop: Extra flushes to harmonize ranks
+        for _ in range(extra_flushes):
             iteration.series_flush()
 
         iteration.close(flush=True)
