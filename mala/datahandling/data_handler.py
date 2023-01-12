@@ -622,7 +622,9 @@ class DataHandler:
     def __load_data(self, function, data_type):
         """
         Load data into the appropriate arrays.
+
         Also transforms them into torch tensors.
+
         Parameters
         ----------
         function : string
