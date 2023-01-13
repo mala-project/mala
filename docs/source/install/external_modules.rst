@@ -60,7 +60,7 @@ Use and test the Python extension module
 LAMMPS (descriptor calculation)
 *******************************
 
-* Checkout https://github.com/athomps/lammps/tree/mala
+* Checkout https://github.com/mala-project/lammps/tree/mala
 * Make sure the ``mala`` tree is checked out locally via ``git branch``!
 * Compile the LAMMPS shared library with the SNAP package installed
 
