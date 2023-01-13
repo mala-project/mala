@@ -66,12 +66,13 @@ class DataHandler:
         if self.descriptor_calculator is None:
             self.descriptor_calculator = Descriptor(parameters)
 
-        # Data will be scaled per user specification.
+        # Data will be scaled per user specification.            
         self.input_data_scaler = input_data_scaler
         if self.input_data_scaler is None:
             self.input_data_scaler \
                 = DataScaler(self.parameters.input_rescaling_type,
                              use_horovod=self.use_horovod)
+
         self.output_data_scaler = output_data_scaler
         if self.output_data_scaler is None:
             self.output_data_scaler \
@@ -81,9 +82,12 @@ class DataHandler:
         # Dimensionalities of data.
         self.input_dimension = 0
         self.output_dimension = 0
-        self.grid_dimension = [0, 0, 0]
-        self.grid_size = 0
         self.nr_snapshots = 0
+
+        # clustering still needs uniform grids
+        if self.parameters.use_clustering:
+            self.grid_dimension = [0, 0, 0]
+            self.grid_size = 0
 
         # Actual data points in the different categories.
         self.nr_training_data = 0
@@ -133,7 +137,7 @@ class DataHandler:
     ##############################
 
     # Adding/Deleting data
-    ######################
+    ######################        
 
     def add_snapshot(self, input_npy_file, input_npy_directory,
                      output_npy_file, output_npy_directory, add_snapshot_as,
@@ -322,6 +326,9 @@ class DataHandler:
             Tensor holding the gradient.
 
         """
+        # get the snapshot from the snapshot number
+        snapshot = self.parameters.snapshot_directories_list[snapshot_number]
+        
         if self.parameters.use_lazy_loading:
             # This fails if an incorrect snapshot was loaded.
             if self.test_data_set.currently_loaded_file != snapshot_number:
@@ -330,8 +337,8 @@ class DataHandler:
             return self.test_data_set.input_data.grad
         else:
             return self.test_data_inputs.\
-                       grad[self.grid_size*snapshot_number:
-                            self.grid_size*(snapshot_number+1)]
+                       grad[snapshot.grid_size*snapshot_number:
+                            snapshot.grid_size*(snapshot_number+1)]
 
     def get_snapshot_calculation_output(self, snapshot_number):
         """
@@ -353,7 +360,7 @@ class DataHandler:
 
     # Debugging
     ######################
-
+        
     def raw_numpy_to_converted_scaled_tensor(self, numpy_array, data_type,
                                              units, convert3Dto1D=False):
         """
@@ -395,7 +402,8 @@ class DataHandler:
                 data_dimension = self.input_dimension
             else:
                 data_dimension = self.output_dimension
-            desired_dimensions = [self.grid_size, data_dimension]
+            grid_size = np.prod(numpy_array[0:3])
+            desired_dimensions = [grid_size, data_dimension]
         else:
             desired_dimensions = None
 
@@ -461,7 +469,7 @@ class DataHandler:
         for snapshot in self.parameters.snapshot_directories_list:
             ####################
             # Descriptors.
-            ####################
+            ####################            
 
             printout("Checking descriptor file ", snapshot.input_npy_file,
                      "at", snapshot.input_npy_directory, min_verbosity=1)
@@ -478,21 +486,21 @@ class DataHandler:
             else:
                 raise Exception("Unknown snapshot file type.")
 
-            # The first snapshot determines the data size to be used.
-            # We need to make sure that snapshot size is consistent.
+            # get the snapshot feature dimension - call it input dimension
+            # for flexible grid sizes only this need be consistent
             tmp_input_dimension = tmp_dimension[-1]
             tmp_grid_dim = tmp_dimension[0:3]
+            snapshot.grid_dimension = tmp_grid_dim
+            snapshot.grid_size = int(np.prod(snapshot.grid_dimension))            
             if firstsnapshot:
                 self.input_dimension = tmp_input_dimension
-                self.grid_dimension[0:3] = tmp_grid_dim[0:3]
+                if self.parameters.use_clustering:
+                    self.grid_dimension[0:3] = tmp_grid_dim[0:3]
+                    self.grid_size = np.prod(self.grid_dimension)
             else:
-                if (self.input_dimension != tmp_input_dimension
-                        or self.grid_dimension[0] != tmp_grid_dim[0]
-                        or self.grid_dimension[1] != tmp_grid_dim[1]
-                        or self.grid_dimension[2] != tmp_grid_dim[2]):
+                if self.input_dimension != tmp_input_dimension:
                     raise Exception("Invalid snapshot entered at ", snapshot.
                                     input_npy_file)
-
             ####################
             # Targets.
             ####################
@@ -515,41 +523,37 @@ class DataHandler:
             # The first snapshot determines the data size to be used.
             # We need to make sure that snapshot size is consistent.
             tmp_output_dimension = tmp_dimension[-1]
-            tmp_grid_dim = tmp_dimension[0:3]
             if firstsnapshot:
                 self.output_dimension = tmp_output_dimension
             else:
                 if self.output_dimension != tmp_output_dimension:
                     raise Exception("Invalid snapshot entered at ", snapshot.
                                     output_npy_file)
-            if (self.grid_dimension[0] != tmp_grid_dim[0]
-                    or self.grid_dimension[1] != tmp_grid_dim[1]
-                    or self.grid_dimension[2] != tmp_grid_dim[2]):
-                raise Exception("Invalid snapshot entered at ", snapshot.
-                                output_npy_file)
-
+                
             if firstsnapshot:
-                firstsnapshot = False
-
-        # Save the grid size.
-        self.grid_size = np.prod(self.grid_dimension)
+                firstsnapshot = False                
 
         # Now we need to confirm that the snapshot list has some inner
         # consistency.
         if self.parameters.data_splitting_type == "by_snapshot":
             snapshot: Snapshot
+            # As we are not actually interested in the number of snapshots,
+            # but in the number of datasets, we also need to multiply by that.
             for snapshot in self.parameters.snapshot_directories_list:
                 if snapshot.snapshot_function == "tr":
                     self.nr_training_snapshots += 1
+                    self.nr_training_data += snapshot.grid_size
                 elif snapshot.snapshot_function == "te":
                     self.nr_test_snapshots += 1
+                    self.nr_test_data += snapshot.grid_size
                 elif snapshot.snapshot_function == "va":
                     self.nr_validation_snapshots += 1
+                    self.nr_validation_data += snapshot.grid_size
                 else:
                     raise Exception("Unknown option for snapshot splitting "
                                     "selected.")
 
-            # Now we need to check whether this input is believable.
+            # Now we need to check whether or not this input is believable.
             nr_of_snapshots = len(self.parameters.snapshot_directories_list)
             if nr_of_snapshots != (self.nr_training_snapshots +
                                    self.nr_test_snapshots +
@@ -557,7 +561,6 @@ class DataHandler:
                 raise Exception("Cannot split snapshots with specified "
                                 "splitting scheme, "
                                 "too few or too many options selected")
-
             # MALA can either be run in training or test-only mode.
             # But it has to be run in either of those!
             # So either training AND validation snapshots can be provided
@@ -578,15 +581,8 @@ class DataHandler:
         else:
             raise Exception("Wrong parameter for data splitting provided.")
 
-        # As we are not actually interested in the number of snapshots, but in
-        # the number of datasets,we need to multiply by that.
-        self.nr_training_data = self.nr_training_snapshots*self.grid_size
-        self.nr_validation_data = self.nr_validation_snapshots*self.grid_size
-        self.nr_test_data = self.nr_test_snapshots*self.grid_size
-
-        # Pre-allocating arrays to load the data into.
         if not self.parameters.use_lazy_loading:
-            self.__allocate_arrays()
+            self.__allocate_arrays()        
 
         # Reordering the lists.
         snapshot_order = {'tr': 0, 'va': 1, 'te': 2}
@@ -596,59 +592,29 @@ class DataHandler:
 
     def __allocate_arrays(self):
         if self.nr_training_data > 0:
-            self.training_data_inputs = np.zeros((self.nr_training_snapshots,
-                                                  self.grid_dimension[0],
-                                                  self.grid_dimension[1],
-                                                  self.grid_dimension[2],
+            self.training_data_inputs = np.zeros((self.nr_training_data,
                                                   self.input_dimension),
                                                  dtype=np.float32)
-            self.training_data_outputs = np.zeros((self.nr_training_snapshots,
-                                                   self.grid_dimension[0],
-                                                   self.grid_dimension[1],
-                                                   self.grid_dimension[2],
+            self.training_data_outputs = np.zeros((self.nr_training_data,
                                                    self.output_dimension),
                                                   dtype=np.float32)
 
         if self.nr_validation_data > 0:
-            self.validation_data_inputs = np.zeros((self.nr_validation_snapshots,
-                                                    self.grid_dimension[0],
-                                                    self.grid_dimension[1],
-                                                    self.grid_dimension[2],
+            self.validation_data_inputs = np.zeros((self.nr_validation_data,
                                                     self.input_dimension),
                                                    dtype=np.float32)
-            self.validation_data_outputs = np.zeros((self.nr_validation_snapshots,
-                                                     self.grid_dimension[0],
-                                                     self.grid_dimension[1],
-                                                     self.grid_dimension[2],
+            self.validation_data_outputs = np.zeros((self.nr_validation_data,
                                                      self.output_dimension),
                                                     dtype=np.float32)
 
         if self.nr_test_data > 0:
-            self.test_data_inputs = np.zeros((self.nr_test_snapshots,
-                                              self.grid_dimension[0],
-                                              self.grid_dimension[1],
-                                              self.grid_dimension[2],
+            self.test_data_inputs = np.zeros((self.nr_test_data,
                                               self.input_dimension),
                                              dtype=np.float32)
-            self.test_data_outputs = np.zeros((self.nr_test_snapshots,
-                                               self.grid_dimension[0],
-                                               self.grid_dimension[1],
-                                               self.grid_dimension[2],
+            self.test_data_outputs = np.zeros((self.nr_test_data,
                                                self.output_dimension),
                                               dtype=np.float32)
-            if self.nr_test_data > 0:
-                self.test_data_inputs = np.zeros((self.nr_test_snapshots,
-                                                  self.grid_dimension[0],
-                                                  self.grid_dimension[1],
-                                                  self.grid_dimension[2],
-                                                  self.input_dimension),
-                                                 dtype=np.float32)
-                self.test_data_outputs = np.zeros((self.nr_test_snapshots,
-                                                   self.grid_dimension[0],
-                                                   self.grid_dimension[1],
-                                                   self.grid_dimension[2],
-                                                   self.output_dimension),
-                                                  dtype=np.float32)
+        
 
     def __load_data(self, function, data_type):
         """
@@ -660,7 +626,6 @@ class DataHandler:
         ----------
         function : string
             Can be "tr", "va" or "te.
-
         data_type : string
             Can be "input" or "output".
         """
@@ -681,7 +646,10 @@ class DataHandler:
             else self.output_dimension
 
         snapshot_counter = 0
+        gs_old = 0
         for snapshot in self.parameters.snapshot_directories_list:
+            # get the snapshot grid size
+            gs_new = snapshot.grid_size
 
             # Data scaling is only performed on the training data sets.
             if snapshot.snapshot_function == function[0:2]:
@@ -695,14 +663,20 @@ class DataHandler:
                     units = snapshot.output_units
 
                 if snapshot.snapshot_type == "numpy":
-                    calculator.read_from_numpy_file(file, units=units,
-                                                    array=getattr(self, array)[snapshot_counter])
+                    calculator.read_from_numpy_file(
+                        file,
+                        units=units,
+                        array=getattr(self, array)[gs_old : gs_old + gs_new, :],
+                        reshape=True,
+                    )
                 elif snapshot.snapshot_type == "openpmd":
-                    getattr(self, array)[snapshot_counter] = \
-                        calculator.read_from_openpmd_file(file, units=units)
+                    getattr(self, array)[gs_old : gs_old + gs_new] = \
+                        calculator.read_from_openpmd_file(file, units=units) \
+                        .reshape([gs_new, feature_dimensions])
                 else:
                     raise Exception("Unknown snapshot file type.")
                 snapshot_counter += 1
+                gs_old += gs_new
 
         # The scalers will later operate on torch Tensors so we have to
         # make sure they are fitted on
@@ -714,42 +688,30 @@ class DataHandler:
         # all ears.
         if data_type == "inputs":
             if function == "training":
-                self.training_data_inputs = self.training_data_inputs.\
-                    reshape([self.nr_training_data, feature_dimension])
                 self.training_data_inputs = torch.\
                     from_numpy(self.training_data_inputs).float()
 
             if function == "validation":
-                self.validation_data_inputs = self.validation_data_inputs.\
-                    reshape([self.nr_validation_data, feature_dimension])
                 self.validation_data_inputs = torch.\
                     from_numpy(self.validation_data_inputs).float()
 
             if function == "test":
-                self.test_data_inputs = self.test_data_inputs.\
-                    reshape([self.nr_test_data, feature_dimension])
                 self.test_data_inputs = torch.\
                     from_numpy(self.test_data_inputs).float()
 
         if data_type == "outputs":
             if function == "training":
-                self.training_data_outputs = self.training_data_outputs.\
-                    reshape([self.nr_training_data, feature_dimension])
                 self.training_data_outputs = torch.\
                     from_numpy(self.training_data_outputs).float()
 
             if function == "validation":
-                self.validation_data_outputs = self.validation_data_outputs.\
-                    reshape([self.nr_validation_data, feature_dimension])
                 self.validation_data_outputs = torch.\
                     from_numpy(self.validation_data_outputs).float()
 
             if function == "test":
-                self.test_data_outputs = self.test_data_outputs.\
-                    reshape([self.nr_test_data, feature_dimension])
                 self.test_data_outputs = torch.\
                     from_numpy(self.test_data_outputs).float()
-
+                
     def __build_datasets(self):
         """Build the DataSets that are used during training."""
         if self.parameters.use_lazy_loading:
@@ -768,7 +730,6 @@ class DataHandler:
                     self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
                     self.use_horovod)
 
                 if self.nr_test_data != 0:
@@ -777,7 +738,6 @@ class DataHandler:
                         self.output_dimension,
                         self.input_data_scaler, self.output_data_scaler,
                         self.descriptor_calculator, self.target_calculator,
-                        self.grid_dimension, self.grid_size,
                         self.use_horovod,
                         input_requires_grad=True)
 
@@ -786,13 +746,11 @@ class DataHandler:
                     self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
                     self.use_horovod)
                 self.validation_data_set = LazyLoadDataset(
                     self.input_dimension, self.output_dimension,
                     self.input_data_scaler, self.output_data_scaler,
                     self.descriptor_calculator, self.target_calculator,
-                    self.grid_dimension, self.grid_size,
                     self.use_horovod)
 
                 if self.nr_test_data != 0:
@@ -801,7 +759,6 @@ class DataHandler:
                         self.output_dimension,
                         self.input_data_scaler, self.output_data_scaler,
                         self.descriptor_calculator, self.target_calculator,
-                        self.grid_dimension, self.grid_size,
                         self.use_horovod,
                         input_requires_grad=True)
 
@@ -894,7 +851,7 @@ class DataHandler:
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
                     tmp = tmp.astype(np.float32)
-                    tmp = tmp.reshape([self.grid_size,
+                    tmp = tmp.reshape([snapshot.grid_size,
                                        self.input_dimension])
                     tmp = torch.from_numpy(tmp).float()
                     self.input_data_scaler.incremental_fit(tmp)
@@ -945,7 +902,7 @@ class DataHandler:
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
                     tmp = tmp.astype(np.float32)
-                    tmp = tmp.reshape([self.grid_size,
+                    tmp = tmp.reshape([snapshot.grid_size,
                                        self.output_dimension])
                     tmp = torch.from_numpy(tmp).float()
                     self.output_data_scaler.incremental_fit(tmp)
@@ -956,7 +913,7 @@ class DataHandler:
             self.__load_data("training", "outputs")
             self.output_data_scaler.fit(self.training_data_outputs)
 
-        printout("Output scaler parametrized.", min_verbosity=1)
+        printout("Output scaler parametrized.", min_verbosity=1)                
 
     def __raw_numpy_to_converted_numpy(self, numpy_array, data_type="in",
                                        units=None):

@@ -55,6 +55,7 @@ class Runner:
                 torch.cuda.set_device(hvd.local_rank())
 
     def _forward_entire_snapshot(self, snapshot_number, data_set,
+                                 data_set_type,
                                  number_of_batches_per_snapshot=0,
                                  batch_size=0):
         """
@@ -64,6 +65,7 @@ class Runner:
         ----------
         snapshot_number : int
             Snapshot for which the prediction is done.
+            GLOBAL snapshot number, i.e. across the entire list.
 
         number_of_batches_per_snapshot : int
             Number of batches that lie within a snapshot.
@@ -79,27 +81,39 @@ class Runner:
         predicted_outputs : numpy.ndarray
             Precicted outputs for snapshot.
         """
+        # Determine where the snapshot begins and ends.
+        from_index = 0
+        to_index = None
+
+        for idx, snapshot in enumerate(self.data.parameters.
+                                               snapshot_directories_list):
+            if snapshot.snapshot_function == data_set_type:
+                if idx == snapshot_number:
+                    to_index = from_index + snapshot.grid_size
+                    break
+                else:
+                    from_index += snapshot.grid_size
+        grid_size = to_index-from_index
+
         if self.data.parameters.use_lazy_loading:
             data_set.return_outputs_directly = True
             actual_outputs = \
                 (data_set
-                 [snapshot_number * self.data.
-                     grid_size:(snapshot_number + 1) * self.data.grid_size])[1]
+                 [from_index:to_index])[1]
         else:
             actual_outputs = \
                 self.data.output_data_scaler.\
                 inverse_transform(
-                    (data_set[snapshot_number * self.data.grid_size:
-                              (snapshot_number + 1) * self.data.grid_size])[1],
+                    (data_set[from_index:to_index])[1],
                     as_numpy=True)
 
-        predicted_outputs = np.zeros((self.data.grid_size,
+        predicted_outputs = np.zeros((grid_size,
                                       self.data.output_dimension))
 
-        offset = snapshot_number * self.data.grid_size
         for i in range(0, number_of_batches_per_snapshot):
             inputs, outputs = \
-                data_set[offset+(i * batch_size):offset+((i + 1) * batch_size)]
+                data_set[from_index+(i * batch_size):from_index+((i + 1)
+                                                                 * batch_size)]
             inputs = inputs.to(self.parameters._configuration["device"])
             predicted_outputs[i * batch_size:(i + 1) * batch_size, :] = \
                 self.data.output_data_scaler.\

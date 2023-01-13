@@ -1,4 +1,7 @@
 """Represents an entire atomic snapshot (including descriptor/target data)."""
+from os.path import join
+
+import numpy as np
 
 from mala.common.json_serializable import JSONSerializable
 
@@ -73,8 +76,14 @@ class Snapshot(JSONSerializable):
 
         # Legacy functionality: Determine whether the snapshot contains
         # numpy or HDF5 files.
-        self.snapshot_type = snapshot_type
+        self.snapshot_type = snapshot_type        
 
+        # All the dimensionalities of the snapshot.
+        self.grid_dimensions = None
+        self.grid_size = None
+        self.input_dimension = None
+        self.output_dimension = None
+        
     @classmethod
     def from_json(cls, json_dict):
         """

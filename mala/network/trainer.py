@@ -569,20 +569,24 @@ class Trainer(Runner):
 
             return np.mean(validation_loss)
         elif validation_type == "band_energy":
-            # Get optimal batch size and number of batches per snapshots.
-            optimal_batch_size = self. \
-                _correct_batch_size_for_testing(self.data.grid_size,
-                                                self.parameters.
-                                                mini_batch_size)
-            number_of_batches_per_snapshot = int(self.data.grid_size /
-                                                 optimal_batch_size)
             errors = []
             for snapshot_number in range(offset_snapshots,
                                          number_of_snapshots+offset_snapshots):
+                # Get optimal batch size and number of batches per snapshotss
+                grid_size = self.data.parameters.\
+                    snapshot_directories_list[snapshot_number].grid_size
+
+                optimal_batch_size = self. \
+                    _correct_batch_size_for_testing(grid_size,
+                                                    self.parameters.
+                                                    mini_batch_size)
+                number_of_batches_per_snapshot = int(grid_size /
+                                                     optimal_batch_size)
+
                 actual_outputs, \
                 predicted_outputs = self.\
-                    _forward_entire_snapshot(snapshot_number-offset_snapshots,
-                                             data_set,
+                    _forward_entire_snapshot(snapshot_number,
+                                             data_set, data_set_type,
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)
                 calculator = self.data.target_calculator
@@ -613,15 +617,21 @@ class Trainer(Runner):
             return np.mean(errors)
         elif validation_type == "total_energy":
             # Get optimal batch size and number of batches per snapshots.
-            optimal_batch_size = self. \
-                _correct_batch_size_for_testing(self.data.grid_size,
-                                                self.parameters.
-                                                mini_batch_size)
-            number_of_batches_per_snapshot = int(self.data.grid_size /
-                                                 optimal_batch_size)
+
             errors = []
             for snapshot_number in range(offset_snapshots,
                                          number_of_snapshots+offset_snapshots):
+                # Get optimal batch size and number of batches per snapshotss
+                grid_size = self.data.parameters.\
+                    snapshot_directories_list[snapshot_number].grid_size
+
+                optimal_batch_size = self. \
+                    _correct_batch_size_for_testing(grid_size,
+                                                    self.parameters.
+                                                    mini_batch_size)
+                number_of_batches_per_snapshot = int(grid_size /
+                                                     optimal_batch_size)
+
                 actual_outputs, predicted_outputs = self.\
                     _forward_entire_snapshot(snapshot_number-offset_snapshots,
                                              data_set,
