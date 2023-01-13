@@ -404,7 +404,8 @@ class DataHandler:
                 data_dimension = self.input_dimension
             else:
                 data_dimension = self.output_dimension
-            desired_dimensions = [self.grid_size, data_dimension]
+            grid_size = np.prod(numpy_array[0:3])
+            desired_dimensions = [grid_size, data_dimension]
         else:
             desired_dimensions = None
 
