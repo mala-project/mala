@@ -818,6 +818,9 @@ class DOS(Target):
         if self.save_target_data:
             self.density_of_states = array
 
+    def _set_feature_size_from_array(self, array):
+        self.parameters.ldos_gridsize = np.shape(array)[-1]
+
     @staticmethod
     def __number_of_electrons_from_dos(dos_data, energy_grid, fermi_energy,
                                        temperature, integration_method):
