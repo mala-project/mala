@@ -59,7 +59,7 @@ class PhysicalData(ABC):
     #   because there is no need to.
     ##############################
 
-    def read_from_numpy_file(self, path, units=None, array=None):
+    def read_from_numpy_file(self, path, units=None, array=None, reshape=False):
         """
         Read the data from a numpy file.
 
@@ -88,7 +88,13 @@ class PhysicalData(ABC):
             self._process_loaded_array(loaded_array, units=units)
             return loaded_array
         else:
-            array[:, :, :, :] = np.load(path)[:, :, :, self._feature_mask():]
+            if reshape:
+                array_dims = np.shape(array)
+                array[:, :] = np.load(path)[:, :, :, self._feature_mask() :].reshape(
+                    array_dims
+                )
+            else:
+                array[:, :, :, :] = np.load(path)[:, :, :, self._feature_mask() :]
             self._process_loaded_array(array, units=units)
 
     def read_from_openpmd_file(self, path, units=None, array=None):

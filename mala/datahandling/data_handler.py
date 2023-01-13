@@ -668,12 +668,16 @@ class DataHandler:
                     units = snapshot.output_units
 
                 if snapshot.snapshot_type == "numpy":
-                    tmp_array = calculator.read_from_numpy_file(file, units=units)
-                    tmp_array = tmp_array.reshape([gs_new, feature_dimension])
-                    getattr(self, array)[gs_old : gs_old + gs_new] = tmp_array
+                    calculator.read_from_numpy_file(
+                        file,
+                        units=units,
+                        array=getattr(self, array)[gs_old : gs_old + gs_new, :],
+                        reshape=True,
+                    )
                 elif snapshot.snapshot_type == "openpmd":
-                    getattr(self, array)[snapshot_counter] = \
-                        calculator.read_from_openpmd_file(file, units=units)
+                    getattr(self, array)[gs_old : gs_old + gs_new] = \
+                        calculator.read_from_openpmd_file(file, units=units) \
+                        .reshape([gs_new, feature_dimensions])
                 else:
                     raise Exception("Unknown snapshot file type.")
                 snapshot_counter += 1
