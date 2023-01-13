@@ -80,11 +80,11 @@ class DataHandler:
                              use_horovod=self.use_horovod)
 
         # Dimensionalities of data.
-        self.input_dimension = 0 # None ??
-        self.output_dimension = 0 # None ??
+        self.input_dimension = 0
+        self.output_dimension = 0
         self.nr_snapshots = 0
-        
-        # TODO only define these parameters in case of clustering
+
+        # clustering still needs uniform grids
         if self.parameters.use_clustering:
             self.grid_dimension = [0, 0, 0]
             self.grid_size = 0
@@ -387,8 +387,6 @@ class DataHandler:
         converted_tensor: torch.Tensor
             The fully converted and scaled tensor.
         """
-        # TODO: not sure where this function is used
-        # since we got rid of the self.grid_size parameter, it won't work in current form
         # Check parameters for consistency.
         if data_type != "in" and data_type != "out":
             raise Exception("Please specify either \"in\" or \"out\" as "
@@ -492,12 +490,10 @@ class DataHandler:
             # for flexible grid sizes only this need be consistent
             tmp_input_dimension = tmp_dimension[-1]
             tmp_grid_dim = tmp_dimension[0:3]
-            # TODO: move assignment of snapshot dims to snapshot.py??            
             snapshot.grid_dimension = tmp_grid_dim
             snapshot.grid_size = int(np.prod(snapshot.grid_dimension))            
             if firstsnapshot:
                 self.input_dimension = tmp_input_dimension
-                # TODO is this the best way to do this?
                 if self.parameters.use_clustering:
                     self.grid_dimension[0:3] = tmp_grid_dim[0:3]
                     self.grid_size = np.prod(self.grid_dimension)
