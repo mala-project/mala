@@ -170,7 +170,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_electrons_from_eigenvals</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">band_energy_dft_calculation</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_energy_dft_calculation</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">electrons_per_atom</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qe_input_data</span> <span class="o">=</span> <span class="p">{</span>
@@ -606,8 +605,10 @@
 <span class="sd">            will be used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">target_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># The feature dimension may be undefined.</span>
             <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_target</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># The feature dimension may be undefined.</span>
             <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">target_data</span><span class="p">)</span></div>
 
     <span class="c1"># Accessing target data</span>

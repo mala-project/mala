@@ -205,7 +205,7 @@ array.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.write_to_openpmd_iteration">
-<span class="sig-name descname"><span class="pre">write_to_openpmd_iteration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/physical_data.html#PhysicalData.write_to_openpmd_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.physical_data.PhysicalData.write_to_openpmd_iteration" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_to_openpmd_iteration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_reach</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_from</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/common/physical_data.html#PhysicalData.write_to_openpmd_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.common.physical_data.PhysicalData.write_to_openpmd_iteration" title="Permalink to this definition"></a></dt>
 <dd><p>Write a file within an OpenPMD iteration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -224,6 +224,12 @@ depending on the class, be saved in the OpenPMD file.</p></li>
 <dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.data_name">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_name</span></span><a class="headerlink" href="#mala.common.physical_data.PhysicalData.data_name" title="Permalink to this definition"></a></dt>
 <dd><p>Get a string that describes the data (for e.g. metadata).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.common.physical_data.PhysicalData.feature_size">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">feature_size</span></span><a class="headerlink" href="#mala.common.physical_data.PhysicalData.feature_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get the feature dimension of this data.</p>
 </dd></dl>
 
 <dl class="py property">

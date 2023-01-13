@@ -77,6 +77,7 @@
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_comm</span><span class="p">,</span> <span class="n">get_rank</span>
 
 <span class="kn">from</span> <span class="nn">mala.version</span> <span class="kn">import</span> <span class="n">__version__</span> <span class="k">as</span> <span class="n">mala_version</span>
 
@@ -95,6 +96,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 
     <span class="c1">##############################</span>
     <span class="c1"># Properties</span>
@@ -104,6 +106,12 @@
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">data_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a string that describes the data (for e.g. metadata).&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the feature dimension of this data.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
@@ -368,17 +376,37 @@
         <span class="k">elif</span> <span class="n">file_ending</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">file_extensions</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid file ending selected: &quot;</span> <span class="o">+</span>
                             <span class="n">file_ending</span><span class="p">)</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
-                           <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                              <span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                <span class="n">path</span><span class="p">,</span>
+                <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
+                <span class="n">get_comm</span><span class="p">(),</span>
+                <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                <span class="n">path</span><span class="p">,</span>
+                <span class="n">io</span><span class="o">.</span><span class="n">Access</span><span class="o">.</span><span class="n">create</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_configuration&quot;</span><span class="p">]))</span>
         <span class="n">series</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">series</span><span class="o">.</span><span class="n">set_software</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MALA&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">mala_version</span><span class="p">)</span>
         <span class="n">series</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>
         <span class="n">iteration</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">write_iterations</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># This function may be called without the feature dimension</span>
+        <span class="c1"># explicitly set (i.e. during testing or post-processing).</span>
+        <span class="c1"># We have to check for that.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_feature_size_from_array</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">write_to_openpmd_iteration</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PhysicalData.write_to_openpmd_iteration"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_iteration">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span>
-                                   <span class="n">additional_metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                                   <span class="n">local_offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">local_reach</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">additional_metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">feature_from</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">feature_to</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write a file within an OpenPMD iteration.</span>
 
@@ -397,6 +425,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
 
+        <span class="k">if</span> <span class="n">local_offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="p">[</span><span class="n">x_from</span><span class="p">,</span> <span class="n">y_from</span><span class="p">,</span> <span class="n">z_from</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">[</span><span class="n">x_from</span><span class="p">,</span> <span class="n">y_from</span><span class="p">,</span> <span class="n">z_from</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_offset</span>
+        <span class="k">if</span> <span class="n">local_reach</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="p">[</span><span class="n">x_to</span><span class="p">,</span> <span class="n">y_to</span><span class="p">,</span> <span class="n">z_to</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">[</span><span class="n">x_to</span><span class="p">,</span> <span class="n">y_to</span><span class="p">,</span> <span class="n">z_to</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_reach</span>
+
         <span class="n">mesh</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_name</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">additional_metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -406,11 +443,15 @@
         <span class="c1"># If the data contains atomic data, we need to process it.</span>
         <span class="n">atoms_ase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_atoms</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">atoms_ase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># This data is equivalent across the ranks, so just write it once</span>
             <span class="n">atoms_openpmd</span> <span class="o">=</span> <span class="n">iteration</span><span class="o">.</span><span class="n">particles</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span>
             <span class="n">atomic_positions</span> <span class="o">=</span> <span class="n">atoms_ase</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
             <span class="n">atomic_numbers</span> <span class="o">=</span> <span class="n">atoms_ase</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">()</span>
-            <span class="n">positions</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">atomic_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
-                                   <span class="n">atomic_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+                <span class="c1"># Need bugfix https://github.com/openPMD/openPMD-api/pull/1357</span>
+                <span class="n">atomic_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="k">if</span> <span class="n">io</span><span class="o">.</span><span class="n">__version__</span> <span class="o">&gt;=</span> <span class="s1">&#39;0.15.0&#39;</span> <span class="k">else</span>
+                <span class="n">io</span><span class="o">.</span><span class="n">Datatype</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">,</span>
+                <span class="n">atomic_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
             <span class="n">numbers</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
                                  <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">iteration</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;periodic_boundary_conditions_x&quot;</span><span class="p">,</span>
@@ -426,42 +467,88 @@
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
 
-                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span>\
-                    <span class="n">store_chunk</span><span class="p">(</span><span class="n">atomic_positions</span><span class="p">[</span><span class="n">atom</span><span class="p">])</span>
-                <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span>\
-                    <span class="n">store_chunk</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="n">atom</span><span class="p">]]))</span>
+                <span class="n">atoms_openpmd_position</span> <span class="o">=</span> <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span>
+                <span class="n">atoms_openpmd_number</span> <span class="o">=</span> <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;number&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">atoms_openpmd_position</span><span class="o">.</span><span class="n">store_chunk</span><span class="p">(</span><span class="n">atomic_positions</span><span class="p">[</span><span class="n">atom</span><span class="p">])</span>
+                    <span class="n">atoms_openpmd_number</span><span class="o">.</span><span class="n">store_chunk</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="n">atom</span><span class="p">]]))</span>
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">make_constant</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="c1"># Positions are stored in Angstrom.</span>
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="mf">1.0e-10</span>
                 <span class="n">atoms_openpmd</span><span class="p">[</span><span class="s2">&quot;positionOffset&quot;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)]</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="mf">1.0e-10</span>
 
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
-                             <span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">feature_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">feature_to</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">feature_to</span> <span class="o">-</span> <span class="n">feature_from</span> <span class="o">!=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">[write_to_openpmd_iteration] Internal error, called function with</span>
+<span class="s2">wrong parameters. Specification of features (</span><span class="si">{}</span><span class="s2"> - </span><span class="si">{}</span><span class="s2">) on rank </span><span class="si">{}</span><span class="s2"> does not</span>
+<span class="s2">match the array dimensions (extent </span><span class="si">{}</span><span class="s2"> in the feature dimension)&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">feature_from</span><span class="p">,</span> <span class="n">feature_to</span><span class="p">,</span> <span class="n">get_rank</span><span class="p">(),</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
 
         <span class="c1"># See above - will currently break for density of states,</span>
         <span class="c1"># which is something we never do though anyway.</span>
         <span class="c1"># Deal with `granularity` items of the vectors at a time</span>
         <span class="c1"># Or in the openPMD layout: with `granularity` record components</span>
-        <span class="n">granularity</span> <span class="o">=</span> <span class="mi">16</span> <span class="c1"># just some random value for now</span>
+        <span class="n">granularity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;openpmd_granularity&quot;</span><span class="p">]</span>
+        <span class="c1"># Before writing the actual data, we have to make two considerations</span>
+        <span class="c1"># for MPI:</span>
+        <span class="c1"># 1) The following loop does not necessarily have the same number of</span>
+        <span class="c1">#    iterations across MPI ranks. Since the Series is flushed in every</span>
+        <span class="c1">#    loop iteration, we need to harmonize the number of flushes</span>
+        <span class="c1">#    (flushing is collective).</span>
+        <span class="c1"># 2) Dataset creation and attribute writing is collective in HDF5.</span>
+        <span class="c1">#    So, we need to define all features on all ranks, even if not all</span>
+        <span class="c1">#    features are written from all ranks.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+            <span class="n">my_iteration_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">granularity</span><span class="p">))</span>
+            <span class="n">highest_iteration_count</span> <span class="o">=</span> <span class="n">get_comm</span><span class="p">()</span><span class="o">.</span><span class="n">allreduce</span><span class="p">(</span><span class="n">my_iteration_count</span><span class="p">,</span>
+                                                           <span class="n">op</span><span class="o">=</span><span class="n">MPI</span><span class="o">.</span><span class="n">MAX</span><span class="p">)</span>
+            <span class="n">extra_flushes</span> <span class="o">=</span> <span class="n">highest_iteration_count</span> <span class="o">-</span> <span class="n">my_iteration_count</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">extra_flushes</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Global feature sizes:</span>
+        <span class="n">feature_global_from</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">feature_global_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_size</span>
+        <span class="c1"># First loop: Only metadata, write metadata equivalently across ranks</span>
+        <span class="k">for</span> <span class="n">current_feature</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">feature_global_from</span><span class="p">,</span> <span class="n">feature_global_to</span><span class="p">):</span>
+            <span class="n">mesh_component</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">current_feature</span><span class="p">)]</span>
+            <span class="n">mesh_component</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="c1"># All data is assumed to be saved in</span>
+            <span class="c1"># MALA units, so the SI conversion factor we save</span>
+            <span class="c1"># here is the one for MALA (ASE) units</span>
+            <span class="n">mesh_component</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">si_unit_conversion</span>
+            <span class="c1"># position: which relative point within the cell is</span>
+            <span class="c1"># represented by the stored values</span>
+            <span class="c1"># ([0.5, 0.5, 0.5] represents the middle)</span>
+            <span class="n">mesh_component</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+
+        <span class="c1"># Second loop: Write heavy data</span>
         <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">granularity</span><span class="p">):</span>
             <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">base</span> <span class="o">+</span> <span class="n">granularity</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
             <span class="n">transposed</span> <span class="o">=</span> \
                 <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">base</span><span class="p">:</span><span class="n">end</span><span class="p">],</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
-                <span class="n">mesh_component</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
-                <span class="n">mesh_component</span><span class="o">.</span><span class="n">reset_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+                <span class="c1"># i is the index within the array passed to this function.</span>
+                <span class="c1"># The feature corresponding to this index is offset</span>
+                <span class="c1"># by the feature_from parameter</span>
+                <span class="n">current_feature</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">feature_from</span>
+                <span class="n">mesh_component</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">current_feature</span><span class="p">)]</span>
 
-                <span class="n">mesh_component</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">transposed</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">base</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+                <span class="n">mesh_component</span><span class="p">[</span><span class="n">x_from</span><span class="p">:</span><span class="n">x_to</span><span class="p">,</span> <span class="n">y_from</span><span class="p">:</span><span class="n">y_to</span><span class="p">,</span> <span class="n">z_from</span><span class="p">:</span><span class="n">z_to</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">transposed</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">base</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
 
-                <span class="c1"># All data is assumed to be saved in</span>
-                <span class="c1"># MALA units, so the SI conversion factor we save</span>
-                <span class="c1"># here is the one for MALA (ASE) units</span>
-                <span class="n">mesh_component</span><span class="o">.</span><span class="n">unit_SI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">si_unit_conversion</span>
-                <span class="c1"># position: which relative point within the cell is</span>
-                <span class="c1"># represented by the stored values</span>
-                <span class="c1"># ([0.5, 0.5, 0.5] represents the middle)</span>
-                <span class="n">mesh_component</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+            <span class="n">iteration</span><span class="o">.</span><span class="n">series_flush</span><span class="p">()</span>
+
+        <span class="c1"># Third loop: Extra flushes to harmonize ranks</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">extra_flushes</span><span class="p">):</span>
             <span class="n">iteration</span><span class="o">.</span><span class="n">series_flush</span><span class="p">()</span>
 
         <span class="n">iteration</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
@@ -478,6 +565,10 @@
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">_process_loaded_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array_dimensions</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">_process_additional_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">additional_metadata</span><span class="p">):</span>

@@ -1305,6 +1305,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_target_data</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">local_density_of_states</span> <span class="o">=</span> <span class="n">array</span>
 
+    <span class="k">def</span> <span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="nf">_gather_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_values</span><span class="p">,</span> <span class="n">use_pickled_comm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gathers the density on rank 0 and sorts it.</span>
@@ -1414,6 +1417,10 @@
 <span class="sd">            Usage will reduce RAM footprint while SIGNIFICANTLY</span>
 <span class="sd">            impacting disk usage and</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">return_local</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s2">&quot;return_local&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">return_local</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;return_local&quot;</span><span class="p">]</span>
+
         <span class="c1"># Find out the number of digits that are needed to encode this</span>
         <span class="c1"># grid (by QE).</span>
         <span class="n">digits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
@@ -1465,6 +1472,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
             <span class="n">barrier</span><span class="p">()</span>
             <span class="n">data_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">return_local</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">start_index</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">end_index</span><span class="o">-</span><span class="mi">1</span>
             <span class="k">if</span> <span class="n">use_memmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ldos_data_full</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="n">use_memmap</span><span class="p">,</span>

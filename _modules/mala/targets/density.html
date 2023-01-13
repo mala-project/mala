@@ -902,6 +902,10 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_target_data</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="n">array</span>
 
+    <span class="k">def</span> <span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="c1"># Feature size is always 1 in this case, no need to do anything.</span>
+        <span class="k">pass</span>
+
     <span class="k">def</span> <span class="nf">__setup_total_energy_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">density_data</span><span class="p">,</span> <span class="n">atoms_Angstrom</span><span class="p">,</span>
                                     <span class="n">create_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">qe_input_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                     <span class="n">qe_pseudopotentials</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

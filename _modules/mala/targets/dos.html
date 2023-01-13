@@ -891,6 +891,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_target_data</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">density_of_states</span> <span class="o">=</span> <span class="n">array</span>
 
+    <span class="k">def</span> <span class="nf">_set_feature_size_from_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ldos_gridsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__number_of_electrons_from_dos</span><span class="p">(</span><span class="n">dos_data</span><span class="p">,</span> <span class="n">energy_grid</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="p">,</span>
                                        <span class="n">temperature</span><span class="p">,</span> <span class="n">integration_method</span><span class="p">):</span>

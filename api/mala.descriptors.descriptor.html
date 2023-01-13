@@ -176,6 +176,23 @@ are no multiple instances running in the same directory.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mala.descriptors.descriptor.Descriptor.convert_local_to_3d">
+<span class="sig-name descname"><span class="pre">convert_local_to_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptors_np</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor.html#Descriptor.convert_local_to_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.convert_local_to_3d" title="Permalink to this definition"></a></dt>
+<dd><p>Convert the desciptors as done in the gather function, but per rank.</p>
+<p>This is useful for e.g. parallel preprocessing.
+This function removes the extra 3 components that come from parallel
+processing.
+I.e. if we have 91 bispectrum descriptors, LAMMPS directly outputs us
+97 (in parallel mode), and this function returns 94, as to retain the
+3 x,y,z ones we by default include.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>descriptors_np</strong> (<em>numpy.array</em>) – Numpy array with the descriptors of this ranks local grid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mala.descriptors.descriptor.Descriptor.convert_units">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/eV'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor.html#Descriptor.convert_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.convert_units" title="Permalink to this definition"></a></dt>
 <dd><p>Convert descriptors from a specified unit into the ones used in MALA.</p>
@@ -220,8 +237,8 @@ objects, the atoms are explicitly in the unit cell.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.descriptors.descriptor.Descriptor.gather_descriptors">
-<span class="sig-name descname"><span class="pre">gather_descriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snap_descriptors_np</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pickled_comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor.html#Descriptor.gather_descriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.gather_descriptors" title="Permalink to this definition"></a></dt>
-<dd><p>Gathers all bispectrum descriptors on rank 0 and sorts them.</p>
+<span class="sig-name descname"><span class="pre">gather_descriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptors_np</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pickled_comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/descriptors/descriptor.html#Descriptor.gather_descriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.descriptors.descriptor.Descriptor.gather_descriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Gathers all descriptors on rank 0 and sorts them.</p>
 <p>This is useful for e.g. parallel preprocessing.
 This function removes the extra 3 components that come from parallel
 processing.
@@ -231,7 +248,7 @@ I.e. if we have 91 bispectrum descriptors, LAMMPS directly outputs us
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>snap_descriptors_np</strong> (<em>numpy.array</em>) – Numpy array with the descriptors of this ranks local grid.</p></li>
+<li><p><strong>descriptors_np</strong> (<em>numpy.array</em>) – Numpy array with the descriptors of this ranks local grid.</p></li>
 <li><p><strong>use_pickled_comm</strong> (<em>bool</em>) – If True, the pickled communication route from mpi4py is used.
 If False, a Recv/Sendv combination is used. I am not entirely
 sure what is faster. Technically Recv/Sendv should be faster,

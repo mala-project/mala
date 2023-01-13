@@ -117,6 +117,11 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a string that describes the target (for e.g. metadata).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;AtomicDensity&quot;</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">feature_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the feature dimension of this data.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span>
+
 <div class="viewcode-block" id="AtomicDensity.convert_units"><a class="viewcode-back" href="../../../api/mala.descriptors.atomic_density.html#mala.descriptors.atomic_density.AtomicDensity.convert_units">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">convert_units</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">in_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
