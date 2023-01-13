@@ -97,7 +97,6 @@ class Target(PhysicalData):
         self.number_of_electrons_from_eigenvals = None
         self.band_energy_dft_calculation = None
         self.total_energy_dft_calculation = None
-        self.grid_dimensions = [0, 0, 0]
         self.atoms = None
         self.electrons_per_atom = None
         self.qe_input_data = {
@@ -533,8 +532,10 @@ class Target(PhysicalData):
             will be used.
         """
         if target_data is None:
+            # The feature dimension may be undefined.
             super(Target, self).write_to_openpmd_file(path, self.get_target())
         else:
+            # The feature dimension may be undefined.
             super(Target, self).write_to_openpmd_file(path, target_data)
 
     # Accessing target data

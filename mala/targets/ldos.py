@@ -1232,6 +1232,9 @@ class LDOS(Target):
         if self.save_target_data:
             self.local_density_of_states = array
 
+    def _set_feature_size_from_array(self, array):
+        self.parameters.ldos_gridsize = np.shape(array)[-1]
+
     def _gather_density(self, density_values, use_pickled_comm=False):
         """
         Gathers the density on rank 0 and sorts it.
@@ -1341,6 +1344,10 @@ class LDOS(Target):
             Usage will reduce RAM footprint while SIGNIFICANTLY
             impacting disk usage and
         """
+        return_local = False
+        if "return_local" in kwargs.keys():
+            return_local = kwargs["return_local"]
+
         # Find out the number of digits that are needed to encode this
         # grid (by QE).
         digits = int(math.log10(self.parameters.ldos_gridsize)) + 1
@@ -1392,6 +1399,8 @@ class LDOS(Target):
         if self.parameters._configuration["mpi"]:
             barrier()
             data_shape = np.shape(ldos_data)
+            if return_local:
+                return ldos_data, start_index-1, end_index-1
             if use_memmap is not None:
                 if get_rank() == 0:
                     ldos_data_full = np.memmap(use_memmap,

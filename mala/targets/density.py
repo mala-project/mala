@@ -829,6 +829,10 @@ class Density(Target):
         if self.save_target_data:
             self.density = array
 
+    def _set_feature_size_from_array(self, array):
+        # Feature size is always 1 in this case, no need to do anything.
+        pass
+
     def __setup_total_energy_module(self, density_data, atoms_Angstrom,
                                     create_file=True, qe_input_data=None,
                                     qe_pseudopotentials=None):
