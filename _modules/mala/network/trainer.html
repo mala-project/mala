@@ -642,20 +642,24 @@
 
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">validation_loss</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">validation_type</span> <span class="o">==</span> <span class="s2">&quot;band_energy&quot;</span><span class="p">:</span>
-            <span class="c1"># Get optimal batch size and number of batches per snapshots.</span>
-            <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
-                <span class="n">_correct_batch_size_for_testing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
-                                                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                <span class="n">mini_batch_size</span><span class="p">)</span>
-            <span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">/</span>
-                                                 <span class="n">optimal_batch_size</span><span class="p">)</span>
             <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">snapshot_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">offset_snapshots</span><span class="p">,</span>
                                          <span class="n">number_of_snapshots</span><span class="o">+</span><span class="n">offset_snapshots</span><span class="p">):</span>
+                <span class="c1"># Get optimal batch size and number of batches per snapshotss</span>
+                <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
+                    <span class="n">snapshot_directories_list</span><span class="p">[</span><span class="n">snapshot_number</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
+
+                <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
+                    <span class="n">_correct_batch_size_for_testing</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span>
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                                    <span class="n">mini_batch_size</span><span class="p">)</span>
+                <span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid_size</span> <span class="o">/</span>
+                                                     <span class="n">optimal_batch_size</span><span class="p">)</span>
+
                 <span class="n">actual_outputs</span><span class="p">,</span> \
                 <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-                    <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">snapshot_number</span><span class="o">-</span><span class="n">offset_snapshots</span><span class="p">,</span>
-                                             <span class="n">data_set</span><span class="p">,</span>
+                    <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">,</span>
+                                             <span class="n">data_set</span><span class="p">,</span> <span class="n">data_set_type</span><span class="p">,</span>
                                              <span class="n">number_of_batches_per_snapshot</span><span class="p">,</span>
                                              <span class="n">optimal_batch_size</span><span class="p">)</span>
                 <span class="n">calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
@@ -686,15 +690,21 @@
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">validation_type</span> <span class="o">==</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">:</span>
             <span class="c1"># Get optimal batch size and number of batches per snapshots.</span>
-            <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
-                <span class="n">_correct_batch_size_for_testing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
-                                                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
-                                                <span class="n">mini_batch_size</span><span class="p">)</span>
-            <span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">/</span>
-                                                 <span class="n">optimal_batch_size</span><span class="p">)</span>
+
             <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">snapshot_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">offset_snapshots</span><span class="p">,</span>
                                          <span class="n">number_of_snapshots</span><span class="o">+</span><span class="n">offset_snapshots</span><span class="p">):</span>
+                <span class="c1"># Get optimal batch size and number of batches per snapshotss</span>
+                <span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
+                    <span class="n">snapshot_directories_list</span><span class="p">[</span><span class="n">snapshot_number</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
+
+                <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span> \
+                    <span class="n">_correct_batch_size_for_testing</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span>
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                                    <span class="n">mini_batch_size</span><span class="p">)</span>
+                <span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid_size</span> <span class="o">/</span>
+                                                     <span class="n">optimal_batch_size</span><span class="p">)</span>
+
                 <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
                     <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">snapshot_number</span><span class="o">-</span><span class="n">offset_snapshots</span><span class="p">,</span>
                                              <span class="n">data_set</span><span class="p">,</span>

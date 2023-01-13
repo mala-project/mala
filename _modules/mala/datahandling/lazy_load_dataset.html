@@ -118,13 +118,6 @@
 <span class="sd">    target_calculator : mala.targets.target.Target or derivative</span>
 <span class="sd">        Used to do unit conversion on output data.</span>
 
-<span class="sd">    grid_dimensions : list</span>
-<span class="sd">        Dimensions of the grid (x,y,z).</span>
-
-<span class="sd">    grid_size : int</span>
-<span class="sd">        Size of the grid (x*y*z), i.e. the number of datapoints per</span>
-<span class="sd">        snapshot.</span>
-
 <span class="sd">    use_horovod : bool</span>
 <span class="sd">        If true, it is assumed that horovod is used.</span>
 
@@ -134,7 +127,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dimension</span><span class="p">,</span> <span class="n">output_dimension</span><span class="p">,</span> <span class="n">input_data_scaler</span><span class="p">,</span>
                  <span class="n">output_data_scaler</span><span class="p">,</span> <span class="n">descriptor_calculator</span><span class="p">,</span>
-                 <span class="n">target_calculator</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">use_horovod</span><span class="p">,</span>
+                 <span class="n">target_calculator</span><span class="p">,</span> <span class="n">use_horovod</span><span class="p">,</span>
                  <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">=</span> <span class="n">input_dimension</span>
@@ -143,8 +136,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span> <span class="o">=</span> <span class="n">output_data_scaler</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">descriptor_calculator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">grid_dimensions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="n">grid_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
@@ -184,7 +175,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">+=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span></div>
 
 <div class="viewcode-block" id="LazyLoadDataset.mix_datasets"><a class="viewcode-back" href="../../../api/mala.datahandling.lazy_load_dataset.html#mala.datahandling.lazy_load_dataset.LazyLoadDataset.mix_datasets">[docs]</a>    <span class="k">def</span> <span class="nf">mix_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -233,14 +224,16 @@
 
         <span class="c1"># Transform the data.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_requires_grad</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">])</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_outputs_directly</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
@@ -249,6 +242,26 @@
 
         <span class="c1"># Save which data we have currently loaded.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">=</span> <span class="n">file_index</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_file_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">file_index</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">index_in_file</span> <span class="o">=</span> <span class="n">idx</span>
+        <span class="k">if</span> <span class="n">is_slice</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">index_in_file</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">file_index</span> <span class="o">=</span> <span class="n">i</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">index_in_file</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
+            <span class="k">return</span> <span class="n">file_index</span><span class="p">,</span> <span class="n">index_in_file</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">index_in_file</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">file_index</span> <span class="o">=</span> <span class="n">i</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">index_in_file</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
+            <span class="k">return</span> <span class="n">file_index</span><span class="p">,</span> <span class="n">index_in_file</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -267,8 +280,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get item can be called with an int or a slice.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">file_index</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
-            <span class="n">index_in_file</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
+            <span class="n">file_index</span><span class="p">,</span> <span class="n">index_in_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_file_index</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
 
             <span class="c1"># Find out if new data is needed.</span>
             <span class="k">if</span> <span class="n">file_index</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span><span class="p">:</span>
@@ -277,18 +289,19 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">output_data</span><span class="p">[</span><span class="n">index_in_file</span><span class="p">]</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
-            <span class="c1"># If a slice is requested, we have to find out if t spans files.</span>
-            <span class="n">file_index_start</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">start</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
-            <span class="n">index_in_file_start</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">start</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
-            <span class="n">file_index_stop</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">stop</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
-            <span class="n">index_in_file_stop</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">stop</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
+            <span class="c1"># If a slice is requested, we have to find out if it spans files.</span>
+            <span class="n">file_index_start</span><span class="p">,</span> <span class="n">index_in_file_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
+                <span class="n">_get_file_index</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">file_index_stop</span><span class="p">,</span> <span class="n">index_in_file_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
+                <span class="n">_get_file_index</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="c1"># If it does, we cannot deliver.</span>
             <span class="c1"># Take care though, if a full snapshot is requested,</span>
             <span class="c1"># the stop index will point to the wrong file.</span>
             <span class="k">if</span> <span class="n">file_index_start</span> <span class="o">!=</span> <span class="n">file_index_stop</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">index_in_file_stop</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">index_in_file_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
+                    <span class="n">index_in_file_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">file_index_stop</span><span class="p">]</span><span class="o">.</span>\
+                        <span class="n">grid_size</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Lazy loading currently only supports &quot;</span>
                                     <span class="s2">&quot;slices in one file. &quot;</span>

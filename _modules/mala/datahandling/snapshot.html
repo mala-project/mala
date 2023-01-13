@@ -72,6 +72,9 @@
              
   <h1>Source code for mala.datahandling.snapshot</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Represents an entire atomic snapshot (including descriptor/target data).&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
 
@@ -146,8 +149,14 @@
 
         <span class="c1"># Legacy functionality: Determine whether the snapshot contains</span>
         <span class="c1"># numpy or HDF5 files.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">=</span> <span class="n">snapshot_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">=</span> <span class="n">snapshot_type</span>        
 
+        <span class="c1"># All the dimensionalities of the snapshot.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">=</span> <span class="kc">None</span>
+        
 <div class="viewcode-block" id="Snapshot.from_json"><a class="viewcode-back" href="../../../api/mala.datahandling.snapshot.html#mala.datahandling.snapshot.Snapshot.from_json">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">json_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

@@ -119,13 +119,6 @@
 <span class="sd">    target_calculator : mala.targets.target.Target or derivative</span>
 <span class="sd">        Used to do unit conversion on output data.</span>
 
-<span class="sd">    grid_dimensions : list</span>
-<span class="sd">        Dimensions of the grid (x,y,z).</span>
-
-<span class="sd">    grid_size : int</span>
-<span class="sd">        Size of the grid (x*y*z), i.e. the number of datapoints per</span>
-<span class="sd">        snapshot.</span>
-
 <span class="sd">    use_horovod : bool</span>
 <span class="sd">        If true, it is assumed that horovod is used.</span>
 
@@ -137,7 +130,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dimension</span><span class="p">,</span> <span class="n">output_dimension</span><span class="p">,</span> <span class="n">input_data_scaler</span><span class="p">,</span>
                  <span class="n">output_data_scaler</span><span class="p">,</span> <span class="n">descriptor_calculator</span><span class="p">,</span>
-                 <span class="n">target_calculator</span><span class="p">,</span> <span class="n">grid_dimensions</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">use_horovod</span><span class="p">,</span>
+                 <span class="n">target_calculator</span><span class="p">,</span> <span class="n">use_horovod</span><span class="p">,</span>
                  <span class="n">number_of_clusters</span><span class="p">,</span> <span class="n">train_ratio</span><span class="p">,</span> <span class="n">sample_ratio</span><span class="p">,</span>
                  <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -147,8 +140,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span> <span class="o">=</span> <span class="n">output_data_scaler</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">descriptor_calculator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">grid_dimensions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="n">grid_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
@@ -169,6 +160,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cluster_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sampling_idxs</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_sampling_idx</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">return_outputs_directly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -198,6 +191,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">!=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Clustering currently only implemented for&quot;</span>
+                            <span class="s2">&quot; snapshots of equal grid sizes.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_snapshots</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">*</span>
                               <span class="bp">self</span><span class="o">.</span><span class="n">sample_ratio</span><span class="p">)</span></div>
 

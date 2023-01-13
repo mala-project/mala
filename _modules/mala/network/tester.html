@@ -106,7 +106,6 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">Tester</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__prepare_to_test</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Tester.test_snapshot"><a class="viewcode-back" href="../../../api/mala.network.tester.html#mala.network.tester.Tester.test_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">test_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -125,30 +124,45 @@
 <span class="sd">        predicted_outputs : numpy.ndarray</span>
 <span class="sd">            Precicted outputs for snapshot.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Adjust batch size and such.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__prepare_to_test</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">)</span>
         <span class="c1"># Make sure no data lingers in the target calculator.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">invalidate_target</span><span class="p">()</span>
 
         <span class="c1"># Forward through network.</span>
+        <span class="n">offset_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nr_validation_snapshots</span> <span class="o">+</span> \
+                           <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nr_training_snapshots</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span>\
-            <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">,</span>
+            <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">offset_snapshots</span><span class="o">+</span><span class="n">snapshot_number</span><span class="p">,</span>
                                      <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">test_data_set</span><span class="p">,</span>
+                                     <span class="s2">&quot;te&quot;</span><span class="p">,</span>
                                      <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span><span class="p">,</span>
                                      <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">__prepare_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__prepare_to_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the tester class to for test run.&quot;&quot;&quot;</span>
         <span class="c1"># We will use the DataSet iterator to iterate over the test data.</span>
         <span class="c1"># But since we only want the data per snapshot,</span>
         <span class="c1"># we need to make sure the batch size is compatible with that.</span>
+        <span class="n">test_snapshot</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">grid_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;te&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">snapshot_number</span> <span class="o">==</span> <span class="n">test_snapshot</span><span class="p">:</span>
+                    <span class="n">grid_size</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span>
+                    <span class="k">break</span>
+                <span class="n">test_snapshot</span> <span class="o">+=</span> <span class="mi">1</span>
+
         <span class="n">optimal_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-            <span class="n">_correct_batch_size_for_testing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
+            <span class="n">_correct_batch_size_for_testing</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span>
                                             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">optimal_batch_size</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">:</span>
             <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Had to readjust batch size from&quot;</span><span class="p">,</span>
                      <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span><span class="p">,</span> <span class="s2">&quot;to&quot;</span><span class="p">,</span>
                      <span class="n">optimal_batch_size</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="n">optimal_batch_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">/</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid_size</span> <span class="o">/</span>
                                                   <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
                                                   <span class="n">mini_batch_size</span><span class="p">)</span></div>
 </pre></div>

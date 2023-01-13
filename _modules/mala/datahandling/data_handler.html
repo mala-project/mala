@@ -139,12 +139,13 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">Descriptor</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
-        <span class="c1"># Data will be scaled per user specification.</span>
+        <span class="c1"># Data will be scaled per user specification.            </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span> <span class="o">=</span> <span class="n">input_data_scaler</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span> \
                 <span class="o">=</span> <span class="n">DataScaler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">input_rescaling_type</span><span class="p">,</span>
                              <span class="n">use_horovod</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span> <span class="o">=</span> <span class="n">output_data_scaler</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span> \
@@ -154,9 +155,12 @@
         <span class="c1"># Dimensionalities of data.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># clustering still needs uniform grids</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_clustering</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># Actual data points in the different categories.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">=</span> <span class="mi">0</span>
@@ -206,7 +210,7 @@
     <span class="c1">##############################</span>
 
     <span class="c1"># Adding/Deleting data</span>
-    <span class="c1">######################</span>
+    <span class="c1">######################        </span>
 
 <div class="viewcode-block" id="DataHandler.add_snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.add_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_npy_file</span><span class="p">,</span> <span class="n">input_npy_directory</span><span class="p">,</span>
                      <span class="n">output_npy_file</span><span class="p">,</span> <span class="n">output_npy_directory</span><span class="p">,</span> <span class="n">add_snapshot_as</span><span class="p">,</span>
@@ -395,6 +399,9 @@
 <span class="sd">            Tensor holding the gradient.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get the snapshot from the snapshot number</span>
+        <span class="n">snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">[</span><span class="n">snapshot_number</span><span class="p">]</span>
+        
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
             <span class="c1"># This fails if an incorrect snapshot was loaded.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_set</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">!=</span> <span class="n">snapshot_number</span><span class="p">:</span>
@@ -403,8 +410,8 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_set</span><span class="o">.</span><span class="n">input_data</span><span class="o">.</span><span class="n">grad</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_inputs</span><span class="o">.</span>\
-                       <span class="n">grad</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="o">*</span><span class="n">snapshot_number</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="o">*</span><span class="p">(</span><span class="n">snapshot_number</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span></div>
+                       <span class="n">grad</span><span class="p">[</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="o">*</span><span class="n">snapshot_number</span><span class="p">:</span>
+                            <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="o">*</span><span class="p">(</span><span class="n">snapshot_number</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span></div>
 
 <div class="viewcode-block" id="DataHandler.get_snapshot_calculation_output"><a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.get_snapshot_calculation_output">[docs]</a>    <span class="k">def</span> <span class="nf">get_snapshot_calculation_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_number</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -426,7 +433,7 @@
 
     <span class="c1"># Debugging</span>
     <span class="c1">######################</span>
-
+        
 <div class="viewcode-block" id="DataHandler.raw_numpy_to_converted_scaled_tensor"><a class="viewcode-back" href="../../../api/mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler.raw_numpy_to_converted_scaled_tensor">[docs]</a>    <span class="k">def</span> <span class="nf">raw_numpy_to_converted_scaled_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numpy_array</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span>
                                              <span class="n">units</span><span class="p">,</span> <span class="n">convert3Dto1D</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -468,7 +475,8 @@
                 <span class="n">data_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">data_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span>
-            <span class="n">desired_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">data_dimension</span><span class="p">]</span>
+            <span class="n">grid_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">numpy_array</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">desired_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">data_dimension</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">desired_dimensions</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -534,7 +542,7 @@
         <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">:</span>
             <span class="c1">####################</span>
             <span class="c1"># Descriptors.</span>
-            <span class="c1">####################</span>
+            <span class="c1">####################            </span>
 
             <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Checking descriptor file &quot;</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">,</span>
                      <span class="s2">&quot;at&quot;</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_directory</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -551,21 +559,21 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown snapshot file type.&quot;</span><span class="p">)</span>
 
-            <span class="c1"># The first snapshot determines the data size to be used.</span>
-            <span class="c1"># We need to make sure that snapshot size is consistent.</span>
+            <span class="c1"># get the snapshot feature dimension - call it input dimension</span>
+            <span class="c1"># for flexible grid sizes only this need be consistent</span>
             <span class="n">tmp_input_dimension</span> <span class="o">=</span> <span class="n">tmp_dimension</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">tmp_grid_dim</span> <span class="o">=</span> <span class="n">tmp_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_dimension</span> <span class="o">=</span> <span class="n">tmp_grid_dim</span>
+            <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">))</span>            
             <span class="k">if</span> <span class="n">firstsnapshot</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">=</span> <span class="n">tmp_input_dimension</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_grid_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_clustering</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_grid_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">!=</span> <span class="n">tmp_input_dimension</span>
-                        <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">tmp_grid_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">tmp_grid_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                        <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="n">tmp_grid_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span> <span class="o">!=</span> <span class="n">tmp_input_dimension</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid snapshot entered at &quot;</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span>
                                     <span class="n">input_npy_file</span><span class="p">)</span>
-
             <span class="c1">####################</span>
             <span class="c1"># Targets.</span>
             <span class="c1">####################</span>
@@ -588,41 +596,37 @@
             <span class="c1"># The first snapshot determines the data size to be used.</span>
             <span class="c1"># We need to make sure that snapshot size is consistent.</span>
             <span class="n">tmp_output_dimension</span> <span class="o">=</span> <span class="n">tmp_dimension</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">tmp_grid_dim</span> <span class="o">=</span> <span class="n">tmp_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">firstsnapshot</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">=</span> <span class="n">tmp_output_dimension</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span> <span class="o">!=</span> <span class="n">tmp_output_dimension</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid snapshot entered at &quot;</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span>
                                     <span class="n">output_npy_file</span><span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">tmp_grid_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">tmp_grid_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="n">tmp_grid_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid snapshot entered at &quot;</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span>
-                                <span class="n">output_npy_file</span><span class="p">)</span>
-
+                
             <span class="k">if</span> <span class="n">firstsnapshot</span><span class="p">:</span>
-                <span class="n">firstsnapshot</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="c1"># Save the grid size.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">)</span>
+                <span class="n">firstsnapshot</span> <span class="o">=</span> <span class="kc">False</span>                
 
         <span class="c1"># Now we need to confirm that the snapshot list has some inner</span>
         <span class="c1"># consistency.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">data_splitting_type</span> <span class="o">==</span> <span class="s2">&quot;by_snapshot&quot;</span><span class="p">:</span>
             <span class="n">snapshot</span><span class="p">:</span> <span class="n">Snapshot</span>
+            <span class="c1"># As we are not actually interested in the number of snapshots,</span>
+            <span class="c1"># but in the number of datasets, we also need to multiply by that.</span>
             <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;tr&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_snapshots</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">+=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span>
                 <span class="k">elif</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;te&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_snapshots</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">+=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span>
                 <span class="k">elif</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="s2">&quot;va&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_snapshots</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span> <span class="o">+=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown option for snapshot splitting &quot;</span>
                                     <span class="s2">&quot;selected.&quot;</span><span class="p">)</span>
 
-            <span class="c1"># Now we need to check whether this input is believable.</span>
+            <span class="c1"># Now we need to check whether or not this input is believable.</span>
             <span class="n">nr_of_snapshots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">nr_of_snapshots</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_training_snapshots</span> <span class="o">+</span>
                                    <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_snapshots</span> <span class="o">+</span>
@@ -630,7 +634,6 @@
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot split snapshots with specified &quot;</span>
                                 <span class="s2">&quot;splitting scheme, &quot;</span>
                                 <span class="s2">&quot;too few or too many options selected&quot;</span><span class="p">)</span>
-
             <span class="c1"># MALA can either be run in training or test-only mode.</span>
             <span class="c1"># But it has to be run in either of those!</span>
             <span class="c1"># So either training AND validation snapshots can be provided</span>
@@ -651,15 +654,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Wrong parameter for data splitting provided.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># As we are not actually interested in the number of snapshots, but in</span>
-        <span class="c1"># the number of datasets,we need to multiply by that.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_snapshots</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_snapshots</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_snapshots</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span>
-
-        <span class="c1"># Pre-allocating arrays to load the data into.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__allocate_arrays</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__allocate_arrays</span><span class="p">()</span>        
 
         <span class="c1"># Reordering the lists.</span>
         <span class="n">snapshot_order</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;tr&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;va&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;te&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
@@ -669,59 +665,29 @@
 
     <span class="k">def</span> <span class="nf">__allocate_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">training_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_training_snapshots</span><span class="p">,</span>
-                                                  <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                  <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                  <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">training_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span><span class="p">,</span>
                                                   <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">),</span>
                                                  <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_training_snapshots</span><span class="p">,</span>
-                                                   <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                   <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                   <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span><span class="p">,</span>
                                                    <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">),</span>
                                                   <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_snapshots</span><span class="p">,</span>
-                                                    <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                    <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                    <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span><span class="p">,</span>
                                                     <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">),</span>
                                                    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_snapshots</span><span class="p">,</span>
-                                                     <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                     <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                     <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span><span class="p">,</span>
                                                      <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">),</span>
                                                     <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">test_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_test_snapshots</span><span class="p">,</span>
-                                              <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                              <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                              <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span><span class="p">,</span>
                                               <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">),</span>
                                              <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_test_snapshots</span><span class="p">,</span>
-                                               <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                               <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                               <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span><span class="p">,</span>
                                                <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">),</span>
                                               <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">test_data_inputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_test_snapshots</span><span class="p">,</span>
-                                                  <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                  <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                  <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                                  <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">),</span>
-                                                 <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_test_snapshots</span><span class="p">,</span>
-                                                   <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                   <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                                   <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                                   <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">),</span>
-                                                  <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        
 
     <span class="k">def</span> <span class="nf">__load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -733,7 +699,6 @@
 <span class="sd">        ----------</span>
 <span class="sd">        function : string</span>
 <span class="sd">            Can be &quot;tr&quot;, &quot;va&quot; or &quot;te.</span>
-
 <span class="sd">        data_type : string</span>
 <span class="sd">            Can be &quot;input&quot; or &quot;output&quot;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -754,7 +719,10 @@
             <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span>
 
         <span class="n">snapshot_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">gs_old</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">:</span>
+            <span class="c1"># get the snapshot grid size</span>
+            <span class="n">gs_new</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span>
 
             <span class="c1"># Data scaling is only performed on the training data sets.</span>
             <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_function</span> <span class="o">==</span> <span class="n">function</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]:</span>
@@ -768,14 +736,20 @@
                     <span class="n">units</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">output_units</span>
 
                 <span class="k">if</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
-                    <span class="n">calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span>
-                                                    <span class="n">array</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">)[</span><span class="n">snapshot_counter</span><span class="p">])</span>
+                    <span class="n">calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
+                        <span class="n">file</span><span class="p">,</span>
+                        <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span>
+                        <span class="n">array</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">)[</span><span class="n">gs_old</span> <span class="p">:</span> <span class="n">gs_old</span> <span class="o">+</span> <span class="n">gs_new</span><span class="p">,</span> <span class="p">:],</span>
+                        <span class="n">reshape</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="k">elif</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">snapshot_type</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
-                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">)[</span><span class="n">snapshot_counter</span><span class="p">]</span> <span class="o">=</span> \
-                        <span class="n">calculator</span><span class="o">.</span><span class="n">read_from_openpmd_file</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
+                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">)[</span><span class="n">gs_old</span> <span class="p">:</span> <span class="n">gs_old</span> <span class="o">+</span> <span class="n">gs_new</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="n">calculator</span><span class="o">.</span><span class="n">read_from_openpmd_file</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span> \
+                        <span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">gs_new</span><span class="p">,</span> <span class="n">feature_dimensions</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown snapshot file type.&quot;</span><span class="p">)</span>
                 <span class="n">snapshot_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">gs_old</span> <span class="o">+=</span> <span class="n">gs_new</span>
 
         <span class="c1"># The scalers will later operate on torch Tensors so we have to</span>
         <span class="c1"># make sure they are fitted on</span>
@@ -787,42 +761,30 @@
         <span class="c1"># all ears.</span>
         <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;inputs&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;training&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_data_inputs</span><span class="o">.</span>\
-                    <span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span><span class="p">,</span> <span class="n">feature_dimension</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">training_data_inputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span>\
                     <span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_inputs</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;validation&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_inputs</span><span class="o">.</span>\
-                    <span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span><span class="p">,</span> <span class="n">feature_dimension</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_inputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span>\
                     <span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_data_inputs</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">test_data_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_inputs</span><span class="o">.</span>\
-                    <span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span><span class="p">,</span> <span class="n">feature_dimension</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">test_data_inputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span>\
                     <span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_data_inputs</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;outputs&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;training&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span><span class="o">.</span>\
-                    <span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_training_data</span><span class="p">,</span> <span class="n">feature_dimension</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span>\
                     <span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;validation&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span><span class="o">.</span>\
-                    <span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_validation_data</span><span class="p">,</span> <span class="n">feature_dimension</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span>\
                     <span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_data_outputs</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">function</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span><span class="o">.</span>\
-                    <span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span><span class="p">,</span> <span class="n">feature_dimension</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span>\
                     <span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_data_outputs</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-
+                
     <span class="k">def</span> <span class="nf">__build_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Build the DataSets that are used during training.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_lazy_loading</span><span class="p">:</span>
@@ -841,7 +803,6 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -850,7 +811,6 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">,</span>
                         <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -859,13 +819,11 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">validation_data_set</span> <span class="o">=</span> <span class="n">LazyLoadDataset</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_test_data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -874,7 +832,6 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">,</span>
                         <span class="n">input_requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -967,7 +924,7 @@
                     <span class="c1"># test/tensor_memory.py</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
                                        <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">])</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">incremental_fit</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
@@ -1018,7 +975,7 @@
                     <span class="c1"># test/tensor_memory.py</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span>
                                        <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">])</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">incremental_fit</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
@@ -1029,7 +986,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__load_data</span><span class="p">(</span><span class="s2">&quot;training&quot;</span><span class="p">,</span> <span class="s2">&quot;outputs&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_outputs</span><span class="p">)</span>
 
-        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Output scaler parametrized.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Output scaler parametrized.&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>                
 
     <span class="k">def</span> <span class="nf">__raw_numpy_to_converted_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numpy_array</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span>
                                        <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
