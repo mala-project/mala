@@ -574,6 +574,10 @@ class ParametersData(ParametersBase):
     sample_ratio : float
         If use_clustering is True, this is the ratio of training data used
         for sampling per snapshot (according to clustering then, of course).
+
+    use_fast_tensor_data_set : bool
+        If True, then the new, fast TensorDataSet implemented by Josh Romero
+        will be used.
     """
 
     def __init__(self):
@@ -588,6 +592,8 @@ class ParametersData(ParametersBase):
         self.number_of_clusters = 40
         self.train_ratio = 0.1
         self.sample_ratio = 0.5
+        self.use_fast_tensor_data_set = False
+
 
 class ParametersRunning(ParametersBase):
     """
@@ -687,6 +693,21 @@ class ParametersRunning(ParametersBase):
     inference_data_grid : list
         List holding the grid to be used for inference in the form of
         [x,y,z].
+
+    use_mixed_precision : bool
+        If True, mixed precision computation (via AMP) will be used.
+
+    use_graphs : bool
+        If True, then CUDA graphs are used during training for improved
+        performance.
+
+    training_report_frequency : int
+        Determines how often detailed performance info is printed during
+        training (only has an effect if the verbosity is high enough).
+
+    profiler_range : list
+        List with two entries determining with which batch size the CUDA
+        profiler will start and stop profiling.
     """
 
     def __init__(self):
@@ -713,6 +734,10 @@ class ParametersRunning(ParametersBase):
         self.during_training_metric = "ldos"
         self.after_before_training_metric = "ldos"
         self.inference_data_grid = [0, 0, 0]
+        self.use_mixed_precision = False
+        self.use_graphs = False
+        self.training_report_frequency = 1000
+        self.profiler_range = [1000, 2000]
 
     def _update_horovod(self, new_horovod):
         super(ParametersRunning, self)._update_horovod(new_horovod)

@@ -52,7 +52,7 @@ class Snapshot(JSONSerializable):
                  snapshot_function,
                  input_units="", output_units="",
                  calculation_output="",
-                 snapshot_type="hdf5"):
+                 snapshot_type="openpmd"):
         super(Snapshot, self).__init__()
 
         # Inputs.
@@ -72,7 +72,7 @@ class Snapshot(JSONSerializable):
         self.snapshot_function = snapshot_function
 
         # Legacy functionality: Determine whether the snapshot contains
-        # numpy or HDF5 files.
+        # numpy or openpmd files.
         self.snapshot_type = snapshot_type
 
     @classmethod
