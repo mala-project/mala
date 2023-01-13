@@ -218,13 +218,13 @@ class Trainer(Runner):
 
         tloss = float("inf")
         vloss = self.__validate_network(self.network,
-                                        "va",
+                                        "validation",
                                         self.parameters.
                                         after_before_training_metric)
 
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
-                                            "te",
+                                            "test",
                                             self.parameters.
                                             after_before_training_metric)
 
@@ -284,7 +284,7 @@ class Trainer(Runner):
 
             # Calculate the validation loss. and output it.
             vloss = self.__validate_network(self.network,
-                                            "va",
+                                            "validation",
                                             self.parameters.
                                             during_training_metric)
 
@@ -369,7 +369,7 @@ class Trainer(Runner):
         if self.parameters.after_before_training_metric != \
                 self.parameters.during_training_metric:
             vloss = self.__validate_network(self.network,
-                                            "va",
+                                            "validation",
                                             self.parameters.
                                             after_before_training_metric)
             if self.parameters_full.use_horovod:
@@ -382,7 +382,7 @@ class Trainer(Runner):
         tloss = float("inf")
         if self.data.test_data_set is not None:
             tloss = self.__validate_network(self.network,
-                                            "te",
+                                            "test",
                                             self.parameters.
                                             after_before_training_metric)
             if self.parameters_full.use_horovod:
@@ -540,14 +540,14 @@ class Trainer(Runner):
 
     def __validate_network(self, network, data_set_type, validation_type):
         """Validate a network, using test or validation data."""
-        if data_set_type == "te":
+        if data_set_type == "test":
             data_loader = self.test_data_loader
             data_set = self.data.test_data_set
             number_of_snapshots = self.data.nr_test_snapshots
             offset_snapshots = self.data.nr_validation_snapshots + \
                                self.data.nr_training_snapshots
 
-        elif data_set_type == "va":
+        elif data_set_type == "validation":
             data_loader = self.validation_data_loader
             data_set = self.data.validation_data_set
             number_of_snapshots = self.data.nr_validation_snapshots

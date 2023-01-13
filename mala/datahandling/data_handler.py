@@ -561,24 +561,23 @@ class DataHandler:
                 raise Exception("Cannot split snapshots with specified "
                                 "splitting scheme, "
                                 "too few or too many options selected")
-            if self.nr_training_snapshots == 0 and self.nr_test_snapshots == 0:
-                raise Exception("No training snapshots provided.")
-            if self.nr_validation_snapshots == 0 and self.nr_test_snapshots == 0:
-                raise Exception("No validation snapshots provided.")
-            if self.nr_training_snapshots == 0 and self.nr_test_snapshots != 0:
-                printout("DataHandler prepared for inference. No training "
-                         "possible with this setup. "
-                         "If this is not what you wanted, please revise the "
-                         "input script.", min_verbosity=0)
-                if self.nr_validation_snapshots != 0:
-                    printout("As this DataHandler can only be used for "
-                             "inference, the validation data you have "
-                             "provided will be ignored.", min_verbosity=1)
-            if self.nr_test_snapshots == 0:
-                printout("Running MALA without test data. If this is not "
-                         "what you wanted, "
-                         "please revise the input script.", min_verbosity=0)
-
+            # MALA can either be run in training or test-only mode.
+            # But it has to be run in either of those!
+            # So either training AND validation snapshots can be provided
+            # OR only test snapshots.
+            if self.nr_test_snapshots != 0:
+                if self.nr_training_snapshots == 0:
+                    printout("DataHandler prepared for inference. No training "
+                             "possible with this setup. If this is not what "
+                             "you wanted, please revise the input script. "
+                             "Validation snapshots you may have entered will"
+                             "be ignored.",
+                             min_verbosity=0)
+            else:
+                if self.nr_training_snapshots == 0:
+                    raise Exception("No training snapshots provided.")
+                if self.nr_validation_snapshots == 0:
+                    raise Exception("No validation snapshots provided.")
         else:
             raise Exception("Wrong parameter for data splitting provided.")
 

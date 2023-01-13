@@ -28,7 +28,6 @@ def plot_radial_distribution_function(show_plots=False):
     fig = plt.figure()
     ax = fig.add_subplot()
     ax.plot(radii, rdf)
-
     if show_plots:
         plt.show()
 

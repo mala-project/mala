@@ -64,7 +64,6 @@ test_parameters.network.nn_type = "transformer"
 # test_parameters.network.nn_type = "gru"
 
 test_parameters.network.num_hidden_layers = 1
-
 test_parameters.network.layer_sizes = [data_handler.input_dimension,100,
                                        data_handler.output_dimension]
 
