@@ -532,8 +532,10 @@ class Target(PhysicalData):
             will be used.
         """
         if target_data is None:
+            # The feature dimension may be undefined.
             super(Target, self).write_to_openpmd_file(path, self.get_target())
         else:
+            # The feature dimension may be undefined.
             super(Target, self).write_to_openpmd_file(path, target_data)
 
     # Accessing target data

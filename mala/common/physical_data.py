@@ -320,6 +320,13 @@ class PhysicalData(ABC):
         series.set_software(name="MALA", version=mala_version)
         series.author = "..."
         iteration = series.write_iterations()[0]
+
+        # This function may be called without the feature dimension
+        # explicitly set (i.e. during testing or post-processing).
+        # We have to check for that.
+        if self.feature_size == 0:
+            self._set_feature_size_from_array(array)
+
         self.write_to_openpmd_iteration(iteration, array)
 
     def write_to_openpmd_iteration(self, iteration, array,
@@ -485,6 +492,10 @@ match the array dimensions (extent {} in the feature dimension)""".format(
 
     @abstractmethod
     def _process_loaded_dimensions(self, array_dimensions):
+        pass
+
+    @abstractmethod
+    def _set_feature_size_from_array(self, array):
         pass
 
     def _process_additional_metadata(self, additional_metadata):

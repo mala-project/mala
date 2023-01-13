@@ -1232,6 +1232,9 @@ class LDOS(Target):
         if self.save_target_data:
             self.local_density_of_states = array
 
+    def _set_feature_size_from_array(self, array):
+        self.parameters.ldos_gridsize = np.shape(array)[-1]
+
     def _gather_density(self, density_values, use_pickled_comm=False):
         """
         Gathers the density on rank 0 and sorts it.

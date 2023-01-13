@@ -396,7 +396,7 @@ class Descriptor(PhysicalData):
 
     def convert_local_to_3d(self, descriptors_np):
         """
-        Converts the desciptors as done in the gather function, but per rank.
+        Convert the desciptors as done in the gather function, but per rank.
 
         This is useful for e.g. parallel preprocessing.
         This function removes the extra 3 components that come from parallel
@@ -808,3 +808,6 @@ class Descriptor(PhysicalData):
     @abstractmethod
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         pass
+
+    def _set_feature_size_from_array(self, array):
+        self.fingerprint_length = np.shape(array)[-1]
