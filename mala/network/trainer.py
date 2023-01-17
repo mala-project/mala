@@ -316,11 +316,11 @@ class Trainer(Runner):
                     torch.cuda.nvtx.range_pop()
                     training_loss_sum += loss
 
-                    if batchid != 0 and (batchid + 1) % self.training_report_frequency == 0:
+                    if batchid != 0 and (batchid + 1) % self.parameters.training_report_frequency == 0:
                         torch.cuda.synchronize()
                         sample_time = time.time() - tsample
-                        avg_sample_time = sample_time / self.training_report_frequency
-                        avg_sample_tput = self.training_report_frequency * inputs.shape[0] / sample_time
+                        avg_sample_time = sample_time / self.parameters.training_report_frequency
+                        avg_sample_tput = self.parameters.training_report_frequency * inputs.shape[0] / sample_time
                         printout(f"batch {batchid + 1}/{len(self.training_data_loader)}, "
                                  f"train avg time: {avg_sample_time} "
                                  f"train avg throughput: {avg_sample_tput}",
