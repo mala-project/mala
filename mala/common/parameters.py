@@ -697,10 +697,6 @@ class ParametersRunning(ParametersBase):
     use_mixed_precision : bool
         If True, mixed precision computation (via AMP) will be used.
 
-    use_graphs : bool
-        If True, then CUDA graphs are used during training for improved
-        performance.
-
     training_report_frequency : int
         Determines how often detailed performance info is printed during
         training (only has an effect if the verbosity is high enough).
@@ -789,6 +785,37 @@ class ParametersRunning(ParametersBase):
                 raise Exception("Currently, MALA can only operate with the "
                                 "\"ldos\" metric for horovod runs.")
         self._after_before_training_metric = value
+
+    @during_training_metric.setter
+    def during_training_metric(self, value):
+        if value != "ldos":
+            if self._configuration["horovod"]:
+                raise Exception("Currently, MALA can only operate with the "
+                                "\"ldos\" metric for horovod runs.")
+        self._during_training_metric = value
+
+    @property
+    def use_graphs(self):
+        """
+        Decide whether CUDA graphs are used during training.
+
+        Doing so will improve performance, but CUDA graphs are only available
+        from CUDA 11.0 upwards.
+        """
+        return self._use_graphs
+
+    @use_graphs.setter
+    def use_graphs(self, value):
+        if value is True:
+            if self._configuration["gpu"] is False or \
+                    torch.version.cuda is None:
+                parallel_warn("No CUDA or GPU found, cannot use CUDA graphs.")
+                value = False
+            else:
+                if float(torch.version.cuda) < 11.0:
+                    raise Exception("Cannot use CUDA graphs with a CUDA"
+                                    " version below 11.0")
+        self._use_graphs = value
 
 
 class ParametersHyperparameterOptimization(ParametersBase):
