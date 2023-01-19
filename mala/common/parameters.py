@@ -702,8 +702,9 @@ class ParametersRunning(ParametersBase):
         training (only has an effect if the verbosity is high enough).
 
     profiler_range : list
-        List with two entries determining with which batch size the CUDA
-        profiler will start and stop profiling.
+        List with two entries determining with which batch/iteration number
+         the CUDA profiler will start and stop profiling. Please note that
+         this option only holds significance if the nsys profiler is used.
     """
 
     def __init__(self):

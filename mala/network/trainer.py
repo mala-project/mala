@@ -486,19 +486,16 @@ class Trainer(Runner):
 
         # Choose an optimizer to use.
         if self.parameters.trainingtype == "SGD":
-            printout("Using torch.optim.SGD optimizer...", min_verbosity=2)
             self.optimizer = optim.SGD(self.network.parameters(),
                                       lr=self.parameters.learning_rate,
                                       weight_decay=self.parameters.
                                       weight_decay)
         elif self.parameters.trainingtype == "Adam":
-            printout("Using torch.optim.Adam optimizer...", min_verbosity=2)
             self.optimizer = optim.Adam(self.network.parameters(),
                                         lr=self.parameters.learning_rate,
                                         weight_decay=self.parameters.
                                         weight_decay)
         elif self.parameters.trainingtype == "FusedAdam":
-            printout("Using Apex FusedAdam optimizer...", min_verbosity=2)
             if version.parse(torch.__version__) >= version.parse("1.13.0"):
                 self.optimizer = optim.Adam(self.network.parameters(),
                                            lr=self.parameters.learning_rate,

@@ -38,6 +38,8 @@ can and should be looked into.
         """
         Likewise, using CUDA graphs improve performance by optimizing GPU
         usage. Be careful, this option is only availabe from CUDA 11.0 onwards.
+        CUDA graphs will be most effective in cases that are latency-limited,
+        e.g. small models with shorter epoch times.
         """
         parameters.running.use_graphs = False # True: Better GPU utilization
         """
