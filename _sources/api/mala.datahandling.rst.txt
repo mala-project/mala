@@ -20,6 +20,7 @@ datahandling
    mala.datahandling.data_handler
    mala.datahandling.data_repo
    mala.datahandling.data_scaler
+   mala.datahandling.fast_tensor_dataset
    mala.datahandling.lazy_load_dataset
    mala.datahandling.lazy_load_dataset_clustered
    mala.datahandling.snapshot

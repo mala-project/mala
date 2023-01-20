@@ -597,6 +597,18 @@ for sampling per snapshot (according to clustering then, of course).</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersData.use_fast_tensor_data_set">
+<span class="sig-name descname"><span class="pre">use_fast_tensor_data_set</span></span><a class="headerlink" href="#mala.common.parameters.ParametersData.use_fast_tensor_data_set" title="Permalink to this definition"></a></dt>
+<dd><p>If True, then the new, fast TensorDataSet implemented by Josh Romero
+will be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1353,6 +1365,44 @@ of the visualization, to avoid having to change input scripts often.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.use_mixed_precision">
+<span class="sig-name descname"><span class="pre">use_mixed_precision</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.use_mixed_precision" title="Permalink to this definition"></a></dt>
+<dd><p>If True, mixed precision computation (via AMP) will be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.training_report_frequency">
+<span class="sig-name descname"><span class="pre">training_report_frequency</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.training_report_frequency" title="Permalink to this definition"></a></dt>
+<dd><p>Determines how often detailed performance info is printed during
+training (only has an effect if the verbosity is high enough).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.profiler_range">
+<span class="sig-name descname"><span class="pre">profiler_range</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.profiler_range" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>List with two entries determining with which batch/iteration number</dt><dd><p>the CUDA profiler will start and stop profiling. Please note that
+this option only holds significance if the nsys profiler is used.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.after_before_training_metric">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">after_before_training_metric</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.after_before_training_metric" title="Permalink to this definition"></a></dt>
@@ -1377,6 +1427,14 @@ used as a metric. Possible options are “band_energy” and
 validation snapshots will be calculated and compared to the provided
 DFT results. Of these, the mean average error in eV/atom will be
 calculated.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.use_graphs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">use_graphs</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.use_graphs" title="Permalink to this definition"></a></dt>
+<dd><p>Decide whether CUDA graphs are used during training.</p>
+<p>Doing so will improve performance, but CUDA graphs are only available
+from CUDA 11.0 upwards.</p>
 </dd></dl>
 
 </dd></dl>

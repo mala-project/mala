@@ -46,7 +46,10 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../usage.html">Usage</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="basicconcepts.html">Basic concepts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Data generation and preprocessing</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Training a model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Training a model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#optimal-performance">Optimal performance</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Postprocessing the LDOS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hyperparameters.html">Tuning the hyperparameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="predictions.html">Predict electronic structures</a></li>
@@ -88,6 +91,48 @@
 approximating any function. In MALA, neural networks are built using PyTorch.
 Hyperparameter optimization can be done using optuna and custom routines.
 To see how a model is trained, refer to e.g. <code class="docutils literal notranslate"><span class="pre">ex01_singleshot</span></code>.</p>
+<div class="section" id="optimal-performance">
+<h2>Optimal performance<a class="headerlink" href="#optimal-performance" title="Permalink to this headline"></a></h2>
+<p>MALA by default uses sub-optimal training parameters to guarantee compatibility
+with a wide range of systems. Users are encouraged to activate advanced
+features for optimal performance. The following is a list of parameters that
+can and should be looked into.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameters</span> <span class="o">=</span> <span class="n">mala</span><span class="o">.</span><span class="n">Parameters</span><span class="p">()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This setting is pretty straightforward - wherever possible, use a GPU.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">use_gpu</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># True: Use GPU</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Multiple workers allow for faster data processing, but require</span>
+<span class="sd">additional CPU/RAM power. A good setup is e.g. using 4 CPUs attached</span>
+<span class="sd">to one GPU and setting the num_workers to 4.</span>
+<span class="sd">Please be aware that using multiple workers is currently not supported</span>
+<span class="sd">with horovod.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># set to e.g. 4</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">MALA supports a faster implementation of the TensorDataSet class</span>
+<span class="sd">from the torch library. Turning it on will drastically improve</span>
+<span class="sd">performance.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">use_fast_tensor_data_set</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># True: Faster data loading</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Likewise, using CUDA graphs improve performance by optimizing GPU</span>
+<span class="sd">usage. Be careful, this option is only availabe from CUDA 11.0 onwards.</span>
+<span class="sd">CUDA graphs will be most effective in cases that are latency-limited,</span>
+<span class="sd">e.g. small models with shorter epoch times.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">use_graphs</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># True: Better GPU utilization</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Using mixed precision can also improve performance, but only if</span>
+<span class="sd">the model is large enough.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">use_mixed_precision</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># True: Improved performance for large models</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
 </div>
 
 

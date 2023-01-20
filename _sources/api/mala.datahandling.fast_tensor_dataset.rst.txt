@@ -1,0 +1,7 @@
+fast\_tensor\_dataset
+=====================
+
+.. automodule:: mala.datahandling.fast_tensor_dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:
