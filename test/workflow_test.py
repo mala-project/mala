@@ -30,6 +30,13 @@ class TestFullWorkflow:
         assert desired_loss_improvement_factor * \
                test_trainer.initial_test_loss > test_trainer.final_test_loss
 
+    def test_network_training_fast_dataset(self):
+        """Test whether MALA can train a NN."""
+
+        test_trainer = self.__simple_training(use_fast_tensor_dataset=True)
+        assert desired_loss_improvement_factor * \
+               test_trainer.initial_test_loss > test_trainer.final_test_loss
+
     @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
                         reason="LAMMPS is currently not part of the pipeline.")
     def test_preprocessing(self):
@@ -244,7 +251,7 @@ class TestFullWorkflow:
                                                 "workflow_test/"))
 
     @staticmethod
-    def __simple_training(save_network=False):
+    def __simple_training(save_network=False, use_fast_tensor_dataset=False):
         """Perform a simple training and save it, if necessary."""
         # Set up parameters.
         test_parameters = mala.Parameters()
@@ -256,6 +263,7 @@ class TestFullWorkflow:
         test_parameters.running.mini_batch_size = 40
         test_parameters.running.learning_rate = 0.00001
         test_parameters.running.trainingtype = "Adam"
+        test_parameters.data.use_fast_tensor_data_set = use_fast_tensor_dataset
 
         # Load data.
         data_handler = mala.DataHandler(test_parameters)

@@ -55,7 +55,7 @@ class Snapshot(JSONSerializable):
                  snapshot_function,
                  input_units="", output_units="",
                  calculation_output="",
-                 snapshot_type="hdf5"):
+                 snapshot_type="openpmd"):
         super(Snapshot, self).__init__()
 
         # Inputs.
@@ -75,15 +75,15 @@ class Snapshot(JSONSerializable):
         self.snapshot_function = snapshot_function
 
         # Legacy functionality: Determine whether the snapshot contains
-        # numpy or HDF5 files.
-        self.snapshot_type = snapshot_type        
+        # numpy or openpmd files.
+        self.snapshot_type = snapshot_type
 
         # All the dimensionalities of the snapshot.
         self.grid_dimensions = None
         self.grid_size = None
         self.input_dimension = None
         self.output_dimension = None
-        
+
     @classmethod
     def from_json(cls, json_dict):
         """

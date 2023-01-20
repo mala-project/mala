@@ -19,6 +19,7 @@ from mala.datahandling.lazy_load_dataset_clustered import \
     LazyLoadDatasetClustered
 from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
+from mala.datahandling.fast_tensor_dataset import FastTensorDataset
 
 
 class DataHandler:
@@ -109,6 +110,9 @@ class DataHandler:
         self.training_data_set = None
         self.validation_data_set = None
         self.test_data_set = None
+
+        # Needed for the fast tensor data sets.
+        self.mini_batch_size = parameters.running.mini_batch_size
 
     ##############################
     # Properties
@@ -783,9 +787,16 @@ class DataHandler:
             if self.nr_training_data != 0:
                 self.input_data_scaler.transform(self.training_data_inputs)
                 self.output_data_scaler.transform(self.training_data_outputs)
-                self.training_data_set = \
-                    TensorDataset(self.training_data_inputs,
-                                  self.training_data_outputs)
+                if self.parameters.use_fast_tensor_data_set:
+                    printout("Using FastTensorDataset.", min_verbosity=2)
+                    self.training_data_set = \
+                        FastTensorDataset(self.mini_batch_size,
+                                          self.training_data_inputs,
+                                          self.training_data_outputs)
+                else:
+                    self.training_data_set = \
+                        TensorDataset(self.training_data_inputs,
+                                      self.training_data_outputs)
 
             if self.nr_validation_data != 0:
                 self.__load_data("validation", "inputs")
@@ -793,10 +804,16 @@ class DataHandler:
 
                 self.__load_data("validation", "outputs")
                 self.output_data_scaler.transform(self.validation_data_outputs)
-
-                self.validation_data_set = \
-                    TensorDataset(self.validation_data_inputs,
-                                  self.validation_data_outputs)
+                if self.parameters.use_fast_tensor_data_set:
+                    printout("Using FastTensorDataset.", min_verbosity=2)
+                    self.validation_data_set = \
+                        FastTensorDataset(self.mini_batch_size,
+                                          self.validation_data_inputs,
+                                          self.validation_data_outputs)
+                else:
+                    self.validation_data_set = \
+                        TensorDataset(self.validation_data_inputs,
+                                      self.validation_data_outputs)
 
             if self.nr_test_data != 0:
                 self.__load_data("test", "inputs")
@@ -805,7 +822,6 @@ class DataHandler:
 
                 self.__load_data("test", "outputs")
                 self.output_data_scaler.transform(self.test_data_outputs)
-
                 self.test_data_set = \
                     TensorDataset(self.test_data_inputs,
                                   self.test_data_outputs)
