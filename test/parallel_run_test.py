@@ -7,7 +7,7 @@ from ase.io import read
 import pytest
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
+data_path = os.path.join(data_repo_path, "Be2")
 
 # Control the various accuracies..
 accuracy_snaps = 1e-4

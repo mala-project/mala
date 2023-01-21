@@ -4,7 +4,7 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36")
+data_path = os.path.join(data_repo_path, "Be2")
 
 """
 ex07_checkpoint_training.py: Shows how a training run can be paused and 
@@ -56,15 +56,12 @@ def initial_setup():
     data_handler = mala.DataHandler(test_parameters)
 
     # Add a snapshot we want to use in to the list.
-    data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                              "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                              output_units="1/(Ry*Bohr^3)")
-    data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                              "Al_debug_2k_nr1.out.npy", data_path, "va",
-                              output_units="1/(Ry*Bohr^3)")
-    data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                              "Al_debug_2k_nr2.out.npy", data_path, "te",
-                              output_units="1/(Ry*Bohr^3)")
+    data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                              "Be_snapshot0.out.npy", data_path, "tr")
+    data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                              "Be_snapshot1.out.npy", data_path, "va")
+    data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                              "Be_snapshot2.out.npy", data_path, "te")
     data_handler.prepare_data()
     printout("Read data: DONE.")
 

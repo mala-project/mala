@@ -18,11 +18,11 @@ ex05_* files used below.
 
 data_repo_path = os.environ["MALA_DATA_REPO"]
 
-data_path = pj(data_repo_path, "Al36")
-params_path = "ex05_params.json"
-network_path = "ex05_network.pth"
-input_scaler_path = "ex05_iscaler.pkl"
-output_scaler_path = "ex05_oscaler.pkl"
+data_path = pj(data_repo_path, "Be2")
+params_path = "be_model.params.json"
+network_path = "be_model.network.pth"
+input_scaler_path = "be_model.iscaler.pkl"
+output_scaler_path = "be_model.oscaler.pkl"
 
 
 def load_whole_snapshot():
@@ -50,9 +50,8 @@ def load_whole_snapshot():
     # Units: output_units="1/(Ry*Bohr^3)" means that the output (target) data (LDOS) has
     # unit 1/Ry. Rescaled network output, after oscaler.inverse_transform() is
     # applied (see below) will be in 1/eV.
-    inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                        "Al_debug_2k_nr2.out.npy", data_path,
-                                        "te", output_units="1/(Ry*Bohr^3)")
+    inference_data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                        "Be_snapshot2.out.npy", data_path, "te")
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 
     # Extract single feature vector from snapshot. The x,y,z part (first 3
@@ -86,7 +85,7 @@ def load_memmap_snapshot():
 
     # Load snapshot with input features, use memmap.
     inputs_array = np.load(
-        pj(data_path, "Al_debug_2k_nr2.in.npy"), mmap_mode="r"
+        pj(data_path, "Be_snapshot2.in.npy"), mmap_mode="r"
     )
 
     # Our inputs usually contain x,y,z information, so one single input vector
@@ -108,9 +107,7 @@ def load_memmap_snapshot():
 
 
 if __name__ == "__main__":
-    # fmt: off
     assert os.path.exists(data_path), f"{data_path} missing, link data repo first"
-    # fmt: on
 
     for pth in [
         params_path,
@@ -118,7 +115,7 @@ if __name__ == "__main__":
         input_scaler_path,
         output_scaler_path,
     ]:
-        assert os.path.exists(pth), f"{pth} missing, run ex05 first"
+        assert os.path.exists(pth), f"{pth} missing, run ex01 first"
 
     a = load_whole_snapshot()
     b = load_memmap_snapshot()

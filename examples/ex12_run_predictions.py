@@ -4,7 +4,7 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
+data_path = os.path.join(data_repo_path, "Be2")
 
 """
 ex12_run_predictions.py: Show how a prediction can be made using MALA.
@@ -100,11 +100,9 @@ def initial_training():
 
     # Add a snapshot we want to use in to the list.
     data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                              "Be_snapshot1.out.npy", data_path, "tr",
-                              output_units="1/(eV*Bohr^3)")
+                              "Be_snapshot1.out.npy", data_path, "tr")
     data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                              "Be_snapshot2.out.npy", data_path, "va",
-                              output_units="1/(eV*Bohr^3)")
+                              "Be_snapshot2.out.npy", data_path, "va")
     data_handler.prepare_data()
     printout("Read data: DONE.")
 

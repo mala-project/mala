@@ -6,9 +6,7 @@ import numpy as np
 import pytest
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36")
-data_path_be = os.path.join(os.path.join(data_repo_path, "Be2"),
-                            "training_data")
+data_path = os.path.join(data_repo_path, "Be2")
 
 # Control how much the loss should be better after hyperopt compared to
 # before. This value is fairly high, but we're training on absolutely
@@ -43,15 +41,12 @@ class TestHyperparameterOptimization:
 
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
-        data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                                  output_units="1/(Ry*Bohr^3)")
-        data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
-                                  output_units="1/(Ry*Bohr^3)")
-        data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
-                                  output_units="1/(Ry*Bohr^3)")
+        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                  "Be_snapshot0.out.npy", data_path, "tr")
+        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                  "Be_snapshot1.out.npy", data_path, "va")
+        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                  "Be_snapshot2.out.npy", data_path, "te")
         data_handler.prepare_data()
 
         # Perform the hyperparameter optimization.
@@ -122,15 +117,12 @@ class TestHyperparameterOptimization:
         data_handler = mala.DataHandler(test_parameters)
 
         # Add all the snapshots we want to use in to the list.
-        data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                                  output_units="1/(Ry*Bohr^3)")
-        data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
-                                  output_units="1/(Ry*Bohr^3)")
-        data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
-                                  output_units="1/(Ry*Bohr^3)")
+        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                  "Be_snapshot0.out.npy", data_path, "tr")
+        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                  "Be_snapshot1.out.npy", data_path, "va")
+        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                  "Be_snapshot2.out.npy", data_path, "te")
         data_handler.prepare_data()
 
         # Create and perform hyperparameter optimization.
@@ -175,14 +167,14 @@ class TestHyperparameterOptimization:
         # hyperoptimizer.add_hyperparameter("bispectrum_twojmax", [6, 8])
         # hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0, 3.0])
 
-        hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path_be,
+        hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path,
                                                                  "Be_snapshot1.out"),
-                                    "numpy", os.path.join(data_path_be,
+                                    "numpy", os.path.join(data_path,
                                                           "Be_snapshot1.in.npy"),
                                     target_units="1/(Ry*Bohr^3)")
-        hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path_be,
+        hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path,
                                                                  "Be_snapshot2.out"),
-                                    "numpy", os.path.join(data_path_be,
+                                    "numpy", os.path.join(data_path,
                                                           "Be_snapshot2.in.npy"),
                                     target_units="1/(Ry*Bohr^3)")
         hyperoptimizer.perform_study()
@@ -209,15 +201,12 @@ class TestHyperparameterOptimization:
 
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
-        data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                                  output_units="1/(Ry*Bohr^3)")
-        data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
-                                  output_units="1/(Ry*Bohr^3)")
-        data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
-                                  output_units="1/(Ry*Bohr^3)")
+        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                  "Be_snapshot0.out.npy", data_path, "tr")
+        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                  "Be_snapshot1.out.npy", data_path, "va")
+        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                  "Be_snapshot2.out.npy", data_path, "te")
         data_handler.prepare_data()
 
         # Perform the actual hyperparameter optimization.

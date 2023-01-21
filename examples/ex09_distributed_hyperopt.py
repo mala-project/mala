@@ -4,7 +4,7 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
+data_path = os.path.join(data_repo_path, "Be2")
 
 """
 ex09_distributed_hyperopt.py: Shows how a hyperparameter 
@@ -72,13 +72,11 @@ data_handler = mala.DataHandler(test_parameters)
 data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
                           "Be_snapshot1.out.npy", data_path, "tr",
                           calculation_output_file=
-                          os.path.join(data_path, "Be_snapshot1.out"),
-                          output_units="1/(eV*Bohr^3)")
+                          os.path.join(data_path, "Be_snapshot1.out"))
 data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
                           "Be_snapshot2.out.npy", data_path, "va",
                           calculation_output_file=
-                          os.path.join(data_path, "Be_snapshot2.out"),
-                          output_units="1/(eV*Bohr^3)")
+                          os.path.join(data_path, "Be_snapshot2.out"))
 data_handler.prepare_data()
 printout("Read data: DONE.")
 

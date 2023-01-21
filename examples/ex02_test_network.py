@@ -4,7 +4,7 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Be2", "training_data")
+data_path = os.path.join(data_repo_path, "Be2")
 
 """
 ex05_training_with_postprocessing.py: Train a network, then use this network 
@@ -42,11 +42,9 @@ def trained_network_test(network, parameters, iscaler, oscaler):
     # data_splitting_snapshots list is correct.
     inference_data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
                                         "Be_snapshot2.out.npy", data_path, "te",
-                                        output_units="1/(eV*Bohr^3)",
                                         calculation_output_file=os.path.join(data_path,"Be_snapshot2.out"))
     inference_data_handler.add_snapshot("Be_snapshot3.in.npy", data_path,
                                         "Be_snapshot3.out.npy", data_path, "te",
-                                        output_units="1/(eV*Bohr^3)",
                                         calculation_output_file=os.path.join(data_path,"Be_snapshot3.out"))
     inference_data_handler.prepare_data(reparametrize_scaler=False)
 

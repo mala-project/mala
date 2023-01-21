@@ -48,14 +48,13 @@ test_parameters.targets.pseudopotential_path = data_path
 # Read in LDOS data. For actual workflows, this part will come
 # from a network.
 ldos = mala.LDOS.from_numpy_file(test_parameters,
-                                 os.path.join(data_path, "Be_ldos.npy"),
-                                 units="1/(eV*Bohr^3)")
+                                 os.path.join(data_path, "Be_snapshot0.out.npy"))
 
 # Read additional information about the calculation.
 # By doing this, the calculator is able to know e.g. the temperature
 # at which the calculation took place or the lattice constant used.
 ldos.read_additional_calculation_data(os.path.join(data_path,
-                                                   "Be.pw.scf.out"))
+                                                   "Be_snapshot0.out"))
 
 # Get quantities of interest.
 # For better values in the post processing, it is recommended to
