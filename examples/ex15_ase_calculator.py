@@ -50,97 +50,12 @@ def use_calculator(network, new_parameters, iscaler, oscaler):
     print(atoms.get_potential_energy())
 
 
-# Trains a network.
-def initial_training():
-    ####################
-    # PARAMETERS
-    # All parameters are handled from a central parameters class that
-    # contains subclasses.
-    ####################
+# Instead of training, these can be loaded.
+parameters = mala.Parameters.load_from_file("be_model.params.json")
+input_scaler = mala.DataScaler.load_from_file("be_model.iscaler.pkl")
+output_scaler = mala.DataScaler.load_from_file("be_model.oscaler.pkl")
+network = mala.Network.load_from_file(parameters, "be_model.network.pth")
 
-    test_parameters = mala.Parameters()
-    # Currently, the splitting in training, validation and test set are
-    # done on a "by snapshot" basis.
-    test_parameters.data.data_splitting_type = "by_snapshot"
-
-    # Specify the data scaling.
-    test_parameters.data.input_rescaling_type = "feature-wise-standard"
-    test_parameters.data.output_rescaling_type = "normal"
-
-    # Specify the used activation function.
-    test_parameters.network.layer_activations = ["ReLU"]
-
-    # Specify the training parameters.
-    test_parameters.running.max_number_epochs = 100
-    test_parameters.running.mini_batch_size = 40
-    test_parameters.running.learning_rate = 0.00001
-    test_parameters.running.trainingtype = "Adam"
-
-    ####################
-    # DATA
-    # Add and prepare snapshots for training.
-    ####################
-
-    data_handler = mala.DataHandler(test_parameters)
-
-    # Add a snapshot we want to use in to the list.
-    data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                              "Be_snapshot1.out.npy", data_path, "tr")
-    data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                              "Be_snapshot2.out.npy", data_path, "va")
-    data_handler.prepare_data()
-    printout("Read data: DONE.")
-
-    ####################
-    # NETWORK SETUP
-    # Set up the network and trainer we want to use.
-    # The layer sizes can be specified before reading data,
-    # but it is safer this way.
-    ####################
-
-    test_parameters.network.layer_sizes = [data_handler.input_dimension,
-                                           100,
-                                           data_handler.output_dimension]
-
-    # Setup network and trainer.
-    test_network = mala.Network(test_parameters)
-    test_trainer = mala.Trainer(test_parameters, test_network, data_handler)
-    printout("Network setup: DONE.")
-
-    ####################
-    # TRAINING
-    # Train the network.
-    ####################
-
-    printout("Starting training.")
-    test_trainer.train_network()
-    printout("Training: DONE.")
-
-    ####################
-    # SAVING
-    # In order to be operational at a later point we need to save 4 objects:
-    # Parameters, input/output scaler, network.
-    ####################
-    # Save networks for debugging.
-    test_network.save_network("ex15.network.pth")
-    test_parameters.save("ex15.params.json")
-    data_handler.input_data_scaler.save("ex15.iscaler.pkl")
-    data_handler.output_data_scaler.save("ex15.oscaler.pkl")
-    return test_network, test_parameters, data_handler.input_data_scaler,\
-           data_handler.output_data_scaler
-
-
-if __name__ == "__main__":
-    # First, train a MALA network.
-    network, parameters, input_scaler, output_scaler = \
-        initial_training()
-
-    # Instead of training, these can also be loaded.
-    # parameters = mala.Parameters.load_from_file("ex15.params.json")
-    # input_scaler = mala.DataScaler.load_from_file("ex15.iscaler.pkl")
-    # output_scaler = mala.DataScaler.load_from_file("ex15.oscaler.pkl")
-    # network = mala.Network.load_from_file(parameters, "ex15.network.pth")
-
-    # Next, use these values to run an MD simulation.
-    use_calculator(network, parameters, input_scaler, output_scaler)
+# Next, use these values to run an MD simulation.
+use_calculator(network, parameters, input_scaler, output_scaler)
 

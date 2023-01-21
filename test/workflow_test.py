@@ -338,7 +338,7 @@ class TestFullWorkflow:
         # Instantiate and use a Tester object.
         tester = mala.Tester(new_parameters, new_network,
                              inference_data_handler)
-        actual_ldos, predicted_ldos = tester.test_snapshot(0)
+        actual_ldos, predicted_ldos = tester.predict_targets(0)
         ldos_calculator = inference_data_handler.target_calculator
         ldos_calculator.read_additional_calculation_data(os.path.join(
                                                          data_path,

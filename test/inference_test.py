@@ -166,7 +166,7 @@ class TestInference:
         inference_data_handler.prepare_data(reparametrize_scaler=False)
 
         tester = Tester(test_parameters, test_network, inference_data_handler)
-        actual_ldos, predicted_ldos = tester.test_snapshot(0)
+        actual_ldos, predicted_ldos = tester.predict_targets(0)
         ldos_calculator = inference_data_handler.target_calculator
         ldos_calculator.read_additional_calculation_data(os.path.join(
                                                          beryllium_path,
@@ -320,7 +320,7 @@ class TestInference:
         tester = Tester(new_parameters, new_network, inference_data_handler)
 
         # Get values with current framework.
-        actual_ldos, predicted_ldos = tester.test_snapshot(0)
+        actual_ldos, predicted_ldos = tester.predict_targets(0)
 
         # Compare actual_ldos with file directly.
         # This is the only comparison that counts.
