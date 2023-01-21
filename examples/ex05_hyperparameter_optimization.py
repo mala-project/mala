@@ -13,6 +13,7 @@ hyperparameter optimizers available in this framework. This example focusses
 on the most universal one - optuna.  
 """
 
+
 def initial_setup():
     ####################
     # PARAMETERS

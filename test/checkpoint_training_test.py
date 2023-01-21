@@ -196,7 +196,7 @@ class TestTrainingCheckpoint:
 
         loaded_params, loaded_network, \
             new_datahandler, new_trainer = \
-            mala.Trainer.resume_checkpoint(checkpoint_name)
+            mala.Trainer.load_run(checkpoint_name)
         loaded_params.running.max_number_epochs = actual_max_epochs
         return new_trainer
 
