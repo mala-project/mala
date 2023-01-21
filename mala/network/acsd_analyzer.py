@@ -16,6 +16,26 @@ target_input_types_acsd = target_input_types+["numpy", "openpmd"]
 
 
 class ACSDAnalyzer(HyperOpt):
+    """
+    Analyzer based on the ACSD analysis.
+
+    Mathematical details see here: doi.org/10.1088/2632-2153/ac9956
+
+    Parameters
+    ----------
+    params : mala.common.parametes.Parameters
+        Parameters used to create this hyperparameter optimizer.
+
+    descriptor_calculator : mala.descriptors.descriptor.Descriptor
+        The descriptor calculator used for parsing/converting fingerprint
+        data. If None, the descriptor calculator will be created by this
+        object using the parameters provided. Default: None
+
+    target_calculator : mala.targets.target.Target
+        Target calculator used for parsing/converting target data. If None,
+        the target calculator will be created by this object using the
+        parameters provided. Default: None
+    """
 
     def __init__(self, params, target_calculator=None,
                  descriptor_calculator=None):
@@ -82,7 +102,6 @@ class ACSDAnalyzer(HyperOpt):
         else:
             raise Exception("Cannot calculate ACSD without descriptor data.")
 
-
         if target_input_type is not None:
             if target_input_path is None:
                 raise Exception("Cannot process target data with no path "
@@ -101,6 +120,19 @@ class ACSDAnalyzer(HyperOpt):
                                       "output": target_units})
 
     def add_hyperparameter(self, name, choices):
+        """
+        Add a hyperparameter to the current investigation.
+
+        Parameters
+        ----------
+        name : string
+            Name of the hyperparameter. Please note that these names always
+            have to be the same as the parameter names in
+            ParametersDescriptors.
+
+        choices :
+            List of possible choices.
+        """
         if name != "bispectrum_twojmax" and \
            name != "bispectrum_cutoff" and \
            name != "atomic_density_sigma" and \
@@ -114,6 +146,12 @@ class ACSDAnalyzer(HyperOpt):
 
     def perform_study(self, file_based_communication=False,
                       return_plotting=False):
+        """
+        Perform the study, i.e. the optimization.
+
+        This is done by sampling different descriptors, calculated with
+        different hyperparameters and then calculating the ACSD.
+        """
         # The individual loops depend on the type of descriptors.
         if self.params.descriptors.descriptor_type == "Bispectrum":
             if list(map(lambda p: "bispectrum_twojmax" in p.name,
@@ -169,6 +207,12 @@ class ACSDAnalyzer(HyperOpt):
             return results_to_plot, {"twojmax": twojmax_list, "cutoff": cutoff_list}
 
     def set_optimal_parameters(self):
+        """
+        Set the optimal parameters found in the present study.
+
+        The parameters will be written to the parameter object with which the
+        hyperparameter optimizer was created.
+        """
         minimum_acsd = self.study[np.argmin(self.study[:, 2])]
         if self.params.descriptors.descriptor_type == "Bispectrum":
             self.params.descriptors.bispectrum_cutoff = minimum_acsd[0]
@@ -279,7 +323,6 @@ class ACSDAnalyzer(HyperOpt):
             A (2,nr_points*nr_points) array containing the cosine similarities.
 
         """
-
         descriptor_dim = np.shape(descriptor_data)
         ldos_dim = np.shape(ldos_data)
         if len(descriptor_dim) == 4:
