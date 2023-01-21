@@ -156,7 +156,7 @@ class ACSDAnalyzer(HyperOpt):
                                                  self.params.hyperparameters.acsd_points,
                                                  descriptor_vectors_contain_xyz=
                                                  self.params.descriptors.descriptors_contain_xyz)
-                            current_list.append([twojmax, cutoff, acsd])
+                            current_list.append([cutoff, twojmax, acsd])
                 self.study.append(current_list)
         self.study = np.mean(self.study, axis=0)
         if return_plotting:
