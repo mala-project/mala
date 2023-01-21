@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mala.network.hyperparameter_interface &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>mala.network.hyperparameter_acsd &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
@@ -61,7 +61,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>mala.network.hyperparameter_interface</li>
+      <li>mala.network.hyperparameter_acsd</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -70,27 +70,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for mala.network.hyperparameter_interface</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Interface function to get the correct type of hyperparameter.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">mala.network.hyperparameter_oat</span> <span class="kn">import</span> <span class="n">HyperparameterOAT</span>
-<span class="kn">from</span> <span class="nn">mala.network.hyperparameter_optuna</span> <span class="kn">import</span> <span class="n">HyperparameterOptuna</span>
-<span class="kn">from</span> <span class="nn">mala.network.hyperparameter_naswot</span> <span class="kn">import</span> <span class="n">HyperparameterNASWOT</span>
+  <h1>Source code for mala.network.hyperparameter_acsd</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Hyperparameter to use with optuna.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">optuna.trial</span> <span class="kn">import</span> <span class="n">Trial</span>
+
+<span class="kn">from</span> <span class="nn">mala.network.hyperparameter</span> <span class="kn">import</span> <span class="n">Hyperparameter</span>
 
 
-<div class="viewcode-block" id="HyperparameterInterface"><a class="viewcode-back" href="../../../api/mala.network.hyperparameter_interface.html#mala.network.hyperparameter_interface.HyperparameterInterface">[docs]</a><span class="k">def</span> <span class="nf">HyperparameterInterface</span><span class="p">(</span><span class="n">hotype</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                            <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get the correct type of hyperparameter based on your hotype.</span>
+<div class="viewcode-block" id="HyperparameterACSD"><a class="viewcode-back" href="../../../api/mala.network.hyperparameter_acsd.html#mala.network.hyperparameter_acsd.HyperparameterACSD">[docs]</a><span class="k">class</span> <span class="nc">HyperparameterACSD</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents an optuna parameter.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    hotype : string</span>
-<span class="sd">        Type of hyperparameter. Currently supported:</span>
-
-<span class="sd">            - optuna: Hyperparameter for HyperOptOptuna.</span>
-<span class="sd">            - oat: Hyperparameter for HyperOptOAT.</span>
-<span class="sd">            - naswot: Hyperparameter for HyperOptNASWOT.</span>
-
 <span class="sd">    opttype : string</span>
 <span class="sd">        Datatype of the hyperparameter. Follows optunas naming convetions.</span>
 <span class="sd">        In principle supported are:</span>
@@ -114,28 +105,21 @@
 <span class="sd">    high : float or int</span>
 <span class="sd">        Higher bound for numerical parameter.</span>
 
-<span class="sd">    choices : list</span>
+<span class="sd">    choices :</span>
 <span class="sd">        List of possible choices (for categorical parameter).</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    hyperparameter : HyperparameterOptuna or HyperparameterOAT or HyperparameterNASWOT</span>
-<span class="sd">        Hyperparameter in desired format.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">hparam</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span><span class="p">:</span>
-        <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterOptuna</span><span class="p">(</span><span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
-                                      <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;naswot&quot;</span><span class="p">:</span>
-        <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterNASWOT</span><span class="p">(</span><span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
-                                      <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;oat&quot;</span><span class="p">:</span>
-        <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterOAT</span><span class="p">(</span><span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">hparam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">hparam</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown hyperparameter type..&quot;</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HyperparameterACSD</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span>
+                                                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                                 <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
+                                                 <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span>
+                                                 <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
+
+        <span class="c1"># For now, only three types of hyperparameters are allowed:</span>
+        <span class="c1"># Lists, floats and ints.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opttype</span> <span class="o">!=</span> <span class="s2">&quot;categorical&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported Hyperparameter type.&quot;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

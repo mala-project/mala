@@ -74,10 +74,10 @@
 <span></span><span class="sd">&quot;&quot;&quot;Hyperparameter to use with optuna.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">optuna.trial</span> <span class="kn">import</span> <span class="n">Trial</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
+<span class="kn">from</span> <span class="nn">mala.network.hyperparameter</span> <span class="kn">import</span> <span class="n">Hyperparameter</span>
 
 
-<div class="viewcode-block" id="HyperparameterOptuna"><a class="viewcode-back" href="../../../api/mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna">[docs]</a><span class="k">class</span> <span class="nc">HyperparameterOptuna</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperparameterOptuna"><a class="viewcode-back" href="../../../api/mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna">[docs]</a><span class="k">class</span> <span class="nc">HyperparameterOptuna</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents an optuna parameter.</span>
 
 <span class="sd">    Parameters</span>
@@ -109,13 +109,12 @@
 <span class="sd">        List of possible choices (for categorical parameter).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">HyperparameterOptuna</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">high</span> <span class="o">=</span> <span class="n">high</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">low</span> <span class="o">=</span> <span class="n">low</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">opttype</span> <span class="o">=</span> <span class="n">opttype</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HyperparameterOptuna</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span>
+                                                   <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                                   <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
+                                                   <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span>
+                                                   <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
 
         <span class="c1"># For now, only three types of hyperparameters are allowed:</span>
         <span class="c1"># Lists, floats and ints.</span>

@@ -892,7 +892,7 @@
                 <span class="n">actual_outputs</span><span class="p">,</span> \
                 <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
                     <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">,</span>
-                                             <span class="n">data_set</span><span class="p">,</span> <span class="n">data_set_type</span><span class="p">,</span>
+                                             <span class="n">data_set</span><span class="p">,</span> <span class="n">data_set_type</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span>
                                              <span class="n">number_of_batches_per_snapshot</span><span class="p">,</span>
                                              <span class="n">optimal_batch_size</span><span class="p">)</span>
                 <span class="n">calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
@@ -940,7 +940,7 @@
 
                 <span class="n">actual_outputs</span><span class="p">,</span> <span class="n">predicted_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
                     <span class="n">_forward_entire_snapshot</span><span class="p">(</span><span class="n">snapshot_number</span><span class="o">-</span><span class="n">offset_snapshots</span><span class="p">,</span>
-                                             <span class="n">data_set</span><span class="p">,</span>
+                                             <span class="n">data_set</span><span class="p">,</span> <span class="n">data_set_type</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span>
                                              <span class="n">number_of_batches_per_snapshot</span><span class="p">,</span>
                                              <span class="n">optimal_batch_size</span><span class="p">)</span>
                 <span class="n">calculator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>

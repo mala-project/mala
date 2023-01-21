@@ -1,0 +1,7 @@
+acsd\_analyzer
+==============
+
+.. automodule:: mala.network.acsd_analyzer
+   :members:
+   :undoc-members:
+   :show-inheritance:

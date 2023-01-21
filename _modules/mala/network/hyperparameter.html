@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.network.hyperparameter &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mala.network.hyperparameter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.network.hyperparameter</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Interface function to get the correct type of hyperparameter.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
+
+
+<div class="viewcode-block" id="Hyperparameter"><a class="viewcode-back" href="../../../api/mala.network.hyperparameter.html#mala.network.hyperparameter.Hyperparameter">[docs]</a><span class="k">class</span> <span class="nc">Hyperparameter</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for all hyperparameters.</span>
+
+<span class="sd">    Will always return the correct subclass of hyperparameter.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    hotype : string</span>
+<span class="sd">        Type of hyperparameter. Currently supported:</span>
+
+<span class="sd">            - optuna: Hyperparameter for HyperOptOptuna.</span>
+<span class="sd">            - oat: Hyperparameter for HyperOptOAT.</span>
+<span class="sd">            - naswot: Hyperparameter for HyperOptNASWOT.</span>
+
+<span class="sd">    opttype : string</span>
+<span class="sd">        Datatype of the hyperparameter. Follows optunas naming convetions.</span>
+<span class="sd">        In principle supported are:</span>
+
+<span class="sd">            - float</span>
+<span class="sd">            - int</span>
+<span class="sd">            - categorical (list)</span>
+
+<span class="sd">        Float and int are not available for OA based approaches at the</span>
+<span class="sd">        moment.</span>
+
+<span class="sd">    name : string</span>
+<span class="sd">        Name of the hyperparameter. Please note that these names always</span>
+<span class="sd">        have to be distinct; if you e.g. want to investigate multiple</span>
+<span class="sd">        layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,</span>
+<span class="sd">        etc. as names.</span>
+
+<span class="sd">    low : float or int</span>
+<span class="sd">        Lower bound for numerical parameter.</span>
+
+<span class="sd">    high : float or int</span>
+<span class="sd">        Higher bound for numerical parameter.</span>
+
+<span class="sd">    choices : list</span>
+<span class="sd">        List of possible choices (for categorical parameter).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    hyperparameter : HyperparameterOptuna or HyperparameterOAT or HyperparameterNASWOT or HyperparameterACSD</span>
+<span class="sd">        Hyperparameter in desired format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a Hyperparameter instance.</span>
+
+<span class="sd">        The correct type of hyperparamer calculator will automatically be</span>
+<span class="sd">        instantiated by this class if possible. You can also instantiate</span>
+<span class="sd">        the desired hyperparamer directly by calling upon the subclass.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        hotype : string</span>
+<span class="sd">            Type of hyperparameter. Currently supported:</span>
+
+<span class="sd">                - optuna: Hyperparameter for HyperOptOptuna.</span>
+<span class="sd">                - oat: Hyperparameter for HyperOptOAT.</span>
+<span class="sd">                - naswot: Hyperparameter for HyperOptNASWOT.</span>
+
+<span class="sd">        opttype : string</span>
+<span class="sd">            Datatype of the hyperparameter. Follows optunas naming convetions.</span>
+<span class="sd">            In principle supported are:</span>
+
+<span class="sd">                - float</span>
+<span class="sd">                - int</span>
+<span class="sd">                - categorical (list)</span>
+
+<span class="sd">            Float and int are not available for OA based approaches at the</span>
+<span class="sd">            moment.</span>
+
+<span class="sd">        name : string</span>
+<span class="sd">            Name of the hyperparameter. Please note that these names always</span>
+<span class="sd">            have to be distinct; if you e.g. want to investigate multiple</span>
+<span class="sd">            layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,</span>
+<span class="sd">            etc. as names.</span>
+
+<span class="sd">        low : float or int</span>
+<span class="sd">            Lower bound for numerical parameter.</span>
+
+<span class="sd">        high : float or int</span>
+<span class="sd">            Higher bound for numerical parameter.</span>
+
+<span class="sd">        choices : list</span>
+<span class="sd">            List of possible choices (for categorical parameter).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">hparam</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="o">==</span> <span class="n">Hyperparameter</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;optuna&quot;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_optuna</span> <span class="kn">import</span> \
+                    <span class="n">HyperparameterOptuna</span>
+                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterOptuna</span><span class="p">(</span><span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
+                                              <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                              <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
+                                              <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;naswot&quot;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_naswot</span> <span class="kn">import</span> \
+                    <span class="n">HyperparameterNASWOT</span>
+                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterNASWOT</span><span class="p">(</span><span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
+                                              <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                              <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span>
+                                              <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;oat&quot;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_oat</span> <span class="kn">import</span> <span class="n">HyperparameterOAT</span>
+                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterOAT</span><span class="p">(</span><span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
+                                           <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                           <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">hotype</span> <span class="o">==</span> <span class="s2">&quot;acsd&quot;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">mala.network.hyperparameter_acsd</span> <span class="kn">import</span> <span class="n">HyperparameterACSD</span>
+                <span class="n">hparam</span> <span class="o">=</span> <span class="n">HyperparameterACSD</span><span class="p">(</span><span class="n">hotype</span><span class="o">=</span><span class="n">hotype</span><span class="p">,</span>
+                                            <span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                            <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">hparam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported hyperparameter.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hparam</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hparam</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opttype</span> <span class="o">=</span> <span class="n">opttype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">low</span> <span class="o">=</span> <span class="n">low</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">high</span> <span class="o">=</span> <span class="n">high</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.network.acsd_analyzer &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mala.network.acsd_analyzer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.network.acsd_analyzer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Class for performing a full ACSD analysis.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">mala.datahandling.data_converter</span> <span class="kn">import</span> <span class="n">descriptor_input_types</span><span class="p">,</span> \
+    <span class="n">target_input_types</span>
+<span class="kn">from</span> <span class="nn">mala.descriptors.descriptor</span> <span class="kn">import</span> <span class="n">Descriptor</span>
+<span class="kn">from</span> <span class="nn">mala.targets.target</span> <span class="kn">import</span> <span class="n">Target</span>
+<span class="kn">from</span> <span class="nn">mala.network.hyperparameter</span> <span class="kn">import</span> <span class="n">Hyperparameter</span>
+<span class="kn">from</span> <span class="nn">mala.network.hyper_opt</span> <span class="kn">import</span> <span class="n">HyperOpt</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">get_rank</span><span class="p">,</span> <span class="n">printout</span>
+
+<span class="n">descriptor_input_types_acsd</span> <span class="o">=</span> <span class="n">descriptor_input_types</span><span class="o">+</span><span class="p">[</span><span class="s2">&quot;numpy&quot;</span><span class="p">,</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">]</span>
+<span class="n">target_input_types_acsd</span> <span class="o">=</span> <span class="n">target_input_types</span><span class="o">+</span><span class="p">[</span><span class="s2">&quot;numpy&quot;</span><span class="p">,</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="ACSDAnalyzer"><a class="viewcode-back" href="../../../api/mala.network.acsd_analyzer.html#mala.network.acsd_analyzer.ACSDAnalyzer">[docs]</a><span class="k">class</span> <span class="nc">ACSDAnalyzer</span><span class="p">(</span><span class="n">HyperOpt</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Analyzer based on the ACSD analysis.</span>
+
+<span class="sd">    Mathematical details see here: doi.org/10.1088/2632-2153/ac9956</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    params : mala.common.parametes.Parameters</span>
+<span class="sd">        Parameters used to create this hyperparameter optimizer.</span>
+
+<span class="sd">    descriptor_calculator : mala.descriptors.descriptor.Descriptor</span>
+<span class="sd">        The descriptor calculator used for parsing/converting fingerprint</span>
+<span class="sd">        data. If None, the descriptor calculator will be created by this</span>
+<span class="sd">        object using the parameters provided. Default: None</span>
+
+<span class="sd">    target_calculator : mala.targets.target.Target</span>
+<span class="sd">        Target calculator used for parsing/converting target data. If None,</span>
+<span class="sd">        the target calculator will be created by this object using the</span>
+<span class="sd">        parameters provided. Default: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">descriptor_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ACSDAnalyzer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="c1"># Calculators used to parse data from compatible files.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">target_calculator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">Target</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">descriptor_calculator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span> <span class="o">=</span> <span class="n">Descriptor</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="c1"># Internal variables.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Filled after the analysis.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="ACSDAnalyzer.add_snapshot"><a class="viewcode-back" href="../../../api/mala.network.acsd_analyzer.html#mala.network.acsd_analyzer.ACSDAnalyzer.add_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor_input_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">descriptor_input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">target_input_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">target_input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">descriptor_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">target_units</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a snapshot to be processed.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        descriptor_input_type : string</span>
+<span class="sd">            Type of descriptor data to be processed.</span>
+<span class="sd">            See mala.datahandling.data_converter.descriptor_input_types</span>
+<span class="sd">            for options.</span>
+
+<span class="sd">        descriptor_input_path : string</span>
+<span class="sd">            Path of descriptor data to be processed.</span>
+
+<span class="sd">        target_input_type : string</span>
+<span class="sd">            Type of target data to be processed.</span>
+<span class="sd">            See mala.datahandling.data_converter.target_input_types</span>
+<span class="sd">            for options.</span>
+
+<span class="sd">        target_input_path : string</span>
+<span class="sd">            Path of target data to be processed.</span>
+
+<span class="sd">        descriptor_units : string</span>
+<span class="sd">            Units for descriptor data processing.</span>
+
+<span class="sd">        target_units : string</span>
+<span class="sd">            Units for target data processing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check the input.</span>
+        <span class="k">if</span> <span class="n">descriptor_input_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">descriptor_input_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot process descriptor data with no path &quot;</span>
+                    <span class="s2">&quot;given.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">descriptor_input_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">descriptor_input_types_acsd</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot process this type of descriptor data.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate ACSD without descriptor data.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">target_input_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">target_input_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot process target data with no path &quot;</span>
+                                <span class="s2">&quot;given.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">target_input_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">target_input_types_acsd</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot process this type of target data.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate ACSD without target data.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Assign info.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshots</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">descriptor_input_path</span><span class="p">,</span>
+                                            <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">target_input_path</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">descriptor_input_type</span><span class="p">,</span>
+                                            <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">target_input_type</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">descriptor_units</span><span class="p">,</span>
+                                      <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="n">target_units</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="ACSDAnalyzer.add_hyperparameter"><a class="viewcode-back" href="../../../api/mala.network.acsd_analyzer.html#mala.network.acsd_analyzer.ACSDAnalyzer.add_hyperparameter">[docs]</a>    <span class="k">def</span> <span class="nf">add_hyperparameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">choices</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a hyperparameter to the current investigation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : string</span>
+<span class="sd">            Name of the hyperparameter. Please note that these names always</span>
+<span class="sd">            have to be the same as the parameter names in</span>
+<span class="sd">            ParametersDescriptors.</span>
+
+<span class="sd">        choices :</span>
+<span class="sd">            List of possible choices.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;bispectrum_twojmax&quot;</span> <span class="ow">and</span> \
+           <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;bispectrum_cutoff&quot;</span> <span class="ow">and</span> \
+           <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;atomic_density_sigma&quot;</span> <span class="ow">and</span> \
+           <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;atomic_density_cutoff&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unkown hyperparameter for ACSD analysis entered.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">(</span><span class="n">hotype</span><span class="o">=</span><span class="s2">&quot;acsd&quot;</span><span class="p">,</span>
+                                                                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                                                <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">,</span>
+                                                                <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;categorical&quot;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ACSDAnalyzer.perform_study"><a class="viewcode-back" href="../../../api/mala.network.acsd_analyzer.html#mala.network.acsd_analyzer.ACSDAnalyzer.perform_study">[docs]</a>    <span class="k">def</span> <span class="nf">perform_study</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_based_communication</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                      <span class="n">return_plotting</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform the study, i.e. the optimization.</span>
+
+<span class="sd">        This is done by sampling different descriptors, calculated with</span>
+<span class="sd">        different hyperparameters and then calculating the ACSD.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># The individual loops depend on the type of descriptors.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">==</span> <span class="s2">&quot;Bispectrum&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;bispectrum_twojmax&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">))</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">twojmax_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">twojmax_list</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">[</span>
+                        <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;bispectrum_twojmax&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">))</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">True</span><span class="p">)]</span><span class="o">.</span><span class="n">choices</span>
+            <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;bispectrum_cutoff&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">))</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cutoff_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cutoff_list</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">[</span>
+                        <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;bispectrum_cutoff&quot;</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">hlist</span><span class="p">))</span><span class="o">.</span><span class="n">index</span><span class="p">(</span>
+                            <span class="kc">True</span><span class="p">)]</span><span class="o">.</span><span class="n">choices</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">,</span> <span class="s2">&quot;twojmax&quot;</span><span class="p">,</span> <span class="s2">&quot;acsd&quot;</span><span class="p">]</span>
+
+            <span class="c1"># Perform the ACSD analysis separately for each snapshot.</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__snapshots</span><span class="p">)):</span>
+                <span class="n">current_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_target</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__snapshots</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                           <span class="n">file_based_communication</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">cutoff</span> <span class="ow">in</span> <span class="n">cutoff_list</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">twojmax</span> <span class="ow">in</span> <span class="n">twojmax_list</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">=</span> <span class="n">twojmax</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">=</span> <span class="n">cutoff</span>
+                        <span class="n">descriptor</span> <span class="o">=</span> \
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__snapshots</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_description</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">__snapshot_units</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">acsd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_acsd</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hyperparameters</span><span class="o">.</span><span class="n">acsd_points</span><span class="p">,</span>
+                                                 <span class="n">descriptor_vectors_contain_xyz</span><span class="o">=</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">)</span>
+                            <span class="n">current_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">twojmax</span><span class="p">,</span> <span class="n">acsd</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">study</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">return_plotting</span><span class="p">:</span>
+                <span class="n">results_to_plot</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">len_twojmax</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">twojmax_list</span><span class="p">)</span>
+                <span class="n">len_cutoffs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cutoff_list</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">len_cutoffs</span><span class="p">):</span>
+                    <span class="n">results_to_plot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="n">len_twojmax</span><span class="p">:(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">len_twojmax</span><span class="p">,</span> <span class="mi">2</span><span class="p">:])</span>
+
+                <span class="k">return</span> <span class="n">results_to_plot</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;twojmax&quot;</span><span class="p">:</span> <span class="n">twojmax_list</span><span class="p">,</span> <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="n">cutoff_list</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="ACSDAnalyzer.set_optimal_parameters"><a class="viewcode-back" href="../../../api/mala.network.acsd_analyzer.html#mala.network.acsd_analyzer.ACSDAnalyzer.set_optimal_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_optimal_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the optimal parameters found in the present study.</span>
+
+<span class="sd">        The parameters will be written to the parameter object with which the</span>
+<span class="sd">        hyperparameter optimizer was created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">minimum_acsd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">study</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">descriptor_type</span> <span class="o">==</span> <span class="s2">&quot;Bispectrum&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_cutoff</span> <span class="o">=</span> <span class="n">minimum_acsd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">bispectrum_twojmax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">minimum_acsd</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;ACSD analysis, optimal parameters: &quot;</span><span class="p">,</span> <span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Bispectrum twojmax: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span>
+                         <span class="n">bispectrum_twojmax</span><span class="p">)</span>
+                <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Bispectrum cutoff: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span>
+                         <span class="n">bispectrum_cutoff</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_calculate_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">original_units</span><span class="p">):</span>
+        <span class="n">descriptor_calculation_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">tmp_input</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;espresso-out&quot;</span><span class="p">:</span>
+            <span class="n">descriptor_calculation_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span>
+            <span class="n">tmp_input</span><span class="p">,</span> <span class="n">local_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
+                <span class="n">calculate_from_qe_out</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">],</span>
+                                      <span class="o">**</span><span class="n">descriptor_calculation_kwargs</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># In this case, only the output is processed.</span>
+            <span class="k">pass</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown file extension, cannot convert &quot;</span>
+                            <span class="s2">&quot;descriptor&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]:</span>
+            <span class="n">tmp_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span> \
+                <span class="n">gather_descriptors</span><span class="p">(</span><span class="n">tmp_input</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tmp_input</span>
+
+    <span class="k">def</span> <span class="nf">_load_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">original_units</span><span class="p">,</span>
+                     <span class="n">file_based_communication</span><span class="p">):</span>
+        <span class="n">memmap</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="ow">and</span> \
+                <span class="n">file_based_communication</span><span class="p">:</span>
+            <span class="n">memmap</span> <span class="o">=</span> <span class="s2">&quot;acsd.out.npy_temp&quot;</span>
+
+        <span class="n">target_calculator_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Read the output data</span>
+        <span class="n">tmp_output</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.cube&quot;</span><span class="p">:</span>
+            <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
+            <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">memmap</span>
+            <span class="c1"># If no units are provided we just assume standard units.</span>
+            <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                <span class="n">read_from_cube</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span>
+            <span class="o">**</span> <span class="n">target_calculator_kwargs</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.xsf&quot;</span><span class="p">:</span>
+            <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span>
+            <span class="n">target_calculator_kwargs</span><span class="p">[</span><span class="s2">&quot;use_memmap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">memmap</span>
+            <span class="c1"># If no units are provided we just assume standard units.</span>
+            <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span> \
+                <span class="n">read_from_xsf</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span>
+            <span class="o">**</span> <span class="n">target_calculator_kwargs</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
+                    <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span> <span class="n">units</span><span class="o">=</span><span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="n">description</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;openpmd&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tmp_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
+                    <span class="n">target_calculator</span><span class="o">.</span><span class="n">read_from_numpy_file</span><span class="p">(</span>
+                    <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span> <span class="n">units</span><span class="o">=</span><span class="n">original_units</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown file extension, cannot convert target&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> \
+                    <span class="ow">and</span> <span class="n">file_based_communication</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">memmap</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tmp_output</span>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_calculate_cosine_similarities</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">nr_points</span><span class="p">,</span>
+                                       <span class="n">descriptor_vectors_contain_xyz</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the raw cosine similarities for descriptor and LDOS data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        descriptor_data : numpy.ndarray</span>
+<span class="sd">            Array containing the descriptors.</span>
+
+<span class="sd">        ldos_data : numpy.ndarray</span>
+<span class="sd">            Array containing the LDOS.</span>
+
+<span class="sd">        descriptor_vectors_contain_xyz : bool</span>
+<span class="sd">            If true, the xyz values are cut from the beginning of the</span>
+<span class="sd">            descriptor vectors.</span>
+
+<span class="sd">        nr_points : int</span>
+<span class="sd">            The number of points for which to calculate the ACSD.</span>
+<span class="sd">            The actual number of distances will be acsd_points x acsd_points,</span>
+<span class="sd">            since the cosine similarity is only defined for pairs.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        similarity_array : numpy.ndarray</span>
+<span class="sd">            A (2,nr_points*nr_points) array containing the cosine similarities.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">descriptor_dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">)</span>
+        <span class="n">ldos_dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptor_dim</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">descriptor_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span>
+                                         <span class="p">(</span><span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span>
+                                          <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span>
+                                          <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                          <span class="n">descriptor_dim</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">descriptor_vectors_contain_xyz</span><span class="p">:</span>
+                <span class="n">descriptor_data</span> <span class="o">=</span> <span class="n">descriptor_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptor_dim</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot work with this descriptor data.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_dim</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">ldos_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">,</span> <span class="p">(</span><span class="n">ldos_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">ldos_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span>
+                                               <span class="n">ldos_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">ldos_dim</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ldos_dim</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot work with this LDOS data.&quot;</span><span class="p">)</span>
+
+        <span class="n">similarity_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Draw nr_points at random from snapshot.</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+        <span class="n">points_i</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                              <span class="n">size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                              <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nr_points</span><span class="p">):</span>
+            <span class="c1"># Draw another nr_points at random from snapshot.</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span>
+            <span class="n">points_j</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                                  <span class="n">size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                                  <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nr_points</span><span class="p">):</span>
+                <span class="c1"># Calculate similarities between these two pairs.</span>
+                <span class="n">descriptor_distance</span> <span class="o">=</span> \
+                    <span class="n">ACSDAnalyzer</span><span class="o">.</span><span class="n">__calc_cosine_similarity</span><span class="p">(</span>
+                        <span class="n">descriptor_data</span><span class="p">[</span><span class="n">points_i</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
+                        <span class="n">descriptor_data</span><span class="p">[</span><span class="n">points_j</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
+                <span class="n">ldos_distance</span> <span class="o">=</span> <span class="n">ACSDAnalyzer</span><span class="o">.</span>\
+                    <span class="n">__calc_cosine_similarity</span><span class="p">(</span><span class="n">ldos_data</span><span class="p">[</span><span class="n">points_i</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
+                                             <span class="n">ldos_data</span><span class="p">[</span><span class="n">points_j</span><span class="p">[</span><span class="n">j</span><span class="p">]])</span>
+                <span class="n">similarity_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">descriptor_distance</span><span class="p">,</span> <span class="n">ldos_distance</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">similarity_array</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_calculate_acsd</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span> <span class="n">acsd_points</span><span class="p">,</span>
+                        <span class="n">descriptor_vectors_contain_xyz</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the ACSD for given descriptor and LDOS data.</span>
+
+<span class="sd">        ACSD stands for average cosine similarity distance and is a metric</span>
+<span class="sd">        of how well the descriptors capture the local environment to a</span>
+<span class="sd">        degree where similar descriptor vectors result in simlar LDOS vectors.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        descriptor_data : numpy.ndarray</span>
+<span class="sd">            Array containing the descriptors.</span>
+
+<span class="sd">        ldos_data : numpy.ndarray</span>
+<span class="sd">            Array containing the LDOS.</span>
+
+<span class="sd">        descriptor_vectors_contain_xyz : bool</span>
+<span class="sd">            If true, the xyz values are cut from the beginning of the</span>
+<span class="sd">            descriptor vectors.</span>
+
+<span class="sd">        acsd_points : int</span>
+<span class="sd">            The number of points for which to calculate the ACSD.</span>
+<span class="sd">            The actual number of distances will be acsd_points x acsd_points,</span>
+<span class="sd">            since the cosine similarity is only defined for pairs.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        acsd : float</span>
+<span class="sd">            The average cosine similarity distance.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">distance_between_points</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y2</span><span class="p">))</span>
+
+        <span class="n">similarity_data</span> <span class="o">=</span> <span class="n">ACSDAnalyzer</span><span class="o">.</span>\
+            <span class="n">_calculate_cosine_similarities</span><span class="p">(</span><span class="n">descriptor_data</span><span class="p">,</span> <span class="n">ldos_data</span><span class="p">,</span>
+                                           <span class="n">acsd_points</span><span class="p">,</span>
+                                           <span class="n">descriptor_vectors_contain_xyz</span><span class="o">=</span>
+                                           <span class="n">descriptor_vectors_contain_xyz</span><span class="p">)</span>
+        <span class="n">data_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">similarity_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data_size</span><span class="p">):</span>
+            <span class="n">distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distance_between_points</span><span class="p">(</span><span class="n">similarity_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                                     <span class="n">similarity_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                                     <span class="n">similarity_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                                     <span class="n">similarity_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__calc_cosine_similarity</span><span class="p">(</span><span class="n">vector1</span><span class="p">,</span> <span class="n">vector2</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">vector1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">vector2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot calculate similarity between vectors &quot;</span>
+                            <span class="s2">&quot;of different dimenstions.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">vector1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">vector1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vector2</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="o">/</span> \
+                   <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">vector1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vector2</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vector1</span><span class="p">,</span> <span class="n">vector2</span><span class="p">)</span> <span class="o">/</span> \
+                   <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector1</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span> <span class="o">*</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector2</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="n">norm</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

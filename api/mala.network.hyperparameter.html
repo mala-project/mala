@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>naswot_pruner &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+  <title>hyperparameter &mdash; Materials Learning Algorithms (MALA)  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
@@ -20,8 +20,8 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="network" href="mala.network.network.html" />
-    <link rel="prev" title="multi_training_pruner" href="mala.network.multi_training_pruner.html" /> 
+    <link rel="next" title="hyperparameter_acsd" href="mala.network.hyperparameter_acsd.html" />
+    <link rel="prev" title="hyper_opt_optuna" href="mala.network.hyper_opt_optuna.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -57,13 +57,13 @@
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_naswot.html">hyper_opt_naswot</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html">hyper_opt_oat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_optuna.html">hyper_opt_optuna</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter.html">hyperparameter</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">hyperparameter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_acsd.html">hyperparameter_acsd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_naswot.html">hyperparameter_naswot</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_oat.html">hyperparameter_oat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_optuna.html">hyperparameter_optuna</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.multi_training_pruner.html">multi_training_pruner</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">naswot_pruner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.naswot_pruner.html">naswot_pruner</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.network.html">network</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.objective_base.html">objective_base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.objective_naswot.html">objective_naswot</a></li>
@@ -99,9 +99,9 @@
           <li><a href="modules.html">API reference</a> &raquo;</li>
           <li><a href="mala.html">mala</a> &raquo;</li>
           <li><a href="mala.network.html">network</a> &raquo;</li>
-      <li>naswot_pruner</li>
+      <li>hyperparameter</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.network.naswot_pruner.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.network.hyperparameter.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -109,52 +109,55 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="module-mala.network.naswot_pruner">
-<span id="naswot-pruner"></span><h1>naswot_pruner<a class="headerlink" href="#module-mala.network.naswot_pruner" title="Permalink to this headline"></a></h1>
-<p>Prunes a network when the score is above a user defined limit.</p>
+  <div class="section" id="module-mala.network.hyperparameter">
+<span id="hyperparameter"></span><h1>hyperparameter<a class="headerlink" href="#module-mala.network.hyperparameter" title="Permalink to this headline"></a></h1>
+<p>Interface function to get the correct type of hyperparameter.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="mala.network.naswot_pruner.NASWOTPruner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NASWOTPruner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/naswot_pruner.html#NASWOTPruner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.naswot_pruner.NASWOTPruner" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">optuna.pruners.BasePruner</span></code></p>
-<p>Implements the NASWOT method (first version of paper) as an optuna pruner.</p>
-<p>This means that before each training of a trial network the network will
-be tested against a user defined surrogate score (which has to be
-calibrated). If this score is good enough, the candidate will be trained.</p>
+<dt class="sig sig-object py" id="mala.network.hyperparameter.Hyperparameter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Hyperparameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hotype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opttype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'float'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyperparameter.html#Hyperparameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyperparameter.Hyperparameter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mala.common.json_serializable.html#mala.common.json_serializable.JSONSerializable" title="mala.common.json_serializable.JSONSerializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.common.json_serializable.JSONSerializable</span></code></a></p>
+<p>Base class for all hyperparameters.</p>
+<p>Will always return the correct subclass of hyperparameter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>search_parameters</strong> (<em>mala.common.parametes.Parameters</em>) – Parameters used to create this objective.</p></li>
-<li><p><strong>data_handler</strong> (<a class="reference internal" href="mala.datahandling.data_handler.html#mala.datahandling.data_handler.DataHandler" title="mala.datahandling.data_handler.DataHandler"><em>mala.datahandling.data_handler.DataHandler</em></a>) – datahandler to be used during the hyperparameter optimization.</p></li>
+<li><p><strong>hotype</strong> (<em>string</em>) – <p>Type of hyperparameter. Currently supported:</p>
+<blockquote>
+<div><ul>
+<li><p>optuna: Hyperparameter for HyperOptOptuna.</p></li>
+<li><p>oat: Hyperparameter for HyperOptOAT.</p></li>
+<li><p>naswot: Hyperparameter for HyperOptNASWOT.</p></li>
 </ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="mala.network.naswot_pruner.NASWOTPruner.prune">
-<span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">optuna.study.Study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">optuna.trial.FrozenTrial</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/mala/network/naswot_pruner.html#NASWOTPruner.prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.naswot_pruner.NASWOTPruner.prune" title="Permalink to this definition"></a></dt>
-<dd><p>Judge whether the trial should be pruned based on the reported values.</p>
-<p>Note that this method is not supposed to be called by library users.
-Instead, <code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.report()</span></code> and
-<code class="xref py py-func docutils literal notranslate"><span class="pre">optuna.trial.Trial.should_prune()</span></code> provide
-user interfaces to implement pruning mechanism in an objective
-function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>study</strong> (<em>optuna.study.Study</em>) – Study object of the target study.</p></li>
-<li><p><strong>trial</strong> (<em>optuna.trial.FrozenTrial</em>) – FrozenTrial object of the target trial.
-Take a copy before modifying this object.</p></li>
+</div></blockquote>
+</p></li>
+<li><p><strong>opttype</strong> (<em>string</em>) – <p>Datatype of the hyperparameter. Follows optunas naming convetions.
+In principle supported are:</p>
+<blockquote>
+<div><ul>
+<li><p>float</p></li>
+<li><p>int</p></li>
+<li><p>categorical (list)</p></li>
+</ul>
+</div></blockquote>
+<p>Float and int are not available for OA based approaches at the
+moment.</p>
+</p></li>
+<li><p><strong>name</strong> (<em>string</em>) – Name of the hyperparameter. Please note that these names always
+have to be distinct; if you e.g. want to investigate multiple
+layer sizes use e.g. ff_neurons_layer_001, ff_neurons_layer_002,
+etc. as names.</p></li>
+<li><p><strong>low</strong> (<em>float</em><em> or </em><em>int</em>) – Lower bound for numerical parameter.</p></li>
+<li><p><strong>high</strong> (<em>float</em><em> or </em><em>int</em>) – Higher bound for numerical parameter.</p></li>
+<li><p><strong>choices</strong> (<em>list</em>) – List of possible choices (for categorical parameter).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>should_prune</strong> – A boolean indicating whether this particular trial should be
-pruned.</p>
+<dd class="field-even"><p><strong>hyperparameter</strong> – Hyperparameter in desired format.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool</p>
+<dd class="field-odd"><p><a class="reference internal" href="mala.network.hyperparameter_optuna.html#mala.network.hyperparameter_optuna.HyperparameterOptuna" title="mala.network.hyperparameter_optuna.HyperparameterOptuna">HyperparameterOptuna</a> or <a class="reference internal" href="mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT" title="mala.network.hyperparameter_oat.HyperparameterOAT">HyperparameterOAT</a> or <a class="reference internal" href="mala.network.hyperparameter_naswot.html#mala.network.hyperparameter_naswot.HyperparameterNASWOT" title="mala.network.hyperparameter_naswot.HyperparameterNASWOT">HyperparameterNASWOT</a> or <a class="reference internal" href="mala.network.hyperparameter_acsd.html#mala.network.hyperparameter_acsd.HyperparameterACSD" title="mala.network.hyperparameter_acsd.HyperparameterACSD">HyperparameterACSD</a></p>
 </dd>
 </dl>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -163,8 +166,8 @@ pruned.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="mala.network.multi_training_pruner.html" class="btn btn-neutral float-left" title="multi_training_pruner" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.network.network.html" class="btn btn-neutral float-right" title="network" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.network.hyper_opt_optuna.html" class="btn btn-neutral float-left" title="hyper_opt_optuna" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.network.hyperparameter_acsd.html" class="btn btn-neutral float-right" title="hyperparameter_acsd" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

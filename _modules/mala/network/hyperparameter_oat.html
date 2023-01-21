@@ -73,10 +73,10 @@
   <h1>Source code for mala.network.hyperparameter_oat</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Hyperparameter to use with OAT.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">mala.common.json_serializable</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
+<span class="kn">from</span> <span class="nn">mala.network.hyperparameter</span> <span class="kn">import</span> <span class="n">Hyperparameter</span>
 
 
-<div class="viewcode-block" id="HyperparameterOAT"><a class="viewcode-back" href="../../../api/mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT">[docs]</a><span class="k">class</span> <span class="nc">HyperparameterOAT</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperparameterOAT"><a class="viewcode-back" href="../../../api/mala.network.hyperparameter_oat.html#mala.network.hyperparameter_oat.HyperparameterOAT">[docs]</a><span class="k">class</span> <span class="nc">HyperparameterOAT</span><span class="p">(</span><span class="n">Hyperparameter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a hyperparameter for OAT.</span>
 
 <span class="sd">    Parameters</span>
@@ -102,11 +102,11 @@
 <span class="sd">        List of possible choices (for categorical parameter).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[]):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">HyperparameterOAT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">opttype</span> <span class="o">=</span> <span class="n">opttype</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hotype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opttype</span><span class="o">=</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[],</span>
+                 <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HyperparameterOAT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">opttype</span><span class="o">=</span><span class="n">opttype</span><span class="p">,</span>
+                                                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                                <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opttype</span> <span class="o">!=</span> <span class="s2">&quot;categorical&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unsupported Hyperparameter type.&quot;</span><span class="p">)</span>

@@ -20,7 +20,7 @@
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="hyperparameter_interface" href="mala.network.hyperparameter_interface.html" />
+    <link rel="next" title="hyperparameter" href="mala.network.hyperparameter.html" />
     <link rel="prev" title="hyper_opt_oat" href="mala.network.hyper_opt_oat.html" /> 
 </head>
 
@@ -52,11 +52,13 @@
 <li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="mala.network.html">network</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mala.network.acsd_analyzer.html">acsd_analyzer</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt.html">hyper_opt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_naswot.html">hyper_opt_naswot</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyper_opt_oat.html">hyper_opt_oat</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">hyper_opt_optuna</a></li>
-<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_interface.html">hyperparameter_interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter.html">hyperparameter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_acsd.html">hyperparameter_acsd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_naswot.html">hyperparameter_naswot</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_oat.html">hyperparameter_oat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="mala.network.hyperparameter_optuna.html">hyperparameter_optuna</a></li>
@@ -112,7 +114,7 @@
 <p>Hyperparameter optimizer using optuna.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.network.hyper_opt_optuna.HyperOptOptuna">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HyperOptOptuna</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HyperOptOptuna</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pkl_checkpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/hyper_opt_optuna.html#HyperOptOptuna"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.hyper_opt_optuna.HyperOptOptuna" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="mala.network.hyper_opt.html#mala.network.hyper_opt.HyperOpt" title="mala.network.hyper_opt.HyperOpt"><code class="xref py py-class docutils literal notranslate"><span class="pre">mala.network.hyper_opt.HyperOpt</span></code></a></p>
 <p>Hyperparameter optimizer using Optuna.</p>
 <dl class="field-list simple">
@@ -240,7 +242,7 @@ hyperparameter optimizer was created.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="mala.network.hyper_opt_oat.html" class="btn btn-neutral float-left" title="hyper_opt_oat" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mala.network.hyperparameter_interface.html" class="btn btn-neutral float-right" title="hyperparameter_interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mala.network.hyperparameter.html" class="btn btn-neutral float-right" title="hyperparameter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

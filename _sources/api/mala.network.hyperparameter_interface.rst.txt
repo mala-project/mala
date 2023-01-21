@@ -1,7 +1,0 @@
-hyperparameter\_interface
-=========================
-
-.. automodule:: mala.network.hyperparameter_interface
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -409,9 +409,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">atomic_density_sigma</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atomic_density_cutoff</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># For accelerated hyperparameter optimization.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">acsd_points</span> <span class="o">=</span> <span class="mi">100</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">use_z_splitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1041,6 +1038,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">naswot_pruner_batch_size</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_bad_trials_before_stopping</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sqlite_timeout</span> <span class="o">=</span> <span class="mi">600</span>
+
+        <span class="c1"># For accelerated hyperparameter optimization.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acsd_points</span> <span class="o">=</span> <span class="mi">100</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">rdb_storage_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
