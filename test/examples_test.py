@@ -8,19 +8,19 @@ import pytest
 @pytest.mark.examples
 class TestExamples:
     def test_ex01(self):
-        runpy.run_path("../examples/ex01_run_singleshot.py")
+        runpy.run_path("../examples/ex01_train_network.py")
 
     def test_ex02(self):
-        runpy.run_path("../examples/ex02_preprocess_data.py")
+        runpy.run_path("../examples/ex03_preprocess_data.py")
 
     def test_ex03(self):
-        runpy.run_path("../examples/ex03_postprocess_data.py")
+        runpy.run_path("../examples/ex04_postprocess_data.py")
 
     def test_ex04(self):
-        runpy.run_path("../examples/ex04_hyperparameter_optimization.py")
+        runpy.run_path("../examples/ex05_hyperparameter_optimization.py")
 
     def test_ex05(self):
-        runpy.run_path("../examples/ex05_training_with_postprocessing.py")
+        runpy.run_path("../examples/ex02_test_network.py")
 
     def test_ex06(self):
         runpy.run_path(
