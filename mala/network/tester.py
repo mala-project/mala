@@ -53,6 +53,15 @@ class Tester(Runner):
             raise Exception("Wrong output format for testing selected.")
 
     def test_all_snapshots(self):
+        """
+        Test the selected observables for all snapshots.
+
+        Returns
+        -------
+        results : dict
+            A dictionary containing the errors for the selected observables,
+            either as list or MAE.
+        """
         results = {}
         for observable in self.observables_to_test:
             results[observable] = []
@@ -75,6 +84,19 @@ class Tester(Runner):
             raise Exception("Wrong output format for testing selected.")
 
     def test_snapshot(self, snapshot_number):
+        """
+        Test the selected observables for a single snapshot.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            Snapshot which to test.
+
+        Returns
+        -------
+        results : dict
+            A dictionary containing the errors for the selected observables.
+        """
         actual_outputs, predicted_outputs = \
             self.predict_targets(snapshot_number)
 
