@@ -114,7 +114,7 @@
 <p>Runner class for running networks.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mala.network.runner.Runner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Runner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/runner.html#Runner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.runner.Runner" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Runner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runner_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/runner.html#Runner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.runner.Runner" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Parent class for all classes that in some sense “run” the network.</p>
 <p>That can be training, benchmarking, inference, etc.</p>
@@ -127,6 +127,79 @@
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.network.runner.Runner.load_run">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_runner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/runner.html#Runner.load_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.runner.Runner.load_run" title="Permalink to this definition"></a></dt>
+<dd><p>Load a run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>run_name</strong> (<em>str</em>) – Name under which the run is saved.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path where the run is saved.</p></li>
+<li><p><strong>zip_run</strong> (<em>bool</em>) – If True, MALA will attempt to load from a .zip file. If False,
+then separate files will be attempted to be loaded.</p></li>
+<li><p><strong>params_format</strong> (<em>str</em>) – Can be “json” or “pkl”, depending on what was saved by the model.
+Default is “json”.</p></li>
+<li><p><strong>load_runner</strong> (<em>bool</em>) – If True, a Runner object will be created/loaded for further use.</p></li>
+<li><p><strong>prepare_data</strong> (<em>bool</em>) – If True, the data will be loaded into memory. This is needed when
+continuing a model training.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>loaded_params</strong> (<em>mala.common.parameters.Parameters</em>) – The Parameters saved to file.</p></li>
+<li><p><strong>loaded_network</strong> (<em>mala.network.network.Network</em>) – The network saved to file.</p></li>
+<li><p><strong>new_datahandler</strong> (<em>mala.datahandling.data_handler.DataHandler</em>) – The data handler reconstructed from file.</p></li>
+<li><p><strong>new_runner</strong> (<em>Runner</em>) – (Optional) The runner reconstructed from file. For Tester and
+Predictor class, this is just a newly instantiated object.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.network.runner.Runner.run_exists">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/runner.html#Runner.run_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.runner.Runner.run_exists" title="Permalink to this definition"></a></dt>
+<dd><p>Check if a run exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>run_name</strong> (<em>str</em>) – Name under which the run is saved.</p></li>
+<li><p><strong>zip_run</strong> (<em>bool</em>) – If True, MALA will look for a .zip file. If False,
+then separate files will be attempted to be loaded.</p></li>
+<li><p><strong>params_format</strong> (<em>str</em>) – Can be “json” or “pkl”, depending on what was saved by the model.
+Default is “json”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>exists</strong> – If True, the model exists.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.network.runner.Runner.save_run">
+<span class="sig-name descname"><span class="pre">save_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_runner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/runner.html#Runner.save_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.runner.Runner.save_run" title="Permalink to this definition"></a></dt>
+<dd><p>Save the current run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>run_name</strong> (<em>str</em>) – Name under which the run should be saved.</p></li>
+<li><p><strong>save_path</strong> (<em>str</em>) – Path where to which the run.</p></li>
+<li><p><strong>zip_run</strong> (<em>bool</em>) – If True, the entire run will be saved as a .zip file. If False,
+then the model will be saved as separate files.</p></li>
+<li><p><strong>save_runner</strong> (<em>bool</em>) – If True, the Runner object will also be saved as object. This
+is unnecessary for most use cases, but used internally when
+a checkpoint is created during model training.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
