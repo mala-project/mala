@@ -161,11 +161,32 @@ class TestHyperparameterOptimization:
     def test_acsd(self):
         """Test that the ACSD routine is still working."""
         test_parameters = mala.Parameters()
+
+        test_parameters.descriptors.descriptors_contain_xyz = True
         test_parameters.descriptors.acsd_points = 100
-        descriptors = mala.Descriptor(test_parameters)
-        snap_data = np.load(os.path.join(data_path_be, "Be_snapshot1.in.npy"))
-        ldos_data = np.load(os.path.join(data_path_be, "Be_snapshot1.out.npy"))
-        assert descriptors.get_acsd(snap_data, ldos_data) < targeted_acsd_value
+        test_parameters.descriptors.descriptor_type = "Bispectrum"
+
+        hyperoptimizer = mala.ACSDAnalyzer(test_parameters)
+        hyperoptimizer.add_hyperparameter("bispectrum_twojmax", [2, 6])
+        hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0])
+        # hyperoptimizer.add_hyperparameter("bispectrum_twojmax", [6, 8])
+        # hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0, 3.0])
+
+        hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path_be,
+                                                                 "Be_snapshot1.out"),
+                                    "numpy", os.path.join(data_path_be,
+                                                          "Be_snapshot1.in.npy"),
+                                    target_units="1/(Ry*Bohr^3)")
+        hyperoptimizer.add_snapshot("espresso-out", os.path.join(data_path_be,
+                                                                 "Be_snapshot2.out"),
+                                    "numpy", os.path.join(data_path_be,
+                                                          "Be_snapshot2.in.npy"),
+                                    target_units="1/(Ry*Bohr^3)")
+        hyperoptimizer.perform_study()
+        hyperoptimizer.set_optimal_parameters()
+
+        # With these parameters, twojmax should always come out as 6.
+        assert hyperoptimizer.params.descriptors.bispectrum_twojmax == 6
 
     @staticmethod
     def __optimize_hyperparameters(hyper_optimizer):
