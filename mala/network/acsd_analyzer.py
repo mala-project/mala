@@ -17,8 +17,9 @@ target_input_types_acsd = target_input_types+["numpy", "openpmd"]
 
 class ACSDAnalyzer(HyperOpt):
 
-    def __int__(self, params, target_calculator=None,
-                descriptor_calculator=None):
+    def __init__(self, params, target_calculator=None,
+                 descriptor_calculator=None):
+        super(ACSDAnalyzer, self).__init__(params)
         # Calculators used to parse data from compatible files.
         self.target_calculator = target_calculator
         if self.target_calculator is None:
@@ -106,8 +107,10 @@ class ACSDAnalyzer(HyperOpt):
            name != "atomic_density_cutoff":
             raise Exception("Unkown hyperparameter for ACSD analysis entered.")
 
-        self.params.hyperparameters.hlist.append(Hyperparameter(name=name,
-                                                    choices=choices))
+        self.params.hyperparameters.hlist.append(Hyperparameter(hotype="acsd",
+                                                                name=name,
+                                                                choices=choices,
+                                                                opttype="categorical"))
 
     def perform_study(self, file_based_communication=False):
         # The individual loops depend on the type of descriptors.
@@ -134,6 +137,7 @@ class ACSDAnalyzer(HyperOpt):
 
             # Perform the ACSD analysis separately for each snapshot.
             for i in range(0, len(self.__snapshots)):
+                current_list = []
                 target = self._load_target(self.__snapshots[i],
                                            self.__snapshot_description[i],
                                            self.__snapshot_units[i],
@@ -151,12 +155,14 @@ class ACSDAnalyzer(HyperOpt):
                                                  self.params.hyperparameters.acsd_points,
                                                  descriptor_vectors_contain_xyz=
                                                  self.params.descriptors.descriptors_contain_xyz)
-                            self.study.append([twojmax, cutoff, acsd])
+                            current_list.append([twojmax, cutoff, acsd])
+                self.study.append(current_list)
 
     def set_optimal_parameters(self):
+        self.study = np.mean(self.study, axis=0)
         minimum_acsd = self.study[np.argmin(self.study[:, 2])]
         if self.params.descriptors.descriptor_type == "Bispectrum":
-            self.params.descriptors.bispectrum_twojmax = minimum_acsd[0]
+            self.params.descriptors.bispectrum_twojmax = int(minimum_acsd[0])
             self.params.descriptors.bispectrum_cutoff = minimum_acsd[1]
             printout("Optimal parameters: ", )
             printout("Bispectrum twojmax: ", self.params.descriptors.
@@ -166,6 +172,7 @@ class ACSDAnalyzer(HyperOpt):
 
     def _calculate_descriptors(self, snapshot, description, original_units):
         descriptor_calculation_kwargs = {}
+        tmp_input = None
         if description["input"] == "espresso-out":
             descriptor_calculation_kwargs["units"] = original_units["input"]
             tmp_input, local_size = self.descriptor_calculator. \
@@ -179,7 +186,6 @@ class ACSDAnalyzer(HyperOpt):
         else:
             raise Exception("Unknown file extension, cannot convert "
                             "descriptor")
-        tmp_input = None
         if self.params.descriptors._configuration["mpi"]:
             tmp_input = self.descriptor_calculator. \
                 gather_descriptors(tmp_input)
@@ -189,7 +195,7 @@ class ACSDAnalyzer(HyperOpt):
     def _load_target(self, snapshot, description, original_units,
                      file_based_communication):
         memmap = None
-        if self.params._configuration["mpi"] and \
+        if self.params.descriptors._configuration["mpi"] and \
                 file_based_communication:
             memmap = "acsd.out.npy_temp"
 
@@ -227,9 +233,8 @@ class ACSDAnalyzer(HyperOpt):
         else:
             raise Exception("Unknown file extension, cannot convert target")
 
-
         if get_rank() == 0:
-            if self.params._configuration["mpi"] \
+            if self.params.targets._configuration["mpi"] \
                     and file_based_communication:
                 os.remove(memmap)
 

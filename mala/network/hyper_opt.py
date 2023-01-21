@@ -25,7 +25,7 @@ class HyperOpt(ABC):
         If true, .pkl checkpoints will be created.
     """
 
-    def __new__(cls, params: Parameters, data, use_pkl_checkpoints=False):
+    def __new__(cls, params: Parameters, data=None, use_pkl_checkpoints=False):
         """
         Create a HyperOpt instance.
 
@@ -64,7 +64,8 @@ class HyperOpt(ABC):
 
         return hoptimizer
 
-    def __init__(self, params: Parameters, data, use_pkl_checkpoints=False):
+    def __init__(self, params: Parameters, data=None,
+                 use_pkl_checkpoints=False):
         self.params: Parameters = params
         self.data_handler = data
         self.objective = ObjectiveBase(self.params, self.data_handler)

@@ -1,11 +1,11 @@
 """Hyperparameter to use with optuna."""
-from mala.network.hyperparameter_optuna import HyperparameterOptuna
+from optuna.trial import Trial
+
+from mala.network.hyperparameter import Hyperparameter
 
 
-class HyperparameterNASWOT(HyperparameterOptuna):
-    """Represents a parameter used for pure NASWOT.
-
-    Based upon the hyperparameter representation for optuna.
+class HyperparameterACSD(Hyperparameter):
+    """Represents an optuna parameter.
 
     Parameters
     ----------
@@ -36,14 +36,14 @@ class HyperparameterNASWOT(HyperparameterOptuna):
         List of possible choices (for categorical parameter).
     """
 
-    def __init__(self, hotype=None, opttype="categorical", name="", low=0, high=0,
-                 choices=None):
-        super(HyperparameterNASWOT, self).__init__(opttype=opttype,
-                                                   name=name,
-                                                   low=low,
-                                                   high=high,
-                                                   choices=choices)
+    def __init__(self, hotype=None, opttype="float", name="", low=0, high=0, choices=None):
+        super(HyperparameterACSD, self).__init__(opttype=opttype,
+                                                 name=name,
+                                                 low=low,
+                                                 high=high,
+                                                 choices=choices)
 
-        # For NASWOT, only categoricals are allowed.
+        # For now, only three types of hyperparameters are allowed:
+        # Lists, floats and ints.
         if self.opttype != "categorical":
             raise Exception("Unsupported Hyperparameter type.")

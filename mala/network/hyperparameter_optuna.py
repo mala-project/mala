@@ -36,7 +36,7 @@ class HyperparameterOptuna(Hyperparameter):
         List of possible choices (for categorical parameter).
     """
 
-    def __init__(self, opttype="float", name="", low=0, high=0, choices=None):
+    def __init__(self, hotype=None, opttype="float", name="", low=0, high=0, choices=None):
         super(HyperparameterOptuna, self).__init__(opttype=opttype,
                                                    name=name,
                                                    low=low,

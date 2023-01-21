@@ -1,8 +1,5 @@
 """Interface function to get the correct type of hyperparameter."""
 from mala.common.json_serializable import JSONSerializable
-from mala.network.hyperparameter_oat import HyperparameterOAT
-from mala.network.hyperparameter_optuna import HyperparameterOptuna
-from mala.network.hyperparameter_naswot import HyperparameterNASWOT
 
 
 class Hyperparameter(JSONSerializable):
@@ -54,16 +51,29 @@ class Hyperparameter(JSONSerializable):
         hparam = None
         if cls == Hyperparameter:
             if hotype == "optuna":
-                hparam = HyperparameterOptuna(opttype=opttype, name=name,
+                from mala.network.hyperparameter_optuna import \
+                    HyperparameterOptuna
+                hparam = HyperparameterOptuna(hotype=hotype,
+                                              opttype=opttype, name=name,
                                               low=low,
                                               high=high, choices=choices)
             if hotype == "naswot":
-                hparam = HyperparameterNASWOT(opttype=opttype, name=name,
+                from mala.network.hyperparameter_naswot import \
+                    HyperparameterNASWOT
+                hparam = HyperparameterNASWOT(hotype=hotype,
+                                              opttype=opttype, name=name,
                                               low=low,
                                               high=high, choices=choices)
             if hotype == "oat":
-                hparam = HyperparameterOAT(opttype=opttype, name=name,
+                from mala.network.hyperparameter_oat import HyperparameterOAT
+                hparam = HyperparameterOAT(hotype=hotype,
+                                           opttype=opttype, name=name,
                                            choices=choices)
+            if hotype == "acsd":
+                from mala.network.hyperparameter_acsd import HyperparameterACSD
+                hparam = HyperparameterACSD(hotype=hotype,
+                                            opttype=opttype, name=name,
+                                            low=low, high=high, choices=choices)
 
             if hparam is None:
                 raise Exception("Unsupported hyperparameter.")
