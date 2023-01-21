@@ -42,8 +42,7 @@ class Trainer(Runner):
         If true, .pkl checkpoints will be created.
     """
 
-    def __init__(self, params, network, data, optimizer_dict=None,
-                 use_pkl_checkpoints=False):
+    def __init__(self, params, network, data, optimizer_dict=None):
         # copy the parameters into the class.
         super(Trainer, self).__init__(params, network, data)
         self.final_test_loss = float("inf")
@@ -58,7 +57,6 @@ class Trainer(Runner):
         self.training_data_loader = None
         self.validation_data_loader = None
         self.test_data_loader = None
-        self.use_pkl_checkpoints = use_pkl_checkpoints
 
         # Samplers for the horovod case.
         self.train_sampler = None
@@ -95,7 +93,7 @@ class Trainer(Runner):
         self.validation_graph = None
 
     @classmethod
-    def checkpoint_exists(cls, checkpoint_name, use_pkl_checkpoints=False):
+    def run_exists(cls, run_name, params_format="json", zip_run=True):
         """
         Check if a hyperparameter optimization checkpoint exists.
 
@@ -115,79 +113,20 @@ class Trainer(Runner):
             True if the checkpoint exists, False otherwise.
 
         """
-        network_name = checkpoint_name + "_network.pth"
-        iscaler_name = checkpoint_name + "_iscaler.pkl"
-        oscaler_name = checkpoint_name + "_oscaler.pkl"
-        if use_pkl_checkpoints:
-            param_name = checkpoint_name + "_params.pkl"
+        if zip_run is True:
+            return os.path.isfile(run_name+".zip")
         else:
-            param_name = checkpoint_name + "_params.json"
-        optimizer_name = checkpoint_name + "_optimizer.pth"
-
-        return all(map(os.path.isfile, [iscaler_name, oscaler_name, param_name,
-                                        network_name, optimizer_name]))
+            network_name = run_name + ".network.pth"
+            iscaler_name = run_name + ".iscaler.pkl"
+            oscaler_name = run_name + ".oscaler.pkl"
+            param_name = run_name + ".params."+params_format
+            optimizer_name = run_name + ".optimizer.pth"
+            return all(map(os.path.isfile, [iscaler_name, oscaler_name,
+                                            param_name,
+                                            network_name, optimizer_name]))
 
     @classmethod
-    def resume_checkpoint(cls, checkpoint_name, use_pkl_checkpoints=False):
-        """
-        Prepare resumption of training from a checkpoint.
-
-        Please note that to actually resume the training,
-        Trainer.train_network() still has to be called.
-
-        Parameters
-        ----------
-        checkpoint_name : string
-            Name of the checkpoint from which
-
-        use_pkl_checkpoints : bool
-            If true, .pkl checkpoints will be loaded.
-
-        Returns
-        -------
-        loaded_params : mala.common.parameters.Parameters
-            The Parameters saved in the checkpoint.
-
-        loaded_network : mala.network.network.Network
-            The network saved in the checkpoint.
-
-        new_datahandler : mala.datahandling.data_handler.DataHandler
-            The data handler reconstructed from the checkpoint.
-
-        new_trainer : Trainer
-            The trainer reconstructed from the checkpoint.
-        """
-        printout("Loading training run from checkpoint.", min_verbosity=0)
-        # The names are based upon the checkpoint name.
-        network_name = checkpoint_name + "_network.pth"
-        iscaler_name = checkpoint_name + "_iscaler.pkl"
-        oscaler_name = checkpoint_name + "_oscaler.pkl"
-        if use_pkl_checkpoints:
-            param_name = checkpoint_name + "_params.pkl"
-        else:
-            param_name = checkpoint_name + "_params.json"
-        optimizer_name = checkpoint_name + "_optimizer.pth"
-
-        # First load the all the regular objects.
-        loaded_params = Parameters.load_from_file(param_name)
-        loaded_iscaler = DataScaler.load_from_file(iscaler_name)
-        loaded_oscaler = DataScaler.load_from_file(oscaler_name)
-        loaded_network = Network.load_from_file(loaded_params,
-                                                network_name)
-
-        printout("Preparing data used for last checkpoint.", min_verbosity=0)
-        # Create a new data handler and prepare the data.
-        new_datahandler = DataHandler(loaded_params,
-                                      input_data_scaler=loaded_iscaler,
-                                      output_data_scaler=loaded_oscaler)
-        new_datahandler.prepare_data(reparametrize_scaler=False)
-        new_trainer = Trainer.load_from_file(loaded_params, optimizer_name,
-                                             loaded_network, new_datahandler)
-
-        return loaded_params, loaded_network, new_datahandler, new_trainer
-
-    @classmethod
-    def load_from_file(cls, params, file_path, network, data):
+    def _load_from_run(cls, params, network, data, file=None):
         """
         Load a trainer from a file.
 
@@ -213,7 +152,7 @@ class Trainer(Runner):
             The trainer that was loaded from the file.
         """
         # First, load the checkpoint.
-        checkpoint = torch.load(file_path)
+        checkpoint = torch.load(file)
 
         # Now, create the Trainer class with it.
         loaded_trainer = Trainer(params, network, data,
@@ -908,28 +847,8 @@ class Trainer(Runner):
         Follows https://pytorch.org/tutorials/recipes/recipes/saving_and_
         loading_a_general_checkpoint.html to some degree.
         """
-        network_name = self.parameters.checkpoint_name \
-            + "_network.pth"
-        iscaler_name = self.parameters.checkpoint_name \
-            + "_iscaler.pkl"
-        oscaler_name = self.parameters.checkpoint_name \
-            + "_oscaler.pkl"
-        if self.use_pkl_checkpoints:
-            param_name = self.parameters.checkpoint_name \
-                         + "_params.pkl"
-            self.parameters_full.save_as_pickle(param_name)
-        else:
-            param_name = self.parameters.checkpoint_name \
-                         + "_params.json"
-            self.parameters_full.save_as_json(param_name)
-
         optimizer_name = self.parameters.checkpoint_name \
-            + "_optimizer.pth"
-
-        # First we save the objects we would also save for inference.
-        self.data.input_data_scaler.save(iscaler_name)
-        self.data.output_data_scaler.save(oscaler_name)
-        self.network.save_network(network_name)
+            + ".optimizer.pth"
 
         # Next, we save all the other objects.
 
@@ -951,9 +870,10 @@ class Trainer(Runner):
                 'early_stopping_counter': self.patience_counter,
                 'early_stopping_last_loss': self.last_loss
             }
-
         torch.save(save_dict, optimizer_name,
                    _use_new_zipfile_serialization=False)
+
+        self.save_run(self.parameters.checkpoint_name, save_runner=True)
 
     @staticmethod
     def __average_validation(val, name):

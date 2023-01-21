@@ -19,10 +19,6 @@ ex05_* files used below.
 data_repo_path = os.environ["MALA_DATA_REPO"]
 
 data_path = pj(data_repo_path, "Be2")
-params_path = "be_model.params.json"
-network_path = "be_model.network.pth"
-input_scaler_path = "be_model.iscaler.pkl"
-output_scaler_path = "be_model.oscaler.pkl"
 
 
 def load_whole_snapshot():
@@ -30,19 +26,9 @@ def load_whole_snapshot():
     single feature vector afterwards.
     """
 
-    # First load Parameters.
-    parameters = mala.Parameters.load_from_file(params_path, no_snapshots=True)
-
-    # Load a network from a file.
-    network = mala.Network.load_from_file(parameters, network_path)
-
-    # Make sure the same scaling is used for data handling.
-    iscaler = mala.DataScaler.load_from_file(input_scaler_path)
-    oscaler = mala.DataScaler.load_from_file(output_scaler_path)
-
-    inference_data_handler = mala.DataHandler(
-        parameters, input_data_scaler=iscaler, output_data_scaler=oscaler
-    )
+    # First load a run.
+    parameters, network, data_handler = mala.Runner.load_run("be_model",
+                                                             load_runner=False)
 
     # Add snapshots that are to be tested and make sure that the
     # data_splitting_snapshots list is correct.
@@ -50,21 +36,22 @@ def load_whole_snapshot():
     # Units: output_units="1/(Ry*Bohr^3)" means that the output (target) data (LDOS) has
     # unit 1/Ry. Rescaled network output, after oscaler.inverse_transform() is
     # applied (see below) will be in 1/eV.
-    inference_data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+    data_handler.clear_data()
+    data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
                                         "Be_snapshot2.out.npy", data_path, "te")
-    inference_data_handler.prepare_data(reparametrize_scaler=False)
+    data_handler.prepare_data(reparametrize_scaler=False)
 
     # Extract single feature vector from snapshot. The x,y,z part (first 3
     # entries) are removed in DataHandler, so the feature vector length is 91
     # instead of 94. See also load_memmap_snapshot() below for details. The
     # removal in DataHandler is controlled by
     # parameters.descriptors_contain_xyz, which is True by default.
-    x_scaled = inference_data_handler.test_data_inputs[0]
+    x_scaled = data_handler.test_data_inputs[0]
     with torch.no_grad():
         y_pred = network(x_scaled)
 
     # Convert to 1/eV
-    y_rescaled = oscaler.inverse_transform(y_pred)
+    y_rescaled = data_handler.output_data_scaler.inverse_transform(y_pred)
 
     return dict(x_scaled=x_scaled, y_pred=y_pred, y_rescaled=y_rescaled)
 
@@ -73,15 +60,9 @@ def load_memmap_snapshot():
     """Load numpy memmap of snapshot and extract single feature. Avoid loading
     whole snapshot into memory.
     """
-    # First load Parameters.
-    parameters = mala.Parameters.load_from_file(params_path, no_snapshots=True)
-
-    # Load a network from a file.
-    network = mala.Network.load_from_file(parameters, network_path)
-
-    # Make sure the same scaling is used for data handling.
-    iscaler = mala.DataScaler.load_from_file(input_scaler_path)
-    oscaler = mala.DataScaler.load_from_file(output_scaler_path)
+    # First load a run.
+    parameters, network, data_handler = mala.Runner.load_run("be_model",
+                                                             load_runner=False)
 
     # Load snapshot with input features, use memmap.
     inputs_array = np.load(
@@ -96,26 +77,22 @@ def load_memmap_snapshot():
 
     # For some reason, DataScaler changes the shape (N,) -> (1,N), revert that
     x_scaled = x.detach().clone()
-    iscaler.transform(x_scaled)
+    x_scaled = x_scaled.reshape((1, 91))
+    data_handler.input_data_scaler.transform(x_scaled)
+    x_scaled = x_scaled.reshape(91)
     with torch.no_grad():
         y_pred = network(x_scaled)
 
     # Convert to 1/eV
-    y_rescaled = oscaler.inverse_transform(y_pred)
+    y_rescaled = data_handler.output_data_scaler.inverse_transform(y_pred)
 
     return dict(x_scaled=x_scaled, y_pred=y_pred, y_rescaled=y_rescaled, x=x)
 
 
 if __name__ == "__main__":
-    assert os.path.exists(data_path), f"{data_path} missing, link data repo first"
-
-    for pth in [
-        params_path,
-        network_path,
-        input_scaler_path,
-        output_scaler_path,
-    ]:
-        assert os.path.exists(pth), f"{pth} missing, run ex01 first"
+    assert os.path.exists(data_path), f"{data_path} missing, link data repo " \
+                                      f"first"
+    assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
 
     a = load_whole_snapshot()
     b = load_memmap_snapshot()

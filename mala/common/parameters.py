@@ -1453,14 +1453,14 @@ class Parameters:
         self.hyperparameters._update_device(device_temp)
 
     @classmethod
-    def load_from_file(cls, filename, save_format="json",
+    def load_from_file(cls, file, save_format="json",
                        no_snapshots=False):
         """
         Load a Parameters object from a file.
 
         Parameters
         ----------
-        filename : string
+        file : string or ZipExtFile
             File to which the parameters will be saved to.
 
         save_format : string
@@ -1478,13 +1478,18 @@ class Parameters:
 
         """
         if save_format == "pickle":
-            with open(filename, 'rb') as handle:
-                loaded_parameters = pickle.load(handle)
-                if no_snapshots is True:
-                    loaded_parameters.data.snapshot_directories_list = []
+            if isinstance(file, str):
+                loaded_parameters = pickle.load(open(file, 'rb'))
+            else:
+                loaded_parameters = pickle.load(file)
+            if no_snapshots is True:
+                loaded_parameters.data.snapshot_directories_list = []
         elif save_format == "json":
-            with open(filename, encoding="utf-8") as json_file:
-                json_dict = json.load(json_file)
+            if isinstance(file, str):
+                json_dict = json.load(open(file, encoding="utf-8"))
+            else:
+                json_dict = json.load(file)
+
             loaded_parameters = cls()
             for key in json_dict:
                 if isinstance(json_dict[key], dict) and key \
@@ -1509,13 +1514,13 @@ class Parameters:
         return loaded_parameters
 
     @classmethod
-    def load_from_pickle(cls, filename, no_snapshots=False):
+    def load_from_pickle(cls, file, no_snapshots=False):
         """
         Load a Parameters object from a pickle file.
 
         Parameters
         ----------
-        filename : string
+        file : string or ZipExtFile
             File to which the parameters will be saved to.
 
         no_snapshots : bool
@@ -1528,17 +1533,17 @@ class Parameters:
             The loaded Parameters object.
 
         """
-        return Parameters.load_from_file(filename, save_format="pickle",
+        return Parameters.load_from_file(file, save_format="pickle",
                                          no_snapshots=no_snapshots)
 
     @classmethod
-    def load_from_json(cls, filename, no_snapshots=False):
+    def load_from_json(cls, file, no_snapshots=False):
         """
         Load a Parameters object from a json file.
 
         Parameters
         ----------
-        filename : string
+        file : string or ZipExtFile
             File to which the parameters will be saved to.
 
         no_snapshots : bool
@@ -1551,5 +1556,5 @@ class Parameters:
             The loaded Parameters object.
 
         """
-        return Parameters.load_from_file(filename, save_format="json",
+        return Parameters.load_from_file(file, save_format="json",
                                          no_snapshots=no_snapshots)

@@ -77,17 +77,8 @@ printout("Network setup: DONE.")
 
 printout("Starting training.")
 test_trainer.train_network()
+test_trainer.save_run("be_model")
 printout("Training: DONE.")
-
-params_path = "./be_model.params.json"
-network_path = "./be_model.network.pth"
-input_scaler_path = "./be_model.iscaler.pkl"
-output_scaler_path = "./be_model.oscaler.pkl"
-
-test_parameters.save(params_path)
-test_network.save_network(network_path)
-data_handler.input_data_scaler.save(input_scaler_path)
-data_handler.output_data_scaler.save(output_scaler_path)
 
 ####################
 # RESULTS.
