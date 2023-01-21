@@ -44,6 +44,26 @@ class Runner:
 
     def save_run(self, run_name, save_path="./", zip_run=True,
                  save_runner=False):
+        """
+        Save the current run.
+
+        Parameters
+        ----------
+        run_name : str
+            Name under which the run should be saved.
+
+        save_path : str
+            Path where to which the run.
+
+        zip_run : bool
+            If True, the entire run will be saved as a .zip file. If False,
+            then the model will be saved as separate files.
+
+        save_runner : bool
+            If True, the Runner object will also be saved as object. This
+            is unnecessary for most use cases, but used internally when
+            a checkpoint is created during model training.
+        """
         model_file = run_name + ".network.pth"
         iscaler_file = run_name + ".iscaler.pkl"
         oscaler_file = run_name + ".oscaler.pkl"
@@ -71,6 +91,47 @@ class Runner:
     def load_run(cls, run_name, path="./", zip_run=True,
                  params_format="json", load_runner=True,
                  prepare_data=False):
+        """
+        Load a run.
+
+        Parameters
+        ----------
+        run_name : str
+            Name under which the run is saved.
+
+        path : str
+            Path where the run is saved.
+
+        zip_run : bool
+            If True, MALA will attempt to load from a .zip file. If False,
+            then separate files will be attempted to be loaded.
+
+        params_format : str
+            Can be "json" or "pkl", depending on what was saved by the model.
+            Default is "json".
+
+        load_runner : bool
+            If True, a Runner object will be created/loaded for further use.
+
+        prepare_data : bool
+            If True, the data will be loaded into memory. This is needed when
+            continuing a model training.
+
+        Return
+        ------
+        loaded_params : mala.common.parameters.Parameters
+            The Parameters saved to file.
+
+        loaded_network : mala.network.network.Network
+            The network saved to file.
+
+        new_datahandler : mala.datahandling.data_handler.DataHandler
+            The data handler reconstructed from file.
+
+        new_runner : Runner
+            (Optional) The runner reconstructed from file. For Tester and
+            Predictor class, this is just a newly instantiated object.
+        """
         if zip_run is True:
             loaded_network = run_name + ".network.pth"
             loaded_iscaler = run_name + ".iscaler.pkl"
@@ -120,6 +181,27 @@ class Runner:
 
     @classmethod
     def run_exists(cls, run_name, params_format="json", zip_run=True):
+        """
+        Check if a run exists.
+
+        Parameters
+        ----------
+        run_name : str
+            Name under which the run is saved.
+
+        zip_run : bool
+            If True, MALA will look for a .zip file. If False,
+            then separate files will be attempted to be loaded.
+
+        params_format : str
+            Can be "json" or "pkl", depending on what was saved by the model.
+            Default is "json".
+
+        Returns
+        -------
+        exists : bool
+            If True, the model exists.
+        """
         if zip_run is True:
             return os.path.isfile(run_name+".zip")
         else:
@@ -132,31 +214,8 @@ class Runner:
 
     @classmethod
     def _load_from_run(cls, params, network, data, file=None):
-        """
-        Load a trainer from a file.
-
-        Parameters
-        ----------
-        params : mala.common.parameters.Parameters
-            Parameters object with which the trainer should be created.
-            Has to be compatible with network and data.
-
-        file_path : string
-            Path to the file from which the trainer should be loaded.
-
-        network : mala.network.network.Network
-            Network which is being trained.
-
-        data : mala.datahandling.data_handler.DataHandler
-            DataHandler holding the training data.
-
-
-        Returns
-        -------
-        loaded_trainer : Network
-            The trainer that was loaded from the file.
-        """
-        # Now, create the Trainer class with it.
+        # Simply create a new runner. If the child classes have to implement
+        # it theirselves.
         loaded_runner = cls(params, network, data)
         return loaded_runner
 
