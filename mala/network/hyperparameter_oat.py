@@ -29,7 +29,8 @@ class HyperparameterOAT(Hyperparameter):
         List of possible choices (for categorical parameter).
     """
 
-    def __init__(self, hotype=None, opttype="categorical", name="", choices=[]):
+    def __init__(self, hotype=None, opttype="categorical", name="", choices=[],
+                 low=0, high=0):
         super(HyperparameterOAT, self).__init__(opttype=opttype,
                                                 name=name,
                                                 choices=choices)
