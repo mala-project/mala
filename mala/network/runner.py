@@ -88,7 +88,7 @@ class Runner:
             loaded_iscaler = os.path.join(path, run_name + ".iscaler.pkl")
             loaded_oscaler = os.path.join(path, run_name + ".oscaler.pkl")
             loaded_params = os.path.join(path, run_name +
-                                         ".params"+params_format)
+                                         ".params."+params_format)
 
         loaded_params = Parameters.load_from_json(loaded_params)
         loaded_network = Network.load_from_file(loaded_params,
