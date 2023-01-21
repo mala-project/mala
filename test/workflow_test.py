@@ -28,7 +28,7 @@ class TestFullWorkflow:
     def test_network_training(self):
         """Test whether MALA can train a NN."""
 
-        test_trainer = self.__simple_training(save_network=True)
+        test_trainer = self.__simple_training()
         assert desired_loss_improvement_factor * \
                test_trainer.initial_test_loss > test_trainer.final_test_loss
 
@@ -223,10 +223,6 @@ class TestFullWorkflow:
         assert np.isclose(total_energy, ldos.total_energy_dft_calculation,
                           atol=accuracy_total_energy)
 
-    def test_training_with_postprocessing(self):
-        """Test if a trained network can be loaded for postprocessing."""
-        self.__test_trained_network()
-
     def test_training_with_postprocessing_data_repo(self):
         """
         Test if a trained network can be loaded for postprocessing.
@@ -235,8 +231,36 @@ class TestFullWorkflow:
         If this does not work, it's most likely because someting in the MALA
         parameters changed.
         """
-        self.__test_trained_network(os.path.join(data_repo_path,
-                                                "workflow_test/"))
+        # Load parameters, network and data scalers.
+        parameters, network, data_handler, tester = \
+            mala.Tester.load_run("workflow_test",
+                                 path=os.path.join(data_repo_path,
+                                                   "workflow_test"),
+                                 zip_run=False)
+
+        parameters.targets.target_type = "LDOS"
+        parameters.targets.ldos_gridsize = 11
+        parameters.targets.ldos_gridspacing_ev = 2.5
+        parameters.targets.ldos_gridoffset_ev = -5
+        parameters.data.use_lazy_loading = True
+
+        data_handler.clear_data()
+        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                  "Be_snapshot2.out.npy", data_path, "te",
+                                  calculation_output_file=os.path.join(
+                                                         data_path,
+                                                         "Be_snapshot2.out"))
+        data_handler.prepare_data(reparametrize_scaler=False)
+
+        # Instantiate and use a Tester object.
+        tester.observables_to_test = ["band_energy", "number_of_electrons"]
+        errors = tester.test_snapshot(0)
+
+        # Check whether the prediction is accurate enough.
+        assert np.isclose(errors["band_energy"], 0,
+                          atol=accuracy_predictions)
+        assert np.isclose(errors["number_of_electrons"], 0,
+                          atol=accuracy_predictions)
 
     @pytest.mark.skipif(importlib.util.find_spec("lammps") is None,
                         reason="LAMMPS is currently not part of the pipeline.")
@@ -254,7 +278,9 @@ class TestFullWorkflow:
         ####################
 
         parameters, network, data_handler, tester = \
-            mala.Tester.load_run("workflow_test", zip_run=False)
+            mala.Tester.load_run("workflow_test", zip_run=False,
+                                 path=os.path.join(data_repo_path,
+                                                   "workflow_test"))
         parameters.targets.target_type = "LDOS"
         parameters.targets.ldos_gridsize = 11
         parameters.targets.ldos_gridspacing_ev = 2.5
@@ -328,7 +354,9 @@ class TestFullWorkflow:
         ####################
 
         parameters, network, data_handler, predictor = \
-            mala.Predictor.load_run("workflow_test", zip_run=False)
+            mala.Predictor.load_run("workflow_test", zip_run=False,
+                                    path=os.path.join(data_repo_path,
+                                                      "workflow_test"))
         parameters.targets.target_type = "LDOS"
         parameters.targets.ldos_gridsize = 11
         parameters.targets.ldos_gridspacing_ev = 2.5
@@ -401,38 +429,3 @@ class TestFullWorkflow:
         if save_network:
             test_trainer.save_run("workflow_test", zip_run=False)
         return test_trainer
-
-    @staticmethod
-    def __test_trained_network(save_path="./"):
-        """Use a trained network to make a prediction."""
-        # Load parameters, network and data scalers.
-        parameters, network, data_handler, tester = \
-            mala.Tester.load_run("workflow_test", path=save_path,
-                                 zip_run=False)
-
-        parameters.targets.target_type = "LDOS"
-        parameters.targets.ldos_gridsize = 11
-        parameters.targets.ldos_gridspacing_ev = 2.5
-        parameters.targets.ldos_gridoffset_ev = -5
-        parameters.data.use_lazy_loading = True
-
-        data_handler.clear_data()
-        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "te",
-                                  calculation_output_file=os.path.join(
-                                                         data_path,
-                                                         "Be_snapshot2.out"))
-        data_handler.prepare_data(reparametrize_scaler=False)
-
-        # Instantiate and use a Tester object.
-        tester.observables_to_test = ["band_energy", "number_of_electrons"]
-        errors = tester.test_snapshot(0)
-
-        # Check whether the prediction is accurate enough.
-        assert np.isclose(errors["band_energy"], 0,
-                          atol=accuracy_predictions)
-        assert np.isclose(errors["number_of_electrons"], 0,
-                          atol=accuracy_predictions)
-
-tester = TestFullWorkflow()
-tester.test_total_energy_predictions()
