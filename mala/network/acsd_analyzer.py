@@ -195,16 +195,18 @@ class ACSDAnalyzer(HyperOpt):
                                                  descriptor_vectors_contain_xyz=
                                                  self.params.descriptors.descriptors_contain_xyz)
                             current_list.append([cutoff, twojmax, acsd])
-                self.study.append(current_list)
-        self.study = np.mean(self.study, axis=0)
-        if return_plotting:
-            results_to_plot = []
-            len_twojmax = len(twojmax_list)
-            len_cutoffs = len(cutoff_list)
-            for i in range(0, len_cutoffs):
-                results_to_plot.append(self.study[i*len_twojmax:(i+1)*len_twojmax, 2:])
+                if get_rank() == 0:
+                    self.study.append(current_list)
+        if get_rank() == 0:
+            self.study = np.mean(self.study, axis=0)
+            if return_plotting:
+                results_to_plot = []
+                len_twojmax = len(twojmax_list)
+                len_cutoffs = len(cutoff_list)
+                for i in range(0, len_cutoffs):
+                    results_to_plot.append(self.study[i*len_twojmax:(i+1)*len_twojmax, 2:])
 
-            return results_to_plot, {"twojmax": twojmax_list, "cutoff": cutoff_list}
+                return results_to_plot, {"twojmax": twojmax_list, "cutoff": cutoff_list}
 
     def set_optimal_parameters(self):
         """
@@ -213,15 +215,16 @@ class ACSDAnalyzer(HyperOpt):
         The parameters will be written to the parameter object with which the
         hyperparameter optimizer was created.
         """
-        minimum_acsd = self.study[np.argmin(self.study[:, 2])]
-        if self.params.descriptors.descriptor_type == "Bispectrum":
-            self.params.descriptors.bispectrum_cutoff = minimum_acsd[0]
-            self.params.descriptors.bispectrum_twojmax = int(minimum_acsd[1])
-            printout("ACSD analysis, optimal parameters: ", )
-            printout("Bispectrum twojmax: ", self.params.descriptors.
-                     bispectrum_twojmax)
-            printout("Bispectrum cutoff: ", self.params.descriptors.
-                     bispectrum_cutoff)
+        if get_rank() == 0:
+            minimum_acsd = self.study[np.argmin(self.study[:, 2])]
+            if self.params.descriptors.descriptor_type == "Bispectrum":
+                self.params.descriptors.bispectrum_cutoff = minimum_acsd[0]
+                self.params.descriptors.bispectrum_twojmax = int(minimum_acsd[1])
+                printout("ACSD analysis, optimal parameters: ", )
+                printout("Bispectrum twojmax: ", self.params.descriptors.
+                         bispectrum_twojmax)
+                printout("Bispectrum cutoff: ", self.params.descriptors.
+                         bispectrum_cutoff)
 
     def _calculate_descriptors(self, snapshot, description, original_units):
         descriptor_calculation_kwargs = {}
