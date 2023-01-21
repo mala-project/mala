@@ -45,7 +45,7 @@ test_parameters.running.trainingtype = "Adam"
 
 # Specify the number of trials, the hyperparameter optimizer should run
 # and the type of hyperparameter.
-test_parameters.hyperparameters.n_trials = 20
+test_parameters.hyperparameters.n_trials = 10
 test_parameters.hyperparameters.checkpoints_each_trial = -1
 test_parameters.hyperparameters.checkpoint_name = "ex09"
 test_parameters.hyperparameters.hyper_opt_method = "optuna"
@@ -59,7 +59,7 @@ test_parameters.hyperparameters.rdb_storage = 'sqlite:///ex09.db'
 test_parameters.targets.ldos_gridsize = 11
 test_parameters.targets.ldos_gridspacing_ev = 2.5
 test_parameters.targets.ldos_gridoffset_ev = -5
-test_parameters.hyperparameters.number_training_per_trial = 5
+test_parameters.hyperparameters.number_training_per_trial = 3
 test_parameters.running.after_before_training_metric = "band_energy"
 
 ####################

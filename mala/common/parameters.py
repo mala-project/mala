@@ -336,9 +336,6 @@ class ParametersDescriptors(ParametersBase):
         self.atomic_density_sigma = None
         self.atomic_density_cutoff = None
 
-        # For accelerated hyperparameter optimization.
-        self.acsd_points = 100
-
     @property
     def use_z_splitting(self):
         """
@@ -968,6 +965,9 @@ class ParametersHyperparameterOptimization(ParametersBase):
         self.naswot_pruner_batch_size = 0
         self.number_bad_trials_before_stopping = None
         self.sqlite_timeout = 600
+
+        # For accelerated hyperparameter optimization.
+        self.acsd_points = 100
 
     @property
     def rdb_storage_heartbeat(self):

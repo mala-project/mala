@@ -46,7 +46,7 @@ class TestExamples:
         runpy.run_path("../examples/ex12_run_predictions.py")
 
     def test_ex13(self):
-        runpy.run_path("../examples/ex13_calculate_acsd.py")
+        runpy.run_path("../examples/ex13_acsd.py")
 
     def test_ex14(self):
         runpy.run_path("../examples/ex14_advanced_networks.py")

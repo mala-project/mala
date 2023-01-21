@@ -475,15 +475,15 @@ class DataConverter:
             pass
 
         else:
-            raise Exception("Unknown file extension, cannot convert target")
+            raise Exception("Unknown file extension, cannot convert descriptor")
 
         if description["input"] is not None:
             # Save data and delete, if not requested otherwise.
             if input_path is not None and input_iteration is None:
+                if self.parameters._configuration["mpi"]:
+                    tmp_input = self.descriptor_calculator. \
+                        gather_descriptors(tmp_input)
                 if get_rank() == 0:
-                    if self.parameters._configuration["mpi"]:
-                        tmp_input = self.descriptor_calculator. \
-                            gather_descriptors(tmp_input)
                     self.descriptor_calculator.\
                         write_to_numpy_file(input_path, tmp_input)
             else:
