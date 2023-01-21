@@ -243,13 +243,19 @@
         <span class="c1"># Save which data we have currently loaded.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">currently_loaded_file</span> <span class="o">=</span> <span class="n">file_index</span></div>
 
-    <span class="k">def</span> <span class="nf">_get_file_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_file_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_start</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">file_index</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">index_in_file</span> <span class="o">=</span> <span class="n">idx</span>
         <span class="k">if</span> <span class="n">is_slice</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="n">index_in_file</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">file_index</span> <span class="o">=</span> <span class="n">i</span>
+
+                    <span class="c1"># From the end of previous file to beginning of new.</span>
+                    <span class="k">if</span> <span class="n">index_in_file</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span> <span class="ow">and</span> \
+                       <span class="n">is_start</span><span class="p">:</span>
+                        <span class="n">file_index</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+                        <span class="n">index_in_file</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="k">break</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">index_in_file</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
@@ -291,7 +297,7 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
             <span class="c1"># If a slice is requested, we have to find out if it spans files.</span>
             <span class="n">file_index_start</span><span class="p">,</span> <span class="n">index_in_file_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
-                <span class="n">_get_file_index</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">_get_file_index</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_start</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">file_index_stop</span><span class="p">,</span> <span class="n">index_in_file_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span>\
                 <span class="n">_get_file_index</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span> <span class="n">is_slice</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
