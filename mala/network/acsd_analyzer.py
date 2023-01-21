@@ -112,7 +112,8 @@ class ACSDAnalyzer(HyperOpt):
                                                                 choices=choices,
                                                                 opttype="categorical"))
 
-    def perform_study(self, file_based_communication=False):
+    def perform_study(self, file_based_communication=False,
+                      return_plotting=False):
         # The individual loops depend on the type of descriptors.
         if self.params.descriptors.descriptor_type == "Bispectrum":
             if list(map(lambda p: "bispectrum_twojmax" in p.name,
@@ -133,7 +134,7 @@ class ACSDAnalyzer(HyperOpt):
                                  self.params.hyperparameters.hlist)).index(
                             True)].choices
 
-            self.labels = ["twojmax", "cutoff", "acsd"]
+            self.labels = ["cutoff", "twojmax", "acsd"]
 
             # Perform the ACSD analysis separately for each snapshot.
             for i in range(0, len(self.__snapshots)):
@@ -142,8 +143,8 @@ class ACSDAnalyzer(HyperOpt):
                                            self.__snapshot_description[i],
                                            self.__snapshot_units[i],
                                            file_based_communication)
-                for twojmax in twojmax_list:
-                    for cutoff in cutoff_list:
+                for cutoff in cutoff_list:
+                    for twojmax in twojmax_list:
                         self.params.descriptors.bispectrum_twojmax = twojmax
                         self.params.descriptors.bispectrum_cutoff = cutoff
                         descriptor = \
@@ -157,14 +158,22 @@ class ACSDAnalyzer(HyperOpt):
                                                  self.params.descriptors.descriptors_contain_xyz)
                             current_list.append([twojmax, cutoff, acsd])
                 self.study.append(current_list)
+        self.study = np.mean(self.study, axis=0)
+        if return_plotting:
+            results_to_plot = []
+            len_twojmax = len(twojmax_list)
+            len_cutoffs = len(cutoff_list)
+            for i in range(0, len_cutoffs):
+                results_to_plot.append(self.study[i*len_twojmax:(i+1)*len_twojmax, 2:])
+
+            return results_to_plot, {"twojmax": twojmax_list, "cutoff": cutoff_list}
 
     def set_optimal_parameters(self):
-        self.study = np.mean(self.study, axis=0)
         minimum_acsd = self.study[np.argmin(self.study[:, 2])]
         if self.params.descriptors.descriptor_type == "Bispectrum":
-            self.params.descriptors.bispectrum_twojmax = int(minimum_acsd[0])
-            self.params.descriptors.bispectrum_cutoff = minimum_acsd[1]
-            printout("Optimal parameters: ", )
+            self.params.descriptors.bispectrum_cutoff = minimum_acsd[0]
+            self.params.descriptors.bispectrum_twojmax = int(minimum_acsd[1])
+            printout("ACSD analysis, optimal parameters: ", )
             printout("Bispectrum twojmax: ", self.params.descriptors.
                      bispectrum_twojmax)
             printout("Bispectrum cutoff: ", self.params.descriptors.
