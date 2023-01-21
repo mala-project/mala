@@ -6,7 +6,7 @@ from mala.common.parallelizer import printout
 from mala.common.parameters import Parameters
 from mala.datahandling.data_handler import DataHandler
 from mala.datahandling.data_scaler import DataScaler
-from mala.network.hyperparameter_interface import HyperparameterInterface
+from mala.network.hyperparameter import Hyperparameter
 from mala.network.objective_base import ObjectiveBase
 
 
@@ -106,13 +106,13 @@ class HyperOpt(ABC):
         """
         self.params.\
             hyperparameters.hlist.append(
-                HyperparameterInterface(self.params.hyperparameters.
-                                        hyper_opt_method,
-                                        opttype=opttype,
-                                        name=name,
-                                        low=low,
-                                        high=high,
-                                        choices=choices))
+                Hyperparameter(self.params.hyperparameters.
+                               hyper_opt_method,
+                               opttype=opttype,
+                               name=name,
+                               low=low,
+                               high=high,
+                               choices=choices))
 
     def clear_hyperparameters(self):
         """Clear the list of hyperparameters that are to be investigated."""
