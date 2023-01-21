@@ -8,7 +8,7 @@ import torch
 import pytest
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36")
+data_path = os.path.join(data_repo_path, "Be2")
 
 # This test compares the data scaling using the regular scaling procedure and
 # the lazy-loading one (incremental fitting).
@@ -67,26 +67,21 @@ class TestLazyLoading:
                 test_parameters.data.output_rescaling_type = scalingtype
                 data_handler = DataHandler(test_parameters)
                 data_handler.clear_data()
-                data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                          "Al_debug_2k_nr0.out.npy", data_path,
-                                          add_snapshot_as="tr",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                          "Al_debug_2k_nr1.out.npy", data_path,
-                                          add_snapshot_as="tr",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                          "Al_debug_2k_nr2.out.npy", data_path,
-                                          add_snapshot_as="tr",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                          "Al_debug_2k_nr1.out.npy", data_path,
-                                          add_snapshot_as="va",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                          "Al_debug_2k_nr2.out.npy", data_path,
-                                          add_snapshot_as="te",
-                                          output_units="1/(Ry*Bohr^3)")
+                data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                          "Be_snapshot0.out.npy", data_path,
+                                          "tr")
+                data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                          "Be_snapshot1.out.npy", data_path,
+                                          "tr")
+                data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                          "Be_snapshot2.out.npy", data_path,
+                                          "tr")
+                data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                          "Be_snapshot1.out.npy", data_path,
+                                          "va")
+                data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                          "Be_snapshot2.out.npy", data_path,
+                                          "te")
                 data_handler.prepare_data()
                 if scalingtype == "standard":
                     # The lazy-loading STD equation (and to a smaller amount the

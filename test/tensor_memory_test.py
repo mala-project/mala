@@ -6,7 +6,7 @@ from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36")
+data_path = os.path.join(data_repo_path, "Be2")
 
 # Define the accuracy used in the tests.
 accuracy = 1e-5
@@ -25,7 +25,7 @@ class TestTensorMemory:
 
         # Load an array as a numpy array
         loaded_array_raw = np.load(os.path.join(data_path,
-                                                "Al_debug_2k_nr0.in.npy"))
+                                                "Be_snapshot0.in.npy"))
 
         # Get dimensions of numpy array.
         dimension = np.shape(loaded_array_raw)

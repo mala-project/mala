@@ -7,17 +7,16 @@ from mala import Parameters, DataHandler, DataScaler, Network, Tester, \
                  Trainer, Predictor, LDOS
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36")
+data_path = os.path.join(data_repo_path, "Be2")
 param_path = os.path.join(data_repo_path, "workflow_test/")
-beryllium_path = os.path.join(data_repo_path, "Be2", "training_data")
 pseudopotential_path = os.path.join(data_repo_path, "Be2")
-params_path = param_path+"workflow_test_params.json"
-network_path = param_path+"workflow_test_network.pth"
-input_scaler_path = param_path+"workflow_test_iscaler.pkl"
-output_scaler_path = param_path+"workflow_test_oscaler.pkl"
+params_path = param_path+"workflow_test.params.json"
+network_path = param_path+"workflow_test.network.pth"
+input_scaler_path = param_path+"workflow_test.iscaler.pkl"
+output_scaler_path = param_path+"workflow_test.oscaler.pkl"
 accuracy_strict = 1e-16
 accuracy_coarse = 5e-7
-accuracy_very_coarse = 1
+accuracy_very_coarse = 3
 
 
 class TestInference:
@@ -39,21 +38,21 @@ class TestInference:
         inference_data_handler = DataHandler(new_parameters,
                                              input_data_scaler=iscaler,
                                              output_data_scaler=oscaler)
-        inference_data_handler.add_snapshot("Al_debug_2k_nr0.in.npy",
-                                            data_path,
-                                            "Al_debug_2k_nr0.out.npy",
-                                            data_path, "te",
-                                            output_units="1/(Ry*Bohr^3)")
+        inference_data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                            "Be_snapshot0.out.npy", data_path,
+                                            "te")
 
         inference_data_handler.prepare_data()
 
         # Confirm that unit conversion does not introduce any errors.
 
         from_file_1 = inference_data_handler.target_calculator.\
-            convert_units(np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0) + ".out.npy")),
-                          in_units="1/(Ry*Bohr^3)")
-        from_file_2 = np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0) + ".out.npy"))\
-            * inference_data_handler.target_calculator.convert_units(1, in_units="1/(Ry*Bohr^3)")
+            convert_units(np.load(os.path.join(data_path, "Be_snapshot" +
+                                               str(0) + ".out.npy")),
+                          in_units="1/(eV*Bohr^3)")
+        from_file_2 = np.load(os.path.join(data_path, "Be_snapshot" + str(0) +
+                                           ".out.npy"))\
+            * inference_data_handler.target_calculator.convert_units(1, in_units="1/(eV*Bohr^3)")
 
         assert from_file_1.sum() == from_file_2.sum()
 
@@ -127,15 +126,12 @@ class TestInference:
         test_parameters.descriptors.descriptor_type = "Bispectrum"
         test_parameters.descriptors.bispectrum_twojmax = 10
         test_parameters.descriptors.bispectrum_cutoff = 4.67637
-        test_parameters.descriptors.bispectrum_switchflag = 0
 
         data_handler = DataHandler(test_parameters)
-        data_handler.add_snapshot("Be_snapshot1.in.npy", beryllium_path,
-                                  "Be_snapshot1.out.npy", beryllium_path, "tr",
-                                  output_units="1/(eV*Bohr^3)")
-        data_handler.add_snapshot("Be_snapshot2.in.npy", beryllium_path,
-                                  "Be_snapshot2.out.npy", beryllium_path, "va",
-                                  output_units="1/(eV*Bohr^3)")
+        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                  "Be_snapshot1.out.npy", data_path, "tr")
+        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                  "Be_snapshot2.out.npy", data_path, "va")
         data_handler.prepare_data()
 
         test_parameters.network.layer_sizes = [
@@ -159,17 +155,16 @@ class TestInference:
                                              output_data_scaler)
         inference_data_handler.clear_data()
         inference_data_handler.add_snapshot("Be_snapshot3.in.npy",
-                                            beryllium_path,
+                                            data_path,
                                             "Be_snapshot3.out.npy",
-                                            beryllium_path, "te",
-                                            output_units="1/(eV*Bohr^3)")
+                                            data_path, "te")
         inference_data_handler.prepare_data(reparametrize_scaler=False)
 
         tester = Tester(test_parameters, test_network, inference_data_handler)
         actual_ldos, predicted_ldos = tester.predict_targets(0)
         ldos_calculator = inference_data_handler.target_calculator
         ldos_calculator.read_additional_calculation_data(os.path.join(
-                                                         beryllium_path,
+                                                         data_path,
                                                          "Be_snapshot3.out"),
                                                          "espresso-out")
 
@@ -184,7 +179,7 @@ class TestInference:
         predictor = Predictor(test_parameters, test_network,
                               inference_data_handler)
         predicted_ldos = predictor.predict_from_qeout(os.path.join(
-                                                         beryllium_path,
+                                                         data_path,
                                                          "Be_snapshot3.out"))
 
         # In order for the results to be the same, we have to use the same
@@ -192,7 +187,7 @@ class TestInference:
         inference_data_handler. \
             target_calculator.\
             read_additional_calculation_data(os.path.join(
-                                             beryllium_path,
+                                             data_path,
                                              "Be_snapshot3.out"),
                                              "espresso-out")
 
@@ -241,16 +236,13 @@ class TestInference:
         test_parameters.descriptors.descriptor_type = "Bispectrum"
         test_parameters.descriptors.bispectrum_twojmax = 10
         test_parameters.descriptors.bispectrum_cutoff = 4.67637
-        test_parameters.descriptors.bispectrum_switchflag = 0
         test_parameters.targets.pseudopotential_path = pseudopotential_path
 
         data_handler = DataHandler(test_parameters)
-        data_handler.add_snapshot("Be_snapshot1.in.npy", beryllium_path,
-                                  "Be_snapshot1.out.npy", beryllium_path, "tr",
-                                  output_units="1/(eV*Bohr^3)")
-        data_handler.add_snapshot("Be_snapshot2.in.npy", beryllium_path,
-                                  "Be_snapshot2.out.npy", beryllium_path, "va",
-                                  output_units="1/(eV*Bohr^3)")
+        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                  "Be_snapshot1.out.npy", data_path, "tr")
+        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                  "Be_snapshot2.out.npy", data_path, "va")
         data_handler.prepare_data()
 
         test_parameters.network.layer_sizes = [
@@ -272,13 +264,13 @@ class TestInference:
         predictor = Predictor(test_parameters, test_network,
                               inference_data_handler)
         predicted_ldos = predictor. \
-            predict_from_qeout(os.path.join(beryllium_path,
+            predict_from_qeout(os.path.join(data_path,
                                             "Be_snapshot3.out"))
 
         ldos_calculator: LDOS
         ldos_calculator = inference_data_handler.target_calculator
         ldos_calculator. \
-            read_additional_calculation_data(os.path.join(beryllium_path,
+            read_additional_calculation_data(os.path.join(data_path,
                                                           "Be_snapshot3.out"),
                                              "espresso-out")
         ldos_calculator.read_from_array(predicted_ldos)
@@ -309,11 +301,12 @@ class TestInference:
         inference_data_handler = DataHandler(new_parameters,
                                              input_data_scaler=iscaler,
                                              output_data_scaler=oscaler)
-        inference_data_handler.add_snapshot("Al_debug_2k_nr0.in.npy",
-                                            data_path,
-                                            "Al_debug_2k_nr0.out.npy",
-                                            data_path, "te",
-                                            output_units="1/(Ry*Bohr^3)")
+        inference_data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                            "Be_snapshot0.out.npy", data_path,
+                                            "te")
+        inference_data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                            "Be_snapshot1.out.npy", data_path,
+                                            "te")
 
         inference_data_handler.prepare_data()
 
@@ -324,12 +317,12 @@ class TestInference:
 
         # Compare actual_ldos with file directly.
         # This is the only comparison that counts.
-        from_file = inference_data_handler.target_calculator.\
-            convert_units(np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0)+".out.npy")),
-                          in_units="1/(Ry*Bohr^3)")
+        from_file = np.load(os.path.join(data_path, "Be_snapshot" + str(0) +
+                                         ".out.npy"))
 
         # Test if prediction still works.
-        raw_predicted_outputs = np.load(os.path.join(data_path, "Al_debug_2k_nr" + str(0) + ".in.npy"))
+        raw_predicted_outputs = np.load(os.path.join(data_path, "Be_snapshot" +
+                                                     str(0) + ".in.npy"))
         raw_predicted_outputs = inference_data_handler.\
             raw_numpy_to_converted_scaled_tensor(raw_predicted_outputs,
                                                  "in", "None")
@@ -339,3 +332,4 @@ class TestInference:
             inverse_transform(raw_predicted_outputs, as_numpy=True)
 
         return actual_ldos, from_file, predicted_ldos, raw_predicted_outputs
+

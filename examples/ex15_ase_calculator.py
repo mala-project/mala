@@ -5,7 +5,7 @@ from mala import printout
 from ase.io import read
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
+data_path = os.path.join(data_repo_path, "Be2")
 
 """
 ex15_ase_calculator.py: Shows how MALA can be used as an ASE calculator. 

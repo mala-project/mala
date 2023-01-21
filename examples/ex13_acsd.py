@@ -3,7 +3,7 @@ import os
 import mala
 import numpy as np
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
+data_path = os.path.join(data_repo_path, "Be2")
 
 """
 ex13_calculate_acsd.py: Shows how MALA can be used to optimize descriptor

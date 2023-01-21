@@ -6,8 +6,7 @@ import numpy as np
 import pytest
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36")
-data_path_ldos = os.path.join(data_repo_path, "Be2")
+data_path = os.path.join(data_repo_path, "Be2")
 # Control how much the loss should be better after training compared to
 # before. This value is fairly high, but we're training on absolutely
 # minimal amounts of data.
@@ -17,7 +16,7 @@ desired_loss_improvement_factor = 1
 accuracy_electrons = 1e-11
 accuracy_total_energy = 1.5
 accuracy_band_energy = 1
-accuracy_predictions = 5e-2
+accuracy_predictions = 0.5
 
 
 class TestFullWorkflow:
@@ -63,11 +62,11 @@ class TestFullWorkflow:
         data_converter = mala.DataConverter(test_parameters)
         data_converter.add_snapshot(descriptor_input_type="espresso-out",
                                     descriptor_input_path=
-                                    os.path.join(data_path_ldos,
-                                                 "Be.pw.scf.out"),
+                                    os.path.join(data_path,
+                                                 "Be_snapshot0.out"),
                                     target_input_type=".cube",
                                     target_input_path=
-                                    os.path.join(data_path_ldos, "cubes",
+                                    os.path.join(data_path, "cubes",
                                                  "tmp.pp*Be_ldos.cube"),
                                     target_units="1/(Ry*Bohr^3)")
         data_converter.convert_snapshots(complete_save_path="./",
@@ -94,26 +93,22 @@ class TestFullWorkflow:
         # Set up parameters.
         test_parameters = mala.Parameters()
         test_parameters.targets.target_type = "DOS"
-        test_parameters.targets.ldos_gridsize = 250
-        test_parameters.targets.ldos_gridspacing_ev = 0.1
-        test_parameters.targets.ldos_gridoffset_ev = -10
+        test_parameters.targets.ldos_gridsize = 11
+        test_parameters.targets.ldos_gridspacing_ev = 2.5
+        test_parameters.targets.ldos_gridoffset_ev = -5
 
         # Create a target calculator to perform postprocessing.
         dos = mala.Target(test_parameters)
         dos.read_additional_calculation_data(os.path.join(
-                                             data_path, "Al.pw.scf.out"),
+                                             data_path, "Be_snapshot0.out"),
                                              "espresso-out")
-        dos_data = np.load(os.path.join(data_path, "Al_dos.npy"))
+        dos_data = np.load(os.path.join(data_path, "Be_snapshot0.dos.npy"))
 
         # Calculate energies
-        self_consistent_fermi_energy = dos. \
-            get_self_consistent_fermi_energy(dos_data)
-        number_of_electrons = dos. \
-            get_number_of_electrons(dos_data, fermi_energy=
-                                    self_consistent_fermi_energy)
-        band_energy = dos.get_band_energy(dos_data,
-                                          fermi_energy=
-                                          self_consistent_fermi_energy)
+        self_consistent_fermi_energy = dos.get_self_consistent_fermi_energy(dos_data)
+        number_of_electrons = dos.get_number_of_electrons(dos_data, fermi_energy=
+                                                          self_consistent_fermi_energy)
+        band_energy = dos.get_band_energy(dos_data)
 
         assert np.isclose(number_of_electrons, dos.number_of_electrons_exact,
                           atol=accuracy_electrons)
@@ -137,12 +132,10 @@ class TestFullWorkflow:
         # Create a target calculator to perform postprocessing.
         ldos = mala.Target(test_parameters)
         ldos.read_additional_calculation_data(os.path.join(
-                                              data_path_ldos,
-                                               "Be.pw.scf.out"),
+                                              data_path,
+                                               "Be_snapshot0.out"),
                                               "espresso-out")
-        ldos_data = ldos.convert_units(
-            np.load(os.path.join(data_path_ldos, "Be_ldos.npy")),
-            "1/(eV*Bohr^3)")
+        ldos_data = np.load(os.path.join(data_path, "Be_snapshot0.out.npy"))
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
@@ -173,18 +166,14 @@ class TestFullWorkflow:
         test_parameters.targets.ldos_gridsize = 11
         test_parameters.targets.ldos_gridspacing_ev = 2.5
         test_parameters.targets.ldos_gridoffset_ev = -5
-        test_parameters.targets.pseudopotential_path = data_path_ldos
+        test_parameters.targets.pseudopotential_path = data_path
         # Create a target calculator to perform postprocessing.
         ldos = mala.Target(test_parameters)
-        dens = mala.Density.from_ldos_calculator(ldos)
         ldos.read_additional_calculation_data(os.path.join(
-                                              data_path_ldos, "Be.pw.scf.out"),
+                                              data_path, "Be_snapshot0.out"),
                                               "espresso-out")
-        dos_data = np.load(os.path.join(data_path_ldos, "Be_dos.npy"))
-        dens_data = dens.convert_units(
-            np.load(os.path.join(data_path_ldos, "Be_dens.npy")),
-            "1/Bohr^3")
-        dens_data = np.reshape(dens_data, list(np.shape(dens_data)) + [1])
+        dos_data = np.load(os.path.join(data_path, "Be_snapshot0.dos.npy"))
+        dens_data = np.load(os.path.join(data_path, "Be_snapshot0.dens.npy"))
 
         dos = mala.DOS.from_ldos_calculator(ldos)
 
@@ -213,16 +202,14 @@ class TestFullWorkflow:
         test_parameters.targets.ldos_gridsize = 11
         test_parameters.targets.ldos_gridspacing_ev = 2.5
         test_parameters.targets.ldos_gridoffset_ev = -5
-        test_parameters.targets.pseudopotential_path = data_path_ldos
+        test_parameters.targets.pseudopotential_path = data_path
 
         # Create a target calculator to perform postprocessing.
         ldos = mala.Target(test_parameters)
         ldos.read_additional_calculation_data(os.path.join(
-                                              data_path_ldos,
-                                              "Be.pw.scf.out"), "espresso-out")
-        ldos_data = ldos.convert_units(
-            np.load(os.path.join(data_path_ldos, "Be_ldos.npy")),
-            in_units="1/(eV*Bohr^3)")
+                                              data_path,
+                                              "Be_snapshot0.out"), "espresso-out")
+        ldos_data = np.load(os.path.join(data_path, "Be_snapshot0.out.npy"))
 
         # Calculate energies
         self_consistent_fermi_energy = ldos. \
@@ -267,15 +254,12 @@ class TestFullWorkflow:
 
         # Load data.
         data_handler = mala.DataHandler(test_parameters)
-        data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                  "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                                  output_units="1/(Ry*Bohr^3)")
-        data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                  "Al_debug_2k_nr1.out.npy", data_path, "va",
-                                  output_units="1/(Ry*Bohr^3)")
-        data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                  "Al_debug_2k_nr2.out.npy", data_path, "te",
-                                  output_units="1/(Ry*Bohr^3)")
+        data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                  "Be_snapshot0.out.npy", data_path, "tr")
+        data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                  "Be_snapshot1.out.npy", data_path, "va")
+        data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                  "Be_snapshot2.out.npy", data_path, "te")
         data_handler.prepare_data()
 
         # Train a network.
@@ -292,10 +276,10 @@ class TestFullWorkflow:
 
         # Save, if necessary.
         if save_network:
-            params_path = "workflow_test_params.json"
-            network_path = "workflow_test_network.pth"
-            input_scaler_path = "workflow_test_iscaler.pkl"
-            output_scaler_path = "workflow_test_oscaler.pkl"
+            params_path = "workflow_test.params.json"
+            network_path = "workflow_test.network.pth"
+            input_scaler_path = "workflow_test.iscaler.pkl"
+            output_scaler_path = "workflow_test.oscaler.pkl"
             test_parameters.save(params_path)
             test_network.save_network(network_path)
             data_handler.input_data_scaler.save(input_scaler_path)
@@ -307,18 +291,18 @@ class TestFullWorkflow:
     def __use_trained_network(save_path="./"):
         """Use a trained network to make a prediction."""
 
-        params_path = os.path.join(save_path, "workflow_test_params.json")
-        network_path = os.path.join(save_path, "workflow_test_network.pth")
-        input_scaler_path = os.path.join(save_path, "workflow_test_iscaler.pkl")
-        output_scaler_path = os.path.join(save_path, "workflow_test_oscaler.pkl")
+        params_path = os.path.join(save_path, "workflow_test.params.json")
+        network_path = os.path.join(save_path, "workflow_test.network.pth")
+        input_scaler_path = os.path.join(save_path, "workflow_test.iscaler.pkl")
+        output_scaler_path = os.path.join(save_path, "workflow_test.oscaler.pkl")
 
         # Load parameters, network and data scalers.
         new_parameters = mala.Parameters.load_from_file(params_path,
                                                         no_snapshots=True)
         new_parameters.targets.target_type = "LDOS"
-        new_parameters.targets.ldos_gridsize = 250
-        new_parameters.targets.ldos_gridspacing_ev = 0.1
-        new_parameters.targets.ldos_gridoffset_ev = -10
+        new_parameters.targets.ldos_gridsize = 11
+        new_parameters.targets.ldos_gridspacing_ev = 2.5
+        new_parameters.targets.ldos_gridoffset_ev = -5
         new_parameters.data.use_lazy_loading = True
         new_network = mala.Network.load_from_file(new_parameters, network_path)
         iscaler = mala.DataScaler.load_from_file(input_scaler_path)
@@ -328,11 +312,8 @@ class TestFullWorkflow:
         inference_data_handler = mala.DataHandler(new_parameters,
                                                   input_data_scaler=iscaler,
                                                   output_data_scaler=oscaler)
-        inference_data_handler.add_snapshot("Al_debug_2k_nr2.in.npy",
-                                            data_path,
-                                            "Al_debug_2k_nr2.out.npy",
-                                            data_path, "te",
-                                            output_units="1/(Ry*Bohr^3)")
+        inference_data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                            "Be_snapshot2.out.npy", data_path, "te")
         inference_data_handler.prepare_data(reparametrize_scaler=False)
 
         # Instantiate and use a Tester object.
@@ -342,7 +323,7 @@ class TestFullWorkflow:
         ldos_calculator = inference_data_handler.target_calculator
         ldos_calculator.read_additional_calculation_data(os.path.join(
                                                          data_path,
-                                                         "Al.pw.scf.out"),
+                                                         "Be_snapshot0.out"),
                                                          "espresso-out")
         band_energy_predicted = ldos_calculator.get_band_energy(predicted_ldos)
         band_energy_actual = ldos_calculator.get_band_energy(actual_ldos)
