@@ -60,7 +60,7 @@ def use_trained_network(network_path, params_path, input_scaler_path,
     tester = mala.Tester(new_parameters, new_network, inference_data_handler)
 
     # Get the results for the first (and only= snapshot.
-    actual_ldos, predicted_ldos = tester.test_snapshot(0)
+    actual_ldos, predicted_ldos = tester.predict_targets(0)
 
     # We will use the LDOS calculator to do some preprocessing.
     ldos_calculator = inference_data_handler.target_calculator
