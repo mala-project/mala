@@ -291,11 +291,6 @@ class ParametersDescriptors(ParametersBase):
         Bispectrum descriptors. If this string is empty, the standard LAMMPS input
         file found in this repository will be used (recommended).
 
-    acsd_points : int
-        Number of points used to calculate the ACSD.
-        The actual number of distances will be acsd_points x acsd_points,
-        since the cosine similarity is only defined for pairs.
-
     descriptors_contain_xyz : bool
         Legacy option. If True, it is assumed that the first three entries of
         the descriptor vector are the xyz coordinates and they are cut from the

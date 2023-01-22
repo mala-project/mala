@@ -28,7 +28,7 @@ test_parameters.descriptors.acsd_points = 100
 # optimized.
 hyperoptimizer = mala.ACSDAnalyzer(test_parameters)
 hyperoptimizer.add_hyperparameter("bispectrum_twojmax", [2, 4])
-hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0])
+hyperoptimizer.add_hyperparameter("bispectrum_cutoff", [1.0, 2.0])
 
 # Add raw snapshots to the hyperoptimizer. For the targets, numpy files are
 # okay as well.

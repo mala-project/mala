@@ -10,6 +10,8 @@ from mala.targets.target import Target
 from mala.network.hyperparameter import Hyperparameter
 from mala.network.hyper_opt import HyperOpt
 from mala.common.parallelizer import get_rank, printout
+from mala.descriptors.bispectrum import Bispectrum
+from mala.descriptors.atomic_density import AtomicDensity
 
 descriptor_input_types_acsd = descriptor_input_types+["numpy", "openpmd"]
 target_input_types_acsd = target_input_types+["numpy", "openpmd"]
@@ -47,6 +49,10 @@ class ACSDAnalyzer(HyperOpt):
         self.descriptor_calculator = descriptor_calculator
         if self.descriptor_calculator is None:
             self.descriptor_calculator = Descriptor(params)
+        if not isinstance(self.descriptor_calculator, Bispectrum) and \
+           not isinstance(self.descriptor_calculator, AtomicDensity):
+            raise Exception("Cannot calculate ACSD for the selected "
+                            "descriptors.")
 
         # Internal variables.
         self.__snapshots = []
@@ -153,60 +159,101 @@ class ACSDAnalyzer(HyperOpt):
         different hyperparameters and then calculating the ACSD.
         """
         # The individual loops depend on the type of descriptors.
-        if self.params.descriptors.descriptor_type == "Bispectrum":
-            if list(map(lambda p: "bispectrum_twojmax" in p.name,
-                         self.params.hyperparameters.hlist)).count(True) == 0:
-                twojmax_list = [self.params.descriptors.bispectrum_twojmax]
-            else:
-                twojmax_list = \
-                    self.params.hyperparameters.hlist[
-                        list(map(lambda p: "bispectrum_twojmax" in p.name,
-                         self.params.hyperparameters.hlist)).index(True)].choices
+        if isinstance(self.descriptor_calculator, Bispectrum):
             if list(map(lambda p: "bispectrum_cutoff" in p.name,
                          self.params.hyperparameters.hlist)).count(True) == 0:
-                cutoff_list = [self.params.descriptors.bispectrum_cutoff]
+                first_dim_list = [self.params.descriptors.bispectrum_cutoff]
             else:
-                cutoff_list = \
+                first_dim_list = \
                     self.params.hyperparameters.hlist[
                         list(map(lambda p: "bispectrum_cutoff" in p.name,
                                  self.params.hyperparameters.hlist)).index(
                             True)].choices
 
+            if list(map(lambda p: "bispectrum_twojmax" in p.name,
+                         self.params.hyperparameters.hlist)).count(True) == 0:
+                second_dim_list = [self.params.descriptors.bispectrum_twojmax]
+            else:
+                second_dim_list = \
+                    self.params.hyperparameters.hlist[
+                        list(map(lambda p: "bispectrum_twojmax" in p.name,
+                         self.params.hyperparameters.hlist)).index(True)].choices
+
             self.labels = ["cutoff", "twojmax", "acsd"]
 
+        elif isinstance(self.descriptor_calculator, AtomicDensity):
+            if list(map(lambda p: "atomic_density_cutoff" in p.name,
+                        self.params.hyperparameters.hlist)).count(True) == 0:
+                first_dim_list = [self.params.descriptors.atomic_density_cutoff]
+            else:
+                first_dim_list = \
+                    self.params.hyperparameters.hlist[
+                        list(map(lambda p: "atomic_density_cutoff" in p.name,
+                                 self.params.hyperparameters.hlist)).index(
+                            True)].choices
+
+            if list(map(lambda p: "atomic_density_sigma" in p.name,
+                        self.params.hyperparameters.hlist)).count(True) == 0:
+                second_dim_list = [self.params.descriptors.atomic_density_sigma]
+            else:
+                second_dim_list = \
+                    self.params.hyperparameters.hlist[
+                        list(map(lambda p: "atomic_density_sigma" in p.name,
+                                 self.params.hyperparameters.hlist)).index(
+                            True)].choices
+
+            self.labels = ["cutoff", "sigma", "acsd"]
+
+        else:
+            raise Exception("Unkown descriptor calculator selected. Cannot "
+                            "calculate ACSD.")
+
             # Perform the ACSD analysis separately for each snapshot.
-            for i in range(0, len(self.__snapshots)):
-                current_list = []
-                target = self._load_target(self.__snapshots[i],
-                                           self.__snapshot_description[i],
-                                           self.__snapshot_units[i],
-                                           file_based_communication)
-                for cutoff in cutoff_list:
-                    for twojmax in twojmax_list:
-                        self.params.descriptors.bispectrum_twojmax = twojmax
-                        self.params.descriptors.bispectrum_cutoff = cutoff
-                        descriptor = \
-                            self._calculate_descriptors(self.__snapshots[i],
-                                                        self.__snapshot_description[i],
-                                                        self.__snapshot_units[i])
-                        if get_rank() == 0:
-                            acsd = self._calculate_acsd(descriptor, target,
-                                                 self.params.hyperparameters.acsd_points,
-                                                 descriptor_vectors_contain_xyz=
-                                                 self.params.descriptors.descriptors_contain_xyz)
-                            current_list.append([cutoff, twojmax, acsd])
-                if get_rank() == 0:
-                    self.study.append(current_list)
+        for i in range(0, len(self.__snapshots)):
+            current_list = []
+            target = self._load_target(self.__snapshots[i],
+                                       self.__snapshot_description[i],
+                                       self.__snapshot_units[i],
+                                       file_based_communication)
+            for first_dim in first_dim_list:
+                for second_dim in second_dim_list:
+                    if isinstance(self.descriptor_calculator, Bispectrum):
+                        self.params.descriptors.bispectrum_cutoff = first_dim
+                        self.params.descriptors.bispectrum_twojmax = second_dim
+                    if isinstance(self.descriptor_calculator, AtomicDensity):
+                        self.params.descriptors.atomic_density_cutoff = first_dim
+                        self.params.descriptors.atomic_density_sigma = \
+                            second_dim
+
+                    descriptor = \
+                        self._calculate_descriptors(self.__snapshots[i],
+                                                    self.__snapshot_description[i],
+                                                    self.__snapshot_units[i])
+                    if get_rank() == 0:
+                        acsd = self._calculate_acsd(descriptor, target,
+                                             self.params.hyperparameters.acsd_points,
+                                             descriptor_vectors_contain_xyz=
+                                             self.params.descriptors.descriptors_contain_xyz)
+                        current_list.append([first_dim, second_dim, acsd])
+            if get_rank() == 0:
+                self.study.append(current_list)
+
         if get_rank() == 0:
             self.study = np.mean(self.study, axis=0)
             if return_plotting:
                 results_to_plot = []
-                len_twojmax = len(twojmax_list)
-                len_cutoffs = len(cutoff_list)
-                for i in range(0, len_cutoffs):
-                    results_to_plot.append(self.study[i*len_twojmax:(i+1)*len_twojmax, 2:])
+                len_first_dim = len(first_dim_list)
+                len_second_dim = len(second_dim_list)
+                for i in range(0, len_first_dim):
+                    results_to_plot.append(
+                        self.study[i*len_second_dim:(i+1)*len_second_dim, 2:])
 
-                return results_to_plot, {"twojmax": twojmax_list, "cutoff": cutoff_list}
+                if isinstance(self.descriptor_calculator, Bispectrum):
+                    return results_to_plot, {"twojmax": second_dim_list,
+                                             "cutoff": first_dim_list}
+                if isinstance(self.descriptor_calculator, AtomicDensity):
+                    return results_to_plot, {"sigma": second_dim_list,
+                                             "cutoff": first_dim_list}
 
     def set_optimal_parameters(self):
         """
@@ -217,13 +264,21 @@ class ACSDAnalyzer(HyperOpt):
         """
         if get_rank() == 0:
             minimum_acsd = self.study[np.argmin(self.study[:, 2])]
-            if self.params.descriptors.descriptor_type == "Bispectrum":
+            if isinstance(self.descriptor_calculator, Bispectrum):
                 self.params.descriptors.bispectrum_cutoff = minimum_acsd[0]
                 self.params.descriptors.bispectrum_twojmax = int(minimum_acsd[1])
                 printout("ACSD analysis, optimal parameters: ", )
                 printout("Bispectrum twojmax: ", self.params.descriptors.
                          bispectrum_twojmax)
                 printout("Bispectrum cutoff: ", self.params.descriptors.
+                         bispectrum_cutoff)
+            if isinstance(self.descriptor_calculator, AtomicDensity):
+                self.params.descriptors.atomic_density_cutoff = minimum_acsd[0]
+                self.params.descriptors.atomic_density_sigma = minimum_acsd[1]
+                printout("ACSD analysis, optimal parameters: ", )
+                printout("Atomic density sigma: ", self.params.descriptors.
+                         bispectrum_twojmax)
+                printout("Atomic density cutoff: ", self.params.descriptors.
                          bispectrum_cutoff)
 
     def _calculate_descriptors(self, snapshot, description, original_units):
