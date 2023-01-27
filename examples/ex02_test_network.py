@@ -7,7 +7,7 @@ from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
-ex05_training_with_postprocessing.py: Train a network, then use this network 
+ex02_test_network.py: Train a network, then use this network 
 to predict the LDOS and then analyze the results of this prediction. This 
 example is structured a little bit different than other examples. It consists 
 of two functions, to show that networks can be saved and reaccessed after being

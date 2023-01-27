@@ -574,7 +574,6 @@ class ParametersData(ParametersBase):
 
     def __init__(self):
         super(ParametersData, self).__init__()
-        self.descriptors_contain_xyz = True
         self.snapshot_directories_list = []
         self.data_splitting_type = "by_snapshot"
         self.input_rescaling_type = "None"
