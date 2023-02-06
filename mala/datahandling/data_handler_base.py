@@ -202,7 +202,7 @@ class DataHandlerBase(ABC):
                                     output_npy_file)
 
             if np.prod(tmp_dimension[0:3]) != snapshot.grid_size:
-                raise Exception("Incosistent snapshot data provided.")
+                raise Exception("Inconsistent snapshot data provided.")
 
             if firstsnapshot:
                 firstsnapshot = False
