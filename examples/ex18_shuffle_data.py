@@ -20,6 +20,9 @@ easily done in memory.
 ####################
 
 test_parameters = mala.Parameters()
+# Important for the shuffling: you can set a custom seed to replicate
+# earlier experiments.
+test_parameters.data.shuffling_seed = 1234
 
 ####################
 # DATA
