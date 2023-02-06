@@ -42,9 +42,7 @@ class DataShuffler(DataHandlerBase):
 
     def add_snapshot(self, input_npy_file, input_npy_directory,
                      output_npy_file, output_npy_directory,
-                     add_snapshot_as="te",
-                     output_units="1/(eV*A^3)", input_units="None",
-                     calculation_output_file="", snapshot_type="numpy"):
+                     snapshot_type="numpy"):
         """
         Add a snapshot to the data pipeline.
 
@@ -62,21 +60,6 @@ class DataShuffler(DataHandlerBase):
         output_npy_directory : string
             Directory containing output_npy_file.
 
-        input_units : string
-            Units of input data. See descriptor classes to see which units are
-            supported.
-
-        output_units : string
-            Units of output data. See target classes to see which units are
-            supported.
-
-        calculation_output_file : string
-            File with the output of the original snapshot calculation. This is
-            only needed when testing multiple snapshots.
-
-        add_snapshot_as : string
-            Should always be "te" for the DataShuffler.
-
         snapshot_type : string
             Either "numpy" or "openpmd" based on what kind of files you
             want to operate on.
@@ -85,8 +68,8 @@ class DataShuffler(DataHandlerBase):
             add_snapshot(input_npy_file, input_npy_directory,
                          output_npy_file, output_npy_directory,
                          add_snapshot_as="te",
-                         output_units=output_units, input_units=input_units,
-                         calculation_output_file=calculation_output_file,
+                         output_units="None", input_units="None",
+                         calculation_output_file="",
                          snapshot_type=snapshot_type)
 
     def shuffle_snapshots(self, save_path, save_name="mala_shuffled_snapshot*",
