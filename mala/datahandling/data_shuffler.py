@@ -40,24 +40,24 @@ class DataShuffler(DataHandlerBase):
             self.descriptor_calculator.parameters.descriptors_contain_xyz = \
                 False
 
-    def add_snapshot(self, input_npy_file, input_npy_directory,
-                     output_npy_file, output_npy_directory,
+    def add_snapshot(self, input_file, input_directory,
+                     output_file, output_directory,
                      snapshot_type="numpy"):
         """
         Add a snapshot to the data pipeline.
 
         Parameters
         ----------
-        input_npy_file : string
+        input_file : string
             File with saved numpy input array.
 
-        input_npy_directory : string
+        input_directory : string
             Directory containing input_npy_directory.
 
-        output_npy_file : string
+        output_file : string
             File with saved numpy output array.
 
-        output_npy_directory : string
+        output_directory : string
             Directory containing output_npy_file.
 
         snapshot_type : string
@@ -65,14 +65,18 @@ class DataShuffler(DataHandlerBase):
             want to operate on.
         """
         super(DataShuffler, self).\
-            add_snapshot(input_npy_file, input_npy_directory,
-                         output_npy_file, output_npy_directory,
+            add_snapshot(input_file, input_directory,
+                         output_file, output_directory,
                          add_snapshot_as="te",
                          output_units="None", input_units="None",
                          calculation_output_file="",
                          snapshot_type=snapshot_type)
 
-    def shuffle_snapshots(self, save_path, save_name="mala_shuffled_snapshot*",
+    def shuffle_snapshots(self,
+                          complete_save_path=None,
+                          descriptor_save_path=None,
+                          target_save_path=None,
+                          save_name="mala_shuffled_snapshot*",
                           number_of_shuffled_snapshots=None):
         """
         Shuffle the snapshots into new snapshots.
@@ -81,8 +85,16 @@ class DataShuffler(DataHandlerBase):
 
         Parameters
         ----------
-        save_path : string
-            Where to save the new, shuffled snapshots.
+        complete_save_path : string
+            If not None: the directory in which all snapshots will be saved.
+            Overwrites descriptor_save_path, target_save_path and
+            additional_info_save_path if set.
+
+        descriptor_save_path : string
+            Directory in which to save descriptor data.
+
+        target_save_path : string
+            Directory in which to save target data.
 
         save_name : string
             Name of the snapshots to be shuffled.
@@ -92,6 +104,14 @@ class DataShuffler(DataHandlerBase):
             to this amount of snapshots. If None, then the same number of
             snapshots provided will be used.
         """
+        # Check the paths.
+        if complete_save_path is not None:
+            descriptor_save_path = complete_save_path
+            target_save_path = complete_save_path
+        else:
+            if target_save_path is None or descriptor_save_path is None:
+                raise Exception("No paths to save shuffled data provided.")
+
         # Check the dimensions of the snapshots.
         self._check_snapshots()
         snapshot_size_list = [snapshot.grid_size for snapshot in
@@ -163,7 +183,10 @@ class DataShuffler(DataHandlerBase):
             new_targets = np.zeros((int(np.prod(shuffle_dimensions)),
                                     self.output_dimension))
             last_start = 0
-            snapshot_name = os.path.join(save_path, save_name.replace("*", str(i)))
+            descriptor_name = os.path.join(descriptor_save_path,
+                                           save_name.replace("*", str(i)))
+            target_name = os.path.join(target_save_path,
+                                       save_name.replace("*", str(i)))
 
             # Each new snapshot gets an number_of_new_snapshots-th from each
             # snapshot.
@@ -194,8 +217,8 @@ class DataShuffler(DataHandlerBase):
                                                shuffle_dimensions[1],
                                                shuffle_dimensions[2],
                                                self.output_dimension])
-            np.save(snapshot_name+".in.npy", new_descriptors)
-            np.save(snapshot_name+".out.npy", new_targets)
+            np.save(descriptor_name+".in.npy", new_descriptors)
+            np.save(target_name+".out.npy", new_targets)
 
         # Since no training will be done with this class, we should always
         # clear the data at the end.

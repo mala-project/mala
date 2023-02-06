@@ -81,8 +81,8 @@ class DataHandlerBase(ABC):
     # Adding/Deleting data
     ########################
 
-    def add_snapshot(self, input_npy_file, input_npy_directory,
-                     output_npy_file, output_npy_directory,
+    def add_snapshot(self, input_file, input_directory,
+                     output_file, output_directory,
                      add_snapshot_as,
                      output_units="1/(eV*A^3)", input_units="None",
                      calculation_output_file="", snapshot_type="numpy"):
@@ -91,16 +91,16 @@ class DataHandlerBase(ABC):
 
         Parameters
         ----------
-        input_npy_file : string
+        input_file : string
             File with saved numpy input array.
 
-        input_npy_directory : string
+        input_directory : string
             Directory containing input_npy_directory.
 
-        output_npy_file : string
+        output_file : string
             File with saved numpy output array.
 
-        output_npy_directory : string
+        output_directory : string
             Directory containing output_npy_file.
 
         input_units : string
@@ -124,8 +124,8 @@ class DataHandlerBase(ABC):
             Either "numpy" or "openpmd" based on what kind of files you
             want to operate on.
         """
-        snapshot = Snapshot(input_npy_file, input_npy_directory,
-                            output_npy_file, output_npy_directory,
+        snapshot = Snapshot(input_file, input_directory,
+                            output_file, output_directory,
                             add_snapshot_as,
                             input_units=input_units,
                             output_units=output_units,

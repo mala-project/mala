@@ -39,6 +39,7 @@ data_shuffler.add_snapshot("Be_snapshot1.in.npy", data_path,
 
 # After shuffling, these snapshots can be loaded as regular snapshots for
 # lazily loaded training-
-data_shuffler.shuffle_snapshots("./", save_name="Be_shuffled*")
+data_shuffler.shuffle_snapshots(complete_save_path="./",
+                                save_name="Be_shuffled*")
 
 
