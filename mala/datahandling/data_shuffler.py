@@ -1,3 +1,4 @@
+"""Mixes data between snapshots for improved lazy-loading training."""
 import os
 
 import numpy as np
@@ -8,6 +9,24 @@ from mala.datahandling.data_handler_base import DataHandlerBase
 
 
 class DataShuffler(DataHandlerBase):
+    """
+    Mixes data between snapshots for improved lazy-loading training.
+
+    This is a DISK operation - new, shuffled snapshots will be created on disk.
+
+    Parameters
+    ----------
+    parameters : mala.common.parameters.Parameters
+        Parameters used to create the data handling object.
+
+    descriptor_calculator : mala.descriptors.descriptor.Descriptor
+        Used to do unit conversion on input data. If None, then one will
+        be created by this class.
+
+    target_calculator : mala.targets.target.Target
+        Used to do unit conversion on output data. If None, then one will
+        be created by this class.
+    """
 
     def __init__(self, parameters: Parameters, target_calculator=None,
                  descriptor_calculator=None):
@@ -26,6 +45,42 @@ class DataShuffler(DataHandlerBase):
                      add_snapshot_as="te",
                      output_units="1/(eV*A^3)", input_units="None",
                      calculation_output_file="", snapshot_type="numpy"):
+        """
+        Add a snapshot to the data pipeline.
+
+        Parameters
+        ----------
+        input_npy_file : string
+            File with saved numpy input array.
+
+        input_npy_directory : string
+            Directory containing input_npy_directory.
+
+        output_npy_file : string
+            File with saved numpy output array.
+
+        output_npy_directory : string
+            Directory containing output_npy_file.
+
+        input_units : string
+            Units of input data. See descriptor classes to see which units are
+            supported.
+
+        output_units : string
+            Units of output data. See target classes to see which units are
+            supported.
+
+        calculation_output_file : string
+            File with the output of the original snapshot calculation. This is
+            only needed when testing multiple snapshots.
+
+        add_snapshot_as : string
+            Should always be "te" for the DataShuffler.
+
+        snapshot_type : string
+            Either "numpy" or "openpmd" based on what kind of files you
+            want to operate on.
+        """
         super(DataShuffler, self).\
             add_snapshot(input_npy_file, input_npy_directory,
                          output_npy_file, output_npy_directory,
@@ -36,6 +91,24 @@ class DataShuffler(DataHandlerBase):
 
     def shuffle_snapshots(self, save_path, save_name="mala_shuffled_snapshot*",
                           shuffle_dimensions=None):
+        """
+        Shuffle the snapshots into new snapshots.
+
+        This saves them to file.
+
+        Parameters
+        ----------
+        save_path : string
+            Where to save the new, shuffled snapshots.
+
+        save_name : string
+            Name of the snapshots to be shuffled.
+
+        shuffle_dimensions : list
+            If not None, must be a list of three entries [x,y,z].
+            If specified, the shuffling class will use these dimensions
+            instead of the ones automatically retrieved from the snapshots.
+        """
         # Check the dimensions of the snapshots.
         self._check_snapshots()
         snapshot_size_list = [snapshot.grid_size for snapshot in

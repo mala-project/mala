@@ -1,3 +1,4 @@
+"""Base class for all data handling (loading, shuffling, etc.)."""
 from abc import ABC
 import os
 
@@ -11,6 +12,22 @@ from mala.datahandling.snapshot import Snapshot
 
 
 class DataHandlerBase(ABC):
+    """
+    Base class for all data handling (loading, shuffling, etc.).
+
+    Parameters
+    ----------
+    parameters : mala.common.parameters.Parameters
+        Parameters used to create the data handling object.
+
+    descriptor_calculator : mala.descriptors.descriptor.Descriptor
+        Used to do unit conversion on input data. If None, then one will
+        be created by this class.
+
+    target_calculator : mala.targets.target.Target
+        Used to do unit conversion on output data. If None, then one will
+        be created by this class.
+    """
 
     def __init__(self, parameters: Parameters, target_calculator=None,
                  descriptor_calculator=None):
