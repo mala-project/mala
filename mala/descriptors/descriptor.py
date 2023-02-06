@@ -72,7 +72,7 @@ class Descriptor(PhysicalData):
     def __init__(self, parameters):
         super(Descriptor, self).__init__(parameters)
         self.parameters: ParametersDescriptors = parameters.descriptors
-        self.fingerprint_length = -1  # so iterations will fail
+        self.fingerprint_length = 0  # so iterations will fail
         self.verbosity = parameters.verbosity
         self.in_format_ase = ""
         self.atoms = None

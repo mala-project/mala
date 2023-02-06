@@ -112,6 +112,19 @@ class DataShuffler(DataHandlerBase):
             if target_save_path is None or descriptor_save_path is None:
                 raise Exception("No paths to save shuffled data provided.")
 
+        # Check the file format.
+        if "." in save_name:
+            file_ending = save_name.split(".")[-1]
+            save_name = save_name.split(".")[0]
+            if file_ending != "npy":
+                import openpmd_api as io
+
+                if file_ending not in io.file_extensions:
+                    raise Exception("Invalid file ending selected: " +
+                                    file_ending)
+        else:
+            file_ending = "npy"
+
         # Check the dimensions of the snapshots.
         self._check_snapshots()
         snapshot_size_list = [snapshot.grid_size for snapshot in
@@ -153,6 +166,7 @@ class DataShuffler(DataHandlerBase):
 
         # Prepare permutations.
         permutations = []
+        seeds = []
         for i in range(0, number_of_new_snapshots):
 
             # This makes the shuffling deterministic, if specified by the user.
@@ -217,8 +231,27 @@ class DataShuffler(DataHandlerBase):
                                                shuffle_dimensions[1],
                                                shuffle_dimensions[2],
                                                self.output_dimension])
-            np.save(descriptor_name+".in.npy", new_descriptors)
-            np.save(target_name+".out.npy", new_targets)
+            if file_ending == "npy":
+                self.descriptor_calculator.\
+                    write_to_numpy_file(descriptor_name+".in.npy",
+                                        new_descriptors)
+                self.target_calculator.\
+                    write_to_numpy_file(target_name+".out.npy",
+                                        new_targets)
+            else:
+                # We check above that in the non-numpy case, OpenPMD will work.
+                self.descriptor_calculator.grid_dimensions = shuffle_dimensions
+                self.target_calculator.grid_dimensions = shuffle_dimensions
+                self.descriptor_calculator.\
+                    write_to_openpmd_file(descriptor_name+".in."+file_ending,
+                                          new_descriptors,
+                                          additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
+                                                                 "local_shuffling_seed": i*self.parameters.shuffling_seed})
+                self.target_calculator.\
+                    write_to_openpmd_file(target_name+".out."+file_ending,
+                                          target_data=new_targets,
+                                          additional_attributes={"global_shuffling_seed": self.parameters.shuffling_seed,
+                                                                 "local_shuffling_seed": i*self.parameters.shuffling_seed})
 
         # Since no training will be done with this class, we should always
         # clear the data at the end.

@@ -518,7 +518,7 @@ class Target(PhysicalData):
         else:
             super(Target, self).write_to_numpy_file(path, target_data)
 
-    def write_to_openpmd_file(self, path, target_data=None):
+    def write_to_openpmd_file(self, path, target_data=None, additional_attributes={}):
         """
         Write data to a numpy file.
 
@@ -530,13 +530,20 @@ class Target(PhysicalData):
         target_data : numpy.ndarray
             Target data to save. If None, the data stored in the calculator
             will be used.
+
+        additional_attributes : dict
+            Dict containing additional attributes to be saved.
         """
         if target_data is None:
             # The feature dimension may be undefined.
-            super(Target, self).write_to_openpmd_file(path, self.get_target())
+            super(Target, self).write_to_openpmd_file(path, self.get_target(),
+                                                      additional_attributes=
+                                                      additional_attributes)
         else:
             # The feature dimension may be undefined.
-            super(Target, self).write_to_openpmd_file(path, target_data)
+            super(Target, self).write_to_openpmd_file(path, target_data,
+                                                      additional_attributes=
+                                                      additional_attributes)
 
     # Accessing target data
     ########################
