@@ -570,6 +570,10 @@ class ParametersData(ParametersBase):
     use_fast_tensor_data_set : bool
         If True, then the new, fast TensorDataSet implemented by Josh Romero
         will be used.
+
+    shuffling_seed : int
+        If not None, a seed that will be used to make the shuffling of the data
+        in the DataShuffler class deterministic.
     """
 
     def __init__(self):
@@ -584,6 +588,7 @@ class ParametersData(ParametersBase):
         self.train_ratio = 0.1
         self.sample_ratio = 0.5
         self.use_fast_tensor_data_set = False
+        self.shuffling_seed = None
 
 
 class ParametersRunning(ParametersBase):

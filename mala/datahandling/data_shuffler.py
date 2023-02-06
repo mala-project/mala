@@ -74,6 +74,10 @@ class DataShuffler(DataHandlerBase):
         # Prepare permutations.
         permutations = []
         for i in range(0, number_of_new_snapshots):
+
+            # This makes the shuffling deterministic, if specified by the user.
+            if self.parameters.shuffling_seed is not None:
+                np.random.seed(i*self.parameters.shuffling_seed)
             permutations.append(np.random.permutation(
                 int(np.prod(shuffle_dimensions))))
 
