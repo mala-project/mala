@@ -73,7 +73,7 @@ class DataShuffler(DataHandlerBase):
                          snapshot_type=snapshot_type)
 
     def shuffle_snapshots(self, save_path, save_name="mala_shuffled_snapshot*",
-                          shuffle_dimensions=None):
+                          number_of_shuffled_snapshots=None):
         """
         Shuffle the snapshots into new snapshots.
 
@@ -87,45 +87,49 @@ class DataShuffler(DataHandlerBase):
         save_name : string
             Name of the snapshots to be shuffled.
 
-        shuffle_dimensions : list
-            If not None, must be a list of three entries [x,y,z].
-            If specified, the shuffling class will use these dimensions
-            instead of the ones automatically retrieved from the snapshots.
+        number_of_shuffled_snapshots : int
+            If not None, this class will attempt to redistribute the data
+            to this amount of snapshots. If None, then the same number of
+            snapshots provided will be used.
         """
         # Check the dimensions of the snapshots.
         self._check_snapshots()
         snapshot_size_list = [snapshot.grid_size for snapshot in
                               self.parameters.snapshot_directories_list]
+        number_of_data_points = np.sum(snapshot_size_list)
 
-        # Calculate how data will be split.
-        if shuffle_dimensions is None:
-            # If all snapshots have the same size, we will just re-use
-            # this size if not otherwise specified.
+        if number_of_shuffled_snapshots is None:
+            # If the user does not tell us how many snapshots to use,
+            # we have to check if the number of snapshots is straightforward.
+            # If all snapshots have the same size, we can just replicate the
+            # snapshot structure.
             if np.max(snapshot_size_list) == np.min(snapshot_size_list):
                 shuffle_dimensions = self.parameters.\
                     snapshot_directories_list[0].grid_dimension
+                number_of_new_snapshots = self.nr_snapshots
             else:
+                # If the snapshots have different sizes we simply create
+                # (x, 1, 1) snapshots big enough to hold the data.
+                number_of_new_snapshots = self.nr_snapshots
+                while number_of_data_points % number_of_new_snapshots != 0:
+                    number_of_new_snapshots += 1
+
                 # If they do have different sizes, we start with the smallest
                 # snapshot, there is some padding down below anyhow.
-                shuffle_dimensions = self.parameters.\
-                    snapshot_directories_list[np.argmin(snapshot_size_list)].\
-                    grid_dimension
+                shuffle_dimensions = [int(number_of_data_points /
+                                          number_of_new_snapshots), 1, 1]
+        else:
+            number_of_new_snapshots = number_of_shuffled_snapshots
+            if number_of_data_points % number_of_new_snapshots != 0:
+                raise Exception("Cannot create this number of snapshots "
+                                "from data provided.")
+            else:
+                shuffle_dimensions = [int(number_of_data_points /
+                                          number_of_new_snapshots), 1, 1]
 
-        # Padding the new snapshot size until we can fit all snapshots.
-        number_of_data_points = np.sum(snapshot_size_list)
-        if number_of_data_points % \
-                int(np.prod(shuffle_dimensions)) != 0:
-            old_shuffle_dimensions = shuffle_dimensions.copy()
-            while number_of_data_points % \
-                    int(np.prod(shuffle_dimensions)) != 0:
-                shuffle_dimensions[3] += 1
-            printout("Had to readjust shuffle dimensions from",
-                     old_shuffle_dimensions, "to", shuffle_dimensions)
-
-        number_of_new_snapshots = int(number_of_data_points /
-                                      int(np.prod(shuffle_dimensions)))
         printout("Data shuffler will generate", number_of_new_snapshots,
                  "new snapshots.")
+        printout("Shuffled snapshot dimension will be ", shuffle_dimensions)
 
         # Prepare permutations.
         permutations = []
@@ -141,7 +145,7 @@ class DataShuffler(DataHandlerBase):
         descriptor_data = []
         target_data = []
         for idx, snapshot in enumerate(self.parameters.
-                                               snapshot_directories_list):
+                                       snapshot_directories_list):
             # TODO: Use descriptor and target calculator for this.
             descriptor_data.append(np.load(os.path.join(snapshot.
                                                         input_npy_directory,
