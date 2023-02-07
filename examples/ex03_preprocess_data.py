@@ -7,7 +7,7 @@ from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
-ex02_preprocess_data.py: Shows how this framework can be used to preprocess
+ex03_preprocess_data.py: Shows how this framework can be used to preprocess
 data. Preprocessing here means converting raw DFT calculation output into 
 numpy arrays of the correct size. For the input data, this means descriptor
 calculation.

@@ -288,7 +288,7 @@ class PhysicalData(ABC):
         """
         np.save(path, array)
 
-    def write_to_openpmd_file(self, path, array):
+    def write_to_openpmd_file(self, path, array, additional_attributes={}):
         """
         Write data to an OpenPMD file.
 
@@ -299,6 +299,9 @@ class PhysicalData(ABC):
 
         array : numpy.ndarray
             Array to save.
+
+        additional_attributes : dict
+            Dict containing additional attributes to be saved.
         """
         import openpmd_api as io
 
@@ -325,6 +328,9 @@ class PhysicalData(ABC):
         series.set_attribute("is_mala_data", 1)
         series.set_software(name="MALA", version=mala_version)
         series.author = "..."
+        for entry in additional_attributes:
+            series.set_attribute(entry, additional_attributes[entry])
+
         iteration = series.write_iterations()[0]
 
         # This function may be called without the feature dimension

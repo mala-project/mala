@@ -9,7 +9,7 @@ data_path = os.path.join(data_repo_path, "Be2")
 
 
 """
-ex03_postprocess_data.py: Shows how this framework can be used to
+ex04_postprocess_data.py: Shows how this framework can be used to
 postprocess data. Usually, this framework outputs LDOS data, thefore,
 post processing of LDOS data will be shown in the following. 
 Set do_total_energy to False, if you don't have the QuantumEspresso
