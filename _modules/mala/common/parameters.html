@@ -643,11 +643,14 @@
 <span class="sd">    use_fast_tensor_data_set : bool</span>
 <span class="sd">        If True, then the new, fast TensorDataSet implemented by Josh Romero</span>
 <span class="sd">        will be used.</span>
+
+<span class="sd">    shuffling_seed : int</span>
+<span class="sd">        If not None, a seed that will be used to make the shuffling of the data</span>
+<span class="sd">        in the DataShuffler class deterministic.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ParametersData</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_directories_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_splitting_type</span> <span class="o">=</span> <span class="s2">&quot;by_snapshot&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_rescaling_type</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
@@ -657,7 +660,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span> <span class="o">=</span> <span class="mi">40</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">train_ratio</span> <span class="o">=</span> <span class="mf">0.1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_ratio</span> <span class="o">=</span> <span class="mf">0.5</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_fast_tensor_data_set</span> <span class="o">=</span> <span class="kc">False</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_fast_tensor_data_set</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="ParametersRunning"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersRunning">[docs]</a><span class="k">class</span> <span class="nc">ParametersRunning</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>

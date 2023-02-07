@@ -488,7 +488,7 @@ will be used.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.targets.target.Target.write_to_openpmd_file">
-<span class="sig-name descname"><span class="pre">write_to_openpmd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_to_openpmd_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_to_openpmd_file" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_to_openpmd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/targets/target.html#Target.write_to_openpmd_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.targets.target.Target.write_to_openpmd_file" title="Permalink to this definition"></a></dt>
 <dd><p>Write data to a numpy file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -496,6 +496,7 @@ will be used.</p></li>
 <li><p><strong>path</strong> (<em>string</em>) – File to save into. If no file ending is given, .h5 is assumed.</p></li>
 <li><p><strong>target_data</strong> (<em>numpy.ndarray</em>) – Target data to save. If None, the data stored in the calculator
 will be used.</p></li>
+<li><p><strong>additional_attributes</strong> (<em>dict</em>) – Dict containing additional attributes to be saved.</p></li>
 </ul>
 </dd>
 </dl>

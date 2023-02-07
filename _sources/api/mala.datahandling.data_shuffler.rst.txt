@@ -1,0 +1,7 @@
+data\_shuffler
+==============
+
+.. automodule:: mala.datahandling.data_shuffler
+   :members:
+   :undoc-members:
+   :show-inheritance:

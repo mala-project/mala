@@ -361,7 +361,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PhysicalData.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+<div class="viewcode-block" id="PhysicalData.write_to_openpmd_file"><a class="viewcode-back" href="../../../api/mala.common.physical_data.html#mala.common.physical_data.PhysicalData.write_to_openpmd_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_openpmd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{}):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write data to an OpenPMD file.</span>
 
@@ -372,6 +372,9 @@
 
 <span class="sd">        array : numpy.ndarray</span>
 <span class="sd">            Array to save.</span>
+
+<span class="sd">        additional_attributes : dict</span>
+<span class="sd">            Dict containing additional attributes to be saved.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
 
@@ -398,6 +401,9 @@
         <span class="n">series</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="s2">&quot;is_mala_data&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">series</span><span class="o">.</span><span class="n">set_software</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MALA&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">mala_version</span><span class="p">)</span>
         <span class="n">series</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">additional_attributes</span><span class="p">:</span>
+            <span class="n">series</span><span class="o">.</span><span class="n">set_attribute</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">additional_attributes</span><span class="p">[</span><span class="n">entry</span><span class="p">])</span>
+
         <span class="n">iteration</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">write_iterations</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># This function may be called without the feature dimension</span>

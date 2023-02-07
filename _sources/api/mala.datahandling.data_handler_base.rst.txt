@@ -1,0 +1,7 @@
+data\_handler\_base
+===================
+
+.. automodule:: mala.datahandling.data_handler_base
+   :members:
+   :undoc-members:
+   :show-inheritance:

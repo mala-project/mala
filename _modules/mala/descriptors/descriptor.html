@@ -145,7 +145,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Descriptor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">ParametersDescriptors</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">descriptors</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># so iterations will fail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint_length</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># so iterations will fail</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">verbosity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">in_format_ase</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="kc">None</span>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mala.datahandling.data_shuffler &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>mala.datahandling.data_shuffler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mala.datahandling.data_shuffler</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Mixes data between snapshots for improved lazy-loading training.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">mala.common.parameters</span> <span class="kn">import</span> <span class="n">ParametersData</span><span class="p">,</span> <span class="n">Parameters</span>
+<span class="kn">from</span> <span class="nn">mala.common.parallelizer</span> <span class="kn">import</span> <span class="n">printout</span>
+<span class="kn">from</span> <span class="nn">mala.datahandling.data_handler_base</span> <span class="kn">import</span> <span class="n">DataHandlerBase</span>
+
+
+<div class="viewcode-block" id="DataShuffler"><a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler">[docs]</a><span class="k">class</span> <span class="nc">DataShuffler</span><span class="p">(</span><span class="n">DataHandlerBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mixes data between snapshots for improved lazy-loading training.</span>
+
+<span class="sd">    This is a DISK operation - new, shuffled snapshots will be created on disk.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameters : mala.common.parameters.Parameters</span>
+<span class="sd">        Parameters used to create the data handling object.</span>
+
+<span class="sd">    descriptor_calculator : mala.descriptors.descriptor.Descriptor</span>
+<span class="sd">        Used to do unit conversion on input data. If None, then one will</span>
+<span class="sd">        be created by this class.</span>
+
+<span class="sd">    target_calculator : mala.targets.target.Target</span>
+<span class="sd">        Used to do unit conversion on output data. If None, then one will</span>
+<span class="sd">        be created by this class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">descriptor_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataShuffler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span>
+                                           <span class="n">target_calculator</span><span class="o">=</span><span class="n">target_calculator</span><span class="p">,</span>
+                                           <span class="n">descriptor_calculator</span><span class="o">=</span>
+                                           <span class="n">descriptor_calculator</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span><span class="p">:</span>
+            <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Disabling XYZ-cutting from descriptor data for &quot;</span>
+                     <span class="s2">&quot;shuffling. If needed, please re-enable afterwards.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">descriptors_contain_xyz</span> <span class="o">=</span> \
+                <span class="kc">False</span>
+
+<div class="viewcode-block" id="DataShuffler.add_snapshot"><a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.add_snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">add_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="p">,</span> <span class="n">input_directory</span><span class="p">,</span>
+                     <span class="n">output_file</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">,</span>
+                     <span class="n">snapshot_type</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a snapshot to the data pipeline.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_file : string</span>
+<span class="sd">            File with saved numpy input array.</span>
+
+<span class="sd">        input_directory : string</span>
+<span class="sd">            Directory containing input_npy_directory.</span>
+
+<span class="sd">        output_file : string</span>
+<span class="sd">            File with saved numpy output array.</span>
+
+<span class="sd">        output_directory : string</span>
+<span class="sd">            Directory containing output_npy_file.</span>
+
+<span class="sd">        snapshot_type : string</span>
+<span class="sd">            Either &quot;numpy&quot; or &quot;openpmd&quot; based on what kind of files you</span>
+<span class="sd">            want to operate on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataShuffler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span>\
+            <span class="n">add_snapshot</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">input_directory</span><span class="p">,</span>
+                         <span class="n">output_file</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">,</span>
+                         <span class="n">add_snapshot_as</span><span class="o">=</span><span class="s2">&quot;te&quot;</span><span class="p">,</span>
+                         <span class="n">output_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="n">input_units</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+                         <span class="n">calculation_output_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                         <span class="n">snapshot_type</span><span class="o">=</span><span class="n">snapshot_type</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataShuffler.shuffle_snapshots"><a class="viewcode-back" href="../../../api/mala.datahandling.data_shuffler.html#mala.datahandling.data_shuffler.DataShuffler.shuffle_snapshots">[docs]</a>    <span class="k">def</span> <span class="nf">shuffle_snapshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                          <span class="n">complete_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">descriptor_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">target_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">save_name</span><span class="o">=</span><span class="s2">&quot;mala_shuffled_snapshot*&quot;</span><span class="p">,</span>
+                          <span class="n">number_of_shuffled_snapshots</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shuffle the snapshots into new snapshots.</span>
+
+<span class="sd">        This saves them to file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        complete_save_path : string</span>
+<span class="sd">            If not None: the directory in which all snapshots will be saved.</span>
+<span class="sd">            Overwrites descriptor_save_path, target_save_path and</span>
+<span class="sd">            additional_info_save_path if set.</span>
+
+<span class="sd">        descriptor_save_path : string</span>
+<span class="sd">            Directory in which to save descriptor data.</span>
+
+<span class="sd">        target_save_path : string</span>
+<span class="sd">            Directory in which to save target data.</span>
+
+<span class="sd">        save_name : string</span>
+<span class="sd">            Name of the snapshots to be shuffled.</span>
+
+<span class="sd">        number_of_shuffled_snapshots : int</span>
+<span class="sd">            If not None, this class will attempt to redistribute the data</span>
+<span class="sd">            to this amount of snapshots. If None, then the same number of</span>
+<span class="sd">            snapshots provided will be used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check the paths.</span>
+        <span class="k">if</span> <span class="n">complete_save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">descriptor_save_path</span> <span class="o">=</span> <span class="n">complete_save_path</span>
+            <span class="n">target_save_path</span> <span class="o">=</span> <span class="n">complete_save_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">target_save_path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">descriptor_save_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No paths to save shuffled data provided.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check the file format.</span>
+        <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">save_name</span><span class="p">:</span>
+            <span class="n">file_ending</span> <span class="o">=</span> <span class="n">save_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">save_name</span> <span class="o">=</span> <span class="n">save_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">file_ending</span> <span class="o">!=</span> <span class="s2">&quot;npy&quot;</span><span class="p">:</span>
+                <span class="kn">import</span> <span class="nn">openpmd_api</span> <span class="k">as</span> <span class="nn">io</span>
+
+                <span class="k">if</span> <span class="n">file_ending</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">file_extensions</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid file ending selected: &quot;</span> <span class="o">+</span>
+                                    <span class="n">file_ending</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_ending</span> <span class="o">=</span> <span class="s2">&quot;npy&quot;</span>
+
+        <span class="c1"># Check the dimensions of the snapshots.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_snapshots</span><span class="p">()</span>
+        <span class="n">snapshot_size_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">snapshot</span><span class="o">.</span><span class="n">grid_size</span> <span class="k">for</span> <span class="n">snapshot</span> <span class="ow">in</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">snapshot_directories_list</span><span class="p">]</span>
+        <span class="n">number_of_data_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">snapshot_size_list</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">number_of_shuffled_snapshots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># If the user does not tell us how many snapshots to use,</span>
+            <span class="c1"># we have to check if the number of snapshots is straightforward.</span>
+            <span class="c1"># If all snapshots have the same size, we can just replicate the</span>
+            <span class="c1"># snapshot structure.</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">snapshot_size_list</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">snapshot_size_list</span><span class="p">):</span>
+                <span class="n">shuffle_dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
+                    <span class="n">snapshot_directories_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid_dimension</span>
+                <span class="n">number_of_new_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># If the snapshots have different sizes we simply create</span>
+                <span class="c1"># (x, 1, 1) snapshots big enough to hold the data.</span>
+                <span class="n">number_of_new_snapshots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span>
+                <span class="k">while</span> <span class="n">number_of_data_points</span> <span class="o">%</span> <span class="n">number_of_new_snapshots</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">number_of_new_snapshots</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c1"># If they do have different sizes, we start with the smallest</span>
+                <span class="c1"># snapshot, there is some padding down below anyhow.</span>
+                <span class="n">shuffle_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">number_of_data_points</span> <span class="o">/</span>
+                                          <span class="n">number_of_new_snapshots</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">number_of_new_snapshots</span> <span class="o">=</span> <span class="n">number_of_shuffled_snapshots</span>
+            <span class="k">if</span> <span class="n">number_of_data_points</span> <span class="o">%</span> <span class="n">number_of_new_snapshots</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot create this number of snapshots &quot;</span>
+                                <span class="s2">&quot;from data provided.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">shuffle_dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">number_of_data_points</span> <span class="o">/</span>
+                                          <span class="n">number_of_new_snapshots</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Data shuffler will generate&quot;</span><span class="p">,</span> <span class="n">number_of_new_snapshots</span><span class="p">,</span>
+                 <span class="s2">&quot;new snapshots.&quot;</span><span class="p">)</span>
+        <span class="n">printout</span><span class="p">(</span><span class="s2">&quot;Shuffled snapshot dimension will be &quot;</span><span class="p">,</span> <span class="n">shuffle_dimensions</span><span class="p">)</span>
+
+        <span class="c1"># Prepare permutations.</span>
+        <span class="n">permutations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">seeds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_new_snapshots</span><span class="p">):</span>
+
+            <span class="c1"># This makes the shuffling deterministic, if specified by the user.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">)</span>
+            <span class="n">permutations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shuffle_dimensions</span><span class="p">))))</span>
+
+        <span class="c1"># Load the data (via memmap).</span>
+        <span class="n">descriptor_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">target_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">snapshot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
+                                       <span class="n">snapshot_directories_list</span><span class="p">):</span>
+            <span class="c1"># TODO: Use descriptor and target calculator for this.</span>
+            <span class="n">descriptor_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span>
+                                                        <span class="n">input_npy_directory</span><span class="p">,</span>
+                                                        <span class="n">snapshot</span><span class="o">.</span><span class="n">input_npy_file</span><span class="p">),</span>
+                                           <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">))</span>
+            <span class="n">target_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span>
+                                                    <span class="n">output_npy_directory</span><span class="p">,</span>
+                                                    <span class="n">snapshot</span><span class="o">.</span><span class="n">output_npy_file</span><span class="p">),</span>
+                                       <span class="n">mmap_mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Do the actual shuffling.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_new_snapshots</span><span class="p">):</span>
+            <span class="n">new_descriptors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shuffle_dimensions</span><span class="p">)),</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">))</span>
+            <span class="n">new_targets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shuffle_dimensions</span><span class="p">)),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">))</span>
+            <span class="n">last_start</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">descriptor_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">descriptor_save_path</span><span class="p">,</span>
+                                           <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
+            <span class="n">target_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target_save_path</span><span class="p">,</span>
+                                       <span class="n">save_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
+
+            <span class="c1"># Each new snapshot gets an number_of_new_snapshots-th from each</span>
+            <span class="c1"># snapshot.</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_snapshots</span><span class="p">):</span>
+                <span class="n">current_grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>\
+                                    <span class="n">snapshot_directories_list</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">grid_size</span>
+                <span class="n">current_chunk</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">current_grid_size</span> <span class="o">/</span>
+                                    <span class="n">number_of_new_snapshots</span><span class="p">)</span>
+                <span class="n">new_descriptors</span><span class="p">[</span><span class="n">last_start</span><span class="p">:</span><span class="n">current_chunk</span><span class="o">+</span><span class="n">last_start</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">descriptor_data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">current_grid_size</span><span class="p">,</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">)</span> \
+                    <span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="n">current_chunk</span><span class="p">:(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">current_chunk</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">new_targets</span><span class="p">[</span><span class="n">last_start</span><span class="p">:</span><span class="n">current_chunk</span><span class="o">+</span><span class="n">last_start</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">target_data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">current_grid_size</span><span class="p">,</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">)</span> \
+                    <span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="n">current_chunk</span><span class="p">:(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">current_chunk</span><span class="p">,</span> <span class="p">:]</span>
+
+                <span class="n">last_start</span> <span class="o">+=</span> <span class="n">current_chunk</span>
+
+            <span class="c1"># Randomize and save to disk.</span>
+            <span class="n">new_descriptors</span> <span class="o">=</span> <span class="n">new_descriptors</span><span class="p">[</span><span class="n">permutations</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">new_targets</span> <span class="o">=</span> <span class="n">new_targets</span><span class="p">[</span><span class="n">permutations</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">new_descriptors</span> <span class="o">=</span> <span class="n">new_descriptors</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">shuffle_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                       <span class="n">shuffle_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                       <span class="n">shuffle_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                                       <span class="bp">self</span><span class="o">.</span><span class="n">input_dimension</span><span class="p">])</span>
+            <span class="n">new_targets</span> <span class="o">=</span> <span class="n">new_targets</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">shuffle_dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                               <span class="n">shuffle_dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                               <span class="n">shuffle_dimensions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">output_dimension</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">file_ending</span> <span class="o">==</span> <span class="s2">&quot;npy&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
+                    <span class="n">write_to_numpy_file</span><span class="p">(</span><span class="n">descriptor_name</span><span class="o">+</span><span class="s2">&quot;.in.npy&quot;</span><span class="p">,</span>
+                                        <span class="n">new_descriptors</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                    <span class="n">write_to_numpy_file</span><span class="p">(</span><span class="n">target_name</span><span class="o">+</span><span class="s2">&quot;.out.npy&quot;</span><span class="p">,</span>
+                                        <span class="n">new_targets</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We check above that in the non-numpy case, OpenPMD will work.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">shuffle_dimensions</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">grid_dimensions</span> <span class="o">=</span> <span class="n">shuffle_dimensions</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">descriptor_calculator</span><span class="o">.</span>\
+                    <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">descriptor_name</span><span class="o">+</span><span class="s2">&quot;.in.&quot;</span><span class="o">+</span><span class="n">file_ending</span><span class="p">,</span>
+                                          <span class="n">new_descriptors</span><span class="p">,</span>
+                                          <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;global_shuffling_seed&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">,</span>
+                                                                 <span class="s2">&quot;local_shuffling_seed&quot;</span><span class="p">:</span> <span class="n">i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                    <span class="n">write_to_openpmd_file</span><span class="p">(</span><span class="n">target_name</span><span class="o">+</span><span class="s2">&quot;.out.&quot;</span><span class="o">+</span><span class="n">file_ending</span><span class="p">,</span>
+                                          <span class="n">target_data</span><span class="o">=</span><span class="n">new_targets</span><span class="p">,</span>
+                                          <span class="n">additional_attributes</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;global_shuffling_seed&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">,</span>
+                                                                 <span class="s2">&quot;local_shuffling_seed&quot;</span><span class="p">:</span> <span class="n">i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">})</span>
+
+        <span class="c1"># Since no training will be done with this class, we should always</span>
+        <span class="c1"># clear the data at the end.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_data</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

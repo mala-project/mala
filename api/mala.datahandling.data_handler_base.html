@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>data_handler_base &mdash; Materials Learning Algorithms (MALA)  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/mala_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="data_repo" href="mala.datahandling.data_repo.html" />
+    <link rel="prev" title="data_handler" href="mala.datahandling.data_handler.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/mala_horizontal_white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mala.html">mala</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mala.common.html">common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.datageneration.html">datageneration</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mala.datahandling.html">datahandling</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_converter.html">data_converter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_handler.html">data_handler</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">data_handler_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_repo.html">data_repo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_scaler.html">data_scaler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.data_shuffler.html">data_shuffler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.fast_tensor_dataset.html">fast_tensor_dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset.html">lazy_load_dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.lazy_load_dataset_clustered.html">lazy_load_dataset_clustered</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mala.datahandling.snapshot.html">snapshot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mala.descriptors.html">descriptors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.interfaces.html">interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.network.html">network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.targets.html">targets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mala.version.html">version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CONTRIBUTE.html">Contributing to MALA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Materials Learning Algorithms (MALA)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">API reference</a> &raquo;</li>
+          <li><a href="mala.html">mala</a> &raquo;</li>
+          <li><a href="mala.datahandling.html">datahandling</a> &raquo;</li>
+      <li>data_handler_base</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com//mala-project/mala/blob/develop/docs/source/api/mala.datahandling.data_handler_base.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="module-mala.datahandling.data_handler_base">
+<span id="data-handler-base"></span><h1>data_handler_base<a class="headerlink" href="#module-mala.datahandling.data_handler_base" title="Permalink to this headline"></a></h1>
+<p>Base class for all data handling (loading, shuffling, etc.).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler_base.DataHandlerBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataHandlerBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><span class="pre">mala.common.parameters.Parameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptor_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler_base.html#DataHandlerBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler_base.DataHandlerBase" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Base class for all data handling (loading, shuffling, etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters</strong> (<a class="reference internal" href="mala.common.parameters.html#mala.common.parameters.Parameters" title="mala.common.parameters.Parameters"><em>mala.common.parameters.Parameters</em></a>) – Parameters used to create the data handling object.</p></li>
+<li><p><strong>descriptor_calculator</strong> (<a class="reference internal" href="mala.descriptors.descriptor.html#mala.descriptors.descriptor.Descriptor" title="mala.descriptors.descriptor.Descriptor"><em>mala.descriptors.descriptor.Descriptor</em></a>) – Used to do unit conversion on input data. If None, then one will
+be created by this class.</p></li>
+<li><p><strong>target_calculator</strong> (<a class="reference internal" href="mala.targets.target.html#mala.targets.target.Target" title="mala.targets.target.Target"><em>mala.targets.target.Target</em></a>) – Used to do unit conversion on output data. If None, then one will
+be created by this class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler_base.DataHandlerBase.add_snapshot">
+<span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_snapshot_as</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1/(eV*A^3)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculation_output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'numpy'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler_base.html#DataHandlerBase.add_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler_base.DataHandlerBase.add_snapshot" title="Permalink to this definition"></a></dt>
+<dd><p>Add a snapshot to the data pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>string</em>) – File with saved numpy input array.</p></li>
+<li><p><strong>input_directory</strong> (<em>string</em>) – Directory containing input_npy_directory.</p></li>
+<li><p><strong>output_file</strong> (<em>string</em>) – File with saved numpy output array.</p></li>
+<li><p><strong>output_directory</strong> (<em>string</em>) – Directory containing output_npy_file.</p></li>
+<li><p><strong>input_units</strong> (<em>string</em>) – Units of input data. See descriptor classes to see which units are
+supported.</p></li>
+<li><p><strong>output_units</strong> (<em>string</em>) – Units of output data. See target classes to see which units are
+supported.</p></li>
+<li><p><strong>calculation_output_file</strong> (<em>string</em>) – File with the output of the original snapshot calculation. This is
+only needed when testing multiple snapshots.</p></li>
+<li><p><strong>add_snapshot_as</strong> (<em>string</em>) – Must be “tr”, “va” or “te”, the snapshot will be added to the
+snapshot list as training, validation or testing snapshot,
+respectively.</p></li>
+<li><p><strong>snapshot_type</strong> (<em>string</em>) – Either “numpy” or “openpmd” based on what kind of files you
+want to operate on.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler_base.DataHandlerBase.clear_data">
+<span class="sig-name descname"><span class="pre">clear_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/datahandling/data_handler_base.html#DataHandlerBase.clear_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.datahandling.data_handler_base.DataHandlerBase.clear_data" title="Permalink to this definition"></a></dt>
+<dd><p>Reset the entire data pipeline.</p>
+<p>Useful when doing multiple investigations in the same python file.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler_base.DataHandlerBase.input_dimension">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_dimension</span></span><a class="headerlink" href="#mala.datahandling.data_handler_base.DataHandlerBase.input_dimension" title="Permalink to this definition"></a></dt>
+<dd><p>Feature dimension of input data.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mala.datahandling.data_handler_base.DataHandlerBase.output_dimension">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_dimension</span></span><a class="headerlink" href="#mala.datahandling.data_handler_base.DataHandlerBase.output_dimension" title="Permalink to this definition"></a></dt>
+<dd><p>Feature dimension of output data.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mala.datahandling.data_handler.html" class="btn btn-neutral float-left" title="data_handler" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mala.datahandling.data_repo.html" class="btn btn-neutral float-right" title="data_repo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 National Technology &amp; Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software. Attila Cangi, J. Austin Ellis, Lenz Fiedler, Daniel Kotik, Normand Modine, Sivasankaran Rajamanickam, Steve Schmerler, Aidan Thompson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
