@@ -126,6 +126,8 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         file_index : i
             File to be read.
         """
+        printout("LazyLoadDataset:get_new_data...", min_verbosity=2)
+        t0 = time.time()
         # Load the data into RAM.
         if self.snapshot_list[file_index].snapshot_type == "numpy":
             self.input_data = self.descriptor_calculator. \
@@ -153,7 +155,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.input_data = \
             self.input_data.reshape([self.snapshot_list[file_index].grid_size,
                                      self.input_dimension])
-        self.input_data = self.input_data.astype(np.float32)
+        self.input_data = self.input_data.astype(np.float32, copy=False)
         self.input_data = torch.from_numpy(self.input_data).float()
         self.input_data_scaler.transform(self.input_data)
         self.input_data.requires_grad = self.input_requires_grad
@@ -162,15 +164,18 @@ class LazyLoadDataset(torch.utils.data.Dataset):
             self.output_data.reshape([self.snapshot_list[file_index].grid_size,
                                       self.output_dimension])
         if self.return_outputs_directly is False:
-            self.output_data = np.array(self.output_data)
-            self.output_data = self.output_data.astype(np.float32)
+            #self.output_data = np.array(self.output_data)
+            self.output_data = self.output_data.astype(np.float32, copy=False)
             self.output_data = torch.from_numpy(self.output_data).float()
             self.output_data_scaler.transform(self.output_data)
 
         # Save which data we have currently loaded.
         self.currently_loaded_file = file_index
 
-    def _get_file_index(self, idx, is_slice=False, is_start=False):
+        t1 = time.time()
+        printout(f"LazyLoadDataset:get_new_data time {t1 - t0}", min_verbosity=2)
+
+    def _get_file_index(self, idx, is_slice=False):
         file_index = None
         index_in_file = idx
         if is_slice:

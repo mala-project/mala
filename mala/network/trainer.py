@@ -181,7 +181,7 @@ class Trainer(Runner):
                                         self.parameters.
                                         after_before_training_metric)
 
-        if self.data.test_data_set is not None:
+        if self.data.test_data_sets:
             tloss = self.__validate_network(self.network,
                                             "test",
                                             self.parameters.
@@ -197,7 +197,7 @@ class Trainer(Runner):
 
         printout("Initial Guess - validation data loss: ", vloss,
                  min_verbosity=1)
-        if self.data.test_data_set is not None:
+        if self.data.test_data_sets:
             printout("Initial Guess - test data loss: ", tloss,
                      min_verbosity=1)
 
@@ -233,67 +233,69 @@ class Trainer(Runner):
                 self.train_sampler.set_epoch(epoch)
 
             # shuffle dataset if necessary
-            if isinstance(self.data.training_data_set, FastTensorDataset):
-                self.data.training_data_set.shuffle()
+            if isinstance(self.data.training_data_sets[0], FastTensorDataset):
+                self.data.training_data_sets[0].shuffle()
 
             if self.parameters._configuration["gpu"]:
                 torch.cuda.synchronize()
                 tsample = time.time()
                 t0 = time.time()
-                for batchid, (inputs, outputs) in \
-                        enumerate(self.training_data_loader):
+                batchid = 0
+                for loader in self.training_data_loaders:
+                    for (inputs, outputs) in loader:
 
-                    if batchid == self.parameters.profiler_range[0]:
-                        torch.cuda.profiler.start()
-                    if batchid == self.parameters.profiler_range[1]:
-                        torch.cuda.profiler.stop()
+                        if batchid == self.parameters.profiler_range[0]:
+                            torch.cuda.profiler.start()
+                        if batchid == self.parameters.profiler_range[1]:
+                            torch.cuda.profiler.stop()
 
-                    torch.cuda.nvtx.range_push(f"step {batchid}")
+                        torch.cuda.nvtx.range_push(f"step {batchid}")
 
-                    torch.cuda.nvtx.range_push("data copy in")
-                    inputs = inputs.to(self.parameters._configuration["device"],
-                                       non_blocking=True)
-                    outputs = outputs.to(self.parameters._configuration["device"],
-                                         non_blocking=True)
-                    # data copy in
-                    torch.cuda.nvtx.range_pop()
+                        torch.cuda.nvtx.range_push("data copy in")
+                        inputs = inputs.to(self.parameters._configuration["device"],
+                                           non_blocking=True)
+                        outputs = outputs.to(self.parameters._configuration["device"],
+                                             non_blocking=True)
+                        # data copy in
+                        torch.cuda.nvtx.range_pop()
 
-                    loss = self.__process_mini_batch(self.network,
-                                                     inputs,
-                                                     outputs)
-                    # step
-                    torch.cuda.nvtx.range_pop()
-                    training_loss_sum += loss
+                        loss = self.__process_mini_batch(self.network,
+                                                         inputs,
+                                                         outputs)
+                        # step
+                        torch.cuda.nvtx.range_pop()
+                        training_loss_sum += loss
 
-                    if batchid != 0 and (batchid + 1) % self.parameters.training_report_frequency == 0:
-                        torch.cuda.synchronize()
-                        sample_time = time.time() - tsample
-                        avg_sample_time = sample_time / self.parameters.training_report_frequency
-                        avg_sample_tput = self.parameters.training_report_frequency * inputs.shape[0] / sample_time
-                        printout(f"batch {batchid + 1}/{len(self.training_data_loader)}, "
-                                 f"train avg time: {avg_sample_time} "
-                                 f"train avg throughput: {avg_sample_tput}",
-                                 min_verbosity=2)
-                        tsample = time.time()
+                        if batchid != 0 and (batchid + 1) % self.parameters.training_report_frequency == 0:
+                            torch.cuda.synchronize()
+                            sample_time = time.time() - tsample
+                            avg_sample_time = sample_time / self.parameters.training_report_frequency
+                            avg_sample_tput = self.parameters.training_report_frequency * inputs.shape[0] / sample_time
+                            printout(f"batch {batchid + 1}, "#/{total_samples}, "
+                                     f"train avg time: {avg_sample_time} "
+                                     f"train avg throughput: {avg_sample_tput}",
+                                     min_verbosity=2)
+                            tsample = time.time()
+                        batchid += 1
                 torch.cuda.synchronize()
                 t1 = time.time()
                 printout(f"training time: {t1 - t0}", min_verbosity=2)
 
-                training_loss = training_loss_sum.item() / \
-                                len(self.training_data_loader)
+                training_loss = training_loss_sum.item() / batchid
 
                 # Calculate the validation loss. and output it.
                 torch.cuda.synchronize()
             else:
-                for batchid, (inputs, outputs) in \
-                        enumerate(self.training_data_loader):
-                    inputs = inputs.to(
-                        self.parameters._configuration["device"])
-                    outputs = outputs.to(
-                        self.parameters._configuration["device"])
-                    training_loss_sum += self.__process_mini_batch(self.network, inputs, outputs)
-                training_loss = training_loss_sum.item() / \
-                                len(self.training_data_loader)
+                batchid = 0
+                for loader in self.training_data_loaders:
+                    for (inputs, outputs) in loader:
+                        inputs = inputs.to(
+                            self.parameters._configuration["device"])
+                        outputs = outputs.to(
+                            self.parameters._configuration["device"])
+                        training_loss_sum += self.__process_mini_batch(self.network, inputs, outputs)
+                        batchid += 1
+                training_loss = training_loss_sum.item() / batchid
 
             t0 = time.time()
             vloss = self.__validate_network(self.network,
@@ -480,20 +482,20 @@ class Trainer(Runner):
                 do_shuffle = False
 
             self.train_sampler = torch.utils.data.\
-                distributed.DistributedSampler(self.data.training_data_set,
+                distributed.DistributedSampler(self.data.training_data_sets[0],
                                                num_replicas=hvd.size(),
                                                rank=hvd.rank(),
                                                shuffle=do_shuffle)
 
             self.validation_sampler = torch.utils.data.\
-                distributed.DistributedSampler(self.data.validation_data_set,
+                distributed.DistributedSampler(self.data.validation_data_sets[0],
                                                num_replicas=hvd.size(),
                                                rank=hvd.rank(),
                                                shuffle=False)
 
-            if self.data.test_data_set is not None:
+            if self.data.test_data_sets:
                 self.test_sampler = torch.utils.data.\
-                    distributed.DistributedSampler(self.data.test_data_set,
+                    distributed.DistributedSampler(self.data.test_data_sets[0],
                                                    num_replicas=hvd.size(),
                                                    rank=hvd.rank(),
                                                    shuffle=False)
@@ -540,42 +542,51 @@ class Trainer(Runner):
             do_shuffle = False
 
         # Prepare data loaders.(look into mini-batch size)
-        if isinstance(self.data.training_data_set, FastTensorDataset):
+        if isinstance(self.data.training_data_sets[0], FastTensorDataset):
             # Not shuffling in loader.
             # I manually shuffle the data set each epoch.
-            self.training_data_loader = DataLoader(self.data.training_data_set,
-                                                   batch_size=None,
-                                                   sampler=self.train_sampler,
-                                                   **kwargs,
-                                                   shuffle=False)
+            self.training_data_loaders.append(DataLoader(self.data.training_data_sets[0],
+                                                         batch_size=None,
+                                                         sampler=self.train_sampler,
+                                                         **kwargs,
+                                                         shuffle=False))
         else:
-            self.training_data_loader = DataLoader(self.data.training_data_set,
-                                                   batch_size=self.parameters.
-                                                   mini_batch_size,
-                                                   sampler=self.train_sampler,
-                                                   **kwargs,
-                                                   shuffle=do_shuffle)
+            if isinstance(self.data.training_data_sets[0], LazyLoadDatasetSingle):
+                self.training_data_loaders = MultiLazyLoadDataLoader(self.data.training_data_sets, **kwargs)
+            else:
+                self.training_data_loaders.append(DataLoader(self.data.training_data_sets[0],
+                                                             batch_size=self.parameters.
+                                                             mini_batch_size,
+                                                             sampler=self.train_sampler,
+                                                             **kwargs,
+                                                             shuffle=do_shuffle))
 
-        if isinstance(self.data.validation_data_set, FastTensorDataset):
-            self.validation_data_loader = DataLoader(self.data.validation_data_set,
-                                                     batch_size=None,
-                                                     sampler=
-                                                     self.validation_sampler,
-                                                     **kwargs)
+        if isinstance(self.data.validation_data_sets[0], FastTensorDataset):
+            self.validation_data_loaders.append(DataLoader(self.data.validation_data_sets[0],
+                                                           batch_size=None,
+                                                           sampler=
+                                                           self.validation_sampler,
+                                                           **kwargs))
         else:
-            self.validation_data_loader = DataLoader(self.data.validation_data_set,
-                                                     batch_size=self.parameters.
-                                                     mini_batch_size * 1,
-                                                     sampler=
-                                                     self.validation_sampler,
-                                                     **kwargs)
+            if isinstance(self.data.validation_data_sets[0], LazyLoadDatasetSingle):
+                self.validation_data_loaders = MultiLazyLoadDataLoader(self.data.validation_data_sets, **kwargs)
+            else:
+                self.validation_data_loaders.append(DataLoader(self.data.validation_data_sets[0],
+                                                               batch_size=self.parameters.
+                                                               mini_batch_size * 1,
+                                                               sampler=
+                                                               self.validation_sampler,
+                                                               **kwargs))
 
-        if self.data.test_data_set is not None:
-            self.test_data_loader = DataLoader(self.data.test_data_set,
-                                               batch_size=self.parameters.
-                                               mini_batch_size * 1,
-                                               sampler=self.test_sampler,
-                                               **kwargs)
+        if self.data.test_data_sets:
+            if isinstance(self.data.test_data_sets[0], LazyLoadDatasetSingle):
+                self.test_data_loaders = MultiLazyLoadDataLoader(self.data.test_data_sets, **kwargs)
+            else:
+                self.test_data_loaders.append(DataLoader(self.data.test_data_sets[0],
+                                                         batch_size=self.parameters.
+                                                         mini_batch_size * 1,
+                                                         sampler=self.test_sampler,
+                                                         **kwargs))
 
     def __process_mini_batch(self, network, input_data, target_data):
         """Process a mini batch."""
@@ -666,15 +677,15 @@ class Trainer(Runner):
     def __validate_network(self, network, data_set_type, validation_type):
         """Validate a network, using test or validation data."""
         if data_set_type == "test":
-            data_loader = self.test_data_loader
-            data_set = self.data.test_data_set
+            data_loaders = self.test_data_loaders
+            data_sets = self.data.test_data_sets
             number_of_snapshots = self.data.nr_test_snapshots
             offset_snapshots = self.data.nr_validation_snapshots + \
                                self.data.nr_training_snapshots
 
         elif data_set_type == "validation":
-            data_loader = self.validation_data_loader
-            data_set = self.data.validation_data_set
+            data_loaders = self.validation_data_loaders
+            data_sets = self.data.validation_data_sets
             number_of_snapshots = self.data.nr_validation_snapshots
             offset_snapshots = self.data.nr_training_snapshots
 
@@ -690,65 +701,71 @@ class Trainer(Runner):
                     report_freq = self.parameters.training_report_frequency
                     torch.cuda.synchronize()
                     tsample = time.time()
-                    for batchid, (x, y) in enumerate(data_loader):
-                        x = x.to(self.parameters._configuration["device"],
-                                 non_blocking=True)
-                        y = y.to(self.parameters._configuration["device"],
-                                 non_blocking=True)
+                    batchid = 0
+                    for loader in data_loaders:
+                        for (x, y) in loader:
+                            x = x.to(self.parameters._configuration["device"],
+                                     non_blocking=True)
+                            y = y.to(self.parameters._configuration["device"],
+                                     non_blocking=True)
 
-                        if self.parameters.use_graphs and self.validation_graph is None:
-                            printout("Capturing CUDA graph for validation.", min_verbosity=2)
-                            s = torch.cuda.Stream()
-                            s.wait_stream(torch.cuda.current_stream())
-                            # Warmup for graphs
-                            with torch.cuda.stream(s):
-                                for _ in range(20):
+                            if self.parameters.use_graphs and self.validation_graph is None:
+                                printout("Capturing CUDA graph for validation.", min_verbosity=2)
+                                s = torch.cuda.Stream()
+                                s.wait_stream(torch.cuda.current_stream())
+                                # Warmup for graphs
+                                with torch.cuda.stream(s):
+                                    for _ in range(20):
+                                        with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
+                                            prediction = network(x)
+                                            loss = network.calculate_loss(prediction, y)
+                                torch.cuda.current_stream().wait_stream(s)
+
+                                # Create static entry point tensors to graph
+                                self.static_input_validation = torch.empty_like(x)
+                                self.static_target_validation = torch.empty_like(y)
+
+                                # Capture graph
+                                self.validation_graph = torch.cuda.CUDAGraph()
+                                with torch.cuda.graph(self.validation_graph):
                                     with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
-                                        prediction = network(x)
-                                        loss = network.calculate_loss(prediction, y)
-                            torch.cuda.current_stream().wait_stream(s)
+                                        self.static_prediction_validation = network(self.static_input_validation)
+                                        self.static_loss_validation = network.calculate_loss(self.static_prediction_validation, self.static_target_validation)
 
-                            # Create static entry point tensors to graph
-                            self.static_input_validation = torch.empty_like(x)
-                            self.static_target_validation = torch.empty_like(y)
-
-                            # Capture graph
-                            self.validation_graph = torch.cuda.CUDAGraph()
-                            with torch.cuda.graph(self.validation_graph):
+                            if self.validation_graph:
+                                self.static_input_validation.copy_(x)
+                                self.static_target_validation.copy_(y)
+                                self.validation_graph.replay()
+                                validation_loss_sum += self.static_loss_validation
+                            else:
                                 with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
-                                    self.static_prediction_validation = network(self.static_input_validation)
-                                    self.static_loss_validation = network.calculate_loss(self.static_prediction_validation, self.static_target_validation)
-
-                        if self.validation_graph:
-                            self.static_input_validation.copy_(x)
-                            self.static_target_validation.copy_(y)
-                            self.validation_graph.replay()
-                            validation_loss_sum += self.static_loss_validation
-                        else:
-                            with torch.cuda.amp.autocast(enabled=self.parameters.use_mixed_precision):
-                                prediction = network(x)
-                                loss = network.calculate_loss(prediction, y)
-                                validation_loss_sum += loss
-                        if batchid != 0 and (batchid + 1) % report_freq == 0:
-                            torch.cuda.synchronize()
-                            sample_time = time.time() - tsample
-                            avg_sample_time = sample_time / report_freq
-                            avg_sample_tput = report_freq * x.shape[0] / sample_time
-                            printout(f"batch {batchid + 1}/{len(data_loader)}, "
-                                     f"validation avg time: {avg_sample_time} "
-                                     f"validation avg throughput: {avg_sample_tput}",
-                                     min_verbosity=2)
-                            tsample = time.time()
+                                    prediction = network(x)
+                                    loss = network.calculate_loss(prediction, y)
+                                    validation_loss_sum += loss
+                            if batchid != 0 and (batchid + 1) % report_freq == 0:
+                                torch.cuda.synchronize()
+                                sample_time = time.time() - tsample
+                                avg_sample_time = sample_time / report_freq
+                                avg_sample_tput = report_freq * x.shape[0] / sample_time
+                                printout(f"batch {batchid + 1}, " #/{total_samples}, "
+                                         f"validation avg time: {avg_sample_time} "
+                                         f"validation avg throughput: {avg_sample_tput}",
+                                         min_verbosity=2)
+                                tsample = time.time()
+                            batchid += 1
                     torch.cuda.synchronize()
                 else:
-                    for x, y in data_loader:
-                        x = x.to(self.parameters._configuration["device"])
-                        y = y.to(self.parameters._configuration["device"])
-                        prediction = network(x)
-                        validation_loss_sum += \
-                            network.calculate_loss(prediction, y).item()
+                    batchid = 0
+                    for loader in data_loaders:
+                        for (x, y) in loader:
+                            x = x.to(self.parameters._configuration["device"])
+                            y = y.to(self.parameters._configuration["device"])
+                            prediction = network(x)
+                            validation_loss_sum += \
+                                network.calculate_loss(prediction, y).item()
+                            batchid += 1
 
-            validation_loss = validation_loss_sum.item() / len(data_loader)
+            validation_loss = validation_loss_sum.item() / batchid
             return validation_loss
         elif validation_type == "band_energy":
             errors = []
@@ -768,7 +785,7 @@ class Trainer(Runner):
                 actual_outputs, \
                 predicted_outputs = self.\
                     _forward_entire_snapshot(snapshot_number,
-                                             data_set, data_set_type[0:2],
+                                             data_set, data_set_type,
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)
                 calculator = self.data.target_calculator

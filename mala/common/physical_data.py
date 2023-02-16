@@ -230,6 +230,18 @@ class PhysicalData(ABC):
         loaded_array = np.load(path, mmap_mode="r")
         return self._process_loaded_dimensions(np.shape(loaded_array))
 
+    def read_dimensions_and_dtype_from_numpy_file(self, path):
+        """
+        Read only the dimensions and dtype from a numpy file.
+
+        Parameters
+        ----------
+        path : string
+            Path to the numpy file.
+        """
+        loaded_array = np.load(path, mmap_mode="r")
+        return self._process_loaded_dimensions(np.shape(loaded_array)), loaded_array.dtype
+
     def read_dimensions_from_openpmd_file(self, path):
         """
         Read only the dimensions from a openPMD file.
