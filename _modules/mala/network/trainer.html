@@ -174,11 +174,11 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        checkpoint_name : string</span>
+<span class="sd">        run_name : string</span>
 <span class="sd">            Name of the checkpoint.</span>
 
-<span class="sd">        use_pkl_checkpoints : bool</span>
-<span class="sd">            If true, .pkl checkpoints will be loaded.</span>
+<span class="sd">        params_format : bool</span>
+<span class="sd">            Save format of the parameters.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -198,6 +198,16 @@
                                             <span class="n">param_name</span><span class="p">,</span>
                                             <span class="n">network_name</span><span class="p">,</span> <span class="n">optimizer_name</span><span class="p">]))</span></div>
 
+<div class="viewcode-block" id="Trainer.load_run"><a class="viewcode-back" href="../../../api/mala.network.trainer.html#mala.network.trainer.Trainer.load_run">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span> <span class="n">zip_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">params_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">load_runner</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">prepare_data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Trainer</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">load_run</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+                                            <span class="n">zip_run</span><span class="o">=</span><span class="n">zip_run</span><span class="p">,</span>
+                                            <span class="n">params_format</span><span class="o">=</span><span class="n">params_format</span><span class="p">,</span>
+                                            <span class="n">load_runner</span><span class="o">=</span><span class="n">load_runner</span><span class="p">,</span>
+                                            <span class="n">prepare_data</span><span class="o">=</span><span class="n">prepare_data</span><span class="p">)</span></div>
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_load_from_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -209,7 +219,7 @@
 <span class="sd">            Parameters object with which the trainer should be created.</span>
 <span class="sd">            Has to be compatible with network and data.</span>
 
-<span class="sd">        file_path : string</span>
+<span class="sd">        file : string</span>
 <span class="sd">            Path to the file from which the trainer should be loaded.</span>
 
 <span class="sd">        network : mala.network.network.Network</span>

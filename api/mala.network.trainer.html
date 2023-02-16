@@ -128,6 +128,37 @@
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="mala.network.trainer.Trainer.load_run">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_runner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.load_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer.load_run" title="Permalink to this definition"></a></dt>
+<dd><p>Load a run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>run_name</strong> (<em>str</em>) – Name under which the run is saved.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path where the run is saved.</p></li>
+<li><p><strong>zip_run</strong> (<em>bool</em>) – If True, MALA will attempt to load from a .zip file. If False,
+then separate files will be attempted to be loaded.</p></li>
+<li><p><strong>params_format</strong> (<em>str</em>) – Can be “json” or “pkl”, depending on what was saved by the model.
+Default is “json”.</p></li>
+<li><p><strong>load_runner</strong> (<em>bool</em>) – If True, a Runner object will be created/loaded for further use.</p></li>
+<li><p><strong>prepare_data</strong> (<em>bool</em>) – If True, the data will be loaded into memory. This is needed when
+continuing a model training.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>loaded_params</strong> (<em>mala.common.parameters.Parameters</em>) – The Parameters saved to file.</p></li>
+<li><p><strong>loaded_network</strong> (<em>mala.network.network.Network</em>) – The network saved to file.</p></li>
+<li><p><strong>new_datahandler</strong> (<em>mala.datahandling.data_handler.DataHandler</em>) – The data handler reconstructed from file.</p></li>
+<li><p><strong>new_runner</strong> (<em>Runner</em>) – (Optional) The runner reconstructed from file. For Tester and
+Predictor class, this is just a newly instantiated object.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mala.network.trainer.Trainer.run_exists">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/trainer.html#Trainer.run_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.trainer.Trainer.run_exists" title="Permalink to this definition"></a></dt>
 <dd><p>Check if a hyperparameter optimization checkpoint exists.</p>
@@ -135,8 +166,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>checkpoint_name</strong> (<em>string</em>) – Name of the checkpoint.</p></li>
-<li><p><strong>use_pkl_checkpoints</strong> (<em>bool</em>) – If true, .pkl checkpoints will be loaded.</p></li>
+<li><p><strong>run_name</strong> (<em>string</em>) – Name of the checkpoint.</p></li>
+<li><p><strong>params_format</strong> (<em>bool</em>) – Save format of the parameters.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
