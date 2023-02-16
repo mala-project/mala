@@ -101,11 +101,11 @@ class Trainer(Runner):
 
         Parameters
         ----------
-        checkpoint_name : string
+        run_name : string
             Name of the checkpoint.
 
-        use_pkl_checkpoints : bool
-            If true, .pkl checkpoints will be loaded.
+        params_format : bool
+            Save format of the parameters.
 
         Returns
         -------
@@ -126,6 +126,16 @@ class Trainer(Runner):
                                             network_name, optimizer_name]))
 
     @classmethod
+    def load_run(cls, run_name, path="./", zip_run=True,
+                 params_format="json", load_runner=True,
+                 prepare_data=True):
+        return super(Trainer, cls).load_run(run_name, path=path,
+                                            zip_run=zip_run,
+                                            params_format=params_format,
+                                            load_runner=load_runner,
+                                            prepare_data=prepare_data)
+
+    @classmethod
     def _load_from_run(cls, params, network, data, file=None):
         """
         Load a trainer from a file.
@@ -136,7 +146,7 @@ class Trainer(Runner):
             Parameters object with which the trainer should be created.
             Has to be compatible with network and data.
 
-        file_path : string
+        file : string
             Path to the file from which the trainer should be loaded.
 
         network : mala.network.network.Network

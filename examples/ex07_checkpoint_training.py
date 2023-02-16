@@ -88,7 +88,7 @@ def initial_setup():
 def run_example07(desired_loss_improvement_factor=1):
     if mala.Trainer.run_exists("ex07"):
         parameters, network, datahandler, trainer = \
-            mala.Trainer.load_run("ex07", prepare_data=True)
+            mala.Trainer.load_run("ex07")
         printout("Starting resumed training.")
     else:
         parameters, network, datahandler, trainer = initial_setup()
