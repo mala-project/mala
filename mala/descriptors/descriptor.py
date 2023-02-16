@@ -515,10 +515,6 @@ class Descriptor(PhysicalData):
             # be 1x{ny}x{nz} need to configure separate total_energy_module
             # with nyfft enabled
             if self.parameters.use_y_splitting > 1:
-                # TODO automatically pass nyfft into QE from MALA
-                # if more processors thatn y*z grid dimensions requested
-                # send error. More processors than y*z grid dimensions reduces
-                # efficiency and scaling of QE.
                 nyfft = self.parameters.use_y_splitting
                 # number of y processors is equal to nyfft
                 yprocs = nyfft
@@ -561,17 +557,20 @@ class Descriptor(PhysicalData):
                 else:
                     # account for remainder with uneven number of
                     # planes/processors
-                    ycut = 1/yprocs
-                    yrem = ny - (yprocs*int(ny/yprocs))
+                    ycut = 1 / ny
+                    yrem = ny - (yprocs * int(ny / yprocs))
                     yint = ''
                     for i in range(0, yrem):
-                        yvals = (((i+1)*2)*ycut)-0.00000001
+                        yvals = (((i + 1) * (
+                                int(ny / yprocs) + 1)) * ycut) - 0.00000001
                         yint += format(yvals, ".8f")
                         yint += ' '
-                    for i in range(yrem, yprocs-1):
-                        yvals = ((i+1+yrem)*ycut)-0.00000001
+                    for i in range(yrem, yprocs - 1):
+                        yvals = (((i + 1) * int(
+                            ny / yprocs) + yrem) * ycut) - 0.00000001
                         yint += format(yvals, ".8f")
                         yint += ' '
+
                 # prepare z plane cuts for balance command in lammps
                 if int(nz / zprocs) == (nz / zprocs):
                     zcut = 1/nz
@@ -581,23 +580,15 @@ class Descriptor(PhysicalData):
                         zint += format(zvals, ".8f")
                         zint += ' '
                 else:
-                    # account for remainder with uneven number of
-                    # planes/processors
+                    # If I (LF) am correct, this should never happen,
+                    # since the remainders get offloaded to the y-dimension,
+                    # right?
+                    # If not, we need to implement the code from below here
+                    # again.
                     raise ValueError("Cannot divide z-planes on processors"
                                      " without remainder. "
                                      "This is currently unsupported.")
 
-                    # zcut = 1/nz
-                    # zrem = nz - (zprocs*int(nz/zprocs))
-                    # zint = ''
-                    # for i in range(0, zrem):
-                    #     zvals = (((i+1)*2)*zcut)-0.00000001
-                    #     zint += format(zvals, ".8f")
-                    #     zint += ' '
-                    # for i in range(zrem, zprocs-1):
-                    #     zvals = ((i+1+zrem)*zcut)-0.00000001
-                    #     zint += format(zvals, ".8f")
-                    #     zint += ' '
                 lammps_dict = {"lammps_procs": f"processors {lammps_procs} "
                                                f"map xyz",
                                "zbal": f"balance 1.0 y {yint} z {zint}",

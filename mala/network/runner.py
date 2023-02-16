@@ -306,7 +306,7 @@ class Runner:
         data_per_snapshot / batch_size will result in an integer division
         without any residual value.
         """
-        new_batch_size = batchsize
+        new_batch_size = min(batchsize, datasize)
         if datasize % new_batch_size != 0:
             while datasize % new_batch_size != 0:
                 new_batch_size += 1
