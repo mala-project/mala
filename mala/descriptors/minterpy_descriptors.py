@@ -14,6 +14,7 @@ try:
 except ModuleNotFoundError:
     pass
 import numpy as np
+import minterpy as mp
 
 from mala.descriptors.lammps_utils import set_cmdlinevars, extract_compute_np
 from mala.descriptors.descriptor import Descriptor
@@ -120,7 +121,29 @@ class MinterpyDescriptors(Descriptor):
         # first grid point - for now just assume 0.0, 0.0, 0.0.
         # That is correct in 99% of the cases I am aware of, and once
         # we have a working implementation we can test and refine this.
-        first_grid_point = [0.0, 0.0, 0.0]
+        # first_grid_point = [0.0, 0.0, 0.0]
+
+        # Get the unisolvent nodes.
+        unisolvent_nodes = self._build_unisolvent_nodes()
+
+        # Transform the unisolvent nodes into cartesian coordinates by assuming
+        # small cubes around the grid points. Currently only works for cubic
+        # cells.
+        self.parameters.minterpy_point_list = []
+        local_cube = atoms.cell.copy()
+        local_cube[0] = local_cube[0] * (self.parameters.
+                                         minterpy_cutoff_cube_size /
+                                         local_cube[0][0])
+        local_cube[1] = local_cube[1] * (self.parameters.
+                                         minterpy_cutoff_cube_size /
+                                         local_cube[0][0])
+        local_cube[2] = local_cube[2] * (self.parameters.
+                                         minterpy_cutoff_cube_size /
+                                         local_cube[0][0])
+        for i in range(np.shape(unisolvent_nodes)[0]):
+            self.parameters.\
+                minterpy_point_list.\
+                append(np.matmul(local_cube, unisolvent_nodes[i]))
 
         # Perform one LAMMPS call for each point in the Minterpy point list.
         for idx, point in enumerate(self.parameters.minterpy_point_list):
@@ -193,3 +216,25 @@ class MinterpyDescriptors(Descriptor):
                 gaussian_descriptors_np[:, :, :, 6:]
 
         return minterpy_descriptors_np, nx * ny * nz
+
+    def _build_unisolvent_nodes(self, dimension=3):
+        """
+        Build the unisolvent nodes
+
+        Parameters
+        ----------
+        dimension : int
+            Dimension of data (should always be 3 for 3D in our case).
+
+        Returns
+        -------
+        nodes : numpy.array
+            Two-dimensional array containing the nodes.
+        """
+        # Calculate the unisolvent nodes.
+        mi = mp.MultiIndexSet.from_degree(spatial_dimension=dimension,
+                                          poly_degree=self.parameters.minterpy_polynomial_degree,
+                                          lp_degree=self.parameters.minterpy_lp_norm)
+        unisolvent_nodes = mp.Grid(mi).unisolvent_nodes
+        return unisolvent_nodes
+
