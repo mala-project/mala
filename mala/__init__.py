@@ -11,8 +11,6 @@ from .descriptors import Bispectrum, Descriptor, AtomicDensity, \
     MinterpyDescriptors
 from .datahandling import DataHandler, DataScaler, DataConverter, Snapshot, \
     DataShuffler
-from .descriptors import Bispectrum, Descriptor, AtomicDensity, \
-
 from .datahandling import DataHandler, DataScaler, DataConverter, Snapshot
 from .network import Network, Tester, Trainer, HyperOpt, \
     HyperOptOptuna, HyperOptNASWOT, HyperOptOAT, Predictor, \
