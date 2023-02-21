@@ -51,7 +51,8 @@ class ACSDAnalyzer(HyperOpt):
         if self.descriptor_calculator is None:
             self.descriptor_calculator = Descriptor(params)
         if not isinstance(self.descriptor_calculator, Bispectrum) and \
-           not isinstance(self.descriptor_calculator, AtomicDensity):
+           not isinstance(self.descriptor_calculator, AtomicDensity) and \
+           not isinstance(self.descriptor_calculator, MinterpyDescriptors):
             raise Exception("Cannot calculate ACSD for the selected "
                             "descriptors.")
 
@@ -286,7 +287,7 @@ class ACSDAnalyzer(HyperOpt):
                     printout("Atomic density cutoff: ", self.params.descriptors.
                              atomic_density_cutoff)
             elif len(self.internal_hyperparam_list) == 5:
-                if isinstance(self.descriptor_calculator, Bispectrum):
+                if isinstance(self.descriptor_calculator, MinterpyDescriptors):
                     self.params.descriptors.atomic_density_cutoff = minimum_acsd[0]
                     self.params.descriptors.atomic_density_sigma = minimum_acsd[1]
                     self.params.descriptors.minterpy_cutoff_cube_size = minimum_acsd[2]

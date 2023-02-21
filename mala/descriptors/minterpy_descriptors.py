@@ -39,6 +39,11 @@ class MinterpyDescriptors(Descriptor):
         """Get a string that describes the target (for e.g. metadata)."""
         return "Minterpy"
 
+    @property
+    def feature_size(self):
+        """Get the feature dimension of this data."""
+        return self.fingerprint_length
+
     @staticmethod
     def convert_units(array, in_units="None"):
         """
@@ -145,6 +150,7 @@ class MinterpyDescriptors(Descriptor):
                 minterpy_point_list.\
                 append(np.matmul(local_cube, unisolvent_nodes[i]))
 
+        self.fingerprint_length = len(self.parameters.minterpy_point_list)
         # Perform one LAMMPS call for each point in the Minterpy point list.
         for idx, point in enumerate(self.parameters.minterpy_point_list):
             # Shift the atoms in negative direction of the point(s) we actually
