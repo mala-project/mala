@@ -4,10 +4,10 @@ import mala
 from mala import printout
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36")
+data_path = os.path.join(data_repo_path, "Be2")
 
 """
-ex01_run_singleshot.py: Shows how a neural network can be trained on material
+ex01_train_network.py: Shows how a neural network can be trained on material
 data using this framework. It uses preprocessed data, that is read in
 from *.npy files.
 """
@@ -33,11 +33,11 @@ test_parameters.data.output_rescaling_type = "normal"
 test_parameters.network.layer_activations = ["ReLU"]
 
 # Specify the training parameters.
-test_parameters.running.max_number_epochs = 20
+test_parameters.running.max_number_epochs = 100
 test_parameters.running.mini_batch_size = 40
 test_parameters.running.learning_rate = 0.00001
 test_parameters.running.trainingtype = "Adam"
-test_parameters.verbosity = 0
+test_parameters.verbosity = 1
 
 ####################
 # DATA
@@ -47,15 +47,10 @@ test_parameters.verbosity = 0
 data_handler = mala.DataHandler(test_parameters)
 
 # Add a snapshot we want to use in to the list.
-data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                          "Al_debug_2k_nr0.out.npy", data_path, "tr",
-                          output_units="1/(Ry*Bohr^3)")
-data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                          "Al_debug_2k_nr1.out.npy", data_path, "va",
-                          output_units="1/(Ry*Bohr^3)")
-data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                          "Al_debug_2k_nr2.out.npy", data_path, "te",
-                          output_units="1/(Ry*Bohr^3)")
+data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                          "Be_snapshot0.out.npy", data_path, "tr")
+data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                          "Be_snapshot1.out.npy", data_path, "va")
 data_handler.prepare_data()
 printout("Read data: DONE.")
 
@@ -66,9 +61,9 @@ printout("Read data: DONE.")
 # but it is safer this way.
 ####################
 
-test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),
+test_parameters.network.layer_sizes = [data_handler.input_dimension,
                                        100,
-                                       data_handler.get_output_dimension()]
+                                       data_handler.output_dimension]
 
 # Setup network and trainer.
 test_network = mala.Network(test_parameters)
@@ -77,11 +72,12 @@ printout("Network setup: DONE.")
 
 ####################
 # TRAINING
-# Train the network.
+# Train the network and save it afterwards.
 ####################
 
 printout("Starting training.")
 test_trainer.train_network()
+test_trainer.save_run("be_model")
 printout("Training: DONE.")
 
 ####################

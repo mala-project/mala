@@ -35,6 +35,11 @@ class Bispectrum(Descriptor):
         """Get a string that describes the target (for e.g. metadata)."""
         return "Bispectrum"
 
+    @property
+    def feature_size(self):
+        """Get the feature dimension of this data."""
+        return self.fingerprint_length
+
     @staticmethod
     def convert_units(array, in_units="None"):
         """

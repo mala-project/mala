@@ -1,10 +1,10 @@
 """Hyperparameter to use with optuna."""
 from optuna.trial import Trial
 
-from mala.common.json_serializable import JSONSerializable
+from mala.network.hyperparameter import Hyperparameter
 
 
-class HyperparameterOptuna(JSONSerializable):
+class HyperparameterOptuna(Hyperparameter):
     """Represents an optuna parameter.
 
     Parameters
@@ -36,13 +36,12 @@ class HyperparameterOptuna(JSONSerializable):
         List of possible choices (for categorical parameter).
     """
 
-    def __init__(self, opttype="float", name="", low=0, high=0, choices=None):
-        super(HyperparameterOptuna, self).__init__()
-        self.name = name
-        self.high = high
-        self.low = low
-        self.opttype = opttype
-        self.choices = choices
+    def __init__(self, hotype=None, opttype="float", name="", low=0, high=0, choices=None):
+        super(HyperparameterOptuna, self).__init__(opttype=opttype,
+                                                   name=name,
+                                                   low=low,
+                                                   high=high,
+                                                   choices=choices)
 
         # For now, only three types of hyperparameters are allowed:
         # Lists, floats and ints.

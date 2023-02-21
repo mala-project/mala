@@ -6,9 +6,9 @@ import numpy as np
 
 from mala.datahandling.data_repo import data_repo_path
 density_path = os.path.join(os.path.join(data_repo_path, "Be2"),
-                          "Be_dens.npy")
+                          "Be_snapshot0.dens.npy")
 atoms_path = os.path.join(os.path.join(data_repo_path, "Be2"),
-                          "Be.pw.scf.out")
+                          "Be_snapshot0.out")
 """
 ex17_visualize_electronic_structure.py : Show how MALA can output
 prediction results in a file format that can be processed by electronic 
@@ -30,10 +30,10 @@ density = np.reshape(density, [np.prod(grid_dimensions), 1])
 atoms = read(atoms_path)
 params = mala.Parameters()
 density_calculator = mala.Density(params)
-density_calculator.read_additional_calculation_data("atoms+grid", [atoms, grid_dimensions])
+density_calculator.read_additional_calculation_data([atoms, grid_dimensions])
 
 # The resulting cube file can be opened by e.g. VMD, VESTA or scenery.
-density_calculator.write_as_cube("Be_dens.cube", density, atoms, grid_dimensions)
+density_calculator.write_to_cube("Be_dens.cube", density, atoms, grid_dimensions)
 
 # Writing of a file for OpenPMD requires reshaping.
 # OpenPMD will become the interface for Unity visualization.

@@ -8,7 +8,7 @@ import torch
 import pytest
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36")
+data_path = os.path.join(data_repo_path, "Be2")
 
 # This test compares the data scaling using the regular scaling procedure and
 # the lazy-loading one (incremental fitting).
@@ -67,26 +67,21 @@ class TestLazyLoading:
                 test_parameters.data.output_rescaling_type = scalingtype
                 data_handler = DataHandler(test_parameters)
                 data_handler.clear_data()
-                data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                                          "Al_debug_2k_nr0.out.npy", data_path,
-                                          add_snapshot_as="tr",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                          "Al_debug_2k_nr1.out.npy", data_path,
-                                          add_snapshot_as="tr",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                          "Al_debug_2k_nr2.out.npy", data_path,
-                                          add_snapshot_as="tr",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                                          "Al_debug_2k_nr1.out.npy", data_path,
-                                          add_snapshot_as="va",
-                                          output_units="1/(Ry*Bohr^3)")
-                data_handler.add_snapshot("Al_debug_2k_nr2.in.npy", data_path,
-                                          "Al_debug_2k_nr2.out.npy", data_path,
-                                          add_snapshot_as="te",
-                                          output_units="1/(Ry*Bohr^3)")
+                data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                                          "Be_snapshot0.out.npy", data_path,
+                                          "tr")
+                data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                          "Be_snapshot1.out.npy", data_path,
+                                          "tr")
+                data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                          "Be_snapshot2.out.npy", data_path,
+                                          "tr")
+                data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                                          "Be_snapshot1.out.npy", data_path,
+                                          "va")
+                data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
+                                          "Be_snapshot2.out.npy", data_path,
+                                          "te")
                 data_handler.prepare_data()
                 if scalingtype == "standard":
                     # The lazy-loading STD equation (and to a smaller amount the
@@ -116,8 +111,8 @@ class TestLazyLoading:
                                           (data_handler.training_data_set[4001])
                                           [0].sum())
                     test_parameters.network.layer_sizes = \
-                        [data_handler.get_input_dimension(), 100,
-                         data_handler.get_output_dimension()]
+                        [data_handler.input_dimension, 100,
+                         data_handler.output_dimension]
 
                     # Setup network and trainer.
                     test_network = Network(test_parameters)
@@ -133,13 +128,25 @@ class TestLazyLoading:
                     # I presume to be due to numerical constraints. To make a
                     # meaningful comparison it is wise to scale the value here.
                     this_result.append(torch.mean(data_handler.input_data_scaler.
-                                                  means)/data_handler.grid_size)
+                                                  means) /
+                                                  data_handler.parameters.
+                                                  snapshot_directories_list[0].
+                                                  grid_size)
                     this_result.append(torch.mean(data_handler.input_data_scaler.
-                                                  stds)/data_handler.grid_size)
+                                                  stds) /
+                                                  data_handler.parameters.
+                                                  snapshot_directories_list[0].
+                                                  grid_size)
                     this_result.append(torch.mean(data_handler.output_data_scaler.
-                                                  means)/data_handler.grid_size)
+                                                  means) /
+                                                  data_handler.parameters.
+                                                  snapshot_directories_list[0].
+                                                  grid_size)
                     this_result.append(torch.mean(data_handler.output_data_scaler.
-                                                  stds)/data_handler.grid_size)
+                                                  stds) /
+                                                  data_handler.parameters.
+                                                  snapshot_directories_list[0].
+                                                  grid_size)
                 elif scalingtype == "feature-wise-normal":
                     this_result.append(torch.mean(data_handler.input_data_scaler.
                                                   maxs))
@@ -219,8 +226,8 @@ class TestLazyLoading:
 
                 data_handler.prepare_data()
                 test_parameters.network.layer_sizes = \
-                    [data_handler.get_input_dimension(), 100,
-                     data_handler.get_output_dimension()]
+                    [data_handler.input_dimension, 100,
+                     data_handler.output_dimension]
 
                 # Setup network and trainer.
                 test_network = Network(test_parameters)
@@ -271,4 +278,3 @@ class TestLazyLoading:
 
         # The loss improvements should be comparable.
         assert np.std(diff) < accuracy_strict
-        

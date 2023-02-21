@@ -4,6 +4,7 @@ import os
 
 import json
 import numpy as np
+from mala.common.parallelizer import get_comm, get_rank
 
 from mala.version import __version__ as mala_version
 
@@ -22,6 +23,7 @@ class PhysicalData(ABC):
 
     def __init__(self, parameters):
         self.parameters = parameters
+        self.grid_dimensions = [0, 0, 0]
 
     ##############################
     # Properties
@@ -31,6 +33,12 @@ class PhysicalData(ABC):
     @abstractmethod
     def data_name(self):
         """Get a string that describes the data (for e.g. metadata)."""
+        pass
+
+    @property
+    @abstractmethod
+    def feature_size(self):
+        """Get the feature dimension of this data."""
         pass
 
     @property
@@ -59,7 +67,7 @@ class PhysicalData(ABC):
     #   because there is no need to.
     ##############################
 
-    def read_from_numpy_file(self, path, units=None, array=None):
+    def read_from_numpy_file(self, path, units=None, array=None, reshape=False):
         """
         Read the data from a numpy file.
 
@@ -88,7 +96,13 @@ class PhysicalData(ABC):
             self._process_loaded_array(loaded_array, units=units)
             return loaded_array
         else:
-            array[:, :, :, :] = np.load(path)[:, :, :, self._feature_mask():]
+            if reshape:
+                array_dims = np.shape(array)
+                array[:, :] = np.load(path)[:, :, :, self._feature_mask() :].reshape(
+                    array_dims
+                )
+            else:
+                array[:, :, :, :] = np.load(path)[:, :, :, self._feature_mask() :]
             self._process_loaded_array(array, units=units)
 
     def read_from_openpmd_file(self, path, units=None, array=None):
@@ -116,11 +130,20 @@ class PhysicalData(ABC):
         """
         import openpmd_api as io
 
+        # The union operator for dicts is only supported starting with
+        # python 3.9. Currently, MALA works down to python 3.8; For now,
+        # I think it is good to keep it that way.
+        # I will leave this code in for now, because that may change in the
+        # future.
+        # series = io.Series(path, io.Access.read_only,
+        #                    options=json.dumps(
+        #                         {"defer_iteration_parsing": True} |
+        #                         self.parameters.
+        #                             _configuration["openpmd_configuration"]))
+        options = self.parameters._configuration["openpmd_configuration"].copy()
+        options["defer_iteration_parsing"] = True
         series = io.Series(path, io.Access.read_only,
-                           options=json.dumps(
-                                {"defer_iteration_parsing": True} |
-                                self.parameters.
-                                    _configuration["openpmd_configuration"]))
+                           options=json.dumps(options))
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:
@@ -217,12 +240,20 @@ class PhysicalData(ABC):
             Path to the openPMD file.
         """
         import openpmd_api as io
-
+        # The union operator for dicts is only supported starting with
+        # python 3.9. Currently, MALA works down to python 3.8; For now,
+        # I think it is good to keep it that way.
+        # I will leave this code in for now, because that may change in the
+        # future.
+        # series = io.Series(path, io.Access.read_only,
+        #                    options=json.dumps(
+        #                         {"defer_iteration_parsing": True} |
+        #                         self.parameters.
+        #                             _configuration["openpmd_configuration"]))
+        options = self.parameters._configuration["openpmd_configuration"].copy()
+        options["defer_iteration_parsing"] = True
         series = io.Series(path, io.Access.read_only,
-                           options=json.dumps(
-                                {"defer_iteration_parsing": True} |
-                                self.parameters.
-                                    _configuration["openpmd_configuration"]))
+                           options=json.dumps(options))
 
         # Check if this actually MALA compatible data.
         if series.get_attribute("is_mala_data") != 1:
@@ -257,9 +288,9 @@ class PhysicalData(ABC):
         """
         np.save(path, array)
 
-    def write_to_openpmd_file(self, path, array):
+    def write_to_openpmd_file(self, path, array, additional_attributes={}):
         """
-        Write data to a numpy file.
+        Write data to an OpenPMD file.
 
         Parameters
         ----------
@@ -268,6 +299,9 @@ class PhysicalData(ABC):
 
         array : numpy.ndarray
             Array to save.
+
+        additional_attributes : dict
+            Dict containing additional attributes to be saved.
         """
         import openpmd_api as io
 
@@ -278,17 +312,40 @@ class PhysicalData(ABC):
         elif file_ending not in io.file_extensions:
             raise Exception("Invalid file ending selected: " +
                             file_ending)
-        series = io.Series(path, io.Access.create,
-                           options=json.dumps(self.parameters.
-                                              _configuration["openpmd_configuration"]))
+        if self.parameters._configuration["mpi"]:
+            series = io.Series(
+                path,
+                io.Access.create,
+                get_comm(),
+                options=json.dumps(
+                    self.parameters._configuration["openpmd_configuration"]))
+        else:
+            series = io.Series(
+                path,
+                io.Access.create,
+                options=json.dumps(
+                    self.parameters._configuration["openpmd_configuration"]))
         series.set_attribute("is_mala_data", 1)
         series.set_software(name="MALA", version=mala_version)
         series.author = "..."
+        for entry in additional_attributes:
+            series.set_attribute(entry, additional_attributes[entry])
+
         iteration = series.write_iterations()[0]
+
+        # This function may be called without the feature dimension
+        # explicitly set (i.e. during testing or post-processing).
+        # We have to check for that.
+        if self.feature_size == 0:
+            self._set_feature_size_from_array(array)
+
         self.write_to_openpmd_iteration(iteration, array)
 
     def write_to_openpmd_iteration(self, iteration, array,
-                                   additional_metadata=None):
+                                   local_offset=None,
+                                   local_reach=None,
+                                   additional_metadata=None,
+                                   feature_from=0, feature_to=None):
         """
         Write a file within an OpenPMD iteration.
 
@@ -307,6 +364,15 @@ class PhysicalData(ABC):
         """
         import openpmd_api as io
 
+        if local_offset is None:
+            [x_from, y_from, z_from] = [None, None, None]
+        else:
+            [x_from, y_from, z_from] = local_offset
+        if local_reach is None:
+            [x_to, y_to, z_to] = [None, None, None]
+        else:
+            [x_to, y_to, z_to] = local_reach
+
         mesh = iteration.meshes[self.data_name]
 
         if additional_metadata is not None:
@@ -316,14 +382,23 @@ class PhysicalData(ABC):
         # If the data contains atomic data, we need to process it.
         atoms_ase = self._get_atoms()
         if atoms_ase is not None:
+            # This data is equivalent across the ranks, so just write it once
             atoms_openpmd = iteration.particles["atoms"]
             atomic_positions = atoms_ase.get_positions()
             atomic_numbers = atoms_ase.get_atomic_numbers()
-            positions = io.Dataset(atomic_positions[0].dtype,
-                                   atomic_positions[0].shape)
+            positions = io.Dataset(
+                # Need bugfix https://github.com/openPMD/openPMD-api/pull/1357
+                atomic_positions[0].dtype if io.__version__ >= '0.15.0' else
+                io.Datatype.DOUBLE,
+                atomic_positions[0].shape)
             numbers = io.Dataset(atomic_numbers[0].dtype,
                                  [1])
-
+            iteration.set_attribute("periodic_boundary_conditions_x",
+                                    atoms_ase.pbc[0])
+            iteration.set_attribute("periodic_boundary_conditions_y",
+                                    atoms_ase.pbc[1])
+            iteration.set_attribute("periodic_boundary_conditions_z",
+                                    atoms_ase.pbc[2])
             # atoms_openpmd["position"].time_offset = 0.0
             # atoms_openpmd["positionOffset"].time_offset = 0.0
             for atom in range(0, len(atoms_ase)):
@@ -331,42 +406,88 @@ class PhysicalData(ABC):
                 atoms_openpmd["number"][str(atom)].reset_dataset(numbers)
                 atoms_openpmd["positionOffset"][str(atom)].reset_dataset(positions)
 
-                atoms_openpmd["position"][str(atom)].\
-                    store_chunk(atomic_positions[atom])
-                atoms_openpmd["number"][str(atom)].\
-                    store_chunk(np.array([atomic_numbers[atom]]))
+                atoms_openpmd_position = atoms_openpmd["position"][str(atom)]
+                atoms_openpmd_number = atoms_openpmd["number"][str(atom)]
+                if get_rank() == 0:
+                    atoms_openpmd_position.store_chunk(atomic_positions[atom])
+                    atoms_openpmd_number.store_chunk(
+                        np.array([atomic_numbers[atom]]))
                 atoms_openpmd["positionOffset"][str(atom)].make_constant(0)
 
                 # Positions are stored in Angstrom.
                 atoms_openpmd["position"][str(atom)].unit_SI = 1.0e-10
                 atoms_openpmd["positionOffset"][str(atom)].unit_SI = 1.0e-10
 
-        dataset = io.Dataset(array.dtype,
-                             array[:, :, :, 0].shape)
+        dataset = io.Dataset(array.dtype, self.grid_dimensions)
+
+        if feature_to is None:
+            feature_to = array.shape[3]
+
+        if feature_to - feature_from != array.shape[3]:
+            raise RuntimeError("""\
+[write_to_openpmd_iteration] Internal error, called function with
+wrong parameters. Specification of features ({} - {}) on rank {} does not
+match the array dimensions (extent {} in the feature dimension)""".format(
+                feature_from, feature_to, get_rank(), array.shape[3]))
 
         # See above - will currently break for density of states,
         # which is something we never do though anyway.
         # Deal with `granularity` items of the vectors at a time
         # Or in the openPMD layout: with `granularity` record components
-        granularity = 16 # just some random value for now
+        granularity = self.parameters._configuration["openpmd_granularity"]
+        # Before writing the actual data, we have to make two considerations
+        # for MPI:
+        # 1) The following loop does not necessarily have the same number of
+        #    iterations across MPI ranks. Since the Series is flushed in every
+        #    loop iteration, we need to harmonize the number of flushes
+        #    (flushing is collective).
+        # 2) Dataset creation and attribute writing is collective in HDF5.
+        #    So, we need to define all features on all ranks, even if not all
+        #    features are written from all ranks.
+        if self.parameters._configuration["mpi"]:
+            from mpi4py import MPI
+            my_iteration_count = len(range(0, array.shape[3], granularity))
+            highest_iteration_count = get_comm().allreduce(my_iteration_count,
+                                                           op=MPI.MAX)
+            extra_flushes = highest_iteration_count - my_iteration_count
+        else:
+            extra_flushes = 0
+
+        # Global feature sizes:
+        feature_global_from = 0
+        feature_global_to = self.feature_size
+        # First loop: Only metadata, write metadata equivalently across ranks
+        for current_feature in range(feature_global_from, feature_global_to):
+            mesh_component = mesh[str(current_feature)]
+            mesh_component.reset_dataset(dataset)
+            # All data is assumed to be saved in
+            # MALA units, so the SI conversion factor we save
+            # here is the one for MALA (ASE) units
+            mesh_component.unit_SI = self.si_unit_conversion
+            # position: which relative point within the cell is
+            # represented by the stored values
+            # ([0.5, 0.5, 0.5] represents the middle)
+            mesh_component.position = [0.5, 0.5, 0.5]
+
+        # Second loop: Write heavy data
         for base in range(0, array.shape[3], granularity):
             end = min(base + granularity, array.shape[3])
             transposed = \
                 np.transpose(array[:, :, :, base:end], axes=[3, 0, 1, 2]).copy()
             for i in range(base, end):
-                mesh_component = mesh[str(i)]
-                mesh_component.reset_dataset(dataset)
+                # i is the index within the array passed to this function.
+                # The feature corresponding to this index is offset
+                # by the feature_from parameter
+                current_feature = i + feature_from
+                mesh_component = mesh[str(current_feature)]
 
-                mesh_component[:, :, :] = transposed[i - base, :, :, :]
+                mesh_component[x_from:x_to, y_from:y_to, z_from:z_to] = \
+                    transposed[i - base, :, :, :]
 
-                # All data is assumed to be saved in
-                # MALA units, so the SI conversion factor we save
-                # here is the one for MALA (ASE) units
-                mesh_component.unit_SI = self.si_unit_conversion
-                # position: which relative point within the cell is
-                # represented by the stored values
-                # ([0.5, 0.5, 0.5] represents the middle)
-                mesh_component.position = [0.5, 0.5, 0.5]
+            iteration.series_flush()
+
+        # Third loop: Extra flushes to harmonize ranks
+        for _ in range(extra_flushes):
             iteration.series_flush()
 
         iteration.close(flush=True)
@@ -383,6 +504,10 @@ class PhysicalData(ABC):
 
     @abstractmethod
     def _process_loaded_dimensions(self, array_dimensions):
+        pass
+
+    @abstractmethod
+    def _set_feature_size_from_array(self, array):
         pass
 
     def _process_additional_metadata(self, additional_metadata):
@@ -419,3 +544,11 @@ class PhysicalData(ABC):
     # That may not always be the case.
     def _get_atoms(self):
         return None
+
+    @staticmethod
+    def _get_attribute_if_attribute_exists(iteration, attribute,
+                                           default_value=None):
+        if attribute in iteration.attributes:
+            return iteration.get_attribute(attribute)
+        else:
+            return default_value

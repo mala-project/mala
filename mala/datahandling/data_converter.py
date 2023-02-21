@@ -3,20 +3,20 @@ import os
 
 import json
 
-from mala.common.parallelizer import printout, get_rank, parallel_warn
+from mala.common.parallelizer import printout, get_rank, get_comm
 from mala.common.parameters import ParametersData
 from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 from mala.version import __version__ as mala_version
 
 descriptor_input_types = [
-    "qe.out"
+    "espresso-out"
 ]
 target_input_types = [
     ".cube", ".xsf"
 ]
 additional_info_input_types = [
-    "qe.out"
+    "espresso-out"
 ]
 
 
@@ -292,25 +292,41 @@ class DataConverter:
             series_name = snapshot_name.replace("*", str("%01T"))
 
             if self.process_descriptors:
-                input_series = io.Series(os.path.join(descriptor_save_path,
-                                                      series_name+".in." +
-                                                      file_ending),
-                                         io.Access.create,
-                                         options=json.dumps(
-                                            self.parameters_full.
-                                                openpmd_configuration))
+                if self.parameters._configuration["mpi"]:
+                    input_series = io.Series(
+                        os.path.join(descriptor_save_path,
+                                     series_name + ".in." + file_ending),
+                        io.Access.create,
+                        get_comm(),
+                        options=json.dumps(
+                            self.parameters_full.openpmd_configuration))
+                else:
+                    input_series = io.Series(
+                        os.path.join(descriptor_save_path,
+                                     series_name + ".in." + file_ending),
+                        io.Access.create,
+                        options=json.dumps(
+                            self.parameters_full.openpmd_configuration))
                 input_series.set_attribute("is_mala_data", 1)
                 input_series.set_software(name="MALA", version="x.x.x")
                 input_series.author = "..."
 
             if self.process_targets:
-                output_series = io.Series(os.path.join(target_save_path,
-                                                       series_name+".out." +
-                                                       file_ending),
-                                          io.Access.create,
-                                          options=json.dumps(
-                                            self.parameters_full.
-                                            openpmd_configuration))
+                if self.parameters._configuration["mpi"]:
+                    output_series = io.Series(
+                        os.path.join(target_save_path,
+                                     series_name + ".out." + file_ending),
+                        io.Access.create,
+                        get_comm(),
+                        options=json.dumps(
+                            self.parameters_full.openpmd_configuration))
+                else:
+                    output_series = io.Series(
+                        os.path.join(target_save_path,
+                                     series_name + ".out." + file_ending),
+                        io.Access.create,
+                        options=json.dumps(
+                            self.parameters_full.openpmd_configuration))
 
                 output_series.set_attribute("is_mala_data", 1)
                 output_series.set_software(name="MALA", version=mala_version)
@@ -327,9 +343,10 @@ class DataConverter:
                                          snapshot_name + ".info.json")
             else:
                 info_path = None
+            input_iteration = None
+            output_iteration = None
+
             if file_ending == "npy":
-                input_iteration = None
-                output_iteration = None
                 # Create the actual paths, if needed.
                 if self.process_descriptors:
                     descriptor_path = os.path.join(descriptor_save_path,
@@ -354,15 +371,14 @@ class DataConverter:
                 descriptor_path = None
                 target_path = None
                 memmap = None
-                input_iteration = input_series.write_iterations()[i + starts_at]
-                output_iteration = output_series.write_iterations()[i + starts_at]
-                for it in [input_iteration, output_iteration]:
-                    # the logical time step
-                    # (in the case of MALA: probably the snapshot index)
-                    it.dt = i + starts_at
-                    # the base time of the iteration
-                    # (in the case of MALA: probably ignore)
-                    it.time = 0
+                if self.process_descriptors:
+                    input_iteration = input_series.write_iterations()[i + starts_at]
+                    input_iteration.dt = i + starts_at
+                    input_iteration.time = 0
+                if self.process_targets:
+                    output_iteration = output_series.write_iterations()[i + starts_at]
+                    output_iteration.dt = i + starts_at
+                    output_iteration.time = 0
 
             self.__convert_single_snapshot(i, descriptor_calculation_kwargs,
                                            target_calculator_kwargs,
@@ -377,6 +393,13 @@ class DataConverter:
                 if self.parameters._configuration["mpi"] \
                         and file_based_communication:
                     os.remove(memmap)
+
+        # Properly close series
+        if file_ending != "npy":
+            if self.process_descriptors:
+                del input_series
+            if self.process_targets:
+                del output_series
 
     def __convert_single_snapshot(self, snapshot_number,
                                 descriptor_calculation_kwargs,
@@ -441,98 +464,127 @@ class DataConverter:
         original_units = self.__snapshot_units[snapshot_number]
 
         # Parse and/or calculate the input descriptors.
-        if description["input"] == "qe.out":
+        if description["input"] == "espresso-out":
             descriptor_calculation_kwargs["units"] = original_units["input"]
             tmp_input, local_size = self.descriptor_calculator. \
                 calculate_from_qe_out(snapshot["input"],
                                       **descriptor_calculation_kwargs)
-            if self.parameters._configuration["mpi"]:
-                tmp_input = self.descriptor_calculator. \
-                    gather_descriptors(tmp_input)
-
-            # Cut the xyz information if requested by the user.
-            if get_rank() == 0:
-                if self.descriptor_calculator.descriptors_contain_xyz is False:
-                    tmp_input = tmp_input[:, :, :, 3:]
 
         elif description["input"] is None:
             # In this case, only the output is processed.
             pass
 
         else:
-            raise Exception("Unknown file extension, cannot convert target")
+            raise Exception("Unknown file extension, cannot convert descriptor")
 
         if description["input"] is not None:
             # Save data and delete, if not requested otherwise.
-            if get_rank() == 0:
-                if input_path is not None and input_iteration is None:
+            if input_path is not None and input_iteration is None:
+                if self.parameters._configuration["mpi"]:
+                    tmp_input = self.descriptor_calculator. \
+                        gather_descriptors(tmp_input)
+                if get_rank() == 0:
                     self.descriptor_calculator.\
                         write_to_numpy_file(input_path, tmp_input)
-                else:
-                    self.descriptor_calculator.\
-                        write_to_openpmd_iteration(input_iteration,
-                                                   tmp_input)
+            else:
+                tmp_input, local_offset, local_reach = \
+                    self.descriptor_calculator.convert_local_to_3d(tmp_input)
+                self.descriptor_calculator.\
+                    write_to_openpmd_iteration(input_iteration,
+                                               tmp_input, local_offset=local_offset, local_reach=local_reach)
             del tmp_input
 
         ###########
         # Outputs #
         ###########
 
-        # Parse and/or calculate the output descriptors.
-        if description["output"] == ".cube":
-            target_calculator_kwargs["units"] = original_units["output"]
-            target_calculator_kwargs["use_memmap"] = use_memmap
-            # If no units are provided we just assume standard units.
-            tmp_output = self.target_calculator. \
-                read_from_cube(snapshot["output"],
-                               **target_calculator_kwargs)
-
-        elif description["output"] == ".xsf":
-            target_calculator_kwargs["units"] = original_units["output"]
-            target_calculator_kwargs["use_memmap"] = use_memmap
-            # If no units are provided we just assume standard units.
-            tmp_output = self.target_calculator.\
-                read_from_xsf(snapshot["output"],
-                               **target_calculator_kwargs)
-
-        elif description["output"] is None:
-            # In this case, only the input is processed.
-            pass
-
-        else:
-            raise Exception(
-                "Unknown file extension, cannot convert target"
-                "data.")
         if description["output"] is not None:
-            if get_rank() == 0:
-                if output_path is not None and output_iteration is None:
+            if output_path is not None and output_iteration is None:
+                # Parse and/or calculate the output descriptors.
+                if description["output"] == ".cube":
+                    target_calculator_kwargs["units"] = original_units[
+                        "output"]
+                    target_calculator_kwargs["use_memmap"] = use_memmap
+                    # If no units are provided we just assume standard units.
+                    tmp_output = self.target_calculator. \
+                        read_from_cube(snapshot["output"],
+                                       **target_calculator_kwargs)
+
+                elif description["output"] == ".xsf":
+                    target_calculator_kwargs["units"] = original_units[
+                        "output"]
+                    target_calculator_kwargs["use_memmap"] = use_memmap
+                    # If no units are provided we just assume standard units.
+                    tmp_output = self.target_calculator. \
+                        read_from_xsf(snapshot["output"],
+                                      **target_calculator_kwargs)
+
+                elif description["output"] is None:
+                    # In this case, only the input is processed.
+                    pass
+
+                else:
+                    raise Exception(
+                        "Unknown file extension, cannot convert target"
+                        "data.")
+
+                if get_rank() == 0:
                     self.target_calculator.write_to_numpy_file(output_path,
                                                                tmp_output)
-                else:
-                    metadata = None
-                    if description["metadata"] is not None:
-                        metadata = [description["metadata"],
-                                    snapshot["metadata"]]
+            else:
+                metadata = None
+                if description["metadata"] is not None:
+                    metadata = [snapshot["metadata"],
+                                description["metadata"]]
+                # Parse and/or calculate the output descriptors.
+                if self.parameters._configuration["mpi"]:
+                    target_calculator_kwargs["return_local"] = True
+                if description["output"] == ".cube":
+                    target_calculator_kwargs["units"] = original_units[
+                        "output"]
+                    target_calculator_kwargs["use_memmap"] = use_memmap
+                    # If no units are provided we just assume standard units.
+                    tmp_output = self.target_calculator. \
+                        read_from_cube(snapshot["output"],
+                                       **target_calculator_kwargs)
 
+                elif description["output"] == ".xsf":
+                    target_calculator_kwargs["units"] = original_units[
+                        "output"]
+                    target_calculator_kwargs["use_memmap"] = use_memmap
+                    # If no units are provided we just assume standard units.
+                    tmp_output = self.target_calculator. \
+                        read_from_xsf(snapshot["output"],
+                                      **target_calculator_kwargs)
+
+                elif description["output"] is None:
+                    # In this case, only the input is processed.
+                    pass
+
+                else:
+                    raise Exception(
+                        "Unknown file extension, cannot convert target"
+                        "data.")
+
+                if self.parameters._configuration["mpi"]:
+                    self.target_calculator. \
+                        write_to_openpmd_iteration(output_iteration,
+                                                   tmp_output[0],
+                                                   feature_from=tmp_output[1],
+                                                   feature_to=tmp_output[2],
+                                                   additional_metadata=metadata)
+                else:
                     self.target_calculator. \
                         write_to_openpmd_iteration(output_iteration,
                                                    tmp_output,
                                                    additional_metadata=metadata)
-                del tmp_output
+            del tmp_output
 
         # Parse and/or calculate the additional info.
-        if description["additional_info"] == "qe.out":
+        if description["additional_info"] is not None:
             # Parsing and saving is done using the target calculator.
             self.target_calculator. \
-                read_additional_calculation_data("qe.out",
-                                                 snapshot["additional_info"])
+                read_additional_calculation_data(snapshot["additional_info"],
+                                                 description["additional_info"])
             self.target_calculator. \
                 write_additional_calculation_data(additional_info_path)
-
-        elif description["additional_info"] is None:
-            # Not additional info provided, pass.
-            pass
-        else:
-            raise Exception(
-                "Unknown file extension, cannot convert additional info "
-                "data.")

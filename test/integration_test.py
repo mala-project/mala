@@ -19,10 +19,10 @@ from mala.datahandling.data_repo import data_repo_path
 # in the data repo.
 
 data_path = os.path.join(data_repo_path, "Be2")
-path_to_out = os.path.join(data_path, "Be.pw.scf.out")
-path_to_ldos_npy = os.path.join(data_path, "Be_ldos.npy")
-path_to_dos_npy = os.path.join(data_path, "Be_dos.npy")
-path_to_dens_npy = os.path.join(data_path, "Be_dens.npy")
+path_to_out = os.path.join(data_path, "Be_snapshot0.out")
+path_to_ldos_npy = os.path.join(data_path, "Be_snapshot0.out.npy")
+path_to_dos_npy = os.path.join(data_path, "Be_snapshot0.dos.npy")
+path_to_dens_npy = os.path.join(data_path, "Be_snapshot0.dens.npy")
 
 # We can read from numpy arrays or directly from QE data.
 # In the later case, numpy arrays will be saved for the subsqeuent run.
@@ -74,13 +74,15 @@ class TestMALAIntegration:
 
         # Calculate the numerically approximated values.
         qint_0, abserr = sp.integrate.quad(
-            lambda e: fermi_function(e, e_fermi, temp),
+            lambda e: fermi_function(e, e_fermi, temp, suppress_overflow=True),
             energies[0], energies[-1])
         qint_1, abserr = sp.integrate.quad(
-            lambda e: (e - e_fermi) * fermi_function(e, e_fermi, temp),
+            lambda e: (e - e_fermi) * fermi_function(e, e_fermi, temp,
+                                                     suppress_overflow=True),
             energies[0], energies[-1])
         qint_2, abserr = sp.integrate.quad(
-            lambda e: (e - e_fermi) ** 2 * fermi_function(e, e_fermi, temp),
+            lambda e: (e - e_fermi) ** 2 * fermi_function(e, e_fermi, temp,
+                                                          suppress_overflow=True),
             energies[0], energies[-1])
 
         # Calculate the errors.
@@ -102,15 +104,11 @@ class TestMALAIntegration:
         """
         # Create a calculator.
         dens_calculator = Density(test_parameters)
-        dens_calculator.read_additional_calculation_data("qe.out", path_to_out)
+        dens_calculator.read_additional_calculation_data(path_to_out,
+                                                         "espresso-out")
 
         # Read the input data.
-        density_dft = dens_calculator.convert_units(np.load(path_to_dens_npy),
-                                                    "1/Bohr^3")
-
-        # Density shape has recently been changed.
-        density_dft = np.reshape(density_dft, list(np.shape(density_dft)) +
-                                 [1])
+        density_dft = np.load(path_to_dens_npy)
 
         # Calculate the quantities we want to compare.
         nr_mala = dens_calculator.get_number_of_electrons(density_dft)
@@ -134,15 +132,12 @@ class TestMALAIntegration:
         """
         # Create a calculator.abs()
         ldos_calculator = LDOS(test_parameters)
-        ldos_calculator.read_additional_calculation_data("qe.out", path_to_out)
+        ldos_calculator.read_additional_calculation_data(path_to_out, "espresso-out")
         dens_calculator = Density.from_ldos_calculator(ldos_calculator)
 
         # Read the input data.
-        density_dft = dens_calculator.convert_units(np.load(path_to_dens_npy),
-                                                    "1/Bohr^3")
-
-        ldos_dft = ldos_calculator.convert_units(np.load(path_to_ldos_npy),
-                                                 "1/(eV*Bohr^3)")
+        density_dft = np.load(path_to_dens_npy)
+        ldos_dft = np.load(path_to_ldos_npy)
 
         # Calculate the quantities we want to compare.
         self_consistent_fermi_energy = ldos_calculator. \
@@ -169,13 +164,12 @@ class TestMALAIntegration:
         The integral of the LDOS over real space grid should yield the DOS.
         """
         ldos_calculator = LDOS(test_parameters)
-        ldos_calculator.read_additional_calculation_data("qe.out", path_to_out)
+        ldos_calculator.read_additional_calculation_data(path_to_out, "espresso-out")
         dos_calculator = DOS(test_parameters)
-        dos_calculator.read_additional_calculation_data("qe.out", path_to_out)
+        dos_calculator.read_additional_calculation_data(path_to_out, "espresso-out")
 
         # Read the input data.
-        ldos_dft = ldos_calculator.convert_units(np.load(path_to_ldos_npy),
-                                                 "1/(eV*Bohr^3)")
+        ldos_dft = np.load(path_to_ldos_npy)
         dos_dft = np.load(path_to_dos_npy)
 
         # Calculate the quantities we want to compare.
@@ -192,7 +186,8 @@ class TestMALAIntegration:
     def test_pwevaldos_vs_ppdos(self):
         """Check pp.x DOS vs. pw.x DOS (from eigenvalues in outfile)."""
         dos_calculator = DOS(test_parameters)
-        dos_calculator.read_additional_calculation_data("qe.out", path_to_out)
+        dos_calculator.read_additional_calculation_data(path_to_out,
+                                                        "espresso-out")
 
         dos_from_pp = np.load(path_to_dos_npy)
 

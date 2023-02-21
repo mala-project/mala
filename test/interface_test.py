@@ -9,7 +9,7 @@ import pytest
 
 
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(os.path.join(data_repo_path, "Be2"), "training_data")
+data_path = os.path.join(data_repo_path, "Be2")
 
 
 # This test checks whether MALA interfaces to other codes, mainly the ASE
@@ -83,7 +83,6 @@ class TestInterfaces:
         test_parameters.descriptors.descriptor_type = "Bispectrum"
         test_parameters.descriptors.bispectrum_twojmax = 10
         test_parameters.descriptors.bispectrum_cutoff = 4.67637
-        test_parameters.descriptors.bispectrum_switchflag = 0
         test_parameters.targets.pseudopotential_path = os.path.join(
             data_repo_path,
             "Be2")
@@ -94,20 +93,18 @@ class TestInterfaces:
 
         data_handler = mala.DataHandler(test_parameters)
         data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
-                                  "Be_snapshot1.out.npy", data_path, "tr",
-                                  output_units="1/(eV*Bohr^3)")
+                                  "Be_snapshot1.out.npy", data_path, "tr")
         data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
-                                  "Be_snapshot2.out.npy", data_path, "va",
-                                  output_units="1/(eV*Bohr^3)")
+                                  "Be_snapshot2.out.npy", data_path, "va")
         data_handler.prepare_data()
 
         ####################
         # NETWORK SETUP AND TRAINING.
         ####################
 
-        test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),
+        test_parameters.network.layer_sizes = [data_handler.input_dimension,
                                                100,
-                                               data_handler.get_output_dimension()]
+                                               data_handler.output_dimension]
 
         # Setup network and trainer.
         test_network = mala.Network(test_parameters)
@@ -123,7 +120,7 @@ class TestInterfaces:
         calculator = mala.MALA(test_parameters, test_network,
                                data_handler,
                                reference_data=
-                                        ["qe.out",
+                                        ["espresso-out",
                                          os.path.join(data_path,
                                                       "Be_snapshot1.out")])
         total_energy_dft_calculation = calculator.data_handler.\
@@ -137,15 +134,15 @@ class TestInterfaces:
         test_parameters = mala.Parameters()
         ldos_calculator = mala.LDOS(test_parameters)
         ldos_calculator.\
-            read_additional_calculation_data("qe.out",
-                                             os.path.join(data_path,
-                                                          "Be_snapshot1.out"))
+            read_additional_calculation_data(os.path.join(data_path,
+                                                          "Be_snapshot1.out"),
+                                             "espresso-out")
         ldos_calculator.\
             write_additional_calculation_data("additional_calculation_data.json")
         new_ldos_calculator = mala.LDOS(test_parameters)
         new_ldos_calculator.\
-            read_additional_calculation_data("json",
-                                             "additional_calculation_data.json")
+            read_additional_calculation_data("additional_calculation_data.json",
+                                             "json")
 
         # Verify that essentially the same info has been loaded.
         assert np.isclose(ldos_calculator.fermi_energy_dft,
@@ -211,9 +208,9 @@ class TestInterfaces:
                             os.path.join(data_path,
                                          "Be_snapshot1.out.npy"))
         ldos_calculator.\
-            read_additional_calculation_data("qe.out",
-                                             os.path.join(data_path,
-                                                          "Be_snapshot1.out"))
+            read_additional_calculation_data(os.path.join(data_path,
+                                                          "Be_snapshot1.out"),
+                                             "espresso-out")
 
         # Write and then read in via OpenPMD and make sure all the info is
         # retained.

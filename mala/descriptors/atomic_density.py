@@ -44,6 +44,11 @@ class AtomicDensity(Descriptor):
         """Get a string that describes the target (for e.g. metadata)."""
         return "AtomicDensity"
 
+    @property
+    def feature_size(self):
+        """Get the feature dimension of this data."""
+        return self.fingerprint_length
+
     @staticmethod
     def convert_units(array, in_units="None"):
         """
@@ -183,10 +188,13 @@ class AtomicDensity(Descriptor):
         # In comparison to SNAP, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
         # if we operate without MPI.
+        self.grid_dimensions = [nx, ny, nz]
         if self.parameters._configuration["mpi"]:
-            self.fingerprint_length = 4
-            return gaussian_descriptors_np.copy(), nrows_ggrid
-
+            if return_directly:
+                return gaussian_descriptors_np.copy()
+            else:
+                self.fingerprint_length = 4
+                return gaussian_descriptors_np.copy(), nrows_ggrid
         else:
             # Since the atomic density may be directly fed back into QE
             # during the total energy calculation, we may have to return

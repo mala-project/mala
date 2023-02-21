@@ -7,7 +7,7 @@ from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
-ex02_preprocess_data.py: Shows how this framework can be used to preprocess
+ex03_preprocess_data.py: Shows how this framework can be used to preprocess
 data. Preprocessing here means converting raw DFT calculation output into 
 numpy arrays of the correct size. For the input data, this means descriptor
 calculation.
@@ -30,7 +30,7 @@ test_parameters = mala.Parameters()
 # with which parameters. These parameters are slightly modified for better
 # performance.
 test_parameters.descriptors.descriptor_type = "Bispectrum"
-test_parameters.descriptors.bispectrum_twojmax = 6
+test_parameters.descriptors.bispectrum_twojmax = 10
 test_parameters.descriptors.bispectrum_cutoff = 4.67637
 test_parameters.descriptors.descriptors_contain_xyz = True
 
@@ -49,16 +49,16 @@ test_parameters.targets.ldos_gridoffset_ev = -5
 
 data_converter = mala.DataConverter(test_parameters)
 
-outfile = os.path.join(data_path, "Be.pw.scf.out")
+outfile = os.path.join(data_path, "Be_snapshot0.out")
 ldosfile = os.path.join(data_path, "cubes/tmp.pp*Be_ldos.cube")
 # The add_snapshot function can be called with a lot of options to reflect
 # the data to be processed.
 # The standard way is this: specifying descriptor, target and additional info.
-data_converter.add_snapshot(descriptor_input_type="qe.out",
+data_converter.add_snapshot(descriptor_input_type="espresso-out",
                             descriptor_input_path=outfile,
                             target_input_type=".cube",
                             target_input_path=ldosfile,
-                            additional_info_input_type="qe.out",
+                            additional_info_input_type="espresso-out",
                             additional_info_input_path=outfile,
                             target_units="1/(Ry*Bohr^3)")
 
@@ -80,7 +80,7 @@ data_converter.convert_snapshots(descriptor_save_path="./",
 # No matter which way you access the DataConvert, you can always specify
 # keywords (check API) for the calculators.
 data_converter = mala.DataConverter(test_parameters)
-data_converter.add_snapshot(descriptor_input_type="qe.out",
+data_converter.add_snapshot(descriptor_input_type="espresso-out",
                             descriptor_input_path=outfile,)
 data_converter.convert_snapshots(complete_save_path="./",
                                  naming_scheme="Be_snapshot_only_in*",

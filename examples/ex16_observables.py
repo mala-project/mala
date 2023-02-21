@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from mala.datahandling.data_repo import data_repo_path
-atoms_path = os.path.join(os.path.join(data_repo_path, "Al36"),
-                          "Al.pw.scf.out")
+atoms_path = os.path.join(os.path.join(data_repo_path, "Be2"),
+                          "Be_snapshot0.out")
 """
 ex16_observables.py : Shows which observables MALA can calculate upon user
 request. Not specifically shown are number of electrons, total energy and
@@ -37,7 +37,7 @@ def plot_three_particle_correlation_function(show_plots=False):
 
     # Any target can be used.
     nbins = 20
-    tpcf = mala.LDOS.three_particle_correlation_function_from_atoms(atoms, nbins, rMax=5.0)
+    tpcf = mala.LDOS.three_particle_correlation_function_from_atoms(atoms, nbins)
 
     # For the plotting of the contour plots, we define a custom color map.
     # plot contour plots.

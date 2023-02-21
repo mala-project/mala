@@ -2,7 +2,7 @@ import mala
 from mala import printout
 import os
 from mala.datahandling.data_repo import data_repo_path
-data_path = os.path.join(data_repo_path, "Al36/")
+data_path = os.path.join(data_repo_path, "Be2")
 
 """
 ex14_advanced_networks.py: Shows how advanced network models such as 
@@ -42,12 +42,10 @@ test_parameters.use_gpu= True
 data_handler = mala.DataHandler(test_parameters)
 
 # Add a snapshot we want to use in to the list.
-data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
-                          "Al_debug_2k_nr0.out.npy", data_path,
-                          add_snapshot_as="tr", output_units="1/(Ry*Bohr^3)")
-data_handler.add_snapshot("Al_debug_2k_nr1.in.npy", data_path,
-                          "Al_debug_2k_nr1.out.npy", data_path,
-                          add_snapshot_as="va", output_units="1/(Ry*Bohr^3)")
+data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
+                          "Be_snapshot0.out.npy", data_path, "tr")
+data_handler.add_snapshot("Be_snapshot1.in.npy", data_path,
+                          "Be_snapshot1.out.npy", data_path, "va")
 data_handler.prepare_data()
 printout("Read data: DONE.")
 
@@ -64,8 +62,8 @@ test_parameters.network.nn_type = "transformer"
 # test_parameters.network.nn_type = "gru"
 
 test_parameters.network.num_hidden_layers = 1
-test_parameters.network.layer_sizes = [data_handler.get_input_dimension(),100,
-                                       data_handler.get_output_dimension()]
+test_parameters.network.layer_sizes = [data_handler.input_dimension,100,
+                                       data_handler.output_dimension]
 
 if test_parameters.network.nn_type == "lstm" or \
         test_parameters.network.nn_type == "gru":

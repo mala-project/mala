@@ -4,10 +4,13 @@ try:
 except ModuleNotFoundError:
     # Warning is thrown by Parameters class
     pass
-import torch
+import numpy as np
 
 from mala.common.parameters import printout
 from mala.network.runner import Runner
+from mala.targets.ldos import LDOS
+from mala.targets.dos import DOS
+from mala.targets.density import Density
 
 
 class Tester(Runner):
@@ -26,16 +29,86 @@ class Tester(Runner):
 
     data : mala.datahandling.data_handler.DataHandler
         DataHandler holding the test data.
+
+    observables_to_test : list
+        List of observables to test. Supported are "ldos", "band_energy",
+        "number_of_electrons" and "total_energy". For the LDOS, the loss mean
+        squared error per snapshot is calculated.
+
+    output_format : string
+        Can be "list" or "mae". If "list", then a list of results across all
+        snapshots is returned. If "mae", then the MAE across all snapshots
+        will be calculated and returned.
     """
 
-    def __init__(self, params, network, data):
+    def __init__(self, params, network, data, observables_to_test=["ldos"],
+                 output_format="list"):
         # copy the parameters into the class.
         super(Tester, self).__init__(params, network, data)
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
-        self.__prepare_to_test()
+        self.observables_to_test = observables_to_test
+        self.output_format = output_format
+        if self.output_format != "list" and self.output_format == "mae":
+            raise Exception("Wrong output format for testing selected.")
+
+    def test_all_snapshots(self):
+        """
+        Test the selected observables for all snapshots.
+
+        Returns
+        -------
+        results : dict
+            A dictionary containing the errors for the selected observables,
+            either as list or MAE.
+        """
+        results = {}
+        for observable in self.observables_to_test:
+            results[observable] = []
+
+        for i in range(0, self.data.nr_test_snapshots):
+            snapshot_result = self.test_snapshot(i)
+            for observable in self.observables_to_test:
+                results[observable].append(snapshot_result[observable])
+
+        if self.output_format == "list":
+            return results
+
+        elif self.output_format == "mae":
+            mae_results = {}
+            for observable in self.observables_to_test:
+                mae_results[observable] = np.mean(np.abs(results[observable]))
+            return mae_results
+
+        else:
+            raise Exception("Wrong output format for testing selected.")
 
     def test_snapshot(self, snapshot_number):
+        """
+        Test the selected observables for a single snapshot.
+
+        Parameters
+        ----------
+        snapshot_number : int
+            Snapshot which to test.
+
+        Returns
+        -------
+        results : dict
+            A dictionary containing the errors for the selected observables.
+        """
+        actual_outputs, predicted_outputs = \
+            self.predict_targets(snapshot_number)
+
+        results = {}
+        for observable in self.observables_to_test:
+            results[observable] = self.\
+                __calculate_observable_error(snapshot_number,
+                                             observable, predicted_outputs,
+                                             actual_outputs)
+        return results
+
+    def predict_targets(self, snapshot_number):
         """
         Get actual and predicted output for a snapshot.
 
@@ -52,29 +125,98 @@ class Tester(Runner):
         predicted_outputs : numpy.ndarray
             Precicted outputs for snapshot.
         """
+        # Adjust batch size and such.
+        self.__prepare_to_test(snapshot_number)
         # Make sure no data lingers in the target calculator.
         self.data.target_calculator.invalidate_target()
 
         # Forward through network.
+        offset_snapshots = self.data.nr_validation_snapshots + \
+                           self.data.nr_training_snapshots
+
         return self.\
-            _forward_entire_snapshot(snapshot_number,
+            _forward_entire_snapshot(offset_snapshots+snapshot_number,
                                      self.data.test_data_set,
+                                     "te",
                                      self.number_of_batches_per_snapshot,
                                      self.parameters.mini_batch_size)
 
-    def __prepare_to_test(self):
+    def __calculate_observable_error(self, snapshot_number, observable,
+                                     predicted_target, actual_target):
+        if observable == "ldos":
+            return np.mean((predicted_target - actual_target)**2)
+
+        elif observable == "band_energy":
+            target_calculator = self.data.target_calculator
+            if not isinstance(target_calculator, LDOS) and not \
+                    isinstance(target_calculator, DOS):
+                raise Exception("Cannot calculate the band energy from this "
+                                "observable.")
+            target_calculator.\
+                read_additional_calculation_data(
+                self.data.get_snapshot_calculation_output(snapshot_number))
+
+            target_calculator.read_from_array(actual_target)
+            actual = target_calculator.band_energy
+
+            target_calculator.read_from_array(predicted_target)
+            predicted = target_calculator.band_energy
+            return actual - predicted
+
+        elif observable == "number_of_electrons":
+            target_calculator = self.data.target_calculator
+            if not isinstance(target_calculator, LDOS) and not \
+                    isinstance(target_calculator, DOS) and not \
+                    isinstance(target_calculator, Density):
+                raise Exception("Cannot calculate the band energy from this "
+                                "observable.")
+            target_calculator.\
+                read_additional_calculation_data(
+                self.data.get_snapshot_calculation_output(snapshot_number))
+
+            actual = target_calculator.get_number_of_electrons(actual_target)
+
+            predicted = target_calculator.get_number_of_electrons(predicted_target)
+            return actual - predicted
+
+        elif observable == "total_energy":
+            target_calculator = self.data.target_calculator
+            if not isinstance(target_calculator, LDOS):
+                raise Exception("Cannot calculate the total energy from this "
+                                "observable.")
+            target_calculator.\
+                read_additional_calculation_data(
+                self.data.get_snapshot_calculation_output(snapshot_number))
+
+            target_calculator.read_from_array(actual_target)
+            actual = target_calculator.total_energy
+
+            target_calculator.read_from_array(predicted_target)
+            predicted = target_calculator.total_energy
+            return actual - predicted
+
+    def __prepare_to_test(self, snapshot_number):
         """Prepare the tester class to for test run."""
         # We will use the DataSet iterator to iterate over the test data.
         # But since we only want the data per snapshot,
         # we need to make sure the batch size is compatible with that.
+        test_snapshot = 0
+        grid_size = None
+        for snapshot in self.data.parameters.snapshot_directories_list:
+            if snapshot.snapshot_function == "te":
+                if snapshot_number == test_snapshot:
+                    grid_size = snapshot.grid_size
+                    break
+                test_snapshot += 1
+
         optimal_batch_size = self.\
-            _correct_batch_size_for_testing(self.data.grid_size,
+            _correct_batch_size_for_testing(grid_size,
                                             self.parameters.mini_batch_size)
         if optimal_batch_size != self.parameters.mini_batch_size:
             printout("Had to readjust batch size from",
                      self.parameters.mini_batch_size, "to",
                      optimal_batch_size, min_verbosity=0)
             self.parameters.mini_batch_size = optimal_batch_size
-        self.number_of_batches_per_snapshot = int(self.data.grid_size /
+        self.number_of_batches_per_snapshot = int(grid_size /
                                                   self.parameters.
                                                   mini_batch_size)

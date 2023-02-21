@@ -169,7 +169,7 @@ class Network(nn.Module):
                    _use_new_zipfile_serialization=False)
 
     @classmethod
-    def load_from_file(cls, params, path_to_file):
+    def load_from_file(cls, params, file):
         """
         Load a network from a file.
 
@@ -181,7 +181,7 @@ class Network(nn.Module):
             enforced by using the same Parameters object (and saving/loading
             it to)
 
-        path_to_file : string
+        file : string or ZipExtFile
             Path to the file from which the network should be loaded.
 
         Returns
@@ -191,10 +191,10 @@ class Network(nn.Module):
         """
         loaded_network = Network(params)
         if params.use_gpu:
-            loaded_network.load_state_dict(torch.load(path_to_file,
+            loaded_network.load_state_dict(torch.load(file,
                                                       map_location="cuda"))
         else:
-            loaded_network.load_state_dict(torch.load(path_to_file,
+            loaded_network.load_state_dict(torch.load(file,
                                                       map_location="cpu"))
         loaded_network.eval()
         return loaded_network
