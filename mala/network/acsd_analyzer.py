@@ -1,4 +1,5 @@
 """Class for performing a full ACSD analysis."""
+import itertools
 import os
 
 import numpy as np
@@ -64,6 +65,7 @@ class ACSDAnalyzer(HyperOpt):
         # Filled after the analysis.
         self.labels = []
         self.study = []
+        self.reduced_study = None
         self.internal_hyperparam_list = None
 
     def add_snapshot(self, descriptor_input_type=None,
@@ -165,85 +167,91 @@ class ACSDAnalyzer(HyperOpt):
         """
         # Prepare the hyperparameter lists.
         self._construct_hyperparam_list()
+        hyperparameter_tuples = list(itertools.product(
+            *self.internal_hyperparam_list))
 
         # Perform the ACSD analysis separately for each snapshot.
+        best_acsd = None
+        best_trial = None
         for i in range(0, len(self.__snapshots)):
+            printout("Starting ACSD analysis of snapshot", str(i),
+                     min_verbosity=1)
             current_list = []
             target = self._load_target(self.__snapshots[i],
                                        self.__snapshot_description[i],
                                        self.__snapshot_units[i],
                                        file_based_communication)
-            # TODO: I know this is ugly, we have to optimize it later.
-            if len(self.internal_hyperparam_list) == 2:
-                for first_dim in self.internal_hyperparam_list[0]:
-                    for second_dim in self.internal_hyperparam_list[1]:
-                        if isinstance(self.descriptor_calculator, Bispectrum):
-                            self.params.descriptors.bispectrum_cutoff = first_dim
-                            self.params.descriptors.bispectrum_twojmax = second_dim
-                        elif isinstance(self.descriptor_calculator, AtomicDensity):
-                            self.params.descriptors.atomic_density_cutoff = first_dim
-                            self.params.descriptors.atomic_density_sigma = \
-                                second_dim
-                        else:
-                            raise Exception("Inconsistent number of "
-                                            "hyperparameters and descriptor "
-                                            "type.")
 
-                        descriptor = \
-                            self._calculate_descriptors(self.__snapshots[i],
-                                                        self.__snapshot_description[i],
-                                                        self.__snapshot_units[i])
-                        if get_rank() == 0:
-                            acsd = self._calculate_acsd(descriptor, target,
-                                                 self.params.hyperparameters.acsd_points,
-                                                 descriptor_vectors_contain_xyz=
-                                                 self.params.descriptors.descriptors_contain_xyz)
-                            current_list.append([first_dim, second_dim, acsd])
-            elif len(self.internal_hyperparam_list) == 5:
-                for first_dim in self.internal_hyperparam_list[0]:
-                    for second_dim in self.internal_hyperparam_list[1]:
-                        for third_dim in self.internal_hyperparam_list[2]:
-                            for fourth_dim in self.internal_hyperparam_list[3]:
-                                for fifth_dim in self.internal_hyperparam_list[4]:
-                                    if isinstance(self.descriptor_calculator,
-                                                    MinterpyDescriptors):
-                                        self.params.descriptors.\
-                                            atomic_density_cutoff = first_dim
-                                        self.params.descriptors.\
-                                            atomic_density_sigma = second_dim
-                                        self.params.descriptors.\
-                                            minterpy_cutoff_cube_size = \
-                                            third_dim
-                                        self.params.descriptors.\
-                                            minterpy_polynomial_degree = \
-                                            fourth_dim
-                                        self.params.descriptors.\
-                                            minterpy_lp_norm = \
-                                            fifth_dim
-                                    else:
-                                        raise Exception("Inconsistent number of "
-                                                        "hyperparameters and descriptor "
-                                                        "type.")
-                                    descriptor = \
-                                        self._calculate_descriptors(
-                                            self.__snapshots[i],
-                                            self.__snapshot_description[i],
-                                            self.__snapshot_units[i])
-                                    if get_rank() == 0:
-                                        acsd = self._calculate_acsd(descriptor,
-                                                                    target,
-                                                                    self.params.hyperparameters.acsd_points,
-                                                                    descriptor_vectors_contain_xyz=
-                                                                    self.params.descriptors.descriptors_contain_xyz)
-                                        current_list.append(
-                                            [first_dim, second_dim, third_dim,
-                                             fourth_dim, fifth_dim, acsd])
+            for idx, hyperparameter_tuple in enumerate(hyperparameter_tuples):
+                if isinstance(self.descriptor_calculator, Bispectrum):
+                    self.params.descriptors.bispectrum_cutoff = \
+                        hyperparameter_tuple[0]
+                    self.params.descriptors.bispectrum_twojmax = \
+                        hyperparameter_tuple[1]
+                elif isinstance(self.descriptor_calculator, AtomicDensity):
+                    self.params.descriptors.atomic_density_cutoff = \
+                        hyperparameter_tuple[0]
+                    self.params.descriptors.atomic_density_sigma = \
+                        hyperparameter_tuple[1]
+                elif isinstance(self.descriptor_calculator,
+                              MinterpyDescriptors):
+                    self.params.descriptors. \
+                        atomic_density_cutoff = hyperparameter_tuple[0]
+                    self.params.descriptors. \
+                        atomic_density_sigma = hyperparameter_tuple[1]
+                    self.params.descriptors. \
+                        minterpy_cutoff_cube_size = \
+                        hyperparameter_tuple[2]
+                    self.params.descriptors. \
+                        minterpy_polynomial_degree = \
+                        hyperparameter_tuple[3]
+                    self.params.descriptors. \
+                        minterpy_lp_norm = \
+                        hyperparameter_tuple[4]
+
+                descriptor = \
+                    self._calculate_descriptors(self.__snapshots[i],
+                                                self.__snapshot_description[i],
+                                                self.__snapshot_units[i])
+                if get_rank() == 0:
+                    acsd = self._calculate_acsd(descriptor, target,
+                                                self.params.hyperparameters.acsd_points,
+                                                descriptor_vectors_contain_xyz=
+                                                self.params.descriptors.descriptors_contain_xyz)
+                    if not np.isnan(acsd):
+                        if best_acsd is None:
+                            best_acsd = acsd
+                            best_trial = idx
+                        elif acsd < best_acsd:
+                            best_acsd = acsd
+                            best_trial = idx
+                        current_list.append(list(hyperparameter_tuple) + [acsd])
+                    else:
+                        current_list.append(list(hyperparameter_tuple) + [np.inf])
+
+                    outstring = "["
+                    for label_id, label in enumerate(self.labels):
+                        outstring += label + ": " + \
+                                     str(hyperparameter_tuple[label_id])
+                        if label_id < len(self.labels) - 1:
+                            outstring += ", "
+                    outstring += "]"
+                    best_trial_string = ". No suitable trial found yet."
+                    if best_acsd is not None:
+                        best_trial_string = ". Best trial is"+str(best_trial) \
+                                            + "with"+str(best_acsd)
+
+                    printout("Trial", idx, "finished with ACSD="+str(acsd),
+                             "and parameters:", outstring+best_trial_string,
+                             min_verbosity=1)
 
             if get_rank() == 0:
                 self.study.append(current_list)
 
         if get_rank() == 0:
             self.study = np.mean(self.study, axis=0)
+
+            # TODO: Does this even make sense for the minterpy descriptors?
             if return_plotting:
                 results_to_plot = []
                 if len(self.internal_hyperparam_list) == 2:
@@ -273,7 +281,7 @@ class ACSDAnalyzer(HyperOpt):
                 if isinstance(self.descriptor_calculator, Bispectrum):
                     self.params.descriptors.bispectrum_cutoff = minimum_acsd[0]
                     self.params.descriptors.bispectrum_twojmax = int(minimum_acsd[1])
-                    printout("ACSD analysis, optimal parameters: ", )
+                    printout("ACSD analysis finished, optimal parameters: ", )
                     printout("Bispectrum twojmax: ", self.params.descriptors.
                              bispectrum_twojmax)
                     printout("Bispectrum cutoff: ", self.params.descriptors.
@@ -281,7 +289,7 @@ class ACSDAnalyzer(HyperOpt):
                 if isinstance(self.descriptor_calculator, AtomicDensity):
                     self.params.descriptors.atomic_density_cutoff = minimum_acsd[0]
                     self.params.descriptors.atomic_density_sigma = minimum_acsd[1]
-                    printout("ACSD analysis, optimal parameters: ", )
+                    printout("ACSD analysis finished, optimal parameters: ", )
                     printout("Atomic density sigma: ", self.params.descriptors.
                              atomic_density_sigma)
                     printout("Atomic density cutoff: ", self.params.descriptors.
@@ -293,16 +301,16 @@ class ACSDAnalyzer(HyperOpt):
                     self.params.descriptors.minterpy_cutoff_cube_size = minimum_acsd[2]
                     self.params.descriptors.minterpy_polynomial_degree = int(minimum_acsd[3])
                     self.params.descriptors.minterpy_lp_norm = int(minimum_acsd[4])
-                    printout("ACSD analysis, optimal parameters: ", )
+                    printout("ACSD analysis finished, optimal parameters: ", )
                     printout("Atomic density sigma: ", self.params.descriptors.
                              atomic_density_sigma)
                     printout("Atomic density cutoff: ", self.params.descriptors.
                              atomic_density_cutoff)
                     printout("Minterpy cube cutoff: ", self.params.descriptors.
                              minterpy_cutoff_cube_size)
-                    printout("Minterpy polynomial degree cutoff: ", self.params.descriptors.
+                    printout("Minterpy polynomial degree: ", self.params.descriptors.
                              minterpy_polynomial_degree)
-                    printout("Minterpy LP norm degree cutoff: ", self.params.descriptors.
+                    printout("Minterpy LP norm degree: ", self.params.descriptors.
                              minterpy_lp_norm)
 
     def _construct_hyperparam_list(self):
@@ -327,7 +335,7 @@ class ACSDAnalyzer(HyperOpt):
                          self.params.hyperparameters.hlist)).index(True)].choices
 
             self.internal_hyperparam_list = [first_dim_list, second_dim_list]
-            self.labels = ["cutoff", "twojmax", "acsd"]
+            self.labels = ["cutoff", "twojmax"]
 
         elif isinstance(self.descriptor_calculator, AtomicDensity):
             if list(map(lambda p: "atomic_density_cutoff" in p.name,
@@ -350,7 +358,7 @@ class ACSDAnalyzer(HyperOpt):
                                  self.params.hyperparameters.hlist)).index(
                             True)].choices
             self.internal_hyperparam_list = [first_dim_list, second_dim_list]
-            self.labels = ["cutoff", "sigma", "acsd"]
+            self.labels = ["cutoff", "sigma"]
 
         elif isinstance(self.descriptor_calculator, MinterpyDescriptors):
             if list(map(lambda p: "atomic_density_cutoff" in p.name,
@@ -407,8 +415,7 @@ class ACSDAnalyzer(HyperOpt):
                                              third_dim_list, fourth_dim_list,
                                              fifth_dim_list]
             self.labels = ["cutoff", "sigma", "minterpy_cutoff",
-                           "minterpy_polynomial_degree", "minterpy_lp_norm",
-                           "acsd"]
+                           "minterpy_polynomial_degree", "minterpy_lp_norm"]
 
         else:
             raise Exception("Unkown descriptor calculator selected. Cannot "
