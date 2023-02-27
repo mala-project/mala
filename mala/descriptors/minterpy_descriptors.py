@@ -111,15 +111,6 @@ class MinterpyDescriptors(Descriptor):
             self.parameters.atomic_density_sigma = AtomicDensity.\
                 get_optimal_sigma(voxel)
 
-        # Array to hold descriptors.
-        coord_length = 3 if self.parameters.descriptors_contain_xyz else 0
-        minterpy_descriptors_np = \
-            np.zeros([nx, ny, nz,
-                      len(self.parameters.minterpy_point_list)+coord_length],
-                     dtype=np.float64)
-        self.fingerprint_length = \
-            len(self.parameters.minterpy_point_list)+coord_length
-
         # Size of the local cube
         # self.parameters.minterpy_cutoff_cube_size
 
@@ -149,6 +140,15 @@ class MinterpyDescriptors(Descriptor):
             self.parameters.\
                 minterpy_point_list.\
                 append(np.matmul(local_cube, unisolvent_nodes[i]))
+
+        # Array to hold descriptors.
+        coord_length = 3 if self.parameters.descriptors_contain_xyz else 0
+        minterpy_descriptors_np = \
+            np.zeros([nx, ny, nz,
+                      len(self.parameters.minterpy_point_list)+coord_length],
+                     dtype=np.float64)
+        self.fingerprint_length = \
+            len(self.parameters.minterpy_point_list)+coord_length
 
         self.fingerprint_length = len(self.parameters.minterpy_point_list)
         # Perform one LAMMPS call for each point in the Minterpy point list.

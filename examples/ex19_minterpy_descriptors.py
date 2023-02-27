@@ -16,5 +16,5 @@ params.descriptors.minterpy_lp_norm = 2
 descriptor_calculator = mala.MinterpyDescriptors(params)
 data = descriptor_calculator.calculate_from_qe_out(outfile)[0]
 
-print(data[0, 0, :, :])
+print(data.shape)
 
