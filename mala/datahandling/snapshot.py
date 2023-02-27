@@ -94,6 +94,14 @@ class Snapshot(JSONSerializable):
         else: 
             self.selection_mask = selection_mask
 
+
+    def set_selection_mask(self, selection_mask):
+        if isinstance(selection_mask, np.ndarray):
+            self.selection_mask = selection_mask.tolist()
+        else: 
+            self.selection_mask = selection_mask
+
+
     @classmethod
     def from_json(cls, json_dict):
         """
