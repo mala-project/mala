@@ -42,7 +42,7 @@ class Runner:
         self.data = data
         self.__prepare_to_run()
 
-    def save_run(self, run_name, save_path="./", zip_run=False,
+    def save_run(self, run_name, save_path="./", zip_run=True,
                  save_runner=False):
         """
         Save the current run.
@@ -88,7 +88,7 @@ class Runner:
                     os.remove(os.path.join(save_path, file))
 
     @classmethod
-    def load_run(cls, run_name, path="./", zip_run=False,
+    def load_run(cls, run_name, path="./", zip_run=True,
                  params_format="json", load_runner=True,
                  prepare_data=False):
         """
@@ -180,7 +180,7 @@ class Runner:
             return loaded_params, loaded_network, new_datahandler
 
     @classmethod
-    def run_exists(cls, run_name, params_format="json", zip_run=False):
+    def run_exists(cls, run_name, params_format="json", zip_run=True):
         """
         Check if a run exists.
 

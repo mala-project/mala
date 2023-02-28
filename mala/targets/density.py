@@ -6,10 +6,10 @@ import ase.io
 from ase.units import Rydberg, Bohr, m
 from functools import cached_property
 import numpy as np
-#try:
-#    import total_energy as te
-#except ModuleNotFoundError:
-#    pass
+try:
+    import total_energy as te
+except ModuleNotFoundError:
+    pass
 
 from mala.common.parallelizer import printout, parallel_warn, barrier, get_size
 from mala.targets.target import Target
