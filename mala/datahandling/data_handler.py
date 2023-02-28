@@ -21,6 +21,7 @@ from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 from mala.datahandling.fast_tensor_dataset import FastTensorDataset
 
+from pprint import pprint
 
 class DataHandler:
     """
@@ -552,14 +553,21 @@ class DataHandler:
         # Now we need to confirm that the snapshot list has some inner
         # consistency.
         if self.parameters.data_splitting_type == "by_snapshot":
-            print(f'refresh = {refresh}')
+            #print(f'refresh = {refresh}')
+            #print(self.parameters.snapshot_directories_list)
+            if refresh: # if we're reloading data, don't recount nrs
+                self.nr_training_snapshots, self.nr_training_data, \
+                self.nr_test_snapshots, self.nr_test_data, \
+                self.nr_validation_snapshots, self.nr_validation_data \
+                = 0, 0, 0, 0, 0, 0 
+            #pprint(vars(self))
+            #pprint(vars(self.parameters))
             snapshot: Snapshot
             # As we are not actually interested in the number of snapshots,
             # but in the number of datasets, we also need to multiply by that.
             for snapshot in self.parameters.snapshot_directories_list:
-                if refresh: # if we're reloading data, don't recount nrs
-                    continue
-                elif snapshot.snapshot_function == "tr":
+                print(snapshot.snapshot_function)
+                if snapshot.snapshot_function == "tr":
                     self.nr_training_snapshots += 1
                     self.nr_training_data += snapshot.grid_size
                 elif snapshot.snapshot_function == "te":
