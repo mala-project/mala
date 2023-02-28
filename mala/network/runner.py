@@ -309,6 +309,8 @@ class Runner:
         new_batch_size = batchsize
         if datasize % new_batch_size != 0:
             while datasize % new_batch_size != 0:
+                if new_batch_size > datasize:
+                    new_batch_size = new_batch_size//2
                 new_batch_size += 1
         return new_batch_size
 
