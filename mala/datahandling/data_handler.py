@@ -221,7 +221,7 @@ class DataHandler:
     # Preparing data
     ######################
 
-    def prepare_data(self, reparametrize_scaler=True):
+    def prepare_data(self, reparametrize_scaler=True, refresh=False):
         """
         Prepare the data to be used in a training process.
 
@@ -250,7 +250,7 @@ class DataHandler:
         # an exception.
         printout("Checking the snapshots and your inputs for consistency.",
                  min_verbosity=1)
-        self.__check_snapshots()
+        self.__check_snapshots(refresh=refresh)
         printout("Consistency check successful.", min_verbosity=0)
 
         # If the DataHandler is used for inference, i.e. no training or
@@ -284,7 +284,7 @@ class DataHandler:
 
         # After the loading is done, target data can safely be saved again.
         self.target_calculator.save_target_data = True
-
+        
         # Wait until all ranks are finished with data preparation.
         # It is not uncommon that ranks might be asynchronous in their
         # data preparation by a small amount of minutes. If you notice
@@ -471,7 +471,7 @@ class DataHandler:
     # Loading data
     ######################
 
-    def __check_snapshots(self):
+    def __check_snapshots(self, refresh=False):
         """Check the snapshots for consistency."""
         self.nr_snapshots = len(self.parameters.snapshot_directories_list)
 
@@ -552,11 +552,14 @@ class DataHandler:
         # Now we need to confirm that the snapshot list has some inner
         # consistency.
         if self.parameters.data_splitting_type == "by_snapshot":
+            print(f'refresh = {refresh}')
             snapshot: Snapshot
             # As we are not actually interested in the number of snapshots,
             # but in the number of datasets, we also need to multiply by that.
             for snapshot in self.parameters.snapshot_directories_list:
-                if snapshot.snapshot_function == "tr":
+                if refresh: # if we're reloading data, don't recount nrs
+                    continue
+                elif snapshot.snapshot_function == "tr":
                     self.nr_training_snapshots += 1
                     self.nr_training_data += snapshot.grid_size
                 elif snapshot.snapshot_function == "te":
@@ -576,7 +579,8 @@ class DataHandler:
                                    self.nr_validation_snapshots):
                 raise Exception("Cannot split snapshots with specified "
                                 "splitting scheme, "
-                                "too few or too many options selected")
+                                "too few or too many options selected: "
+                                f"[{nr_of_snapshots} != {self.nr_training_snapshots} + {self.nr_test_snapshots} + {self.nr_validation_snapshots}]")
             # MALA can either be run in training or test-only mode.
             # But it has to be run in either of those!
             # So either training AND validation snapshots can be provided
@@ -597,7 +601,7 @@ class DataHandler:
         else:
             raise Exception("Wrong parameter for data splitting provided.")
 
-        if not self.parameters.use_lazy_loading:
+        if not self.parameters.use_lazy_loading:# and not refresh:
             self.__allocate_arrays()        
 
         # Reordering the lists.
