@@ -19,8 +19,6 @@ from mala.datahandling.lazy_load_dataset import LazyLoadDataset
 from mala.datahandling.lazy_load_dataset_clustered import \
     LazyLoadDatasetClustered
 from mala.datahandling.lazy_load_dataset_single import LazyLoadDatasetSingle
-from mala.descriptors.descriptor import Descriptor
-from mala.targets.target import Target
 from mala.datahandling.fast_tensor_dataset import FastTensorDataset
 
 
@@ -94,9 +92,9 @@ class DataHandler(DataHandlerBase):
         self.training_data_outputs = torch.empty(0)
         self.validation_data_outputs = torch.empty(0)
         self.test_data_outputs = torch.empty(0)
-        self.training_data_set = None
-        self.validation_data_set = None
-        self.test_data_set = None
+        self.training_data_sets = []
+        self.validation_data_sets = []
+        self.test_data_sets = []
 
         # Needed for the fast tensor data sets.
         self.mini_batch_size = parameters.running.mini_batch_size

@@ -1,119 +1,11 @@
 """DataSet for lazy-loading."""
 import os
-import time
+from multiprocessing import shared_memory
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 
-from mala.common.parallelizer import printout, barrier
-
-from multiprocessing import shared_memory
-import concurrent.futures
-
-# Worker function to load data into shared memory (limited to numpy files only for now)
-def load_snapshot_to_shm(snapshot, descriptor_calculator, target_calculator,
-                         input_shm_name, output_shm_name):
-
-    # Get shared mem
-    input_shm = shared_memory.SharedMemory(name=input_shm_name)
-    output_shm = shared_memory.SharedMemory(name=output_shm_name)
-    
-    input_shape, input_dtype  = descriptor_calculator. \
-        read_dimensions_and_dtype_from_numpy_file(
-        os.path.join(snapshot.input_npy_directory,
-                     snapshot.input_npy_file))
-
-    output_shape, output_dtype  = target_calculator. \
-        read_dimensions_and_dtype_from_numpy_file(
-        os.path.join(snapshot.output_npy_directory,
-                     snapshot.output_npy_file))
-
-    # Form numpy arrays from shm buffers
-    input_data = np.ndarray(shape=input_shape, dtype=input_dtype, buffer=input_shm.buf)
-    output_data = np.ndarray(shape=output_shape, dtype=output_dtype, buffer=output_shm.buf)
-
-    # Load numpy data into shm buffers
-    descriptor_calculator. \
-        read_from_numpy_file(
-        os.path.join(snapshot.input_npy_directory,
-                     snapshot.input_npy_file),
-                     units=snapshot.input_units,
-                     array=input_data)
-    target_calculator. \
-        read_from_numpy_file(
-        os.path.join(snapshot.output_npy_directory,
-                     snapshot.output_npy_file),
-                     units=snapshot.output_units,
-                     array=output_data)
-
-    # This function only loads the numpy data with scaling. Remaining data
-    # preprocessing occurs in __getitem__ of LazyLoadDatasetSingle
-    input_shm.close()
-    output_shm.close()
-
-
-# Class to handle loading multiple LazyLoadDatasetSingle objects with prefetching
-class MultiLazyLoadDataLoader:
-    def __init__(self, datasets, **kwargs):
-        self.datasets = datasets
-        self.loaders = []
-        for d in datasets:
-            self.loaders.append(DataLoader(d,
-                                          batch_size=None,
-                                          **kwargs,
-                                          shuffle=False))
-
-        # Create single process pool for prefetching
-        # Can use ThreadPoolExecutor for debugging.
-        #self.pool = concurrent.futures.ThreadPoolExecutor(1)
-        self.pool = concurrent.futures.ProcessPoolExecutor(1)
-
-        # Allocate shared memory and commence file load for first
-        # dataset in list
-        dset = self.datasets[0]
-        dset.allocate_shared_mem()
-        self.load_future = self.pool.submit(load_snapshot_to_shm,
-                                            dset.snapshot, 
-                                            dset.descriptor_calculator,
-                                            dset.target_calculator,
-                                            dset.input_shm_name,
-                                            dset.output_shm_name)
-    def __len__(self):
-        return len(self.loaders)
-
-    def __iter__(self):
-        self.count = 0
-        return self
-
-    def __next__(self):
-        self.count += 1
-        if self.count > len(self.loaders):
-            raise StopIteration
-        else:
-            # Wait on last prefetch
-            if self.count - 1 >= 0:
-                if not self.datasets[self.count - 1].loaded:
-                    self.load_future.result()
-                    self.datasets[self.count - 1].loaded = True
-
-            # Delete last
-            if self.count - 2 >= 0:
-                self.datasets[self.count - 2].delete_data()
-
-            # Prefetch next file (looping around epoch boundary)
-            dset = self.datasets[self.count % len(self.loaders)]
-            if not dset.loaded:
-              dset.allocate_shared_mem()
-              self.load_future = self.pool.submit(load_snapshot_to_shm,
-                                                  dset.snapshot, 
-                                                  dset.descriptor_calculator,
-                                                  dset.target_calculator,
-                                                  dset.input_shm_name,
-                                                  dset.output_shm_name)
-
-            # Return current
-            return self.loaders[self.count - 1]
 
 class LazyLoadDatasetSingle(torch.utils.data.Dataset):
     """
@@ -153,8 +45,8 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         If True, then the gradient is stored for the inputs.
     """
 
-    def __init__(self, batch_size, snapshot, input_dimension, output_dimension, input_data_scaler,
-                 output_data_scaler, descriptor_calculator,
+    def __init__(self, batch_size, snapshot, input_dimension, output_dimension,
+                 input_data_scaler, output_data_scaler, descriptor_calculator,
                  target_calculator, use_horovod,
                  input_requires_grad=False):
         self.snapshot = snapshot
@@ -211,10 +103,11 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
                          self.snapshot.output_npy_file))
 
         # To avoid copies and dealing with in-place casting from FP64, restrict
-        # usage to data in FP32 type (which is a good idea anyway to save memory)
+        # usage to data in FP32 type (which is a good idea anyway to save
+        # memory)
         if self.input_dtype != np.float32 or self.output_dtype != np.float32:
-            raise Exception("LazyLoadDatasetSingle requires numpy data in FP32.")
-
+            raise Exception("LazyLoadDatasetSingle requires numpy data in "
+                            "FP32.")
 
         # Allocate shared memory buffer
         input_bytes = self.input_dtype.itemsize * np.prod(self.input_shape)
@@ -261,8 +154,12 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         input_shm = shared_memory.SharedMemory(name=self.input_shm_name)
         output_shm = shared_memory.SharedMemory(name=self.output_shm_name)
 
-        input_data = np.ndarray(shape=[self.snapshot.grid_size, self.input_dimension], dtype=np.float32, buffer=input_shm.buf)
-        output_data = np.ndarray(shape=[self.snapshot.grid_size, self.output_dimension], dtype=np.float32, buffer=output_shm.buf)
+        input_data = np.ndarray(shape=[self.snapshot.grid_size,
+                                       self.input_dimension],
+                                dtype=np.float32, buffer=input_shm.buf)
+        output_data = np.ndarray(shape=[self.snapshot.grid_size,
+                                        self.output_dimension],
+                                 dtype=np.float32, buffer=output_shm.buf)
 
         batch = self.indices[idx*self.batch_size:(idx+1)*self.batch_size]
 
@@ -294,8 +191,8 @@ class LazyLoadDatasetSingle(torch.utils.data.Dataset):
         """
         return self.len
 
-    # For this class, instead of mixing the datasets, we just shuffle the indices
-    # and leave the dataset order unchanged
+    # For this class, instead of mixing the datasets, we just shuffle the
+    # indices and leave the dataset order unchanged
     def mix_datasets(self):
         # NOTE: It seems that the shuffled access to the shared memory performance is much reduced (relative to the FastTensorDataset).
         # To regain performance, can rewrite to shuffle the datasets like in the existing LazyLoadDataset. Another option might be

@@ -10,7 +10,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from mala.common.parallelizer import barrier
+from mala.common.parallelizer import barrier, printout
 from mala.datahandling.snapshot import Snapshot
 
 
@@ -126,8 +126,6 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         file_index : i
             File to be read.
         """
-        printout("LazyLoadDataset:get_new_data...", min_verbosity=2)
-        t0 = time.time()
         # Load the data into RAM.
         if self.snapshot_list[file_index].snapshot_type == "numpy":
             self.input_data = self.descriptor_calculator. \
@@ -172,10 +170,7 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         # Save which data we have currently loaded.
         self.currently_loaded_file = file_index
 
-        t1 = time.time()
-        printout(f"LazyLoadDataset:get_new_data time {t1 - t0}", min_verbosity=2)
-
-    def _get_file_index(self, idx, is_slice=False):
+    def _get_file_index(self, idx, is_slice=False, is_start=False):
         file_index = None
         index_in_file = idx
         if is_slice:
