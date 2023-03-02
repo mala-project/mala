@@ -54,9 +54,9 @@ class Trainer(Runner):
         self.patience_counter = 0
         self.last_epoch = 0
         self.last_loss = None
-        self.training_data_loader = None
-        self.validation_data_loader = None
-        self.test_data_loader = None
+        self.training_data_loaders = []
+        self.validation_data_loaders = []
+        self.test_data_loaders = []
 
         # Samplers for the horovod case.
         self.train_sampler = None
