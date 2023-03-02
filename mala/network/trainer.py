@@ -15,13 +15,13 @@ from torch import optim
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from mala.common.parameters import Parameters
 from mala.common.parameters import printout
-from mala.datahandling.data_handler import DataHandler
-from mala.datahandling.data_scaler import DataScaler
 from mala.datahandling.fast_tensor_dataset import FastTensorDataset
 from mala.network.network import Network
 from mala.network.runner import Runner
+from mala.datahandling.lazy_load_dataset_single import LazyLoadDatasetSingle
+from mala.datahandling.multi_lazy_load_data_loader import \
+    MultiLazyLoadDataLoader
 
 
 class Trainer(Runner):
@@ -785,7 +785,7 @@ class Trainer(Runner):
                 actual_outputs, \
                 predicted_outputs = self.\
                     _forward_entire_snapshot(snapshot_number,
-                                             data_set, data_set_type,
+                                             data_sets, data_set_type,
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)
                 calculator = self.data.target_calculator
@@ -833,7 +833,7 @@ class Trainer(Runner):
 
                 actual_outputs, predicted_outputs = self.\
                     _forward_entire_snapshot(snapshot_number-offset_snapshots,
-                                             data_set, data_set_type[0:2],
+                                             data_sets, data_set_type[0:2],
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)
                 calculator = self.data.target_calculator
