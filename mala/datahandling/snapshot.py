@@ -48,6 +48,10 @@ class Snapshot(JSONSerializable):
 
         Replaces the old approach of MALA to have a separate list.
         Default is None.
+
+    selection_mask : None or [boolean]
+        If None, entire snapshot is loaded, if [boolean], it is used as a
+        mask to select which examples are loaded
     """
 
     def __init__(self, input_npy_file, input_npy_directory,
@@ -55,7 +59,7 @@ class Snapshot(JSONSerializable):
                  snapshot_function,
                  input_units="", output_units="",
                  calculation_output="",
-                 snapshot_type="openpmd"):
+                 snapshot_type="openpmd", selection_mask=None):
         super(Snapshot, self).__init__()
 
         # Inputs.
@@ -83,6 +87,20 @@ class Snapshot(JSONSerializable):
         self.grid_size = None
         self.input_dimension = None
         self.output_dimension = None
+    
+        # Mask determining which examples from the snapshot to use
+        if isinstance(selection_mask, np.ndarray):
+            self.selection_mask = selection_mask.tolist()
+        else: 
+            self.selection_mask = selection_mask
+
+
+    def set_selection_mask(self, selection_mask):
+        if isinstance(selection_mask, np.ndarray):
+            self.selection_mask = selection_mask.tolist()
+        else: 
+            self.selection_mask = selection_mask
+
 
     @classmethod
     def from_json(cls, json_dict):
@@ -106,7 +124,8 @@ class Snapshot(JSONSerializable):
                                   json_dict["output_npy_file"],
                                   json_dict["output_npy_directory"],
                                   json_dict["snapshot_function"],
-                                  json_dict["snapshot_type"])
+                                  json_dict["snapshot_type"],
+                                  json_dict["selection_mask"])
         for key in json_dict:
             setattr(deserialized_object, key, json_dict[key])
         return deserialized_object
