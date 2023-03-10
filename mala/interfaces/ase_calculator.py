@@ -16,15 +16,8 @@ class MALA(Calculator):
 
     Parameters
     ----------
-    params : mala.common.parametes.Parameters
-        Parameters used to create this Interface.
-
-    network : mala.network.network.Network
-        Network which is being used for the run.
-
-    data : mala.datahandling.data_handler.DataHandler
-        DataHandler; not really used in the classical sense, more as a
-        collector of properties and objects (such as a target calculator).
+    model_name : string
+        Name of the model to be loaded.
 
     reference_data : list
         A list containing
@@ -40,22 +33,17 @@ class MALA(Calculator):
 
     implemented_properties = ['energy', 'forces']
 
-    def __init__(self, params: Parameters, network: Network,
-                 data: DataHandler, reference_data):
+    def __init__(self, model_name, reference_data):
         super(MALA, self).__init__()
 
         # Copy the MALA relevant objects.
-        self.params: Parameters = params
-        if self.params.targets.target_type != "LDOS":
+        self.predictor: Predictor
+        self.mala_parameters, self.network, self.data_handler, self.predictor = \
+            Predictor.load_run(model_name)
+
+        if self.mala_parameters.targets.target_type != "LDOS":
             raise Exception("The MALA calculator currently only works with the"
                             "LDOS.")
-
-        self.network: Network = network
-        self.data_handler: DataHandler = data
-
-        # Prepare for prediction.
-        self.predictor = Predictor(self.params, self.network,
-                                   self.data_handler)
 
         # Get critical values from a reference file (cutoff, temperature, etc.)
         self.data_handler.target_calculator.\
@@ -166,7 +154,7 @@ class MALA(Calculator):
             Path to file in which to store the Calculator.
 
         """
-        self.params.save(filename+".params.json")
+        self.mala_parameters.save(filename + ".params.json")
         self.network.save_network(filename+".network.pth")
         self.data_handler.input_data_scaler.save(filename+".iscaler.pkl")
         self.data_handler.output_data_scaler.save(filename+".oscaler.pkl")
