@@ -295,13 +295,10 @@ class Trainer(Runner):
                 training_loss = training_loss_sum.item() / \
                                 len(self.training_data_loader)
 
-            t0 = time.time()
             vloss = self.__validate_network(self.network,
                                             "validation",
                                             self.parameters.
                                             during_training_metric)
-            t1 = time.time()
-            printout(f"validation time: {t1 - t0}", min_verbosity=2)
 
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
@@ -336,15 +333,12 @@ class Trainer(Runner):
             if self.parameters._configuration["gpu"]:
                 torch.cuda.synchronize()
 
-            t0 = time.time()
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
             if self.parameters.use_shuffling_for_samplers:
                 self.data.mix_datasets()
             if self.parameters._configuration["gpu"]:
                 torch.cuda.synchronize()
-            t1 = time.time()
-            printout(f"mix datasets time: {t1 - t0}", min_verbosity=2)
 
             # If a scheduler is used, update it.
             if self.scheduler is not None:
