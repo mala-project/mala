@@ -20,9 +20,8 @@ assert os.path.exists("be_model.zip"), "Be model missing, run ex01 first."
 
 # Set up the ASE objects.
 atoms = read(os.path.join(data_path, "Be_snapshot1.out"))
-calculator = mala.MALA("be_model", reference_data=["espresso-out",
-                                                   os.path.join(data_path,
-                                                                "Be_snapshot1.out")])
+calculator = mala.MALA.load_model("be_model", os.path.join(data_path,
+                                                           "Be_snapshot1.out"))
 
 ####################
 # PARAMETERS

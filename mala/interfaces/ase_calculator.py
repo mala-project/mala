@@ -16,8 +16,15 @@ class MALA(Calculator):
 
     Parameters
     ----------
-    model_name : string
-        Name of the model to be loaded.
+    params : mala.common.parametes.Parameters
+        Parameters used to create this Interface.
+
+    network : mala.network.network.Network
+        Network which is being used for the run.
+
+    data : mala.datahandling.data_handler.DataHandler
+        DataHandler; not really used in the classical sense, more as a
+        collector of properties and objects (such as a target calculator).
 
     reference_data : list
         A list containing
@@ -33,25 +40,56 @@ class MALA(Calculator):
 
     implemented_properties = ['energy', 'forces']
 
-    def __init__(self, model_name, reference_data):
+    def __init__(self, params: Parameters, network: Network,
+                 data: DataHandler, reference_data,
+                 predictor=None):
         super(MALA, self).__init__()
 
         # Copy the MALA relevant objects.
-        self.predictor: Predictor
-        self.mala_parameters, self.network, self.data_handler, self.predictor = \
-            Predictor.load_run(model_name)
-
+        self.mala_parameters: Parameters = params
         if self.mala_parameters.targets.target_type != "LDOS":
             raise Exception("The MALA calculator currently only works with the"
                             "LDOS.")
 
+        self.network: Network = network
+        self.data_handler: DataHandler = data
+
+        # Prepare for prediction.
+        if predictor is None:
+            self.predictor = Predictor(self.mala_parameters, self.network,
+                                       self.data_handler)
+        else:
+            self.predictor = predictor
+
         # Get critical values from a reference file (cutoff, temperature, etc.)
         self.data_handler.target_calculator.\
-            read_additional_calculation_data(reference_data[1],
-                                             reference_data[0])
+            read_additional_calculation_data(reference_data)
 
         # Needed for e.g. Monte Carlo.
         self.last_energy_contributions = {}
+
+    @classmethod
+    def load_model(cls, run_name, reference_data, path="./"):
+        """
+        Load a model to use for the calculator.
+
+        Only supports zipped models with .json parameters. No legacy
+        models supported.
+
+        Parameters
+        ----------
+        run_name : str
+            Name under which the model is saved.
+
+        path : str
+            Path where the model is saved.
+        """
+        loaded_params, loaded_network, \
+            new_datahandler, loaded_runner = Predictor.\
+            load_run(run_name, path=path)
+        calculator = cls(loaded_params, loaded_network, new_datahandler,
+                         reference_data, predictor=loaded_runner)
+        return calculator
 
     def calculate(self, atoms=None, properties=['energy'],
                   system_changes=all_changes):
