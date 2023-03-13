@@ -400,6 +400,13 @@ class ParametersDescriptors(ParametersBase):
         if _int_value > 0:
             self._snap_switchflag = 1
 
+    def _update_mpi(self, new_mpi):
+        self._configuration["mpi"] = new_mpi
+
+        # There may have been a serial or parallel run before that is now
+        # no longer valid.
+        self.lammps_compute_file = ""
+
 
 class ParametersTargets(ParametersBase):
     """
