@@ -471,7 +471,14 @@
         <span class="k">if</span> <span class="n">_int_value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_snap_switchflag</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">if</span> <span class="n">_int_value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_snap_switchflag</span> <span class="o">=</span> <span class="mi">1</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_snap_switchflag</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_update_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_mpi</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;mpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_mpi</span>
+
+        <span class="c1"># There may have been a serial or parallel run before that is now</span>
+        <span class="c1"># no longer valid.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lammps_compute_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="ParametersTargets"><a class="viewcode-back" href="../../../api/mala.common.parameters.html#mala.common.parameters.ParametersTargets">[docs]</a><span class="k">class</span> <span class="nc">ParametersTargets</span><span class="p">(</span><span class="n">ParametersBase</span><span class="p">):</span>

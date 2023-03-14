@@ -368,13 +368,10 @@
                 <span class="n">training_loss</span> <span class="o">=</span> <span class="n">training_loss_sum</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> \
                                 <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_data_loader</span><span class="p">)</span>
 
-            <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
             <span class="n">vloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__validate_network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
                                             <span class="s2">&quot;validation&quot;</span><span class="p">,</span>
                                             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span>
                                             <span class="n">during_training_metric</span><span class="p">)</span>
-            <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-            <span class="n">printout</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validation time: </span><span class="si">{</span><span class="n">t1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_full</span><span class="o">.</span><span class="n">use_horovod</span><span class="p">:</span>
                 <span class="n">vloss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__average_validation</span><span class="p">(</span><span class="n">vloss</span><span class="p">,</span> <span class="s1">&#39;average_loss&#39;</span><span class="p">)</span>
@@ -409,15 +406,12 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]:</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
 
-            <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
             <span class="c1"># Mix the DataSets up (this function only does something</span>
             <span class="c1"># in the lazy loading case).</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">use_shuffling_for_samplers</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mix_datasets</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_configuration</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">]:</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-            <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-            <span class="n">printout</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mix datasets time: </span><span class="si">{</span><span class="n">t1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">min_verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
             <span class="c1"># If a scheduler is used, update it.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

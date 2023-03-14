@@ -114,12 +114,13 @@
     <span class="n">implemented_properties</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">,</span> <span class="s1">&#39;forces&#39;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Network</span><span class="p">,</span>
-                 <span class="n">data</span><span class="p">:</span> <span class="n">DataHandler</span><span class="p">,</span> <span class="n">reference_data</span><span class="p">):</span>
+                 <span class="n">data</span><span class="p">:</span> <span class="n">DataHandler</span><span class="p">,</span> <span class="n">reference_data</span><span class="p">,</span>
+                 <span class="n">predictor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MALA</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="c1"># Copy the MALA relevant objects.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span> <span class="n">Parameters</span> <span class="o">=</span> <span class="n">params</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">target_type</span> <span class="o">!=</span> <span class="s2">&quot;LDOS&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mala_parameters</span><span class="p">:</span> <span class="n">Parameters</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mala_parameters</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">target_type</span> <span class="o">!=</span> <span class="s2">&quot;LDOS&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The MALA calculator currently only works with the&quot;</span>
                             <span class="s2">&quot;LDOS.&quot;</span><span class="p">)</span>
 
@@ -127,16 +128,41 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">:</span> <span class="n">DataHandler</span> <span class="o">=</span> <span class="n">data</span>
 
         <span class="c1"># Prepare for prediction.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="n">Predictor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
-                                   <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">predictor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="n">Predictor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mala_parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor</span>
 
         <span class="c1"># Get critical values from a reference file (cutoff, temperature, etc.)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
-            <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">reference_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                                             <span class="n">reference_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">reference_data</span><span class="p">)</span>
 
         <span class="c1"># Needed for e.g. Monte Carlo.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_energy_contributions</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="MALA.load_model"><a class="viewcode-back" href="../../../api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.load_model">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">reference_data</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a model to use for the calculator.</span>
+
+<span class="sd">        Only supports zipped models with .json parameters. No legacy</span>
+<span class="sd">        models supported.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        run_name : str</span>
+<span class="sd">            Name under which the model is saved.</span>
+
+<span class="sd">        path : str</span>
+<span class="sd">            Path where the model is saved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">loaded_params</span><span class="p">,</span> <span class="n">loaded_network</span><span class="p">,</span> \
+            <span class="n">new_datahandler</span><span class="p">,</span> <span class="n">loaded_runner</span> <span class="o">=</span> <span class="n">Predictor</span><span class="o">.</span>\
+            <span class="n">load_run</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">calculator</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">loaded_params</span><span class="p">,</span> <span class="n">loaded_network</span><span class="p">,</span> <span class="n">new_datahandler</span><span class="p">,</span>
+                         <span class="n">reference_data</span><span class="p">,</span> <span class="n">predictor</span><span class="o">=</span><span class="n">loaded_runner</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">calculator</span></div>
 
 <div class="viewcode-block" id="MALA.calculate"><a class="viewcode-back" href="../../../api/mala.interfaces.ase_calculator.html#mala.interfaces.ase_calculator.MALA.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span>
                   <span class="n">system_changes</span><span class="o">=</span><span class="n">all_changes</span><span class="p">):</span>
@@ -239,7 +265,7 @@
 <span class="sd">            Path to file in which to store the Calculator.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.params.json&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mala_parameters</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s2">&quot;.params.json&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">save_network</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.network.pth&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">input_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.iscaler.pkl&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_handler</span><span class="o">.</span><span class="n">output_data_scaler</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="o">+</span><span class="s2">&quot;.oscaler.pkl&quot;</span><span class="p">)</span>
