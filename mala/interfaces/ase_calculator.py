@@ -41,12 +41,13 @@ class MALA(Calculator):
     implemented_properties = ['energy', 'forces']
 
     def __init__(self, params: Parameters, network: Network,
-                 data: DataHandler, reference_data):
+                 data: DataHandler, reference_data,
+                 predictor=None):
         super(MALA, self).__init__()
 
         # Copy the MALA relevant objects.
-        self.params: Parameters = params
-        if self.params.targets.target_type != "LDOS":
+        self.mala_parameters: Parameters = params
+        if self.mala_parameters.targets.target_type != "LDOS":
             raise Exception("The MALA calculator currently only works with the"
                             "LDOS.")
 
@@ -54,16 +55,41 @@ class MALA(Calculator):
         self.data_handler: DataHandler = data
 
         # Prepare for prediction.
-        self.predictor = Predictor(self.params, self.network,
-                                   self.data_handler)
+        if predictor is None:
+            self.predictor = Predictor(self.mala_parameters, self.network,
+                                       self.data_handler)
+        else:
+            self.predictor = predictor
 
         # Get critical values from a reference file (cutoff, temperature, etc.)
         self.data_handler.target_calculator.\
-            read_additional_calculation_data(reference_data[1],
-                                             reference_data[0])
+            read_additional_calculation_data(reference_data)
 
         # Needed for e.g. Monte Carlo.
         self.last_energy_contributions = {}
+
+    @classmethod
+    def load_model(cls, run_name, reference_data, path="./"):
+        """
+        Load a model to use for the calculator.
+
+        Only supports zipped models with .json parameters. No legacy
+        models supported.
+
+        Parameters
+        ----------
+        run_name : str
+            Name under which the model is saved.
+
+        path : str
+            Path where the model is saved.
+        """
+        loaded_params, loaded_network, \
+            new_datahandler, loaded_runner = Predictor.\
+            load_run(run_name, path=path)
+        calculator = cls(loaded_params, loaded_network, new_datahandler,
+                         reference_data, predictor=loaded_runner)
+        return calculator
 
     def calculate(self, atoms=None, properties=['energy'],
                   system_changes=all_changes):
@@ -166,7 +192,7 @@ class MALA(Calculator):
             Path to file in which to store the Calculator.
 
         """
-        self.params.save(filename+".params.json")
+        self.mala_parameters.save(filename + ".params.json")
         self.network.save_network(filename+".network.pth")
         self.data_handler.input_data_scaler.save(filename+".iscaler.pkl")
         self.data_handler.output_data_scaler.save(filename+".oscaler.pkl")
