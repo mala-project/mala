@@ -86,12 +86,13 @@ class Runner:
         if save_runner:
             files += [optimizer_file]
         if zip_run:
-            additional_calculation_file = run_name+".info.json"
-            self.data.target_calculator.\
-                read_additional_calculation_data(additional_calculation_data)
-            self.data.target_calculator.\
-                write_additional_calculation_data(additional_calculation_file)
-            files.append(additional_calculation_file)
+            if additional_calculation_data is not None:
+                additional_calculation_file = run_name+".info.json"
+                self.data.target_calculator.\
+                    read_additional_calculation_data(additional_calculation_data)
+                self.data.target_calculator.\
+                    write_additional_calculation_data(additional_calculation_file)
+                files.append(additional_calculation_file)
             with ZipFile(os.path.join(save_path, run_name+".zip"), 'w',
                          compression=ZIP_STORED) as zip_obj:
                 for file in files:
