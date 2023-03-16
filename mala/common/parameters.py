@@ -632,12 +632,15 @@ class ParametersRunning(ParametersBase):
         early stopping is performed. Default: 0.
 
     early_stopping_threshold : float
-        If the validation accuracy does not improve by at least threshold for
-        early_stopping_epochs epochs, training is terminated:
-        validation_loss < validation_loss_old * (1+early_stopping_threshold),
-        or patience counter will go up.
+        Minimum fractional reduction in validation loss required to avoid
+        early stopping, e.g. a value of 0.05 means that validation loss must
+        decrease by 5% within early_stopping_epochs epochs or the training
+        will be stopped early. More explicitly,
+        validation_loss < validation_loss_old * (1-early_stopping_threshold)
+        or the patience counter goes up.
         Default: 0. Numbers bigger than 0 can make early stopping very
-        aggresive.
+        aggresive, while numbers less than 0 make the trainer very forgiving
+        of loss increase.
 
     learning_rate_scheduler : string
         Learning rate scheduler to be used. If not None, an instance of the
