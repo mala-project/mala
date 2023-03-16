@@ -41,7 +41,7 @@ class MALA(Calculator):
     implemented_properties = ['energy', 'forces']
 
     def __init__(self, params: Parameters, network: Network,
-                 data: DataHandler, reference_data,
+                 data: DataHandler, reference_data=None,
                  predictor=None):
         super(MALA, self).__init__()
 
@@ -61,15 +61,17 @@ class MALA(Calculator):
         else:
             self.predictor = predictor
 
-        # Get critical values from a reference file (cutoff, temperature, etc.)
-        self.data_handler.target_calculator.\
-            read_additional_calculation_data(reference_data)
+        if reference_data is not None:
+            # Get critical values from a reference file (cutoff,
+            # temperature, etc.)
+            self.data_handler.target_calculator.\
+                read_additional_calculation_data(reference_data)
 
         # Needed for e.g. Monte Carlo.
         self.last_energy_contributions = {}
 
     @classmethod
-    def load_model(cls, run_name, reference_data, path="./"):
+    def load_model(cls, run_name, path="./"):
         """
         Load a model to use for the calculator.
 
@@ -88,7 +90,7 @@ class MALA(Calculator):
             new_datahandler, loaded_runner = Predictor.\
             load_run(run_name, path=path)
         calculator = cls(loaded_params, loaded_network, new_datahandler,
-                         reference_data, predictor=loaded_runner)
+                         predictor=loaded_runner)
         return calculator
 
     def calculate(self, atoms=None, properties=['energy'],

@@ -421,6 +421,11 @@ class Target(PhysicalData):
                 self.number_of_electrons_exact = self.electrons_per_atom * \
                                                  len(self.atoms)
         elif data_type == "json":
+            if isinstance(data, str):
+                json_dict = json.load(open(data, encoding="utf-8"))
+            else:
+                json_dict = json.load(data)
+
             self.fermi_energy_dft = None
             self.temperature = None
             self.number_of_electrons_exact = None
@@ -430,8 +435,6 @@ class Target(PhysicalData):
             self.grid_dimensions = [0, 0, 0]
             self.atoms = None
 
-            with open(data, encoding="utf-8") as json_file:
-                json_dict = json.load(json_file)
             for key in json_dict:
                 if not isinstance(json_dict[key], dict):
                     setattr(self, key, json_dict[key])

@@ -91,10 +91,24 @@ class Predictor(Runner):
         predicted_ldos : numpy.array
             Precicted LDOS for these atomic positions.
         """
-        self.data.grid_dimension = self.parameters.inference_data_grid
-        self.data.grid_size = self.data.grid_dimension[0] * \
-                              self.data.grid_dimension[1] * \
-                              self.data.grid_dimension[2]
+        # If there is no inference data grid, we will try to get the grid
+        # dimensions from the target calculator, because some data may
+        # have been saved there.
+
+        if np.prod(self.parameters.inference_data_grid) > 0:
+            self.data.grid_dimension = self.parameters.inference_data_grid
+        else:
+            # We need to check if we're in size transfer mode.
+            old_cell = self.data.target_calculator.atoms.get_cell()
+            new_cell = atoms.get_cell()
+
+            # We only need the diagonal elements.
+            factor = np.diag(new_cell)/np.diag(old_cell)
+            factor = factor.astype(int)
+            self.data.grid_dimension = \
+                factor * self.data.target_calculator.grid_dimensions
+
+        self.data.grid_size = np.prod(self.data.grid_dimension)
 
         # Make sure no data lingers in the target calculator.
         self.data.target_calculator.invalidate_target()
