@@ -885,25 +885,27 @@
                 <span class="c1"># ordered.</span>
                 <span class="n">calculator</span><span class="o">.</span>\
                     <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
-                <span class="n">fe_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
-                    <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
-                <span class="n">be_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
-                    <span class="n">get_band_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span><span class="p">)</span>
 
                 <span class="k">try</span><span class="p">:</span>
+                    <span class="n">fe_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span> \
+                        <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                    <span class="n">be_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span> \
+                        <span class="n">get_band_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">,</span> <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span><span class="p">)</span>
+
                     <span class="n">fe_predicted</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
                         <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
                     <span class="n">be_predicted</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
                         <span class="n">get_band_energy</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">,</span>
                                         <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span><span class="p">)</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">be_predicted</span> <span class="o">-</span> <span class="n">be_actual</span><span class="p">)</span> <span class="o">*</span>
+                                  <span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)))</span>
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                     <span class="c1"># If the training went badly, it might be that the above</span>
                     <span class="c1"># code results in an error, due to the LDOS being so wrong</span>
                     <span class="c1"># that the estimation of the self consistent Fermi energy</span>
                     <span class="c1"># fails.</span>
-                    <span class="n">be_predicted</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">be_predicted</span><span class="o">-</span><span class="n">be_actual</span><span class="p">)</span> <span class="o">*</span>
-                              <span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)))</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
+
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">validation_type</span> <span class="o">==</span> <span class="s2">&quot;total_energy&quot;</span><span class="p">:</span>
             <span class="c1"># Get optimal batch size and number of batches per snapshots.</span>
@@ -933,26 +935,28 @@
                 <span class="c1"># ordered.</span>
                 <span class="n">calculator</span><span class="o">.</span>\
                     <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_snapshot_calculation_output</span><span class="p">(</span><span class="n">snapshot_number</span><span class="p">))</span>
-                <span class="n">fe_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
-                    <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
-                <span class="n">te_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
-                    <span class="n">get_total_energy</span><span class="p">(</span><span class="n">ldos_data</span><span class="o">=</span><span class="n">actual_outputs</span><span class="p">,</span>
-                                     <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span><span class="p">)</span>
 
                 <span class="k">try</span><span class="p">:</span>
+                    <span class="n">fe_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span> \
+                        <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">actual_outputs</span><span class="p">)</span>
+                    <span class="n">te_actual</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span> \
+                        <span class="n">get_total_energy</span><span class="p">(</span><span class="n">ldos_data</span><span class="o">=</span><span class="n">actual_outputs</span><span class="p">,</span>
+                                         <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_actual</span><span class="p">)</span>
+
                     <span class="n">fe_predicted</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
                         <span class="n">get_self_consistent_fermi_energy</span><span class="p">(</span><span class="n">predicted_outputs</span><span class="p">)</span>
                     <span class="n">te_predicted</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span>\
                         <span class="n">get_total_energy</span><span class="p">(</span><span class="n">ldos_data</span><span class="o">=</span><span class="n">actual_outputs</span><span class="p">,</span>
                                          <span class="n">fermi_energy</span><span class="o">=</span><span class="n">fe_predicted</span><span class="p">)</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">te_predicted</span> <span class="o">-</span> <span class="n">te_actual</span><span class="p">)</span> <span class="o">*</span>
+                                  <span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)))</span>
+
                 <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                     <span class="c1"># If the training went badly, it might be that the above</span>
                     <span class="c1"># code results in an error, due to the LDOS being so wrong</span>
                     <span class="c1"># that the estimation of the self consistent Fermi energy</span>
                     <span class="c1"># fails.</span>
-                    <span class="n">te_predicted</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">te_predicted</span><span class="o">-</span><span class="n">te_actual</span><span class="p">)</span> <span class="o">*</span>
-                              <span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">)))</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
