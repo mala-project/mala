@@ -40,6 +40,7 @@ class Predictor(Runner):
                               self.data.grid_dimension[2]
         self.test_data_loader = None
         self.number_of_batches_per_snapshot = 0
+        self.target_calculator = data.target_calculator
 
     def predict_from_qeout(self, path_to_file, gather_ldos=False):
         """
@@ -71,7 +72,7 @@ class Predictor(Runner):
         return self.predict_for_atoms(self.data.target_calculator.atoms,
                                       gather_ldos=gather_ldos)
 
-    def predict_for_atoms(self, atoms, gather_ldos=False):
+    def predict_for_atoms(self, atoms, gather_ldos=False, temperature=None):
         """
         Get predicted LDOS for an atomic configuration.
 
@@ -85,6 +86,12 @@ class Predictor(Runner):
             are gathered on rank 0, and the pass is performed there.
             Helpful for using multiple CPUs for descriptor calculations
             and only one for network pass.
+
+        temperature : float
+            If not None, this temperature value will be set in the internal
+            target calculator and can be used in subsequent integrations.
+            If None, the default temperature loaded from the model will be
+            used. Temperature has to be given in K.
 
         Returns
         -------
@@ -109,6 +116,10 @@ class Predictor(Runner):
                 factor * self.data.target_calculator.grid_dimensions
 
         self.data.grid_size = np.prod(self.data.grid_dimension)
+
+        # Set the tempetature, if necessary.
+        if temperature is not None:
+            self.data.target_calculator.temperature = temperature
 
         # Make sure no data lingers in the target calculator.
         self.data.target_calculator.invalidate_target()

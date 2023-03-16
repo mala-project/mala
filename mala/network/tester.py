@@ -51,6 +51,7 @@ class Tester(Runner):
         self.output_format = output_format
         if self.output_format != "list" and self.output_format == "mae":
             raise Exception("Wrong output format for testing selected.")
+        self.target_calculator = data.target_calculator
 
     def test_all_snapshots(self):
         """
