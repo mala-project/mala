@@ -183,7 +183,7 @@ Default is “json”.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.runner.Runner.save_run">
-<span class="sig-name descname"><span class="pre">save_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_runner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/runner.html#Runner.save_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.runner.Runner.save_run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">save_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_runner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_calculation_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/runner.html#Runner.save_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.runner.Runner.save_run" title="Permalink to this definition"></a></dt>
 <dd><p>Save the current run.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -195,6 +195,9 @@ then the model will be saved as separate files.</p></li>
 <li><p><strong>save_runner</strong> (<em>bool</em>) – If True, the Runner object will also be saved as object. This
 is unnecessary for most use cases, but used internally when
 a checkpoint is created during model training.</p></li>
+<li><p><strong>additional_calculation_data</strong> (<em>string</em>) – If not None, then additional calculation data will be copied
+from this file and included in the saved model. Only has an effect
+in the .zip mode.</p></li>
 </ul>
 </dd>
 </dl>

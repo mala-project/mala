@@ -113,6 +113,7 @@
                               <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_data_loader</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_batches_per_snapshot</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_calculator</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span>
 
 <div class="viewcode-block" id="Predictor.predict_from_qeout"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_from_qeout">[docs]</a>    <span class="k">def</span> <span class="nf">predict_from_qeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -144,7 +145,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span>
                                       <span class="n">gather_ldos</span><span class="o">=</span><span class="n">gather_ldos</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Predictor.predict_for_atoms"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_for_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Predictor.predict_for_atoms"><a class="viewcode-back" href="../../../api/mala.network.predictor.html#mala.network.predictor.Predictor.predict_for_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">predict_for_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">gather_ldos</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get predicted LDOS for an atomic configuration.</span>
 
@@ -159,15 +160,39 @@
 <span class="sd">            Helpful for using multiple CPUs for descriptor calculations</span>
 <span class="sd">            and only one for network pass.</span>
 
+<span class="sd">        temperature : float</span>
+<span class="sd">            If not None, this temperature value will be set in the internal</span>
+<span class="sd">            target calculator and can be used in subsequent integrations.</span>
+<span class="sd">            If None, the default temperature loaded from the model will be</span>
+<span class="sd">            used. Temperature has to be given in K.</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        predicted_ldos : numpy.array</span>
 <span class="sd">            Precicted LDOS for these atomic positions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inference_data_grid</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> \
-                              <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> \
-                              <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c1"># If there is no inference data grid, we will try to get the grid</span>
+        <span class="c1"># dimensions from the target calculator, because some data may</span>
+        <span class="c1"># have been saved there.</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inference_data_grid</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inference_data_grid</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># We need to check if we&#39;re in size transfer mode.</span>
+            <span class="n">old_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
+            <span class="n">new_cell</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
+
+            <span class="c1"># We only need the diagonal elements.</span>
+            <span class="n">factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">new_cell</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">old_cell</span><span class="p">)</span>
+            <span class="n">factor</span> <span class="o">=</span> <span class="n">factor</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span> <span class="o">=</span> \
+                <span class="n">factor</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">grid_dimensions</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grid_dimension</span><span class="p">)</span>
+
+        <span class="c1"># Set the tempetature, if necessary.</span>
+        <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
 
         <span class="c1"># Make sure no data lingers in the target calculator.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span><span class="n">invalidate_target</span><span class="p">()</span>

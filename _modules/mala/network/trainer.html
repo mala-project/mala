@@ -202,6 +202,47 @@
     <span class="k">def</span> <span class="nf">load_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span> <span class="n">zip_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">params_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">load_runner</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">prepare_data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a run.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        run_name : str</span>
+<span class="sd">            Name under which the run is saved.</span>
+
+<span class="sd">        path : str</span>
+<span class="sd">            Path where the run is saved.</span>
+
+<span class="sd">        zip_run : bool</span>
+<span class="sd">            If True, MALA will attempt to load from a .zip file. If False,</span>
+<span class="sd">            then separate files will be attempted to be loaded.</span>
+
+<span class="sd">        params_format : str</span>
+<span class="sd">            Can be &quot;json&quot; or &quot;pkl&quot;, depending on what was saved by the model.</span>
+<span class="sd">            Default is &quot;json&quot;.</span>
+
+<span class="sd">        load_runner : bool</span>
+<span class="sd">            If True, a Runner object will be created/loaded for further use.</span>
+
+<span class="sd">        prepare_data : bool</span>
+<span class="sd">            If True, the data will be loaded into memory. This is needed when</span>
+<span class="sd">            continuing a model training.</span>
+
+<span class="sd">        Return</span>
+<span class="sd">        ------</span>
+<span class="sd">        loaded_params : mala.common.parameters.Parameters</span>
+<span class="sd">            The Parameters saved to file.</span>
+
+<span class="sd">        loaded_network : mala.network.network.Network</span>
+<span class="sd">            The network saved to file.</span>
+
+<span class="sd">        new_datahandler : mala.datahandling.data_handler.DataHandler</span>
+<span class="sd">            The data handler reconstructed from file.</span>
+
+<span class="sd">        new_trainer : Trainer</span>
+<span class="sd">            (Optional) The runner reconstructed from file. For Tester and</span>
+<span class="sd">            Predictor class, this is just a newly instantiated object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Trainer</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">load_run</span><span class="p">(</span><span class="n">run_name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
                                             <span class="n">zip_run</span><span class="o">=</span><span class="n">zip_run</span><span class="p">,</span>
                                             <span class="n">params_format</span><span class="o">=</span><span class="n">params_format</span><span class="p">,</span>

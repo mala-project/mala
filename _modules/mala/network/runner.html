@@ -116,7 +116,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__prepare_to_run</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Runner.save_run"><a class="viewcode-back" href="../../../api/mala.network.runner.html#mala.network.runner.Runner.save_run">[docs]</a>    <span class="k">def</span> <span class="nf">save_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_name</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span> <span class="n">zip_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                 <span class="n">save_runner</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                 <span class="n">save_runner</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">additional_calculation_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the current run.</span>
 
@@ -136,6 +136,11 @@
 <span class="sd">            If True, the Runner object will also be saved as object. This</span>
 <span class="sd">            is unnecessary for most use cases, but used internally when</span>
 <span class="sd">            a checkpoint is created during model training.</span>
+
+<span class="sd">        additional_calculation_data : string</span>
+<span class="sd">            If not None, then additional calculation data will be copied</span>
+<span class="sd">            from this file and included in the saved model. Only has an effect</span>
+<span class="sd">            in the .zip mode.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">model_file</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.network.pth&quot;</span>
         <span class="n">iscaler_file</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.iscaler.pkl&quot;</span>
@@ -154,6 +159,13 @@
         <span class="k">if</span> <span class="n">save_runner</span><span class="p">:</span>
             <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">optimizer_file</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">zip_run</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">additional_calculation_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">additional_calculation_file</span> <span class="o">=</span> <span class="n">run_name</span><span class="o">+</span><span class="s2">&quot;.info.json&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                    <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">additional_calculation_data</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                    <span class="n">write_additional_calculation_data</span><span class="p">(</span><span class="n">additional_calculation_file</span><span class="p">)</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">additional_calculation_file</span><span class="p">)</span>
             <span class="k">with</span> <span class="n">ZipFile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">run_name</span><span class="o">+</span><span class="s2">&quot;.zip&quot;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
                          <span class="n">compression</span><span class="o">=</span><span class="n">ZIP_STORED</span><span class="p">)</span> <span class="k">as</span> <span class="n">zip_obj</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
@@ -205,11 +217,13 @@
 <span class="sd">            (Optional) The runner reconstructed from file. For Tester and</span>
 <span class="sd">            Predictor class, this is just a newly instantiated object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">loaded_info</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">zip_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">loaded_network</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.network.pth&quot;</span>
             <span class="n">loaded_iscaler</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.iscaler.pkl&quot;</span>
             <span class="n">loaded_oscaler</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.oscaler.pkl&quot;</span>
             <span class="n">loaded_params</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.params.&quot;</span><span class="o">+</span><span class="n">params_format</span>
+            <span class="n">loaded_info</span> <span class="o">=</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.info.json&quot;</span>
 
             <span class="n">zip_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.zip&quot;</span><span class="p">)</span>
             <span class="k">with</span> <span class="n">ZipFile</span><span class="p">(</span><span class="n">zip_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zip_obj</span><span class="p">:</span>
@@ -217,6 +231,11 @@
                 <span class="n">loaded_network</span> <span class="o">=</span> <span class="n">zip_obj</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">loaded_network</span><span class="p">)</span>
                 <span class="n">loaded_iscaler</span> <span class="o">=</span> <span class="n">zip_obj</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">loaded_iscaler</span><span class="p">)</span>
                 <span class="n">loaded_oscaler</span> <span class="o">=</span> <span class="n">zip_obj</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">loaded_oscaler</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">loaded_info</span> <span class="ow">in</span> <span class="n">zip_obj</span><span class="o">.</span><span class="n">namelist</span><span class="p">():</span>
+                    <span class="n">loaded_info</span> <span class="o">=</span> <span class="n">zip_obj</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">loaded_info</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">loaded_info</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="n">loaded_network</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.network.pth&quot;</span><span class="p">)</span>
             <span class="n">loaded_iscaler</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">run_name</span> <span class="o">+</span> <span class="s2">&quot;.iscaler.pkl&quot;</span><span class="p">)</span>
@@ -232,6 +251,11 @@
         <span class="n">new_datahandler</span> <span class="o">=</span> <span class="n">DataHandler</span><span class="p">(</span><span class="n">loaded_params</span><span class="p">,</span>
                                       <span class="n">input_data_scaler</span><span class="o">=</span><span class="n">loaded_iscaler</span><span class="p">,</span>
                                       <span class="n">output_data_scaler</span><span class="o">=</span><span class="n">loaded_oscaler</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">loaded_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_datahandler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
+                <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">loaded_info</span><span class="p">,</span>
+                                                 <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">prepare_data</span><span class="p">:</span>
             <span class="n">new_datahandler</span><span class="o">.</span><span class="n">prepare_data</span><span class="p">(</span><span class="n">reparametrize_scaler</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 

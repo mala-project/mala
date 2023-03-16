@@ -130,7 +130,7 @@ as an interface to Target and Descriptor objects.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="mala.network.predictor.Predictor.predict_for_atoms">
-<span class="sig-name descname"><span class="pre">predict_for_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_ldos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/predictor.html#Predictor.predict_for_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.predictor.Predictor.predict_for_atoms" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predict_for_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_ldos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mala/network/predictor.html#Predictor.predict_for_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mala.network.predictor.Predictor.predict_for_atoms" title="Permalink to this definition"></a></dt>
 <dd><p>Get predicted LDOS for an atomic configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -140,6 +140,10 @@ as an interface to Target and Descriptor objects.</p></li>
 are gathered on rank 0, and the pass is performed there.
 Helpful for using multiple CPUs for descriptor calculations
 and only one for network pass.</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – If not None, this temperature value will be set in the internal
+target calculator and can be used in subsequent integrations.
+If None, the default temperature loaded from the model will be
+used. Temperature has to be given in K.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
