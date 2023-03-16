@@ -160,6 +160,8 @@ class Runner:
                 loaded_oscaler = zip_obj.open(loaded_oscaler)
                 if loaded_info in zip_obj.namelist():
                     loaded_info = zip_obj.open(loaded_info)
+                else:
+                    loaded_info = None
 
         else:
             loaded_network = os.path.join(path, run_name + ".network.pth")
