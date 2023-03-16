@@ -389,7 +389,7 @@ class Trainer(Runner):
 
             # If early stopping is used, check if we need to do something.
             if self.parameters.early_stopping_epochs > 0:
-                if vloss < vloss_old * (1.0 + self.parameters.
+                if vloss < vloss_old * (1.0 - self.parameters.
                                         early_stopping_threshold):
                     self.patience_counter = 0
                     vloss_old = vloss
