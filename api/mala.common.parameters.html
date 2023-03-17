@@ -1199,12 +1199,15 @@ early stopping is performed. Default: 0.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mala.common.parameters.ParametersRunning.early_stopping_threshold">
 <span class="sig-name descname"><span class="pre">early_stopping_threshold</span></span><a class="headerlink" href="#mala.common.parameters.ParametersRunning.early_stopping_threshold" title="Permalink to this definition"></a></dt>
-<dd><p>If the validation accuracy does not improve by at least threshold for
-early_stopping_epochs epochs, training is terminated:
-validation_loss &lt; validation_loss_old * (1+early_stopping_threshold),
-or patience counter will go up.
+<dd><p>Minimum fractional reduction in validation loss required to avoid
+early stopping, e.g. a value of 0.05 means that validation loss must
+decrease by 5% within early_stopping_epochs epochs or the training
+will be stopped early. More explicitly,
+validation_loss &lt; validation_loss_old * (1-early_stopping_threshold)
+or the patience counter goes up.
 Default: 0. Numbers bigger than 0 can make early stopping very
-aggresive.</p>
+aggresive, while numbers less than 0 make the trainer very forgiving
+of loss increase.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>float</p>

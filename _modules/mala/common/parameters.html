@@ -705,12 +705,15 @@
 <span class="sd">        early stopping is performed. Default: 0.</span>
 
 <span class="sd">    early_stopping_threshold : float</span>
-<span class="sd">        If the validation accuracy does not improve by at least threshold for</span>
-<span class="sd">        early_stopping_epochs epochs, training is terminated:</span>
-<span class="sd">        validation_loss &lt; validation_loss_old * (1+early_stopping_threshold),</span>
-<span class="sd">        or patience counter will go up.</span>
+<span class="sd">        Minimum fractional reduction in validation loss required to avoid</span>
+<span class="sd">        early stopping, e.g. a value of 0.05 means that validation loss must</span>
+<span class="sd">        decrease by 5% within early_stopping_epochs epochs or the training</span>
+<span class="sd">        will be stopped early. More explicitly,</span>
+<span class="sd">        validation_loss &lt; validation_loss_old * (1-early_stopping_threshold)</span>
+<span class="sd">        or the patience counter goes up.</span>
 <span class="sd">        Default: 0. Numbers bigger than 0 can make early stopping very</span>
-<span class="sd">        aggresive.</span>
+<span class="sd">        aggresive, while numbers less than 0 make the trainer very forgiving</span>
+<span class="sd">        of loss increase.</span>
 
 <span class="sd">    learning_rate_scheduler : string</span>
 <span class="sd">        Learning rate scheduler to be used. If not None, an instance of the</span>
