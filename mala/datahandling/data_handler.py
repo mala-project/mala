@@ -20,6 +20,7 @@ from mala.datahandling.lazy_load_dataset_clustered import \
 from mala.descriptors.descriptor import Descriptor
 from mala.targets.target import Target
 from mala.datahandling.fast_tensor_dataset import FastTensorDataset
+import time
 
 from pprint import pprint
 
@@ -222,7 +223,7 @@ class DataHandler:
     # Preparing data
     ######################
 
-    def prepare_data(self, reparametrize_scaler=True, refresh=False):
+    def prepare_data(self, reparametrize_scaler=True, refresh=False, from_arrays_dict=None):
         """
         Prepare the data to be used in a training process.
 
@@ -275,13 +276,14 @@ class DataHandler:
                 self.nr_training_data != 0:
             printout("Data scalers already initilized, loading data to RAM.",
                      min_verbosity=0)
-            self.__load_data("training", "inputs")
-            self.__load_data("training", "outputs")
+            self.__load_data("training", "inputs",  from_arrays_dict=from_arrays_dict)
+            self.__load_data("training", "outputs", from_arrays_dict=from_arrays_dict)
 
-        # Build Datasets.
-        printout("Build datasets.", min_verbosity=1)
-        self.__build_datasets()
-        printout("Build dataset: Done.", min_verbosity=0)
+        if not refresh:
+            # Build Datasets.
+            printout("Build datasets.", min_verbosity=1)
+            self.__build_datasets()
+            printout("Build dataset: Done.", min_verbosity=0)
 
         # After the loading is done, target data can safely be saved again.
         self.target_calculator.save_target_data = True
@@ -609,7 +611,7 @@ class DataHandler:
         else:
             raise Exception("Wrong parameter for data splitting provided.")
 
-        if not self.parameters.use_lazy_loading:# and not refresh:
+        if not self.parameters.use_lazy_loading and not refresh:
             self.__allocate_arrays()        
 
         # Reordering the lists.
@@ -644,7 +646,7 @@ class DataHandler:
                                               dtype=np.float32)
         
 
-    def __load_data(self, function, data_type):
+    def __load_data(self, function, data_type, from_arrays_dict=None):
         """
         Load data into the appropriate arrays.
 
@@ -657,6 +659,8 @@ class DataHandler:
         data_type : string
             Can be "input" or "output".
         """
+        start = time.time()
+
         if function != "training" and function != "test" and \
                 function != "validation":
             raise Exception("Unknown snapshot type detected.")
@@ -674,7 +678,12 @@ class DataHandler:
 
         snapshot_counter = 0
         gs_old = 0
-        for snapshot in self.parameters.snapshot_directories_list:
+
+        print(f'ttt load_data 0 initialize:                {time.time() - start}')
+
+        for i, snapshot in enumerate(self.parameters.snapshot_directories_list):
+            mid = time.time()
+
             # get the snapshot grid size
             gs_new = snapshot.grid_size
 
@@ -689,7 +698,43 @@ class DataHandler:
                                         snapshot.output_npy_file)
                     units = snapshot.output_units
 
-                if snapshot.snapshot_type == "numpy":
+                # Pull from existing array rather than file
+                if from_arrays_dict is not None:
+                    #print(f'Fastloaded: {from_arrays_dict[i].shape} -  {from_arrays_dict[i]}')
+                    #print(f'units = {units}')
+                    #arr0 = from_arrays_dict[i]
+                    #print(f'arr0 {arr0.shape}:  {arr0}')
+                    #arr1 = from_arrays_dict[i][:, :, :, calculator._feature_mask():]
+                    #print(f'arr1 {arr1.shape}:  {arr1}')
+                    #calculator._process_loaded_array(from_arrays_dict[i][:, :, :, calculator._feature_mask():][snapshot.selection_mask], units=units)
+                    #print(f'arr2 {arr1.shape}:  {arr1}')
+
+                    # Update data already in tensor form
+                    if torch.is_tensor(getattr(self, array)): 
+                        getattr(self, array)[gs_old : gs_old + gs_new, :] =\
+                            torch.from_numpy(from_arrays_dict[(i, data_type)]\
+                            [:, calculator._feature_mask():]\
+                            [snapshot.selection_mask])
+
+                    # Update a fresh numpy array
+                    else:        
+                        getattr(self, array)[gs_old : gs_old + gs_new, :] =\
+                            from_arrays_dict[(i, data_type)]\
+                            [:, calculator._feature_mask():]\
+                            [snapshot.selection_mask]
+
+                    print(f'ttt load_data 1 existing_assign:           {time.time() - mid}')
+                    mid = time.time()
+
+                    calculator._process_loaded_array(getattr(self,array)[gs_old : gs_old + gs_new, :], units=units)
+                    
+                    print(f'ttt load_data 2 existing_process:          {time.time() - mid}')
+                    mid = time.time()
+
+                    print(f'Fastloaded: {getattr(self,array)[gs_old : gs_old + gs_new, :].shape} {getattr(self,array)[gs_old : gs_old + gs_new, :]}')
+
+                # Pull directly from file
+                elif snapshot.snapshot_type == "numpy":
                     calculator.read_from_numpy_file(
                         file,
                         units=units,
@@ -713,32 +758,36 @@ class DataHandler:
         # test/tensor_memory.py
         # Also, the following bit does not work with getattr, so I had to
         # hard code it. If someone has a smart idea to circumvent this, I am
-        # all ears.
-        if data_type == "inputs":
-            if function == "training":
-                self.training_data_inputs = torch.\
-                    from_numpy(self.training_data_inputs).float()
+        # all ears
+        if not torch.is_tensor(getattr(self, array)): 
+            if data_type == "inputs":
+                if function == "training":
+                    self.training_data_inputs = torch.\
+                        from_numpy(self.training_data_inputs).float()
 
-            if function == "validation":
-                self.validation_data_inputs = torch.\
-                    from_numpy(self.validation_data_inputs).float()
+                if function == "validation":
+                    self.validation_data_inputs = torch.\
+                        from_numpy(self.validation_data_inputs).float()
 
-            if function == "test":
-                self.test_data_inputs = torch.\
-                    from_numpy(self.test_data_inputs).float()
+                if function == "test":
+                    self.test_data_inputs = torch.\
+                        from_numpy(self.test_data_inputs).float()
 
-        if data_type == "outputs":
-            if function == "training":
-                self.training_data_outputs = torch.\
-                    from_numpy(self.training_data_outputs).float()
+            if data_type == "outputs":
+                if function == "training":
+                    self.training_data_outputs = torch.\
+                        from_numpy(self.training_data_outputs).float()
 
-            if function == "validation":
-                self.validation_data_outputs = torch.\
-                    from_numpy(self.validation_data_outputs).float()
+                if function == "validation":
+                    self.validation_data_outputs = torch.\
+                        from_numpy(self.validation_data_outputs).float()
 
-            if function == "test":
-                self.test_data_outputs = torch.\
-                    from_numpy(self.test_data_outputs).float()
+                if function == "test":
+                    self.test_data_outputs = torch.\
+                        from_numpy(self.test_data_outputs).float()
+
+            print(f'ttt load_data 3 existing_tensorize:            {time.time() - mid}')
+            print(f'tttt load_data 4 total:                        {time.time() - start}')
                 
     def __build_datasets(self):
         """Build the DataSets that are used during training."""
