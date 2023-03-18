@@ -100,6 +100,9 @@ class Snapshot(JSONSerializable):
             self.selection_mask = selection_mask.tolist()
         else: 
             self.selection_mask = selection_mask
+        if selection_mask is not None:
+            self.grid_size = sum(self.selection_mask)
+        # TODO also adjust other dimensinot params
 
 
     @classmethod

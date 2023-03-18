@@ -279,11 +279,120 @@ class DataHandler:
             self.__load_data("training", "inputs",  from_arrays_dict=from_arrays_dict)
             self.__load_data("training", "outputs", from_arrays_dict=from_arrays_dict)
 
+        # Build Datasets (unless
         if not refresh:
-            # Build Datasets.
             printout("Build datasets.", min_verbosity=1)
             self.__build_datasets()
             printout("Build dataset: Done.", min_verbosity=0)
+
+        # After the loading is done, target data can safely be saved again.
+        self.target_calculator.save_target_data = True
+        
+        # Wait until all ranks are finished with data preparation.
+        # It is not uncommon that ranks might be asynchronous in their
+        # data preparation by a small amount of minutes. If you notice
+        # an elongated wait time at this barrier, check that your file system
+        # allows for parallel I/O.
+        barrier()
+
+    def refresh_data(self, from_arrays_dict=None, partitions=['tr','va','te']):
+        """
+        Replace tr, va, te data for next generation of active learning.
+
+
+        Parameters
+        ----------
+        from_arrays_dict : dict or None
+            If None, load new data from files, if not None, has the form
+            {(i, data_type): data} where i is the index of the snapshot
+            for to slice data of data_type (inputs or outputs) from data.
+
+        partitions: list
+            Specifies the partitions for which to reload data
+
+        """
+        # During data loading, there is no need to save target data to
+        # calculators.
+        # Technically, this would be no issue, but due to technical reasons
+        # (i.e. float64 to float32 conversion) saving the data this way
+        # may create copies in memory.
+        self.target_calculator.save_target_data = False
+        
+         
+        # Reallocate arrays for data storage
+        start = time.time()
+        if self.parameters.data_splitting_type == "by_snapshot":
+            self.nr_training_snapshots, self.nr_training_data, \
+            self.nr_test_snapshots, self.nr_test_data, \
+            self.nr_validation_snapshots, self.nr_validation_data \
+            = 0, 0, 0, 0, 0, 0 
+            #pprint(vars(self))
+            #pprint(vars(self.parameters))
+            snapshot: Snapshot
+            # As we are not actually interested in the number of snapshots,
+            # but in the number of datasets, we also need to multiply by that.
+
+            #TODO - set based on mask?? - or ensure grid_size is updated
+
+            for i, snapshot in enumerate(self.parameters.snapshot_directories_list):
+                print(f'Snapshot {i}: {snapshot.grid_size}')
+                if snapshot.snapshot_function == "tr":
+                    self.nr_training_snapshots += 1
+                    self.nr_training_data += snapshot.grid_size
+                elif snapshot.snapshot_function == "te":
+                    self.nr_test_snapshots += 1
+                    self.nr_test_data += snapshot.grid_size
+                elif snapshot.snapshot_function == "va":
+                    self.nr_validation_snapshots += 1
+                    self.nr_validation_data += snapshot.grid_size
+                else:
+                    raise Exception("Unknown option for snapshot splitting "
+                                    "selected.")
+
+            # Now we need to check whether or not this input is believable.
+            nr_of_snapshots = len(self.parameters.snapshot_directories_list)
+            if nr_of_snapshots != (self.nr_training_snapshots +
+                                   self.nr_test_snapshots +
+                                   self.nr_validation_snapshots):
+                raise Exception("Cannot split snapshots with specified "
+                                "splitting scheme, "
+                                "too few or too many options selected: "
+                                f"[{nr_of_snapshots} != {self.nr_training_snapshots} + {self.nr_test_snapshots} + {self.nr_validation_snapshots}]")
+
+            # MALA can either be run in training or test-only mode.
+            # But it has to be run in either of those!
+            # So either training AND validation snapshots can be provided
+            # OR only test snapshots.
+            if self.nr_test_snapshots != 0:
+                if self.nr_training_snapshots == 0:
+                    printout("DataHandler prepared for inference. No training "
+                             "possible with this setup. If this is not what "
+                             "you wanted, please revise the input script. "
+                             "Validation snapshots you may have entered will"
+                             "be ignored.",
+                             min_verbosity=0)
+            else:
+                if self.nr_training_snapshots == 0:
+                    raise Exception("No training snapshots provided.")
+                if self.nr_validation_snapshots == 0:
+                    raise Exception("No validation snapshots provided.")
+        else:
+            raise Exception("Wrong parameter for data splitting provided.")
+
+        self.__allocate_arrays()
+        printout(f'ttt allocate:                         {time.time()-start}s')
+    
+        ### Load updated data
+        start = time.time()
+        expand_partition_name = {'tr':'training', 
+                                 'va':'validation', 
+                                 'te':'test'}
+        for partition in partitions:
+            self.__load_data(expand_partition_name[partition], "inputs", 
+                             from_arrays_dict=from_arrays_dict)
+            self.__load_data(expand_partition_name[partition], "outputs", 
+                             from_arrays_dict=from_arrays_dict)
+        printout(f'ttt refresh:                          {time.time()-start}s')
 
         # After the loading is done, target data can safely be saved again.
         self.target_calculator.save_target_data = True
@@ -611,7 +720,7 @@ class DataHandler:
         else:
             raise Exception("Wrong parameter for data splitting provided.")
 
-        if not self.parameters.use_lazy_loading and not refresh:
+        if not self.parameters.use_lazy_loading:# and not refresh:
             self.__allocate_arrays()        
 
         # Reordering the lists.
@@ -679,7 +788,7 @@ class DataHandler:
         snapshot_counter = 0
         gs_old = 0
 
-        print(f'ttt load_data 0 initialize:                {time.time() - start}')
+        print(f'ttt load_data_{function} 0 initialize:                {time.time() - start}')
 
         for i, snapshot in enumerate(self.parameters.snapshot_directories_list):
             mid = time.time()
@@ -700,12 +809,14 @@ class DataHandler:
 
                 # Pull from existing array rather than file
                 if from_arrays_dict is not None:
-                    #print(f'Fastloaded: {from_arrays_dict[i].shape} -  {from_arrays_dict[i]}')
+                    
+                    print(f'Fastloaded {i}, {data_type}: {from_arrays_dict[(i, data_type)].shape}')# -  {from_arrays_dict[(i, data_type)]}')
+                    print(f'indices: {gs_old}:{gs_old+gs_new} in {getattr(self,array).shape}')
                     #print(f'units = {units}')
-                    #arr0 = from_arrays_dict[i]
-                    #print(f'arr0 {arr0.shape}:  {arr0}')
-                    #arr1 = from_arrays_dict[i][:, :, :, calculator._feature_mask():]
-                    #print(f'arr1 {arr1.shape}:  {arr1}')
+                    arr0 = from_arrays_dict[(i, data_type)]
+                    print(f'arr0 {arr0.shape}')#:  {arr0}')
+                    arr1 = from_arrays_dict[(i, data_type)][:, calculator._feature_mask():]
+                    print(f'arr1 {arr1.shape}')#:  {arr1}')
                     #calculator._process_loaded_array(from_arrays_dict[i][:, :, :, calculator._feature_mask():][snapshot.selection_mask], units=units)
                     #print(f'arr2 {arr1.shape}:  {arr1}')
 
@@ -731,7 +842,7 @@ class DataHandler:
                     print(f'ttt load_data 2 existing_process:          {time.time() - mid}')
                     mid = time.time()
 
-                    print(f'Fastloaded: {getattr(self,array)[gs_old : gs_old + gs_new, :].shape} {getattr(self,array)[gs_old : gs_old + gs_new, :]}')
+                    #print(f'Fastloaded: {getattr(self,array)[gs_old : gs_old + gs_new, :].shape} {getattr(self,array)[gs_old : gs_old + gs_new, :]}')
 
                 # Pull directly from file
                 elif snapshot.snapshot_type == "numpy":
@@ -872,7 +983,7 @@ class DataHandler:
                                       self.training_data_outputs)
 
             if self.nr_validation_data != 0:
-                self.__load_data("validation", "inputs")
+                self.__load_data("validation", "inputs", )
                 self.input_data_scaler.transform(self.validation_data_inputs)
 
                 self.__load_data("validation", "outputs")
