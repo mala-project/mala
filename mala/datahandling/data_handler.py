@@ -252,7 +252,7 @@ class DataHandler:
         # an exception.
         printout("Checking the snapshots and your inputs for consistency.",
                  min_verbosity=1)
-        self.__check_snapshots(refresh=refresh)
+        self.__check_snapshots(refresh=refresh, from_arrays_dict=from_arrays_dict)
         printout("Consistency check successful.", min_verbosity=0)
 
         # If the DataHandler is used for inference, i.e. no training or
@@ -270,7 +270,7 @@ class DataHandler:
         # Parametrize the scalers, if needed.
         if reparametrize_scaler:
             printout("Initializing the data scalers.", min_verbosity=1)
-            self.__parametrize_scalers()
+            self.__parametrize_scalers(from_arrays_dict=from_arrays_dict)
             printout("Data scalers initialized.", min_verbosity=0)
         elif self.parameters.use_lazy_loading is False and \
                 self.nr_training_data != 0:
@@ -279,10 +279,10 @@ class DataHandler:
             self.__load_data("training", "inputs",  from_arrays_dict=from_arrays_dict)
             self.__load_data("training", "outputs", from_arrays_dict=from_arrays_dict)
 
-        # Build Datasets (unless
+        # Build Datasets (unless we are just refreshing the selection)
         if not refresh:
             printout("Build datasets.", min_verbosity=1)
-            self.__build_datasets()
+            self.__build_datasets(from_arrays_dict=from_arrays_dict)
             printout("Build dataset: Done.", min_verbosity=0)
 
         # After the loading is done, target data can safely be saved again.
@@ -331,8 +331,6 @@ class DataHandler:
             snapshot: Snapshot
             # As we are not actually interested in the number of snapshots,
             # but in the number of datasets, we also need to multiply by that.
-
-            #TODO - set based on mask?? - or ensure grid_size is updated
 
             for i, snapshot in enumerate(self.parameters.snapshot_directories_list):
                 print(f'Snapshot {i}: {snapshot.grid_size}')
@@ -583,25 +581,31 @@ class DataHandler:
     # Loading data
     ######################
 
-    def __check_snapshots(self, refresh=False):
+    def __check_snapshots(self, refresh=False, from_arrays_dict=None):
         """Check the snapshots for consistency."""
         self.nr_snapshots = len(self.parameters.snapshot_directories_list)
 
         # Read the snapshots using a memorymap to see if there is consistency.
         firstsnapshot = True
-        for snapshot in self.parameters.snapshot_directories_list:
+        for i, snapshot in enumerate(self.parameters.snapshot_directories_list):
             ####################
             # Descriptors.
             ####################            
 
             printout("Checking descriptor file ", snapshot.input_npy_file,
                      "at", snapshot.input_npy_directory, min_verbosity=1)
-            if snapshot.snapshot_type == "numpy":
+            if from_arrays_dict is not None:
+                print(f'arrdim:   {from_arrays_dict[(i, "inputs")].shape}')
+                print(f'featmask: {self.descriptor_calculator._feature_mask()}')
+                tmp_dimension = from_arrays_dict[(i, 'inputs')]\
+                    [:,self.descriptor_calculator._feature_mask():].shape
+                printout(f"from_arrays_dict dim {i}: {from_arrays_dict[(i, 'inputs')].shape}")
+            elif snapshot.snapshot_type == "numpy":
                 tmp_dimension = self.descriptor_calculator.\
                     read_dimensions_from_numpy_file(
                     os.path.join(snapshot.input_npy_directory,
-                                 snapshot.input_npy_file), 
-                    selection_mask=snapshot.selection_mask)
+                                 snapshot.input_npy_file))#, 
+                    #selection_mask=snapshot.selection_mask)
             elif snapshot.snapshot_type == "openpmd":
                 tmp_dimension = self.descriptor_calculator.\
                     read_dimensions_from_openpmd_file(
@@ -614,8 +618,8 @@ class DataHandler:
             # for flexible grid sizes only this need be consistent
             tmp_input_dimension = tmp_dimension[-1]
             tmp_grid_dim = tmp_dimension[0:3]
-            print(f'tmp_input_dim: {tmp_input_dimension}')
-            print(f'tmp_grid_dim: {tmp_grid_dim}')
+            print(f'tmp_input_dim {i}: {tmp_input_dimension}')
+            print(f'tmp_grid_dim {i}:  {tmp_grid_dim}')
             snapshot.grid_dimension = tmp_grid_dim
             snapshot.grid_size = int(np.prod(snapshot.grid_dimension))            
             printout(f'grid_size: {snapshot.grid_size}')
@@ -634,12 +638,15 @@ class DataHandler:
 
             printout("Checking targets file ", snapshot.output_npy_file, "at",
                      snapshot.output_npy_directory, min_verbosity=1)
-            if snapshot.snapshot_type == "numpy":
+            if from_arrays_dict is not None:
+                tmp_dimension = from_arrays_dict[(i, 'outputs')]\
+                    [:,self.target_calculator._feature_mask():].shape
+            elif snapshot.snapshot_type == "numpy":
                 tmp_dimension = self.target_calculator.\
                     read_dimensions_from_numpy_file(
                     os.path.join(snapshot.output_npy_directory,
-                                 snapshot.output_npy_file),
-                    selection_mask=snapshot.selection_mask)
+                                 snapshot.output_npy_file))#,
+                    #selection_mask=snapshot.selection_mask)
             elif snapshot.snapshot_type == "openpmd":
                 tmp_dimension = self.target_calculator.\
                     read_dimensions_from_openpmd_file(
@@ -664,8 +671,6 @@ class DataHandler:
         # Now we need to confirm that the snapshot list has some inner
         # consistency.
         if self.parameters.data_splitting_type == "by_snapshot":
-            #print(f'refresh = {refresh}')
-            #print(self.parameters.snapshot_directories_list)
             if refresh: # if we're reloading data, don't recount nrs
                 self.nr_training_snapshots, self.nr_training_data, \
                 self.nr_test_snapshots, self.nr_test_data, \
@@ -795,6 +800,7 @@ class DataHandler:
 
             # get the snapshot grid size
             gs_new = snapshot.grid_size
+            print(f'gs_new {i}: {gs_new}')
 
             # Data scaling is only performed on the training data sets.
             if snapshot.snapshot_function == function[0:2]:
@@ -809,7 +815,7 @@ class DataHandler:
 
                 # Pull from existing array rather than file
                 if from_arrays_dict is not None:
-                    
+                    if snapshot.selection_mask is not None: gs_new = sum(snapshot.selection_mask)
                     print(f'Fastloaded {i}, {data_type}: {from_arrays_dict[(i, data_type)].shape}')# -  {from_arrays_dict[(i, data_type)]}')
                     print(f'indices: {gs_old}:{gs_old+gs_new} in {getattr(self,array).shape}')
                     #print(f'units = {units}')
@@ -817,6 +823,9 @@ class DataHandler:
                     print(f'arr0 {arr0.shape}')#:  {arr0}')
                     arr1 = from_arrays_dict[(i, data_type)][:, calculator._feature_mask():]
                     print(f'arr1 {arr1.shape}')#:  {arr1}')
+                    arr2 = from_arrays_dict[(i, data_type)][:, calculator._feature_mask():][snapshot.selection_mask]
+                    print(f'arr2 {arr2.shape}')#:  {arr1}')
+                    del arr0, arr1, arr2
                     #calculator._process_loaded_array(from_arrays_dict[i][:, :, :, calculator._feature_mask():][snapshot.selection_mask], units=units)
                     #print(f'arr2 {arr1.shape}:  {arr1}')
 
@@ -900,7 +909,7 @@ class DataHandler:
             print(f'ttt load_data 3 existing_tensorize:            {time.time() - mid}')
             print(f'tttt load_data 4 total:                        {time.time() - start}')
                 
-    def __build_datasets(self):
+    def __build_datasets(self, from_arrays_dict=None):
         """Build the DataSets that are used during training."""
         if self.parameters.use_lazy_loading:
 
@@ -983,10 +992,10 @@ class DataHandler:
                                       self.training_data_outputs)
 
             if self.nr_validation_data != 0:
-                self.__load_data("validation", "inputs", )
+                self.__load_data("validation", "inputs", from_arrays_dict=from_arrays_dict)
                 self.input_data_scaler.transform(self.validation_data_inputs)
 
-                self.__load_data("validation", "outputs")
+                self.__load_data("validation", "outputs", from_arrays_dict=from_arrays_dict)
                 self.output_data_scaler.transform(self.validation_data_outputs)
                 if self.parameters.use_fast_tensor_data_set:
                     printout("Using FastTensorDataset.", min_verbosity=2)
@@ -1000,11 +1009,11 @@ class DataHandler:
                                       self.validation_data_outputs)
 
             if self.nr_test_data != 0:
-                self.__load_data("test", "inputs")
+                self.__load_data("test", "inputs", from_arrays_dict=from_arrays_dict)
                 self.input_data_scaler.transform(self.test_data_inputs)
                 self.test_data_inputs.requires_grad = True
 
-                self.__load_data("test", "outputs")
+                self.__load_data("test", "outputs", from_arrays_dict=from_arrays_dict)
                 self.output_data_scaler.transform(self.test_data_outputs)
                 self.test_data_set = \
                     TensorDataset(self.test_data_inputs,
@@ -1015,7 +1024,7 @@ class DataHandler:
     # Scaling
     ######################
 
-    def __parametrize_scalers(self):
+    def __parametrize_scalers(self, from_arrays_dict=None):
         """Use the training data to parametrize the DataScalers."""
         ##################
         # Inputs.
@@ -1062,7 +1071,7 @@ class DataHandler:
             self.input_data_scaler.finish_incremental_fitting()
 
         else:
-            self.__load_data("training", "inputs")
+            self.__load_data("training", "inputs", from_arrays_dict=from_arrays_dict)
             self.input_data_scaler.fit(self.training_data_inputs)
 
         printout("Input scaler parametrized.", min_verbosity=1)
@@ -1115,7 +1124,7 @@ class DataHandler:
             self.output_data_scaler.finish_incremental_fitting()
 
         else:
-            self.__load_data("training", "outputs")
+            self.__load_data("training", "outputs", from_arrays_dict=from_arrays_dict)
             self.output_data_scaler.fit(self.training_data_outputs)
 
         printout("Output scaler parametrized.", min_verbosity=1)                
