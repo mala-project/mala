@@ -599,6 +599,11 @@ class DataHandler:
                 print(f'featmask: {self.descriptor_calculator._feature_mask()}')
                 tmp_dimension = from_arrays_dict[(i, 'inputs')]\
                     [:,self.descriptor_calculator._feature_mask():].shape
+                # We don't need any reference to full grid dim at this point
+                # so this is just for compatibility w other code
+                if len(tmp_dimension) > 2: 
+                    raise ValueError('Flatten the data pool arrays.')
+                tmp_dimension = (tmp_dimension[0], 1, 1, tmp_dimension[-1])
                 printout(f"from_arrays_dict dim {i}: {from_arrays_dict[(i, 'inputs')].shape}")
             elif snapshot.snapshot_type == "numpy":
                 tmp_dimension = self.descriptor_calculator.\
@@ -613,15 +618,20 @@ class DataHandler:
                                  snapshot.input_npy_file))
             else:
                 raise Exception("Unknown snapshot file type.")
-
+            
             # get the snapshot feature dimension - call it input dimension
             # for flexible grid sizes only this need be consistent
             tmp_input_dimension = tmp_dimension[-1]
             tmp_grid_dim = tmp_dimension[0:3]
+            
+            # If using selection_mask, apply to dimensions 
+            if snapshot.selection_mask is not None:
+                tmp_grid_dim = (sum(snapshot.selection_mask),1,1)
+            
             print(f'tmp_input_dim {i}: {tmp_input_dimension}')
             print(f'tmp_grid_dim {i}:  {tmp_grid_dim}')
             snapshot.grid_dimension = tmp_grid_dim
-            snapshot.grid_size = int(np.prod(snapshot.grid_dimension))            
+            snapshot.grid_size = int(np.prod(tmp_grid_dim))            
             printout(f'grid_size: {snapshot.grid_size}')
             if firstsnapshot:
                 self.input_dimension = tmp_input_dimension
@@ -641,6 +651,11 @@ class DataHandler:
             if from_arrays_dict is not None:
                 tmp_dimension = from_arrays_dict[(i, 'outputs')]\
                     [:,self.target_calculator._feature_mask():].shape
+                # We don't need any reference to full grid dim at this point
+                # so this is just for compatibility w other code
+                if len(tmp_dimension) > 2: 
+                    raise ValueError('Flatten the data pool arrays.')
+                tmp_dimension = (tmp_dimension[0], 1, 1, tmp_dimension[-1])
             elif snapshot.snapshot_type == "numpy":
                 tmp_dimension = self.target_calculator.\
                     read_dimensions_from_numpy_file(
@@ -793,14 +808,13 @@ class DataHandler:
         snapshot_counter = 0
         gs_old = 0
 
-        print(f'ttt load_data_{function} 0 initialize:                {time.time() - start}')
+        print(f'ttt load_data_{function} 0 initialize:   {time.time() - start}')
 
         for i, snapshot in enumerate(self.parameters.snapshot_directories_list):
             mid = time.time()
 
             # get the snapshot grid size
             gs_new = snapshot.grid_size
-            print(f'gs_new {i}: {gs_new}')
 
             # Data scaling is only performed on the training data sets.
             if snapshot.snapshot_function == function[0:2]:
@@ -816,39 +830,57 @@ class DataHandler:
                 # Pull from existing array rather than file
                 if from_arrays_dict is not None:
                     if snapshot.selection_mask is not None: gs_new = sum(snapshot.selection_mask)
+                    print(f'gs_new {i}: {gs_new}')
                     print(f'Fastloaded {i}, {data_type}: {from_arrays_dict[(i, data_type)].shape}')# -  {from_arrays_dict[(i, data_type)]}')
+                    print(f'selmask -> {gs_new}')
                     print(f'indices: {gs_old}:{gs_old+gs_new} in {getattr(self,array).shape}')
                     #print(f'units = {units}')
-                    arr0 = from_arrays_dict[(i, data_type)]
-                    print(f'arr0 {arr0.shape}')#:  {arr0}')
-                    arr1 = from_arrays_dict[(i, data_type)][:, calculator._feature_mask():]
-                    print(f'arr1 {arr1.shape}')#:  {arr1}')
-                    arr2 = from_arrays_dict[(i, data_type)][:, calculator._feature_mask():][snapshot.selection_mask]
-                    print(f'arr2 {arr2.shape}')#:  {arr1}')
-                    del arr0, arr1, arr2
+                    #arr0 = from_arrays_dict[(i, data_type)]
+                    #print(f'arr0 {arr0.shape}')#:  {arr0}')
+                    #arr1 = from_arrays_dict[(i, data_type)][:, calculator._feature_mask():]
+                    #print(f'arr1 {arr1.shape}')#:  {arr1}')
+                    #if snapshot.selection_mask is not None:
+                    #    arr2 = from_arrays_dict[(i, data_type)][:, calculator._feature_mask():][snapshot.selection_mask]
+                    #    print(f'arr2 {arr2.shape}')#:  {arr1}')
+                    #    del arr2
+                    #del arr0, arr1
                     #calculator._process_loaded_array(from_arrays_dict[i][:, :, :, calculator._feature_mask():][snapshot.selection_mask], units=units)
                     #print(f'arr2 {arr1.shape}:  {arr1}')
 
-                    # Update data already in tensor form
-                    if torch.is_tensor(getattr(self, array)): 
-                        getattr(self, array)[gs_old : gs_old + gs_new, :] =\
-                            torch.from_numpy(from_arrays_dict[(i, data_type)]\
-                            [:, calculator._feature_mask():]\
-                            [snapshot.selection_mask])
+                    #TODO streamline this
+                    if snapshot.selection_mask is not None:
+                        # Update data already in tensor form
+                        if torch.is_tensor(getattr(self, array)): 
+                            getattr(self, array)[gs_old : gs_old + gs_new, :] =\
+                                torch.from_numpy(from_arrays_dict[(i, data_type)]\
+                                [:, calculator._feature_mask():]\
+                                [snapshot.selection_mask])
 
-                    # Update a fresh numpy array
-                    else:        
-                        getattr(self, array)[gs_old : gs_old + gs_new, :] =\
-                            from_arrays_dict[(i, data_type)]\
-                            [:, calculator._feature_mask():]\
-                            [snapshot.selection_mask]
+                        # Update a fresh numpy array
+                        else:        
+                            getattr(self, array)[gs_old : gs_old + gs_new, :] =\
+                                from_arrays_dict[(i, data_type)]\
+                                [:, calculator._feature_mask():]\
+                                [snapshot.selection_mask]
+                    else:
+                        # Update data already in tensor form
+                        if torch.is_tensor(getattr(self, array)): 
+                            getattr(self, array)[gs_old : gs_old + gs_new, :] =\
+                                torch.from_numpy(from_arrays_dict[(i, data_type)]\
+                                [:, calculator._feature_mask():])
+                        # Update a fresh numpy array
+                        else:        
+                            getattr(self, array)[gs_old : gs_old + gs_new, :] =\
+                                from_arrays_dict[(i, data_type)]\
+                                [:, calculator._feature_mask():]
 
-                    print(f'ttt load_data 1 existing_assign:           {time.time() - mid}')
+
+                    print(f'ttt load_data 1 existing_assign:                   {time.time() - mid}')
                     mid = time.time()
 
                     calculator._process_loaded_array(getattr(self,array)[gs_old : gs_old + gs_new, :], units=units)
                     
-                    print(f'ttt load_data 2 existing_process:          {time.time() - mid}')
+                    print(f'ttt load_data 2 existing_process:                  {time.time() - mid}')
                     mid = time.time()
 
                     #print(f'Fastloaded: {getattr(self,array)[gs_old : gs_old + gs_new, :].shape} {getattr(self,array)[gs_old : gs_old + gs_new, :]}')
@@ -906,8 +938,8 @@ class DataHandler:
                     self.test_data_outputs = torch.\
                         from_numpy(self.test_data_outputs).float()
 
-            print(f'ttt load_data 3 existing_tensorize:            {time.time() - mid}')
-            print(f'tttt load_data 4 total:                        {time.time() - start}')
+            print(f'ttt load_data 3 existing_tensorize:      {time.time() - mid}')
+            print(f'tttt load_data 4 total:                  {time.time() - start}')
                 
     def __build_datasets(self, from_arrays_dict=None):
         """Build the DataSets that are used during training."""
