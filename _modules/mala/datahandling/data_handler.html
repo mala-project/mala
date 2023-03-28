@@ -123,6 +123,10 @@
 <span class="sd">    output_data_scaler : mala.datahandling.data_scaler.DataScaler</span>
 <span class="sd">        Used to scale the output data. If None, then one will be created by</span>
 <span class="sd">        this class.</span>
+
+<span class="sd">    clear_data : bool</span>
+<span class="sd">        If true (default), the data list will be cleared upon creation of</span>
+<span class="sd">        the object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">##############################</span>
@@ -131,7 +135,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">target_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">descriptor_calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_data_scaler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">output_data_scaler</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">output_data_scaler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clear_data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">DataHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span>
                                           <span class="n">target_calculator</span><span class="o">=</span><span class="n">target_calculator</span><span class="p">,</span>
                                           <span class="n">descriptor_calculator</span><span class="o">=</span>
@@ -172,6 +176,8 @@
 
         <span class="c1"># Needed for the fast tensor data sets.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mini_batch_size</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">mini_batch_size</span>
+        <span class="k">if</span> <span class="n">clear_data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clear_data</span><span class="p">()</span>
 
     <span class="c1">##############################</span>
     <span class="c1"># Public methods</span>

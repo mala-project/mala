@@ -213,7 +213,7 @@
 <span class="sd">        new_datahandler : mala.datahandling.data_handler.DataHandler</span>
 <span class="sd">            The data handler reconstructed from file.</span>
 
-<span class="sd">        new_runner : Runner</span>
+<span class="sd">        new_runner : cls</span>
 <span class="sd">            (Optional) The runner reconstructed from file. For Tester and</span>
 <span class="sd">            Predictor class, this is just a newly instantiated object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -250,7 +250,8 @@
         <span class="n">loaded_oscaler</span> <span class="o">=</span> <span class="n">DataScaler</span><span class="o">.</span><span class="n">load_from_file</span><span class="p">(</span><span class="n">loaded_oscaler</span><span class="p">)</span>
         <span class="n">new_datahandler</span> <span class="o">=</span> <span class="n">DataHandler</span><span class="p">(</span><span class="n">loaded_params</span><span class="p">,</span>
                                       <span class="n">input_data_scaler</span><span class="o">=</span><span class="n">loaded_iscaler</span><span class="p">,</span>
-                                      <span class="n">output_data_scaler</span><span class="o">=</span><span class="n">loaded_oscaler</span><span class="p">)</span>
+                                      <span class="n">output_data_scaler</span><span class="o">=</span><span class="n">loaded_oscaler</span><span class="p">,</span>
+                                      <span class="n">clear_data</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="n">prepare_data</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">loaded_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new_datahandler</span><span class="o">.</span><span class="n">target_calculator</span><span class="o">.</span>\
                 <span class="n">read_additional_calculation_data</span><span class="p">(</span><span class="n">loaded_info</span><span class="p">,</span>
