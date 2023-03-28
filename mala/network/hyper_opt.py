@@ -251,7 +251,8 @@ class HyperOpt(ABC):
             loaded_params.data.use_lazy_loading = True
         new_datahandler = DataHandler(loaded_params,
                                       input_data_scaler=loaded_iscaler,
-                                      output_data_scaler=loaded_oscaler)
+                                      output_data_scaler=loaded_oscaler,
+                                      clear_data=False)
         new_datahandler.prepare_data(reparametrize_scaler=False)
 
         return loaded_params, new_datahandler, optimizer_name

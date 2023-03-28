@@ -50,6 +50,10 @@ class DataHandler(DataHandlerBase):
     output_data_scaler : mala.datahandling.data_scaler.DataScaler
         Used to scale the output data. If None, then one will be created by
         this class.
+
+    clear_data : bool
+        If true (default), the data list will be cleared upon creation of
+        the object.
     """
 
     ##############################
@@ -58,7 +62,7 @@ class DataHandler(DataHandlerBase):
 
     def __init__(self, parameters: Parameters, target_calculator=None,
                  descriptor_calculator=None, input_data_scaler=None,
-                 output_data_scaler=None):
+                 output_data_scaler=None, clear_data=True):
         super(DataHandler, self).__init__(parameters,
                                           target_calculator=target_calculator,
                                           descriptor_calculator=
@@ -99,6 +103,8 @@ class DataHandler(DataHandlerBase):
 
         # Needed for the fast tensor data sets.
         self.mini_batch_size = parameters.running.mini_batch_size
+        if clear_data:
+            self.clear_data()
 
     ##############################
     # Public methods
