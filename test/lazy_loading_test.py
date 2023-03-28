@@ -102,13 +102,13 @@ class TestLazyLoading:
                     this_result.append(data_handler.input_data_scaler.total_min)
                     this_result.append(data_handler.output_data_scaler.total_max)
                     this_result.append(data_handler.output_data_scaler.total_min)
-                    dataset_tester.append((data_handler.training_data_set[3998])
+                    dataset_tester.append((data_handler.training_data_sets[0][3998])
                                           [0].sum() +
-                                          (data_handler.training_data_set[3999])
+                                          (data_handler.training_data_sets[0][3999])
                                           [0].sum() +
-                                          (data_handler.training_data_set[4000])
+                                          (data_handler.training_data_sets[0][4000])
                                           [0].sum() +
-                                          (data_handler.training_data_set[4001])
+                                          (data_handler.training_data_sets[0][4001])
                                           [0].sum())
                     test_parameters.network.layer_sizes = \
                         [data_handler.input_dimension, 100,

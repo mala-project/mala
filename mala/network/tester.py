@@ -136,7 +136,7 @@ class Tester(Runner):
 
         return self.\
             _forward_entire_snapshot(offset_snapshots+snapshot_number,
-                                     self.data.test_data_set,
+                                     self.data.test_data_sets[0],
                                      "te",
                                      self.number_of_batches_per_snapshot,
                                      self.parameters.mini_batch_size)

@@ -112,9 +112,9 @@ class DataHandler(DataHandlerBase):
 
         Useful when doing multiple investigations in the same python file.
         """
-        self.training_data_set = None
-        self.validation_data_set = None
-        self.test_data_set = None
+        self.training_data_sets = []
+        self.validation_data_sets = []
+        self.test_data_sets = []
         self.nr_training_data = 0
         self.nr_test_data = 0
         self.nr_validation_data = 0
@@ -697,7 +697,7 @@ class DataHandler(DataHandlerBase):
 
                 self.__load_data("test", "outputs")
                 self.output_data_scaler.transform(self.test_data_outputs)
-                self.test_data_set.append( \
+                self.test_data_sets.append( \
                     TensorDataset(self.test_data_inputs,
                                   self.test_data_outputs))
 

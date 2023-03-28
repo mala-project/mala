@@ -405,7 +405,7 @@ class Trainer(Runner):
         printout("Final validation data loss: ", vloss, min_verbosity=0)
 
         tloss = float("inf")
-        if self.data.test_data_set is not None:
+        if len(self.data.test_data_sets) > 0:
             tloss = self.__validate_network(self.network,
                                             "test",
                                             self.parameters.
@@ -785,7 +785,7 @@ class Trainer(Runner):
                 actual_outputs, \
                 predicted_outputs = self.\
                     _forward_entire_snapshot(snapshot_number,
-                                             data_sets, data_set_type,
+                                             data_sets[0], data_set_type[0:2],
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)
                 calculator = self.data.target_calculator
@@ -833,7 +833,7 @@ class Trainer(Runner):
 
                 actual_outputs, predicted_outputs = self.\
                     _forward_entire_snapshot(snapshot_number-offset_snapshots,
-                                             data_sets, data_set_type[0:2],
+                                             data_sets[0], data_set_type[0:2],
                                              number_of_batches_per_snapshot,
                                              optimal_batch_size)
                 calculator = self.data.target_calculator
