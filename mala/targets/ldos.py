@@ -1163,10 +1163,12 @@ class LDOS(Target):
                 dos_values *= grid_spacing_z
         else:
             if len(ldos_data_shape) == 4:
-                dos_values = np.sum(ldos_data, axis=(0, 1, 2)) * \
+                dos_values = np.sum(ldos_data, axis=(0, 1, 2),
+                                    dtype=np.float64) * \
                              voxel.volume
             if len(ldos_data_shape) == 2:
-                dos_values = np.sum(ldos_data, axis=0) * \
+                dos_values = np.sum(ldos_data, axis=0,
+                                    dtype=np.float64) * \
                              voxel.volume
 
         if self.parameters._configuration["mpi"] and gather_dos:
