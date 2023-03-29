@@ -1349,6 +1349,10 @@ class LDOS(Target):
         return_local = False
         if "return_local" in kwargs.keys():
             return_local = kwargs["return_local"]
+        use_fp64 = False
+        if "use_fp64" in kwargs.keys():
+            use_fp64 = kwargs["use_fp64"]
+        ldos_dtype = np.float64 if use_fp64 else np.float32
 
         # Find out the number of digits that are needed to encode this
         # grid (by QE).
@@ -1391,7 +1395,7 @@ class LDOS(Target):
                 data_shape = np.shape(data)
                 ldos_data = np.zeros((data_shape[0], data_shape[1],
                                       data_shape[2], local_size),
-                                     dtype=np.float64)
+                                     dtype=ldos_dtype)
 
             # Convert and then append the LDOS data.
             data = data*self.convert_units(1, in_units=units)
@@ -1412,7 +1416,7 @@ class LDOS(Target):
                                                       self.parameters.
                                                       ldos_gridsize),
                                                mode="w+",
-                                               dtype=np.float64)
+                                               dtype=ldos_dtype)
                 barrier()
                 if get_rank() != 0:
                     ldos_data_full = np.memmap(use_memmap,
@@ -1422,7 +1426,7 @@ class LDOS(Target):
                                                       self.parameters.
                                                       ldos_gridsize),
                                                mode="r+",
-                                               dtype=np.float64)
+                                               dtype=ldos_dtype)
                 barrier()
                 ldos_data_full[:, :, :, start_index-1:end_index-1] = \
                     ldos_data[:, :, :, :]
@@ -1439,7 +1443,7 @@ class LDOS(Target):
                 if get_rank() == 0:
                     ldos_data_full = np.empty((data_shape[0], data_shape[1],
                                                data_shape[2], self.parameters.
-                                               ldos_gridsize),dtype=np.float64)
+                                               ldos_gridsize),dtype=ldos_dtype)
                     ldos_data_full[:, :, :, start_index-1:end_index-1] = \
                         ldos_data[:, :, :, :]
 
@@ -1451,7 +1455,7 @@ class LDOS(Target):
                         local_size = local_end-local_start
                         ldos_local = np.empty(local_size*data_shape[0] *
                                               data_shape[1]*data_shape[2],
-                                              dtype=np.float64)
+                                              dtype=ldos_dtype)
                         comm.Recv(ldos_local, source=i, tag=100 + i)
                         ldos_data_full[:, :, :, local_start-1:local_end-1] = \
                             np.reshape(ldos_local, (data_shape[0],

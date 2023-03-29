@@ -29,7 +29,8 @@ def set_cmdlinevars(cmdargs, argdict):
 #     return [x for x in string.splitlines() if x.strip() != '']
 
 
-def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None):
+def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None,
+                       use_fp64=False):
     """
     Convert a lammps compute to a numpy array.
 
@@ -55,6 +56,10 @@ def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None):
     array_shape
         Array shape of the LAMMPS calculation.
 
+    use_fp64 : bool
+        If True, return the array with double precision. If False (default),
+        the array will be processed with single precision. Only has an effect
+        if result_type equals 2.
     """
     # 1,2: Style (1) is per-atom compute, returns array type (2).
     ptr = lmp.extract_compute(name, compute_type, result_type)
@@ -67,7 +72,10 @@ def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None):
                                                      total_size))
         array_np = np.frombuffer(buffer_ptr.contents, dtype=float)
         array_np.shape = array_shape
-        return array_np
+        if use_fp64:
+            return array_np.copy()
+        else:
+            return array_np.astype(np.float32)
     if result_type == 4 or result_type == 5:
         # ptr is an int
         return ptr
