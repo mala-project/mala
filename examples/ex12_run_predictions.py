@@ -37,7 +37,7 @@ parameters.descriptors.bispectrum_cutoff = 4.67637
 # of the training data.
 atoms = read(os.path.join(data_path, "Be_snapshot3.out"))
 ldos = predictor.predict_for_atoms(atoms)
-ldos_calculator: mala.LDOS = data_handler.target_calculator
+ldos_calculator: mala.LDOS = predictor.target_calculator
 ldos_calculator.read_from_array(ldos)
 
 printout("Predicted band energy: ",

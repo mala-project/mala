@@ -140,7 +140,7 @@ class Runner:
         new_datahandler : mala.datahandling.data_handler.DataHandler
             The data handler reconstructed from file.
 
-        new_runner : Runner
+        new_runner : cls
             (Optional) The runner reconstructed from file. For Tester and
             Predictor class, this is just a newly instantiated object.
         """
@@ -177,7 +177,8 @@ class Runner:
         loaded_oscaler = DataScaler.load_from_file(loaded_oscaler)
         new_datahandler = DataHandler(loaded_params,
                                       input_data_scaler=loaded_iscaler,
-                                      output_data_scaler=loaded_oscaler)
+                                      output_data_scaler=loaded_oscaler,
+                                      clear_data=(not prepare_data))
         if loaded_info is not None:
             new_datahandler.target_calculator.\
                 read_additional_calculation_data(loaded_info,

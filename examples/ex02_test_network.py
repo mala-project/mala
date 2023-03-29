@@ -7,16 +7,9 @@ from mala.datahandling.data_repo import data_repo_path
 data_path = os.path.join(data_repo_path, "Be2")
 
 """
-ex02_test_network.py: Train a network, then use this network 
-to predict the LDOS and then analyze the results of this prediction. This 
-example is structured a little bit different than other examples. It consists 
-of two functions, to show that networks can be saved and reaccessed after being
-trained once. By default, the training function is commented out. A saved 
-network architecture and parameters is provided in this repository, so this 
-example focusses more on the analysis part. Nonetheless, the training can also
-be done by simply uncommenting the function call. Please not that the values 
-calculated at the end will be wrong, because we operate on 0.0025 % of a full 
-DFT simulation cell for this example. 
+ex02_test_network.py: This example shows how a trained network can be tested
+with additional test snapshots. Either execute ex01 before executing this one
+or download the appropriate model from the provided test data repo.
 """
 
 
@@ -40,7 +33,6 @@ parameters.data.use_lazy_loading = True
 # data_splitting_snapshots list is correct.
 # The clear data in front is used because some data is still attached from
 # the training process.
-data_handler.clear_data()
 data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
                           "Be_snapshot2.out.npy", data_path, "te",
                           calculation_output_file=

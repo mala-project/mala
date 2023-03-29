@@ -244,7 +244,6 @@ class TestFullWorkflow:
         parameters.targets.ldos_gridoffset_ev = -5
         parameters.data.use_lazy_loading = True
 
-        data_handler.clear_data()
         data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
                                   "Be_snapshot2.out.npy", data_path, "te",
                                   calculation_output_file=os.path.join(
@@ -291,7 +290,6 @@ class TestFullWorkflow:
         parameters.descriptors.bispectrum_cutoff = 4.67637
         parameters.data.use_lazy_loading = True
 
-        data_handler.clear_data()
         data_handler.add_snapshot("Be_snapshot3.in.npy",
                                   data_path,
                                   "Be_snapshot3.out.npy",
