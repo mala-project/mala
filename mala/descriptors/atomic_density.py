@@ -120,6 +120,10 @@ class AtomicDensity(Descriptor):
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual Gaussian descriptor calculation."""
         from lammps import lammps
+        if "use_fp64" in kwargs.keys():
+            use_fp64 = kwargs["use_fp64"]
+        else:
+            use_fp64 = False
 
         return_directly = False
         if "return_directly" in kwargs.keys():
@@ -183,7 +187,8 @@ class AtomicDensity(Descriptor):
         gaussian_descriptors_np = \
             extract_compute_np(lmp, "ggrid",
                                lammps_constants.LMP_STYLE_LOCAL, 2,
-                               array_shape=(nrows_ggrid, ncols_ggrid))
+                               array_shape=(nrows_ggrid, ncols_ggrid),
+                               use_fp64=use_fp64)
 
         # In comparison to SNAP, the atomic density always returns
         # in the "local mode". Thus we have to make some slight adjustments
