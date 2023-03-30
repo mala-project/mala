@@ -12,6 +12,7 @@ import torch
 from torch.utils.data import Dataset
 
 from mala.datahandling.snapshot import Snapshot
+from mala.common.parameters import DEFAULT_NP_DATA_DTYPE
 from mala.common.parallelizer import printout, barrier
 
 
@@ -142,8 +143,8 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         # Transform the data.
         input_data = input_data.reshape([self.grid_size, self.input_dimension])
 
-        if self.input_data.dtype != np.float32:
-            self.input_data = self.input_data.astype(np.float32)
+        if self.input_data.dtype != DEFAULT_NP_DATA_DTYPE:
+            self.input_data = self.input_data.astype(DEFAULT_NP_DATA_DTYPE)
         input_data = torch.from_numpy(input_data).float()
         self.input_data_scaler.transform(input_data)
         input_data = np.array(input_data)
@@ -275,8 +276,8 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
         # Transform the data.
         self.input_data = \
             self.input_data.reshape([self.grid_size, self.input_dimension])
-        if self.input_data.dtype != np.float32:
-            self.input_data = self.input_data.astype(np.float32)
+        if self.input_data.dtype != DEFAULT_NP_DATA_DTYPE:
+            self.input_data = self.input_data.astype(DEFAULT_NP_DATA_DTYPE)
         self.input_data = torch.from_numpy(self.input_data).float()
         self.input_data_scaler.transform(self.input_data)
         self.input_data.requires_grad = self.input_requires_grad
@@ -288,8 +289,8 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
             convert_units(1, self.snapshot_list[file_index].output_units)
         if self.return_outputs_directly is False:
             self.output_data = np.array(self.output_data)
-            if self.output_data.dtype != np.float32:
-                self.output_data = self.output_data.astype(np.float32)
+            if self.output_data.dtype != DEFAULT_NP_DATA_DTYPE:
+                self.output_data = self.output_data.astype(DEFAULT_NP_DATA_DTYPE)
             self.output_data = torch.from_numpy(self.output_data).float()
             self.output_data_scaler.transform(self.output_data)
 

@@ -8,6 +8,7 @@ from scipy import integrate
 
 from mala.common.parallelizer import get_comm, printout, get_rank, get_size, \
     barrier
+from mala.common.parameters import DEFAULT_NP_DATA_DTYPE
 from mala.targets.cube_parser import read_cube
 from mala.targets.xsf_parser import read_xsf
 from mala.targets.target import Target
@@ -1352,7 +1353,7 @@ class LDOS(Target):
         use_fp64 = False
         if "use_fp64" in kwargs.keys():
             use_fp64 = kwargs["use_fp64"]
-        ldos_dtype = np.float64 if use_fp64 else np.float32
+        ldos_dtype = np.float64 if use_fp64 else DEFAULT_NP_DATA_DTYPE
 
         # Find out the number of digits that are needed to encode this
         # grid (by QE).

@@ -11,6 +11,7 @@ import torch
 from torch.utils.data import Dataset
 
 from mala.common.parallelizer import barrier
+from mala.common.parameters import DEFAULT_NP_DATA_DTYPE
 from mala.datahandling.snapshot import Snapshot
 
 
@@ -153,8 +154,8 @@ class LazyLoadDataset(torch.utils.data.Dataset):
         self.input_data = \
             self.input_data.reshape([self.snapshot_list[file_index].grid_size,
                                      self.input_dimension])
-        if self.input_data.dtype != np.float32:
-            self.input_data = self.input_data.astype(np.float32)
+        if self.input_data.dtype != DEFAULT_NP_DATA_DTYPE:
+            self.input_data = self.input_data.astype(DEFAULT_NP_DATA_DTYPE)
         self.input_data = torch.from_numpy(self.input_data).float()
         self.input_data_scaler.transform(self.input_data)
         self.input_data.requires_grad = self.input_requires_grad
@@ -164,8 +165,8 @@ class LazyLoadDataset(torch.utils.data.Dataset):
                                       self.output_dimension])
         if self.return_outputs_directly is False:
             self.output_data = np.array(self.output_data)
-            if self.output_data.dtype != np.float32:
-                self.output_data = self.output_data.astype(np.float32)
+            if self.output_data.dtype != DEFAULT_NP_DATA_DTYPE:
+                self.output_data = self.output_data.astype(DEFAULT_NP_DATA_DTYPE)
             self.output_data = torch.from_numpy(self.output_data).float()
             self.output_data_scaler.transform(self.output_data)
 

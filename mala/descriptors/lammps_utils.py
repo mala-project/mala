@@ -3,6 +3,8 @@ import ctypes
 
 import numpy as np
 
+from mala.common.parameters import DEFAULT_NP_DATA_DTYPE
+
 
 def set_cmdlinevars(cmdargs, argdict):
     """
@@ -85,7 +87,7 @@ def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None,
         if use_fp64:
             return array_np.copy()
         else:
-            return array_np.astype(np.float32)
+            return array_np.astype(DEFAULT_NP_DATA_DTYPE)
     if result_type == 4 or result_type == 5:
         # ptr is an int
         return ptr

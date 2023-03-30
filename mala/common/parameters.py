@@ -10,13 +10,15 @@ try:
     import horovod.torch as hvd
 except ModuleNotFoundError:
     pass
-
+import numpy as np
 import torch
 
 from mala.common.parallelizer import printout, set_horovod_status, \
     set_mpi_status, get_rank, get_local_rank, set_current_verbosity, \
     parallel_warn
 from mala.common.json_serializable import JSONSerializable
+
+DEFAULT_NP_DATA_DTYPE = np.float32
 
 
 class ParametersBase(JSONSerializable):
