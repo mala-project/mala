@@ -715,7 +715,8 @@ class DataHandler(DataHandlerBase):
                     # follows does NOT load it into memory, see
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
-                    tmp = tmp.astype(np.float32)
+                    if tmp.dtype != np.float32:
+                        tmp = tmp.astype(np.float32)
                     tmp = tmp.reshape([snapshot.grid_size,
                                        self.input_dimension])
                     tmp = torch.from_numpy(tmp).float()
@@ -766,7 +767,8 @@ class DataHandler(DataHandlerBase):
                     # follows does NOT load it into memory, see
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
-                    tmp = tmp.astype(np.float32)
+                    if tmp.dtype != np.float32:
+                        tmp = tmp.astype(np.float32)
                     tmp = tmp.reshape([snapshot.grid_size,
                                        self.output_dimension])
                     tmp = torch.from_numpy(tmp).float()

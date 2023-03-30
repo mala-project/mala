@@ -140,13 +140,10 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
                                  input_npy_file)
         input_data = np.load(file_path)
         # Transform the data.
-        if self.descriptors_contain_xyz:
-            input_data = input_data[:, :, :, 3:]
         input_data = input_data.reshape([self.grid_size, self.input_dimension])
-        input_data *= \
-            self.descriptor_calculator.\
-            convert_units(1, self.snapshot_list[snapshot_idx].input_units)
-        input_data = input_data.astype(np.float32)
+
+        if self.input_data.dtype != np.float32:
+            self.input_data = self.input_data.astype(np.float32)
         input_data = torch.from_numpy(input_data).float()
         self.input_data_scaler.transform(input_data)
         input_data = np.array(input_data)
@@ -276,14 +273,10 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
                              self.snapshot_list[file_index].output_npy_file))
 
         # Transform the data.
-        if self.descriptors_contain_xyz:
-            self.input_data = self.input_data[:, :, :, 3:]
         self.input_data = \
             self.input_data.reshape([self.grid_size, self.input_dimension])
-        self.input_data *= \
-            self.descriptor_calculator.\
-            convert_units(1, self.snapshot_list[file_index].input_units)
-        self.input_data = self.input_data.astype(np.float32)
+        if self.input_data.dtype != np.float32:
+            self.input_data = self.input_data.astype(np.float32)
         self.input_data = torch.from_numpy(self.input_data).float()
         self.input_data_scaler.transform(self.input_data)
         self.input_data.requires_grad = self.input_requires_grad
@@ -295,7 +288,8 @@ class LazyLoadDatasetClustered(torch.utils.data.Dataset):
             convert_units(1, self.snapshot_list[file_index].output_units)
         if self.return_outputs_directly is False:
             self.output_data = np.array(self.output_data)
-            self.output_data = self.output_data.astype(np.float32)
+            if self.output_data.dtype != np.float32:
+                self.output_data = self.output_data.astype(np.float32)
             self.output_data = torch.from_numpy(self.output_data).float()
             self.output_data_scaler.transform(self.output_data)
 
