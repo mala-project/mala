@@ -175,12 +175,6 @@ class Bispectrum(Descriptor):
 
             # Copy the grid dimensions only at the end.
             self.grid_dimensions = [nx, ny, nz]
-
-            # If I directly return the descriptors, this sometimes leads
-            # to errors, because presumably the python garbage collection
-            # deallocates memory too quickly. This copy is more memory
-            # hungry, and we might have to tackle this later on, but
-            # for now it works.
             return snap_descriptors_np, nrows_local
 
         else:
@@ -194,14 +188,6 @@ class Bispectrum(Descriptor):
             snap_descriptors_np = snap_descriptors_np.transpose([2, 1, 0, 3])
             # Copy the grid dimensions only at the end.
             self.grid_dimensions = [nx, ny, nz]
-            # If I directly return the descriptors, this sometimes leads
-            # to errors, because presumably the python garbage collection
-            # deallocates memory too quickly. This copy is more memory
-            # hungry, and we might have to tackle this later on, but
-            # for now it works.
-            # I thought the transpose would take care of that, but apparently
-            # it does not necessarily do that - so we have do go down
-            # that route.
             if self.parameters.descriptors_contain_xyz:
                 return snap_descriptors_np, nx*ny*nz
             else:

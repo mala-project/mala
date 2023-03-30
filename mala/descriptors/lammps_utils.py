@@ -72,6 +72,16 @@ def extract_compute_np(lmp, name, compute_type, result_type, array_shape=None,
                                                      total_size))
         array_np = np.frombuffer(buffer_ptr.contents, dtype=float)
         array_np.shape = array_shape
+        # If I directly return the descriptors, this sometimes leads
+        # to errors, because presumably the python garbage collection
+        # deallocates memory too quickly. This copy is more memory
+        # hungry, and we might have to tackle this later on, but
+        # for now it works.
+        # I thought the transpose would take care of that, but apparently
+        # it does not necessarily do that - so we have do go down
+        # that route.
+        # If we have to modify the data type, the copy becomes redundant,
+        # since .astype always copies.
         if use_fp64:
             return array_np.copy()
         else:
