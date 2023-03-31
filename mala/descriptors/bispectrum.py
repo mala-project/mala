@@ -93,10 +93,7 @@ class Bispectrum(Descriptor):
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual bispectrum calculation."""
         from lammps import lammps
-        if "use_fp64" in kwargs.keys():
-            use_fp64 = kwargs["use_fp64"]
-        else:
-            use_fp64 = False
+        use_fp64 = kwargs.get("use_fp64", False)
 
         lammps_format = "lammps-data"
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")

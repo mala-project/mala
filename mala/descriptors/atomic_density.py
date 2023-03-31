@@ -119,15 +119,8 @@ class AtomicDensity(Descriptor):
 
     def _calculate(self, atoms, outdir, grid_dimensions, **kwargs):
         """Perform actual Gaussian descriptor calculation."""
-        from lammps import lammps
-        if "use_fp64" in kwargs.keys():
-            use_fp64 = kwargs["use_fp64"]
-        else:
-            use_fp64 = False
-
-        return_directly = False
-        if "return_directly" in kwargs.keys():
-            return_directly = kwargs["return_directly"]
+        use_fp64 = kwargs.get("use_fp64", False)
+        return_directly = kwargs.get("return_directly", False)
 
         lammps_format = "lammps-data"
         ase_out_path = os.path.join(outdir, "lammps_input.tmp")

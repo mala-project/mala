@@ -1347,12 +1347,8 @@ class LDOS(Target):
             Usage will reduce RAM footprint while SIGNIFICANTLY
             impacting disk usage and
         """
-        return_local = False
-        if "return_local" in kwargs.keys():
-            return_local = kwargs["return_local"]
-        use_fp64 = False
-        if "use_fp64" in kwargs.keys():
-            use_fp64 = kwargs["use_fp64"]
+        use_fp64 = kwargs.get("use_fp64", False)
+        return_local = kwargs.get("return_local", False)
         ldos_dtype = np.float64 if use_fp64 else DEFAULT_NP_DATA_DTYPE
 
         # Find out the number of digits that are needed to encode this
