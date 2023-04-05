@@ -610,7 +610,7 @@ class DataHandler:
                     read_dimensions_from_numpy_file(
                     os.path.join(snapshot.input_npy_directory,
                                  snapshot.input_npy_file))#, 
-                    #selection_mask=snapshot.selection_mask)
+                    #selection_mask=snapshot._selection_mask)
             elif snapshot.snapshot_type == "openpmd":
                 tmp_dimension = self.descriptor_calculator.\
                     read_dimensions_from_openpmd_file(
@@ -625,8 +625,8 @@ class DataHandler:
             tmp_grid_dim = tmp_dimension[0:3]
             
             # If using selection_mask, apply to dimensions 
-            if snapshot.selection_mask is not None:
-                tmp_grid_dim = (sum(snapshot.selection_mask),1,1)
+            if snapshot._selection_mask is not None:
+                tmp_grid_dim = (sum(snapshot._selection_mask),1,1)
             
             print(f'tmp_input_dim {i}: {tmp_input_dimension}')
             print(f'tmp_grid_dim {i}:  {tmp_grid_dim}')
@@ -661,7 +661,7 @@ class DataHandler:
                     read_dimensions_from_numpy_file(
                     os.path.join(snapshot.output_npy_directory,
                                  snapshot.output_npy_file))#,
-                    #selection_mask=snapshot.selection_mask)
+                    #selection_mask=snapshot._selection_mask)
             elif snapshot.snapshot_type == "openpmd":
                 tmp_dimension = self.target_calculator.\
                     read_dimensions_from_openpmd_file(
@@ -829,7 +829,7 @@ class DataHandler:
 
                 # Pull from existing array rather than file
                 if from_arrays_dict is not None:
-                    if snapshot.selection_mask is not None: gs_new = sum(snapshot.selection_mask)
+                    if snapshot._selection_mask is not None: gs_new = sum(snapshot._selection_mask)
                     print(f'gs_new {i}: {gs_new}')
                     print(f'Fastloaded {i}, {data_type}: {from_arrays_dict[(i, data_type)].shape}')# -  {from_arrays_dict[(i, data_type)]}')
                     print(f'selmask -> {gs_new}')
@@ -839,29 +839,29 @@ class DataHandler:
                     #print(f'arr0 {arr0.shape}')#:  {arr0}')
                     #arr1 = from_arrays_dict[(i, data_type)][:, calculator._feature_mask():]
                     #print(f'arr1 {arr1.shape}')#:  {arr1}')
-                    #if snapshot.selection_mask is not None:
-                    #    arr2 = from_arrays_dict[(i, data_type)][:, calculator._feature_mask():][snapshot.selection_mask]
+                    #if snapshot._selection_mask is not None:
+                    #    arr2 = from_arrays_dict[(i, data_type)][:, calculator._feature_mask():][snapshot._selection_mask]
                     #    print(f'arr2 {arr2.shape}')#:  {arr1}')
                     #    del arr2
                     #del arr0, arr1
-                    #calculator._process_loaded_array(from_arrays_dict[i][:, :, :, calculator._feature_mask():][snapshot.selection_mask], units=units)
+                    #calculator._process_loaded_array(from_arrays_dict[i][:, :, :, calculator._feature_mask():][snapshot._selection_mask], units=units)
                     #print(f'arr2 {arr1.shape}:  {arr1}')
 
                     #TODO streamline this
-                    if snapshot.selection_mask is not None:
+                    if snapshot._selection_mask is not None:
                         # Update data already in tensor form
                         if torch.is_tensor(getattr(self, array)): 
                             getattr(self, array)[gs_old : gs_old + gs_new, :] =\
                                 torch.from_numpy(from_arrays_dict[(i, data_type)]\
                                 [:, calculator._feature_mask():]\
-                                [snapshot.selection_mask])
+                                [snapshot._selection_mask])
 
                         # Update a fresh numpy array
                         else:        
                             getattr(self, array)[gs_old : gs_old + gs_new, :] =\
                                 from_arrays_dict[(i, data_type)]\
                                 [:, calculator._feature_mask():]\
-                                [snapshot.selection_mask]
+                                [snapshot._selection_mask]
                     else:
                         # Update data already in tensor form
                         if torch.is_tensor(getattr(self, array)): 
@@ -891,10 +891,10 @@ class DataHandler:
                         file,
                         units=units,
                         array=getattr(self, array)[gs_old : gs_old + gs_new, :],
-                        reshape=True, selection_mask=snapshot.selection_mask
+                        reshape=True, selection_mask=snapshot._selection_mask
                     )
                 elif snapshot.snapshot_type == "openpmd":
-                    if snapshot.selection_mask is not None: raise NotImplementedError('Selection mask is not implemented for openpmd')
+                    if snapshot._selection_mask is not None: raise NotImplementedError('Selection mask is not implemented for openpmd')
                     getattr(self, array)[gs_old : gs_old + gs_new] = \
                         calculator.read_from_openpmd_file(file, units=units) \
                         .reshape([gs_new, feature_dimensions])
@@ -1080,7 +1080,7 @@ class DataHandler:
                             read_from_numpy_file(os.path.join(snapshot.input_npy_directory,
                                                               snapshot.input_npy_file),
                                                  units=snapshot.input_units, 
-                                                 selection_mask=snapshot.selection_mask)
+                                                 selection_mask=snapshot._selection_mask)
                     elif snapshot.snapshot_type == "openpmd":
                         tmp = self.descriptor_calculator. \
                             read_from_openpmd_file(os.path.join(snapshot.input_npy_directory,
@@ -1125,7 +1125,7 @@ class DataHandler:
             # We need to perform the data scaling over the entirety of the
             # training data.
             for snapshot in self.parameters.snapshot_directories_list:
-                if snapshot.selection_mask is not None:  
+                if snapshot._selection_mask is not None:  
                     raise NotImplementedError("Example selection hasn't been implemented for lazy loading yet.") 
                 # Data scaling is only performed on the training data sets.
                 if snapshot.snapshot_function == "tr":

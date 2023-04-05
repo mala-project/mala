@@ -1340,7 +1340,7 @@ class Parameters:
                          min_verbosity=0)
                 parobject.show("\t")
 
-    def save(self, filename, save_format="json", include_selection_mask=False):
+    def save(self, filename, save_format="json"):
         """
         Save the Parameters object to a file.
 
@@ -1354,11 +1354,6 @@ class Parameters:
             Currently only supported file format is "pickle".
 
         """
-
-        if not include_selection_mask:
-            for snapshot in self.data.snapshot_directories_list:
-                snapshot.set_selection_mask(None)
-
         if get_rank() != 0:
             return
 

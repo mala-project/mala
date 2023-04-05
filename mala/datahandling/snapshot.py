@@ -90,18 +90,18 @@ class Snapshot(JSONSerializable):
     
         # Mask determining which examples from the snapshot to use
         if isinstance(selection_mask, np.ndarray):
-            self.selection_mask = selection_mask.tolist()
+            self._selection_mask = selection_mask.tolist()
         else: 
-            self.selection_mask = selection_mask
+            self._selection_mask = selection_mask
 
 
     def set_selection_mask(self, selection_mask):
         if isinstance(selection_mask, np.ndarray):
-            self.selection_mask = selection_mask.tolist()
+            self._selection_mask = selection_mask.tolist()
         else: 
-            self.selection_mask = selection_mask
+            self._selection_mask = selection_mask
         if selection_mask is not None:
-            self.grid_size = sum(self.selection_mask)
+            self.grid_size = sum(self._selection_mask)
         # TODO also adjust other dimensinot params
 
 
