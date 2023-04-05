@@ -129,6 +129,47 @@ class Trainer(Runner):
     def load_run(cls, run_name, path="./", zip_run=True,
                  params_format="json", load_runner=True,
                  prepare_data=True):
+        """
+        Load a run.
+
+        Parameters
+        ----------
+        run_name : str
+            Name under which the run is saved.
+
+        path : str
+            Path where the run is saved.
+
+        zip_run : bool
+            If True, MALA will attempt to load from a .zip file. If False,
+            then separate files will be attempted to be loaded.
+
+        params_format : str
+            Can be "json" or "pkl", depending on what was saved by the model.
+            Default is "json".
+
+        load_runner : bool
+            If True, a Runner object will be created/loaded for further use.
+
+        prepare_data : bool
+            If True, the data will be loaded into memory. This is needed when
+            continuing a model training.
+
+        Return
+        ------
+        loaded_params : mala.common.parameters.Parameters
+            The Parameters saved to file.
+
+        loaded_network : mala.network.network.Network
+            The network saved to file.
+
+        new_datahandler : mala.datahandling.data_handler.DataHandler
+            The data handler reconstructed from file.
+
+        new_trainer : Trainer
+            (Optional) The runner reconstructed from file. For Tester and
+            Predictor class, this is just a newly instantiated object.
+        """
         return super(Trainer, cls).load_run(run_name, path=path,
                                             zip_run=zip_run,
                                             params_format=params_format,
@@ -297,13 +338,10 @@ class Trainer(Runner):
                         batchid += 1
                 training_loss = training_loss_sum.item() / batchid
 
-            t0 = time.time()
             vloss = self.__validate_network(self.network,
                                             "validation",
                                             self.parameters.
                                             during_training_metric)
-            t1 = time.time()
-            printout(f"validation time: {t1 - t0}", min_verbosity=2)
 
             if self.parameters_full.use_horovod:
                 vloss = self.__average_validation(vloss, 'average_loss')
@@ -338,15 +376,12 @@ class Trainer(Runner):
             if self.parameters._configuration["gpu"]:
                 torch.cuda.synchronize()
 
-            t0 = time.time()
             # Mix the DataSets up (this function only does something
             # in the lazy loading case).
             if self.parameters.use_shuffling_for_samplers:
                 self.data.mix_datasets()
             if self.parameters._configuration["gpu"]:
                 torch.cuda.synchronize()
-            t1 = time.time()
-            printout(f"mix datasets time: {t1 - t0}", min_verbosity=2)
 
             # If a scheduler is used, update it.
             if self.scheduler is not None:
@@ -356,7 +391,7 @@ class Trainer(Runner):
 
             # If early stopping is used, check if we need to do something.
             if self.parameters.early_stopping_epochs > 0:
-                if vloss < vloss_old * (1.0 + self.parameters.
+                if vloss < vloss_old * (1.0 - self.parameters.
                                         early_stopping_threshold):
                     self.patience_counter = 0
                     vloss_old = vloss
@@ -794,25 +829,27 @@ class Trainer(Runner):
                 # ordered.
                 calculator.\
                     read_additional_calculation_data(self.data.get_snapshot_calculation_output(snapshot_number))
-                fe_actual = calculator.\
-                    get_self_consistent_fermi_energy(actual_outputs)
-                be_actual = calculator.\
-                    get_band_energy(actual_outputs, fermi_energy=fe_actual)
 
                 try:
+                    fe_actual = calculator. \
+                        get_self_consistent_fermi_energy(actual_outputs)
+                    be_actual = calculator. \
+                        get_band_energy(actual_outputs, fermi_energy=fe_actual)
+
                     fe_predicted = calculator.\
                         get_self_consistent_fermi_energy(predicted_outputs)
                     be_predicted = calculator.\
                         get_band_energy(predicted_outputs,
                                         fermi_energy=fe_predicted)
+                    errors.append(np.abs(be_predicted - be_actual) *
+                                  (1000 / len(calculator.atoms)))
                 except ValueError:
                     # If the training went badly, it might be that the above
                     # code results in an error, due to the LDOS being so wrong
                     # that the estimation of the self consistent Fermi energy
                     # fails.
-                    be_predicted = float("inf")
-                errors.append(np.abs(be_predicted-be_actual) *
-                              (1000/len(calculator.atoms)))
+                    errors.append(float("inf"))
+
             return np.mean(errors)
         elif validation_type == "total_energy":
             # Get optimal batch size and number of batches per snapshots.
@@ -842,26 +879,28 @@ class Trainer(Runner):
                 # ordered.
                 calculator.\
                     read_additional_calculation_data(self.data.get_snapshot_calculation_output(snapshot_number))
-                fe_actual = calculator.\
-                    get_self_consistent_fermi_energy(actual_outputs)
-                te_actual = calculator.\
-                    get_total_energy(ldos_data=actual_outputs,
-                                     fermi_energy=fe_actual)
 
                 try:
+                    fe_actual = calculator. \
+                        get_self_consistent_fermi_energy(actual_outputs)
+                    te_actual = calculator. \
+                        get_total_energy(ldos_data=actual_outputs,
+                                         fermi_energy=fe_actual)
+
                     fe_predicted = calculator.\
                         get_self_consistent_fermi_energy(predicted_outputs)
                     te_predicted = calculator.\
                         get_total_energy(ldos_data=actual_outputs,
                                          fermi_energy=fe_predicted)
+                    errors.append(np.abs(te_predicted - te_actual) *
+                                  (1000 / len(calculator.atoms)))
+
                 except ValueError:
                     # If the training went badly, it might be that the above
                     # code results in an error, due to the LDOS being so wrong
                     # that the estimation of the self consistent Fermi energy
                     # fails.
-                    te_predicted = float("inf")
-                errors.append(np.abs(te_predicted-te_actual) *
-                              (1000/len(calculator.atoms)))
+                    errors.append(float("inf"))
             return np.mean(errors)
 
         else:

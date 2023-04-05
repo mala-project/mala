@@ -26,7 +26,6 @@ class TestInference:
         parameters.data.use_lazy_loading = False
         parameters.running.mini_batch_size = 50
 
-        data_handler.clear_data()
         data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
                                             "Be_snapshot0.out.npy", data_path,
                                             "te")
@@ -91,7 +90,6 @@ class TestInference:
         parameters.data.use_lazy_loading = use_lazy_loading
         parameters.running.mini_batch_size = batchsize
 
-        data_handler.clear_data()
         data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
                                   "Be_snapshot0.out.npy", data_path,
                                   "te")

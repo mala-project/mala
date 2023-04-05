@@ -66,7 +66,6 @@ class TestLazyLoading:
                 test_parameters.data.input_rescaling_type = scalingtype
                 test_parameters.data.output_rescaling_type = scalingtype
                 data_handler = DataHandler(test_parameters)
-                data_handler.clear_data()
                 data_handler.add_snapshot("Be_snapshot0.in.npy", data_path,
                                           "Be_snapshot0.out.npy", data_path,
                                           "tr")
@@ -202,7 +201,6 @@ class TestLazyLoading:
                 test_parameters.data.use_lazy_loading = ll
                 test_parameters.use_horovod = hvduse
                 data_handler = DataHandler(test_parameters)
-                data_handler.clear_data()
                 data_handler.add_snapshot("Al_debug_2k_nr0.in.npy", data_path,
                                           "Al_debug_2k_nr0.out.npy", data_path,
                                           add_snapshot_as="tr",

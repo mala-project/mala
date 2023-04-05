@@ -332,7 +332,7 @@ class Descriptor(PhysicalData):
                 for i in range(0, get_size()):
                     all_descriptors_list.append(
                         np.empty(sendcounts[i] * raw_feature_length,
-                                 dtype=np.float64))
+                                 dtype=descriptors_np.dtype))
 
                 # No MPI necessary for first rank. For all the others,
                 # collect the buffers.

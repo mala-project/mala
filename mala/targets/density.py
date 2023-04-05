@@ -1057,6 +1057,6 @@ class Density(Target):
 
     def _get_gaussian_descriptors_for_structure_factors(self, atoms, grid):
         descriptor_calculator = AtomicDensity(self._parameters_full)
-        kwargs = {"return_directly": True}
+        kwargs = {"return_directly": True, "use_fp64": True}
         return descriptor_calculator.\
             calculate_from_atoms(atoms, grid, **kwargs)[:, 6:]

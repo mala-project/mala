@@ -1,5 +1,6 @@
 import os
 
+from ase.io import read
 import mala
 from mala import printout
 
@@ -20,27 +21,24 @@ parameters, network, data_handler, predictor = mala.Predictor.\
 
 ####################
 # PARAMETERS
-# Specify the correct LDOS parameters and load network.
+# This may already have been done when training the network, but
+# for predictions, the correct LDOS and descriptor parameters need to be known.
 ####################
 parameters.targets.target_type = "LDOS"
 parameters.targets.ldos_gridsize = 11
 parameters.targets.ldos_gridspacing_ev = 2.5
 parameters.targets.ldos_gridoffset_ev = -5
-parameters.running.inference_data_grid = [18, 18, 27]
 
 parameters.descriptors.descriptor_type = "Bispectrum"
 parameters.descriptors.bispectrum_twojmax = 10
 parameters.descriptors.bispectrum_cutoff = 4.67637
 
-# Using a QE out is simply for convenience; with the function
-# .predict_from_atoms, prediction can be made directly from atomic
-# configurations.
-ldos = predictor.predict_from_qeout(os.path.join(data_path,
-                                                 "Be_snapshot3.out"))
-ldos_calculator: mala.LDOS = data_handler.target_calculator
+# First, read atoms from some source, we'll simply use the simulation outputs
+# of the training data.
+atoms = read(os.path.join(data_path, "Be_snapshot3.out"))
+ldos = predictor.predict_for_atoms(atoms)
+ldos_calculator: mala.LDOS = predictor.target_calculator
 ldos_calculator.read_from_array(ldos)
-fermi_energy = ldos_calculator.get_self_consistent_fermi_energy(ldos)
 
-printout("Predicted number of electrons: ", ldos_calculator.
-         number_of_electrons)
-printout("Predicted band energy: ", ldos_calculator.band_energy)
+printout("Predicted band energy: ",
+         ldos_calculator.band_energy)

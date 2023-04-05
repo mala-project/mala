@@ -95,7 +95,6 @@ class TestDataShuffling:
 
         # Train with shuffling.
         data_handler = mala.DataHandler(test_parameters)
-        data_handler.clear_data()
         # Add a snapshot we want to use in to the list.
         data_handler.add_snapshot("Be_shuffled0.in.npy", ".",
                                   "Be_shuffled0.out.npy", ".", "tr")

@@ -36,7 +36,6 @@ def load_whole_snapshot():
     # Units: output_units="1/(Ry*Bohr^3)" means that the output (target) data (LDOS) has
     # unit 1/Ry. Rescaled network output, after oscaler.inverse_transform() is
     # applied (see below) will be in 1/eV.
-    data_handler.clear_data()
     data_handler.add_snapshot("Be_snapshot2.in.npy", data_path,
                                         "Be_snapshot2.out.npy", data_path, "te")
     data_handler.prepare_data(reparametrize_scaler=False)

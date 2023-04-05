@@ -11,7 +11,7 @@ import torch
 from torch.utils.data import TensorDataset
 
 from mala.common.parallelizer import printout, barrier
-from mala.common.parameters import Parameters
+from mala.common.parameters import Parameters, DEFAULT_NP_DATA_DTYPE
 from mala.datahandling.data_handler_base import DataHandlerBase
 from mala.datahandling.data_scaler import DataScaler
 from mala.datahandling.snapshot import Snapshot
@@ -49,6 +49,10 @@ class DataHandler(DataHandlerBase):
     output_data_scaler : mala.datahandling.data_scaler.DataScaler
         Used to scale the output data. If None, then one will be created by
         this class.
+
+    clear_data : bool
+        If true (default), the data list will be cleared upon creation of
+        the object.
     """
 
     ##############################
@@ -57,7 +61,7 @@ class DataHandler(DataHandlerBase):
 
     def __init__(self, parameters: Parameters, target_calculator=None,
                  descriptor_calculator=None, input_data_scaler=None,
-                 output_data_scaler=None):
+                 output_data_scaler=None, clear_data=True):
         super(DataHandler, self).__init__(parameters,
                                           target_calculator=target_calculator,
                                           descriptor_calculator=
@@ -98,6 +102,8 @@ class DataHandler(DataHandlerBase):
 
         # Needed for the fast tensor data sets.
         self.mini_batch_size = parameters.running.mini_batch_size
+        if clear_data:
+            self.clear_data()
 
     ##############################
     # Public methods
@@ -442,27 +448,26 @@ class DataHandler(DataHandlerBase):
         if self.nr_training_data > 0:
             self.training_data_inputs = np.zeros((self.nr_training_data,
                                                   self.input_dimension),
-                                                 dtype=np.float32)
+                                                 dtype=DEFAULT_NP_DATA_DTYPE)
             self.training_data_outputs = np.zeros((self.nr_training_data,
                                                    self.output_dimension),
-                                                  dtype=np.float32)
+                                                  dtype=DEFAULT_NP_DATA_DTYPE)
 
         if self.nr_validation_data > 0:
             self.validation_data_inputs = np.zeros((self.nr_validation_data,
                                                     self.input_dimension),
-                                                   dtype=np.float32)
+                                                   dtype=DEFAULT_NP_DATA_DTYPE)
             self.validation_data_outputs = np.zeros((self.nr_validation_data,
                                                      self.output_dimension),
-                                                    dtype=np.float32)
+                                                    dtype=DEFAULT_NP_DATA_DTYPE)
 
         if self.nr_test_data > 0:
             self.test_data_inputs = np.zeros((self.nr_test_data,
                                               self.input_dimension),
-                                             dtype=np.float32)
+                                             dtype=DEFAULT_NP_DATA_DTYPE)
             self.test_data_outputs = np.zeros((self.nr_test_data,
                                                self.output_dimension),
-                                              dtype=np.float32)
-        
+                                              dtype=DEFAULT_NP_DATA_DTYPE)
 
     def __load_data(self, function, data_type):
         """
@@ -741,7 +746,8 @@ class DataHandler(DataHandlerBase):
                     # follows does NOT load it into memory, see
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
-                    tmp = tmp.astype(np.float32)
+                    if tmp.dtype != DEFAULT_NP_DATA_DTYPE:
+                        tmp = tmp.astype(DEFAULT_NP_DATA_DTYPE)
                     tmp = tmp.reshape([snapshot.grid_size,
                                        self.input_dimension])
                     tmp = torch.from_numpy(tmp).float()
@@ -792,7 +798,8 @@ class DataHandler(DataHandlerBase):
                     # follows does NOT load it into memory, see
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
-                    tmp = tmp.astype(np.float32)
+                    if tmp.dtype != DEFAULT_NP_DATA_DTYPE:
+                        tmp = tmp.astype(DEFAULT_NP_DATA_DTYPE)
                     tmp = tmp.reshape([snapshot.grid_size,
                                        self.output_dimension])
                     tmp = torch.from_numpy(tmp).float()
@@ -834,7 +841,7 @@ class DataHandler(DataHandlerBase):
         This tensor that can simply be put into a MALA network.
         No unit conversion is done here.
         """
-        numpy_array = numpy_array.astype(np.float32)
+        numpy_array = numpy_array.astype(DEFAULT_NP_DATA_DTYPE)
         if desired_dimensions is not None:
             numpy_array = numpy_array.reshape(desired_dimensions)
         numpy_array = torch.from_numpy(numpy_array).float()

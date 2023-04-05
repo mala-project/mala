@@ -51,6 +51,7 @@ class Tester(Runner):
         self.output_format = output_format
         if self.output_format != "list" and self.output_format == "mae":
             raise Exception("Wrong output format for testing selected.")
+        self.target_calculator = data.target_calculator
 
     def test_all_snapshots(self):
         """
@@ -163,6 +164,24 @@ class Tester(Runner):
             predicted = target_calculator.band_energy
             return actual - predicted
 
+        elif observable == "band_energy_full":
+            target_calculator = self.data.target_calculator
+            if not isinstance(target_calculator, LDOS) and not \
+                    isinstance(target_calculator, DOS):
+                raise Exception("Cannot calculate the band energy from this "
+                                "observable.")
+            target_calculator.\
+                read_additional_calculation_data(
+                self.data.get_snapshot_calculation_output(snapshot_number))
+
+            target_calculator.read_from_array(actual_target)
+            actual = target_calculator.band_energy
+
+            target_calculator.read_from_array(predicted_target)
+            predicted = target_calculator.band_energy
+            return [actual, predicted,
+                    target_calculator.total_energy_dft_calculation]
+
         elif observable == "number_of_electrons":
             target_calculator = self.data.target_calculator
             if not isinstance(target_calculator, LDOS) and not \
@@ -194,6 +213,23 @@ class Tester(Runner):
             target_calculator.read_from_array(predicted_target)
             predicted = target_calculator.total_energy
             return actual - predicted
+
+        elif observable == "total_energy_full":
+            target_calculator = self.data.target_calculator
+            if not isinstance(target_calculator, LDOS):
+                raise Exception("Cannot calculate the total energy from this "
+                                "observable.")
+            target_calculator.\
+                read_additional_calculation_data(
+                self.data.get_snapshot_calculation_output(snapshot_number))
+
+            target_calculator.read_from_array(actual_target)
+            actual = target_calculator.total_energy
+
+            target_calculator.read_from_array(predicted_target)
+            predicted = target_calculator.total_energy
+            return [actual, predicted,
+                    target_calculator.total_energy_dft_calculation]
 
     def __prepare_to_test(self, snapshot_number):
         """Prepare the tester class to for test run."""
