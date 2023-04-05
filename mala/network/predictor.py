@@ -166,8 +166,6 @@ class Predictor(Runner):
                                     " for parallel inference")
 
                 snap_descriptors = \
-                    snap_descriptors.astype(np.float32)
-                snap_descriptors = \
                     torch.from_numpy(snap_descriptors).float()
                 self.data.input_data_scaler.transform(snap_descriptors)
                 return self. \
@@ -178,8 +176,6 @@ class Predictor(Runner):
                 snap_descriptors = snap_descriptors[:, :, :, 3:]
                 feature_length -= 3
 
-            snap_descriptors = \
-                snap_descriptors.astype(np.float32)
             snap_descriptors = \
                 snap_descriptors.reshape(
                     [self.data.grid_size, feature_length])

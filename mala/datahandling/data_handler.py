@@ -11,15 +11,13 @@ import torch
 from torch.utils.data import TensorDataset
 
 from mala.common.parallelizer import printout, barrier
-from mala.common.parameters import Parameters
+from mala.common.parameters import Parameters, DEFAULT_NP_DATA_DTYPE
 from mala.datahandling.data_handler_base import DataHandlerBase
 from mala.datahandling.data_scaler import DataScaler
 from mala.datahandling.snapshot import Snapshot
 from mala.datahandling.lazy_load_dataset import LazyLoadDataset
 from mala.datahandling.lazy_load_dataset_clustered import \
     LazyLoadDatasetClustered
-from mala.descriptors.descriptor import Descriptor
-from mala.targets.target import Target
 from mala.datahandling.fast_tensor_dataset import FastTensorDataset
 
 
@@ -448,26 +446,26 @@ class DataHandler(DataHandlerBase):
         if self.nr_training_data > 0:
             self.training_data_inputs = np.zeros((self.nr_training_data,
                                                   self.input_dimension),
-                                                 dtype=np.float32)
+                                                 dtype=DEFAULT_NP_DATA_DTYPE)
             self.training_data_outputs = np.zeros((self.nr_training_data,
                                                    self.output_dimension),
-                                                  dtype=np.float32)
+                                                  dtype=DEFAULT_NP_DATA_DTYPE)
 
         if self.nr_validation_data > 0:
             self.validation_data_inputs = np.zeros((self.nr_validation_data,
                                                     self.input_dimension),
-                                                   dtype=np.float32)
+                                                   dtype=DEFAULT_NP_DATA_DTYPE)
             self.validation_data_outputs = np.zeros((self.nr_validation_data,
                                                      self.output_dimension),
-                                                    dtype=np.float32)
+                                                    dtype=DEFAULT_NP_DATA_DTYPE)
 
         if self.nr_test_data > 0:
             self.test_data_inputs = np.zeros((self.nr_test_data,
                                               self.input_dimension),
-                                             dtype=np.float32)
+                                             dtype=DEFAULT_NP_DATA_DTYPE)
             self.test_data_outputs = np.zeros((self.nr_test_data,
                                                self.output_dimension),
-                                              dtype=np.float32)
+                                              dtype=DEFAULT_NP_DATA_DTYPE)
 
     def __load_data(self, function, data_type):
         """
@@ -715,7 +713,8 @@ class DataHandler(DataHandlerBase):
                     # follows does NOT load it into memory, see
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
-                    tmp = tmp.astype(np.float32)
+                    if tmp.dtype != DEFAULT_NP_DATA_DTYPE:
+                        tmp = tmp.astype(DEFAULT_NP_DATA_DTYPE)
                     tmp = tmp.reshape([snapshot.grid_size,
                                        self.input_dimension])
                     tmp = torch.from_numpy(tmp).float()
@@ -766,7 +765,8 @@ class DataHandler(DataHandlerBase):
                     # follows does NOT load it into memory, see
                     # test/tensor_memory.py
                     tmp = np.array(tmp)
-                    tmp = tmp.astype(np.float32)
+                    if tmp.dtype != DEFAULT_NP_DATA_DTYPE:
+                        tmp = tmp.astype(DEFAULT_NP_DATA_DTYPE)
                     tmp = tmp.reshape([snapshot.grid_size,
                                        self.output_dimension])
                     tmp = torch.from_numpy(tmp).float()
@@ -808,7 +808,7 @@ class DataHandler(DataHandlerBase):
         This tensor that can simply be put into a MALA network.
         No unit conversion is done here.
         """
-        numpy_array = numpy_array.astype(np.float32)
+        numpy_array = numpy_array.astype(DEFAULT_NP_DATA_DTYPE)
         if desired_dimensions is not None:
             numpy_array = numpy_array.reshape(desired_dimensions)
         numpy_array = torch.from_numpy(numpy_array).float()
